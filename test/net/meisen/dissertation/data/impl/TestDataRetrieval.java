@@ -29,7 +29,7 @@ public class TestDataRetrieval {
 
 	@Test
 	public void testDb() throws InterruptedException {
-		assertTrue(true);
+		
 	}
 
 	@AfterClass

@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -188,5 +193,23 @@ public class Db {
 	public void shutDownDb() {
 		hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
 		assertTrue(Files.deleteDir(tmpFolder));
+	}
+
+	public Connection getConncetion(final String dbName, final String query)
+			throws SQLException {
+		final Connection c = DriverManager.getConnection(
+				"jdbc:hsqldb:hsql://localhost/" + dbName, "SA", "");
+		final Statement stmnt = c.createStatement();
+		final ResultSet rs = stmnt.executeQuery(query);
+
+		while (rs.next()) {
+
+		}
+
+		rs.close();
+		stmnt.close();
+		c.close();
+
+		return c;
 	}
 }
