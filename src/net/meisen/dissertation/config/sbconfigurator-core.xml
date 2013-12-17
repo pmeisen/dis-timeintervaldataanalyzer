@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
+    
+  <!-- include the default server configuration -->
+  <import resource="classpath:/net/meisen/general/server/sbconfigurator-core.xml" />
+  
+  <!-- include additional needed loader -->
+  <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-loader.xml" />
+  
+  <!-- import some miscellaneous stuff -->
+  <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-misc.xml" />
+
+  <!-- load some other beans into the configuration, which are only needed for running -->
+  <sbc:loader id="tidaBeans" selector="tidaBeans.xml" />
+</beans>

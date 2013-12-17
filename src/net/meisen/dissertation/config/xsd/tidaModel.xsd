@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model" xmlns:mns="http://dev.meisen.net/xsd/dissertation/model" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/model" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  
+  <!-- 
+    define some general attribute-types:
+    - id
+    - dataType
+    -->
+  <xs:simpleType name="identifier">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z][A-Za-z0-9_\-]*" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="javaClass">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_]*(\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <!-- 
+    Define the <model>-content:
+    
+    <meta>...</meta>
+    <interval>...</interval>
+    -->
+  <xs:complexType name="modelType">
+    <xs:sequence>
+      <xs:element name="config" type="configModelType" minOccurs="0" />
+      <xs:element name="meta" type="metaModelType" minOccurs="0" />
+      <xs:element name="interval" type="intervalModelType" />
+    </xs:sequence>
+    <xs:attribute name="id" type="identifier" use="optional" />
+    <xs:attribute name="name" type="xs:string" use="optional" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <config>-content:
+    
+    <factories>...</factories>
+    <descriptors>...</descriptors>
+    <dataretrievers>...</dataretrievers>
+    
+    <[any]>...</[any]>
+    -->
+  <xs:complexType name="configModelType">
+    <xs:sequence>    
+      <xs:element name="factories" type="factoriesConfigType" minOccurs="0" />
+      <xs:element name="descriptors" type="descriptorsConfigType" minOccurs="0" />
+      <xs:element name="dataretrievers" type="dataretrieversConfigType" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+   
+  <!-- 
+    Define the <factories>-content:
+    
+    <indexes implementation="..." />
+    <resource implementation="..." idfactory="..." />
+    <descriptor implementation="..." idfactory="..." />
+    -->
+  <xs:complexType name="factoriesConfigType">
+    <xs:sequence>
+      <xs:element name="indexes" type="indexesFactoryConfigType" minOccurs="0" />      
+      <xs:element name="resource" type="resourceFactoryConfigType" minOccurs="0" />
+      <xs:element name="descriptor" type="descriptorFactoryConfigType" minOccurs="0" />
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!--
+    Define the <indexes>-element, which is used to configure a factory:
+    
+    <indexes implementation="..." />
+    -->
+  <xs:complexType name="indexesFactoryConfigType">
+    <xs:attribute name="implementation" type="javaClass" use="required" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <resource>-element, which is used to configure a factory:
+    
+    <resource implementation="..." idfactory="..." />
+    -->
+  <xs:complexType name="resourceFactoryConfigType">
+    <xs:attribute name="implementation" type="javaClass" use="optional" />
+    <xs:attribute name="idfactory" type="xs:string" use="required" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <descriptor>-element, which is used to configure a factory:
+    
+    <descriptor implementation="..." idfactory="..." />
+    -->
+  <xs:complexType name="descriptorFactoryConfigType">
+    <xs:attribute name="implementation" type="javaClass" use="optional" />
+    <xs:attribute name="idfactory" type="xs:string" use="required" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <descriptors>-content:
+    
+    <descriptor dataType="..." implementation="..." />
+    -->
+  <xs:complexType name="descriptorsConfigType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="descriptor" type="descriptorConfigType" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <!-- 
+    Define the <descriptor>-element, which is used to register a new dataType:
+    
+    <descriptor dataType="..." implementation="..." />
+    -->
+  <xs:complexType name="descriptorConfigType">
+    <xs:attribute name="dataType" type="javaClass" use="required" />
+    <xs:attribute name="implementation" type="javaClass" use="required" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <dataretrievers>-content:
+    
+    <dataretriever id="..." implementation="..." />
+    -->
+  <xs:complexType name="dataretrieversConfigType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="dataretriever" type="dataretrieverConfigType" minOccurs="0" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <!-- 
+    Define the <dataretriever>-element, which is used to configure a dataretriever:
+    
+    <dataretriever id="..." implementation="..." />
+    -->
+  <xs:complexType name="dataretrieverConfigType">
+    <xs:sequence>
+      <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+
+    <xs:attribute name="id" type="identifier" use="required" />
+    <xs:attribute name="implementation" type="javaClass" use="optional" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <meta>-content:
+    
+    <resources>...</resources>
+    <descriptors>...</descriptors>
+    <values>...</values>
+    -->
+  <xs:complexType name="metaModelType">
+    <xs:sequence>    
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name="resources" type="resourcesModelType" />
+          <xs:element name="descriptors" type="descriptorsModelType" minOccurs="0"/>
+        </xs:sequence>
+        <xs:element name="descriptors" type="descriptorsModelType" />
+      </xs:choice>
+      <xs:element name="values" type="valuesType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- 
+    Define the <interval>-content:
+    
+    <interval granularity="..." naturals="..." mapper="..." />
+    -->
+  <xs:complexType name="intervalModelType">
+    <xs:attribute name="granularity" type="javaClass" use="optional" />
+    <xs:attribute name="naturals" type="javaClass" use="optional" />
+    <xs:attribute name="mapper" type="javaClass" use="optional" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <resources>-content:
+    
+    <resource id="..." name="..." />
+    <resource id="..." name="..." />
+    <resource id="..." name="..." />
+    -->
+  <xs:complexType name="resourcesModelType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="resource" type="resourceModelType" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <!-- 
+    Define the <descriptors>-content:
+    
+    <descriptor id="..." name="..." dataType="..." />
+    <descriptor id="..." name="..." dataType="..." />
+    <descriptor id="..." name="..." dataType="..." />
+    -->
+  <xs:complexType name="descriptorsModelType">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="descriptor" type="descriptorModelType" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <!-- 
+    Define the <values>-content:
+    
+    <resource model="..." value="..." />
+    <descriptor model="..." value="..." />
+    -->
+  <xs:complexType name="valuesType">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="resource" type="valueType" />
+      </xs:choice>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="descriptor" type="valueType" />
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <!-- 
+    Define the <resource>-element, which is used to define the model:
+    
+    <resource id="..." name="..." />
+    -->
+  <xs:complexType name="resourceModelType">
+    <xs:attribute name="id" type="identifier" use="required" />
+    <xs:attribute name="name" type="xs:string" use="optional" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the <descriptor>-element, which is used to define the model:
+    
+    <descriptor id="..." name="..." dataType="..." />
+    -->
+  <xs:complexType name="descriptorModelType">
+    <xs:attribute name="id" type="identifier" use="required" />
+    <xs:attribute name="name" type="xs:string" use="optional" />
+    <xs:attribute name="dataType" type="javaClass" use="required" />
+  </xs:complexType>
+  
+  <!-- 
+    Define the type used by a <descriptor>- or <resource>-element, which is used 
+    to define a value.
+    -->
+  <xs:complexType name="valueType">
+    <xs:sequence>
+      <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  
+    <xs:attribute name="model" type="identifier" use="required" />
+    <xs:attribute name="value" type="xs:string" use="optional" />
+    <xs:attribute name="dataretriever" type="identifier" use="optional" />
+  </xs:complexType>
+
+  <!--
+    define the root, i.e. <model>:
+    
+    <model>...</model>
+    -->
+  <xs:element name="model" type="modelType">  
+    <xs:key name="testUniqueResourceId">
+      <xs:selector xpath="mns:meta/mns:resources/mns:resource"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+
+    <xs:key name="testUniqueDescriptorId">
+      <xs:selector xpath="mns:meta/mns:descriptors/mns:descriptor"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+      
+    <xs:keyref name="testRefResourceId" refer="testUniqueResourceId">
+      <xs:selector xpath="mns:meta/mns:values/mns:resource" />
+      <xs:field xpath="@model" />
+    </xs:keyref>
+
+    <xs:keyref name="testRefDescriptorId" refer="testUniqueDescriptorId">
+      <xs:selector xpath="mns:meta/mns:values/mns:descriptor" />
+      <xs:field xpath="@model" />
+    </xs:keyref>
+  </xs:element>
+</xs:schema>

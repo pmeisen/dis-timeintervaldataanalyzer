@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/db" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:base="http://dev.meisen.net/xsd/dissertation/model"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/model/db" attributeFormDefault="unqualified" elementFormDefault="qualified">
+           
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
+
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="jdbc" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="connection">
+    <xs:complexType>
+      <xs:attribute name="type" type="type" use="required" />
+      <xs:attribute name="url" type="xs:anyURI" use="required" />
+      <xs:attribute name="driver" type="base:javaClass" use="required" />
+      <xs:attribute name="username" type="xs:string" use="required" />
+      <xs:attribute name="password" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+   
+  <xs:element name="query">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="value" type="xs:string" use="optional" />
+          <xs:attribute name="connection" type="base:identifier" use="optional" />
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sbc="http://dev.meisen.net/sbconfigurator/ns"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
+
+  <import resource="classpath:/net/meisen/general/server/sbconfigurator-core.xml" />
+  <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-loader.xml" />
+  <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-misc.xml" />
+  
+  <sbc:loader id="testloader" loadFromClassPath="true" loadFromWorkingDir="false" selector="${testBeans.selector}" />
+</beans>

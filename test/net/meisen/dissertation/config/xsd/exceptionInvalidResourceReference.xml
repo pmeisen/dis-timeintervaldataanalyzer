@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd">
+
+  <meta>
+    <resources>
+      <resource id="R1" name="person" />
+      <resource id="R2" name="toy" />
+    </resources>
+    
+    <values>
+      <resource model="R1" value="Philipp" />
+      <resource model="R3" value="rattle" />
+    </values>
+  </meta>
+  
+  <interval />
+</model>

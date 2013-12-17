@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<server xmlns="http://dev.meisen.net/server/config" 
+		xmlns:e="http://dev.meisen.net/server/config/extension"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://dev.meisen.net/server/config http://dev.meisen.net/xsd/server/serverConfig.xsd
+                            http://dev.meisen.net/server/config/extension http://dev.meisen.net/xsd/server/serverConfigExtension.xsd">
+
+  <connector id="MAIN" port="7000" listener="HTTP">
+  	<e:extension> 	
+      <servlet urlmatcher="/servlet/*">net.meisen.dissertation.server.TIDAServerServlet</servlet>
+      
+      <servlet>
+      	<script>
+			response.setStatusCode(org.apache.http.HttpStatus.SC_OK);
+			var entity = new org.apache.http.entity.StringEntity('THE TEST WAS SUCCESSFUL USING THE SCRIPT');
+			response.setEntity(entity);
+      	</script>
+      	net.meisen.general.server.http.listener.servlets.ScriptedServlet
+      </servlet>
+    </e:extension>
+  </connector>
+  
+  <connector id="DEFAULT" port="${server.settings.defaultPort}" listener="${server.settings.defaultListener}" enable="false" />
+</server>

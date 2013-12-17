@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    
+  <import resource="classpath:/net/meisen/dissertation/config/tida-bean-exceptions.xml"/>
+
+  <bean id="descriptorsFactory" class="net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory">
+    <constructor-arg type="net.meisen.dissertation.data.IIdsFactory">
+      <bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" />
+    </constructor-arg>
+    <constructor-arg type="java.util.Map">
+      <map key-type="java.lang.Class" value-type="java.lang.Class">
+        <entry key="java.lang.Object" 
+               value="net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor" />
+      </map>
+    </constructor-arg>
+  </bean>
+  
+  <bean id="resourcesFactory" class="net.meisen.dissertation.data.impl.resources.ResourcesFactory">
+    <constructor-arg type="net.meisen.dissertation.data.IIdsFactory">
+      <bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" />
+    </constructor-arg>
+  </bean>
+  
+  <bean id="resourceModels" class="java.util.ArrayList">
+    <constructor-arg>
+      <list value-type="net.meisen.dissertation.models.impl.data.ResourceModel">
+        <bean class="net.meisen.dissertation.models.impl.data.ResourceModel">
+          <constructor-arg type="java.lang.String"><value>ID1</value></constructor-arg>
+        </bean>
+        <bean class="net.meisen.dissertation.models.impl.data.ResourceModel">
+          <constructor-arg type="java.lang.String"><value>ID2</value></constructor-arg>
+        </bean>
+      </list>
+    </constructor-arg>
+  </bean>
+  
+  <bean id="descriptorModels" class="java.util.ArrayList">
+    <constructor-arg>
+      <list value-type="net.meisen.dissertation.models.impl.data.DescriptorModel">
+        <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID1</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>java.lang.String</value></constructor-arg>
+        </bean>
+        <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID2</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>java.util.UUID</value></constructor-arg>
+        </bean>
+        <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID3</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>java.lang.String</value></constructor-arg>
+        </bean>
+      </list>
+    </constructor-arg>
+  </bean>
+</beans>

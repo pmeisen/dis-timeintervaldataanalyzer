@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+  
+  <!-- general test configuration -->
+  <bean id="amountOfData" class="java.lang.Integer">
+    <constructor-arg type="int"><value>1000000</value></constructor-arg>
+  </bean>
+  <bean id="amountOfRuns" class="java.lang.Integer">
+    <constructor-arg type="int"><value>10</value></constructor-arg>
+  </bean>
+  
+  <!-- define the id and data generator to be used -->
+  <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance.IntegerIdGenerator" />
+  <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance.IntegerDataGenerator" />
+  
+  <!-- the indexes to be tested -->
+  <bean id="idxHashMapIndexObject" class="net.meisen.dissertation.data.impl.indexes.MapIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="java.lang.Class"><value>java.util.HashMap</value></constructor-arg>
+  </bean>
+  <bean id="idxLinkedHashMapIndexObject" class="net.meisen.dissertation.data.impl.indexes.MapIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="java.lang.Class"><value>java.util.LinkedHashMap</value></constructor-arg>
+  </bean>
+  <bean id="idxTreeMapIndexObject" class="net.meisen.dissertation.data.impl.indexes.MapIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="java.lang.Class"><value>java.util.TreeMap</value></constructor-arg>
+  </bean>
+  <bean id="idxHashMapIndexMethod" class="net.meisen.dissertation.data.impl.indexes.MapIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="java.lang.Class"><value>java.util.HashMap</value></constructor-arg>
+  </bean>
+  <bean id="idxHashMapIndexComposite" class="net.meisen.dissertation.data.impl.indexes.MapIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue,getClass</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="java.lang.Class"><value>java.util.HashMap</value></constructor-arg>
+  </bean>
+  <bean id="idxTroveIntIndexObject" class="net.meisen.dissertation.data.impl.indexes.TroveIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+  <bean id="idxTroveIntIndexMethod" class="net.meisen.dissertation.data.impl.indexes.TroveIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+  <bean id="idxHppcIntIndexMethod" class="net.meisen.dissertation.data.impl.indexes.HppcIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+  <bean id="idxFastUtilIntIndexMethod" class="net.meisen.dissertation.data.impl.indexes.FastUtilIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+  
+  <!-- the maps to be tested -->
+  <bean id="mapHashMap" class="java.util.HashMap" />
+  <bean id="mapLinkedHashMap" class="java.util.LinkedHashMap" />
+  <bean id="mapTreeMap" class="java.util.TreeMap" />
+</beans>

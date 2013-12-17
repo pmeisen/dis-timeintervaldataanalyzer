@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model    http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+
+       id="myModel">
+
+  <config>
+    <factories>
+      <!-- Define the factory to be used to determine which IndexedCollectionFactory
+           to be used.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory
+        -->
+      <indexes implementation="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
+
+      <!-- Define the factory used for the resources, available are.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.data.impl.resources.ResourcesFactory
+            
+           As identifier-factory the following implementations are available:
+            + net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory
+            + net.meisen.dissertation.data.impl.idfactories.LongIdsFactory
+            + net.meisen.dissertation.data.impl.idfactories.UuIdsFactory
+        -->
+      <resource implementation="net.meisen.dissertation.data.impl.resources.ResourcesFactory" idfactory="net.meisen.dissertation.data.impl.idfactories.UuIdsFactory" />
+      
+      <!-- Define the factory used for the descriptors, available are.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory
+            
+           As identifier-factory the following implementations are available:
+            + net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory
+            + net.meisen.dissertation.data.impl.idfactories.LongIdsFactory
+            + net.meisen.dissertation.data.impl.idfactories.UuIdsFactory
+        -->
+      <descriptor implementation="net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory" idfactory="net.meisen.dissertation.data.impl.idfactories.LongIdsFactory" />
+    </factories>
+    
+    <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
+         by default the following id-prefixes are mapped to the specified implementation:
+          + db_       is mapped to     net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever
+          + rnd_   is mapped to     net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever
+      -->
+    <dataretrievers>
+      <dataretriever id="db_butRandom" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+      <dataretriever id="rnd_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+      <dataretriever id="db_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <meta>
+    <resources>
+      <resource id="R1" name="person" />
+      <resource id="R2" name="toy" />
+      <resource id="R3" />
+    </resources>
+    <descriptors>
+      <descriptor id="D1" name="funFactor" dataType="java.lang.String" />
+      <descriptor id="D2" name="smiles" dataType="java.lang.Integer" />
+      <descriptor id="D3" dataType="java.lang.String" />
+      <descriptor id="D4" dataType="java.util.List" />
+    </descriptors>
+
+    <values>
+      <resource model="R1" value="Edison" />
+
+      <resource model="R2" dataretriever="db_test">
+        <db:query value="PERSONNR">SELECT DISTINCT PERSONNR FROM TB_DIM_PERSON</db:query>
+      </resource>
+      <resource model="R3" value="NoValue" />
+
+      <descriptor model="D1" dataretriever="db_test">
+        <db:query value="TYPE">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
+      </descriptor>
+
+      <descriptor model="D2" value="2" />
+
+      <descriptor model="D3" value="Some Value" />
+      
+      <descriptor model="D4" dataretriever="rnd_test">
+        <db:query value="TYPE">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
+      </descriptor>
+    </values>
+  </meta>
+
+  <interval granularity="net.meisen.dissertation.models.impl.granularity.rawtime.Minute" 
+            naturals="net.meisen.dissertation.models.impl.naturals.IntegerNaturalsFactory"
+            mapper="not.defined.Yet" />
+</model>
