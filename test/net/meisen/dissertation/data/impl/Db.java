@@ -7,9 +7,13 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -195,21 +199,46 @@ public class Db {
 		assertTrue(Files.deleteDir(tmpFolder));
 	}
 
-	public Connection getConncetion(final String dbName, final String query)
-			throws SQLException {
+	/**
+	 * Queries the database for some data.
+	 * 
+	 * @param dbName
+	 *            the database to retrieve data from
+	 * @param query
+	 *            the query to be fired
+	 * 
+	 * @return the retrieved data
+	 * 
+	 * @throws SQLException
+	 *             if the query could not be fired
+	 */
+	public List<Map<String, Object>> query(final String dbName,
+			final String query) throws SQLException {
 		final Connection c = DriverManager.getConnection(
-				"jdbc:hsqldb:hsql://localhost/" + dbName, "SA", "");
+				"jdbc:hsqldb:hsql://localhost:6666/" + dbName, "SA", "");
 		final Statement stmnt = c.createStatement();
 		final ResultSet rs = stmnt.executeQuery(query);
+		final ResultSetMetaData metaData = rs.getMetaData();
 
+		final List<Map<String, Object>> table = new ArrayList<Map<String, Object>>();
 		while (rs.next()) {
+			final Map<String, Object> row = new LinkedHashMap<String, Object>();
 
+			for (int i = 1; i <= metaData.getColumnCount(); i++) {
+				final String key = metaData.getColumnName(i);
+				final Object value = rs.getObject(key);
+
+				row.put(key, value);
+			}
+
+			table.add(row);
 		}
 
+		// close everything
 		rs.close();
 		stmnt.close();
 		c.close();
 
-		return c;
+		return table;
 	}
 }

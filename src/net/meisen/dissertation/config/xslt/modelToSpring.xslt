@@ -270,13 +270,11 @@
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultDataRetrieverImplementation(@id)"/></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    
-    <xsl:apply-imports />
-    
+        
     <!-- define the bean -->
     <bean class="{$implementation}">
-      <constructor-arg type="java.lang.Object">
-        <null />
+      <constructor-arg type="net.meisen.dissertation.data.impl.dataretriever.IDataRetrieverConfiguration">
+        <xsl:apply-imports />
       </constructor-arg>
     </bean>
   </xsl:template>

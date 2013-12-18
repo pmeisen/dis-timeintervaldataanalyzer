@@ -20,17 +20,17 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.transform.TransformerFactory;
-
 import net.meisen.dissertation.config.TIDAConfig;
 import net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor;
 import net.meisen.dissertation.data.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.data.impl.dataretriever.RandomConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
 import net.meisen.dissertation.models.impl.data.Descriptor;
 import net.meisen.dissertation.models.impl.data.MetaDataModel;
 import net.meisen.dissertation.models.impl.data.Resource;
-import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
@@ -198,28 +198,75 @@ public class TestXsltTidaModel {
 		System.out.println(output);
 
 		// check that we have the dataretriever as map
-		final Map<String, String> expectedDataRetriever = new LinkedHashMap<String, String>();
-		expectedDataRetriever.put("db_butRandom",
-				RandomDataRetriever.class.getName());
-		expectedDataRetriever.put("myOwnId",
-				RandomDataRetriever.class.getName());
-		expectedDataRetriever.put("rnd_test",
-				RandomDataRetriever.class.getName());
-		expectedDataRetriever.put("db_test", DbDataRetriever.class.getName());
 		final List<String> dr = new ArrayList<String>();
 		dr.add("<bean id=\"dataretrievers-\\E[a-z\\-0-9]+\\Q\" class=\"java.util.HashMap\">");
 		dr.add("<constructor-arg>");
 		dr.add("<map key-type=\"java.lang.String\" value-type=\""
 				+ BaseDataRetriever.class.getName() + "\">");
-		for (final Entry<String, String> e : expectedDataRetriever.entrySet()) {
-			dr.add("<entry key=\"" + e.getKey() + "\">");
-			dr.add("<bean class=\"" + e.getValue() + "\">");
-			dr.add("<constructor-arg type=\"java.lang.Object\">");
-			dr.add("<null/>");
-			dr.add("</constructor-arg>");
-			dr.add("</bean>");
-			dr.add("</entry>");
-		}
+
+		// add the db_butRandom
+		dr.add("<entry key=\"db_butRandom\">");
+		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\""
+				+ IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\""
+				+ RandomConnectionConfig.class.getName()
+				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<property name=\"amount\" value=\"100\"/>");
+		dr.add("<property name=\"type\" value=\"java.lang.Integer\"/>");
+		dr.add("</bean>");
+		dr.add("</constructor-arg>");
+		dr.add("</bean>");
+		dr.add("</entry>");
+
+		// add the myOwnId
+		dr.add("<entry key=\"myOwnId\">");
+		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\""
+				+ IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\""
+				+ RandomConnectionConfig.class.getName()
+				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<property name=\"amount\" value=\"500\"/>");
+		dr.add("<property name=\"type\" value=\"java.lang.Double\"/>");
+		dr.add("</bean>");
+		dr.add("</constructor-arg>");
+		dr.add("</bean>");
+		dr.add("</entry>");
+
+		// add the rnd_test
+		dr.add("<entry key=\"rnd_test\">");
+		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\""
+				+ IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\""
+				+ RandomConnectionConfig.class.getName()
+				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<property name=\"amount\" value=\"1000\"/>");
+		dr.add("<property name=\"type\" value=\"java.lang.String\"/>");
+		dr.add("</bean>");
+		dr.add("</constructor-arg>");
+		dr.add("</bean>");
+		dr.add("</entry>");
+
+		// add the db_test
+		dr.add("<entry key=\"db_test\">");
+		dr.add("<bean class=\"" + DbDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\""
+				+ IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\""
+				+ DbConnectionConfig.class.getName()
+				+ "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\">");
+		dr.add("<property name=\"type\" value=\"jdbc\"/>");
+		dr.add("<property name=\"url\" value=\"jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks\"/>");
+		dr.add("<property name=\"driver\" value=\"org.hsqldb.jdbcDriver\"/>");
+		dr.add("<property name=\"username\" value=\"SA\"/>");
+		dr.add("<property name=\"password\" value=\"\"/>");
+		dr.add("</bean>");
+		dr.add("</constructor-arg>");
+		dr.add("</bean>");
+		dr.add("</entry>");
+
 		dr.add("</map>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");

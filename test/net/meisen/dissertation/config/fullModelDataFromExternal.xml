@@ -2,10 +2,12 @@
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:rnd="http://dev.meisen.net/xsd/dissertation/model/rnd"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
-       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model    http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/db http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/rnd http://dev.meisen.net/xsd/dissertation/tidaRandomExtension.xsd"
 
        id="myModel">
 
@@ -47,17 +49,17 @@
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
          by default the following id-prefixes are mapped to the specified implementation:
           + db_       is mapped to     net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever
-          + rnd_   is mapped to     net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever
+          + rnd_      is mapped to     net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever
       -->
     <dataretrievers>
       <dataretriever id="db_butRandom" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
-        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+        <rnd:data amount="100" type="java.lang.Integer" />
       </dataretriever>
       <dataretriever id="myOwnId" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
-        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+        <rnd:data amount="500" type="java.lang.Double" />
       </dataretriever>
       <dataretriever id="rnd_test">
-        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+        <rnd:data amount="1000" type="java.lang.String" />
       </dataretriever>
       <dataretriever id="db_test">
         <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
