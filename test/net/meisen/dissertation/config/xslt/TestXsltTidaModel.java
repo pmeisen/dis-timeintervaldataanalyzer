@@ -22,21 +22,26 @@ import java.util.regex.Pattern;
 
 import net.meisen.dissertation.config.TIDAConfig;
 import net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor;
-import net.meisen.dissertation.data.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
-import net.meisen.dissertation.data.impl.dataretriever.IDataRetrieverConfiguration;
 import net.meisen.dissertation.data.impl.dataretriever.RandomConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
+import net.meisen.dissertation.data.impl.idfactories.LongIdsFactory;
+import net.meisen.dissertation.data.impl.idfactories.UuIdsFactory;
 import net.meisen.dissertation.models.impl.data.Descriptor;
+import net.meisen.dissertation.models.impl.data.DescriptorModel;
 import net.meisen.dissertation.models.impl.data.MetaDataModel;
 import net.meisen.dissertation.models.impl.data.Resource;
+import net.meisen.dissertation.models.impl.data.ResourceModel;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 import net.meisen.general.sbconfigurator.config.transformer.ClasspathXsltUriResolver;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsltUriResolver;
+import net.meisen.general.sbconfigurator.factories.MergedCollection;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -58,6 +63,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextClass(TIDAConfig.class)
 @ContextFile("sbconfigurator-core.xml")
 public class TestXsltTidaModel {
+	private final String pathToFM = "/net/meisen/dissertation/config/fullModel.xml";
+	private final String pathToFMDFE = "/net/meisen/dissertation/config/fullModelDataFromExternal.xml";
 
 	/**
 	 * the default xslt transformer used for testing
@@ -98,17 +105,15 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testAddedDescriptors() throws TransformationFailedException {
-		transformer
-				.transformFromClasspath(
-						"/net/meisen/dissertation/config/xslt/configAddDescriptors.xml",
+		// @formatter:off
+		 transformer.transformFromClasspath("/net/meisen/dissertation/config/xslt/configAddDescriptors.xml",
 						outputStream);
-
 		final String output = getOutput();
-		assertTrue(
-				output,
-				match(output,
-						"<entry key=\"java.util.List\" value=\"net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor\"/>",
+		
+		assertTrue(output, match(output,
+						"<entry key=\"java.util.List\" value=\"" + MyOwnTestDescriptor.class.getName() + "\"/>",
 						"</map>"));
+		// @formatter:on
 	}
 
 	/**
@@ -120,29 +125,22 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testChangeOfFactories() throws TransformationFailedException {
-		transformer
-				.transformFromClasspath(
-						"/net/meisen/dissertation/config/xslt/configChangeFactories.xml",
+		// @formatter:off
+		transformer.transformFromClasspath("/net/meisen/dissertation/config/xslt/configChangeFactories.xml",
 						outputStream);
-
 		final String output = getOutput();
-		assertTrue(
-				output,
-				match(output,
-						"<bean id=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" class=\""
-								+ DefaultValues
-										.getDescriptorsFactoryImplementation()
-								+ "\">",
-						"<constructor-arg type=\"net.meisen.dissertation.data.IIdsFactory\">",
-						"<bean class=\"net.meisen.dissertation.data.impl.idfactories.LongIdsFactory\"/>",
+
+		assertTrue(output, match(output,
+						"<bean id=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" class=\"" + DefaultValues.getDescriptorsFactoryImplementation() + "\">",
+						"<constructor-arg type=\"" + net.meisen.dissertation.data.IIdsFactory.class.getName() + "\">",
+						"<bean class=\"" + LongIdsFactory.class.getName() + "\"/>",
 						"</constructor-arg>"));
-		assertTrue(
-				output,
-				match(output,
+		assertTrue(output, match(output,
 						"<bean id=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" class=\"my.own.impl.ResourceFactory\">",
-						"<constructor-arg type=\"net.meisen.dissertation.data.IIdsFactory\">",
-						"<bean class=\"net.meisen.dissertation.data.impl.idfactories.UuIdsFactory\"/>",
+						"<constructor-arg type=\"" + net.meisen.dissertation.data.IIdsFactory.class.getName() + "\">",
+						"<bean class=\"" + UuIdsFactory.class.getName() + "\"/>",
 						"</constructor-arg>"));
+		// @formatter:on
 	}
 
 	/**
@@ -154,109 +152,87 @@ public class TestXsltTidaModel {
 	@Test
 	public void testFullModelTransformation()
 			throws TransformationFailedException {
-		transformer.transformFromClasspath(
-				"/net/meisen/dissertation/config/fullModel.xml", outputStream);
+		transformer.transformFromClasspath(pathToFM, outputStream);
 
 		final String output = getOutput();
 
 		// check the resourcemodels
 		for (int i = 1; i <= 3; i++) {
 			final String id = "R" + i;
-			assertTrue(
-					output,
-					match(output,
-							"<bean id=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-"
-									+ id
-									+ "\" class=\"net.meisen.dissertation.models.impl.data.ResourceModel\">",
+
+			// @formatter:off
+			assertTrue(output, match(output,
+							"<bean id=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.ResourceModel\">",
 							"<constructor-arg type=\"java.lang.String\">",
 							"<value>" + id + "</value>", "</constructor-arg>"));
+			// @formatter:on
 		}
 
 		// check descriptormodels
 		for (int i = 1; i <= 4; i++) {
 			final String id = "D" + i;
-			assertTrue(
-					output,
-					match(output,
-							"<bean id=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-"
-									+ id
-									+ "\" class=\"net.meisen.dissertation.models.impl.data.DescriptorModel\">",
+
+			// @formatter:off
+			assertTrue(output, match(output,
+							"<bean id=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.DescriptorModel\">",
 							"<constructor-arg type=\"java.lang.String\">",
 							"<value>" + id + "</value>", "</constructor-arg>"));
+			// @formatter:on
 		}
 	}
 
+	/**
+	 * Tests the transformation of a full model configuration using external
+	 * data-sources.
+	 * 
+	 * @throws TransformationFailedException
+	 *             if the XSLT cannot be applied
+	 */
 	@Test
 	public void testFullModelDataFromExternalTransformation()
 			throws TransformationFailedException {
-		transformer
-				.transformFromClasspath(
-						"/net/meisen/dissertation/config/fullModelDataFromExternal.xml",
-						outputStream);
-
+		transformer.transformFromClasspath(pathToFMDFE, outputStream);
 		final String output = getOutput();
-		System.out.println(output);
+		// System.out.println(output);
 
 		// check that we have the dataretriever as map
 		final List<String> dr = new ArrayList<String>();
-		dr.add("<bean id=\"dataretrievers-\\E[a-z\\-0-9]+\\Q\" class=\"java.util.HashMap\">");
-		dr.add("<constructor-arg>");
-		dr.add("<map key-type=\"java.lang.String\" value-type=\""
-				+ BaseDataRetriever.class.getName() + "\">");
 
 		// add the db_butRandom
-		dr.add("<entry key=\"db_butRandom\">");
-		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
-		dr.add("<constructor-arg type=\""
-				+ IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\""
-				+ RandomConnectionConfig.class.getName()
-				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		// @formatter:off
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butRandom\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"100\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.Integer\"/>");
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
-		dr.add("</entry>");
 
 		// add the myOwnId
-		dr.add("<entry key=\"myOwnId\">");
-		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
-		dr.add("<constructor-arg type=\""
-				+ IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\""
-				+ RandomConnectionConfig.class.getName()
-				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"500\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.Double\"/>");
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
-		dr.add("</entry>");
 
 		// add the rnd_test
-		dr.add("<entry key=\"rnd_test\">");
-		dr.add("<bean class=\"" + RandomDataRetriever.class.getName() + "\">");
-		dr.add("<constructor-arg type=\""
-				+ IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\""
-				+ RandomConnectionConfig.class.getName()
-				+ "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-rnd_test\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"1000\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.String\"/>");
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
-		dr.add("</entry>");
 
 		// add the db_test
-		dr.add("<entry key=\"db_test\">");
-		dr.add("<bean class=\"" + DbDataRetriever.class.getName() + "\">");
-		dr.add("<constructor-arg type=\""
-				+ IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\""
-				+ DbConnectionConfig.class.getName()
-				+ "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\">");
 		dr.add("<property name=\"type\" value=\"jdbc\"/>");
 		dr.add("<property name=\"url\" value=\"jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks\"/>");
 		dr.add("<property name=\"driver\" value=\"org.hsqldb.jdbcDriver\"/>");
@@ -265,11 +241,8 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
-		dr.add("</entry>");
+		// @formatter:on
 
-		dr.add("</map>");
-		dr.add("</constructor-arg>");
-		dr.add("</bean>");
 		assertTrue(output, match(output, dr.toArray(new String[dr.size()])));
 
 		// check that the resources with a dataretriever are not added somehow
@@ -278,23 +251,56 @@ public class TestXsltTidaModel {
 		expectedResources.put("R3", "NoValue");
 
 		// get the lines
+		// @formatter:off
 		final List<String> rl = new ArrayList<String>();
-		rl.add("<bean id=\"resources-\\E[a-z\\-0-9]+\\Q\" class=\"java.util.ArrayList\">");
-		rl.add("<constructor-arg>");
+		rl.add("<bean id=\"resources-\\E[a-z\\-0-9]+\\Q\" class=\"" + MergedCollection.class.getName() + "\">");
+		rl.add("<property name=\"collections\">");
+		rl.add("<list value-type=\"java.util.Collection\">");
+		// @formatter:on
+
+		// first we expect the resources directly defined within the xml
+		// @formatter:off
 		rl.add("<list value-type=\"net.meisen.dissertation.models.impl.data.Resource\">");
 		for (final Entry<String, String> e : expectedResources.entrySet()) {
 			rl.add("<bean factory-bean=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createResource\">");
-			rl.add("<constructor-arg>");
-			rl.add("<ref bean=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey()
-					+ "\"/>");
+			rl.add("<constructor-arg type=\"" + ResourceModel.class.getName() + "\">");
+			rl.add("<ref bean=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
 			rl.add("</constructor-arg>");
-			rl.add("<constructor-arg>");
+			rl.add("<constructor-arg type=\"java.lang.String\">");
 			rl.add("<value>" + e.getValue() + "</value>");
 			rl.add("</constructor-arg>");
 			rl.add("</bean>");
 		}
 		rl.add("</list>");
+		// @formatter:on
+
+		// next the dataRetriever should appear
+		// @formatter:off
+		rl.add("<bean factory-bean=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createResources\">");
+		rl.add("<constructor-arg type=\"" + ResourceModel.class.getName() + "\">");
+		rl.add("<ref bean=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-R2\"/>");
 		rl.add("</constructor-arg>");
+		rl.add("<constructor-arg type=\"java.util.Collection\">");
+		
+		rl.add("<bean class=\"org.springframework.beans.factory.config.MethodInvokingFactoryBean\">");
+		rl.add("<property name=\"targetMethod\" value=\"transform\"/>");
+		rl.add("<property name=\"targetObject\">");
+		
+		rl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" factory-method=\"retrieve\">");
+		rl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
+		rl.add("<null xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\"/>");
+		rl.add("</constructor-arg>");
+		rl.add("</bean>");
+		
+		rl.add("</property>");
+		rl.add("</bean>");
+		
+		rl.add("</constructor-arg>");
+		rl.add("</bean>");
+		// @formatter:on
+
+		rl.add("</list>");
+		rl.add("</property>");
 		rl.add("</bean>");
 
 		// check the lines
@@ -304,25 +310,67 @@ public class TestXsltTidaModel {
 		final Map<String, String> expectedDescriptors = new LinkedHashMap<String, String>();
 		expectedDescriptors.put("D2", "2");
 		expectedDescriptors.put("D3", "Some Value");
+		final Map<String, String> expectedRetrDescriptors = new LinkedHashMap<String, String>();
+		expectedRetrDescriptors.put("D1", "db_test");
+		expectedRetrDescriptors.put("D4", "rnd_test");
 
 		// get the lines
 		final List<String> dl = new ArrayList<String>();
-		dl.add("<bean id=\"descriptors-\\E[a-z\\-0-9]+\\Q\" class=\"java.util.ArrayList\">");
-		dl.add("<constructor-arg>");
+		// @formatter:off
+		dl.add("<bean id=\"descriptors-\\E[a-z\\-0-9]+\\Q\" class=\"" + MergedCollection.class.getName() + "\">");
+		dl.add("<property name=\"collections\">");
+		dl.add("<list value-type=\"java.util.Collection\">");
+		// @formatter:on
+
+		// first we expect the descriptors directly defined within the xml
+		// @formatter:off
 		dl.add("<list value-type=\"net.meisen.dissertation.models.impl.data.Descriptor\">");
 		for (final Entry<String, String> e : expectedDescriptors.entrySet()) {
 			dl.add("<bean factory-bean=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createDescriptor\">");
-			dl.add("<constructor-arg>");
-			dl.add("<ref bean=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-"
-					+ e.getKey() + "\"/>");
+			dl.add("<constructor-arg type=\"" + DescriptorModel.class.getName()	+ "\">");
+			dl.add("<ref bean=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
 			dl.add("</constructor-arg>");
-			dl.add("<constructor-arg>");
+			dl.add("<constructor-arg type=\"java.lang.Object\">");
 			dl.add("<value>" + e.getValue() + "</value>");
 			dl.add("</constructor-arg>");
 			dl.add("</bean>");
 		}
 		dl.add("</list>");
-		dl.add("</constructor-arg>");
+		// @formatter:on
+
+		// next the dataRetriever should appear
+		// @formatter:off
+		for (final Entry<String, String> e : expectedRetrDescriptors.entrySet()) {
+			dl.add("<bean factory-bean=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createDescriptors\">");
+			dl.add("<constructor-arg type=\"" + DescriptorModel.class.getName() + "\">");
+			dl.add("<ref bean=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
+			dl.add("</constructor-arg>");
+			dl.add("<constructor-arg type=\"java.util.Collection\">");
+			
+			dl.add("<bean class=\"org.springframework.beans.factory.config.MethodInvokingFactoryBean\">");
+			dl.add("<property name=\"targetMethod\" value=\"transform\"/>");
+			dl.add("<property name=\"targetObject\">");
+			
+			dl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-" + e.getValue() + "\" factory-method=\"retrieve\">");
+			dl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
+			if (e.getValue().startsWith("db")) {
+				dl.add("<null xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\"/>");
+			} else {
+				dl.add("<null/>");
+			}
+			dl.add("</constructor-arg>");
+			dl.add("</bean>");
+			
+			dl.add("</property>");
+			dl.add("</bean>");
+			
+			dl.add("</constructor-arg>");
+			dl.add("</bean>");
+		}
+		// @formatter:on
+
+		dl.add("</list>");
+		dl.add("</property>");
 		dl.add("</bean>");
 
 		// check the lines
@@ -334,8 +382,7 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testFullModelCreation() {
-		final InputStream xml = getClass().getResourceAsStream(
-				"/net/meisen/dissertation/config/fullModel.xml");
+		final InputStream xml = getClass().getResourceAsStream(pathToFM);
 		final Map<String, Object> modules = configuration.loadDelayed(
 				"tidaModelBeans", xml);
 
@@ -383,13 +430,23 @@ public class TestXsltTidaModel {
 		assertEquals(0, expectedValues.size());
 	}
 
+	/**
+	 * Tests if the full model configuration with external data-sources can be
+	 * read.
+	 */
 	@Test
 	public void testFullModelDataFromExternalCreation() {
-		final InputStream xml = getClass()
-				.getResourceAsStream(
-						"/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
+		final InputStream xml = getClass().getResourceAsStream(pathToFMDFE);
 		final Map<String, Object> modules = configuration.loadDelayed(
 				"tidaModelBeans", xml);
+
+		// get the model
+		final MetaDataModel m = (MetaDataModel) modules.get(DefaultValues
+				.getGeneratedModuleName());
+		assertNotNull(m);
+		assertEquals("modelWithExternalSources", m.getId());
+		assertEquals("modelWithExternalSources", m.getName());
+
 	}
 
 	/**

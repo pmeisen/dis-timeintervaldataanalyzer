@@ -104,6 +104,17 @@ public class DefaultValues {
 		return d;
 	}
 
+	/**
+	 * Determines the {@code DataRetriever} to be used for the specified
+	 * {@code id}.
+	 * 
+	 * @param id
+	 *            the id to determine a default {@code DataRetriever} for
+	 * 
+	 * @return the {@code Clazz} of the {@code DataRetriever} to use, can be
+	 *         also {@code null} if no default is known for the specified
+	 *         {@code id}
+	 */
 	public static String getDefaultDataRetrieverImplementation(final String id) {
 
 		// check if an id starts with the specified value

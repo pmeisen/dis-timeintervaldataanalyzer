@@ -27,6 +27,12 @@ public class LongDescriptor<I extends Object> extends
 		this.value = value;
 	}
 
+	public LongDescriptor(final DescriptorModel model, final I id,
+			final Number value) {
+		super(model, id);
+		this.value = mapToDataType(value);
+	}
+
 	@Override
 	public Long getValue() {
 		return value;

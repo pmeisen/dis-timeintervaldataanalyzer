@@ -1,5 +1,9 @@
 package net.meisen.dissertation.data.impl.resources;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import net.meisen.dissertation.data.IIdsFactory;
 import net.meisen.dissertation.models.impl.data.Resource;
 import net.meisen.dissertation.models.impl.data.ResourceModel;
@@ -42,6 +46,17 @@ public class ResourcesFactory {
 	public Resource<?> createResource(final ResourceModel model,
 			final String value) {
 		return new Resource<Object>(model, idsFactory.getId(), value);
+	}
+
+	public Collection<Resource<?>> createResources(final ResourceModel model,
+			final Collection<String> values) {
+		final List<Resource<?>> resources = new ArrayList<Resource<?>>();
+
+		for (final String value : values) {
+			resources.add(createResource(model, value));
+		}
+
+		return resources;
 	}
 
 	/**

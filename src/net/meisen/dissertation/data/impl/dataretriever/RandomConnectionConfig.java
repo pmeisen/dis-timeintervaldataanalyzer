@@ -1,5 +1,7 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+
 public class RandomConnectionConfig implements IDataRetrieverConfiguration {
 	private int amount;
 	private Class<?> type;

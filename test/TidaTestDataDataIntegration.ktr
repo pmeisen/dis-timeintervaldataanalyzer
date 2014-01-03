@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>TidaGhTasksDataIntegration</name>
+    <name>TidaTestDataDataIntegration</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -61,11 +61,38 @@
     <clusterschemas>
     </clusterschemas>
   <created_user>-</created_user>
-  <created_date>2013&#47;12&#47;10 11:05:41.390</created_date>
+  <created_date>2014&#47;01&#47;02 12:59:34.054</created_date>
   <modified_user>-</modified_user>
-  <modified_date>2013&#47;12&#47;10 11:05:41.390</modified_date>
+  <modified_date>2014&#47;01&#47;02 12:59:34.054</modified_date>
   </info>
   <notepads>
+    <notepad>
+      <note>CREATE TABLE &quot;PUBLIC&quot;.TB_TESTDATA
+(
+  FIXED VARCHAR(11)
+, RANDOM VARCHAR(36)
+, COUNTER INTEGER
+)
+;</note>
+      <xloc>571</xloc>
+      <yloc>148</yloc>
+      <width>270</width>
+      <heigth>115</heigth>
+      <fontname>Arial</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>165</backgroundcolorgreen>
+      <backgroundcolorblue>0</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+      <drawshadow>Y</drawshadow>
+    </notepad>
   </notepads>
   <connection>
     <name>seminarRegistrationDb</name>
@@ -93,11 +120,11 @@
     </attributes>
   </connection>
   <connection>
-    <name>TidaGhTasks-Hsqldb</name>
+    <name>TidaTestData-Hsqldb</name>
     <server>localhost</server>
     <type>HYPERSONIC</type>
     <access>Native</access>
-    <database>tidaGhTasks</database>
+    <database>tidaTestData</database>
     <port>6666</port>
     <username>SA</username>
     <password>Encrypted </password>
@@ -114,33 +141,11 @@
       <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
     </attributes>
   </connection>
-  <connection>
-    <name>TidaGhTasks-Oracle</name>
-    <server>localhost</server>
-    <type>ORACLE</type>
-    <access>Native</access>
-    <database>db12c</database>
-    <port>1521</port>
-    <username>tida_gh_tasks</username>
-    <password>Encrypted 2be98afc86aa7f2e4cb09a679d29bbfca</password>
-    <servername/>
-    <data_tablespace>ts_data</data_tablespace>
-    <index_tablespace>ts_data</index_tablespace>
-    <attributes>
-      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
-      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
-      <attribute><code>PORT_NUMBER</code><attribute>1521</attribute></attribute>
-      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
-      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>N</attribute></attribute>
-      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
-    </attributes>
-  </connection>
   <order>
-  <hop> <from>getLocations</from><to>putLocations</to><enabled>Y</enabled> </hop>  <hop> <from>getPersons</from><to>putPersons</to><enabled>Y</enabled> </hop>  <hop> <from>getTaskType</from><to>putTaskTypes</to><enabled>Y</enabled> </hop>  <hop> <from>getFacts</from><to>putFacts</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Generate random value</from><to>Add sequence</to><enabled>Y</enabled> </hop>  <hop> <from>Generate Rows</from><to>Generate random value</to><enabled>Y</enabled> </hop>  <hop> <from>Add sequence</from><to>Select values</to><enabled>Y</enabled> </hop>  <hop> <from>Select values</from><to>Table output</to><enabled>Y</enabled> </hop>  <hop> <from>Table output</from><to>Blocking Step</to><enabled>Y</enabled> </hop>  <hop> <from>Blocking Step</from><to>Execute SQL script</to><enabled>Y</enabled> </hop>  </order>
   <step>
-    <name>getFacts</name>
-    <type>TableInput</type>
+    <name>Add sequence</name>
+    <type>Sequence</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -148,24 +153,27 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Oracle</connection>
-    <sql>SELECT * FROM TB_FACTS_TASK_INTERVAL</sql>
-    <limit>0</limit>
-    <lookup/>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
+      <valuename>COUNTER</valuename>
+      <use_database>N</use_database>
+      <connection/>
+      <schema/>
+      <seqname>SEQ_</seqname>
+      <use_counter>Y</use_counter>
+      <counter_name/>
+      <start_at>1</start_at>
+      <increment_by>1</increment_by>
+      <max_value>999999999</max_value>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>54</xloc>
-      <yloc>350</yloc>
+      <xloc>353</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>getLocations</name>
-    <type>TableInput</type>
+    <name>Generate random value</name>
+    <type>RandomValue</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -173,24 +181,23 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Oracle</connection>
-    <sql>SELECT * FROM TB_DIM_LOCATION</sql>
-    <limit>0</limit>
-    <lookup/>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
+    <fields>
+      <field>
+        <name>RANDOM</name>
+        <type>random uuid</type>
+      </field>
+    </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>40</xloc>
-      <yloc>52</yloc>
+      <xloc>185</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>getPersons</name>
-    <type>TableInput</type>
+    <name>Generate Rows</name>
+    <type>RowGenerator</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -198,48 +205,30 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Oracle</connection>
-    <sql>SELECT * FROM TB_DIM_PERSON</sql>
-    <limit>0</limit>
-    <lookup/>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
+    <fields>
+      <field>
+        <name>FIXED</name>
+        <type>String</type>
+        <format/>
+        <currency/>
+        <decimal/>
+        <group/>
+        <nullif>FIXED VALUE</nullif>
+        <length>-1</length>
+        <precision>-1</precision>
+      </field>
+    </fields>
+    <limit>10000</limit>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>44</xloc>
-      <yloc>156</yloc>
+      <xloc>35</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>getTaskType</name>
-    <type>TableInput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <connection>TidaGhTasks-Oracle</connection>
-    <sql>SELECT * FROM TB_DIM_TASKTYPE</sql>
-    <limit>0</limit>
-    <lookup/>
-    <execute_each_row>N</execute_each_row>
-    <variables_active>N</variables_active>
-    <lazy_conversion_active>N</lazy_conversion_active>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>50</xloc>
-      <yloc>254</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>putFacts</name>
+    <name>Table output</name>
     <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
@@ -248,9 +237,9 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Hsqldb</connection>
+    <connection>TidaTestData-Hsqldb</connection>
     <schema>PUBLIC</schema>
-    <table>TB_INTERVALS</table>
+    <table>TB_TESTDATA</table>
     <commit>1000</commit>
     <truncate>Y</truncate>
     <ignore_errors>N</ignore_errors>
@@ -269,15 +258,15 @@
     </fields>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>243</xloc>
-      <yloc>350</yloc>
+      <xloc>626</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>putLocations</name>
-    <type>TableOutput</type>
+    <name>Select values</name>
+    <type>SelectValues</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -285,36 +274,30 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Hsqldb</connection>
-    <schema>PUBLIC</schema>
-    <table>TB_DIM_LOCATION</table>
-    <commit>1000</commit>
-    <truncate>Y</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>N</specify_fields>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <tablename_in_field>N</tablename_in_field>
-    <tablename_field/>
-    <tablename_in_table>Y</tablename_in_table>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields>
-    </fields>
-     <cluster_schema/>
+    <fields>        <select_unspecified>N</select_unspecified>
+      <meta>        <name>COUNTER</name>
+        <rename>COUNTER</rename>
+        <type>Integer</type>
+        <length>-2</length>
+        <precision>0</precision>
+        <conversion_mask/>
+        <date_format_lenient>false</date_format_lenient>
+        <encoding/>
+        <decimal_symbol/>
+        <grouping_symbol/>
+        <currency_symbol/>
+        <storage_type/>
+      </meta>    </fields>     <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>236</xloc>
-      <yloc>52</yloc>
+      <xloc>503</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>putPersons</name>
-    <type>TableOutput</type>
+    <name>Execute SQL script</name>
+    <type>ExecSQL</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -322,52 +305,28 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Hsqldb</connection>
-    <schema>PUBLIC</schema>
-    <table>TB_DIM_PERSON</table>
-    <commit>1000</commit>
-    <truncate>Y</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>Y</specify_fields>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <tablename_in_field>N</tablename_in_field>
-    <tablename_field/>
-    <tablename_in_table>Y</tablename_in_table>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields>
-        <field>
-          <column_name>FISRTNAME</column_name>
-          <stream_name>FISRTNAME</stream_name>
-        </field>
-        <field>
-          <column_name>KEY_PERSON</column_name>
-          <stream_name>KEY_PERSON</stream_name>
-        </field>
-        <field>
-          <column_name>LASTNAME</column_name>
-          <stream_name>LASTNAME</stream_name>
-        </field>
-        <field>
-          <column_name>PERSONNR</column_name>
-          <stream_name>PERSONNR</stream_name>
-        </field>
-    </fields>
+    <connection>TidaTestData-Hsqldb</connection>
+    <execute_each_row>Y</execute_each_row>
+    <single_statement>Y</single_statement>
+    <replace_variables>N</replace_variables>
+    <sql>SHUTDOWN</sql>
+    <insert_field/>
+    <update_field/>
+    <delete_field/>
+    <read_field/>
+    <arguments>
+    </arguments>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>237</xloc>
-      <yloc>156</yloc>
+      <xloc>845</xloc>
+      <yloc>65</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
 
   <step>
-    <name>putTaskTypes</name>
-    <type>TableOutput</type>
+    <name>Blocking Step</name>
+    <type>BlockingStep</type>
     <description/>
     <distribute>Y</distribute>
     <copies>1</copies>
@@ -375,29 +334,15 @@
            <method>none</method>
            <schema_name/>
            </partitioning>
-    <connection>TidaGhTasks-Hsqldb</connection>
-    <schema>PUBLIC</schema>
-    <table>TB_DIM_TASKTYPE</table>
-    <commit>1000</commit>
-    <truncate>Y</truncate>
-    <ignore_errors>N</ignore_errors>
-    <use_batch>Y</use_batch>
-    <specify_fields>N</specify_fields>
-    <partitioning_enabled>N</partitioning_enabled>
-    <partitioning_field/>
-    <partitioning_daily>N</partitioning_daily>
-    <partitioning_monthly>Y</partitioning_monthly>
-    <tablename_in_field>N</tablename_in_field>
-    <tablename_field/>
-    <tablename_in_table>Y</tablename_in_table>
-    <return_keys>N</return_keys>
-    <return_field/>
-    <fields>
-    </fields>
+      <pass_all_rows>N</pass_all_rows>
+      <directory>%%java.io.tmpdir%%</directory>
+      <prefix>block</prefix>
+      <cache_size>5000</cache_size>
+      <compress>Y</compress>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>241</xloc>
-      <yloc>254</yloc>
+      <xloc>734</xloc>
+      <yloc>64</yloc>
       <draw>Y</draw>
       </GUI>
     </step>

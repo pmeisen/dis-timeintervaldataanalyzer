@@ -13,14 +13,20 @@ import java.util.regex.Pattern;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import net.meisen.dissertation.data.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.general.genmisc.resources.Resource;
 import net.meisen.general.genmisc.resources.ResourceInfo;
 import net.meisen.general.genmisc.resources.ResourceType;
 import net.meisen.general.genmisc.types.Files;
-import net.meisen.general.genmisc.types.Strings;
 import net.meisen.general.sbconfigurator.config.transformer.XsltURIResolver;
 
+/**
+ * Implementation of a {@code XsltURIResolver} which searches for xslt files
+ * available for {@code DateRetriever}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DataRetrieverXsltResolver implements XsltURIResolver {
 
 	@Override
@@ -54,12 +60,32 @@ public class DataRetrieverXsltResolver implements XsltURIResolver {
 		return createSource(xsltIncludes);
 	}
 
+	/**
+	 * Creates a path for the specified {@code Resource} of using the specified
+	 * class as path.
+	 * 
+	 * @param clazz
+	 *            the class to create the xslt for
+	 * @param resInfo
+	 *            the resource pointing to the xslt
+	 * 
+	 * @return the created xslt path
+	 */
 	protected String createXsltPath(final String clazz,
 			final ResourceInfo resInfo) {
 		final String ext = Files.getExtension(resInfo.getFullPath());
 		return clazz.replace('.', '/') + "." + ext;
 	}
 
+	/**
+	 * Creates a {@code Source} which includes all the specified xslt-files.
+	 * 
+	 * @param xslts
+	 *            the {@code Collection} of xslts to be included
+	 * 
+	 * @return the created {@code Source} which includes all the specified
+	 *         xslt-files
+	 */
 	protected Source createSource(final Collection<String> xslts) {
 
 		String xsltFile = "";
@@ -85,15 +111,26 @@ public class DataRetrieverXsltResolver implements XsltURIResolver {
 		return new StreamSource(stream);
 	}
 
-	protected String transformToClass(final ResourceInfo resInfo) {
+	/**
+	 * Transforms the specified xslt {@code Resource} to a class, i.e. removes
+	 * the ending, replaces separators.
+	 * 
+	 * @param xsltResInfo
+	 *            the xslt resource to transform or determine the class for
+	 * 
+	 * @return the class which is not validated
+	 * 
+	 * @see #isValidClass(String)
+	 */
+	protected String transformToClass(final ResourceInfo xsltResInfo) {
 
 		// get the path to the xslt with '.' instead of a separator
 		final String modXsltPath;
-		if (ResourceType.IN_JAR_FILE.equals(resInfo.getType())) {
-			final String xsltPath = resInfo.getInJarPath();
+		if (ResourceType.IN_JAR_FILE.equals(xsltResInfo.getType())) {
+			final String xsltPath = xsltResInfo.getInJarPath();
 			modXsltPath = xsltPath == null ? null : xsltPath.replace('/', '.');
 		} else {
-			final String xsltPath = resInfo.getRelativePathToRoot();
+			final String xsltPath = xsltResInfo.getRelativePathToRoot();
 			modXsltPath = xsltPath == null ? null : xsltPath.replace(
 					File.separatorChar, '.');
 		}
@@ -105,6 +142,17 @@ public class DataRetrieverXsltResolver implements XsltURIResolver {
 		}
 	}
 
+	/**
+	 * Checks if the specified {@code clazzName} is valid considering the name
+	 * and the used super-class (i.e. must be assignable from
+	 * {@code BaseDataRetriever}.
+	 * 
+	 * @param clazzName
+	 *            the class to be validated
+	 * 
+	 * @return {@code true} if the class is valid to be used, otherwise
+	 *         {@code false}
+	 */
 	protected boolean isValidClass(final String clazzName) {
 		if (clazzName == null) {
 			return false;

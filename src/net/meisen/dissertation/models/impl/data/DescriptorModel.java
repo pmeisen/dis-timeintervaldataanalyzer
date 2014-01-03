@@ -14,7 +14,7 @@ public class DescriptorModel {
 
 	/**
 	 * Constructor to define the {@code id} and the {@code dataType} of the
-	 * model.
+	 * model's data.
 	 * 
 	 * @param id
 	 *            the id of the model
@@ -27,7 +27,7 @@ public class DescriptorModel {
 
 	/**
 	 * Constructor to define the {@code id}, {@code name} and the
-	 * {@code dataType} of the model.
+	 * {@code dataType} of the model's data.
 	 * 
 	 * @param id
 	 *            the id of the model

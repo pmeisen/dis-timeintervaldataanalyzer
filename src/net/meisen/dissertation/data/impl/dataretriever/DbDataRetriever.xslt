@@ -18,5 +18,10 @@
       <property name="username" value="{$username}"/>
       <property name="password" value="{password}"/>
     </bean>
-  </xsl:template> 
+
+  </xsl:template>
+  
+  <xsl:template match="db:singlevaluequery">
+    <null />
+  </xsl:template>
 </xsl:stylesheet>

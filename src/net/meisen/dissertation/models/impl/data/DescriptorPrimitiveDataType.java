@@ -1,5 +1,8 @@
 package net.meisen.dissertation.models.impl.data;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import net.meisen.general.genmisc.types.Objects;
 
 /**
@@ -51,6 +54,77 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 		}
 
 		return cmp;
+	}
+
+	public D mapToDataType(final Object value) {
+
+		if (value == null) {
+			return null;
+		}
+
+		final Class<D> clazz = getPrimitiveDataType();
+
+		if (clazz.equals(value.getClass())) {
+			return castToType(value);
+		} else if (Number.class.isAssignableFrom(clazz)) {
+			final Number number = (Number) value;
+			final Number result = castToNumber(number, clazz);
+
+			// check the result
+			if (result != null) {
+				final Class<?> srcClazz = number.getClass();
+				final Number cmpNumber = castToNumber(result, number.getClass());
+
+				if (cmpNumber.equals(number)) {
+					return castToType(result);
+				}
+				/*
+				 * There is a problem with the BigDecimal the equality depends
+				 * on how it is created, i.e. using new BigDecimal(...) or
+				 * BigDecimal.valueOf(...). The castToNumber method uses the
+				 * valueOf, therefore here we check the constructor.
+				 */
+				else if (BigDecimal.class.equals(srcClazz)
+						&& new BigDecimal(result.doubleValue()).equals(number)) {
+					return castToType(result);
+				}
+			}
+		}
+
+		// if we came so far there is no hope
+		return null;
+	}
+
+	protected Number castToNumber(final Number number, final Class<?> clazz) {
+		final Number result;
+
+		if (Byte.class.equals(clazz)) {
+			result = number.byteValue();
+		} else if (Short.class.equals(clazz)) {
+			result = number.shortValue();
+		} else if (Integer.class.equals(clazz)) {
+			result = number.intValue();
+		} else if (Long.class.equals(clazz)) {
+			result = number.longValue();
+		} else if (Float.class.equals(clazz)) {
+			result = number.floatValue();
+		} else if (Double.class.equals(clazz)) {
+			result = number.doubleValue();
+		} else if (BigInteger.class.equals(clazz)) {
+			result = BigInteger.valueOf(number.longValue());
+		} else if (BigDecimal.class.equals(clazz)) {
+			result = BigDecimal.valueOf(number.doubleValue());
+		} else {
+			return null;
+		}
+
+		return result;
+	}
+
+	protected D castToType(final Object value) {
+		@SuppressWarnings("unchecked")
+		final D result = (D) value;
+		return result;
 	}
 
 	/**

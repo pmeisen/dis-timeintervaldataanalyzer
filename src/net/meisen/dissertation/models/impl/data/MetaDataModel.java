@@ -1,5 +1,6 @@
 package net.meisen.dissertation.models.impl.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 

@@ -16,8 +16,12 @@ import net.meisen.dissertation.data.impl.indexes.TestIndexedCollectionDefinition
 import net.meisen.dissertation.data.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.data.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.data.impl.resources.TestResoucesFactory;
+import net.meisen.dissertation.help.TestDb;
+import net.meisen.dissertation.models.impl.data.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.models.impl.data.TestMetaDataModel;
 import net.meisen.dissertation.models.impl.data.TestResource;
+import net.meisen.dissertation.models.impl.dataretriever.TestDataCollection;
+import net.meisen.dissertation.models.impl.dataretriever.TestDataRecord;
 import net.meisen.dissertation.models.impl.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.models.impl.naturals.TestBigIntegerNaturals;
 import net.meisen.dissertation.models.impl.naturals.TestBigIntegerNaturalsFactory;
@@ -41,6 +45,9 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+
+		// Test general helper
+		TestDb.class,
 
 		// Test the naturals
 		TestIntegerNaturals.class,
@@ -72,12 +79,15 @@ import org.junit.runners.Suite;
 		TestUuIdsFactory.class,
 
 		// Test the descriptors and the resource
-		TestDoubleDescriptor.class, TestIntegerDescriptor.class,
-		TestLongDescriptor.class, TestGeneralDescriptor.class,
-		TestResource.class,
+		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
+		TestIntegerDescriptor.class, TestLongDescriptor.class,
+		TestGeneralDescriptor.class, TestResource.class,
 
 		// Test the factories for descriptors and resources
 		TestDescriptorsFactory.class, TestResoucesFactory.class,
+
+		// Test the dataRetrievers
+		TestDataCollection.class, TestDataRecord.class,
 
 		// Test combined meta-model
 		TestMetaDataModel.class,

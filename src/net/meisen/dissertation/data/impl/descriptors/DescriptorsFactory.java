@@ -1,7 +1,10 @@
 package net.meisen.dissertation.data.impl.descriptors;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.meisen.dissertation.data.IIdsFactory;
@@ -33,6 +36,17 @@ public class DescriptorsFactory {
 		this.idsFactory = idsFactory;
 		this.descriptors = descriptors == null ? new HashMap<Class<?>, Class<? extends Descriptor<?, ?, ?>>>()
 				: descriptors;
+	}
+
+	public Collection<Descriptor<?, ?, ?>> createDescriptors(
+			final DescriptorModel model, final Collection<Object> values) {
+		final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
+
+		for (final Object value : values) {
+			descriptors.add(createDescriptor(model, value));
+		}
+
+		return descriptors;
 	}
 
 	public Descriptor<?, ?, ?> createDescriptor(final DescriptorModel model,
@@ -116,7 +130,7 @@ public class DescriptorsFactory {
 			return clazz;
 		}
 	}
-	
+
 	public Class<?> getIdClass() {
 		return idsFactory.getIdClass();
 	}

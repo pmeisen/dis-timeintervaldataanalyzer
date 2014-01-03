@@ -9,7 +9,7 @@
                            http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
                            http://dev.meisen.net/xsd/dissertation/model/rnd http://dev.meisen.net/xsd/dissertation/tidaRandomExtension.xsd"
 
-       id="myModel">
+       id="modelWithExternalSources">
 
   <config>
     <factories>
@@ -82,23 +82,17 @@
 
     <values>
       <resource model="R1" value="Edison" />
-
       <resource model="R2" dataretriever="db_test">
-        <db:query value="PERSONNR">SELECT DISTINCT PERSONNR FROM TB_DIM_PERSON</db:query>
+        <db:singlevaluequery>SELECT DISTINCT PERSONNR FROM TB_DIM_PERSON</db:singlevaluequery>
       </resource>
       <resource model="R3" value="NoValue" />
 
       <descriptor model="D1" dataretriever="db_test">
-        <db:query value="TYPE">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
+        <db:singlevaluequery>SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:singlevaluequery>
       </descriptor>
-
       <descriptor model="D2" value="2" />
-
-      <descriptor model="D3" value="Some Value" />
-      
-      <descriptor model="D4" dataretriever="rnd_test">
-        <db:query value="TYPE">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
-      </descriptor>
+      <descriptor model="D3" value="Some Value" />     
+      <descriptor model="D4" dataretriever="rnd_test" />
     </values>
   </meta>
 

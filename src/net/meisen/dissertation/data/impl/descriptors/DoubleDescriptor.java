@@ -31,6 +31,13 @@ public class DoubleDescriptor<I extends Object> extends
 		super(model, id);
 		this.value = value;
 	}
+	
+	public DoubleDescriptor(final DescriptorModel model, final I id,
+			final Number value) {
+		super(model, id);
+		this.value = mapToDataType(value);
+	}
+
 
 	@Override
 	public Double getValue() {
