@@ -2,6 +2,7 @@ package net.meisen.dissertation;
 
 import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
+import net.meisen.dissertation.data.impl.dataretriever.TestDbDataRetriever;
 import net.meisen.dissertation.data.impl.descriptors.TestDescriptorsFactory;
 import net.meisen.dissertation.data.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.data.impl.descriptors.TestGeneralDescriptor;
@@ -67,7 +68,8 @@ import org.junit.runners.Suite;
 		TestRawTemporalModel.class,
 
 		// Test indexes
-		TestCompositeIndexKey.class, TestIndexKeyDefinition.class,
+		TestCompositeIndexKey.class,
+		TestIndexKeyDefinition.class,
 		TestMapIndex.class,
 		TestIndexedCollectionDefinition.class,
 		TestNestedIndexedCollection.class,
@@ -88,6 +90,7 @@ import org.junit.runners.Suite;
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
+		TestDbDataRetriever.class,
 
 		// Test combined meta-model
 		TestMetaDataModel.class,

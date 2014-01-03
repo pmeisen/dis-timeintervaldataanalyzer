@@ -14,7 +14,7 @@ public class DbConnectionConfig implements IDataRetrieverConfiguration {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(final String type) {
 		this.type = type;
 	}
 
@@ -22,7 +22,7 @@ public class DbConnectionConfig implements IDataRetrieverConfiguration {
 		return url;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(final String url) {
 		this.url = url;
 	}
 
@@ -30,7 +30,7 @@ public class DbConnectionConfig implements IDataRetrieverConfiguration {
 		return driver;
 	}
 
-	public void setDriver(String driver) {
+	public void setDriver(final String driver) {
 		this.driver = driver;
 	}
 
@@ -38,7 +38,7 @@ public class DbConnectionConfig implements IDataRetrieverConfiguration {
 		return username;
 	}
 
-	public void setUsername(String username) {
+	public void setUsername(final String username) {
 		this.username = username;
 	}
 
@@ -46,8 +46,7 @@ public class DbConnectionConfig implements IDataRetrieverConfiguration {
 		return password;
 	}
 
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
-
 }

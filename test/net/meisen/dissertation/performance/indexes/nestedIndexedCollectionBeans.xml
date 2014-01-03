@@ -22,9 +22,9 @@
         <constructor-arg type="java.lang.String[]"><value>getAge</value></constructor-arg>
       </bean>
     </constructor-arg>
-    <constructor-arg type="net.meisen.dissertation.data.impl.indexes.NestedCollectionDefinition[]">
-      <list value-type="net.meisen.dissertation.data.impl.indexes.NestedCollectionDefinition">
-        <bean class="net.meisen.dissertation.data.impl.indexes.NestedCollectionDefinition">
+    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition[]">
+      <list value-type="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition">
+        <bean class="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition">
           <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.indexes.TroveIntIndexedCollection</value></constructor-arg>
           <constructor-arg type="java.lang.Object[]"><null /></constructor-arg>
         </bean>

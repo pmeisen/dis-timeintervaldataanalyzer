@@ -54,7 +54,8 @@ public abstract class DataCollection<D> {
 
 	public <T> Collection<T> transform() {
 		if (getRecordSize() != 1) {
-			throw new IllegalStateException("");
+			throw new IllegalStateException(
+					"A dataCollection must be of size 1 to be transformable into a Collection.");
 		}
 
 		final ArrayList<T> data = new ArrayList<T>();

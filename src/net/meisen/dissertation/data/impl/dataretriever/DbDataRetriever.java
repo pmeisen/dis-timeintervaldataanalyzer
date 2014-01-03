@@ -1,28 +1,21 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
-import com.jolbox.bonecp.BoneCPDataSource;
-
+import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
-import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
-import net.meisen.dissertation.models.impl.dataretriever.DataRecord;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.genmisc.types.Classes;
 
-public class DbDataRetriever extends BaseDataRetriever {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.jolbox.bonecp.BoneCPDataSource;
+
+public class DbDataRetriever extends BaseDataRetriever {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(DbDataRetriever.class);
 	private final BoneCPDataSource ds;
 
 	public DbDataRetriever(final IDataRetrieverConfiguration config) {
@@ -44,7 +37,14 @@ public class DbDataRetriever extends BaseDataRetriever {
 		ds.setPassword(c.getPassword());
 
 		// TODO add additional properties to the DbConnectionConfig
-		// TODO ds muss irgendwie wieder mit ds.close() geschlossen werden
+	}
+
+	public void close() {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Closing the DbDataRetriever for database '"
+					+ ds.getJdbcUrl() + "'");
+		}
+		ds.close();
 	}
 
 	@Override
@@ -58,9 +58,8 @@ public class DbDataRetriever extends BaseDataRetriever {
 	}
 
 	@Override
-	public DataCollection<?> retrieve(
+	public DbDataCollection retrieve(
 			final IQueryConfiguration queryConfiguration) {
-		final List<?> res = new ArrayList<Object>();
 
 		if (queryConfiguration == null) {
 			exceptionRegistry.throwRuntimeException(
@@ -68,58 +67,22 @@ public class DbDataRetriever extends BaseDataRetriever {
 		} else if (queryConfiguration instanceof DbQueryConfiguration) {
 			// do nothing everything is fine
 		} else {
-			throw new IllegalArgumentException("The '"
-					+ DbDataRetriever.class.getName()
-					+ "' does not support a queryConfiguration of type '"
-					+ queryConfiguration.getClass().getName() + "'");
+			exceptionRegistry.throwRuntimeException(
+					DataRetrieverException.class, 1002, DbDataRetriever.class
+							.getName(),
+					queryConfiguration.getClass().getName(),
+					DbQueryConfiguration.class.getName());
 		}
-		
+
 		final DbQueryConfiguration query = (DbQueryConfiguration) queryConfiguration;
-		
+		try {
+			return new DbDataCollection(query, ds.getConnection());
+		} catch (final SQLException e) {
+			exceptionRegistry.throwRuntimeException(
+					DbDataRetrieverException.class, 1002, e, ds.getJdbcUrl());
 
-		return new DataCollection<String>(new String[] { "A" }) {
-
-			@Override
-			public Iterator<DataRecord<String>> open() {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public void close() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-	}
-
-	public List<Map<String, Object>> query(final String dbName,
-			final String query) throws SQLException {
-		final Connection c = DriverManager.getConnection(
-				"jdbc:hsqldb:hsql://localhost:6666/" + dbName, "SA", "");
-		final Statement stmnt = c.createStatement();
-		final ResultSet rs = stmnt.executeQuery(query);
-		final ResultSetMetaData metaData = rs.getMetaData();
-
-		final List<Map<String, Object>> table = new ArrayList<Map<String, Object>>();
-		while (rs.next()) {
-			final Map<String, Object> row = new LinkedHashMap<String, Object>();
-
-			for (int i = 1; i <= metaData.getColumnCount(); i++) {
-				final String key = metaData.getColumnName(i);
-				final Object value = rs.getObject(key);
-
-				row.put(key, value);
-			}
-
-			table.add(row);
+			// cannot happen
+			return null;
 		}
-
-		// close everything
-		rs.close();
-		stmnt.close();
-		c.close();
-
-		return table;
 	}
 }

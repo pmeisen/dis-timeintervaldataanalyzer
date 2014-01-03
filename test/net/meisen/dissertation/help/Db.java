@@ -29,6 +29,8 @@ import net.meisen.general.genmisc.types.Streams;
 
 import org.hsqldb.Database;
 import org.hsqldb.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper class to work with databases during tests
@@ -37,6 +39,7 @@ import org.hsqldb.Server;
  * 
  */
 public class Db {
+	private final static Logger LOG = LoggerFactory.getLogger(Db.class);
 
 	private final File tmpFolder;
 	private final Server hSqlDb;
@@ -321,7 +324,14 @@ public class Db {
 	 * Shutdown the database.
 	 */
 	public void shutDownDb() {
-		hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
+		try {
+			hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
+		} catch (final Exception e) {
+			// ignore any error as long as the files can be removed
+			if (LOG.isErrorEnabled()) {
+				LOG.error("The shutdown of the database failed.", e);
+			}
+		}
 		assertTrue(Files.deleteDir(tmpFolder));
 	}
 
