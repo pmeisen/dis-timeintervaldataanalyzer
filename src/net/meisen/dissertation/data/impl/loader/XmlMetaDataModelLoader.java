@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Map;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.models.impl.data.MetaDataModel;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.api.IModuleHolder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -38,11 +38,11 @@ public class XmlMetaDataModelLoader {
 	}
 
 	public MetaDataModel loadXml(final InputStream xmlFile) {
-		final Map<String, Object> modules = configuration.loadDelayed(
-				"tidaModelBeans",
-				getClass().getResourceAsStream(
-						"/net/meisen/dissertation/config/fullModel.xml"));
-		final MetaDataModel m = (MetaDataModel) modules.get(DefaultValues
+		final InputStream inputStream = getClass().getResourceAsStream(
+				"/net/meisen/dissertation/config/fullModel.xml");
+		final IModuleHolder moduleHolder = configuration.loadDelayed(
+				"tidaModelBeans", inputStream);
+		final MetaDataModel m = moduleHolder.getModule(DefaultValues
 				.getGeneratedModuleName());
 
 		return m;

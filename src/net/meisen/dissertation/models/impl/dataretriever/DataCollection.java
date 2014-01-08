@@ -2,37 +2,75 @@ package net.meisen.dissertation.models.impl.dataretriever;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A data collection is a collection which contains data addressed by a specific
+ * name (i.e. equal to a {@link Map}). But instead this collection supports a
+ * lazy data retrieval. This means that the data collected - e.g. from an
+ * underlying database - is collected when asked for, whereby the meta
+ * information of the data (i.e. the names) are known after creation.
+ * 
+ * @author pmeisen
+ * 
+ * @param <D>
+ */
 public abstract class DataCollection<D> {
 
-	private final List<D> names;
+	private List<D> names = null;
+
+	public DataCollection() {
+		this(null);
+	}
 
 	public DataCollection(final D[] names) {
-		if (names == null) {
-			throw new NullPointerException("The names cannot be null.");
+		setNames(names);
+	}
+
+	protected void setNames(final D[] names) {
+		if (this.names != null) {
+			throw new IllegalStateException(
+					"The names of a DataCollection cannot be modified after those are defined once.");
+		} else if (names == null) {
+			return;
 		}
 
 		this.names = Collections.unmodifiableList(Arrays.asList(names));
 	}
 
+	protected void validate() {
+		if (this.names == null) {
+			throw new IllegalStateException(
+					"Please specify the names of the DataCollection prior to any other usage, i.e. during construction or using the setNames method.");
+		}
+	}
+
 	public Collection<D> getNames() {
+		validate();
+		
 		return names;
 	}
 
 	public int getRecordSize() {
+		validate();
+		
 		return names.size();
 	}
 
 	public D getNameOfPos(final int pos) {
+		validate();
+
 		return net.meisen.general.genmisc.collections.Collections.get(pos,
 				names);
 	}
 
 	public int getPosOfName(final D name) {
+		validate();
+
 		return net.meisen.general.genmisc.collections.Collections.getPosition(
 				names, name);
 	}
@@ -42,6 +80,8 @@ public abstract class DataCollection<D> {
 	public abstract void release();
 
 	public Collection<DataRecord<D>> get() {
+		validate();
+
 		final Iterator<DataRecord<D>> it = iterate();
 		final ArrayList<DataRecord<D>> data = new ArrayList<DataRecord<D>>();
 
@@ -62,6 +102,7 @@ public abstract class DataCollection<D> {
 	}
 
 	public <T> Collection<T> transform(final int position) {
+		validate();
 
 		final ArrayList<T> data = new ArrayList<T>();
 		final Iterator<DataRecord<D>> it = iterate();
@@ -81,7 +122,7 @@ public abstract class DataCollection<D> {
 		if (it instanceof ICloseableDataIterator) {
 			((ICloseableDataIterator) it).close();
 		}
-		
+
 		return data;
 	}
 

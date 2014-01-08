@@ -38,6 +38,7 @@ import net.meisen.dissertation.models.impl.data.Resource;
 import net.meisen.dissertation.models.impl.data.ResourceModel;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
+import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
@@ -203,7 +204,7 @@ public class TestXsltTidaModel {
 
 		// add the db_butRandom
 		// @formatter:off
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butRandom\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butRandom\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
 		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"100\"/>");
@@ -213,7 +214,7 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 
 		// add the myOwnId
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
 		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"500\"/>");
@@ -223,7 +224,7 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 
 		// add the rnd_test
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-rnd_test\" class=\"" + RandomDataRetriever.class.getName() + "\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-rnd_test\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
 		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"1000\"/>");
@@ -233,7 +234,7 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 
 		// add the db_test
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
 		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
 		dr.add("<property name=\"type\" value=\"jdbc\"/>");
@@ -285,7 +286,7 @@ public class TestXsltTidaModel {
 		rl.add("</constructor-arg>");
 		rl.add("<constructor-arg type=\"java.util.Collection\">");
 		
-		rl.add("<bean class=\"org.springframework.beans.factory.config.MethodInvokingFactoryBean\">");
+		rl.add("<bean class=\"net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean\">");
 		rl.add("<property name=\"targetMethod\" value=\"transform\"/>");
 		rl.add("<property name=\"targetObject\">");
 		
@@ -303,6 +304,7 @@ public class TestXsltTidaModel {
 		rl.add("</bean>");
 		
 		rl.add("</property>");
+		rl.add("<property name=\"postExecutionMethod\" value=\"release\"/>");
 		rl.add("</bean>");
 		
 		rl.add("</constructor-arg>");
@@ -357,7 +359,7 @@ public class TestXsltTidaModel {
 			dl.add("</constructor-arg>");
 			dl.add("<constructor-arg type=\"java.util.Collection\">");
 			
-			dl.add("<bean class=\"org.springframework.beans.factory.config.MethodInvokingFactoryBean\">");
+			dl.add("<bean class=\"net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean\">");
 			dl.add("<property name=\"targetMethod\" value=\"transform\"/>");
 			dl.add("<property name=\"targetObject\">");
 			
@@ -377,6 +379,7 @@ public class TestXsltTidaModel {
 			dl.add("</bean>");
 			
 			dl.add("</property>");
+			dl.add("<property name=\"postExecutionMethod\" value=\"release\"/>");
 			dl.add("</bean>");
 			
 			dl.add("</constructor-arg>");
@@ -398,11 +401,11 @@ public class TestXsltTidaModel {
 	@Test
 	public void testFullModelCreation() {
 		final InputStream xml = getClass().getResourceAsStream(pathToFM);
-		final Map<String, Object> modules = configuration.loadDelayed(
+		final IModuleHolder moduleHolder = configuration.loadDelayed(
 				"tidaModelBeans", xml);
 
 		// get the model
-		final MetaDataModel m = (MetaDataModel) modules.get(DefaultValues
+		final MetaDataModel m = moduleHolder.getModule(DefaultValues
 				.getGeneratedModuleName());
 		assertNotNull(m);
 		assertEquals("myModel", m.getId());
@@ -443,6 +446,8 @@ public class TestXsltTidaModel {
 
 		// check if all the expected values were retrieved
 		assertEquals(0, expectedValues.size());
+
+		moduleHolder.release();
 	}
 
 	/**
@@ -461,11 +466,11 @@ public class TestXsltTidaModel {
 		db.setUpDb();
 
 		final InputStream xml = getClass().getResourceAsStream(pathToFMDFE);
-		final Map<String, Object> modules = configuration.loadDelayed(
+		final IModuleHolder moduleHolder = configuration.loadDelayed(
 				"tidaModelBeans", xml);
 
 		// get the model
-		final MetaDataModel m = (MetaDataModel) modules.get(DefaultValues
+		final MetaDataModel m = moduleHolder.getModule(DefaultValues
 				.getGeneratedModuleName());
 		assertNotNull(m);
 		assertEquals("modelWithExternalSources", m.getId());
@@ -485,6 +490,7 @@ public class TestXsltTidaModel {
 		assertNotNull(m.getResource("R1", "Edison"));
 		assertNotNull(m.getResource("R3", "NoValue"));
 
+		moduleHolder.release();
 		db.shutDownDb();
 	}
 

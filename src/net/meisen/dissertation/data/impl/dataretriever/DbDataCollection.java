@@ -1,13 +1,16 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@code DbDataCollection} is a database's data collection, i.e. a collection
@@ -20,52 +23,66 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class DbDataCollection extends DataCollection<String> {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(DbDataCollection.class);
+
 	private final Connection connection;
 	private final DbQueryConfig query;
+	private final PreparedStatement statement;
 
 	/**
-	 * 
+	 * Constructor to create a {@code DataCollection} for the specified
+	 * {@code query} on the specified {@code connection}. The {@code connection}
+	 * will be closed whenever the {@code DataCollection} is released (i.e.
+	 * {@link #release()}.
 	 * 
 	 * @param query
+	 *            the {@code DbQueryConfig} to fire against the database to
+	 *            retrieve the data for the collection
 	 * @param connection
+	 *            the {@code Connection} to be used to retrieve the data
 	 */
 	public DbDataCollection(final DbQueryConfig query,
 			final Connection connection) {
-		super(getColumnNames(query, connection));
 
-		// keep some needed stuff
+		// set the attributes
 		this.connection = connection;
 		this.query = query;
+
+		// check the language (currently we only support SQL)
+		if (!"sql".equalsIgnoreCase(query.getLanguage())) {
+			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
+					DbDataRetrieverException.class, 1009, query.getLanguage());
+
+			closeConnection(false);
+			throw exForwarded;
+		}
+
+		// prepare a statement for the query
+		try {
+			this.statement = connection.prepareStatement(query.getQuery(),
+					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		} catch (final SQLException e) {
+			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
+					DbDataRetrieverException.class, 1005, e, query.getQuery());
+
+			closeConnection(false);
+			throw exForwarded;
+		}
+
+		// finally make sure the names are set
+		setNames(getColumnNames());
 	}
 
 	/**
 	 * Gets the column names for the specified {@code query}.
 	 * 
-	 * @param query
-	 *            the {@code DbQueryConfig} to get the columns names from
-	 * @param connection
-	 *            the {@code Connection} to fire the query against
-	 * 
 	 * @return the names of the columns of the query
 	 */
-	protected static String[] getColumnNames(final DbQueryConfig query,
-			final Connection connection) {
-
-		if (!"sql".equalsIgnoreCase(query.getLanguage())) {
-			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
-					DbDataRetrieverException.class, 1009, query.getLanguage());
-
-			closeConnection(connection, false);
-			throw exForwarded;
-		}
+	protected String[] getColumnNames() {
 
 		try {
-			// create the statement
-			final Statement stmnt = connection.createStatement(
-					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			final ResultSet rs = stmnt.executeQuery("SELECT * FROM ("
-					+ query.getQuery() + ") WHERE 1=0");
-			final ResultSetMetaData metaData = rs.getMetaData();
+			final ResultSetMetaData metaData = statement.getMetaData();
 
 			// create the String-Array
 			final int size = metaData.getColumnCount();
@@ -74,15 +91,11 @@ public class DbDataCollection extends DataCollection<String> {
 				columns[i - 1] = metaData.getColumnName(i);
 			}
 
-			// close the statement
-			stmnt.close();
-
 			return columns;
 		} catch (final SQLException e) {
 			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
 					DbDataRetrieverException.class, 1005, e, query.getQuery());
 
-			closeConnection(connection, false);
 			throw exForwarded;
 		}
 	}
@@ -91,25 +104,45 @@ public class DbDataCollection extends DataCollection<String> {
 	 * Closes the specified {@code Connection} and exception is thrown if
 	 * {@code throwException} is {@code true}.
 	 * 
-	 * @param connection
-	 *            the {@code Connection} to be closed
 	 * @param throwException
 	 *            defines if the connection should be thrown {@code true} or not
 	 */
-	protected static void closeConnection(final Connection connection,
-			final boolean throwException) {
-		if (connection == null) {
-			return;
+	protected void closeConnection(final boolean throwException) {
+
+		if (statement != null) {
+			try {
+				statement.close();
+			} catch (final SQLException e) {
+				if (throwException) {
+					final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
+							DbDataRetrieverException.class, 1010, e,
+							query.getQuery());
+					throw exForwarded;
+				} else {
+					LOG.error("Unable to close the statement for query '"
+							+ query.getQuery() + "'.", e);
+				}
+			}
 		}
 
-		try {
-			// we cannot use the connection so close it
-			connection.close();
-		} catch (final SQLException e) {
-			if (throwException) {
-				final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
-						DbDataRetrieverException.class, 1004, e);
-				throw exForwarded;
+		if (connection != null) {
+			try {
+				// we cannot use the connection so close it
+				connection.close();
+
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Closed connection of collection for '"
+							+ query.getQuery() + "'.");
+				}
+			} catch (final SQLException e) {
+				if (throwException) {
+					final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
+							DbDataRetrieverException.class, 1004, e);
+					throw exForwarded;
+				} else {
+					LOG.error("Unable to close the connection for query '"
+							+ query.getQuery() + "'.", e);
+				}
 			}
 		}
 	}
@@ -117,21 +150,18 @@ public class DbDataCollection extends DataCollection<String> {
 	@Override
 	public DbDataIterator iterate() {
 		try {
-			final Statement stmnt = connection.createStatement(
-					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			final ResultSet rs = stmnt.executeQuery(query.getQuery());
-
+			final ResultSet rs = statement.executeQuery();
 			return new DbDataIterator(this, rs);
 		} catch (final SQLException e) {
 			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
-					DbDataRetrieverException.class, 1003, e, query.getQuery());
+					DbDataRetrieverException.class, 1003, e, getQuery());
 			throw exForwarded;
 		}
 	}
 
 	@Override
 	public void release() {
-		closeConnection(connection, true);
+		closeConnection(true);
 	}
 
 	/**

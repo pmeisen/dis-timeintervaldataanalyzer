@@ -11,6 +11,12 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Iterator used to iterate through the retrieved data from a database.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DbDataIterator extends DataIterator<String> implements
 		ICloseableDataIterator {
 	private final static Logger LOG = LoggerFactory
@@ -66,8 +72,8 @@ public class DbDataIterator extends DataIterator<String> implements
 
 			// log the closing
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Closed resultSet of query '"
-						+ collection.getQuery() + "'");
+				LOG.trace("Closed resultSet of query '" + collection.getQuery()
+						+ "'");
 			}
 		} catch (final SQLException e) {
 			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(

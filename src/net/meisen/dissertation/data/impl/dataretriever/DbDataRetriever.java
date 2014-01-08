@@ -14,11 +14,27 @@ import org.slf4j.LoggerFactory;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 
+/**
+ * {@code DataRetriever} to retrieve data from a database.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DbDataRetriever extends BaseDataRetriever {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(DbDataRetriever.class);
 	private final BoneCPDataSource ds;
 
+	/**
+	 * Constructor with the {@code DataRetrieverConfiguration}, the
+	 * {@code config} must be of a valid type.
+	 * 
+	 * @param config
+	 *            the {@code DataRetrieverConfiguration} used for the
+	 *            {@code DataRetriever}
+	 * 
+	 * @see #supportedConfiguration()
+	 */
 	public DbDataRetriever(final IDataRetrieverConfiguration config) {
 		super(config);
 
@@ -40,6 +56,7 @@ public class DbDataRetriever extends BaseDataRetriever {
 		// TODO add additional properties to the DbConnectionConfig
 	}
 
+	@Override
 	public void release() {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Closing the DbDataRetriever for database '"

@@ -275,7 +275,7 @@
         <ref bean="resourcemodel-{$uniqueIdPrefix}-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.util.Collection">
-        <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <bean class="net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean">
           <property name="targetMethod" value="transform" />
           <property name="targetObject">
             <bean factory-bean="dataretriever-{$uniqueIdPrefix}-{$dataretriever}" factory-method="retrieve">
@@ -287,6 +287,8 @@
               </constructor-arg>
             </bean>
           </property>
+          
+          <property name="postExecutionMethod" value="release" />
         </bean>
       </constructor-arg>
     </bean>
@@ -318,7 +320,7 @@
         <ref bean="descriptormodel-{$uniqueIdPrefix}-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.util.Collection">
-        <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <bean class="net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean">
           <property name="targetMethod" value="transform" />
           <property name="targetObject">
             <bean factory-bean="dataretriever-{$uniqueIdPrefix}-{$dataretriever}" factory-method="retrieve">
@@ -330,6 +332,8 @@
               </constructor-arg>
             </bean>
           </property>
+          
+          <property name="postExecutionMethod" value="release" />
         </bean>
       </constructor-arg>
     </bean>
@@ -349,7 +353,7 @@
     </xsl:variable>
         
     <!-- define the bean -->
-    <bean id="dataretriever-{$uniqueIdPrefix}-{$id}" class="{$implementation}">
+    <bean id="dataretriever-{$uniqueIdPrefix}-{$id}" class="{$implementation}" destroy-method="release">
       <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration">
         <xsl:choose>
           <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
