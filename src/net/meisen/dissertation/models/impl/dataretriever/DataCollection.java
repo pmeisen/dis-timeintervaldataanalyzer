@@ -37,29 +37,34 @@ public abstract class DataCollection<D> {
 				names, name);
 	}
 
-	public abstract Iterator<DataRecord<D>> open();
+	public abstract DataIterator<D> iterate();
 
-	public abstract void close();
+	public abstract void release();
 
 	public Collection<DataRecord<D>> get() {
-		final Iterator<DataRecord<D>> it = open();
+		final Iterator<DataRecord<D>> it = iterate();
 		final ArrayList<DataRecord<D>> data = new ArrayList<DataRecord<D>>();
 
 		while (it.hasNext()) {
 			data.add(it.next());
 		}
 
+		// close the iterator if it is one that has to be closed
+		if (it instanceof ICloseableDataIterator) {
+			((ICloseableDataIterator) it).close();
+		}
+
 		return data;
 	}
 
 	public <T> Collection<T> transform() {
-		if (getRecordSize() != 1) {
-			throw new IllegalStateException(
-					"A dataCollection must be of size 1 to be transformable into a Collection.");
-		}
+		return transform(null);
+	}
+
+	public <T> Collection<T> transform(final int position) {
 
 		final ArrayList<T> data = new ArrayList<T>();
-		final Iterator<DataRecord<D>> it = open();
+		final Iterator<DataRecord<D>> it = iterate();
 		if (it == null) {
 			return data;
 		}
@@ -68,10 +73,36 @@ public abstract class DataCollection<D> {
 			final DataRecord<D> rec = it.next();
 
 			@SuppressWarnings("unchecked")
-			final T value = (T) rec.getDataByPos(0);
+			final T value = (T) rec.getDataByPos(position);
 			data.add(value);
 		}
 
+		// close the iterator if it is one that has to be closed
+		if (it instanceof ICloseableDataIterator) {
+			((ICloseableDataIterator) it).close();
+		}
+		
 		return data;
+	}
+
+	public <T> Collection<T> transform(final D fieldName) {
+		final int position;
+
+		// define the position
+		if (getRecordSize() < 1) {
+			position = -1;
+		} else if (fieldName == null) {
+			position = 0;
+		} else {
+			position = getPosOfName(fieldName);
+		}
+
+		// check the position
+		if (position == -1) {
+			throw new IllegalArgumentException("The field '" + fieldName
+					+ "' cannot be found within the query.");
+		}
+
+		return transform(position);
 	}
 }

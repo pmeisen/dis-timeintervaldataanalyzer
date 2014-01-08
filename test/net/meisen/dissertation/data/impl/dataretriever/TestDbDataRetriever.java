@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Locale;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.dissertation.help.Db;
-import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
+import net.meisen.dissertation.models.impl.dataretriever.DataRecord;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -31,6 +31,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * Tests the implementation of a {@code DbDataRetriever}.
+ * 
+ * @author pmeisen
+ * 
+ */
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
@@ -43,8 +49,23 @@ public class TestDbDataRetriever {
 
 	private static final Db db = new Db();
 
+	/**
+	 * Helper class for the tests.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class Util {
 
+		/**
+		 * Creates a {@code DbConnectionConfig} for the specified {@code dbName}
+		 * .
+		 * 
+		 * @param dbName
+		 *            the name of the database to create the configuration for
+		 * 
+		 * @return the created {code DbConnectionConfig}
+		 */
 		public static DbConnectionConfig getConnectionConfig(final String dbName) {
 
 			final DbConnectionConfig config = new DbConnectionConfig();
@@ -57,6 +78,18 @@ public class TestDbDataRetriever {
 			return config;
 		}
 
+		/**
+		 * Creates a {@code DbDataRetriever} used to retrieve data from the
+		 * specified database of name {@code dbName}.
+		 * 
+		 * @param configuration
+		 *            the {@code DbConnectionConfig} to use for the
+		 *            {@code DbDataRetriever}
+		 * @param dbName
+		 *            the name of the database to create the retriever for
+		 * 
+		 * @return the created instance
+		 */
 		public static DbDataRetriever create(
 				final IConfiguration configuration, final String dbName) {
 			// get the DatabaseRetriever to be tested
@@ -76,6 +109,12 @@ public class TestDbDataRetriever {
 
 	private Locale oldDefault;
 
+	/**
+	 * Initializes the database used for testing.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be loaded
+	 */
 	@BeforeClass
 	public static void init() throws IOException {
 		// start the test database
@@ -94,9 +133,11 @@ public class TestDbDataRetriever {
 		Locale.setDefault(Locale.US);
 	}
 
+	/**
+	 * Tests the definition using a {@code null} configuration.
+	 */
 	@Test
-	public void testInvalidRetrieveWithNullQueryConfiguration()
-			throws SQLException {
+	public void testInvalidRetrieveWithNullQueryConfiguration() {
 		final DbDataRetriever db = Util.create(c, "tidaTestData");
 
 		thrown.expect(DbDataRetrieverException.class);
@@ -106,9 +147,11 @@ public class TestDbDataRetriever {
 		db.retrieve(null);
 	}
 
+	/**
+	 * Tests the definition using an invalid configuration.
+	 */
 	@Test
-	public void testInvalidRetrieveWithIncompatibleQueryConfiguration()
-			throws SQLException {
+	public void testInvalidRetrieveWithIncompatibleQueryConfiguration() {
 		final DbDataRetriever db = Util.create(c, "tidaTestData");
 
 		thrown.expect(DataRetrieverException.class);
@@ -121,22 +164,70 @@ public class TestDbDataRetriever {
 		});
 	}
 
+	/**
+	 * Tests the data retrieval.
+	 */
 	@Test
-	public void test() throws SQLException {
+	public void testRetrieve() {
 		final DbDataRetriever db = Util.create(c, "tidaTestData");
 
-		final DbQueryConfiguration queryConfiguration = new DbQueryConfiguration();
-		queryConfiguration.setSqlQuery("SELECT * FROM TB_TESTDATA WHERE COUNTER < 10");
-
+		// get a collection of the data based on a query
+		final DbQueryConfig queryConfiguration = new DbQueryConfig();
+		queryConfiguration
+				.setQuery("SELECT * FROM TB_TESTDATA WHERE COUNTER < 10");
+		queryConfiguration.setLanguage("sql");
 		final DbDataCollection res = db.retrieve(queryConfiguration);
-		
+
 		// check the retrieved column names
 		assertEquals(3, res.getNames().size());
 		assertTrue(res.getNames().contains("FIXED"));
 		assertTrue(res.getNames().contains("RANDOM"));
 		assertTrue(res.getNames().contains("COUNTER"));
 
-		db.close();
+		// check the data
+		final Collection<DataRecord<String>> data = res.get();
+		final int size = data.size();
+		assertEquals(9, size);
+
+		final Object[] ar = data.toArray();
+		for (int i = 0; i < size; i++) {
+			@SuppressWarnings("unchecked")
+			final DataRecord<String> dr = (DataRecord<String>) ar[i];
+			assertEquals(i + 1, dr.getData("COUNTER"));
+			assertEquals("FIXED VALUE", dr.getData("FIXED"));
+		}
+
+		db.release();
+	}
+
+	/**
+	 * Tests the retrieval of data using an invalid query.
+	 */
+	@Test
+	public void testRetrieveInvalidQuery() {
+		final DbDataRetriever db = Util.create(c, "tidaTestData");
+
+		// get a collection of the data based on a query
+		final DbQueryConfig queryConfiguration = new DbQueryConfig();
+		queryConfiguration.setQuery("SELECT * FROM TB_IDONTEXIST");
+		queryConfiguration.setLanguage("sql");
+
+		boolean error = false;
+		try {
+			db.retrieve(queryConfiguration);
+		} catch (final DbDataRetrieverException e) {
+			error = true;
+			assertTrue(e instanceof DbDataRetrieverException);
+			assertTrue(
+					e.getMessage(),
+					e.getMessage()
+							.contains(
+									"Unable to retrieve the meta-data (column names) for the query"));
+		} finally {
+			db.release();
+		}
+
+		assertTrue("Expected exception not thrown", error);
 	}
 
 	/**
@@ -147,6 +238,9 @@ public class TestDbDataRetriever {
 		Locale.setDefault(oldDefault);
 	}
 
+	/**
+	 * CleanUp behind the class
+	 */
 	@AfterClass
 	public static void tearDown() {
 		// close the database again

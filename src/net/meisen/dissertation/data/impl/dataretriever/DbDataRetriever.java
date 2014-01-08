@@ -6,6 +6,7 @@ import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Classes;
 
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class DbDataRetriever extends BaseDataRetriever {
 		// TODO add additional properties to the DbConnectionConfig
 	}
 
-	public void close() {
+	public void release() {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Closing the DbDataRetriever for database '"
 					+ ds.getJdbcUrl() + "'");
@@ -64,22 +65,27 @@ public class DbDataRetriever extends BaseDataRetriever {
 		if (queryConfiguration == null) {
 			exceptionRegistry.throwRuntimeException(
 					DbDataRetrieverException.class, 1001);
-		} else if (queryConfiguration instanceof DbQueryConfiguration) {
+		} else if (queryConfiguration instanceof DbQueryConfig) {
 			// do nothing everything is fine
 		} else {
 			exceptionRegistry.throwRuntimeException(
 					DataRetrieverException.class, 1002, DbDataRetriever.class
 							.getName(),
 					queryConfiguration.getClass().getName(),
-					DbQueryConfiguration.class.getName());
+					DbQueryConfig.class.getName());
 		}
 
-		final DbQueryConfiguration query = (DbQueryConfiguration) queryConfiguration;
+		final DbQueryConfig query = (DbQueryConfig) queryConfiguration;
 		try {
 			return new DbDataCollection(query, ds.getConnection());
 		} catch (final SQLException e) {
 			exceptionRegistry.throwRuntimeException(
 					DbDataRetrieverException.class, 1002, e, ds.getJdbcUrl());
+
+			// cannot happen
+			return null;
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
 
 			// cannot happen
 			return null;

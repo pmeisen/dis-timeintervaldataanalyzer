@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -24,10 +25,12 @@ import net.meisen.dissertation.config.TIDAConfig;
 import net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor;
 import net.meisen.dissertation.data.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.DbQueryConfig;
 import net.meisen.dissertation.data.impl.dataretriever.RandomConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
 import net.meisen.dissertation.data.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.data.impl.idfactories.UuIdsFactory;
+import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.models.impl.data.Descriptor;
 import net.meisen.dissertation.models.impl.data.DescriptorModel;
 import net.meisen.dissertation.models.impl.data.MetaDataModel;
@@ -232,9 +235,9 @@ public class TestXsltTidaModel {
 		// add the db_test
 		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\">");
+		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
 		dr.add("<property name=\"type\" value=\"jdbc\"/>");
-		dr.add("<property name=\"url\" value=\"jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks\"/>");
+		dr.add("<property name=\"url\" value=\"jdbc:hsqldb:hsql://localhost:6666/tidaTestData\"/>");
 		dr.add("<property name=\"driver\" value=\"org.hsqldb.jdbcDriver\"/>");
 		dr.add("<property name=\"username\" value=\"SA\"/>");
 		dr.add("<property name=\"password\" value=\"\"/>");
@@ -288,7 +291,14 @@ public class TestXsltTidaModel {
 		
 		rl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" factory-method=\"retrieve\">");
 		rl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
-		rl.add("<null xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\"/>");
+		
+		rl.add("<bean class=\"" + DbQueryConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
+		rl.add("<property name=\"query\">");
+		rl.add("<value>SELECT DISTINCT COUNTER FROM TB_TESTDATA</value>");
+		rl.add("</property>");
+		rl.add("<property name=\"language\" value=\"sql\"/>");
+	    rl.add("</bean>");
+		
 		rl.add("</constructor-arg>");
 		rl.add("</bean>");
 		
@@ -354,7 +364,12 @@ public class TestXsltTidaModel {
 			dl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-" + e.getValue() + "\" factory-method=\"retrieve\">");
 			dl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
 			if (e.getValue().startsWith("db")) {
-				dl.add("<null xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\"/>");
+				dl.add("<bean class=\"" + DbQueryConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
+				dl.add("<property name=\"query\">");
+				dl.add("<value>SELECT DISTINCT FIXED FROM TB_TESTDATA</value>");
+				dl.add("</property>");
+				dl.add("<property name=\"language\" value=\"sql\"/>");
+				dl.add("</bean>");
 			} else {
 				dl.add("<null/>");
 			}
@@ -433,9 +448,18 @@ public class TestXsltTidaModel {
 	/**
 	 * Tests if the full model configuration with external data-sources can be
 	 * read.
+	 * 
+	 * @throws IOException
 	 */
 	@Test
-	public void testFullModelDataFromExternalCreation() {
+	public void testFullModelDataFromExternalCreation() throws IOException {
+
+		// we need a running database now
+		final Db db = new Db();
+		db.addDb("tidaTestData",
+				"/net/meisen/dissertation/data/impl/hsqldbs/tidaTestData.zip");
+		db.setUpDb();
+
 		final InputStream xml = getClass().getResourceAsStream(pathToFMDFE);
 		final Map<String, Object> modules = configuration.loadDelayed(
 				"tidaModelBeans", xml);
@@ -447,6 +471,21 @@ public class TestXsltTidaModel {
 		assertEquals("modelWithExternalSources", m.getId());
 		assertEquals("modelWithExternalSources", m.getName());
 
+		// check the descriptors
+		assertEquals(3, m.getDescriptors().size());
+		assertNotNull(m.getDescriptor("D1", "FIXED VALUE"));
+		assertNotNull(m.getDescriptor("D2", 2));
+		assertNotNull(m.getDescriptor("D3", "Some Value"));
+
+		// check the resources
+		assertEquals(10002, m.getResources().size());
+		for (int i = 1; i <= 10000; i++) {
+			assertNotNull(m.getResource("R2", "" + i));
+		}
+		assertNotNull(m.getResource("R1", "Edison"));
+		assertNotNull(m.getResource("R3", "NoValue"));
+
+		db.shutDownDb();
 	}
 
 	/**

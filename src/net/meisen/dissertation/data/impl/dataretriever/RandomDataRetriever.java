@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
+import net.meisen.dissertation.models.impl.dataretriever.DataIterator;
 import net.meisen.dissertation.models.impl.dataretriever.DataRecord;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
@@ -21,13 +22,13 @@ public class RandomDataRetriever extends BaseDataRetriever {
 		return new DataCollection<String>(new String[] { "A" }) {
 
 			@Override
-			public Iterator<DataRecord<String>> open() {
+			public DataIterator<String> iterate() {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public void close() {
+			public void release() {
 				// TODO Auto-generated method stub
 
 			}

@@ -7,15 +7,21 @@
            
   <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
 
-  <xs:simpleType name="type">
+  <xs:simpleType name="connectionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="jdbc" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="queryLanguage">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="sql" />
     </xs:restriction>
   </xs:simpleType>
 
   <xs:element name="connection">
     <xs:complexType>
-      <xs:attribute name="type" type="type" use="required" />
+      <xs:attribute name="type" type="connectionType" use="required" />
       <xs:attribute name="url" type="xs:anyURI" use="required" />
       <xs:attribute name="driver" type="base:javaClass" use="required" />
       <xs:attribute name="username" type="xs:string" use="required" />
@@ -23,10 +29,12 @@
     </xs:complexType>
   </xs:element>
    
-  <xs:element name="singlevaluequery">
+  <xs:element name="query">
     <xs:complexType>
       <xs:simpleContent>
-        <xs:extension base="xs:string" />
+        <xs:extension base="xs:string">
+          <xs:attribute name="language" type="queryLanguage" use="optional" />
+        </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>

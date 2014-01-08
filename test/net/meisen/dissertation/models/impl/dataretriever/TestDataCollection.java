@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import net.meisen.dissertation.models.impl.dataretriever.mock.MockDataCollection;
+import net.meisen.general.genmisc.collections.Collections;
 
 import org.junit.Test;
 
@@ -61,14 +62,39 @@ public class TestDataCollection {
 		assertEquals("SecondName", dc.getNameOfPos(1));
 	}
 
+	/**
+	 * Tests the implementation of {@link DataCollection#transform(int)}.
+	 */
 	@Test
 	public void testTransform() {
 		final DataCollection<String> dc = new MockDataCollection<String>(
-				new String[] { "FirstName", "SecondName" });
+				new String[] { "FirstName", "SecondName" }, 200);
 
-		
-		final Collection<Object> tc = dc.transform();
-		
-		// TODO formalize test
+		Collection<Object> tc;
+
+		tc = dc.transform("FirstName");
+		for (int i = 0; i < 200; i++) {
+			assertEquals("FirstName " + i, Collections.get(i, tc));
+		}
+
+		tc = dc.transform(null);
+		for (int i = 0; i < 200; i++) {
+			assertEquals("FirstName " + i, Collections.get(i, tc));
+		}
+
+		tc = dc.transform("SecondName");
+		for (int i = 0; i < 200; i++) {
+			assertEquals("SecondName " + i, Collections.get(i, tc));
+		}
+
+		tc = dc.transform(0);
+		for (int i = 0; i < 200; i++) {
+			assertEquals("FirstName " + i, Collections.get(i, tc));
+		}
+
+		tc = dc.transform(1);
+		for (int i = 0; i < 200; i++) {
+			assertEquals("SecondName " + i, Collections.get(i, tc));
+		}
 	}
 }

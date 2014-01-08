@@ -2,6 +2,7 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                               xmlns="http://www.springframework.org/schema/beans"
+                              xmlns:dbdef="net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues"
                               xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db">
 
   <xsl:template match="db:connection">
@@ -18,10 +19,19 @@
       <property name="username" value="{$username}"/>
       <property name="password" value="{password}"/>
     </bean>
-
   </xsl:template>
   
-  <xsl:template match="db:singlevaluequery">
-    <null />
+  <xsl:template match="db:query">
+    <bean class="net.meisen.dissertation.data.impl.dataretriever.DbQueryConfig">
+      <xsl:variable name="language">
+        <xsl:choose>
+          <xsl:when test="@language"><xsl:value-of select="@language" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="dbdef:getDefaultLanguage()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+
+      <property name="query"><value><xsl:value-of select="normalize-space(.)" /></value></property>
+      <property name="language" value="{$language}"/>
+    </bean>
   </xsl:template>
 </xsl:stylesheet>
