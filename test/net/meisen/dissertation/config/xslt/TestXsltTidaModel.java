@@ -26,7 +26,7 @@ import net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor;
 import net.meisen.dissertation.data.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.DbQueryConfig;
-import net.meisen.dissertation.data.impl.dataretriever.RandomConnectionConfig;
+import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetrieverConfig;
 import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
 import net.meisen.dissertation.data.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.data.impl.idfactories.UuIdsFactory;
@@ -36,7 +36,7 @@ import net.meisen.dissertation.models.impl.data.DescriptorModel;
 import net.meisen.dissertation.models.impl.data.MetaDataModel;
 import net.meisen.dissertation.models.impl.data.Resource;
 import net.meisen.dissertation.models.impl.data.ResourceModel;
-import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
@@ -205,8 +205,8 @@ public class TestXsltTidaModel {
 		// add the db_butRandom
 		// @formatter:off
 		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butRandom\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
-		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"100\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.Integer\"/>");
 		dr.add("</bean>");
@@ -215,8 +215,8 @@ public class TestXsltTidaModel {
 
 		// add the myOwnId
 		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
-		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"500\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.Double\"/>");
 		dr.add("</bean>");
@@ -225,8 +225,8 @@ public class TestXsltTidaModel {
 
 		// add the rnd_test
 		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-rnd_test\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
-		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomConnectionConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
+		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
 		dr.add("<property name=\"amount\" value=\"1000\"/>");
 		dr.add("<property name=\"type\" value=\"java.lang.String\"/>");
 		dr.add("</bean>");
@@ -235,7 +235,7 @@ public class TestXsltTidaModel {
 
 		// add the db_test
 		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\" destroy-method=\"release\">");
-		dr.add("<constructor-arg type=\"" + IDataRetrieverConfiguration.class.getName() + "\">");
+		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
 		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
 		dr.add("<property name=\"type\" value=\"jdbc\"/>");
 		dr.add("<property name=\"url\" value=\"jdbc:hsqldb:hsql://localhost:6666/tidaTestData\"/>");

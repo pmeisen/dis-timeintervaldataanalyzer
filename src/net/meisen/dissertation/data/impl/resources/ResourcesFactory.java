@@ -48,6 +48,21 @@ public class ResourcesFactory {
 		return new Resource<Object>(model, idsFactory.getId(), value);
 	}
 
+	/**
+	 * Creates several {@code Resource} instances based on the specified
+	 * {@code model}.
+	 * 
+	 * @param model
+	 *            the {@code ResourceModel} of the {@code Resource} instances to
+	 *            be created
+	 * @param values
+	 *            the {@code Collection} of values to create the
+	 *            {@code Resource} instances for
+	 * 
+	 * @return the created {@code Resource} instances ordered by the
+	 *         {@code values} iterator, i.e. iterating over the values will
+	 *         match the created {@code Resource} instances
+	 */
 	public Collection<Resource<?>> createResources(final ResourceModel model,
 			final Collection<String> values) {
 		final List<Resource<?>> resources = new ArrayList<Resource<?>>();

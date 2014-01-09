@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public abstract class BaseDataRetriever {
-	private IDataRetrieverConfiguration config;
+	private IDataRetrieverConfig config;
 
 	/**
 	 * The {@code ExceptionRegistry} used to throw exceptions.
@@ -32,8 +32,8 @@ public abstract class BaseDataRetriever {
 	 * 
 	 * @see #supportedConfiguration()
 	 */
-	public BaseDataRetriever(final IDataRetrieverConfiguration config) {
-		final Class<? extends IDataRetrieverConfiguration> configClazz = supportedConfiguration();
+	public BaseDataRetriever(final IDataRetrieverConfig config) {
+		final Class<? extends IDataRetrieverConfig> configClazz = supportedConfiguration();
 		if (config == null && needConfiguration()) {
 			exceptionRegistry.throwException(DataRetrieverException.class,
 					1000, getClass().getName());
@@ -70,20 +70,20 @@ public abstract class BaseDataRetriever {
 	 * @return the defined configuration
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends IDataRetrieverConfiguration> T getConfig() {
+	protected <T extends IDataRetrieverConfig> T getConfig() {
 		return (T) config;
 	}
 
 	/**
 	 * Defines the type of the configuration which has to be passed to the
 	 * constructor. By default the type has to be
-	 * {@link IDataRetrieverConfiguration}.
+	 * {@link IDataRetrieverConfig}.
 	 * 
 	 * @return the type of the configuration which has to be passed to the
 	 *         constructor
 	 */
-	protected Class<? extends IDataRetrieverConfiguration> supportedConfiguration() {
-		return IDataRetrieverConfiguration.class;
+	protected Class<? extends IDataRetrieverConfig> supportedConfiguration() {
+		return IDataRetrieverConfig.class;
 	}
 
 	/**

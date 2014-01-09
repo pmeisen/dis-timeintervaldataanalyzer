@@ -1,6 +1,7 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
-import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 
 /**
  * The configuration of a database connection.
@@ -8,7 +9,7 @@ import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfigura
  * @author pmeisen
  * 
  */
-public class DbConnectionConfig implements IDataRetrieverConfiguration {
+public class DbConnectionConfig implements IDataRetrieverConfig {
 
 	private String type;
 	private String url;

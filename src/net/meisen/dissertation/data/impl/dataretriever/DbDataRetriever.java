@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
-import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Classes;
@@ -35,7 +35,7 @@ public class DbDataRetriever extends BaseDataRetriever {
 	 * 
 	 * @see #supportedConfiguration()
 	 */
-	public DbDataRetriever(final IDataRetrieverConfiguration config) {
+	public DbDataRetriever(final IDataRetrieverConfig config) {
 		super(config);
 
 		final DbConnectionConfig c = getConfig();
@@ -71,7 +71,7 @@ public class DbDataRetriever extends BaseDataRetriever {
 	}
 
 	@Override
-	protected Class<? extends IDataRetrieverConfiguration> supportedConfiguration() {
+	protected Class<? extends IDataRetrieverConfig> supportedConfiguration() {
 		return DbConnectionConfig.class;
 	}
 

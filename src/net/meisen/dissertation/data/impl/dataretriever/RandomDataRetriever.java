@@ -6,12 +6,12 @@ import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
 import net.meisen.dissertation.models.impl.dataretriever.DataIterator;
 import net.meisen.dissertation.models.impl.dataretriever.DataRecord;
-import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 
 public class RandomDataRetriever extends BaseDataRetriever {
 
-	public RandomDataRetriever(final IDataRetrieverConfiguration config) {
+	public RandomDataRetriever(final IDataRetrieverConfig config) {
 		super(config);
 	}
 

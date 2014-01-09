@@ -1,12 +1,12 @@
 package net.meisen.dissertation.models.impl.dataretriever;
 
 /**
- * A configuration used to configure a query used to retrieve data using a
+ * A configuration which is used to configure a specific implementation of a
  * {@code DataRetriever}.
  * 
  * @author pmeisen
  * 
  */
-public interface IQueryConfiguration {
+public interface IDataRetrieverConfig {
 	// nothing to be specified
 }

@@ -1,8 +1,8 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
-import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration;
+import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 
-public class RandomConnectionConfig implements IDataRetrieverConfiguration {
+public class RandomDataRetrieverConfig implements IDataRetrieverConfig {
 	private int amount;
 	private Class<?> type;
 
