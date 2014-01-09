@@ -222,7 +222,7 @@ public class TestDbDataRetriever {
 					e.getMessage(),
 					e.getMessage()
 							.contains(
-									"Unable to retrieve the meta-data (column names) for the query"));
+									"Unable to create the preparedStatement of query"));
 		} finally {
 			db.release();
 		}

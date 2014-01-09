@@ -141,12 +141,7 @@ public class DataRecord<D> {
 	 * @return the data for the specified position
 	 */
 	public Object getDataByPos(final int pos) {
-		if (collection.isValidPosition(pos)) {
-			return record.get(pos);
-		} else {
-			throw new IllegalArgumentException("The specified position '" + pos
-					+ "' is not valid considering the specified collection.");
-		}
+		return record.get(pos);
 	}
 
 	/**
@@ -159,12 +154,7 @@ public class DataRecord<D> {
 	 *            the data to be set
 	 */
 	public void setDataByPos(final int pos, final Object data) {
-		if (collection.isValidPosition(pos)) {
-			record.add(pos, data);
-		} else {
-			throw new IllegalArgumentException("The specified position '" + pos
-					+ "' is not valid considering the specified collection.");
-		}
+		record.add(pos, data);
 	}
 
 	/**

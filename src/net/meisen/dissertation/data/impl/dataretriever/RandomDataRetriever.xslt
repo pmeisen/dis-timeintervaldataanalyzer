@@ -5,7 +5,7 @@
                               xmlns:rnd="http://dev.meisen.net/xsd/dissertation/model/rnd">
 
   <xsl:template match="rnd:data">
-    <bean class="net.meisen.dissertation.data.impl.dataretriever.RandomConnectionConfig">
+    <bean class="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetrieverConfig">
       <xsl:variable name="amount" select="@amount" />
       <xsl:variable name="type" select="@type" />
     

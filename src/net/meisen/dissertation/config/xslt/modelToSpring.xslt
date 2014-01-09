@@ -354,7 +354,7 @@
         
     <!-- define the bean -->
     <bean id="dataretriever-{$uniqueIdPrefix}-{$id}" class="{$implementation}" destroy-method="release">
-      <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfiguration">
+      <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig">
         <xsl:choose>
           <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
           <xsl:otherwise><null /></xsl:otherwise>

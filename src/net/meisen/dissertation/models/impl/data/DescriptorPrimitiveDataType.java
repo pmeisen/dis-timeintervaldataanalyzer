@@ -56,6 +56,16 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 		return cmp;
 	}
 
+	/**
+	 * Maps the specified value to the primitive data type used by {@code this}
+	 * descriptor.
+	 * 
+	 * @param value
+	 *            the value to be mapped
+	 * 
+	 * @return the mapped value or {@code null} if it cannot be mapped to the
+	 *         primitive type
+	 */
 	public D mapToDataType(final Object value) {
 
 		if (value == null) {
@@ -67,8 +77,10 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 		if (clazz.equals(value.getClass())) {
 			return castToType(value);
 		} else if (Number.class.isAssignableFrom(clazz)) {
+			@SuppressWarnings("unchecked")
+			final Class<? extends Number> numClazz = (Class<? extends Number>) clazz;
 			final Number number = (Number) value;
-			final Number result = castToNumber(number, clazz);
+			final Number result = castToNumber(number, numClazz);
 
 			// check the result
 			if (result != null) {
@@ -95,10 +107,27 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 		return null;
 	}
 
-	protected Number castToNumber(final Number number, final Class<?> clazz) {
+	/**
+	 * Method which maps a {@code number} to the specified {@code clazz}. The
+	 * specified {@code clazz} is another {@code Number}.
+	 * 
+	 * @param number
+	 *            the number to be casted
+	 * @param clazz
+	 *            the {@code Number}-class to cast the {@code number} to
+	 * 
+	 * @return the casted {@code number} or {@code null} if a cast wasn't
+	 *         possible
+	 */
+	protected Number castToNumber(final Number number,
+			final Class<? extends Number> clazz) {
 		final Number result;
 
-		if (Byte.class.equals(clazz)) {
+		if (number == null) {
+			return null;
+		} else if (number.getClass().equals(clazz)) {
+			return number;
+		} else if (Byte.class.equals(clazz)) {
 			result = number.byteValue();
 		} else if (Short.class.equals(clazz)) {
 			result = number.shortValue();
@@ -121,6 +150,14 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 		return result;
 	}
 
+	/**
+	 * Helper method to cast a value to the specified type.
+	 * 
+	 * @param value
+	 *            the value to be casted
+	 *            
+	 * @return the casted value
+	 */
 	protected D castToType(final Object value) {
 		@SuppressWarnings("unchecked")
 		final D result = (D) value;
