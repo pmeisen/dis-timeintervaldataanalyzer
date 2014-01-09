@@ -23,14 +23,37 @@ public abstract class DataCollection<D> {
 
 	private List<D> names = null;
 
-	public DataCollection() {
+	/**
+	 * Constructor to create a {@code DataCollection} without any names, the
+	 * names have to be defined using {@link #setNames(Object[])} prior to any
+	 * other usage.
+	 */
+	protected DataCollection() {
 		this(null);
 	}
 
+	/**
+	 * Constructor to create a {@code DataCollection} with the specified names.
+	 * If the {@code names} are {@code null} {@link #setNames(Object[])} has to
+	 * be called prior to any other usage.
+	 * 
+	 * @param names
+	 *            the list of names used for the data of the collection
+	 */
 	public DataCollection(final D[] names) {
 		setNames(names);
 	}
 
+	/**
+	 * Set the names of the data of the collection. The names can only be set
+	 * once and only if those are not set during construction (see
+	 * {@link #DataCollection(Object[])}). If not set during construction, the
+	 * names have to be set directly after it (i.e. no other method should be
+	 * called prior to the setting).
+	 * 
+	 * @param names
+	 *            the names to be set, cannot be {@code null}
+	 */
 	protected void setNames(final D[] names) {
 		if (this.names != null) {
 			throw new IllegalStateException(
@@ -42,6 +65,9 @@ public abstract class DataCollection<D> {
 		this.names = Collections.unmodifiableList(Arrays.asList(names));
 	}
 
+	/**
+	 * Validates if the names are set, if not set an exception is thrown.
+	 */
 	protected void validate() {
 		if (this.names == null) {
 			throw new IllegalStateException(
@@ -49,25 +75,58 @@ public abstract class DataCollection<D> {
 		}
 	}
 
+	/**
+	 * Get the defined names for the collection.
+	 * 
+	 * @return the defined names for the collection
+	 */
 	public Collection<D> getNames() {
 		validate();
-		
+
 		return names;
 	}
 
+	/**
+	 * Gets the size of a record contained in this collection.
+	 * 
+	 * @return the size of a record contained in this collection
+	 */
 	public int getRecordSize() {
 		validate();
-		
+
 		return names.size();
 	}
 
-	public D getNameOfPos(final int pos) {
+	/**
+	 * Gets the name of the specified position. An exception is thrown if the
+	 * specified position is invalid (i.e. out of bound).
+	 * 
+	 * @param pos
+	 *            the position to get the name for
+	 * 
+	 * @return the name of the position
+	 * 
+	 * @throws IndexOutOfBoundsException
+	 *             if the specified position is not within the range of the
+	 *             {@link Collection}
+	 */
+	public D getNameOfPos(final int pos) throws IndexOutOfBoundsException {
 		validate();
 
 		return net.meisen.general.genmisc.collections.Collections.get(pos,
 				names);
 	}
 
+	/**
+	 * Gets the position of a name, i.e. the position of the data within the
+	 * record for the specified {@code name}. The method returns {@code -1} if
+	 * the name is not defined.
+	 * 
+	 * @param name
+	 *            the name to get the position for
+	 * 
+	 * @return the position or {@code -1} if not found
+	 */
 	public int getPosOfName(final D name) {
 		validate();
 
@@ -75,13 +134,29 @@ public abstract class DataCollection<D> {
 				names, name);
 	}
 
+	/**
+	 * Gets an {@code DataIterator} to iterate through the data of the
+	 * collection.
+	 * 
+	 * @return an {@code DataIterator} to iterate through the data of
+	 *         {@code this} collection
+	 */
 	public abstract DataIterator<D> iterate();
 
+	/**
+	 * This method should be called whenever the collection is not used anymore.
+	 * It releases all bound resources of the {@code DataCollection}.
+	 */
 	public abstract void release();
 
+	/**
+	 * Gets a {@code Collection} containing all the {@code DataRecords} of
+	 * {@code this} collection.
+	 * 
+	 * @return a {@code Collection} containing all the {@code DataRecords} of
+	 *         {@code this} collection
+	 */
 	public Collection<DataRecord<D>> get() {
-		validate();
-
 		final Iterator<DataRecord<D>> it = iterate();
 		final ArrayList<DataRecord<D>> data = new ArrayList<DataRecord<D>>();
 
@@ -97,13 +172,44 @@ public abstract class DataCollection<D> {
 		return data;
 	}
 
+	/**
+	 * Transforms the {@code DataCollection} into a {@code Collection} of the
+	 * first field of {@code this}. This would be equal to call {@link #get()}
+	 * and retrieve all values of the field named by {@code getNameOfPos(0)}.
+	 * 
+	 * @return a {@code Collection} of the first field of {@code this}
+	 */
 	public <T> Collection<T> transform() {
 		return transform(null);
 	}
 
-	public <T> Collection<T> transform(final int position) {
-		validate();
+	/**
+	 * Checks if the specified position is valid considering the defined
+	 * {@code DataCollection}.
+	 * 
+	 * @param pos
+	 *            the position to be validated
+	 *            
+	 * @return {@code true} if the position is a valid position, otherwise
+	 *         {@code false}
+	 */
+	public boolean isValidPosition(final int pos) {
+		return pos > -1 && pos < getRecordSize();
+	}
 
+	/**
+	 * Transforms the {@code DataCollection} into a {@code Collection} of the
+	 * field defined by {@code position} of {@code this}. This would be equal to
+	 * call {@link #get()} and retrieve all values of the field named by
+	 * {@code getNameOfPos(position)}.
+	 * 
+	 * @param position
+	 *            the position to be included in the {@code Collection}
+	 * 
+	 * @return a {@code Collection} of the field defined by {@code position} of
+	 *         {@code this}
+	 */
+	public <T> Collection<T> transform(final int position) {
 		final ArrayList<T> data = new ArrayList<T>();
 		final Iterator<DataRecord<D>> it = iterate();
 		if (it == null) {
@@ -126,6 +232,17 @@ public abstract class DataCollection<D> {
 		return data;
 	}
 
+	/**
+	 * Transforms the {@code DataCollection} into a {@code Collection} of the
+	 * field with the name {@code fieldName}. This would be equal to call
+	 * {@link #get()} and retrieve all values of the field with the name
+	 * {@code fieldName}.
+	 * 
+	 * @param fieldName
+	 *            the name of the field to be included in the {@code Collection}
+	 * 
+	 * @return a {@code Collection} of the field with the name {@code fieldName}
+	 */
 	public <T> Collection<T> transform(final D fieldName) {
 		final int position;
 

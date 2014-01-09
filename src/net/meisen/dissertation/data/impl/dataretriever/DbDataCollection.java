@@ -64,7 +64,7 @@ public class DbDataCollection extends DataCollection<String> {
 					ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		} catch (final SQLException e) {
 			final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
-					DbDataRetrieverException.class, 1005, e, query.getQuery());
+					DbDataRetrieverException.class, 1011, e, query.getQuery());
 
 			closeConnection(false);
 			throw exForwarded;
@@ -129,11 +129,6 @@ public class DbDataCollection extends DataCollection<String> {
 			try {
 				// we cannot use the connection so close it
 				connection.close();
-
-				if (LOG.isTraceEnabled()) {
-					LOG.trace("Closed connection of collection for '"
-							+ query.getQuery() + "'.");
-				}
 			} catch (final SQLException e) {
 				if (throwException) {
 					final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
@@ -144,6 +139,11 @@ public class DbDataCollection extends DataCollection<String> {
 							+ query.getQuery() + "'.", e);
 				}
 			}
+		}
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Closed connection and preparedStatement of DataCollection (query: '"
+					+ query.getQuery() + "').");
 		}
 	}
 
