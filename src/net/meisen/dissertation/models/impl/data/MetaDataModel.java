@@ -1,6 +1,5 @@
 package net.meisen.dissertation.models.impl.data;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -95,7 +94,7 @@ public class MetaDataModel {
 		this.descriptorFactory = descriptorFactory;
 		this.indexedCollectionFactory = indexedCollectionFactory;
 
-		// get the indexes use the factory to decide which one is best
+		// get the indexes, use the factory to decide which one is best
 		this.resourceModels = indexedCollectionFactory
 				.create(new IndexKeyDefinition(ResourceModel.class, "getId"));
 		this.descriptorModels = indexedCollectionFactory
@@ -103,16 +102,19 @@ public class MetaDataModel {
 
 		final IndexKeyDefinition resIdDef = new IndexKeyDefinition(
 				Resource.class, "getId");
+		final IndexKeyDefinition uniqueResDef = new IndexKeyDefinition(
+				Resource.class, "getModelId", "getValue");
 		resIdDef.overrideType(0, this.resourceFactory.getIdClass());
 		this.resources = indexedCollectionFactory
-				.create(resIdDef, new IndexKeyDefinition(Resource.class,
-						"getModelId", "getValue"));
+				.create(resIdDef, uniqueResDef);
+
 		final IndexKeyDefinition desIdDef = new IndexKeyDefinition(
 				Descriptor.class, "getId");
+		final IndexKeyDefinition uniqueDesDef = new IndexKeyDefinition(
+				Descriptor.class, "getModelId", "getValue");
 		desIdDef.overrideType(0, this.descriptorFactory.getIdClass());
 		this.descriptors = indexedCollectionFactory.create(desIdDef,
-				new IndexKeyDefinition(Descriptor.class, "getModelId",
-						"getValue"));
+				uniqueDesDef);
 
 		// add all the models
 		addResourceModels(resourceModels);
@@ -122,7 +124,7 @@ public class MetaDataModel {
 		addResources(resources);
 		addDescriptors(descriptors);
 	}
-	
+
 	public String getId() {
 		return id;
 	}

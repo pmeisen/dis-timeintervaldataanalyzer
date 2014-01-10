@@ -37,14 +37,16 @@ public abstract class BaseDataRetriever {
 		if (config == null && needConfiguration()) {
 			exceptionRegistry.throwException(DataRetrieverException.class,
 					1000, getClass().getName());
+		} else if (config == null) {
+			this.config = createDefaultConfig();
 		} else if (configClazz != null
 				&& !configClazz.isAssignableFrom(config.getClass())) {
 			exceptionRegistry.throwException(DataRetrieverException.class,
 					1001, getClass().getName(), configClazz.getName(), config
 							.getClass().getName());
+		} else {
+			this.config = config;
 		}
-
-		this.config = config;
 	}
 
 	/**
@@ -76,14 +78,27 @@ public abstract class BaseDataRetriever {
 
 	/**
 	 * Defines the type of the configuration which has to be passed to the
-	 * constructor. By default the type has to be
-	 * {@link IDataRetrieverConfig}.
+	 * constructor. By default the type has to be {@link IDataRetrieverConfig}.
 	 * 
 	 * @return the type of the configuration which has to be passed to the
 	 *         constructor
 	 */
 	protected Class<? extends IDataRetrieverConfig> supportedConfiguration() {
 		return IDataRetrieverConfig.class;
+	}
+
+	/**
+	 * This method is called if the {@code DataRetriever} allows to run without
+	 * any configuration (i.e. {@link #needConfiguration()} returns
+	 * {@code false}). It is used to create and assign a default configuration
+	 * in the case, that no configuration is passed. The default implementation
+	 * just returns {@code null}.
+	 * 
+	 * @return a new instance of a default {@code DataRetrieverConfig} for the
+	 *         {@code DataRetriever}
+	 */
+	protected IDataRetrieverConfig createDefaultConfig() {
+		return null;
 	}
 
 	/**

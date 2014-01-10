@@ -1,6 +1,5 @@
 package net.meisen.dissertation.data.impl.dataretriever;
 
-import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 
 /**

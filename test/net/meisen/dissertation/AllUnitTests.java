@@ -3,6 +3,7 @@ package net.meisen.dissertation;
 import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.data.impl.dataretriever.TestDbDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.TestFixedStructureDataRetriever;
 import net.meisen.dissertation.data.impl.descriptors.TestDescriptorsFactory;
 import net.meisen.dissertation.data.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.data.impl.descriptors.TestGeneralDescriptor;
@@ -90,7 +91,7 @@ import org.junit.runners.Suite;
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
-		TestDbDataRetriever.class,
+		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
 
 		// Test combined meta-model
 		TestMetaDataModel.class,

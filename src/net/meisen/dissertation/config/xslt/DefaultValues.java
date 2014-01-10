@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 import net.meisen.dissertation.data.IIdsFactory;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
-import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory;
 import net.meisen.dissertation.data.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor;
@@ -139,7 +139,7 @@ public class DefaultValues {
 		final Map<String, String> d = new LinkedHashMap<String, String>();
 
 		d.put("db", DbDataRetriever.class.getName());
-		d.put("rnd", RandomDataRetriever.class.getName());
+		d.put("fxd", FixedStructureDataRetriever.class.getName());
 
 		return d;
 	}

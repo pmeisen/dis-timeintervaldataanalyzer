@@ -156,7 +156,7 @@ public abstract class DataCollection<D> {
 	 * @return a {@code Collection} containing all the {@code DataRecords} of
 	 *         {@code this} collection
 	 */
-	public Collection<DataRecord<D>> get() {
+	public List<DataRecord<D>> get() {
 		final Iterator<DataRecord<D>> it = iterate();
 		final ArrayList<DataRecord<D>> data = new ArrayList<DataRecord<D>>();
 

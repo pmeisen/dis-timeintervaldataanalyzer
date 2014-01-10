@@ -2,12 +2,12 @@
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
-       xmlns:rnd="http://dev.meisen.net/xsd/dissertation/model/rnd"
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
                            http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/rnd http://dev.meisen.net/xsd/dissertation/tidaRandomExtension.xsd"
+                           http://dev.meisen.net/xsd/dissertation/model/fxd http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
 
        id="modelWithExternalSources">
 
@@ -49,17 +49,29 @@
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
          by default the following id-prefixes are mapped to the specified implementation:
           + db_       is mapped to     net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever
-          + rnd_      is mapped to     net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever
+          + fxd_      is mapped to     net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever
       -->
     <dataretrievers>
-      <dataretriever id="db_butRandom" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
-        <rnd:data amount="100" type="java.lang.Integer" />
+      <dataretriever id="db_butFixed" implementation="net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever" />
+      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever">
+        <fxd:record>
+          <fxd:field name="DOUBLE" type="java.lang.Double" />
+        </fxd:record>
       </dataretriever>
-      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever">
-        <rnd:data amount="500" type="java.lang.Double" />
-      </dataretriever>
-      <dataretriever id="rnd_test">
-        <rnd:data amount="1000" type="java.lang.String" />
+      <dataretriever id="fxd_test">
+        <fxd:record>
+          <fxd:field name="FIX_DOUBLE" value="1.00" type="java.lang.Double" />
+          <fxd:field name="FIX_STRING" value="Hello World" type="java.lang.String" />
+          <fxd:field name="FIX_INTEGER" value="1" type="java.lang.Integer" />
+          <fxd:field name="FIX_LONG" value="10000" type="java.lang.Long" />
+          
+          <fxd:field name="RND_DOUBLE" type="java.lang.Double" />
+          <fxd:field name="RND_STRING" type="java.lang.String" />
+          <fxd:field name="RND_INTEGER" type="java.lang.Integer" />
+          <fxd:field name="RND_LONG" type="java.lang.Long" />
+          
+          <fxd:field name="NULL_INTEGER" type="java.lang.Integer" random="false" />
+        </fxd:record>
       </dataretriever>
       <dataretriever id="db_test">
         <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaTestData" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
@@ -77,7 +89,7 @@
       <descriptor id="D1" name="funFactor" dataType="java.lang.String" />
       <descriptor id="D2" name="smiles" dataType="java.lang.Integer" />
       <descriptor id="D3" dataType="java.lang.String" />
-      <descriptor id="D4" dataType="java.util.List" />
+      <descriptor id="D4" dataType="java.lang.Double" />
     </descriptors>
 
     <values>
@@ -92,7 +104,9 @@
       </descriptor>
       <descriptor model="D2" value="2" />
       <descriptor model="D3" value="Some Value" />     
-      <descriptor model="D4" dataretriever="rnd_test" />
+      <descriptor model="D4" dataretriever="fxd_test">
+        <fxd:query amount="1" />
+      </descriptor>
     </values>
   </meta>
 

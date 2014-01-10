@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/fxd" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:base="http://dev.meisen.net/xsd/dissertation/model"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/model/fxd" attributeFormDefault="unqualified" elementFormDefault="qualified">
+           
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
+
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="java.lang.Integer" />
+      <xs:enumeration value="java.lang.Long" />
+      <xs:enumeration value="java.lang.Double" />
+      <xs:enumeration value="java.lang.String" />
+      <xs:enumeration value="java.lang.Boolean" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="nonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[^\s].+"></xs:pattern>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="fieldType">
+    <xs:attribute name="name" type="nonEmptyString" use="required" />
+    <xs:attribute name="type" type="type" use="required" />
+    <xs:attribute name="value" type="xs:string" use="optional" />
+    <xs:attribute name="random" type="xs:boolean" use="optional" />
+  </xs:complexType>
+  
+  <xs:complexType name="recordType">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="field" type="fieldType" />
+    </xs:choice>
+  </xs:complexType>
+  
+  <xs:complexType name="queryType">
+    <xs:attribute name="amount" type="xs:positiveInteger" use="required" />
+  </xs:complexType>
+
+  <xs:element name="record" type="recordType" />
+  
+  <xs:element name="query" type="queryType" />
+</xs:schema>

@@ -26,8 +26,10 @@ import net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor;
 import net.meisen.dissertation.data.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.DbQueryConfig;
-import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetrieverConfig;
-import net.meisen.dissertation.data.impl.dataretriever.RandomDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetrieverConfig;
+import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever;
+import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetrieverConfigEntry;
+import net.meisen.dissertation.data.impl.dataretriever.FixedStructureQueryConfig;
 import net.meisen.dissertation.data.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.data.impl.idfactories.UuIdsFactory;
 import net.meisen.dissertation.help.Db;
@@ -204,31 +206,130 @@ public class TestXsltTidaModel {
 
 		// add the db_butRandom
 		// @formatter:off
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butRandom\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butFixed\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
-		dr.add("<property name=\"amount\" value=\"100\"/>");
-		dr.add("<property name=\"type\" value=\"java.lang.Integer\"/>");
-		dr.add("</bean>");
+		dr.add("<null/>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
 
 		// add the myOwnId
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
-		dr.add("<property name=\"amount\" value=\"500\"/>");
-		dr.add("<property name=\"type\" value=\"java.lang.Double\"/>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfig.class.getName() + "\" xmlns:fxd=\"http://dev.meisen.net/xsd/dissertation/model/fxd\">");
+		dr.add("<constructor-arg type=\"java.util.Collection\">");
+		dr.add("<list value-type=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>DOUBLE</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Double</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("</list>");
+		dr.add("</constructor-arg>");
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
 
-		// add the rnd_test
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-rnd_test\" class=\"" + RandomDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		// add the fxd_test
+		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-fxd_test\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
-		dr.add("<bean class=\"" + RandomDataRetrieverConfig.class.getName() + "\" xmlns:rnd=\"http://dev.meisen.net/xsd/dissertation/model/rnd\">");
-		dr.add("<property name=\"amount\" value=\"1000\"/>");
-		dr.add("<property name=\"type\" value=\"java.lang.String\"/>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfig.class.getName() + "\" xmlns:fxd=\"http://dev.meisen.net/xsd/dissertation/model/fxd\">");
+		dr.add("<constructor-arg type=\"java.util.Collection\">");
+		dr.add("<list value-type=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>FIX_DOUBLE</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Double</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"value\">");
+		dr.add("<value type=\"java.lang.Double\">1.00</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>FIX_STRING</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.String</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"value\">");
+		dr.add("<value type=\"java.lang.String\">Hello World</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>FIX_INTEGER</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Integer</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"value\">");
+		dr.add("<value type=\"java.lang.Integer\">1</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>FIX_LONG</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Long</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"value\">");
+		dr.add("<value type=\"java.lang.Long\">10000</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>RND_DOUBLE</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Double</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>RND_STRING</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.String</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>RND_INTEGER</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Integer</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>RND_LONG</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Long</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		
+		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfigEntry.class.getName() + "\">");
+		dr.add("<property name=\"name\">");
+		dr.add("<value>NULL_INTEGER</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"type\">");
+		dr.add("<value>java.lang.Integer</value>");
+		dr.add("</property>");
+		dr.add("<property name=\"random\">");
+		dr.add("<value>false</value>");
+		dr.add("</property>");
+		dr.add("</bean>");
+		dr.add("</list>");
+		dr.add("</constructor-arg>");
 		dr.add("</bean>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
@@ -324,7 +425,7 @@ public class TestXsltTidaModel {
 		expectedDescriptors.put("D3", "Some Value");
 		final Map<String, String> expectedRetrDescriptors = new LinkedHashMap<String, String>();
 		expectedRetrDescriptors.put("D1", "db_test");
-		expectedRetrDescriptors.put("D4", "rnd_test");
+		expectedRetrDescriptors.put("D4", "fxd_test");
 
 		// get the lines
 		final List<String> dl = new ArrayList<String>();
@@ -372,7 +473,11 @@ public class TestXsltTidaModel {
 				dl.add("</property>");
 				dl.add("<property name=\"language\" value=\"sql\"/>");
 				dl.add("</bean>");
-			} else {
+			} else if (e.getValue().startsWith("fxd")) {
+				dl.add("<bean class=\"" + FixedStructureQueryConfig.class.getName() + "\" xmlns:fxd=\"http://dev.meisen.net/xsd/dissertation/model/fxd\">");
+				dl.add("<property name=\"amount\" value=\"1\"/>");
+				dl.add("</bean>");
+		    } else {
 				dl.add("<null/>");
 			}
 			dl.add("</constructor-arg>");
@@ -477,10 +582,11 @@ public class TestXsltTidaModel {
 		assertEquals("modelWithExternalSources", m.getName());
 
 		// check the descriptors
-		assertEquals(3, m.getDescriptors().size());
+		assertEquals(4, m.getDescriptors().size());
 		assertNotNull(m.getDescriptor("D1", "FIXED VALUE"));
 		assertNotNull(m.getDescriptor("D2", 2));
 		assertNotNull(m.getDescriptor("D3", "Some Value"));
+		assertNotNull(m.getDescriptor("D4", 1.0));
 
 		// check the resources
 		assertEquals(10002, m.getResources().size());
