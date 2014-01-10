@@ -5,6 +5,13 @@ import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig;
 import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 
+/**
+ * A {@code DataRetriever} to retrieve random or fixed values in a pre-defined
+ * (configured) structure.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class FixedStructureDataRetriever extends BaseDataRetriever {
 
 	/**

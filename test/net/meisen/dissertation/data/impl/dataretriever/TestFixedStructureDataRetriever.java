@@ -4,13 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
 import java.util.Locale;
 
 import net.meisen.dissertation.config.TestConfig;
-import net.meisen.dissertation.models.impl.dataretriever.DataCollection;
 import net.meisen.dissertation.models.impl.dataretriever.DataRecord;
-import net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -50,6 +47,16 @@ public class TestFixedStructureDataRetriever {
 	 */
 	public static class Util {
 
+		/**
+		 * Creates a new instance of a {@code FixedStructureDataRetriever}.
+		 * 
+		 * @param c
+		 *            the {@code Configuration} which can be used for wiring
+		 * @param config
+		 *            the {@code FixedStructureDataRetrieverConfig} of the
+		 *            retriever
+		 * @return the instance of the {@code FixedStructureDataRetriever}
+		 */
 		public static FixedStructureDataRetriever create(
 				final IConfiguration c,
 				final FixedStructureDataRetrieverConfig config) {
@@ -71,6 +78,9 @@ public class TestFixedStructureDataRetriever {
 		Locale.setDefault(Locale.US);
 	}
 
+	/**
+	 * Tests the retrieval of single, random integers.
+	 */
 	@Test
 	public void testSingleRandomInteger() {
 		final FixedStructureDataRetrieverConfig config = new FixedStructureDataRetrieverConfig();
@@ -90,6 +100,9 @@ public class TestFixedStructureDataRetriever {
 		assertTrue(data.get().get(0).getData("RANDOM_INTEGER") instanceof Integer);
 	}
 
+	/**
+	 * Tests the retrieval of single, fixed integers.
+	 */
 	@Test
 	public void testSingleFixedInteger() {
 		final FixedStructureDataRetrieverConfig config = new FixedStructureDataRetrieverConfig();
@@ -108,6 +121,9 @@ public class TestFixedStructureDataRetriever {
 		}
 	}
 
+	/**
+	 * Tests multiple fields within the fixed structure.
+	 */
 	@Test
 	public void testMultiple() {
 		final FixedStructureDataRetrieverConfig config = new FixedStructureDataRetrieverConfig();
