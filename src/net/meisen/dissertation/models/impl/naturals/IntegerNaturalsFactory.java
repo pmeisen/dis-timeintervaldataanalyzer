@@ -2,6 +2,7 @@ package net.meisen.dissertation.models.impl.naturals;
 
 import java.util.Random;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.NaturalsFactoryException;
 import net.meisen.dissertation.models.INaturalsFactory;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -24,7 +25,7 @@ public class IntegerNaturalsFactory implements
 			Integer.MAX_VALUE);
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
 	@Override

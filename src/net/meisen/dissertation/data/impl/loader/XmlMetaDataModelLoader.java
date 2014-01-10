@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class XmlMetaDataModelLoader {
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
 	@Autowired(required = true)
@@ -42,8 +42,8 @@ public class XmlMetaDataModelLoader {
 				"/net/meisen/dissertation/config/fullModel.xml");
 		final IModuleHolder moduleHolder = configuration.loadDelayed(
 				"tidaModelBeans", inputStream);
-		final MetaDataModel m = moduleHolder.getModule(DefaultValues
-				.getGeneratedModuleName());
+		final MetaDataModel m = moduleHolder
+				.getModule(DefaultValues.METADATAMODEL_ID);
 
 		return m;
 	}

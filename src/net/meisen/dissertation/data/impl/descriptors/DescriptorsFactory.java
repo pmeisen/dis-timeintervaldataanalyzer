@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.data.IIdsFactory;
 import net.meisen.dissertation.exceptions.DescriptorsFactoryException;
 import net.meisen.dissertation.models.impl.data.Descriptor;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class DescriptorsFactory {
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
 	private final IIdsFactory<?> idsFactory;

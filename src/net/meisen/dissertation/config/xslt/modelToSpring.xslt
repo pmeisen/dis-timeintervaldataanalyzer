@@ -10,10 +10,13 @@
   <xsl:import href="dataretriever://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
+  
+  <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
+  <xsl:variable name="resourcesFactoryId" select="mdef:getId('RESOURCESFACTORY_ID')" />
+  <xsl:variable name="descriptorsFactoryId" select="mdef:getId('DESCRIPTORSFACTORY_ID')" />
+  <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
 
   <xsl:template match="/mns:model">
-    <xsl:variable name="generatedModuleName" select="mdef:getGeneratedModuleName()" />
-    <xsl:variable name="uniqueIdPrefix" select="uuid:randomUUID()" />
     <xsl:variable name="modelId">
       <xsl:choose>
         <xsl:when test="@id"><xsl:value-of select="@id" /></xsl:when>
@@ -32,13 +35,13 @@
         <xsl:otherwise><xsl:value-of select="mdef:getIndexedCollectionFactoryImplementation()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable> 
-    <xsl:variable name="descriptorsFactory">
+    <xsl:variable name="descriptorsFactoryClass">
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:descriptor/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:descriptor/@implementation" /></xsl:when>
         <xsl:otherwise><xsl:value-of select="mdef:getDescriptorsFactoryImplementation()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>    
-    <xsl:variable name="resourcesFactory">
+    <xsl:variable name="resourcesFactoryClass">
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:resource/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:resource/@implementation" /></xsl:when>
         <xsl:otherwise><xsl:value-of select="mdef:getResourcesFactoryImplementation()" /></xsl:otherwise>
@@ -61,9 +64,9 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
       
-      <bean id="indexedFactory-{$uniqueIdPrefix}" class="{$indexedFactory}" />
+      <bean id="{$indexFactoryId}" class="{$indexedFactory}" />
       
-      <bean id="descriptorsFactory-{$uniqueIdPrefix}" class="{$descriptorsFactory}">
+      <bean id="{$descriptorsFactoryId}" class="{$descriptorsFactoryClass}">
         <constructor-arg type="net.meisen.dissertation.data.IIdsFactory">
           <bean class="{$descriptorsFactoryIdFactory}" />
         </constructor-arg>
@@ -86,114 +89,90 @@
       </bean>
          
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">
-        <xsl:call-template name="beanDataRetriever">
-          <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-        </xsl:call-template>
+        <xsl:call-template name="beanDataRetriever" />
       </xsl:for-each>
       
-      <bean id="resourcesFactory-{$uniqueIdPrefix}" class="{$resourcesFactory}">
+      <bean id="{$resourcesFactoryId}" class="{$resourcesFactoryClass}">
         <constructor-arg type="net.meisen.dissertation.data.IIdsFactory">
           <bean class="{$resourcesFactoryIdFactory}" />
         </constructor-arg>
       </bean>
 
       <xsl:for-each select="mns:meta/mns:resources/mns:resource">
-        <xsl:call-template name="beanResourceModel">
-          <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-        </xsl:call-template>
+        <xsl:call-template name="beanResourceModel" />
       </xsl:for-each>
       
       <xsl:for-each select="mns:meta/mns:descriptors/mns:descriptor">
-        <xsl:call-template name="beanDescriptorModel">
-          <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-        </xsl:call-template>
+        <xsl:call-template name="beanDescriptorModel" />
       </xsl:for-each>
       
-      <bean id="resources-{$uniqueIdPrefix}" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+      <bean id="resources" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
         <property name="collections">
           <list value-type="java.util.Collection">
         
             <list value-type="net.meisen.dissertation.models.impl.data.Resource">
               <xsl:for-each select="mns:meta/mns:values/mns:resource[@value]">
-                <xsl:call-template name="beanResource">
-                  <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-                </xsl:call-template>
+                <xsl:call-template name="beanResource" />
               </xsl:for-each>
             </list>
           
             <xsl:for-each select="mns:meta/mns:values/mns:resource[@dataretriever]">
-              <xsl:call-template name="beanDataRetrieverResource">
-                <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-              </xsl:call-template>
+              <xsl:call-template name="beanDataRetrieverResource" />
             </xsl:for-each>
           </list>
         </property>
       </bean>
       
-      <bean id="descriptors-{$uniqueIdPrefix}" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
+      <bean id="descriptors" class="net.meisen.general.sbconfigurator.factories.MergedCollection">
         <property name="collections">
           <list value-type="java.util.Collection">
             
             <list value-type="net.meisen.dissertation.models.impl.data.Descriptor">
               <xsl:for-each select="mns:meta/mns:values/mns:descriptor[@value]">
-                <xsl:call-template name="beanDescriptor">
-                  <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-                </xsl:call-template>
+                <xsl:call-template name="beanDescriptor" />
               </xsl:for-each>
             </list>
           
             <xsl:for-each select="mns:meta/mns:values/mns:descriptor[@dataretriever]">
-              <xsl:call-template name="beanDataRetrieverDescriptor">
-                <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-              </xsl:call-template>
+              <xsl:call-template name="beanDataRetrieverDescriptor" />
             </xsl:for-each>
           </list>
         </property>
       </bean>
       
-      <bean id="{$generatedModuleName}" class="net.meisen.dissertation.models.impl.data.MetaDataModel">
+      <!-- generate the MetaDataModel -->
+      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.models.impl.data.MetaDataModel" init-method="init">
         <constructor-arg type="java.lang.String"><value><xsl:value-of select="$modelId" /></value></constructor-arg>
         <constructor-arg type="java.lang.String"><value><xsl:value-of select="$modelName" /></value></constructor-arg>
+      </bean>
+      
+      <bean class="net.meisen.dissertation.models.impl.data.MetaData">
         <constructor-arg type="java.util.Collection">
           <list value-type="net.meisen.dissertation.models.impl.data.ResourceModel">
             <xsl:for-each select="mns:meta/mns:resources/mns:resource">
-              <xsl:call-template name="beanReferenceResourceModel">
-                <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-              </xsl:call-template>
+              <xsl:call-template name="beanReferenceResourceModel" />
             </xsl:for-each>
           </list>
         </constructor-arg>
         <constructor-arg type="java.util.Collection">
           <list value-type="net.meisen.dissertation.models.impl.data.DescriptorModel">
             <xsl:for-each select="mns:meta/mns:descriptors/mns:descriptor">
-              <xsl:call-template name="beanReferenceDescriptorModel">
-                <xsl:with-param name="uniqueIdPrefix"><xsl:value-of select="$uniqueIdPrefix" /></xsl:with-param>
-              </xsl:call-template>
+              <xsl:call-template name="beanReferenceDescriptorModel" />
             </xsl:for-each>
           </list>
         </constructor-arg>
-        <constructor-arg type="net.meisen.dissertation.data.impl.resources.ResourcesFactory">
-          <ref bean="resourcesFactory-{$uniqueIdPrefix}" />
-        </constructor-arg>
-        <constructor-arg type="net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory">
-          <ref bean="descriptorsFactory-{$uniqueIdPrefix}" />
-        </constructor-arg>
-        <constructor-arg type="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory">
-          <ref bean="indexedFactory-{$uniqueIdPrefix}" />
+        <constructor-arg type="java.util.Collection">
+          <ref bean="resources"/>
         </constructor-arg>
         <constructor-arg type="java.util.Collection">
-          <ref bean="resources-{$uniqueIdPrefix}" />
-        </constructor-arg>
-        <constructor-arg type="java.util.Collection">
-          <ref bean="descriptors-{$uniqueIdPrefix}" />
+          <ref bean="descriptors"/>
         </constructor-arg>
       </bean>
     </beans>
   </xsl:template>
 
   <xsl:template name="beanResourceModel">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-  
+
     <xsl:variable name="id">
       <xsl:value-of select="@id"/>
     </xsl:variable>
@@ -204,23 +183,19 @@
       </xsl:choose>
     </xsl:variable>
     
-    <bean id="resourcemodel-{$uniqueIdPrefix}-{$id}" class="net.meisen.dissertation.models.impl.data.ResourceModel">
+    <bean id="resourcemodel-{$id}" class="net.meisen.dissertation.models.impl.data.ResourceModel">
       <constructor-arg type="java.lang.String"><value><xsl:value-of select="$id" /></value></constructor-arg>
       <constructor-arg type="java.lang.String"><value><xsl:value-of select="$name" /></value></constructor-arg>
     </bean>
   </xsl:template>
   
   <xsl:template name="beanReferenceResourceModel">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-  
     <xsl:variable name="id"><xsl:value-of select="@id"/></xsl:variable>
     
-    <ref bean="resourcemodel-{$uniqueIdPrefix}-{$id}" />
+    <ref bean="resourcemodel-{$id}" />
   </xsl:template>
   
   <xsl:template name="beanDescriptorModel">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-  
     <xsl:variable name="id">
       <xsl:value-of select="@id"/>
     </xsl:variable>
@@ -234,7 +209,7 @@
       <xsl:value-of select="@dataType"/>
     </xsl:variable>
     
-    <bean id="descriptormodel-{$uniqueIdPrefix}-{$id}" class="net.meisen.dissertation.models.impl.data.DescriptorModel">
+    <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.models.impl.data.DescriptorModel">
       <constructor-arg type="java.lang.String"><value><xsl:value-of select="$id" /></value></constructor-arg>
       <constructor-arg type="java.lang.String"><value><xsl:value-of select="$name" /></value></constructor-arg>
       <constructor-arg type="java.lang.Class"><value><xsl:value-of select="$dataType" /></value></constructor-arg>
@@ -242,21 +217,17 @@
   </xsl:template>
   
   <xsl:template name="beanReferenceDescriptorModel">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-  
     <xsl:variable name="id"><xsl:value-of select="@id"/></xsl:variable>
     
-    <ref bean="descriptormodel-{$uniqueIdPrefix}-{$id}" />
+    <ref bean="descriptormodel-{$id}" />
   </xsl:template>
   
   <xsl:template name="beanResource">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-    
     <xsl:variable name="model" select="@model" />
     
-    <bean factory-bean="resourcesFactory-{$uniqueIdPrefix}" factory-method="createResource">
+    <bean factory-bean="{$resourcesFactoryId}" factory-method="createResource">
       <constructor-arg type="net.meisen.dissertation.models.impl.data.ResourceModel">
-        <ref bean="resourcemodel-{$uniqueIdPrefix}-{$model}" />
+        <ref bean="resourcemodel-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.lang.String">
         <value><xsl:value-of select="@value"/></value>
@@ -265,20 +236,18 @@
   </xsl:template>
   
   <xsl:template name="beanDataRetrieverResource">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-    
     <xsl:variable name="model" select="@model" />
     <xsl:variable name="dataretriever" select="@dataretriever" />
     
-    <bean factory-bean="resourcesFactory-{$uniqueIdPrefix}" factory-method="createResources">
+    <bean factory-bean="{$resourcesFactoryId}" factory-method="createResources">
       <constructor-arg type="net.meisen.dissertation.models.impl.data.ResourceModel">
-        <ref bean="resourcemodel-{$uniqueIdPrefix}-{$model}" />
+        <ref bean="resourcemodel-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.util.Collection">
         <bean class="net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean">
           <property name="targetMethod" value="transform" />
           <property name="targetObject">
-            <bean factory-bean="dataretriever-{$uniqueIdPrefix}-{$dataretriever}" factory-method="retrieve">
+            <bean factory-bean="dataretriever-{$dataretriever}" factory-method="retrieve">
               <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration">
                 <xsl:choose>
                   <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
@@ -295,13 +264,11 @@
   </xsl:template>
   
   <xsl:template name="beanDescriptor">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
-    
     <xsl:variable name="model" select="@model" />
     
-    <bean factory-bean="descriptorsFactory-{$uniqueIdPrefix}" factory-method="createDescriptor">
+    <bean factory-bean="{$descriptorsFactoryId}" factory-method="createDescriptor">
       <constructor-arg type="net.meisen.dissertation.models.impl.data.DescriptorModel">
-        <ref bean="descriptormodel-{$uniqueIdPrefix}-{$model}" />
+        <ref bean="descriptormodel-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.lang.Object">
         <value><xsl:value-of select="@value"/></value>
@@ -310,20 +277,19 @@
   </xsl:template>
   
   <xsl:template name="beanDataRetrieverDescriptor">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
     
     <xsl:variable name="model" select="@model" />
     <xsl:variable name="dataretriever" select="@dataretriever" />
     
-    <bean factory-bean="descriptorsFactory-{$uniqueIdPrefix}" factory-method="createDescriptors">
+    <bean factory-bean="{$descriptorsFactoryId}" factory-method="createDescriptors">
       <constructor-arg type="net.meisen.dissertation.models.impl.data.DescriptorModel">
-        <ref bean="descriptormodel-{$uniqueIdPrefix}-{$model}" />
+        <ref bean="descriptormodel-{$model}" />
       </constructor-arg>
       <constructor-arg type="java.util.Collection">
         <bean class="net.meisen.general.sbconfigurator.factories.MethodInvokingFactoryBean">
           <property name="targetMethod" value="transform" />
           <property name="targetObject">
-            <bean factory-bean="dataretriever-{$uniqueIdPrefix}-{$dataretriever}" factory-method="retrieve">
+            <bean factory-bean="dataretriever-{$dataretriever}" factory-method="retrieve">
               <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration">
                 <xsl:choose>
                   <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
@@ -340,7 +306,6 @@
   </xsl:template>
   
   <xsl:template name="beanDataRetriever">
-    <xsl:param name="uniqueIdPrefix"></xsl:param>
 
     <xsl:variable name="id" select="@id" />
     
@@ -353,7 +318,7 @@
     </xsl:variable>
         
     <!-- define the bean -->
-    <bean id="dataretriever-{$uniqueIdPrefix}-{$id}" class="{$implementation}" destroy-method="release">
+    <bean id="dataretriever-{$id}" class="{$implementation}" destroy-method="release">
       <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig">
         <xsl:choose>
           <xsl:when test="node()"><xsl:apply-imports /></xsl:when>

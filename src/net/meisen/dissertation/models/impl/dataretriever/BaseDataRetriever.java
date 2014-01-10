@@ -1,5 +1,6 @@
 package net.meisen.dissertation.models.impl.dataretriever;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -19,7 +20,7 @@ public abstract class BaseDataRetriever {
 	 * The {@code ExceptionRegistry} used to throw exceptions.
 	 */
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	protected IExceptionRegistry exceptionRegistry;
 
 	/**

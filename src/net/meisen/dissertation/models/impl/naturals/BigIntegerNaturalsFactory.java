@@ -6,6 +6,7 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.NaturalsFactoryException;
 import net.meisen.dissertation.models.INaturalsFactory;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -25,7 +26,7 @@ public class BigIntegerNaturalsFactory implements
 			BigInteger.ONE);
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
 	@Override

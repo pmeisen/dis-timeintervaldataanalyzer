@@ -1,5 +1,6 @@
 package net.meisen.dissertation.data.impl.idfactories;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.data.IOrderedIdsFactory;
 import net.meisen.dissertation.exceptions.IdsFactoryException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -24,7 +25,7 @@ public class IntegerIdsFactory implements IOrderedIdsFactory<Integer> {
 	protected static final int FIRST_ID = 1;
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
 	private int nextId = FIRST_ID;

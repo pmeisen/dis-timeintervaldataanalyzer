@@ -1,5 +1,6 @@
 package net.meisen.dissertation.config.xslt;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -25,15 +26,47 @@ import net.meisen.dissertation.data.impl.resources.ResourcesFactory;
  * 
  */
 public class DefaultValues {
-
 	/**
 	 * The name of the module created by the XSLT process, which contains the
-	 * created model.
-	 * 
-	 * @return name of the module created by the XSLT process
+	 * created {@code MetaDataModel}.
 	 */
-	public static String getGeneratedModuleName() {
-		return "metaModelData";
+	public static final String METADATAMODEL_ID = "metaDataModel";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code ResourcesFactory}.
+	 */
+	public static final String RESOURCESFACTORY_ID = "resourcesFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code DescriptorsFactory}.
+	 */
+	public static final String DESCRIPTORSFACTORY_ID = "descriptorsFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code IndexedCollectionFactory}.
+	 */
+	public static final String INDEXFACTORY_ID = "indexFactory";
+	/**
+	 * The name of the module for the exceptionRegistry
+	 */
+	public static final String EXCEPTIONREGISTRY_ID = "exceptionRegistry";
+
+	/**
+	 * Access method to the id via reflection used for XSLT process.
+	 * 
+	 * @param id
+	 *            the id to get the value for
+	 * 
+	 * @return the value of the static field named {@code id} of
+	 *         {@code DefaultValue}
+	 */
+	public static String getId(final String id) {
+		try {
+			final Field idField = DefaultValues.class.getField(id);
+			return (String) idField.get(null);
+		} catch (final Exception e) {
+			return null;
+		}
 	}
 
 	/**

@@ -137,12 +137,12 @@ public class TestXsltTidaModel {
 		final String output = getOutput();
 
 		assertTrue(output, match(output,
-						"<bean id=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" class=\"" + DefaultValues.getDescriptorsFactoryImplementation() + "\">",
+						"<bean id=\"descriptorsFactory\" class=\"" + DefaultValues.getDescriptorsFactoryImplementation() + "\">",
 						"<constructor-arg type=\"" + net.meisen.dissertation.data.IIdsFactory.class.getName() + "\">",
 						"<bean class=\"" + LongIdsFactory.class.getName() + "\"/>",
 						"</constructor-arg>"));
 		assertTrue(output, match(output,
-						"<bean id=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" class=\"my.own.impl.ResourceFactory\">",
+						"<bean id=\"resourcesFactory\" class=\"my.own.impl.ResourceFactory\">",
 						"<constructor-arg type=\"" + net.meisen.dissertation.data.IIdsFactory.class.getName() + "\">",
 						"<bean class=\"" + UuIdsFactory.class.getName() + "\"/>",
 						"</constructor-arg>"));
@@ -168,7 +168,7 @@ public class TestXsltTidaModel {
 
 			// @formatter:off
 			assertTrue(output, match(output,
-							"<bean id=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.ResourceModel\">",
+							"<bean id=\"resourcemodel-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.ResourceModel\">",
 							"<constructor-arg type=\"java.lang.String\">",
 							"<value>" + id + "</value>", "</constructor-arg>"));
 			// @formatter:on
@@ -180,7 +180,7 @@ public class TestXsltTidaModel {
 
 			// @formatter:off
 			assertTrue(output, match(output,
-							"<bean id=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.DescriptorModel\">",
+							"<bean id=\"descriptormodel-" + id + "\" class=\"net.meisen.dissertation.models.impl.data.DescriptorModel\">",
 							"<constructor-arg type=\"java.lang.String\">",
 							"<value>" + id + "</value>", "</constructor-arg>"));
 			// @formatter:on
@@ -206,14 +206,14 @@ public class TestXsltTidaModel {
 
 		// add the db_butRandom
 		// @formatter:off
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_butFixed\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-db_butFixed\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
 		dr.add("<null/>");
 		dr.add("</constructor-arg>");
 		dr.add("</bean>");
 
 		// add the myOwnId
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-myOwnId\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-myOwnId\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
 		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfig.class.getName() + "\" xmlns:fxd=\"http://dev.meisen.net/xsd/dissertation/model/fxd\">");
 		dr.add("<constructor-arg type=\"java.util.Collection\">");
@@ -233,7 +233,7 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 
 		// add the fxd_test
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-fxd_test\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-fxd_test\" class=\"" + FixedStructureDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
 		dr.add("<bean class=\"" + FixedStructureDataRetrieverConfig.class.getName() + "\" xmlns:fxd=\"http://dev.meisen.net/xsd/dissertation/model/fxd\">");
 		dr.add("<constructor-arg type=\"java.util.Collection\">");
@@ -335,7 +335,7 @@ public class TestXsltTidaModel {
 		dr.add("</bean>");
 
 		// add the db_test
-		dr.add("<bean id=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" class=\"" + DbDataRetriever.class.getName() + "\" destroy-method=\"release\">");
+		dr.add("<bean id=\"dataretriever-db_test\" class=\"" + DbDataRetriever.class.getName() + "\" destroy-method=\"release\">");
 		dr.add("<constructor-arg type=\"" + IDataRetrieverConfig.class.getName() + "\">");
 		dr.add("<bean class=\"" + DbConnectionConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
 		dr.add("<property name=\"type\" value=\"jdbc\"/>");
@@ -358,7 +358,7 @@ public class TestXsltTidaModel {
 		// get the lines
 		// @formatter:off
 		final List<String> rl = new ArrayList<String>();
-		rl.add("<bean id=\"resources-\\E[a-z\\-0-9]+\\Q\" class=\"" + MergedCollection.class.getName() + "\">");
+		rl.add("<bean id=\"resources\" class=\"" + MergedCollection.class.getName() + "\">");
 		rl.add("<property name=\"collections\">");
 		rl.add("<list value-type=\"java.util.Collection\">");
 		// @formatter:on
@@ -367,9 +367,9 @@ public class TestXsltTidaModel {
 		// @formatter:off
 		rl.add("<list value-type=\"net.meisen.dissertation.models.impl.data.Resource\">");
 		for (final Entry<String, String> e : expectedResources.entrySet()) {
-			rl.add("<bean factory-bean=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createResource\">");
+			rl.add("<bean factory-bean=\"resourcesFactory\" factory-method=\"createResource\">");
 			rl.add("<constructor-arg type=\"" + ResourceModel.class.getName() + "\">");
-			rl.add("<ref bean=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
+			rl.add("<ref bean=\"resourcemodel-" + e.getKey() + "\"/>");
 			rl.add("</constructor-arg>");
 			rl.add("<constructor-arg type=\"java.lang.String\">");
 			rl.add("<value>" + e.getValue() + "</value>");
@@ -381,9 +381,9 @@ public class TestXsltTidaModel {
 
 		// next the dataRetriever should appear
 		// @formatter:off
-		rl.add("<bean factory-bean=\"resourcesFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createResources\">");
+		rl.add("<bean factory-bean=\"resourcesFactory\" factory-method=\"createResources\">");
 		rl.add("<constructor-arg type=\"" + ResourceModel.class.getName() + "\">");
-		rl.add("<ref bean=\"resourcemodel-\\E[a-z\\-0-9]+\\Q-R2\"/>");
+		rl.add("<ref bean=\"resourcemodel-R2\"/>");
 		rl.add("</constructor-arg>");
 		rl.add("<constructor-arg type=\"java.util.Collection\">");
 		
@@ -391,7 +391,7 @@ public class TestXsltTidaModel {
 		rl.add("<property name=\"targetMethod\" value=\"transform\"/>");
 		rl.add("<property name=\"targetObject\">");
 		
-		rl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-db_test\" factory-method=\"retrieve\">");
+		rl.add("<bean factory-bean=\"dataretriever-db_test\" factory-method=\"retrieve\">");
 		rl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
 		
 		rl.add("<bean class=\"" + DbQueryConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
@@ -430,7 +430,7 @@ public class TestXsltTidaModel {
 		// get the lines
 		final List<String> dl = new ArrayList<String>();
 		// @formatter:off
-		dl.add("<bean id=\"descriptors-\\E[a-z\\-0-9]+\\Q\" class=\"" + MergedCollection.class.getName() + "\">");
+		dl.add("<bean id=\"descriptors\" class=\"" + MergedCollection.class.getName() + "\">");
 		dl.add("<property name=\"collections\">");
 		dl.add("<list value-type=\"java.util.Collection\">");
 		// @formatter:on
@@ -439,9 +439,9 @@ public class TestXsltTidaModel {
 		// @formatter:off
 		dl.add("<list value-type=\"net.meisen.dissertation.models.impl.data.Descriptor\">");
 		for (final Entry<String, String> e : expectedDescriptors.entrySet()) {
-			dl.add("<bean factory-bean=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createDescriptor\">");
+			dl.add("<bean factory-bean=\"descriptorsFactory\" factory-method=\"createDescriptor\">");
 			dl.add("<constructor-arg type=\"" + DescriptorModel.class.getName()	+ "\">");
-			dl.add("<ref bean=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
+			dl.add("<ref bean=\"descriptormodel-" + e.getKey() + "\"/>");
 			dl.add("</constructor-arg>");
 			dl.add("<constructor-arg type=\"java.lang.Object\">");
 			dl.add("<value>" + e.getValue() + "</value>");
@@ -454,9 +454,9 @@ public class TestXsltTidaModel {
 		// next the dataRetriever should appear
 		// @formatter:off
 		for (final Entry<String, String> e : expectedRetrDescriptors.entrySet()) {
-			dl.add("<bean factory-bean=\"descriptorsFactory-\\E[a-z\\-0-9]+\\Q\" factory-method=\"createDescriptors\">");
+			dl.add("<bean factory-bean=\"descriptorsFactory\" factory-method=\"createDescriptors\">");
 			dl.add("<constructor-arg type=\"" + DescriptorModel.class.getName() + "\">");
-			dl.add("<ref bean=\"descriptormodel-\\E[a-z\\-0-9]+\\Q-" + e.getKey() + "\"/>");
+			dl.add("<ref bean=\"descriptormodel-" + e.getKey() + "\"/>");
 			dl.add("</constructor-arg>");
 			dl.add("<constructor-arg type=\"java.util.Collection\">");
 			
@@ -464,7 +464,7 @@ public class TestXsltTidaModel {
 			dl.add("<property name=\"targetMethod\" value=\"transform\"/>");
 			dl.add("<property name=\"targetObject\">");
 			
-			dl.add("<bean factory-bean=\"dataretriever-\\E[a-z\\-0-9]+\\Q-" + e.getValue() + "\" factory-method=\"retrieve\">");
+			dl.add("<bean factory-bean=\"dataretriever-" + e.getValue() + "\" factory-method=\"retrieve\">");
 			dl.add("<constructor-arg type=\"" + IQueryConfiguration.class.getName() + "\">");
 			if (e.getValue().startsWith("db")) {
 				dl.add("<bean class=\"" + DbQueryConfig.class.getName() + "\" xmlns:db=\"http://dev.meisen.net/xsd/dissertation/model/db\" xmlns:dbdef=\"net.meisen.dissertation.data.impl.dataretriever.DbDefaultValues\">");
@@ -510,8 +510,8 @@ public class TestXsltTidaModel {
 				"tidaModelBeans", xml);
 
 		// get the model
-		final MetaDataModel m = moduleHolder.getModule(DefaultValues
-				.getGeneratedModuleName());
+		final MetaDataModel m = moduleHolder
+				.getModule(DefaultValues.METADATAMODEL_ID);
 		assertNotNull(m);
 		assertEquals("myModel", m.getId());
 		assertEquals("My wonderful Model", m.getName());
@@ -575,8 +575,8 @@ public class TestXsltTidaModel {
 				"tidaModelBeans", xml);
 
 		// get the model
-		final MetaDataModel m = moduleHolder.getModule(DefaultValues
-				.getGeneratedModuleName());
+		final MetaDataModel m = moduleHolder
+				.getModule(DefaultValues.METADATAMODEL_ID);
 		assertNotNull(m);
 		assertEquals("modelWithExternalSources", m.getId());
 		assertEquals("modelWithExternalSources", m.getName());

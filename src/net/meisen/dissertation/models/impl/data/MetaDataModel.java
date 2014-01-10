@@ -3,6 +3,7 @@ package net.meisen.dissertation.models.impl.data;
 import java.util.Collection;
 import java.util.UUID;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory;
 import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.data.impl.resources.ResourcesFactory;
@@ -18,81 +19,102 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class MetaDataModel {
 
 	@Autowired
-	@Qualifier("exceptionRegistry")
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
-	private final IMultipleKeySupport resources;
-	private final IMultipleKeySupport descriptors;
+	@Autowired(required = false)
+	private Collection<MetaData> metaData;
 
-	private final IIndexedCollection resourceModels;
-	private final IIndexedCollection descriptorModels;
+	@Autowired
+	@Qualifier(DefaultValues.RESOURCESFACTORY_ID)
+	private final ResourcesFactory resourcesFactory;
 
-	private final ResourcesFactory resourceFactory;
-	private final DescriptorsFactory descriptorFactory;
+	@Autowired
+	@Qualifier(DefaultValues.DESCRIPTORSFACTORY_ID)
+	private final DescriptorsFactory descriptorsFactory;
 
+	@Autowired
+	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private final IndexedCollectionFactory indexedCollectionFactory;
 
 	private final String id;
 	private final String name;
 
-	public MetaDataModel(final Collection<ResourceModel> resourceModels,
-			final Collection<DescriptorModel> descriptorModels,
-			final ResourcesFactory resourceFactory,
+	private IMultipleKeySupport resources;
+	private IMultipleKeySupport descriptors;
+
+	private IIndexedCollection resourceModels;
+	private IIndexedCollection descriptorModels;
+
+	public MetaDataModel() {
+		this(null, null, null, null, null);
+	}
+
+	public MetaDataModel(final String id) {
+		this(id, null, null, null, null);
+	}
+
+	public MetaDataModel(final String id, final String name) {
+		this(id, name, null, null, null);
+	}
+
+	public MetaDataModel(final ResourcesFactory resourceFactory,
 			final DescriptorsFactory descriptorFactory,
 			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(null, resourceModels, descriptorModels, resourceFactory,
-				descriptorFactory, indexedCollectionFactory);
+		this(null, null, resourceFactory, descriptorFactory,
+				indexedCollectionFactory);
 	}
 
 	public MetaDataModel(final String id,
-			final Collection<ResourceModel> resourceModels,
-			final Collection<DescriptorModel> descriptorModels,
 			final ResourcesFactory resourceFactory,
 			final DescriptorsFactory descriptorFactory,
 			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(id, null, resourceModels, descriptorModels, resourceFactory,
-				descriptorFactory, indexedCollectionFactory);
+		this(id, null, resourceFactory, descriptorFactory,
+				indexedCollectionFactory);
 	}
 
 	public MetaDataModel(final String id, final String name,
-			final Collection<ResourceModel> resourceModels,
-			final Collection<DescriptorModel> descriptorModels,
 			final ResourcesFactory resourceFactory,
 			final DescriptorsFactory descriptorFactory,
 			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(id, name, resourceModels, descriptorModels, resourceFactory,
-				descriptorFactory, indexedCollectionFactory, null, null);
-	}
-
-	public MetaDataModel(final String id, final String name,
-			final Collection<ResourceModel> resourceModels,
-			final Collection<DescriptorModel> descriptorModels,
-			final ResourcesFactory resourceFactory,
-			final DescriptorsFactory descriptorFactory,
-			final IndexedCollectionFactory indexedCollectionFactory,
-			final Collection<Resource<?>> resources,
-			final Collection<Descriptor<?, ?, ?>> descriptors) {
-
-		// make sure all the passed parameters are correct
-		if (resourceFactory == null) {
-			throw new NullPointerException(
-					"The resourceFactory of a MetaDataModel cannot be null.");
-		} else if (descriptorFactory == null) {
-			throw new NullPointerException(
-					"The descriptorFactory of a MetaDataModel cannot be null.");
-		} else if (indexedCollectionFactory == null) {
-			throw new NullPointerException(
-					"The indexedCollectionFactory of a MetaDataModel cannot be null.");
-		}
 
 		// set id and name
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
 
 		// set the factories
-		this.resourceFactory = resourceFactory;
-		this.descriptorFactory = descriptorFactory;
+		this.resourcesFactory = resourceFactory;
+		this.descriptorsFactory = descriptorFactory;
 		this.indexedCollectionFactory = indexedCollectionFactory;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Initializes any auto-wired {@code MetaData} and validates other
+	 * auto-wired fields.
+	 */
+	public void init() {
+
+		if (exceptionRegistry == null) {
+			throw new NullPointerException(
+					"The exceptionRegistry of a MetaDataModel cannot be null!");
+		} else if (indexedCollectionFactory == null) {
+			throw new NullPointerException(
+					"The indexedCollectionFactory of a MetaDataModel cannot be null!");
+		} else if (resourcesFactory == null) {
+			throw new NullPointerException(
+					"The resourcesFactory of a MetaDataModel cannot be null!");
+		} else if (descriptorsFactory == null) {
+			throw new NullPointerException(
+					"The descriptorsFactory of a MetaDataModel cannot be null!");
+		}
 
 		// get the indexes, use the factory to decide which one is best
 		this.resourceModels = indexedCollectionFactory
@@ -104,7 +126,7 @@ public class MetaDataModel {
 				Resource.class, "getId");
 		final IndexKeyDefinition uniqueResDef = new IndexKeyDefinition(
 				Resource.class, "getModelId", "getValue");
-		resIdDef.overrideType(0, this.resourceFactory.getIdClass());
+		resIdDef.overrideType(0, this.resourcesFactory.getIdClass());
 		this.resources = indexedCollectionFactory
 				.create(resIdDef, uniqueResDef);
 
@@ -112,25 +134,19 @@ public class MetaDataModel {
 				Descriptor.class, "getId");
 		final IndexKeyDefinition uniqueDesDef = new IndexKeyDefinition(
 				Descriptor.class, "getModelId", "getValue");
-		desIdDef.overrideType(0, this.descriptorFactory.getIdClass());
+		desIdDef.overrideType(0, this.descriptorsFactory.getIdClass());
 		this.descriptors = indexedCollectionFactory.create(desIdDef,
 				uniqueDesDef);
 
-		// add all the models
-		addResourceModels(resourceModels);
-		addDescriptorModels(descriptorModels);
-
-		// add the specified stuff now
-		addResources(resources);
-		addDescriptors(descriptors);
-	}
-
-	public String getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
+		// add all the data from the defined metaData
+		if (metaData != null && metaData.size() > 0) {
+			for (final MetaData md : metaData) {
+				addResourceModels(md.getResourceModels());
+				addDescriptorModels(md.getDescriptorModels());
+				addResources(md.getResources());
+				addDescriptors(md.getDescriptors());
+			}
+		}
 	}
 
 	protected ResourceModel getResourceModel(final String id) {
@@ -202,7 +218,7 @@ public class MetaDataModel {
 		}
 
 		// create the resource and add it
-		final Resource<?> resource = resourceFactory.createResource(model,
+		final Resource<?> resource = resourcesFactory.createResource(model,
 				value);
 		this.addResource(resource);
 
@@ -228,7 +244,7 @@ public class MetaDataModel {
 		}
 
 		// create the descriptor and add it
-		final Descriptor<?, ?, ?> descriptor = descriptorFactory
+		final Descriptor<?, ?, ?> descriptor = descriptorsFactory
 				.createDescriptor(model, value);
 		this.addDescriptor(descriptor);
 
@@ -252,6 +268,7 @@ public class MetaDataModel {
 
 	protected void addDescriptors(
 			final Collection<Descriptor<?, ?, ?>> descriptors) {
+
 		if (descriptors != null) {
 			for (final Descriptor<?, ?, ?> descriptor : descriptors) {
 				addDescriptor(descriptor);
@@ -286,10 +303,12 @@ public class MetaDataModel {
 		return (Resource<I>) resources.getObject(id);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Resource<?>> getResources() {
 		return (Collection<Resource<?>>) resources.getAll();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Collection<Descriptor<?, ?, ?>> getDescriptors() {
 		return (Collection<Descriptor<?, ?, ?>>) descriptors.getAll();
 	}

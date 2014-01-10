@@ -10,10 +10,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
-import net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory;
 import net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor;
-import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
-import net.meisen.dissertation.data.impl.resources.ResourcesFactory;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -42,14 +39,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextFile("test-sbconfigurator-core.xml")
 @SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/models/impl/data/testMetaDataModel.xml")
 public class TestMetaDataModel {
-
-	@Autowired(required = true)
-	@Qualifier("descriptorsFactory")
-	private DescriptorsFactory descriptorsFactory;
-
-	@Autowired(required = true)
-	@Qualifier("resourcesFactory")
-	private ResourcesFactory resourcesFactory;
 
 	@Autowired(required = true)
 	@Qualifier("resourceModels")
@@ -82,15 +71,28 @@ public class TestMetaDataModel {
 	}
 
 	/**
+	 * Helper method for the test to create a {@code MetaDataModel}.
+	 * 
+	 * @return an instance of a {@code MetaDataModel} used for testing purposes
+	 */
+	protected MetaDataModel createTestModel() {
+		final MetaDataModel model = new MetaDataModel();
+		configuration.wireInstance(model);
+		model.init();
+
+		model.addResourceModels(resourceModels);
+		model.addDescriptorModels(descriptorModels);
+
+		return model;
+	}
+
+	/**
 	 * Tests the creation of a {@code MetaDataModel}.
 	 */
 	@Test
 	public void testMetaModelCreation() {
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
-		
+		final MetaDataModel model = createTestModel();
+
 		// check the available resources and descriptors
 		assertEquals(0, model.getResources().size());
 		assertEquals(0, model.getDescriptors().size());
@@ -122,10 +124,7 @@ public class TestMetaDataModel {
 	 */
 	@Test
 	public void testResourceCreation() {
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource
 		assertEquals(0, model.getResources().size());
@@ -140,10 +139,7 @@ public class TestMetaDataModel {
 	 */
 	@Test
 	public void testDescriptorCreation() {
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource
 		final UUID uuid = UUID.randomUUID();
@@ -164,10 +160,7 @@ public class TestMetaDataModel {
 	 */
 	@Test
 	public void testDescriptorRetrieval() {
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		final UUID uuid = UUID.randomUUID();
 		final Descriptor<?, ?, ?> descriptor = model.createDescriptor("ID2",
@@ -187,10 +180,7 @@ public class TestMetaDataModel {
 	 */
 	@Test
 	public void testResourceRetrieval() {
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		final Resource<?> resource = model.createResource("ID1", "someName");
 		assertEquals("ID1", resource.getModelId());
@@ -212,10 +202,7 @@ public class TestMetaDataModel {
 		thrown.expectMessage(JUnitMatchers
 				.containsString("A ResourceModel cannot be null"));
 
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 		model.addResourceModel(null);
 	}
 
@@ -229,10 +216,7 @@ public class TestMetaDataModel {
 		thrown.expectMessage(JUnitMatchers
 				.containsString("A ResourceModel with id 'ID1' already exists"));
 
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		final ResourceModel resourceModel = new ResourceModel("ID1");
 		model.addResourceModel(resourceModel);
@@ -248,10 +232,7 @@ public class TestMetaDataModel {
 		thrown.expectMessage(JUnitMatchers
 				.containsString("A DescriptorModel cannot be null"));
 
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 		model.addDescriptorModel(null);
 	}
 
@@ -265,10 +246,7 @@ public class TestMetaDataModel {
 		thrown.expectMessage(JUnitMatchers
 				.containsString("A DescriptorModel with id 'ID2' already exists"));
 
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		final DescriptorModel descriptorModel = new DescriptorModel("ID2",
 				String.class);
@@ -286,10 +264,7 @@ public class TestMetaDataModel {
 				.containsString("Unable to find a model with id 'IDONTEXIST'"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createResource("IDONTEXIST", "My New ID3");
@@ -305,10 +280,7 @@ public class TestMetaDataModel {
 				.containsString("ResourceModel cannot be null"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createResource((ResourceModel) null, "My New ID3");
@@ -324,10 +296,7 @@ public class TestMetaDataModel {
 				.containsString("resource 'My New ID3' already exists in the model 'ID1'"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createResource("ID1", "My New ID3");
@@ -346,10 +315,7 @@ public class TestMetaDataModel {
 				.containsString("Unable to find a model with id 'IDONTEXIST'"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createDescriptor("IDONTEXIST", "My New ID3");
@@ -365,10 +331,7 @@ public class TestMetaDataModel {
 				.containsString("DescriptorModel cannot be null"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createDescriptor((DescriptorModel) null, "My New ID3");
@@ -384,10 +347,7 @@ public class TestMetaDataModel {
 				.containsString("descriptor 'My New ID3' already exists in the model 'ID1'"));
 
 		// get the model
-		final MetaDataModel model = new MetaDataModel(resourceModels,
-				descriptorModels, resourcesFactory, descriptorsFactory,
-				new IndexedCollectionFactory());
-		configuration.wireInstance(model);
+		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
 		model.createDescriptor("ID1", "My New ID3");

@@ -23,6 +23,8 @@
     </constructor-arg>
   </bean>
   
+  <bean id="indexFactory" class="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
+  
   <bean id="resourceModels" class="java.util.ArrayList">
     <constructor-arg>
       <list value-type="net.meisen.dissertation.models.impl.data.ResourceModel">
