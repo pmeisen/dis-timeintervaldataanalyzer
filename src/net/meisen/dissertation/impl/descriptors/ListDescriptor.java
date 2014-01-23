@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 /**
  * Simple test-{@code Descriptor} to handle {@code List} instances.

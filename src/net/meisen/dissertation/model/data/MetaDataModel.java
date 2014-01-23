@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
@@ -76,9 +78,9 @@ public class MetaDataModel {
 
 	/**
 	 * Creates a {@code MetaDataModel} with a random id and the specified
-	 * {@code baseIndexedCollectionFactory}, which should not be {@code null}. If
-	 * the {@code baseIndexedCollectionFactory} should be {@code null} use another
-	 * constructor and read it's information.
+	 * {@code baseIndexedCollectionFactory}, which should not be {@code null}.
+	 * If the {@code baseIndexedCollectionFactory} should be {@code null} use
+	 * another constructor and read it's information.
 	 * 
 	 * @param baseIndexedCollectionFactory
 	 *            the {@code BaseIndexedCollectionFactory} used to determine the
@@ -86,16 +88,17 @@ public class MetaDataModel {
 	 * 
 	 * @see BaseIndexedCollectionFactory
 	 */
-	public MetaDataModel(final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+	public MetaDataModel(
+			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
 		this(null, null, baseIndexedCollectionFactory);
 	}
 
 	/**
 	 * Creates a {@code MetaDataModel} with the specified {@code id}, the
-	 * specified {@code name} and the specified {@code baseIndexedCollectionFactory}
-	 * , which should not be {@code null}. If the
-	 * {@code baseIndexedCollectionFactory} should be {@code null} use another
-	 * constructor and read it's information.
+	 * specified {@code name} and the specified
+	 * {@code baseIndexedCollectionFactory} , which should not be {@code null}.
+	 * If the {@code baseIndexedCollectionFactory} should be {@code null} use
+	 * another constructor and read it's information.
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
@@ -167,18 +170,15 @@ public class MetaDataModel {
 	 * 
 	 * @return the created {@code Descriptor}
 	 */
-	public <D, T extends Descriptor<D, T, ?>> Descriptor<D, T, ?> createDescriptor(
-			final String modelId, final D value) {
+	public <D> Descriptor<D, ?, ?> createDescriptor(final String modelId,
+			final D value) {
 		final DescriptorModel<?> model = getDescriptorModel(modelId);
 		if (model == null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
 					1002, modelId);
 		}
 
-		@SuppressWarnings("unchecked")
-		final Descriptor<D, T, ?> descriptor = (Descriptor<D, T, ?>) model
-				.createDescriptor(value);
-		return descriptor;
+		return model.createDescriptor(value);
 	}
 
 	/**
@@ -382,8 +382,8 @@ public class MetaDataModel {
 	/**
 	 * Gets the {@code Index} used to index the different
 	 * {@code DescriptorModel} instances. This method never returns {@code null}
-	 * , but throws an exception if the {@code baseIndexedCollectionFactory} isn't
-	 * defined by wiring or construction.
+	 * , but throws an exception if the {@code baseIndexedCollectionFactory} 
+	 * isn't defined by wiring or construction.
 	 * 
 	 * @return the {@code Index} used to index the different
 	 *         {@code DescriptorModel} instances

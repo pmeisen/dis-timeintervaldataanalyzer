@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 import org.junit.Test;
 

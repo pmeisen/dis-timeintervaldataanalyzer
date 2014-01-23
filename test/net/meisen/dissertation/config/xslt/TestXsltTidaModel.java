@@ -28,9 +28,9 @@ import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
@@ -298,7 +298,7 @@ public class TestXsltTidaModel {
 	public void testFullModelDataFromExternalCreation() throws IOException {
 
 		// we need a running database now
-		getDb("/net/meisen/dissertation/data/impl/hsqldbs/tidaTestData.zip");
+		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 
 		// get the model
 		final MetaDataModel m = getModel(pathToFMDFE);

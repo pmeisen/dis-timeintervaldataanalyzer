@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/data/impl/idfactories/testIdFactories.xml")
+@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/impl/idfactories/testIdFactories.xml")
 public class TestLongIdsFactory {
 
 	@Autowired(required = true)

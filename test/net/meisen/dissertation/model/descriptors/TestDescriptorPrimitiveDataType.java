@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -6,7 +6,7 @@ import static org.junit.Assert.assertNull;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import net.meisen.dissertation.model.data.mock.MockDescriptorPrimitiveDataType;
+import net.meisen.dissertation.model.descriptors.mock.MockDescriptorPrimitiveDataType;
 
 import org.junit.Test;
 

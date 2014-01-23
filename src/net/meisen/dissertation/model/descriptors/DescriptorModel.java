@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -188,8 +188,7 @@ public class DescriptorModel<I extends Object> {
 	 * 
 	 * @see Descriptor
 	 */
-	public <D, T extends Descriptor<D, T, I>> Descriptor<D, T, I> createDescriptor(
-			final D value) {
+	public <D> Descriptor<D, ?, I> createDescriptor(final D value) {
 		final Class<?> valueType = value.getClass();
 
 		// get the constructor
@@ -209,7 +208,7 @@ public class DescriptorModel<I extends Object> {
 		addDescriptor(descriptor);
 
 		@SuppressWarnings("unchecked")
-		final Descriptor<D, T, I> typedDescriptor = (Descriptor<D, T, I>) descriptor;
+		final Descriptor<D, ?, I> typedDescriptor = (Descriptor<D, ?, I>) descriptor;
 		return typedDescriptor;
 	}
 

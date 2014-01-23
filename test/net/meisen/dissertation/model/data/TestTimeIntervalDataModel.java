@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/models/impl/data/testTimeIntervalDataModel.xml")
+@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/model/data/testTimeIntervalDataModel.xml")
 public class TestTimeIntervalDataModel {
 
 	

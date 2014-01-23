@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import net.meisen.general.genmisc.types.Objects;
 

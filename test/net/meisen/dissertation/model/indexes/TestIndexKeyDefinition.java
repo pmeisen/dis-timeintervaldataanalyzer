@@ -12,8 +12,8 @@ import net.meisen.dissertation.impl.indexes.keys.WrappedObjectIndexKey;
 import net.meisen.dissertation.impl.indexes.mock.ConcreteValueCreator;
 import net.meisen.dissertation.impl.indexes.mock.GenericValueCreator;
 import net.meisen.dissertation.impl.indexes.mock.OverrideValueCreator;
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.mock.ToIntIdResolver;
 

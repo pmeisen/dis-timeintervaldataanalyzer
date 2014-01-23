@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.descriptors;
 
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 /**
  * A {@code ResourceDescriptor} is something which is consumed by an interval,

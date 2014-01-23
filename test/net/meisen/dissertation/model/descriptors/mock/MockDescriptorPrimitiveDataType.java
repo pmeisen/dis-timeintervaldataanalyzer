@@ -1,12 +1,12 @@
-package net.meisen.dissertation.model.data.mock;
+package net.meisen.dissertation.model.descriptors.mock;
 
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
-import net.meisen.dissertation.model.data.DescriptorPrimitiveDataType;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
 
 /**
  * Mock to test the implementation of a {@code DescriptorPrimitiveDataType}.

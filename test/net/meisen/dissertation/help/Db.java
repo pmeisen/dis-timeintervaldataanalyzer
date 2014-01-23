@@ -422,7 +422,7 @@ public class Db {
 		}
 
 		final File dbLoc = new File(
-				"test/net/meisen/dissertation/data/impl/hsqldbs");
+				"test/net/meisen/dissertation/impl/hsqldbs");
 
 		System.out.println("Going to start the following databases:");
 		for (final String arg : dbs) {

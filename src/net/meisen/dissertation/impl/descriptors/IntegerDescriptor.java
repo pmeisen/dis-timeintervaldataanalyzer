@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.descriptors;
 
-import net.meisen.dissertation.model.data.DescriptorModel;
-import net.meisen.dissertation.model.data.DescriptorPrimitiveDataType;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
 
 /**
  * A {@code Descriptor} defined by a {@code Integer} value.

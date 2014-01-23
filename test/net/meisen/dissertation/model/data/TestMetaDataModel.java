@@ -15,9 +15,9 @@ import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -46,7 +46,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextFile("test-sbconfigurator-core.xml")
 @SystemProperty(property = "testBeans.selector", value = "?")
 public class TestMetaDataModel {
-	private final static String testXmlModel = "/net/meisen/dissertation/models/impl/data/testMetaDataModel.xml";
+	private final static String testXmlModel = "/net/meisen/dissertation/model/data/testMetaDataModel.xml";
 
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")

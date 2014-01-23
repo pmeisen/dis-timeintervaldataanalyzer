@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

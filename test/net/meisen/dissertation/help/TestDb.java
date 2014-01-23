@@ -79,7 +79,7 @@ public class TestDb {
 	@Test
 	public void testSqlQuery() throws SQLException, IOException {
 		db.addDb("tidaTestData",
-				"/net/meisen/dissertation/data/impl/hsqldbs/tidaTestData.zip");
+				"/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 		db.setUpDb();
 
 		final List<Map<String, Object>> data = db.query("tidaTestData",

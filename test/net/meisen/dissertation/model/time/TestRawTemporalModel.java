@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/models/impl/time/testRawTemporalModel.xml")
+@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/model/time/testRawTemporalModel.xml")
 public class TestRawTemporalModel {
 
 	@Autowired(required = true)

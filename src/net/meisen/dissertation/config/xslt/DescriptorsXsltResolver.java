@@ -1,6 +1,6 @@
 package net.meisen.dissertation.config.xslt;
 
-import net.meisen.dissertation.model.data.Descriptor;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.general.sbconfigurator.config.transformer.XsltImportResolver;
 
 /**

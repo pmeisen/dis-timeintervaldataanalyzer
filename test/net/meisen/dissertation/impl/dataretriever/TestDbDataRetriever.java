@@ -124,7 +124,7 @@ public class TestDbDataRetriever {
 	public static void init() throws IOException {
 		// start the test database
 		db.addDb("tidaTestData",
-				"/net/meisen/dissertation/data/impl/hsqldbs/tidaTestData.zip");
+				"/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 		db.setUpDb();
 	}
 

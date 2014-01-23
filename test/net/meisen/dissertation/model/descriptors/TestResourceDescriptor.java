@@ -1,11 +1,11 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.data;
+package net.meisen.dissertation.model.descriptors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,8 +17,8 @@ import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.MultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
-import net.meisen.dissertation.model.data.Descriptor;
-import net.meisen.dissertation.model.data.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -44,7 +44,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/models/impl/data/testDescriptorModel.xml")
+@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/model/descriptors/testDescriptorModel.xml")
 public class TestDescriptorModel {
 
 	@Autowired(required = true)

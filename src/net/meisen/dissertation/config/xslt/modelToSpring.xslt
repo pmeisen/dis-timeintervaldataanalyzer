@@ -72,7 +72,7 @@
         <property name="collections">
           <list value-type="java.util.Collection">
             
-            <list value-type="net.meisen.dissertation.model.data.Descriptor">
+            <list value-type="net.meisen.dissertation.model.descriptors.Descriptor">
               <xsl:for-each select="mns:meta/mns:entries/mns:entry[@value]">
                 <xsl:variable name="descriptorValue" select="@value" />
                 <xsl:variable name="descriptorModel" select="@descriptor" />
@@ -125,7 +125,7 @@
         <property name="type" value="init" />
         
         <property name="arguments">
-          <list value-type="net.meisen.dissertation.model.data.DescriptorModel">
+          <list value-type="net.meisen.dissertation.model.descriptors.DescriptorModel">
             <xsl:for-each select="mns:meta/mns:descriptors/*">
               <xsl:variable name="id" select="@id" />
               <ref bean="descriptormodel-{$id}" />
@@ -156,7 +156,7 @@
       </xsl:choose>
     </xsl:variable>
     
-    <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.model.data.DescriptorModel">
+    <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.model.descriptors.DescriptorModel">
       <constructor-arg type="java.lang.String" value="{$id}" />
       <constructor-arg type="java.lang.String" value="{$name}" />
       <constructor-arg type="java.lang.Class" value="{$class}" />
