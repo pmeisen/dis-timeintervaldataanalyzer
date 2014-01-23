@@ -1,6 +1,7 @@
 package net.meisen.dissertation.data.impl.descriptors;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.models.impl.data.Descriptor;
@@ -27,12 +28,12 @@ public class ListDescriptor<I extends Object> extends
 	 * @param id
 	 *            the identifier of the {@code Descriptor}
 	 */
-	public ListDescriptor(final DescriptorModel model, final I id) {
-		this(model, id, null);
+	public ListDescriptor(final DescriptorModel<I> model, final I id) {
+		this(model, id, (String) null);
 	}
 
 	/**
-	 * Constructor with value assignment.
+	 * Constructor with {@code String}-value assignment.
 	 * 
 	 * @param model
 	 *            the {@code DescriptorModel} of the {@code Descriptor}
@@ -41,15 +42,42 @@ public class ListDescriptor<I extends Object> extends
 	 * @param value
 	 *            the value to be assigned
 	 */
-	public ListDescriptor(final DescriptorModel model, final I id,
+	public ListDescriptor(final DescriptorModel<I> model, final I id,
 			final String value) {
+		this(model, id, value == null ? new String[] {} : value.split(","));
+	}
+
+	/**
+	 * Constructor with {@code Collection}-value assignment.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} of the {@code Descriptor}
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 * @param value
+	 *            the value to be assigned
+	 */
+	public ListDescriptor(final DescriptorModel<I> model, final I id,
+			final Collection<String> value) {
+		this(model, id, value == null ? new String[] {} : value
+				.toArray(new String[] {}));
+	}
+
+	/**
+	 * Constructor with {@code String-Array}-value assignment.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} of the {@code Descriptor}
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 * @param value
+	 *            the value to be assigned
+	 */
+	public ListDescriptor(final DescriptorModel<I> model, final I id,
+			final String[] value) {
 		super(model, id);
 
-		if (value == null) {
-			values = new String[] {};
-		} else {
-			values = value.split(",");
-		}
+		this.values = value;
 	}
 
 	/**

@@ -3,26 +3,74 @@ package net.meisen.dissertation.data.impl.descriptors;
 import net.meisen.dissertation.models.impl.data.DescriptorModel;
 import net.meisen.dissertation.models.impl.data.DescriptorPrimitiveDataType;
 
+/**
+ * A {@code Descriptor} defined by a {@code Integer} value.
+ * 
+ * @author pmeisen
+ * 
+ * @param <I>
+ *            the type of the identifier of the index used for the
+ *            {@code Descriptor}
+ */
 public class IntegerDescriptor<I extends Object> extends
 		DescriptorPrimitiveDataType<Integer, IntegerDescriptor<I>, I> {
 	private int value;
 
-	public IntegerDescriptor(final DescriptorModel model, final I id) {
+	/**
+	 * A constructor which creates a {@code 0}-{@code Integer} descriptor.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} the {@code Descriptor} belongs to
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 */
+	public IntegerDescriptor(final DescriptorModel<I> model, final I id) {
 		this(model, id, 0);
 	}
 
-	public IntegerDescriptor(final DescriptorModel model, final I id,
+	/**
+	 * A constructor which creates a {@code value}-{@code Integer} descriptor.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} the {@code Descriptor} belongs to
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 * @param value
+	 *            the string which specifies the integer-value of the descriptor
+	 */
+	public IntegerDescriptor(final DescriptorModel<I> model, final I id,
 			final String value) {
 		this(model, id, Integer.parseInt(value));
 	}
 
-	public IntegerDescriptor(final DescriptorModel model, final I id,
+	/**
+	 * A constructor which creates a {@code value}-{@code Integer} descriptor.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} the {@code Descriptor} belongs to
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 * @param value
+	 *            the integer which specifies the integer-value of the
+	 *            descriptor
+	 */
+	public IntegerDescriptor(final DescriptorModel<I> model, final I id,
 			final Integer value) {
 		super(model, id);
 		this.value = value;
 	}
-	
-	public IntegerDescriptor(final DescriptorModel model, final I id,
+
+	/**
+	 * A constructor which creates a {@code value}-{@code Integer} descriptor.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} the {@code Descriptor} belongs to
+	 * @param id
+	 *            the identifier of the {@code Descriptor}
+	 * @param value
+	 *            the number which specifies the integer-value of the descriptor
+	 */
+	public IntegerDescriptor(final DescriptorModel<I> model, final I id,
 			final Number value) {
 		super(model, id);
 		this.value = mapToDataType(value);

@@ -27,7 +27,7 @@ public class ResourceDescriptor<I extends Object> extends
 	 * @param value
 	 *            the value of the {@code ResourceDescriptor}
 	 */
-	public ResourceDescriptor(final DescriptorModel model, final I id,
+	public ResourceDescriptor(final DescriptorModel<I> model, final I id,
 			final String value) {
 		super(model, id);
 
