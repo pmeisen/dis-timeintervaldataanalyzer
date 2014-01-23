@@ -10,14 +10,9 @@ import java.util.Map.Entry;
 import net.meisen.dissertation.data.IIdsFactory;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever;
-import net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory;
-import net.meisen.dissertation.data.impl.descriptors.DoubleDescriptor;
-import net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor;
-import net.meisen.dissertation.data.impl.descriptors.IntegerDescriptor;
-import net.meisen.dissertation.data.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
-import net.meisen.dissertation.data.impl.resources.ResourcesFactory;
+import net.meisen.general.sbconfigurator.api.IConfiguration;
 
 /**
  * This class presents the default values used within the XSLT process.
@@ -33,23 +28,13 @@ public class DefaultValues {
 	public static final String METADATAMODEL_ID = "metaDataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
-	 * created {@code ResourcesFactory}.
-	 */
-	public static final String RESOURCESFACTORY_ID = "resourcesFactory";
-	/**
-	 * The name of the module created by the XSLT process, which contains the
-	 * created {@code DescriptorsFactory}.
-	 */
-	public static final String DESCRIPTORSFACTORY_ID = "descriptorsFactory";
-	/**
-	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IndexedCollectionFactory}.
 	 */
 	public static final String INDEXFACTORY_ID = "indexFactory";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
-	public static final String EXCEPTIONREGISTRY_ID = "exceptionRegistry";
+	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;
 
 	/**
 	 * Access method to the id via reflection used for XSLT process.
@@ -79,62 +64,14 @@ public class DefaultValues {
 	}
 
 	/**
-	 * Gets the default {@code ResourcesFactory} to be used.
-	 * 
-	 * @return the class of the default {@code ResourcesFactory}
-	 */
-	public static String getResourcesFactoryImplementation() {
-		return ResourcesFactory.class.getName();
-	}
-
-	/**
-	 * Gets the default {@code DescriptorsFactory} to be used.
-	 * 
-	 * @return the class of the default {@code DescriptorsFactory}
-	 */
-	public static String getDescriptorsFactoryImplementation() {
-		return DescriptorsFactory.class.getName();
-	}
-
-	/**
-	 * Gets the class of the {@code IdFactory} to be used for the resources.
-	 * 
-	 * @return the class of the {@code IdFactory} to be used for the resources
-	 * 
-	 * @see IIdsFactory
-	 */
-	public static String getResourcesFactoryIdFactory() {
-		return IntegerIdsFactory.class.getName();
-	}
-
-	/**
 	 * Gets the class of the {@code IdFactory} to be used for the descriptors.
 	 * 
 	 * @return the class of the {@code IdFactory} to be used for the descriptors
 	 * 
 	 * @see IIdsFactory
 	 */
-	public static String getDescriptorsFactoryIdFactory() {
+	public static String getDefaultIdFactory() {
 		return IntegerIdsFactory.class.getName();
-	}
-
-	/**
-	 * Get the default descriptors to be used, i.e. the map maps a class of a
-	 * descriptor to the concrete {@code Descriptor} implementation.
-	 * 
-	 * @return the mappings between a class and a concrete {@code Descriptor}
-	 *         representation
-	 */
-	public static Map<String, String> getDescriptors() {
-		final Map<String, String> d = new LinkedHashMap<String, String>();
-
-		// add the default mappings
-		d.put(Double.class.getName(), DoubleDescriptor.class.getName());
-		d.put(Long.class.getName(), LongDescriptor.class.getName());
-		d.put(Integer.class.getName(), IntegerDescriptor.class.getName());
-		d.put(Object.class.getName(), GeneralDescriptor.class.getName());
-
-		return d;
 	}
 
 	/**
@@ -148,7 +85,7 @@ public class DefaultValues {
 	 *         also {@code null} if no default is known for the specified
 	 *         {@code id}
 	 */
-	public static String getDefaultDataRetrieverImplementation(final String id) {
+	public static String getDefaultDataRetriever(final String id) {
 
 		// check if an id starts with the specified value
 		if (id != null) {

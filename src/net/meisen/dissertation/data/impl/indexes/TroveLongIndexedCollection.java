@@ -79,4 +79,9 @@ public class TroveLongIndexedCollection extends IndexedCollection {
 	public Collection<Object> getAll() {
 		return Arrays.asList(troveMap.values());
 	}
+	
+	@Override
+	public int size() {
+		return troveMap.size();
+	}
 }

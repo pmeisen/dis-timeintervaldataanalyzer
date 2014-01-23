@@ -5,6 +5,7 @@
        					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
 
   <import resource="classpath:/net/meisen/general/server/sbconfigurator-core.xml" />
+  <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-exceptions.xml" />
   <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-loader.xml" />
   <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-misc.xml" />
   

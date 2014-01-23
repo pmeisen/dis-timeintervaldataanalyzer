@@ -80,4 +80,9 @@ public class FastUtilIntIndexedCollection extends IndexedCollection {
 	public Collection<Object> getAll() {
 		return fastUtilMap.values();
 	}
+
+	@Override
+	public int size() {
+		return fastUtilMap.size();
+	}
 }

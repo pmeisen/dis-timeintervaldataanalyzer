@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.UUID;
 
+import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.models.impl.data.DescriptorModel;
 
 import org.junit.Test;
@@ -54,7 +55,8 @@ public class TestDoubleDescriptor {
 		final DoubleDescriptor<Integer> d2 = new DoubleDescriptor<Integer>(
 				null, 3, 5.0);
 
-		final DescriptorModel model = new DescriptorModel("myId", Double.class);
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"myId", DoubleDescriptor.class, new IntegerIdsFactory());
 		final DoubleDescriptor<Integer> d3 = new DoubleDescriptor<Integer>(
 				model, 3, 5.0);
 		final DoubleDescriptor<Integer> d4 = new DoubleDescriptor<Integer>(

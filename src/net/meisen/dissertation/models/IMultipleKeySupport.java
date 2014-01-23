@@ -1,6 +1,6 @@
 package net.meisen.dissertation.models;
 
-
+import net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition;
 
 /**
  * This interface describes the property of an {@code IndexedCollection}, which
@@ -12,6 +12,22 @@ package net.meisen.dissertation.models;
  * 
  */
 public interface IMultipleKeySupport extends IIndexedCollection {
-	// nothing special to be added, but the constructor has to support multiple
-	// IndexKeyDefinitions
+
+	/**
+	 * Uses a specific {@code IndexKeyDefinition} to get the object for a
+	 * specified key.
+	 * 
+	 * @param keyDefNr
+	 *            the number of the {@code IndexKeyDefinition} to be used
+	 * @param values
+	 *            the values to retrieve the object for
+	 * 
+	 * @return the {@code Object} associated to the specified keys
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the key doesn't fit
+	 * 
+	 * @see IndexKeyDefinition
+	 */
+	public Object getObjectByDefNr(final int keyDefNr, final Object... values);
 }

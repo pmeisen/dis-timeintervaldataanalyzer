@@ -1,4 +1,4 @@
-package net.meisen.dissertation.config.xslt.mock;
+package net.meisen.dissertation.data.impl.descriptors;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,8 +14,8 @@ import net.meisen.dissertation.models.impl.data.DescriptorModel;
  * @param <I>
  *            the type of the indizes used
  */
-public class MyOwnTestDescriptor<I extends Object> extends
-		Descriptor<String[], MyOwnTestDescriptor<I>, I> {
+public class ListDescriptor<I extends Object> extends
+		Descriptor<String[], ListDescriptor<I>, I> {
 
 	private String[] values;
 
@@ -27,7 +27,7 @@ public class MyOwnTestDescriptor<I extends Object> extends
 	 * @param id
 	 *            the identifier of the {@code Descriptor}
 	 */
-	public MyOwnTestDescriptor(final DescriptorModel model, final I id) {
+	public ListDescriptor(final DescriptorModel model, final I id) {
 		this(model, id, null);
 	}
 
@@ -41,7 +41,7 @@ public class MyOwnTestDescriptor<I extends Object> extends
 	 * @param value
 	 *            the value to be assigned
 	 */
-	public MyOwnTestDescriptor(final DescriptorModel model, final I id,
+	public ListDescriptor(final DescriptorModel model, final I id,
 			final String value) {
 		super(model, id);
 
@@ -71,7 +71,7 @@ public class MyOwnTestDescriptor<I extends Object> extends
 	}
 
 	@Override
-	public MyOwnTestDescriptor<I> clone() {
+	public ListDescriptor<I> clone() {
 		return null;
 	}
 

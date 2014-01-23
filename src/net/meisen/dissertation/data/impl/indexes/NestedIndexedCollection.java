@@ -298,4 +298,9 @@ public class NestedIndexedCollection extends IndexedCollection implements
 
 		return new Wrapper<IndexedCollection>(id, idx);
 	}
+	
+	@Override
+	public int size() {
+		return getAll().size();
+	}
 }

@@ -37,24 +37,6 @@ public abstract class IndexedCollection implements IIndexedCollection {
 	}
 
 	@Override
-	public abstract boolean containsObject(final Object object);
-
-	@Override
-	public abstract boolean addObject(final Object object);
-
-	@Override
-	public abstract void removeAll();
-
-	@Override
-	public abstract Object getObject(final Object... keys);
-
-	@Override
-	public abstract Collection<?> getAll();
-
-	@Override
-	public abstract void removeObject(final Object object);
-
-	@Override
 	public boolean supports(final Object... values) {
 		return getKeyDefinition().matches(values);
 	}

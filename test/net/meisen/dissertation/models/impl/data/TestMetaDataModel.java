@@ -5,14 +5,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor;
+import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
+import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -37,16 +41,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-@SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/models/impl/data/testMetaDataModel.xml")
+@SystemProperty(property = "testBeans.selector", value = "?")
 public class TestMetaDataModel {
-
-	@Autowired(required = true)
-	@Qualifier("resourceModels")
-	private ArrayList<ResourceModel> resourceModels;
-
-	@Autowired(required = true)
-	@Qualifier("descriptorModels")
-	private ArrayList<DescriptorModel> descriptorModels;
+	private final static String testXmlModel = "/net/meisen/dissertation/models/impl/data/testMetaDataModel.xml";
 
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")
@@ -75,13 +72,14 @@ public class TestMetaDataModel {
 	 * 
 	 * @return an instance of a {@code MetaDataModel} used for testing purposes
 	 */
+	@SuppressWarnings("unchecked")
 	protected MetaDataModel createTestModel() {
-		final MetaDataModel model = new MetaDataModel();
-		configuration.wireInstance(model);
-		model.init();
-
-		model.addResourceModels(resourceModels);
-		model.addDescriptorModels(descriptorModels);
+		final InputStream is = getClass().getResourceAsStream(testXmlModel);
+		final IModuleHolder modules = configuration.loadDelayed("testloader",
+				is);
+		final MetaDataModel model = modules.getModule("metaDataModelId");
+		model.addDescriptorModels((Collection<DescriptorModel<?>>) modules
+				.getModule("descriptorModels"));
 
 		return model;
 	}
@@ -94,44 +92,22 @@ public class TestMetaDataModel {
 		final MetaDataModel model = createTestModel();
 
 		// check the available resources and descriptors
-		assertEquals(0, model.getResources().size());
 		assertEquals(0, model.getDescriptors().size());
 
 		// check the models
 		assertNull(model.getDescriptorModel("NOMODEL"));
-		assertNull(model.getResourceModel("NOMODEL"));
 		assertNotNull(model.getDescriptorModel("ID1"));
 		assertNotNull(model.getDescriptorModel("ID2"));
-		assertNotNull(model.getResourceModel("ID1"));
-		assertNotNull(model.getResourceModel("ID2"));
 
 		// check some models more detailed
-		final ResourceModel rModel = model.getResourceModel("ID2");
-		assertEquals("ID2", rModel.getId());
-		assertEquals("ID2", rModel.getName());
-		final DescriptorModel dModel1 = model.getDescriptorModel("ID1");
+		final DescriptorModel<?> dModel1 = model.getDescriptorModel("ID1");
 		assertEquals("ID1", dModel1.getId());
 		assertEquals("ID1", dModel1.getName());
-		assertEquals(String.class, dModel1.getDataType());
-		final DescriptorModel dModel2 = model.getDescriptorModel("ID2");
+		assertEquals(GeneralDescriptor.class, dModel1.getDescriptorClass());
+		final DescriptorModel<?> dModel2 = model.getDescriptorModel("ID2");
 		assertEquals("ID2", dModel2.getId());
 		assertEquals("ID2", dModel2.getName());
-		assertEquals(UUID.class, dModel2.getDataType());
-	}
-
-	/**
-	 * Tests the creation of a {@code Resource}.
-	 */
-	@Test
-	public void testResourceCreation() {
-		final MetaDataModel model = createTestModel();
-
-		// create a new resource
-		assertEquals(0, model.getResources().size());
-		model.createResource("ID2", "My New ID3");
-		assertEquals(1, model.getResources().size());
-		assertEquals("My New ID3", model.getResources().iterator().next()
-				.getValue());
+		assertEquals(GeneralDescriptor.class, dModel2.getDescriptorClass());
 	}
 
 	/**
@@ -155,7 +131,7 @@ public class TestMetaDataModel {
 	}
 
 	/**
-	 * Tests the retrieval from a {@code Descriptor} from the
+	 * Tests the retrieval from a {@code Descriptor} by value from the
 	 * {@code MetaDataModel}.
 	 */
 	@Test
@@ -169,57 +145,9 @@ public class TestMetaDataModel {
 		assertEquals(uuid, descriptor.getValue());
 
 		assertTrue(descriptor.getId() instanceof Integer);
-		assertEquals(descriptor, model.getDescriptor(descriptor.getId()));
-		assertEquals(descriptor, model.getDescriptor("ID2", uuid));
-		assertNull(model.getDescriptor("ID1", "someName"));
-	}
-
-	/**
-	 * Tests the retrieval from a {@code Resource} from the
-	 * {@code MetaDataModel}.
-	 */
-	@Test
-	public void testResourceRetrieval() {
-		final MetaDataModel model = createTestModel();
-
-		final Resource<?> resource = model.createResource("ID1", "someName");
-		assertEquals("ID1", resource.getModelId());
-		assertEquals("someName", resource.getValue());
-
-		assertTrue(resource.getId() instanceof Integer);
-		assertEquals(resource, model.getResource(resource.getId()));
-		assertEquals(resource, model.getResource("ID1", "someName"));
-		assertNull(model.getResource("ID2", "someName"));
-	}
-
-	/**
-	 * Checks that an exception is thrown whenever a {@code ResourceModel} with
-	 * {@code null} is added.
-	 */
-	@Test
-	public void testNullResourceModel() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("A ResourceModel cannot be null"));
-
-		final MetaDataModel model = createTestModel();
-		model.addResourceModel(null);
-	}
-
-	/**
-	 * Checks that an exception is thrown whenever a {@code ResourceModel} with
-	 * the same id is added.
-	 */
-	@Test
-	public void testDuplicateResourceModel() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("A ResourceModel with id 'ID1' already exists"));
-
-		final MetaDataModel model = createTestModel();
-
-		final ResourceModel resourceModel = new ResourceModel("ID1");
-		model.addResourceModel(resourceModel);
+		assertEquals(descriptor, model.getDescriptor("ID2", descriptor.getId()));
+		assertEquals(descriptor, model.getDescriptorByValue("ID2", uuid));
+		assertNull(model.getDescriptorByValue("ID1", "someName"));
 	}
 
 	/**
@@ -248,60 +176,9 @@ public class TestMetaDataModel {
 
 		final MetaDataModel model = createTestModel();
 
-		final DescriptorModel descriptorModel = new DescriptorModel("ID2",
-				String.class);
+		final DescriptorModel<Integer> descriptorModel = new DescriptorModel<Integer>(
+				"ID2", GeneralDescriptor.class, new IntegerIdsFactory());
 		model.addDescriptorModel(descriptorModel);
-	}
-
-	/**
-	 * Tests if an exception is thrown when an invalid model identifier is used
-	 * to create a resource.
-	 */
-	@Test
-	public void testExceptionInvalidModelResourceCreation() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("Unable to find a model with id 'IDONTEXIST'"));
-
-		// get the model
-		final MetaDataModel model = createTestModel();
-
-		// create a new resource for an invalid ResourceModel
-		model.createResource("IDONTEXIST", "My New ID3");
-	}
-
-	/**
-	 * Tests if an exception is thrown when {@code null} as a model is used.
-	 */
-	@Test
-	public void testExceptionNullModelResourceCreation() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("ResourceModel cannot be null"));
-
-		// get the model
-		final MetaDataModel model = createTestModel();
-
-		// create a new resource for an invalid ResourceModel
-		model.createResource((ResourceModel) null, "My New ID3");
-	}
-
-	/**
-	 * Tests if an exception is thrown when a value is used multiple times.
-	 */
-	@Test
-	public void testExceptionDuplicatedValueResourceCreation() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("resource 'My New ID3' already exists in the model 'ID1'"));
-
-		// get the model
-		final MetaDataModel model = createTestModel();
-
-		// create a new resource for an invalid ResourceModel
-		model.createResource("ID1", "My New ID3");
-		model.createResource("ID2", "My New ID3");
-		model.createResource("ID1", "My New ID3");
 	}
 
 	/**
@@ -322,37 +199,21 @@ public class TestMetaDataModel {
 	}
 
 	/**
-	 * Tests if an exception is thrown when {@code null} as a model is used.
-	 */
-	@Test
-	public void testExceptionNullModelDescriptorCreation() {
-		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("DescriptorModel cannot be null"));
-
-		// get the model
-		final MetaDataModel model = createTestModel();
-
-		// create a new resource for an invalid ResourceModel
-		model.createDescriptor((DescriptorModel) null, "My New ID3");
-	}
-
-	/**
 	 * Tests if an exception is thrown when a value is used multiple times.
 	 */
 	@Test
 	public void testExceptionDuplicatedValueDescriptorCreation() {
-		thrown.expect(MetaDataModelException.class);
+		thrown.expect(DescriptorModelException.class);
 		thrown.expectMessage(JUnitMatchers
-				.containsString("descriptor 'My New ID3' already exists in the model 'ID1'"));
+				.containsString("descriptor 'My New ID1' already exists in the model 'ID1'"));
 
 		// get the model
 		final MetaDataModel model = createTestModel();
 
 		// create a new resource for an invalid ResourceModel
-		model.createDescriptor("ID1", "My New ID3");
+		model.createDescriptor("ID1", "My New ID1");
 		model.createDescriptor("ID3", "My New ID3");
-		model.createDescriptor("ID1", "My New ID3");
+		model.createDescriptor("ID1", "My New ID1");
 	}
 
 	/**

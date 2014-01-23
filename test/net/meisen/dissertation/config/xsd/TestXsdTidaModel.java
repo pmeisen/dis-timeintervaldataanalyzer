@@ -1,5 +1,7 @@
 package net.meisen.dissertation.config.xsd;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import net.meisen.general.sbconfigurator.config.exception.ValidationFailedException;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator;
 
@@ -7,6 +9,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.rules.ExpectedException;
+import org.xml.sax.SAXParseException;
 
 /**
  * Tests the xsd of the tida model.
@@ -54,30 +57,6 @@ public class TestXsdTidaModel {
 	}
 
 	/**
-	 * Tests a model which only defines resources and no descriptors.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testNoResourcesModel() throws ValidationFailedException {
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/noResourcesModel.xml");
-	}
-
-	/**
-	 * Tests a model which only defines descriptors and no resources.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testNoDescriptorsModel() throws ValidationFailedException {
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/noDescriptorsModel.xml");
-	}
-
-	/**
 	 * Tests the simpliest model, i.e. just intervals.
 	 * 
 	 * @throws ValidationFailedException
@@ -102,19 +81,15 @@ public class TestXsdTidaModel {
 	}
 
 	/**
-	 * Tests the failure if several resources models are defined.
+	 * Tests a model which only defines some descriptors.
 	 * 
 	 * @throws ValidationFailedException
 	 *             if the validation is invalid
 	 */
 	@Test
-	public void testExceptionDoubleResourcesModel()
-			throws ValidationFailedException {
-		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
-
+	public void testSimpleDescriptorsModel() throws ValidationFailedException {
 		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionDoubleResourcesModel.xml");
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/simpleDescriptors.xml");
 	}
 
 	/**
@@ -129,8 +104,9 @@ public class TestXsdTidaModel {
 		thrown.expect(ValidationFailedException.class);
 		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
 
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionDoubleDescriptorsModel.xml");
+		assertException(
+				"/net/meisen/dissertation/config/xsd/exceptionDoubleDescriptorsModel.xml",
+				"Invalid content was found starting with element 'descriptors'");
 	}
 
 	/**
@@ -144,73 +120,35 @@ public class TestXsdTidaModel {
 		thrown.expect(ValidationFailedException.class);
 		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
 
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml");
+		assertException(
+				"/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml",
+				"The content of element 'meta' is not complete");
 	}
 
 	/**
-	 * Tests the exception thrown when a resource's identifier is not unique.
+	 * Helper method to validate the cause of a {@code SAXParseException}.
 	 * 
+	 * @param xml
+	 *            the xml to be validated
+	 * @param contains
+	 *            the substring of the {@code SAXParseException}'s message
+	 *            
 	 * @throws ValidationFailedException
-	 *             if the validation is invalid
+	 *             the main exception thrown
 	 */
-	@Test
-	public void testExceptionUniqueResourceModel()
+	protected void assertException(final String xml, final String contains)
 			throws ValidationFailedException {
-		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
 
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionUniqueResourceModel.xml");
-	}
+		try {
+			xsdValidator.validateFromClasspath(xml);
+		} catch (final ValidationFailedException e) {
+			final Throwable cause = e.getCause();
+			assertNotNull(cause);
+			assertTrue(cause instanceof SAXParseException);
+			assertTrue(cause.getMessage(), cause.getMessage()
+					.contains(contains));
 
-	/**
-	 * Tests the exception thrown when a descriptor's identifier is not unique.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testExceptionUniqueDescriptorModel()
-			throws ValidationFailedException {
-		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
-
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionUniqueDescriptorModel.xml");
-	}
-
-	/**
-	 * Tests the exception which should be thrown when a reference to a resource
-	 * is invalid.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testExceptionReferenceResource()
-			throws ValidationFailedException {
-		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
-
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionInvalidResourceReference.xml");
-	}
-
-	/**
-	 * Tests the exception which should be thrown when a reference to a
-	 * descriptor is invalid.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testExceptionReferenceDescriptor()
-			throws ValidationFailedException {
-		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
-
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/exceptionInvalidDescriptorReference.xml");
+			throw e;
+		}
 	}
 }

@@ -173,4 +173,9 @@ public class ComplexIndexedCollection extends IndexedCollection {
 	public void removeObject(Object object) {
 		// nothing to do just a mock
 	}
+
+	@Override
+	public int size() {
+		return 0;
+	}
 }

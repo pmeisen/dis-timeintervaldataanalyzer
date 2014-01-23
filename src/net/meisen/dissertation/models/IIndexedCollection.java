@@ -78,4 +78,11 @@ public interface IIndexedCollection {
 	 * @return all the data within the collection
 	 */
 	public Collection<?> getAll();
+
+	/**
+	 * Gets the amount of elements within the index.
+	 * 
+	 * @return the amount of elements within the index
+	 */
+	public int size();
 }

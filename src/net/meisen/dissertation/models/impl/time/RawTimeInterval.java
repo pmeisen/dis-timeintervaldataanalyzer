@@ -18,7 +18,7 @@ public class RawTimeInterval<T extends INaturals<T>> {
 	public T getDuration() {
 		return duration;
 	}
-	
+
 	public RawTimePoint<T> getEnd() {
 		T offset = point.getOffset();
 		return new RawTimePoint<T>(offset.add(duration));

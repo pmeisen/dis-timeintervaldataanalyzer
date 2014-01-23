@@ -30,7 +30,7 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 	 * @param id
 	 *            the identifier of the descriptor
 	 */
-	public DescriptorPrimitiveDataType(final DescriptorModel model, final I id) {
+	public DescriptorPrimitiveDataType(final DescriptorModel<I> model, final I id) {
 		super(model, id);
 	}
 

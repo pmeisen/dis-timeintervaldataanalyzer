@@ -1,5 +1,10 @@
 package net.meisen.dissertation.models.impl.data.mock;
 
+import net.meisen.dissertation.data.impl.descriptors.DoubleDescriptor;
+import net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor;
+import net.meisen.dissertation.data.impl.descriptors.IntegerDescriptor;
+import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
+import net.meisen.dissertation.models.impl.data.Descriptor;
 import net.meisen.dissertation.models.impl.data.DescriptorModel;
 import net.meisen.dissertation.models.impl.data.DescriptorPrimitiveDataType;
 
@@ -24,8 +29,22 @@ public class MockDescriptorPrimitiveDataType<D>
 	 *            the value cannot be {@code null}
 	 */
 	public MockDescriptorPrimitiveDataType(final D value) {
-		super(new DescriptorModel("SomeId", value.getClass()), 1);
+		super(new DescriptorModel<Integer>("SomeId",
+				getDescriptorClass(value.getClass()), new IntegerIdsFactory()),
+				1);
 		this.value = value;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Class<? extends Descriptor> getDescriptorClass(
+			final Class<?> clazz) {
+		if (clazz.equals(Integer.class)) {
+			return IntegerDescriptor.class;
+		} else if (clazz.equals(Double.class)) {
+			return DoubleDescriptor.class;
+		} else {
+			return GeneralDescriptor.class;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

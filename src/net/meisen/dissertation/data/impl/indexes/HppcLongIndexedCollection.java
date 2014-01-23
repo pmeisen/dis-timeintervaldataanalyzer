@@ -80,4 +80,9 @@ public class HppcLongIndexedCollection extends IndexedCollection {
 	public Collection<Object> getAll() {
 		return Arrays.asList(hppcMap.values().toArray());
 	}
+	
+	@Override
+	public int size() {
+		return hppcMap.size();
+	}
 }

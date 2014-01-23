@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 
 import net.meisen.dissertation.data.impl.descriptors.IntegerDescriptor;
+import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.data.impl.indexes.keys.WrappedObjectIndexKey;
 import net.meisen.dissertation.data.impl.indexes.mock.ConcreteValueCreator;
 import net.meisen.dissertation.data.impl.indexes.mock.GenericValueCreator;
@@ -66,7 +67,8 @@ public class TestIndexKeyDefinition {
 				Descriptor.class, "getValue");
 
 		// create a descriptor
-		final DescriptorModel model = new DescriptorModel("MYID", Integer.class);
+		final DescriptorModel model = new DescriptorModel("MYID",
+				IntegerDescriptor.class, new IntegerIdsFactory());
 		final IntegerDescriptor<Integer> descriptor = new IntegerDescriptor<Integer>(
 				model, 1, 5000);
 

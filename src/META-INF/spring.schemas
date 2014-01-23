@@ -1,3 +1,4 @@
 http\://dev.meisen.net/xsd/dissertation/tidaModel.xsd=net/meisen/dissertation/config/xsd/tidaModel.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd=net/meisen/dissertation/data/impl/dataretriever/DbDataRetriever.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd=net/meisen/dissertation/data/impl/dataretriever/FixedStructureDataRetriever.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd=net/meisen/dissertation/data/impl/descriptors/advancedDescriptors.xsd

@@ -20,30 +20,6 @@
             + net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory
         -->
       <indexes implementation="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
-
-      <!-- Define the factory used for the resources, available are.
-           
-           The following factories are available by default:
-            + net.meisen.dissertation.data.impl.resources.ResourcesFactory
-            
-           As identifier-factory the following implementations are available:
-            + net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory
-            + net.meisen.dissertation.data.impl.idfactories.LongIdsFactory
-            + net.meisen.dissertation.data.impl.idfactories.UuIdsFactory
-        -->
-      <resource implementation="net.meisen.dissertation.data.impl.resources.ResourcesFactory" idfactory="net.meisen.dissertation.data.impl.idfactories.UuIdsFactory" />
-      
-      <!-- Define the factory used for the descriptors, available are.
-           
-           The following factories are available by default:
-            + net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory
-            
-           As identifier-factory the following implementations are available:
-            + net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory
-            + net.meisen.dissertation.data.impl.idfactories.LongIdsFactory
-            + net.meisen.dissertation.data.impl.idfactories.UuIdsFactory
-        -->
-      <descriptor implementation="net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory" idfactory="net.meisen.dissertation.data.impl.idfactories.LongIdsFactory" />
     </factories>
     
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
@@ -80,34 +56,33 @@
   </config>
 
   <meta>
-    <resources>
+    <descriptors>
       <resource id="R1" name="person" />
       <resource id="R2" name="toy" />
       <resource id="R3" />
-    </resources>
-    <descriptors>
-      <descriptor id="D1" name="funFactor" dataType="java.lang.String" />
-      <descriptor id="D2" name="smiles" dataType="java.lang.Integer" />
-      <descriptor id="D3" dataType="java.lang.String" />
-      <descriptor id="D4" dataType="java.lang.Double" />
+    
+      <string id="D1" name="funFactor" />
+      <integer id="D2" name="smiles" />
+      <string id="D3" />
+      <string id="D4" />
     </descriptors>
 
-    <values>
-      <resource model="R1" value="Edison" />
-      <resource model="R2" dataretriever="db_test">
-        <db:query>SELECT DISTINCT COUNTER FROM TB_TESTDATA</db:query>
-      </resource>
-      <resource model="R3" value="NoValue" />
+    <entries>
+      <entry descriptor="R1" value="Edison" />
+      <entry descriptor="R2" dataretriever="db_test">
+        <db:query>SELECT DISTINCT CONVERT(COUNTER, SQL_VARCHAR) FROM TB_TESTDATA</db:query>
+      </entry>
+      <entry descriptor="R3" value="NoValue" />
 
-      <descriptor model="D1" dataretriever="db_test">
+      <entry descriptor="D1" dataretriever="db_test">
         <db:query language="sql">SELECT DISTINCT FIXED FROM TB_TESTDATA</db:query>
-      </descriptor>
-      <descriptor model="D2" value="2" />
-      <descriptor model="D3" value="Some Value" />     
-      <descriptor model="D4" dataretriever="fxd_test">
+      </entry>
+      <entry descriptor="D2" value="2" />
+      <entry descriptor="D3" value="Some Value" />     
+      <entry descriptor="D4" dataretriever="fxd_test">
         <fxd:query amount="1" />
-      </descriptor>
-    </values>
+      </entry>
+    </entries>
   </meta>
 
   <interval granularity="net.meisen.dissertation.models.impl.granularity.rawtime.Minute" 

@@ -4,7 +4,6 @@ import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.data.impl.dataretriever.TestDbDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.TestFixedStructureDataRetriever;
-import net.meisen.dissertation.data.impl.descriptors.TestDescriptorsFactory;
 import net.meisen.dissertation.data.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.data.impl.descriptors.TestGeneralDescriptor;
 import net.meisen.dissertation.data.impl.descriptors.TestIntegerDescriptor;
@@ -13,15 +12,16 @@ import net.meisen.dissertation.data.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.data.impl.idfactories.TestLongIdsFactory;
 import net.meisen.dissertation.data.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.data.impl.indexes.TestCompositeIndexKey;
-import net.meisen.dissertation.data.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.data.impl.indexes.TestIndexedCollectionDefinition;
+import net.meisen.dissertation.data.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.data.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.data.impl.indexes.TestNestedIndexedCollection;
-import net.meisen.dissertation.data.impl.resources.TestResoucesFactory;
 import net.meisen.dissertation.help.TestDb;
+import net.meisen.dissertation.models.impl.data.TestDescriptorModel;
 import net.meisen.dissertation.models.impl.data.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.models.impl.data.TestMetaDataModel;
-import net.meisen.dissertation.models.impl.data.TestResource;
+import net.meisen.dissertation.models.impl.data.TestResourceDescriptor;
+import net.meisen.dissertation.models.impl.data.TestTimeIntervalDataModel;
 import net.meisen.dissertation.models.impl.dataretriever.TestDataCollection;
 import net.meisen.dissertation.models.impl.dataretriever.TestDataRecord;
 import net.meisen.dissertation.models.impl.indexes.TestIndexKeyDefinition;
@@ -81,20 +81,20 @@ import org.junit.runners.Suite;
 		TestLongIdsFactory.class,
 		TestUuIdsFactory.class,
 
-		// Test the descriptors and the resource
+		// Test the descriptors
 		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
 		TestIntegerDescriptor.class, TestLongDescriptor.class,
-		TestGeneralDescriptor.class, TestResource.class,
-
-		// Test the factories for descriptors and resources
-		TestDescriptorsFactory.class, TestResoucesFactory.class,
+		TestGeneralDescriptor.class, TestResourceDescriptor.class,
+		
+		// Test the descriptorModel
+		TestDescriptorModel.class,
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
 		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
 
-		// Test combined meta-model
-		TestMetaDataModel.class,
+		// Test combined meta-model and interval-model
+		TestMetaDataModel.class, TestTimeIntervalDataModel.class,
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,

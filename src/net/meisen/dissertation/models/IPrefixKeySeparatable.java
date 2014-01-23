@@ -2,7 +2,6 @@ package net.meisen.dissertation.models;
 
 import java.util.List;
 
-
 /**
  * This interface describes the property of an {@code IndexedCollection}, which
  * identifies that a key can be separated to query for data. <br/>
@@ -35,4 +34,13 @@ public interface IPrefixKeySeparatable extends IIndexedCollection {
 	 *         or the empty list is returned
 	 */
 	public List<Object> getObjects(final Object... keys);
+
+	/**
+	 * Gets the amount of elements within the index. Using a
+	 * {@code IPrefixKeySeparatable} it might be considerable to get all
+	 * elements {@link #getAll()} and count those if all elements are needed.
+	 * 
+	 * @return the amount of elements within the index
+	 */
+	public int size();
 }

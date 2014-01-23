@@ -264,6 +264,8 @@ public class IndexKeyDefinition {
 			}
 
 			return new CompositeIndexKey(objects);
+		} else if (objects[0] == null) {
+			throw new NullPointerException("Cannot create a key from null.");
 		} else {
 			if (!getType(0).isAssignableFrom(objects[0].getClass())) {
 				throw new IllegalArgumentException("The class '"

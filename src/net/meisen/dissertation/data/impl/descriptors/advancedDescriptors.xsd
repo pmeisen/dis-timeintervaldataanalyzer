@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:base="http://dev.meisen.net/xsd/dissertation/model"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors" attributeFormDefault="unqualified" elementFormDefault="qualified">
+           
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
+
+  <xs:element name="list" type="base:descriptor" />
+</xs:schema>

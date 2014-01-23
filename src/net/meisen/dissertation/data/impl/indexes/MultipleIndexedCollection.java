@@ -2,6 +2,7 @@ package net.meisen.dissertation.data.impl.indexes;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import net.meisen.dissertation.models.IIndexedCollection;
 import net.meisen.dissertation.models.IMultipleKeySupport;
@@ -139,22 +140,7 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 		}
 	}
 
-	/**
-	 * Uses a specific {@code IndexKeyDefinition} to get the object for a
-	 * specified key.
-	 * 
-	 * @param keyDefNr
-	 *            the number of the {@code IndexKeyDefinition} to be used
-	 * @param values
-	 *            the values to retrieve the object for
-	 * 
-	 * @return the {@code Object} associated to the specified keys
-	 * 
-	 * @throws IllegalArgumentException
-	 *             if the key doesn't fit
-	 * 
-	 * @see IndexKeyDefinition
-	 */
+	@Override
 	public Object getObjectByDefNr(final int keyDefNr, final Object... values) {
 		final IIndexedCollection idx = this.idx[keyDefNr];
 
@@ -206,6 +192,29 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 		return idx.getObject(values);
 	}
 
+	/**
+	 * Get the index used for the {@code IndexKey} at position {@code pos}.
+	 * 
+	 * @param pos
+	 *            the position to get the {@code IndexedCollection} for
+	 * 
+	 * @return the {@code IndexedCollection} for the specified position
+	 */
+	public IIndexedCollection getIndexedCollection(final int pos) {
+		return idx[pos];
+	}
+
+	/**
+	 * Gets a {@code List} of all the {@code IndexedCollection} of {@code this}
+	 * {@code MultipleIndexedCollection}.
+	 * 
+	 * @return all the {@code IndexedCollection} of {@code this}
+	 *         {@code MultipleIndexedCollection}
+	 */
+	public List<IIndexedCollection> getAllIndexedCollection() {
+		return Arrays.asList(idx);
+	}
+
 	@Override
 	public Collection<?> getAll() {
 		return idx[0].getAll();
@@ -224,5 +233,10 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 		res += "}";
 
 		return res;
+	}
+	
+	@Override
+	public int size() {
+		return idx[0].size();
 	}
 }

@@ -61,7 +61,7 @@ public class MapIndexedCollection extends IndexedCollection {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public void removeObject(Object object) {
 		final IndexKey<?> key = getKeyDefinition().getKey(object);
@@ -86,5 +86,10 @@ public class MapIndexedCollection extends IndexedCollection {
 	@Override
 	public Collection<Object> getAll() {
 		return index.values();
+	}
+
+	@Override
+	public int size() {
+		return index.size();
 	}
 }

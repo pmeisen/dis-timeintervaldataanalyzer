@@ -15,15 +15,6 @@ public class GeneralDescriptor<I extends Object> extends
 			final Object value) {
 		super(model, id);
 
-		if (value != null
-				&& !getModel().getDataType().isAssignableFrom(value.getClass())) {
-			throw new IllegalArgumentException(
-					"The model specifies the usage of the class '"
-							+ getModel().getDataType().getName()
-							+ "' but the assign value is of type '"
-							+ value.getClass().getName() + "'");
-		}
-
 		this.value = value;
 	}
 

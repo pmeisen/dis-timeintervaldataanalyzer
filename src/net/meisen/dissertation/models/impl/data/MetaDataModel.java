@@ -1,81 +1,133 @@
 package net.meisen.dissertation.models.impl.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory;
 import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
-import net.meisen.dissertation.data.impl.resources.ResourcesFactory;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.models.IIndexedCollection;
-import net.meisen.dissertation.models.IMultipleKeySupport;
 import net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The model which keeps all the {@code MetaData} of the data used for the
+ * analyzes. This {@code MetaData} includes all descriptions about the data. The
+ * model adds {@code Indexes} to support a fast access.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MetaDataModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
-	@Autowired(required = false)
-	private Collection<MetaData> metaData;
-
-	@Autowired
-	@Qualifier(DefaultValues.RESOURCESFACTORY_ID)
-	private final ResourcesFactory resourcesFactory;
-
-	@Autowired
-	@Qualifier(DefaultValues.DESCRIPTORSFACTORY_ID)
-	private final DescriptorsFactory descriptorsFactory;
-
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private final IndexedCollectionFactory indexedCollectionFactory;
+	private IndexedCollectionFactory indexedCollectionFactory;
 
 	private final String id;
 	private final String name;
 
-	private IMultipleKeySupport resources;
-	private IMultipleKeySupport descriptors;
-
-	private IIndexedCollection resourceModels;
 	private IIndexedCollection descriptorModels;
 
+	/**
+	 * Creates a {@code MetaDataModel} with a random id, the instance must be
+	 * wired prior to it's usage to ensure that a
+	 * {@code indexedCollectionFactory} is available.
+	 */
 	public MetaDataModel() {
-		this(null, null, null, null, null);
+		this(null, null, null);
 	}
 
+	/**
+	 * Creates a {@code MetaDataModel} with the specified {@code id}, the
+	 * instance must be wired prior to it's usage to ensure that a
+	 * {@code indexedCollectionFactory} is available.
+	 * 
+	 * @param id
+	 *            the identifier used for the {@code MetaDataModel}
+	 */
 	public MetaDataModel(final String id) {
-		this(id, null, null, null, null);
+		this(id, null, null);
 	}
 
+	/**
+	 * Creates a {@code MetaDataModel} with the specified {@code id} and the
+	 * specified {@code name}, the instance must be wired prior to it's usage to
+	 * ensure that a {@code indexedCollectionFactory} is available.
+	 * 
+	 * @param id
+	 *            the identifier used for the {@code MetaDataModel}
+	 * @param name
+	 *            the name of the {@code MetaDataModel}, if {@code null} the
+	 *            name will be equal to the {@code id}
+	 */
 	public MetaDataModel(final String id, final String name) {
-		this(id, name, null, null, null);
+		this(id, name, null);
 	}
 
-	public MetaDataModel(final ResourcesFactory resourceFactory,
-			final DescriptorsFactory descriptorFactory,
-			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(null, null, resourceFactory, descriptorFactory,
-				indexedCollectionFactory);
+	/**
+	 * Creates a {@code MetaDataModel} with a random id and the specified
+	 * {@code indexedCollectionFactory}, which should not be {@code null}. If
+	 * the {@code indexedCollectionFactory} should be {@code null} use another
+	 * constructor and read it's information.
+	 * 
+	 * @param indexedCollectionFactory
+	 *            the {@code IndexedCollectionFactory} used to determine the
+	 *            indexes to be used
+	 * 
+	 * @see IndexedCollectionFactory
+	 */
+	public MetaDataModel(final IndexedCollectionFactory indexedCollectionFactory) {
+		this(null, null, indexedCollectionFactory);
 	}
 
+	/**
+	 * Creates a {@code MetaDataModel} with the specified {@code id}, the
+	 * specified {@code name} and the specified {@code indexedCollectionFactory}
+	 * , which should not be {@code null}. If the
+	 * {@code indexedCollectionFactory} should be {@code null} use another
+	 * constructor and read it's information.
+	 * 
+	 * @param id
+	 *            the identifier used for the {@code MetaDataModel}
+	 * @param indexedCollectionFactory
+	 *            the {@code IndexedCollectionFactory} used to determine the
+	 *            indexes to be used
+	 * 
+	 * @see IndexedCollectionFactory
+	 */
 	public MetaDataModel(final String id,
-			final ResourcesFactory resourceFactory,
-			final DescriptorsFactory descriptorFactory,
 			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(id, null, resourceFactory, descriptorFactory,
-				indexedCollectionFactory);
+		this(id, null, indexedCollectionFactory);
 	}
 
+	/**
+	 * Creates a {@code MetaDataModel} with the specified {@code id} and the
+	 * specified {@code indexedCollectionFactory}, which should not be
+	 * {@code null}. If the {@code indexedCollectionFactory} should be
+	 * {@code null} use another constructor and read it's information.
+	 * 
+	 * @param id
+	 *            the identifier used for the {@code MetaDataModel}
+	 * @param name
+	 *            the name of the {@code MetaDataModel}, if {@code null} the
+	 *            name will be equal to the {@code id}
+	 * @param indexedCollectionFactory
+	 *            the {@code IndexedCollectionFactory} used to determine the
+	 *            indexes to be used
+	 * 
+	 * @see IndexedCollectionFactory
+	 */
 	public MetaDataModel(final String id, final String name,
-			final ResourcesFactory resourceFactory,
-			final DescriptorsFactory descriptorFactory,
 			final IndexedCollectionFactory indexedCollectionFactory) {
 
 		// set id and name
@@ -83,233 +135,270 @@ public class MetaDataModel {
 		this.name = name == null ? id : name;
 
 		// set the factories
-		this.resourcesFactory = resourceFactory;
-		this.descriptorsFactory = descriptorFactory;
 		this.indexedCollectionFactory = indexedCollectionFactory;
 	}
 
+	/**
+	 * Gets the identifier of the {@code MetaDataModel}.
+	 * 
+	 * @return the identifier of the {@code MetaDataModel}
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * Gets the name of the {@code MetaDataModel}.
+	 * 
+	 * @return the name of the {@code MetaDataModel}
+	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Initializes any auto-wired {@code MetaData} and validates other
-	 * auto-wired fields.
+	 * Creates a {@code Descriptor} for the specified {@code DescriptorModel}.
+	 * 
+	 * @param modelId
+	 *            the id of the {@code DescriptorModel} to create the
+	 *            {@code Descriptor} for
+	 * @param value
+	 *            the value of the {@code Descriptor} to be added
+	 * 
+	 * @return the created {@code Descriptor}
 	 */
-	public void init() {
-
-		if (exceptionRegistry == null) {
-			throw new NullPointerException(
-					"The exceptionRegistry of a MetaDataModel cannot be null!");
-		} else if (indexedCollectionFactory == null) {
-			throw new NullPointerException(
-					"The indexedCollectionFactory of a MetaDataModel cannot be null!");
-		} else if (resourcesFactory == null) {
-			throw new NullPointerException(
-					"The resourcesFactory of a MetaDataModel cannot be null!");
-		} else if (descriptorsFactory == null) {
-			throw new NullPointerException(
-					"The descriptorsFactory of a MetaDataModel cannot be null!");
-		}
-
-		// get the indexes, use the factory to decide which one is best
-		this.resourceModels = indexedCollectionFactory
-				.create(new IndexKeyDefinition(ResourceModel.class, "getId"));
-		this.descriptorModels = indexedCollectionFactory
-				.create(new IndexKeyDefinition(DescriptorModel.class, "getId"));
-
-		final IndexKeyDefinition resIdDef = new IndexKeyDefinition(
-				Resource.class, "getId");
-		final IndexKeyDefinition uniqueResDef = new IndexKeyDefinition(
-				Resource.class, "getModelId", "getValue");
-		resIdDef.overrideType(0, this.resourcesFactory.getIdClass());
-		this.resources = indexedCollectionFactory
-				.create(resIdDef, uniqueResDef);
-
-		final IndexKeyDefinition desIdDef = new IndexKeyDefinition(
-				Descriptor.class, "getId");
-		final IndexKeyDefinition uniqueDesDef = new IndexKeyDefinition(
-				Descriptor.class, "getModelId", "getValue");
-		desIdDef.overrideType(0, this.descriptorsFactory.getIdClass());
-		this.descriptors = indexedCollectionFactory.create(desIdDef,
-				uniqueDesDef);
-
-		// add all the data from the defined metaData
-		if (metaData != null && metaData.size() > 0) {
-			for (final MetaData md : metaData) {
-				addResourceModels(md.getResourceModels());
-				addDescriptorModels(md.getDescriptorModels());
-				addResources(md.getResources());
-				addDescriptors(md.getDescriptors());
-			}
-		}
-	}
-
-	protected ResourceModel getResourceModel(final String id) {
-		return (ResourceModel) resourceModels.getObject(id);
-	}
-
-	protected DescriptorModel getDescriptorModel(final String id) {
-		return (DescriptorModel) descriptorModels.getObject(id);
-	}
-
-	protected void addResourceModels(
-			final Collection<ResourceModel> resourceModels) {
-		if (resourceModels != null) {
-			for (final ResourceModel resourceModel : resourceModels) {
-				addResourceModel(resourceModel);
-			}
-		}
-	}
-
-	protected void addResourceModel(final ResourceModel resourceModel) {
-		if (resourceModel == null) {
-			exceptionRegistry
-					.throwException(MetaDataModelException.class, 1006);
-		} else if (resourceModels.getObject(resourceModel.getId()) != null) {
-			exceptionRegistry.throwException(MetaDataModelException.class,
-					1004, resourceModel.getId());
-		} else {
-			resourceModels.addObject(resourceModel);
-		}
-
-	}
-
-	protected void addDescriptorModels(
-			final Collection<DescriptorModel> descriptorModels) {
-		if (descriptorModels != null) {
-			for (final DescriptorModel descriptorModel : descriptorModels) {
-				addDescriptorModel(descriptorModel);
-			}
-		}
-	}
-
-	protected void addDescriptorModel(final DescriptorModel descriptorModel) {
-		if (descriptorModel == null) {
-			exceptionRegistry
-					.throwException(MetaDataModelException.class, 1007);
-		} else if (descriptorModels.getObject(descriptorModel.getId()) != null) {
-			exceptionRegistry.throwException(MetaDataModelException.class,
-					1005, descriptorModel.getId());
-		} else {
-			descriptorModels.addObject(descriptorModel);
-		}
-	}
-
-	public Resource<?> createResource(final String modelId, final String value) {
-		final ResourceModel model = getResourceModel(modelId);
-		if (model == null) {
-			exceptionRegistry.throwException(MetaDataModelException.class,
-					1000, modelId);
-		}
-
-		return createResource(model, value);
-	}
-
-	public Resource<?> createResource(final ResourceModel model,
-			final String value) {
-		if (model == null) {
-			exceptionRegistry
-					.throwException(MetaDataModelException.class, 1001);
-		}
-
-		// create the resource and add it
-		final Resource<?> resource = resourcesFactory.createResource(model,
-				value);
-		this.addResource(resource);
-
-		return resource;
-	}
-
-	public Descriptor<?, ?, ?> createDescriptor(final String modelId,
-			final Object value) {
-		final DescriptorModel model = getDescriptorModel(modelId);
+	public <D, T extends Descriptor<D, T, ?>> Descriptor<D, T, ?> createDescriptor(
+			final String modelId, final D value) {
+		final DescriptorModel<?> model = getDescriptorModel(modelId);
 		if (model == null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
 					1002, modelId);
 		}
 
-		return createDescriptor(model, value);
-	}
-
-	public Descriptor<?, ?, ?> createDescriptor(final DescriptorModel model,
-			final Object value) {
-		if (model == null) {
-			exceptionRegistry
-					.throwException(MetaDataModelException.class, 1003);
-		}
-
-		// create the descriptor and add it
-		final Descriptor<?, ?, ?> descriptor = descriptorsFactory
-				.createDescriptor(model, value);
-		this.addDescriptor(descriptor);
-
+		@SuppressWarnings("unchecked")
+		final Descriptor<D, T, ?> descriptor = (Descriptor<D, T, ?>) model
+				.createDescriptor(value);
 		return descriptor;
 	}
 
-	protected void addResources(final Collection<Resource<?>> resources) {
-		if (resources != null) {
-			for (final Resource<?> resource : resources) {
-				addResource(resource);
+	/**
+	 * Gets all the {@code DescriptorModel} instances of {@code this} model.
+	 * 
+	 * @return all the {@code DescriptorModel} instances of {@code this} model
+	 */
+	public Collection<DescriptorModel<?>> getDescriptorModels() {
+
+		@SuppressWarnings("unchecked")
+		final Collection<DescriptorModel<?>> coll = (Collection<DescriptorModel<?>>) getDescriptorModelsIndex()
+				.getAll();
+
+		return coll;
+	}
+
+	/**
+	 * Get the {@code DescriptorModel} with the specified {@code id} of
+	 * {@code this} model.
+	 * 
+	 * @param id
+	 *            the id of the {@code DescriptorModel} to be retrieved
+	 * @return the {@code DescriptorModel} with the specified {@code id} of
+	 *         {@code this} model or {@code null} if no such
+	 *         {@code DescriptorModel} exists
+	 */
+	public DescriptorModel<?> getDescriptorModel(final String id) {
+		if (id == null) {
+			return null;
+		} else {
+			return (DescriptorModel<?>) getDescriptorModelsIndex()
+					.getObject(id);
+		}
+	}
+
+	/**
+	 * Adds all the {@code descriptorModels} to {@code this} model.
+	 * 
+	 * @param descriptorModels
+	 *            the {@code descriptorModels} to be added
+	 */
+	protected void addDescriptorModels(
+			final Collection<DescriptorModel<?>> descriptorModels) {
+		if (descriptorModels != null) {
+			for (final DescriptorModel<?> descriptorModel : descriptorModels) {
+				addDescriptorModel(descriptorModel);
 			}
 		}
 	}
 
-	protected void addResource(final Resource<?> resource) {
-		if (!resources.addObject(resource)) {
+	/**
+	 * Add the {@code descriptorModel} to {@code this} model.
+	 * 
+	 * @param descriptorModel
+	 *            the {@code descriptorModel} to {@code this} model.
+	 */
+	protected void addDescriptorModel(final DescriptorModel<?> descriptorModel) {
+		if (descriptorModel == null) {
+			exceptionRegistry
+					.throwException(MetaDataModelException.class, 1007);
+		} else if (getDescriptorModelsIndex()
+				.getObject(descriptorModel.getId()) != null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
-					1008, resource, resource.getModelId());
+					1005, descriptorModel.getId());
+		} else {
+			getDescriptorModelsIndex().addObject(descriptorModel);
 		}
 	}
 
-	protected void addDescriptors(
-			final Collection<Descriptor<?, ?, ?>> descriptors) {
-
-		if (descriptors != null) {
-			for (final Descriptor<?, ?, ?> descriptor : descriptors) {
-				addDescriptor(descriptor);
-			}
-		}
-	}
-
-	protected void addDescriptor(final Descriptor<?, ?, ?> descriptor) {
-		if (!descriptors.addObject(descriptor)) {
+	/**
+	 * Gets the {@code Descriptor} of a specific model with the specified
+	 * {@code id}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel} to look for the
+	 *            value
+	 * @param id
+	 *            the id of the {@code Descriptor} to be retrieved
+	 * 
+	 * @return the {@code Descriptor} found, or {@code null} if no descriptor
+	 *         was found
+	 * 
+	 * @throws MetaDataModelException
+	 *             if the specified model is not part of {@code this}
+	 *             {@code MetaDataModel}
+	 */
+	@SuppressWarnings("unchecked")
+	public <I> Descriptor<?, ?, I> getDescriptor(final String modelId,
+			final I id) {
+		final DescriptorModel<I> model = (DescriptorModel<I>) getDescriptorModel(modelId);
+		if (model == null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
-					1009, descriptor, descriptor.getModelId());
+					1002, modelId);
 		}
+
+		return (Descriptor<?, ?, I>) model.getDescriptor(id);
 	}
 
+	/**
+	 * Gets the {@code Descriptor} of a specific model with the specified
+	 * {@code value}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel} to look for the
+	 *            value
+	 * @param value
+	 *            the value of the {@code Descriptor} to be retrieved
+	 * 
+	 * @return the {@code Descriptor} found, or {@code null} if no descriptor
+	 *         was found
+	 * 
+	 * @throws MetaDataModelException
+	 *             if the specified model is not part of {@code this}
+	 *             {@code MetaDataModel}
+	 */
 	@SuppressWarnings("unchecked")
-	public <D> Descriptor<D, ?, ?> getDescriptor(final String modelId,
-			final D value) {
-		return (Descriptor<D, ?, ?>) descriptors.getObject(modelId, value);
+	public <D> Descriptor<D, ?, ?> getDescriptorByValue(final String modelId,
+			final D value) throws MetaDataModelException {
+		final DescriptorModel<?> model = getDescriptorModel(modelId);
+		if (model == null) {
+			exceptionRegistry.throwException(MetaDataModelException.class,
+					1002, modelId);
+		}
+
+		return (Descriptor<D, ?, ?>) model.getDescriptorByValue(value);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <I> Descriptor<?, ?, I> getDescriptor(final I id) {
-		return (Descriptor<?, ?, I>) descriptors.getObject(id);
-	}
-
-	public Resource<?> getResource(final String modelId, final String value) {
-		return (Resource<?>) resources.getObject(modelId, value);
-	}
-
-	@SuppressWarnings("unchecked")
-	public <I> Resource<I> getResource(final I id) {
-		return (Resource<I>) resources.getObject(id);
-	}
-
-	@SuppressWarnings("unchecked")
-	public Collection<Resource<?>> getResources() {
-		return (Collection<Resource<?>>) resources.getAll();
-	}
-
-	@SuppressWarnings("unchecked")
+	/**
+	 * Get all the {@code Descriptor} instances stored within the
+	 * {@code MetaDataModel}.
+	 * 
+	 * @return all the {@code Descriptor} instances stored within the
+	 *         {@code MetaDataModel}
+	 */
 	public Collection<Descriptor<?, ?, ?>> getDescriptors() {
-		return (Collection<Descriptor<?, ?, ?>>) descriptors.getAll();
+		final Collection<DescriptorModel<?>> descriptorModels = getDescriptorModels();
+
+		final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
+		for (final DescriptorModel<?> descriptorModel : descriptorModels) {
+			descriptors.addAll(descriptorModel.getDescriptors());
+		}
+
+		return descriptors;
+	}
+
+	/**
+	 * Get all the {@code Descriptor} instances stored within the
+	 * {@code MetaDataModel} of a specific {@code descriptorClazz}.
+	 * 
+	 * @param descriptorClazz
+	 *            the class of which the {@code Descriptors} should be
+	 * 
+	 * @return all the {@code Descriptor} instances stored within the
+	 *         {@code MetaDataModel} of a specific {@code descriptorClazz}
+	 */
+	public Collection<Descriptor<?, ?, ?>> getDescriptorsByClass(
+			final Class<?>... descriptorClazz) {
+		final Collection<DescriptorModel<?>> descriptorModels = getDescriptorModels();
+
+		final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
+		if (descriptorClazz == null) {
+			return descriptors;
+		}
+
+		// check the data of each DescriptorModel
+		for (final DescriptorModel<?> descriptorModel : descriptorModels) {
+
+			@SuppressWarnings("unchecked")
+			final Class<? extends Descriptor<?, ?, ?>> mdc = (Class<? extends Descriptor<?, ?, ?>>) descriptorModel
+					.getDescriptorClass();
+
+			// make sure it's the correct type
+			boolean add = false;
+			for (Class<?> dc : descriptorClazz) {
+				if (dc.isAssignableFrom(mdc)) {
+					add = true;
+					break;
+				}
+			}
+
+			if (add) {
+				descriptors.addAll(descriptorModel.getDescriptors());
+			}
+		}
+
+		return descriptors;
+	}
+
+	/**
+	 * Gets the {@code indexedCollectionFactory} specified for the
+	 * {@code MetaDataModel}. This method should never return {@code null} if
+	 * the {@code MetaDataModel} is assumed to be initialized.
+	 * 
+	 * @return the {@code indexedCollectionFactory} specified for the
+	 *         {@code MetaDataModel}
+	 */
+	public IndexedCollectionFactory getIndexedCollectionFactory() {
+		return indexedCollectionFactory;
+	}
+
+	/**
+	 * Gets the {@code Index} used to index the different
+	 * {@code DescriptorModel} instances. This method never returns {@code null}
+	 * , but throws an exception if the {@code indexedCollectionFactory} isn't
+	 * defined by wiring or construction.
+	 * 
+	 * @return the {@code Index} used to index the different
+	 *         {@code DescriptorModel} instances
+	 * 
+	 * @throws RuntimeException
+	 *             can throw any exception if the
+	 *             {@code indexedCollectionFactory} is {@code null}
+	 */
+	public IIndexedCollection getDescriptorModelsIndex() {
+		if (descriptorModels == null) {
+			final IndexKeyDefinition key = new IndexKeyDefinition(
+					DescriptorModel.class, "getId");
+			descriptorModels = getIndexedCollectionFactory().create(key);
+		}
+
+		return descriptorModels;
 	}
 }

@@ -1,24 +1,24 @@
 package net.meisen.dissertation.config.xslt;
 
-import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.models.impl.data.Descriptor;
 import net.meisen.general.sbconfigurator.config.transformer.XsltImportResolver;
 
 /**
  * Implementation of a {@code XsltURIResolver} which searches for xslt files
- * available for {@code DateRetriever}.
+ * available for {@code Descriptor}.
  * 
  * @author pmeisen
  * 
  */
-public class DataRetrieverXsltResolver extends XsltImportResolver {
-
+public class DescriptorsXsltResolver extends XsltImportResolver {
+	
 	@Override
 	public String getProtocol() {
-		return "dataretriever";
+		return "descriptors";
 	}
 
 	@Override
 	protected Class<?> getBaseClass() {
-		return BaseDataRetriever.class;
+		return Descriptor.class;
 	}
 }

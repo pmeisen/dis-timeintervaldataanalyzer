@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
+       
+       id="testModel">
+
+  <meta>
+    <descriptors>
+      <advDes:list id="D4" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="D4" value="A,B,C" />
+      <entry descriptor="D4" value="D,E,F,G,H" />
+      <entry descriptor="D4" value="I" />
+    </entries>
+  </meta>
+  
+  <interval />
+</model>

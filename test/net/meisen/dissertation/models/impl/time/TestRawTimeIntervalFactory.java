@@ -18,10 +18,10 @@ import org.junit.Test;
 public class TestRawTimeIntervalFactory {
 
 	/**
-	 * Tests the factory with a {@code IntegerNaturalsFactory}.
+	 * Tests the factory with a {@code BigIntegerNaturalsFactory}.
 	 */
 	@Test
-	public void testIntegerBigIntegerIntervalCreation() {
+	public void testBigIntegerIntervalCreation() {
 		final BigIntegerNaturalsFactory naturalsFactory = new BigIntegerNaturalsFactory();
 		final RawTimeIntervalFactory<BigIntegerNaturals> factory = new RawTimeIntervalFactory<BigIntegerNaturals>(
 				naturalsFactory);

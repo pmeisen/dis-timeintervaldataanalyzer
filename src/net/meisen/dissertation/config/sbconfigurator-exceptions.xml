@@ -5,11 +5,11 @@
     
   <!-- add the catalogs to the exceptionsRegistry of the server -->
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="targetObject"><ref bean="exceptionRegistry" /></property>
+    <property name="targetObject"><ref bean="coreExceptionRegistry" /></property>
     <property name="targetMethod" value="addExceptionCatalogsByClass" />
     <property name="arguments">
       <map key-type="java.lang.Class" value-type="java.lang.Class">
-        <entry key="net.meisen.dissertation.exceptions.DescriptorsFactoryException" 
+        <entry key="net.meisen.dissertation.exceptions.DescriptorModelException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.NaturalsFactoryException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testModel">
+
+  <meta>
+    <descriptors>
+      <string id="D1" />
+      <integer id="D2" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="D1" value="IchHabeHunger" />
+      <entry descriptor="D1" value="IchBinHungrig" />
+      <entry descriptor="D2" value="1" />
+      <entry descriptor="D2" value="2" />
+      <entry descriptor="D2" value="3" />
+    </entries>
+  </meta>
+  
+  <interval />
+</model>

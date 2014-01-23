@@ -7,8 +7,7 @@
 
   <config>
     <factories>
-      <resource implementation="my.own.impl.ResourceFactory" idfactory="net.meisen.dissertation.data.impl.idfactories.UuIdsFactory" />
-      <descriptor idfactory="net.meisen.dissertation.data.impl.idfactories.LongIdsFactory" />
+      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory" />
     </factories>
   </config>
   

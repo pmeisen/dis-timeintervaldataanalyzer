@@ -78,4 +78,9 @@ public class FastUtilLongIndexedCollection extends IndexedCollection {
 	public Collection<Object> getAll() {
 		return  fastUtilMap.values();
 	}
+	
+	@Override
+	public int size() {
+		return fastUtilMap.size();
+	}
 }

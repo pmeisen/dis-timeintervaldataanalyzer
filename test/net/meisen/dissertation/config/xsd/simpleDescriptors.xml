@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd">
+
+  <meta>
+    <descriptors>
+      <string id="D1" name="funFactor" />
+      <integer id="D2" name="smiles" />
+    </descriptors>
+    
+    <entries>      
+      <entry descriptor="D1" value="no" />
+      <entry descriptor="D1" value="low" />
+      <entry descriptor="D1" value="average" />
+      <entry descriptor="D1" value="high" />
+      <entry descriptor="D1" value="very high" />
+      
+      <entry descriptor="D2" value="1" />
+      <entry descriptor="D2" value="2" />
+      <entry descriptor="D2" value="3" />
+      <entry descriptor="D2" value="4" />
+      <entry descriptor="D2" value="5" />
+    </entries>
+  </meta>
+  
+  <interval />
+</model>

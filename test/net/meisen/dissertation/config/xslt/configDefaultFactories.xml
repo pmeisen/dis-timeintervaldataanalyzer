@@ -5,11 +5,5 @@
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        id="myModel">
 
-  <config>    
-    <descriptors>
-      <descriptor dataType="java.util.List" implementation="net.meisen.dissertation.config.xslt.mock.MyOwnTestDescriptor" />
-    </descriptors>
-  </config>
-  
   <interval />
 </model>

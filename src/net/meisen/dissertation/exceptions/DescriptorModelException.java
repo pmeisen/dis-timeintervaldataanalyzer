@@ -6,7 +6,7 @@ package net.meisen.dissertation.exceptions;
  * @author pmeisen
  * 
  */
-public class DescriptorsFactoryException extends RuntimeException {
+public class DescriptorModelException extends RuntimeException {
 	private static final long serialVersionUID = 7268719248335330247L;
 
 	/**
@@ -16,7 +16,7 @@ public class DescriptorsFactoryException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public DescriptorsFactoryException(final String message) {
+	public DescriptorModelException(final String message) {
 		super(message);
 	}
 
@@ -29,7 +29,7 @@ public class DescriptorsFactoryException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public DescriptorsFactoryException(final String message, final Throwable t) {
+	public DescriptorModelException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

@@ -17,7 +17,7 @@ import net.meisen.general.genmisc.types.Objects;
  */
 public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>, I extends Object> {
 	private final I id;
-	private final DescriptorModel model;
+	private final DescriptorModel<I> model;
 
 	/**
 	 * Constructor which creates a {@code Descriptor} based on the specified
@@ -28,7 +28,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 * @param id
 	 *            the identifier of the descriptor
 	 */
-	public Descriptor(final DescriptorModel model, final I id) {
+	public Descriptor(final DescriptorModel<I> model, final I id) {
 		this.id = id;
 		this.model = model;
 	}
@@ -47,7 +47,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 * 
 	 * @return the {@code DescriptorModel} of this descriptor
 	 */
-	protected DescriptorModel getModel() {
+	protected DescriptorModel<I> getModel() {
 		return model;
 	}
 
@@ -67,6 +67,16 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 */
 	public String getModelId() {
 		return getModel().getId();
+	}
+
+	/**
+	 * Gets the class of the identifier used by this {@code Descriptor}. This
+	 * class is equal to the generic-parameter {@code I}.
+	 * 
+	 * @return the class of the identifier used by this {@code Descriptor}
+	 */
+	public Class<?> getIdClass() {
+		return getModel().getIdClass();
 	}
 
 	/**
