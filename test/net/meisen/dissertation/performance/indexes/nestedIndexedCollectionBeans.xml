@@ -15,27 +15,27 @@
   <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestNestedIndexedCollectionPerformance.IntegerIdGenerator" />
   <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestNestedIndexedCollectionPerformance.DataGenerator" />
   
-  <bean id="idxNestedTroveIntIndex" class="net.meisen.dissertation.data.impl.indexes.NestedIndexedCollection">
-    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
-      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
-        <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.indexes.mock.PersonMock</value></constructor-arg>
+  <bean id="idxNestedTroveIntIndex" class="net.meisen.dissertation.impl.indexes.NestedIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.indexes.mock.PersonMock</value></constructor-arg>
         <constructor-arg type="java.lang.String[]"><value>getAge</value></constructor-arg>
       </bean>
     </constructor-arg>
-    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition[]">
-      <list value-type="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition">
-        <bean class="net.meisen.dissertation.models.impl.indexes.IndexedCollectionDefinition">
-          <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.indexes.TroveIntIndexedCollection</value></constructor-arg>
+    <constructor-arg type="net.meisen.dissertation.model.indexes.IndexedCollectionDefinition[]">
+      <list value-type="net.meisen.dissertation.model.indexes.IndexedCollectionDefinition">
+        <bean class="net.meisen.dissertation.model.indexes.IndexedCollectionDefinition">
+          <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection</value></constructor-arg>
           <constructor-arg type="java.lang.Object[]"><null /></constructor-arg>
         </bean>
       </list>
     </constructor-arg>
   </bean>
     
-  <bean id="idxTroveIntIndexMethod" class="net.meisen.dissertation.data.impl.indexes.TroveIntIndexedCollection">
-    <constructor-arg type="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
-      <bean class="net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition">
-        <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.indexes.mock.PersonMock</value></constructor-arg>
+  <bean id="idxTroveIntIndexMethod" class="net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.indexes.mock.PersonMock</value></constructor-arg>
         <constructor-arg type="java.lang.String[]"><value>getAge</value></constructor-arg>
       </bean>
     </constructor-arg>

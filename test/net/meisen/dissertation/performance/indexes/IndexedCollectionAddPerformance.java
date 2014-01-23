@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import net.meisen.dissertation.help.Performance;
 import net.meisen.dissertation.help.Performance.ResultHolder;
-import net.meisen.dissertation.models.impl.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.IndexedCollection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -1,6 +1,6 @@
 package net.meisen.dissertation.exceptions;
 
-import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 
 /**
  * General exceptions thrown within a {@code DataRetriever}.

@@ -1,5 +1,7 @@
 package net.meisen.dissertation.models;
 
+import net.meisen.dissertation.model.idfactories.IIdsFactory;
+
 /**
  * An {@code IdsFactory} which uses an ordered list for identifiers to be
  * created.

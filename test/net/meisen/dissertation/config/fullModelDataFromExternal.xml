@@ -17,19 +17,19 @@
            to be used.
            
            The following factories are available by default:
-            + net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory
+            + net.meisen.dissertation.impl.indexes.IndexedCollectionFactory
         -->
-      <indexes implementation="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
     </factories>
     
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
          by default the following id-prefixes are mapped to the specified implementation:
-          + db_       is mapped to     net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever
-          + fxd_      is mapped to     net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever
+          + db_       is mapped to     net.meisen.dissertation.impl.dataretriever.DbDataRetriever
+          + fxd_      is mapped to     net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever
       -->
     <dataretrievers>
-      <dataretriever id="db_butFixed" implementation="net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever" />
-      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever">
+      <dataretriever id="db_butFixed" implementation="net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever" />
+      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever">
         <fxd:record>
           <fxd:field name="DOUBLE" type="java.lang.Double" />
         </fxd:record>
@@ -85,7 +85,7 @@
     </entries>
   </meta>
 
-  <interval granularity="net.meisen.dissertation.models.impl.granularity.rawtime.Minute" 
-            naturals="net.meisen.dissertation.models.impl.naturals.IntegerNaturalsFactory"
+  <interval granularity="net.meisen.dissertation.model.granularity.rawtime.Minute" 
+            naturals="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory"
             mapper="not.defined.Yet" />
 </model>

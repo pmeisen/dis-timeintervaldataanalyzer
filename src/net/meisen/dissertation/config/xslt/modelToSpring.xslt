@@ -53,7 +53,7 @@
         </xsl:variable>
             
         <bean id="dataretriever-{$id}" class="{$implementation}" destroy-method="release">
-          <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IDataRetrieverConfig">
+          <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
             <xsl:choose>
               <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
               <xsl:otherwise><null /></xsl:otherwise>
@@ -72,7 +72,7 @@
         <property name="collections">
           <list value-type="java.util.Collection">
             
-            <list value-type="net.meisen.dissertation.models.impl.data.Descriptor">
+            <list value-type="net.meisen.dissertation.model.data.Descriptor">
               <xsl:for-each select="mns:meta/mns:entries/mns:entry[@value]">
                 <xsl:variable name="descriptorValue" select="@value" />
                 <xsl:variable name="descriptorModel" select="@descriptor" />
@@ -93,7 +93,7 @@
                     <property name="targetMethod" value="transform" />
                     <property name="targetObject">
                       <bean factory-bean="dataretriever-{$dataretriever}" factory-method="retrieve">
-                        <constructor-arg type="net.meisen.dissertation.models.impl.dataretriever.IQueryConfiguration">
+                        <constructor-arg type="net.meisen.dissertation.model.dataretriever.IQueryConfiguration">
                           <xsl:choose>
                             <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
                             <xsl:otherwise><null /></xsl:otherwise>
@@ -112,7 +112,7 @@
       </bean>
       
       <!-- generate the MetaDataModel -->
-      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.models.impl.data.MetaDataModel">
+      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel">
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
       </bean>
@@ -125,7 +125,7 @@
         <property name="type" value="init" />
         
         <property name="arguments">
-          <list value-type="net.meisen.dissertation.models.impl.data.DescriptorModel">
+          <list value-type="net.meisen.dissertation.model.data.DescriptorModel">
             <xsl:for-each select="mns:meta/mns:descriptors/*">
               <xsl:variable name="id" select="@id" />
               <ref bean="descriptormodel-{$id}" />
@@ -156,11 +156,11 @@
       </xsl:choose>
     </xsl:variable>
     
-    <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.models.impl.data.DescriptorModel">
+    <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.model.data.DescriptorModel">
       <constructor-arg type="java.lang.String" value="{$id}" />
       <constructor-arg type="java.lang.String" value="{$name}" />
       <constructor-arg type="java.lang.Class" value="{$class}" />
-      <constructor-arg type="net.meisen.dissertation.models.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
+      <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
     </bean>
   </xsl:template>
   
@@ -169,37 +169,37 @@
     -->
   <xsl:template match="mns:object">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.GeneralDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   
   <xsl:template match="mns:string">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.GeneralDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   
   <xsl:template match="mns:double">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.DoubleDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.DoubleDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   
   <xsl:template match="mns:long">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.LongDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.LongDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   
   <xsl:template match="mns:integer">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.IntegerDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.IntegerDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   
   <xsl:template match="mns:resource">
     <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.data.impl.descriptors.ResourceDescriptor</xsl:with-param>
+      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.ResourceDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
   

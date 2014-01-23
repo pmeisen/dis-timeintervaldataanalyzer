@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    
+  <bean id="indexFactory" class="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+  
+  <bean id="metaDataModelId" class="net.meisen.dissertation.model.data.MetaDataModel" />
+  
+  <bean id="descriptorModels" class="java.util.ArrayList">
+    <constructor-arg>
+      <list value-type="net.meisen.dissertation.model.data.DescriptorModel">
+        <bean class="net.meisen.dissertation.model.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID1</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.descriptors.GeneralDescriptor</value></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+        </bean>
+        <bean class="net.meisen.dissertation.model.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID2</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.descriptors.GeneralDescriptor</value></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+        </bean>
+        <bean class="net.meisen.dissertation.model.data.DescriptorModel">
+          <constructor-arg type="java.lang.String"><value>ID3</value></constructor-arg>
+          <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.impl.descriptors.GeneralDescriptor</value></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+        </bean>
+      </list>
+    </constructor-arg>
+  </bean>
+</beans>

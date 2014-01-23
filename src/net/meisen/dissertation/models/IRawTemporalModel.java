@@ -1,5 +1,7 @@
 package net.meisen.dissertation.models;
 
+import net.meisen.dissertation.model.naturals.INaturals;
+
 
 /**
  * Interface of a {@code TemporalModel}.

@@ -2,6 +2,8 @@ package net.meisen.dissertation.models;
 
 import java.util.List;
 
+import net.meisen.dissertation.model.indexes.IIndexedCollection;
+
 /**
  * This interface describes the property of an {@code IndexedCollection}, which
  * identifies that a key can be separated to query for data. <br/>

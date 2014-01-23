@@ -1,6 +1,6 @@
 package net.meisen.dissertation.performance.indexes;
 
-import net.meisen.dissertation.data.impl.indexes.mock.PersonMock;
+import net.meisen.dissertation.impl.indexes.mock.PersonMock;
 import net.meisen.dissertation.performance.PerformanceConfig;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;

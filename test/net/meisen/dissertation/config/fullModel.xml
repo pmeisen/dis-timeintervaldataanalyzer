@@ -19,27 +19,27 @@
            to be used.
            
            The following factories are available by default:
-            + net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory
+            + net.meisen.dissertation.impl.indexes.IndexedCollectionFactory
         -->
-      <indexes implementation="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
     </factories>
   </config>
 
   <meta>
     <!-- As identifier-factory the following implementations are available:
-          + net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory
-          + net.meisen.dissertation.data.impl.idfactories.LongIdsFactory
-          + net.meisen.dissertation.data.impl.idfactories.UuIdsFactory
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
       -->
     <descriptors>
-      <resource id="R1" name="person" idfactory="net.meisen.dissertation.data.impl.idfactories.UuIdsFactory" />
-      <resource id="R2" name="toy" idfactory="net.meisen.dissertation.data.impl.idfactories.UuIdsFactory" />
+      <resource id="R1" name="person" idfactory="net.meisen.dissertation.impl.idfactories.UuIdsFactory" />
+      <resource id="R2" name="toy" idfactory="net.meisen.dissertation.impl.idfactories.UuIdsFactory" />
       <resource id="R3" />
     
       <string id="D1" name="funFactor" />
       <integer id="D2" name="smiles" />
       <string id="D3" />
-      <advDes:list id="D4" idfactory="net.meisen.dissertation.data.impl.idfactories.LongIdsFactory" />
+      <advDes:list id="D4" idfactory="net.meisen.dissertation.impl.idfactories.LongIdsFactory" />
     </descriptors>
     
     <entries>
@@ -72,7 +72,7 @@
     </entries>
   </meta>
   
-  <interval granularity="net.meisen.dissertation.models.impl.granularity.rawtime.Minute" 
-            naturals="net.meisen.dissertation.models.impl.naturals.IntegerNaturalsFactory"
+  <interval granularity="net.meisen.dissertation.model.granularity.rawtime.Minute" 
+            naturals="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory"
             mapper="not.defined.Yet" />
 </model>

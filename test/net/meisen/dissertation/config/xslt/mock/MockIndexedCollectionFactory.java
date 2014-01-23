@@ -1,6 +1,6 @@
 package net.meisen.dissertation.config.xslt.mock;
 
-import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 
 /**
  * A mock for a {@code IndexedCollectionFactory}.

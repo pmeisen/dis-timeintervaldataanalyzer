@@ -7,7 +7,7 @@
 
   <config>
     <factories>
-      <indexes implementation="net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
     </factories>
   </config>
   

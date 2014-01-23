@@ -1,6 +1,6 @@
 package net.meisen.dissertation.config.xslt;
 
-import net.meisen.dissertation.models.impl.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.general.sbconfigurator.config.transformer.XsltImportResolver;
 
 /**
