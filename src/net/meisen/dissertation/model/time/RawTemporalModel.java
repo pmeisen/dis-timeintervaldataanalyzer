@@ -1,9 +1,8 @@
 package net.meisen.dissertation.model.time;
 
+import net.meisen.dissertation.model.granularity.rawtime.IRawTimeGranularity;
 import net.meisen.dissertation.model.naturals.INaturals;
 import net.meisen.dissertation.model.naturals.INaturalsFactory;
-import net.meisen.dissertation.models.IRawTemporalModel;
-import net.meisen.dissertation.models.IRawTimeGranularity;
 
 public class RawTemporalModel<T extends INaturals<T>> implements IRawTemporalModel<T> {
 	private final INaturalsFactory<T> factory;

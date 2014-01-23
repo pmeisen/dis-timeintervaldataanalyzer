@@ -4,10 +4,10 @@ import java.util.HashMap;
 
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
+import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
-import net.meisen.dissertation.models.IPrefixKeySeparatable;
 
 /**
  * Factory to create a {@code IndexedCollection}.

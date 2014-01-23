@@ -1,4 +1,4 @@
-package net.meisen.dissertation.models;
+package net.meisen.dissertation.model.granularity.rawtime;
 
 /**
  * The granularity supported for the {@code RawTime}.

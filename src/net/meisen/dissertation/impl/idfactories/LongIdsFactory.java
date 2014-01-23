@@ -2,7 +2,7 @@ package net.meisen.dissertation.impl.idfactories;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.IdsFactoryException;
-import net.meisen.dissertation.models.IOrderedIdsFactory;
+import net.meisen.dissertation.model.idfactories.IOrderedIdsFactory;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.indexes;
 
-import net.meisen.dissertation.models.IPrefixKeySeparatable;
 
 /**
  * Factory to create a {@code IndexedCollection}.

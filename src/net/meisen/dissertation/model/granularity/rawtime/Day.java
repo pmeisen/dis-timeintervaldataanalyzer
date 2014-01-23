@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.granularity.rawtime;
 
-import net.meisen.dissertation.models.IRawTimeGranularity;
 
 /**
  * 24 hours, 1,440 minutes or 86,400 seconds

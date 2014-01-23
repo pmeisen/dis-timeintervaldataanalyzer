@@ -1,5 +1,6 @@
-package net.meisen.dissertation.models;
+package net.meisen.dissertation.model.time;
 
+import net.meisen.dissertation.model.granularity.rawtime.IRawTimeGranularity;
 import net.meisen.dissertation.model.naturals.INaturals;
 
 

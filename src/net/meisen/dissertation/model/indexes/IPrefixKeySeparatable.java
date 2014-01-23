@@ -1,8 +1,7 @@
-package net.meisen.dissertation.models;
+package net.meisen.dissertation.model.indexes;
 
 import java.util.List;
 
-import net.meisen.dissertation.model.indexes.IIndexedCollection;
 
 /**
  * This interface describes the property of an {@code IndexedCollection}, which

@@ -8,7 +8,7 @@
     <constructor-arg type="net.meisen.dissertation.model.naturals.INaturalsFactory">
       <bean class="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory" />
     </constructor-arg>
-    <constructor-arg type="net.meisen.dissertation.models.IRawTimeGranularity">
+    <constructor-arg type="net.meisen.dissertation.model.granularity.rawtime.IRawTimeGranularity">
       <bean class="net.meisen.dissertation.model.granularity.rawtime.Minute" />
     </constructor-arg>
   </bean>

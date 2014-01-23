@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.granularity.rawtime;
 
-import net.meisen.dissertation.models.IRawTimeGranularity;
 
 /**
  * 1 second

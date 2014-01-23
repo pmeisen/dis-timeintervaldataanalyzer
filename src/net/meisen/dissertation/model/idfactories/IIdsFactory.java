@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.idfactories;
 
-import net.meisen.dissertation.models.IOrderedIdsFactory;
 
 /**
  * An {@code IdFactory} is used to create unique identifiers. The factory has to

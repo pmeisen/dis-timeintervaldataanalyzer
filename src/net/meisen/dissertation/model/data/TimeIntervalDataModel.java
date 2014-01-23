@@ -1,6 +1,6 @@
 package net.meisen.dissertation.model.data;
 
-import net.meisen.dissertation.models.IRawTemporalModel;
+import net.meisen.dissertation.model.time.IRawTemporalModel;
 
 public class TimeIntervalDataModel {
 

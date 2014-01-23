@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IndexKey;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
-import net.meisen.dissertation.models.IPrefixKeySeparatable;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
