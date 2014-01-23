@@ -12,8 +12,8 @@
   </bean>
   
   <!-- define the id and data generator to be used -->
-  <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestLongIndexedCollectionPerformance.LongIdGenerator" />
-  <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestLongIndexedCollectionPerformance.LongDataGenerator" />
+  <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestLongIndexedCollectionPerformance$LongIdGenerator" />
+  <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestLongIndexedCollectionPerformance$LongDataGenerator" />
   
   <!-- the indexes to be tested -->
   <bean id="idxHashMapIndexObject" class="net.meisen.dissertation.impl.indexes.MapIndexedCollection">

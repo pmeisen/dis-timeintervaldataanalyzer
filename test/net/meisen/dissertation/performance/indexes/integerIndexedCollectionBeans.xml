@@ -12,8 +12,8 @@
   </bean>
   
   <!-- define the id and data generator to be used -->
-  <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance.IntegerIdGenerator" />
-  <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance.IntegerDataGenerator" />
+  <bean id="idGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance$IntegerIdGenerator" />
+  <bean id="dataGenerator" class="net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionPerformance$IntegerDataGenerator" />
   
   <!-- the indexes to be tested -->
   <bean id="idxHashMapIndexObject" class="net.meisen.dissertation.impl.indexes.MapIndexedCollection">
