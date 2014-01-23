@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.models.IIndexedCollection;
 import net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.models.impl.indexes.BaseIndexedCollectionFactory;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class MetaDataModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private IndexedCollectionFactory indexedCollectionFactory;
+	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
 
 	private final String id;
 	private final String name;
@@ -41,7 +41,7 @@ public class MetaDataModel {
 	/**
 	 * Creates a {@code MetaDataModel} with a random id, the instance must be
 	 * wired prior to it's usage to ensure that a
-	 * {@code indexedCollectionFactory} is available.
+	 * {@code baseIndexedCollectionFactory} is available.
 	 */
 	public MetaDataModel() {
 		this(null, null, null);
@@ -50,7 +50,7 @@ public class MetaDataModel {
 	/**
 	 * Creates a {@code MetaDataModel} with the specified {@code id}, the
 	 * instance must be wired prior to it's usage to ensure that a
-	 * {@code indexedCollectionFactory} is available.
+	 * {@code baseIndexedCollectionFactory} is available.
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
@@ -62,7 +62,7 @@ public class MetaDataModel {
 	/**
 	 * Creates a {@code MetaDataModel} with the specified {@code id} and the
 	 * specified {@code name}, the instance must be wired prior to it's usage to
-	 * ensure that a {@code indexedCollectionFactory} is available.
+	 * ensure that a {@code baseIndexedCollectionFactory} is available.
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
@@ -76,44 +76,44 @@ public class MetaDataModel {
 
 	/**
 	 * Creates a {@code MetaDataModel} with a random id and the specified
-	 * {@code indexedCollectionFactory}, which should not be {@code null}. If
-	 * the {@code indexedCollectionFactory} should be {@code null} use another
+	 * {@code baseIndexedCollectionFactory}, which should not be {@code null}. If
+	 * the {@code baseIndexedCollectionFactory} should be {@code null} use another
 	 * constructor and read it's information.
 	 * 
-	 * @param indexedCollectionFactory
-	 *            the {@code IndexedCollectionFactory} used to determine the
+	 * @param baseIndexedCollectionFactory
+	 *            the {@code BaseIndexedCollectionFactory} used to determine the
 	 *            indexes to be used
 	 * 
-	 * @see IndexedCollectionFactory
+	 * @see BaseIndexedCollectionFactory
 	 */
-	public MetaDataModel(final IndexedCollectionFactory indexedCollectionFactory) {
-		this(null, null, indexedCollectionFactory);
+	public MetaDataModel(final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+		this(null, null, baseIndexedCollectionFactory);
 	}
 
 	/**
 	 * Creates a {@code MetaDataModel} with the specified {@code id}, the
-	 * specified {@code name} and the specified {@code indexedCollectionFactory}
+	 * specified {@code name} and the specified {@code baseIndexedCollectionFactory}
 	 * , which should not be {@code null}. If the
-	 * {@code indexedCollectionFactory} should be {@code null} use another
+	 * {@code baseIndexedCollectionFactory} should be {@code null} use another
 	 * constructor and read it's information.
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
-	 * @param indexedCollectionFactory
-	 *            the {@code IndexedCollectionFactory} used to determine the
+	 * @param baseIndexedCollectionFactory
+	 *            the {@code BaseIndexedCollectionFactory} used to determine the
 	 *            indexes to be used
 	 * 
-	 * @see IndexedCollectionFactory
+	 * @see BaseIndexedCollectionFactory
 	 */
 	public MetaDataModel(final String id,
-			final IndexedCollectionFactory indexedCollectionFactory) {
-		this(id, null, indexedCollectionFactory);
+			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+		this(id, null, baseIndexedCollectionFactory);
 	}
 
 	/**
 	 * Creates a {@code MetaDataModel} with the specified {@code id} and the
-	 * specified {@code indexedCollectionFactory}, which should not be
-	 * {@code null}. If the {@code indexedCollectionFactory} should be
+	 * specified {@code baseIndexedCollectionFactory}, which should not be
+	 * {@code null}. If the {@code baseIndexedCollectionFactory} should be
 	 * {@code null} use another constructor and read it's information.
 	 * 
 	 * @param id
@@ -121,21 +121,21 @@ public class MetaDataModel {
 	 * @param name
 	 *            the name of the {@code MetaDataModel}, if {@code null} the
 	 *            name will be equal to the {@code id}
-	 * @param indexedCollectionFactory
-	 *            the {@code IndexedCollectionFactory} used to determine the
+	 * @param baseIndexedCollectionFactory
+	 *            the {@code BaseIndexedCollectionFactory} used to determine the
 	 *            indexes to be used
 	 * 
-	 * @see IndexedCollectionFactory
+	 * @see BaseIndexedCollectionFactory
 	 */
 	public MetaDataModel(final String id, final String name,
-			final IndexedCollectionFactory indexedCollectionFactory) {
+			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
 
 		// set id and name
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
 
 		// set the factories
-		this.indexedCollectionFactory = indexedCollectionFactory;
+		this.baseIndexedCollectionFactory = baseIndexedCollectionFactory;
 	}
 
 	/**
@@ -368,21 +368,21 @@ public class MetaDataModel {
 	}
 
 	/**
-	 * Gets the {@code indexedCollectionFactory} specified for the
+	 * Gets the {@code baseIndexedCollectionFactory} specified for the
 	 * {@code MetaDataModel}. This method should never return {@code null} if
 	 * the {@code MetaDataModel} is assumed to be initialized.
 	 * 
-	 * @return the {@code indexedCollectionFactory} specified for the
+	 * @return the {@code baseIndexedCollectionFactory} specified for the
 	 *         {@code MetaDataModel}
 	 */
-	public IndexedCollectionFactory getIndexedCollectionFactory() {
-		return indexedCollectionFactory;
+	public BaseIndexedCollectionFactory getIndexedCollectionFactory() {
+		return baseIndexedCollectionFactory;
 	}
 
 	/**
 	 * Gets the {@code Index} used to index the different
 	 * {@code DescriptorModel} instances. This method never returns {@code null}
-	 * , but throws an exception if the {@code indexedCollectionFactory} isn't
+	 * , but throws an exception if the {@code baseIndexedCollectionFactory} isn't
 	 * defined by wiring or construction.
 	 * 
 	 * @return the {@code Index} used to index the different
@@ -390,7 +390,7 @@ public class MetaDataModel {
 	 * 
 	 * @throws RuntimeException
 	 *             can throw any exception if the
-	 *             {@code indexedCollectionFactory} is {@code null}
+	 *             {@code baseIndexedCollectionFactory} is {@code null}
 	 */
 	public IIndexedCollection getDescriptorModelsIndex() {
 		if (descriptorModels == null) {

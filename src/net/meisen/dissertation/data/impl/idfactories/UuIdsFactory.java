@@ -2,7 +2,7 @@ package net.meisen.dissertation.data.impl.idfactories;
 
 import java.util.UUID;
 
-import net.meisen.dissertation.data.IIdsFactory;
+import net.meisen.dissertation.models.IIdsFactory;
 
 /**
  * An implementation of a {@code IdsFactory}, which is based on {@code UUID}.

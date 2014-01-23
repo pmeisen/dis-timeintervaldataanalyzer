@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.data.IIdsFactory;
-import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.models.IIdsFactory;
 import net.meisen.dissertation.models.IMultipleKeySupport;
 import net.meisen.dissertation.models.impl.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.models.impl.indexes.BaseIndexedCollectionFactory;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class DescriptorModel<I extends Object> {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private IndexedCollectionFactory indexedCollectionFactory;
+	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
 
 	private IMultipleKeySupport descriptors;
 
@@ -97,19 +97,19 @@ public class DescriptorModel<I extends Object> {
 	 * @param idsFactory
 	 *            the {@code IIdsFactory} used to create indexes for the
 	 *            {@code Descriptor}
-	 * @param indexedCollectionFactory
-	 *            the {@code IndexedCollectionFactory} which determines what
+	 * @param baseIndexedCollectionFactory
+	 *            the {@code BaseIndexedCollectionFactory} which determines what
 	 *            index to be used for the {@code Descriptor}
 	 */
 	public DescriptorModel(final String id, final String name,
 			final Class<? extends Descriptor> descriptorClass,
 			final IIdsFactory<I> idsFactory,
-			final IndexedCollectionFactory indexedCollectionFactory) {
+			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
 		this.id = id;
 		this.name = name;
 		this.descriptorClass = descriptorClass;
 		this.idsFactory = idsFactory;
-		this.indexedCollectionFactory = indexedCollectionFactory;
+		this.baseIndexedCollectionFactory = baseIndexedCollectionFactory;
 	}
 
 	/**
@@ -308,15 +308,15 @@ public class DescriptorModel<I extends Object> {
 	/**
 	 * Gets the {@code Index} used to index the different {@code Descriptor}
 	 * instances. This method never returns {@code null}, but throws an
-	 * exception if the {@code indexedCollectionFactory} isn't defined by wiring
-	 * or construction.
+	 * exception if the {@code baseIndexedCollectionFactory} isn't defined by
+	 * wiring or construction.
 	 * 
 	 * @return the {@code Index} used to index the different {@code Descriptor}
 	 *         instances
 	 * 
 	 * @throws RuntimeException
 	 *             can throw any exception if the
-	 *             {@code indexedCollectionFactory} is {@code null}
+	 *             {@code baseIndexedCollectionFactory} is {@code null}
 	 */
 	protected IMultipleKeySupport getDescriptorIndex() {
 		if (descriptors == null) {
@@ -327,8 +327,8 @@ public class DescriptorModel<I extends Object> {
 					Descriptor.class, "getValue");
 
 			// create the descriptors index
-			descriptors = indexedCollectionFactory.create(desIdDef,
-					uniqueDesDef);
+			descriptors = baseIndexedCollectionFactory
+					.createMultipleKeySupport(desIdDef, uniqueDesDef);
 		}
 
 		return descriptors;

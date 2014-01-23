@@ -67,8 +67,8 @@ public class TestIndexKeyDefinition {
 				Descriptor.class, "getValue");
 
 		// create a descriptor
-		final DescriptorModel model = new DescriptorModel("MYID",
-				IntegerDescriptor.class, new IntegerIdsFactory());
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"MYID", IntegerDescriptor.class, new IntegerIdsFactory());
 		final IntegerDescriptor<Integer> descriptor = new IntegerDescriptor<Integer>(
 				model, 1, 5000);
 

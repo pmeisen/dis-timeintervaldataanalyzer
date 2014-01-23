@@ -13,17 +13,17 @@
         <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
           <constructor-arg type="java.lang.String"><value>ID1</value></constructor-arg>
           <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor</value></constructor-arg>
-          <constructor-arg type="net.meisen.dissertation.data.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.models.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
         </bean>
         <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
           <constructor-arg type="java.lang.String"><value>ID2</value></constructor-arg>
           <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor</value></constructor-arg>
-          <constructor-arg type="net.meisen.dissertation.data.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.models.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
         </bean>
         <bean class="net.meisen.dissertation.models.impl.data.DescriptorModel">
           <constructor-arg type="java.lang.String"><value>ID3</value></constructor-arg>
           <constructor-arg type="java.lang.Class"><value>net.meisen.dissertation.data.impl.descriptors.GeneralDescriptor</value></constructor-arg>
-          <constructor-arg type="net.meisen.dissertation.data.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.models.IIdsFactory"><bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" /></constructor-arg>
         </bean>
       </list>
     </constructor-arg>

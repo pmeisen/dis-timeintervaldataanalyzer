@@ -160,7 +160,7 @@
       <constructor-arg type="java.lang.String" value="{$id}" />
       <constructor-arg type="java.lang.String" value="{$name}" />
       <constructor-arg type="java.lang.Class" value="{$class}" />
-      <constructor-arg type="net.meisen.dissertation.data.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
+      <constructor-arg type="net.meisen.dissertation.models.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
     </bean>
   </xsl:template>
   

@@ -1,4 +1,4 @@
-package net.meisen.dissertation.data;
+package net.meisen.dissertation.models;
 
 /**
  * An {@code IdFactory} is used to create unique identifiers. The factory has to

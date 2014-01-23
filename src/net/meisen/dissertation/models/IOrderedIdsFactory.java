@@ -1,4 +1,4 @@
-package net.meisen.dissertation.data;
+package net.meisen.dissertation.models;
 
 /**
  * An {@code IdsFactory} which uses an ordered list for identifiers to be

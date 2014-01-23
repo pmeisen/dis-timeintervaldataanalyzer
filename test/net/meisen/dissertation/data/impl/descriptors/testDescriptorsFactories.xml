@@ -6,7 +6,7 @@
   <import resource="classpath:/net/meisen/dissertation/config/tida-bean-exceptions.xml"/>
 
   <bean id="descriptorsFactoryWithIntegerIds" class="net.meisen.dissertation.data.impl.descriptors.DescriptorsFactory">
-    <constructor-arg type="net.meisen.dissertation.data.IIdsFactory">
+    <constructor-arg type="net.meisen.dissertation.models.IIdsFactory">
       <bean class="net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory" />
     </constructor-arg>
     <constructor-arg type="java.util.Map">

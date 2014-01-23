@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.meisen.dissertation.data.IIdsFactory;
 import net.meisen.dissertation.data.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.data.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.data.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.data.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.models.IIdsFactory;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 
 /**
@@ -55,9 +55,9 @@ public class DefaultValues {
 	}
 
 	/**
-	 * Gets the default {@code IIndexedCollectionFactory} to be used.
+	 * Gets the default {@code BaseIndexedCollectionFactory} to be used.
 	 * 
-	 * @return the default {@code IIndexedCollectionFactory} to be used
+	 * @return the default {@code BaseIndexedCollectionFactory} to be used
 	 */
 	public static String getIndexedCollectionFactoryImplementation() {
 		return IndexedCollectionFactory.class.getName();
