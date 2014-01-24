@@ -5,9 +5,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
+import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfig;
+import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfigEntry;
+import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
@@ -17,8 +22,6 @@ import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.MultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
-import net.meisen.dissertation.model.descriptors.Descriptor;
-import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -121,6 +124,45 @@ public class TestDescriptorModel {
 	}
 
 	/**
+	 * Tests the implementation {@code DescriptorModel#createDescriptor(Object)}
+	 * .
+	 */
+	@Test
+	public void testCreateDescriptor() {
+
+		// create a model using an integerIdsFactory
+		final DescriptorModel<Integer> model1 = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory(), new IndexedCollectionFactory());
+
+		// create a bunch of descriptors
+		for (int i = 1; i < 100; i++) {
+			final Descriptor<?, ?, ?> descriptor = model1
+					.createDescriptor("TestValue" + i);
+			assertNotNull(descriptor);
+			assertEquals(descriptor.getId(), i);
+			assertTrue(Integer.class.equals(descriptor.getId().getClass()));
+			assertEquals(descriptor.getValue(), "TestValue" + i);
+		}
+		assertEquals(99, model1.getDescriptors().size());
+
+		final DescriptorModel<Long> model2 = new DescriptorModel<Long>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new LongIdsFactory(), new IndexedCollectionFactory());
+
+		// create a bunch of descriptors
+		for (long i = 1; i < 100; i++) {
+			final Descriptor<?, ?, ?> descriptor = model2
+					.createDescriptor("TestValue" + i);
+			assertNotNull(descriptor);
+			assertEquals(descriptor.getId(), i);
+			assertTrue(Long.class.equals(descriptor.getId().getClass()));
+			assertEquals(descriptor.getValue(), "TestValue" + i);
+		}
+		assertEquals(99, model2.getDescriptors().size());
+	}
+
+	/**
 	 * Tests the implementation of
 	 * {@code DescriptorModel#addDescriptor(Descriptor)}.
 	 */
@@ -144,45 +186,6 @@ public class TestDescriptorModel {
 	}
 
 	/**
-	 * Tests the implementation {@code DescriptorModel#createDescriptor(Object)}
-	 * .
-	 */
-	@Test
-	public void testCreateDescriptor() {
-
-		// create a model using an integerIdsFactory
-		final DescriptorModel<Integer> modelIntIds = new DescriptorModel<Integer>(
-				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
-
-		// create a bunch of descriptors
-		for (int i = 1; i < 100; i++) {
-			final Descriptor<?, ?, ?> descriptor = modelIntIds
-					.createDescriptor("TestValue" + i);
-			assertNotNull(descriptor);
-			assertEquals(descriptor.getId(), i);
-			assertTrue(Integer.class.equals(descriptor.getId().getClass()));
-			assertEquals(descriptor.getValue(), "TestValue" + i);
-		}
-		assertEquals(99, modelIntIds.getDescriptors().size());
-
-		final DescriptorModel<Long> modelLongIds = new DescriptorModel<Long>(
-				"ModelId", "ModelName", GeneralDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
-
-		// create a bunch of descriptors
-		for (long i = 1; i < 100; i++) {
-			final Descriptor<?, ?, ?> descriptor = modelLongIds
-					.createDescriptor("TestValue" + i);
-			assertNotNull(descriptor);
-			assertEquals(descriptor.getId(), i);
-			assertTrue(Long.class.equals(descriptor.getId().getClass()));
-			assertEquals(descriptor.getValue(), "TestValue" + i);
-		}
-		assertEquals(99, modelLongIds.getDescriptors().size());
-	}
-
-	/**
 	 * Tests the implementation {@code DescriptorModel#getDescriptor(Object)} .
 	 */
 	@Test
@@ -201,6 +204,38 @@ public class TestDescriptorModel {
 			assertEquals(new Long(i), desc.getId());
 			assertEquals(new Long(100 - i), desc.getValue());
 		}
+	}
+
+	/**
+	 * Tests the implementation of
+	 * {@code DescriptorModel#createDescriptors(BaseDataRetriever, IQueryConfiguration)}
+	 * .
+	 */
+	@Test
+	public void testCreateDescriptorFromDataRetriever() {
+
+		// create some descriptors using a dataRetriever
+		final FixedStructureDataRetrieverConfig config = new FixedStructureDataRetrieverConfig(
+				new FixedStructureDataRetrieverConfigEntry("RND", String.class));
+		final FixedStructureDataRetriever retriever = new FixedStructureDataRetriever(
+				config);
+		final FixedStructureQueryConfig query = new FixedStructureQueryConfig(
+				99);
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory(), new IndexedCollectionFactory());
+		model.createDescriptors(retriever, query);
+		for (int i = 1; i < 100; i++) {
+			final Descriptor<?, ?, ?> descriptor = model.getDescriptor(i);
+			assertNotNull(descriptor);
+			assertEquals(descriptor.getId(), i);
+			assertTrue(Integer.class.equals(descriptor.getId().getClass()));
+			assertTrue(descriptor.getValue() instanceof String);
+
+			// no exception
+			UUID.fromString((String) descriptor.getValue());
+		}
+		retriever.release();
 	}
 
 	/**

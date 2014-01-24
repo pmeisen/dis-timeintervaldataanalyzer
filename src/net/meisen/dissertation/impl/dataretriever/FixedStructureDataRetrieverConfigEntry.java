@@ -3,8 +3,6 @@ package net.meisen.dissertation.impl.dataretriever;
 import java.util.Random;
 import java.util.UUID;
 
-import net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig;
-
 /**
  * An entry within a {@code FixedStructureDataRetrieverConfig} used to define a
  * field to be available within the {@code FixedStructureDataCollection}.
@@ -12,8 +10,7 @@ import net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig;
  * @author pmeisen
  * 
  */
-public class FixedStructureDataRetrieverConfigEntry implements
-		IDataRetrieverConfig {
+public class FixedStructureDataRetrieverConfigEntry {
 	private static final Random RND = new Random();
 
 	private String name;

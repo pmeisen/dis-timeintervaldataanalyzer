@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextFile("test-sbconfigurator-core.xml")
 @SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/model/data/testTimeIntervalDataModel.xml")
 public class TestTimeIntervalDataModel {
-
 	
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")

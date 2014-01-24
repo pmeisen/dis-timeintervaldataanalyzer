@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       
+       id="testModel">
+
+  <config>
+    <factories>
+      <!-- Define the factory to be used to determine which IndexedCollectionFactory
+           to be used.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.impl.indexes.IndexedCollectionFactory
+        -->
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+    </factories>
+    
+    <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
+         by default the following id-prefixes are mapped to the specified implementation:
+          + db_       is mapped to     net.meisen.dissertation.impl.dataretriever.DbDataRetriever
+          + fxd_      is mapped to     net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever
+      -->
+    <dataretrievers>
+      <dataretriever id="db_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://invalid Domain:6666/tidaTestData" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <meta>
+    <descriptors>
+      <resource id="RES" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="RES" dataretriever="db_test">
+        <db:query>INVALID SQL</db:query>
+      </entry>
+    </entries>
+  </meta>
+  
+  <interval />
+</model>

@@ -7,6 +7,9 @@ import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.model.dataretriever.DataCollection;
+import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
@@ -175,6 +178,33 @@ public class DescriptorModel<I extends Object> {
 		}
 
 		return descriptors;
+	}
+
+	/**
+	 * Create {@code Descriptor} instances from the passed {@code retriever}
+	 * using the specified {@code query}.
+	 * 
+	 * @param retriever
+	 *            the retrieve to be used to retrieve the data
+	 * @param query
+	 *            the query used to retrieve the data
+	 * 
+	 * @return the the {@code Collection} of created {@code Descriptors}
+	 */
+	public Collection<Descriptor> createDescriptors(
+			final BaseDataRetriever retriever, final IQueryConfiguration query) {
+
+		// get the loader to retrieve the data
+		final DataCollection<?> loader = retriever.retrieve(query);
+
+		// retrieve the data
+		final Collection<Descriptor> data = createDescriptors(loader
+				.transform());
+
+		// release the loader
+		loader.release();
+
+		return data;
 	}
 
 	/**

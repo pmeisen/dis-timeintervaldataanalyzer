@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 import net.meisen.dissertation.config.TIDAConfig;
 import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
 import net.meisen.dissertation.help.Db;
+import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
@@ -36,14 +38,19 @@ import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer;
+import net.meisen.general.sbconfigurator.helper.SpringHelper;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -58,8 +65,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextClass(TIDAConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
 public class TestXsltTidaModel {
-	private final String pathToFM = "/net/meisen/dissertation/config/fullModel.xml";
-	private final String pathToFMDFE = "/net/meisen/dissertation/config/fullModelDataFromExternal.xml";
 
 	/**
 	 * the default xslt transformer used for testing
@@ -75,18 +80,29 @@ public class TestXsltTidaModel {
 	@Qualifier("coreConfiguration")
 	private DefaultConfiguration configuration;
 
-	private IModuleHolder modulesHolder;
+	/**
+	 * Rule to evaluate exceptions
+	 */
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
+	private Locale oldDefault;
+	private IModuleHolder modulesHolder;
 	private Db db;
 
 	/**
 	 * Initializes the {@code transformer} to point to the correct {@code xslt}.
+	 * Furthermore it ensures that we have {@code Locale.US} so that comparisons
+	 * of errors will fit.
 	 * 
 	 * @throws InvalidXsltException
 	 *             if the xslt is invalid
 	 */
 	@Before
 	public void init() throws InvalidXsltException {
+		oldDefault = Locale.getDefault();
+		Locale.setDefault(Locale.US);
+
 		transformer = (DefaultXsltTransformer) configuration
 				.getXsltTransformer();
 		transformer
@@ -131,7 +147,13 @@ public class TestXsltTidaModel {
 		if (modulesHolder != null) {
 			modulesHolder.release();
 		}
-		modulesHolder = configuration.loadDelayed("tidaModelBeans", res);
+
+		try {
+			modulesHolder = configuration.loadDelayed("tidaModelBeans", res);
+		} catch (final BeanCreationException e) {
+			throw SpringHelper.getNoneSpringBeanException(e,
+					RuntimeException.class);
+		}
 
 		return modulesHolder.getModule(DefaultValues.METADATAMODEL_ID);
 	}
@@ -232,13 +254,25 @@ public class TestXsltTidaModel {
 	}
 
 	/**
+	 * Tests an invalid definition of a {@code DataRetriever}
+	 */
+	@Test
+	public void testInvalidDataRetriever() {
+		thrown.expect(DbDataRetrieverException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("Unable to retrieve a new connection to the specified database"));
+
+		getModel("/net/meisen/dissertation/config/xslt/invalidDataRetriever.xml");
+	}
+
+	/**
 	 * Tests the created {@code MetaDataModel}.
 	 */
 	@Test
 	public void testFullModelCreation() {
 
 		// get the model
-		final MetaDataModel m = getModel(pathToFM);
+		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(m);
 		assertEquals("myModel", m.getId());
 		assertEquals("My wonderful Model", m.getName());
@@ -301,7 +335,7 @@ public class TestXsltTidaModel {
 		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 
 		// get the model
-		final MetaDataModel m = getModel(pathToFMDFE);
+		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
 		assertNotNull(m);
 		assertEquals("modelWithExternalSources", m.getId());
 		assertEquals("modelWithExternalSources", m.getName());
@@ -389,6 +423,8 @@ public class TestXsltTidaModel {
 	 */
 	@After
 	public void cleanUp() {
+		Locale.setDefault(oldDefault);
+
 		if (modulesHolder != null) {
 			modulesHolder.release();
 		}
