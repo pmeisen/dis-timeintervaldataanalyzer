@@ -24,9 +24,10 @@ import net.meisen.dissertation.impl.naturals.TestIntegerNaturalsFactory;
 import net.meisen.dissertation.impl.naturals.TestLongNaturals;
 import net.meisen.dissertation.impl.naturals.TestLongNaturalsFactory;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
-import net.meisen.dissertation.model.data.TestTimeIntervalDataModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
+import net.meisen.dissertation.model.datasets.TestDataRetrieverDataSet;
+import net.meisen.dissertation.model.datasets.TestSingleStaticDataSet;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
@@ -93,8 +94,11 @@ import org.junit.runners.Suite;
 		TestDataCollection.class, TestDataRecord.class,
 		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
 
-		// Test combined meta-model and interval-model
-		TestMetaDataModel.class, TestTimeIntervalDataModel.class,
+		// Test the dataSets
+		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
+		
+		// Test the different created instances
+		TestMetaDataModel.class, 
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,

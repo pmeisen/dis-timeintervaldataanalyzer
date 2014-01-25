@@ -2,7 +2,7 @@ package net.meisen.dissertation.impl.indexes;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import net.meisen.dissertation.impl.indexes.keys.CompositeIndexKey;
+import net.meisen.dissertation.model.indexes.keys.CompositeIndexKey;
 
 import org.junit.Test;
 

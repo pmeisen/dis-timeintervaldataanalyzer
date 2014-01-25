@@ -57,7 +57,7 @@ public class TestXsdTidaModel {
 	}
 
 	/**
-	 * Tests the simpliest model, i.e. just intervals.
+	 * Tests the simpliest configuration, i.e. just intervals.
 	 * 
 	 * @throws ValidationFailedException
 	 *             if the validation is invalid
@@ -75,9 +75,9 @@ public class TestXsdTidaModel {
 	 *             if the validation is invalid
 	 */
 	@Test
-	public void testSimpleConfig() throws ValidationFailedException {
+	public void testConfigurationOfFactories() throws ValidationFailedException {
 		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/simpleConfig.xml");
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/configureFactories.xml");
 	}
 
 	/**
@@ -87,9 +87,26 @@ public class TestXsdTidaModel {
 	 *             if the validation is invalid
 	 */
 	@Test
-	public void testSimpleDescriptorsModel() throws ValidationFailedException {
+	public void testDefinitionOfDescriptorsModel()
+			throws ValidationFailedException {
 		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/simpleDescriptors.xml");
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineDescriptors.xml");
+	}
+
+	/**
+	 * Tests the definition of the data-section within the XML.
+	 * 
+	 * @throws ValidationFailedException
+	 *             if the validation is invalid
+	 */
+	@Test
+	public void testDefinitionOfData() throws ValidationFailedException {
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineStaticDataOnly.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineRetrieverDataOnly.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineSeveralDataSets.xml");
 	}
 
 	/**
@@ -132,7 +149,7 @@ public class TestXsdTidaModel {
 	 *            the xml to be validated
 	 * @param contains
 	 *            the substring of the {@code SAXParseException}'s message
-	 *            
+	 * 
 	 * @throws ValidationFailedException
 	 *             the main exception thrown
 	 */

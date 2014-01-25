@@ -8,13 +8,13 @@ import java.util.UUID;
 
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.impl.indexes.keys.WrappedObjectIndexKey;
 import net.meisen.dissertation.impl.indexes.mock.ConcreteValueCreator;
 import net.meisen.dissertation.impl.indexes.mock.GenericValueCreator;
 import net.meisen.dissertation.impl.indexes.mock.OverrideValueCreator;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.keys.WrappedObjectIndexKey;
 import net.meisen.dissertation.model.indexes.mock.ToIntIdResolver;
 
 import org.junit.Rule;

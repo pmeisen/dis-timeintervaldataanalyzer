@@ -54,6 +54,13 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              
+              <xs:element name="interval" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="granularity" type="javaClass" use="optional" />
+                  <xs:attribute name="naturals" type="javaClass" use="optional" />
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -91,12 +98,34 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-
-        <xs:element name="interval">
+        
+        <xs:element name="structure" minOccurs="0">
           <xs:complexType>
-            <xs:attribute name="granularity" type="javaClass" use="optional" />
-            <xs:attribute name="naturals" type="javaClass" use="optional" />
-            <xs:attribute name="mapper" type="javaClass" use="optional" />
+
+          </xs:complexType>
+        </xs:element>
+        
+        <xs:element name="data">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="dataset" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
+                    <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="class" type="javaClass" use="optional" />
+                        <xs:attribute name="value" type="xs:string" use="optional" />
+                        <xs:attribute name="name" type="xs:string" use="optional" />
+                        <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+
+                  <xs:attribute name="dataretriever" type="identifier" use="optional" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
           </xs:complexType>
         </xs:element>
       </xs:sequence>

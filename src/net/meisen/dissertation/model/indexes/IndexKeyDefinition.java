@@ -3,8 +3,8 @@ package net.meisen.dissertation.model.indexes;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.meisen.dissertation.impl.indexes.keys.CompositeIndexKey;
-import net.meisen.dissertation.impl.indexes.keys.WrappedObjectIndexKey;
+import net.meisen.dissertation.model.indexes.keys.CompositeIndexKey;
+import net.meisen.dissertation.model.indexes.keys.WrappedObjectIndexKey;
 
 /**
  * A definition of an {@code IndexKey}.

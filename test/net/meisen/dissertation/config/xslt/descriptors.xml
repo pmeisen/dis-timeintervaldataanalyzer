@@ -16,12 +16,12 @@
     
     <entries>
       <entry descriptor="D1" value="IchHabeHunger" />
-      <entry descriptor="D1" value="IchBinHungrig" />
+      <entry descriptor="D1" />
       <entry descriptor="D2" value="1" />
       <entry descriptor="D2" value="2" />
       <entry descriptor="D2" value="3" />
     </entries>
   </meta>
   
-  <interval />
+  <data />
 </model>

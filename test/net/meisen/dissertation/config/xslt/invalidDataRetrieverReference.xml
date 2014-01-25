@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/fxd http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
+       
+       id="testModel">
+
+  <config>
+    <factories>
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+    </factories>
+    
+    <dataretrievers>
+      <dataretriever id="fxd_test">
+        <fxd:record>
+          <fxd:field name="DOUBLE" type="java.lang.Double" />
+        </fxd:record>
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <meta>
+    <descriptors>
+      <resource id="RES" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="RES" dataretriever="fxd_test_undefined">
+        <fxd:query amount="1" />
+      </entry>
+    </entries>
+  </meta>
+  
+  <data />
+</model>

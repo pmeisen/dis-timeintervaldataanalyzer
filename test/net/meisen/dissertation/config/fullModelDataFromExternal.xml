@@ -84,8 +84,6 @@
       </entry>
     </entries>
   </meta>
-
-  <interval granularity="net.meisen.dissertation.model.granularity.rawtime.Minute" 
-            naturals="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory"
-            mapper="not.defined.Yet" />
+  
+  <data />
 </model>

@@ -4,12 +4,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        id="myModel">
-
-  <config>
-    <factories>
-      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
-    </factories>
-  </config>
   
-  <interval />
+  <data>
+    <dataset>
+      <entry class="java.util.Date" value="" />
+      <entry class="java.lang.String" value="" />
+      <entry class="java.util.Date" value="" />
+      <entry class="java.lang.Integer" value="" />
+    </dataset>
+  </data>
 </model>

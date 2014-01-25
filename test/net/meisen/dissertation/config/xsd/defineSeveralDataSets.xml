@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+                           
+       id="myModel">
+  
+  <data>
+    <dataset dataretriever="db_test">
+      <db:query>SELECT DISTINCT CONVERT(COUNTER, SQL_VARCHAR) FROM TB_TESTDATA</db:query>
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="" />
+      <entry class="java.lang.String" value="" />
+      <entry class="java.util.Date" />
+      <entry class="java.lang.Integer" value="" />
+    </dataset>
+    
+    <dataset>
+      <entry value="" />
+      <entry class="java.lang.String" value="" />
+      <entry class="java.util.Date" value="" />
+      <entry class="java.lang.Integer" value="" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="" />
+      <entry />
+      <entry class="java.util.Date" value="" />
+      <entry class="java.lang.Integer" value="" />
+    </dataset>
+  </data>
+</model>

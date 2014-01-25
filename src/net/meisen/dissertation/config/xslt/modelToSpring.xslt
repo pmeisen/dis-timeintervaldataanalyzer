@@ -13,7 +13,9 @@
   <xsl:output method="xml" indent="yes" />
   
   <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
+  <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
+  <xsl:variable name="timeIntervalDataAnalyzerModelId" select="mdef:getId('TIMEINTERVALDATAANALYZERMODEL_ID')" />
 
   <xsl:template match="/mns:model">
     <xsl:variable name="modelId">
@@ -31,7 +33,7 @@
     <xsl:variable name="indexedFactory">
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:indexes/@implementation" /></xsl:when>
-        <xsl:otherwise><xsl:value-of select="mdef:getIndexedCollectionFactoryImplementation()" /></xsl:otherwise>
+        <xsl:otherwise><xsl:value-of select="mdef:getDefaultIndexedCollectionFactory()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable> 
   
@@ -66,16 +68,15 @@
       <xsl:for-each select="mns:meta/mns:descriptors">
         <xsl:apply-templates />
       </xsl:for-each>
-            
-      <!-- generate the MetaDataModel -->
-      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel">
-        <constructor-arg type="java.lang.String" value="{$modelId}" />
-        <constructor-arg type="java.lang.String" value="{$modelName}" />
-      </bean>
       
-      <!-- add the descriptors defined in XML to the descriptorModels -->
-      <xsl:for-each select="mns:meta/mns:entries/mns:entry[@value]">
-        <xsl:variable name="descriptorValue" select="@value" />
+      <!-- add the descriptors defined in XML to their descriptorModels -->
+      <xsl:for-each select="mns:meta/mns:entries/mns:entry[not(@dataretriever)]">
+        <xsl:variable name="descriptorValue">
+          <xsl:choose>
+            <xsl:when test="@value"><xsl:value-of select="@value" /></xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable> 
         <xsl:variable name="descriptorModel" select="@descriptor" />
 
         <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
@@ -86,7 +87,7 @@
         </bean>
       </xsl:for-each>
 
-      <!-- add the descriptors from dataRetrievers to the descriptorModels -->
+      <!-- add the descriptors from dataRetrievers to their descriptorModels -->
       <xsl:for-each select="mns:meta/mns:entries/mns:entry[@dataretriever]">
         <xsl:variable name="descriptorModel" select="@descriptor" />
         <xsl:variable name="dataretriever" select="@dataretriever" />
@@ -107,6 +108,9 @@
         </bean>
       </xsl:for-each>
       
+      <!-- create the MetaDataModel -->
+      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel" />
+      
       <!-- add the descriptorModels to the metaDataModel -->
       <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
         <property name="targetMethod" value="addDescriptorModels" />
@@ -122,6 +126,26 @@
             </xsl:for-each>    
           </list>
         </property>
+      </bean>
+      
+      <!-- create the dataModel -->
+      <bean id="{$dataModelId}" class="net.meisen.dissertation.model.data.DataModel" />
+      
+      <!-- add the different dataSets -->
+      <xsl:for-each select="mns:data/mns:dataset/mns:entry[not(@dataretriever)]">
+        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
+          <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
+            <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+              <null />
+            </array>
+          </constructor-arg>
+        </bean>
+      </xsl:for-each>
+      
+      <!-- create the timeIntervalDataAnalyzerModel -->
+      <bean id="{$timeIntervalDataAnalyzerModelId}" class="net.meisen.dissertation.model.data.TimeIntervalDataAnalyzerModel">
+        <constructor-arg type="java.lang.String" value="{$modelId}" />
+        <constructor-arg type="java.lang.String" value="{$modelName}" />
       </bean>
     </beans>
   </xsl:template>

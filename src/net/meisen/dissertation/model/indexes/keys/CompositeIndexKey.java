@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.indexes.keys;
+package net.meisen.dissertation.model.indexes.keys;
 
 import net.meisen.dissertation.model.indexes.IndexKey;
 import net.meisen.general.genmisc.types.Objects;

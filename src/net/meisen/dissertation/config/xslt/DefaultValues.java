@@ -28,6 +28,16 @@ public class DefaultValues {
 	public static final String METADATAMODEL_ID = "metaDataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code DataModel}.
+	 */
+	public static final String DATAMODEL_ID = "dataModel";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code TimeIntervalDataAnalyzerModel}.
+	 */
+	public static final String TIMEINTERVALDATAANALYZERMODEL_ID = "timeIntervalDataAnalyzerModel";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IndexedCollectionFactory}.
 	 */
 	public static final String INDEXFACTORY_ID = "indexFactory";
@@ -59,7 +69,7 @@ public class DefaultValues {
 	 * 
 	 * @return the default {@code BaseIndexedCollectionFactory} to be used
 	 */
-	public static String getIndexedCollectionFactoryImplementation() {
+	public static String getDefaultIndexedCollectionFactory() {
 		return IndexedCollectionFactory.class.getName();
 	}
 

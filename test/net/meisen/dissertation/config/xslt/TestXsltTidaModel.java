@@ -51,6 +51,7 @@ import org.junit.matchers.JUnitMatchers;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -228,7 +229,7 @@ public class TestXsltTidaModel {
 		assertNotNull(desModel);
 		assertEquals(2, desModel.size());
 		assertNotNull(model.getDescriptorByValue("D1", "IchHabeHunger"));
-		assertNotNull(model.getDescriptorByValue("D1", "IchBinHungrig"));
+		assertNotNull(model.getDescriptorByValue("D1", ""));
 
 		desModel = model.getDescriptorModel("D2");
 		assertNotNull(desModel);
@@ -254,7 +255,7 @@ public class TestXsltTidaModel {
 	}
 
 	/**
-	 * Tests an invalid definition of a {@code DataRetriever}
+	 * Tests an invalid definition of a {@code DataRetriever}.
 	 */
 	@Test
 	public void testInvalidDataRetriever() {
@@ -266,6 +267,17 @@ public class TestXsltTidaModel {
 	}
 
 	/**
+	 * Tests the usage of an invalid {@code DataRetriever} reference.
+	 */
+	@Test
+	public void testInvalidDataRetrieverReference() {
+		thrown.expect(NoSuchBeanDefinitionException.class);
+		thrown.expectMessage(JUnitMatchers.containsString("No bean named"));
+
+		getModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
+	}
+
+	/**
 	 * Tests the created {@code MetaDataModel}.
 	 */
 	@Test
@@ -274,8 +286,6 @@ public class TestXsltTidaModel {
 		// get the model
 		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(m);
-		assertEquals("myModel", m.getId());
-		assertEquals("My wonderful Model", m.getName());
 
 		// check the resources and descriptors
 		Collection<Descriptor<?, ?, ?>> des;
@@ -337,8 +347,6 @@ public class TestXsltTidaModel {
 		// get the model
 		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
 		assertNotNull(m);
-		assertEquals("modelWithExternalSources", m.getId());
-		assertEquals("modelWithExternalSources", m.getName());
 
 		// check the descriptors
 		assertEquals(

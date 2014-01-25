@@ -23,6 +23,9 @@
         -->
       <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
     </factories>
+    
+    <interval granularity="net.meisen.dissertation.model.granularity.rawtime.Minute" 
+              naturals="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory" />
   </config>
 
   <meta>
@@ -71,8 +74,8 @@
       <entry descriptor="D4" value="I" />
     </entries>
   </meta>
-  
-  <interval granularity="net.meisen.dissertation.model.granularity.rawtime.Minute" 
-            naturals="net.meisen.dissertation.impl.naturals.IntegerNaturalsFactory"
-            mapper="not.defined.Yet" />
+    
+  <structure />
+            
+  <data />
 </model>
