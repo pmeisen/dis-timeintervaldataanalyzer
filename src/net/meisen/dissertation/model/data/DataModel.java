@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.model.datasets.BaseDataSet;
+import net.meisen.dissertation.model.datasets.DataSetIterator;
+import net.meisen.dissertation.model.datasets.IDataSet;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,16 @@ public class DataModel {
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
-	
+
 	@Autowired(required = false)
-	private List<BaseDataSet> baseDataSets = new ArrayList<BaseDataSet>();
-	
-	public void addDataSet(final BaseDataSet dataSet) {
+	private List<IDataSet> dataSets = new ArrayList<IDataSet>();
+
+	public DataSetIterator iterate() {
+		return new DataSetIterator(dataSets);
+	}
+
+	public void addDataSet(final IDataSet dataSet) {
 		System.out.println("-------> ADDING dataSet ");
-		baseDataSets.add(dataSet);
+		dataSets.add(dataSet);
 	}
 }

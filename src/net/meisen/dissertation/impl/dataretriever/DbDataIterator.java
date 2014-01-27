@@ -25,6 +25,8 @@ public class DbDataIterator extends DataIterator<String> implements
 	private final ResultSet rs;
 	private final DbDataCollection collection;
 
+	Boolean lastNext = null;
+
 	/**
 	 * The constructor of a {@code DbDataIterator}.
 	 * 
@@ -41,7 +43,8 @@ public class DbDataIterator extends DataIterator<String> implements
 	@Override
 	public boolean hasNext() {
 		try {
-			final boolean next = rs.next();
+			final boolean next = lastNext == null ? rs.next() : lastNext;
+			lastNext = next;
 			if (next) {
 				return true;
 			} else {
@@ -95,6 +98,19 @@ public class DbDataIterator extends DataIterator<String> implements
 	@Override
 	public DataRecord<String> next() {
 		final DataRecord<String> record = new DataRecord<String>(collection);
+
+		if (lastNext == null) {
+			try {
+				rs.next();
+			} catch (final SQLException e) {
+				final ForwardedRuntimeException exForwarded = new ForwardedRuntimeException(
+						DbDataRetrieverException.class, 1006, e,
+						collection.getQuery());
+				throw exForwarded;
+			}
+		} else {
+			lastNext = null;
+		}
 
 		for (final String colName : collection.getNames()) {
 			try {

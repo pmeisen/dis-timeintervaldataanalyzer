@@ -165,4 +165,9 @@ public class DataRecord<D> {
 	public Collection<Object> getData() {
 		return Collections.unmodifiableList(record);
 	}
+
+	@Override
+	public String toString() {
+		return record == null ? null : record.toString();
+	}
 }

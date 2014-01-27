@@ -131,13 +131,49 @@
       <!-- create the dataModel -->
       <bean id="{$dataModelId}" class="net.meisen.dissertation.model.data.DataModel" />
       
-      <!-- add the different dataSets -->
-      <xsl:for-each select="mns:data/mns:dataset/mns:entry[not(@dataretriever)]">
+      <!-- add the different dataSets -->      
+      <xsl:for-each select="mns:data/mns:dataset[not(@dataretriever)]">
         <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
           <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
             <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
-              <null />
+              <xsl:for-each select="mns:entry">
+              
+                <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+                  <constructor-arg type="int">
+                    <value><xsl:choose><xsl:when test="@position"><xsl:value-of select="@position" /></xsl:when><xsl:otherwise>-1</xsl:otherwise></xsl:choose></value>
+                  </constructor-arg>
+                  <constructor-arg type="java.lang.String">
+                    <value><xsl:choose><xsl:when test="@name"><xsl:value-of select="@name" /></xsl:when><xsl:otherwise><xsl:value-of select="uuid:randomUUID()" /></xsl:otherwise></xsl:choose></value>
+                  </constructor-arg>
+                  <constructor-arg type="java.lang.Object">
+                    <xsl:choose>
+                      <xsl:when test="@value and @class">
+                        <xsl:variable name="valueClass" select="@class" />
+                        <value type="{$valueClass}"><xsl:value-of select="@value" /></value>
+                      </xsl:when>
+                      <xsl:when test="@value"><value type="java.lang.String"><xsl:value-of select="@value" /></value></xsl:when>
+                      <xsl:otherwise><null /></xsl:otherwise>
+                    </xsl:choose>
+                  </constructor-arg>
+                </bean>
+              </xsl:for-each>
             </array>
+          </constructor-arg>
+        </bean>
+      </xsl:for-each>
+      
+      <xsl:for-each select="mns:data/mns:dataset[@dataretriever]">
+        <xsl:variable name="dataretriever" select="@dataretriever" />
+
+        <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+          <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
+              <ref bean="dataretriever-{$dataretriever}" />
+          </constructor-arg>
+          <constructor-arg type="net.meisen.dissertation.model.dataretriever.IQueryConfiguration">
+            <xsl:choose>
+              <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
+              <xsl:otherwise><null /></xsl:otherwise>
+            </xsl:choose>
           </constructor-arg>
         </bean>
       </xsl:for-each>

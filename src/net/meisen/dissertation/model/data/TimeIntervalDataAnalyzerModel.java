@@ -80,4 +80,8 @@ public class TimeIntervalDataAnalyzerModel {
 	public String getName() {
 		return name;
 	}
+
+	public MetaDataModel getMetaDataModel() {
+		return metaDataModel;
+	}
 }

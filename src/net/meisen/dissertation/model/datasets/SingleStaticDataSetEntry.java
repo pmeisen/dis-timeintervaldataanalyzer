@@ -31,6 +31,12 @@ public class SingleStaticDataSetEntry {
 		return position;
 	}
 
+	/**
+	 * Gets the name assigned to {@code this} entry. The name can never be
+	 * {@code null}.
+	 * 
+	 * @return the name of the entry, which can never be {@code null}
+	 */
 	public String getName() {
 		return name;
 	}

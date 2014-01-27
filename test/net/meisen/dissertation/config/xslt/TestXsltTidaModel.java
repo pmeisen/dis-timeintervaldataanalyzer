@@ -1,6 +1,7 @@
 package net.meisen.dissertation.config.xslt;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -9,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,9 +32,13 @@ import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.datasets.DataSetIterator;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
@@ -134,16 +140,7 @@ public class TestXsltTidaModel {
 		return db;
 	}
 
-	/**
-	 * Gets the model created by the specified {@code xml}.
-	 * 
-	 * @param xml
-	 *            the path to the xml with the {@code MetaDataModel} to be
-	 *            loaded
-	 * 
-	 * @return the loaded {@code MetaDataModel}
-	 */
-	public MetaDataModel getModel(final String xml) {
+	private void setModulesHolder(final String xml) {
 		final InputStream res = getClass().getResourceAsStream(xml);
 		if (modulesHolder != null) {
 			modulesHolder.release();
@@ -155,8 +152,25 @@ public class TestXsltTidaModel {
 			throw SpringHelper.getNoneSpringBeanException(e,
 					RuntimeException.class);
 		}
+	}
 
+	/**
+	 * Gets the model created by the specified {@code xml}.
+	 * 
+	 * @param xml
+	 *            the path to the xml with the {@code MetaDataModel} to be
+	 *            loaded
+	 * 
+	 * @return the loaded {@code MetaDataModel}
+	 */
+	private MetaDataModel getMetaDataModel(final String xml) {
+		setModulesHolder(xml);
 		return modulesHolder.getModule(DefaultValues.METADATAMODEL_ID);
+	}
+
+	private DataModel getDataModel(final String xml) {
+		setModulesHolder(xml);
+		return modulesHolder.getModule(DefaultValues.DATAMODEL_ID);
 	}
 
 	/**
@@ -167,7 +181,7 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testDefaultFactories() throws TransformationFailedException {
-		final MetaDataModel model = getModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
+		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
 		final Class<?> res = model.getIndexedCollectionFactory().getClass();
 
 		assertTrue("Instance of '" + res.getName() + "'",
@@ -182,7 +196,7 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testChangedFactories() throws TransformationFailedException {
-		final MetaDataModel model = getModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
+		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
 		final Class<?> res = model.getIndexedCollectionFactory().getClass();
 
 		assertTrue("Instance of '" + res.getName() + "'",
@@ -198,7 +212,7 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testGetDescriptorModel() throws TransformationFailedException {
-		final MetaDataModel model = getModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
+		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
 
 		assertEquals(2, model.getDescriptorModels().size());
 		assertNotNull(model.getDescriptorModel("D1"));
@@ -219,7 +233,7 @@ public class TestXsltTidaModel {
 	 */
 	@Test
 	public void testGetDescriptor() throws TransformationFailedException {
-		final MetaDataModel model = getModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
+		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
 
 		assertEquals(5, model.getDescriptors().size());
 
@@ -248,7 +262,7 @@ public class TestXsltTidaModel {
 	@Test
 	public void testDescriptorModelExtension()
 			throws TransformationFailedException {
-		final MetaDataModel model = getModel("/net/meisen/dissertation/config/xslt/extendedDescriptors.xml");
+		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/extendedDescriptors.xml");
 
 		assertNotNull(model.getDescriptorModel("D4"));
 		assertEquals(3, model.getDescriptors().size());
@@ -263,7 +277,7 @@ public class TestXsltTidaModel {
 		thrown.expectMessage(JUnitMatchers
 				.containsString("Unable to retrieve a new connection to the specified database"));
 
-		getModel("/net/meisen/dissertation/config/xslt/invalidDataRetriever.xml");
+		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetriever.xml");
 	}
 
 	/**
@@ -274,7 +288,63 @@ public class TestXsltTidaModel {
 		thrown.expect(NoSuchBeanDefinitionException.class);
 		thrown.expectMessage(JUnitMatchers.containsString("No bean named"));
 
-		getModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
+		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
+	}
+
+	@Test
+	public void testSingleData() throws TransformationFailedException,
+			ParseException {
+		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/singleStaticDataSets.xml");
+		final DataSetIterator it = model.iterate();
+
+		// count the entries
+		int count = 0;
+		while (it.hasNext()) {
+			final IDataRecord record = it.next();
+			assertEquals(3, record.getSize());
+			count++;
+
+			if (count == 1) {
+				assertEquals(Dates.createDateFromString("20.01.1981 08:00",
+						"dd.MM.yyyy HH:mm"), record.getValue(1));
+				assertEquals("Tobias", record.getValue(2));
+				assertEquals(1, record.getValue(3));
+
+				assertFalse(record.hasNamedValue("status"));
+			} else if (count == 2) {
+				assertEquals(Dates.createDateFromString("20.01.1981 08:07",
+						"dd.MM.yyyy HH:mm"), record.getValue(1));
+				assertEquals("Philipp", record.getValue(2));
+				assertEquals("1", record.getValue(3));
+
+				assertTrue(record.hasNamedValue("status"));
+				assertEquals("1", record.getValue("status"));
+			}
+		}
+		assertEquals(2, count);
+
+		// cleanUp
+		it.close();
+	}
+
+	@Test
+	public void testDbData() throws TransformationFailedException,
+			ParseException, IOException {
+
+		// we need a running database now
+		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
+
+		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/dbDataSets.xml");
+		final DataSetIterator it = model.iterate();
+
+		while (it.hasNext()) {
+			final IDataRecord record = it.next();
+			
+			System.out.println(record.getValue("COUNTER"));
+		}
+
+		// cleanUp
+		it.close();
 	}
 
 	/**
@@ -284,7 +354,7 @@ public class TestXsltTidaModel {
 	public void testFullModelCreation() {
 
 		// get the model
-		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModel.xml");
+		final MetaDataModel m = getMetaDataModel("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(m);
 
 		// check the resources and descriptors
@@ -345,7 +415,7 @@ public class TestXsltTidaModel {
 		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 
 		// get the model
-		final MetaDataModel m = getModel("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
+		final MetaDataModel m = getMetaDataModel("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
 		assertNotNull(m);
 
 		// check the descriptors

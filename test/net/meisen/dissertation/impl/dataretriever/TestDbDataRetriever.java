@@ -1,7 +1,10 @@
 package net.meisen.dissertation.impl.dataretriever;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -206,6 +209,56 @@ public class TestDbDataRetriever {
 	}
 
 	/**
+	 * Tests the {@code DbDataIterator} used by the retriever.
+	 */
+	@Test
+	public void testIteration() {
+		final DbDataRetriever db = Util.create(c, "tidaTestData");
+
+		final DbQueryConfig queryConfiguration = new DbQueryConfig();
+		queryConfiguration
+				.setQuery("SELECT * FROM TB_TESTDATA WHERE COUNTER < 10");
+		queryConfiguration.setLanguage("sql");
+		final DbDataCollection res = db.retrieve(queryConfiguration);
+		final DbDataIterator it = res.iterate();
+
+		// check the iteration, it should not change the cursor
+		int counter = 0;
+		while (it.hasNext() && counter < 100) {
+			counter++;
+		}
+		assertEquals(100, counter);
+
+		// now iterate every second time
+		DataRecord<String> record = null;
+		for (counter = 1; counter < 19; counter++) {
+			if (counter % 2 == 0) {
+				DataRecord<String> oldRecord = record;
+				record = it.next();
+
+				final int orgCounter = (counter / 2);
+				if (oldRecord != null) {
+					assertEquals(orgCounter - 1, oldRecord.getData("COUNTER"));
+				}
+				assertEquals(orgCounter, record.getData("COUNTER"));
+			} else {
+				assertTrue(it.hasNext());
+			}
+		}
+		assertFalse(it.hasNext());
+
+		// next call to next has to fail
+		try {
+			it.next();
+			fail("Exception not thrown");
+		} catch (final Exception e) {
+			assertNotNull(e);
+		}
+
+		db.release();
+	}
+
+	/**
 	 * Tests the retrieval of data using an invalid query.
 	 */
 	@Test
@@ -225,9 +278,8 @@ public class TestDbDataRetriever {
 			assertTrue(e instanceof DbDataRetrieverException);
 			assertTrue(
 					e.getMessage(),
-					e.getMessage()
-							.contains(
-									"Unable to create the preparedStatement of query"));
+					e.getMessage().contains(
+							"Unable to create the preparedStatement of query"));
 		} finally {
 			db.release();
 		}

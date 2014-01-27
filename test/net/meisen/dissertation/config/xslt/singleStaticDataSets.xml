@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testModel">
+  
+  <data>
+    <dataset>
+      <entry class="java.util.Date" value="20.01.1981 08:00:00" />
+      <entry class="java.lang.String" value="Tobias" />
+      <entry class="int" value="1" />
+    </dataset>
+    
+    <dataset>
+      <entry position="1" class="java.util.Date" name="date" value="20.01.1981 08:07:00" />
+      <entry position="2" name="name" value="Philipp" />
+      <entry position="3" name="status" value="1" />
+    </dataset>
+  </data>
+</model>

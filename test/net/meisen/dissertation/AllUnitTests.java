@@ -27,6 +27,7 @@ import net.meisen.dissertation.model.data.TestMetaDataModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
 import net.meisen.dissertation.model.datasets.TestDataRetrieverDataSet;
+import net.meisen.dissertation.model.datasets.TestDataSetIterator;
 import net.meisen.dissertation.model.datasets.TestSingleStaticDataSet;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
@@ -84,9 +85,11 @@ import org.junit.runners.Suite;
 
 		// Test the descriptors
 		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
-		TestIntegerDescriptor.class, TestLongDescriptor.class,
-		TestGeneralDescriptor.class, TestResourceDescriptor.class,
-		
+		TestIntegerDescriptor.class,
+		TestLongDescriptor.class,
+		TestGeneralDescriptor.class,
+		TestResourceDescriptor.class,
+
 		// Test the descriptorModel
 		TestDescriptorModel.class,
 
@@ -96,9 +99,10 @@ import org.junit.runners.Suite;
 
 		// Test the dataSets
 		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
-		
+		TestDataSetIterator.class,
+
 		// Test the different created instances
-		TestMetaDataModel.class, 
+		TestMetaDataModel.class,
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,

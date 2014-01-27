@@ -12,5 +12,10 @@
       <entry class="java.util.Date" value="" />
       <entry class="java.lang.Integer" value="" />
     </dataset>
+    
+    <dataset>
+      <entry position="2" class="java.util.Date" value="" />
+      <entry name="myDataValue" class="java.util.Date" value="" />
+    </dataset>
   </data>
 </model>

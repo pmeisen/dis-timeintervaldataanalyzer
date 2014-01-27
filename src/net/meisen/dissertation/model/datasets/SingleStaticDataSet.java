@@ -1,8 +1,12 @@
 package net.meisen.dissertation.model.datasets;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-public class SingleStaticDataSet extends BaseDataSet {
+public class SingleStaticDataSet implements IDataSet, IDataRecord {
+
 	private final SingleStaticDataSetEntry[] entries;
 
 	public SingleStaticDataSet(final Object... objects) {
@@ -42,8 +46,12 @@ public class SingleStaticDataSet extends BaseDataSet {
 			initCapacity = Math.max(max, entries.length);
 		}
 
-		this.entries = new SingleStaticDataSetEntry[initCapacity];
+		// make sure there are no names duplicates
+		final Set<String> names = new HashSet<String>();
+
+		// set all the dataSetEntries
 		int curPos = -1;
+		this.entries = new SingleStaticDataSetEntry[initCapacity];
 		for (final SingleStaticDataSetEntry entry : entries) {
 			curPos++;
 
@@ -51,6 +59,7 @@ public class SingleStaticDataSet extends BaseDataSet {
 				continue;
 			}
 
+			// check if the position can be used
 			final int pos = entry.getPosition() < 1 ? curPos : entry
 					.getPosition() - 1;
 			if (this.entries[pos] == null) {
@@ -58,6 +67,12 @@ public class SingleStaticDataSet extends BaseDataSet {
 			} else {
 				throw new IllegalArgumentException("The position '" + (pos + 1)
 						+ "' is used by multiple entries.");
+			}
+
+			// check the name
+			if (!names.add(entry.getName())) {
+				throw new IllegalArgumentException("The name '"
+						+ entry.getName() + "' is used multiple times.");
 			}
 		}
 	}
@@ -68,6 +83,7 @@ public class SingleStaticDataSet extends BaseDataSet {
 				.toArray(new SingleStaticDataSetEntry[] {}));
 	}
 
+	@Override
 	public Object getValue(final String name) {
 		if (name == null) {
 			throw new NullPointerException("The name cannot be null.");
@@ -85,8 +101,9 @@ public class SingleStaticDataSet extends BaseDataSet {
 				+ "' is not available within the dataset.");
 	}
 
+	@Override
 	public Object getValue(final int position) {
-		if (position < 1 || position > entrySize()) {
+		if (position < 1 || position > getSize()) {
 			throw new IllegalArgumentException("The position '" + position
 					+ "' is invalid.");
 		} else {
@@ -94,12 +111,24 @@ public class SingleStaticDataSet extends BaseDataSet {
 		}
 	}
 
-	public int size() {
-		return 1;
+	@Override
+	public boolean hasNamedValue(final String name) {
+		for (final SingleStaticDataSetEntry entry : entries) {
+			if (entry == null) {
+				continue;
+			} else if (name == null) {
+				return false;
+			} else if (name.equals(entry.getName())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
-	
-	public int entrySize() {
-		return entries.length;
+
+	@Override
+	public boolean isValidPosition(final int position) {
+		return position > 0 && position <= getSize();
 	}
 
 	protected Object getValue(final SingleStaticDataSetEntry entry) {
@@ -108,5 +137,15 @@ public class SingleStaticDataSet extends BaseDataSet {
 		} else {
 			return entry.getValue();
 		}
+	}
+
+	@Override
+	public SingleStaticDataSetIterator iterate() {
+		return new SingleStaticDataSetIterator(this);
+	}
+
+	@Override
+	public int getSize() {
+		return entries.length;
 	}
 }

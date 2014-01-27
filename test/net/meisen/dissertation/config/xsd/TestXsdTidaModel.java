@@ -141,7 +141,7 @@ public class TestXsdTidaModel {
 				"/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml",
 				"The content of element 'meta' is not complete");
 	}
-
+	
 	/**
 	 * Helper method to validate the cause of a {@code SAXParseException}.
 	 * 

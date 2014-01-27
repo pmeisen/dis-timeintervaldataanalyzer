@@ -18,7 +18,7 @@ public abstract class DataIterator<D> implements Iterator<DataRecord<D>> {
 
 	@Override
 	public final void remove() {
-		throw new IllegalStateException(
+		throw new UnsupportedOperationException(
 				"A DataIterator does not support the remove operation.");
 	}
 }

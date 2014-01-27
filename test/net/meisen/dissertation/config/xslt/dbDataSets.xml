@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       
+       id="testModel">
+       
+  <config>
+    <dataretrievers>
+      <dataretriever id="db_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaTestData" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <data>
+    <dataset dataretriever="db_test">
+      <db:query>SELECT * FROM TB_TESTDATA WHERE COUNTER &lt; 10</db:query>
+    </dataset>
+    
+    <dataset dataretriever="db_test">
+      <db:query>SELECT * FROM TB_TESTDATA WHERE COUNTER &gt; 9990</db:query>
+    </dataset>
+  </data>
+</model>
