@@ -1,15 +1,28 @@
 package net.meisen.dissertation.model.datasets;
 
-import java.util.Iterator;
-
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.DataIterator;
 import net.meisen.dissertation.model.dataretriever.ICloseableDataIterator;
 
-public class DataRetrieverDataSetIterator implements Iterator<IDataRecord>,
-		IClosableIterator {
+/**
+ * Iterator to iterate over a {@code DataRetrieverDataSet}. This is more or less
+ * just a wrapper for a {@code DataIterator}.
+ * 
+ * @author pmeisen
+ * 
+ * @see DataRetrieverDataSet
+ * 
+ */
+public class DataRetrieverDataSetIterator implements
+		IClosableIterator<IDataRecord> {
 	private final DataIterator<String> it;
 
+	/**
+	 * The constructor which specifies which {@code DataCollection} {@code this}
+	 * instance wraps.
+	 * 
+	 * @param collection
+	 */
 	public DataRetrieverDataSetIterator(final DataCollection<String> collection) {
 		this.it = collection.iterate();
 	}

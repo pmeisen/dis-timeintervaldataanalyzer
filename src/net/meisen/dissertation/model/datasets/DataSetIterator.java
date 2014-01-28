@@ -3,8 +3,7 @@ package net.meisen.dissertation.model.datasets;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class DataSetIterator implements Iterator<IDataRecord>,
-		IClosableIterator {
+public class DataSetIterator implements IClosableIterator<IDataRecord> {
 
 	private final IDataSet[] dataSets;
 	private final int amount;

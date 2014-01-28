@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -34,8 +35,10 @@ import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
-import net.meisen.dissertation.model.datasets.DataSetIterator;
+import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
+import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Dates;
@@ -291,11 +294,39 @@ public class TestXsltTidaModel {
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
 	}
 
+	/**
+	 * Tests the retrieval of no defined data.
+	 * 
+	 * @throws TransformationFailedException
+	 *             if the xml cannot be read
+	 * @throws ParseException
+	 *             if a comparison value cannot be parsed
+	 */
+	@Test
+	public void testNoData() throws TransformationFailedException,
+			ParseException {
+		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/noDataSets.xml");
+		final Iterator<IDataRecord> it = model.iterate();
+
+		assertFalse(it.hasNext());
+	}
+
+	/**
+	 * Tests the retrieval of a {@code DataModel} which consists of
+	 * {@code SingleStaticDataSet} instances.
+	 * 
+	 * @throws TransformationFailedException
+	 *             if the xml cannot be read
+	 * @throws ParseException
+	 *             if a comparison value cannot be parsed
+	 * 
+	 * @see SingleStaticDataSet
+	 */
 	@Test
 	public void testSingleData() throws TransformationFailedException,
 			ParseException {
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/singleStaticDataSets.xml");
-		final DataSetIterator it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterate();
 
 		// count the entries
 		int count = 0;
@@ -327,6 +358,19 @@ public class TestXsltTidaModel {
 		it.close();
 	}
 
+	/**
+	 * Tests the implementation of a {@code DataModel} using two
+	 * {@code DataRetrieverDataSet}.
+	 * 
+	 * @throws TransformationFailedException
+	 *             if the xml cannot be read
+	 * @throws ParseException
+	 *             if a comparison value cannot be parsed
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 * 
+	 * @see DataRetrieverDataSet
+	 */
 	@Test
 	public void testDbData() throws TransformationFailedException,
 			ParseException, IOException {
@@ -335,13 +379,24 @@ public class TestXsltTidaModel {
 		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/dbDataSets.xml");
-		final DataSetIterator it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterate();
 
+		// get the expected
+		final Set<Integer> expected = new HashSet<Integer>();
+		for (int i = 1; i <= 10000; i = i == 9 ? 9991 : i + 1) {
+			expected.add(i);
+		}
+
+		// check the expected values
 		while (it.hasNext()) {
 			final IDataRecord record = it.next();
-			
-			System.out.println(record.getValue("COUNTER"));
+			final Object val = record.getValue("COUNTER");
+
+			assertTrue(val + " not found", expected.remove(val));
+			assertTrue(record.hasNamedValue("FIXED"));
+			assertEquals("FIXED VALUE", record.getValue("FIXED"));
 		}
+		assertEquals(0, expected.size());
 
 		// cleanUp
 		it.close();

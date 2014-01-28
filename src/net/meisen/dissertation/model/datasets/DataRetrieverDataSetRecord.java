@@ -1,10 +1,28 @@
 package net.meisen.dissertation.model.datasets;
 
+import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataRecord;
 
+/**
+ * A {@code DataRecord} which wraps a {@link DataRecord} from a
+ * {@code DataRetriever}.
+ * 
+ * @author pmeisen
+ * 
+ * @see BaseDataRetriever
+ * @see DataRecord
+ * 
+ */
 public class DataRetrieverDataSetRecord implements IDataRecord {
 	private final DataRecord<String> record;
 
+	/**
+	 * The constructor specifies which {@code DataRecord} should be wrapped by
+	 * {@code this}.
+	 * 
+	 * @param record
+	 *            the {@code DataRecord} to be wrapped
+	 */
 	public DataRetrieverDataSetRecord(final DataRecord<String> record) {
 		this.record = record;
 	}
@@ -23,7 +41,7 @@ public class DataRetrieverDataSetRecord implements IDataRecord {
 	public boolean hasNamedValue(final String name) {
 		return record.getNames().contains(name);
 	}
-	
+
 	@Override
 	public int getSize() {
 		return record.getSize();
