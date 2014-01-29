@@ -133,7 +133,7 @@ public class DataRecord<D> {
 	}
 
 	/**
-	 * Gets the data at the specified position.
+	 * Gets the data at the specified position. The position is {@code 0}-based.
 	 * 
 	 * @param pos
 	 *            the position to get the data for

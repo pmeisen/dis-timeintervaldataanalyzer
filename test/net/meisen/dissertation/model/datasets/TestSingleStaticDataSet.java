@@ -27,6 +27,10 @@ public class TestSingleStaticDataSet {
 		assertEquals(0, dataSet.getSize());
 	}
 
+	/**
+	 * Tests the creation of a {@code SingleStaticDataSet}, which has
+	 * {@code null} values implicitly defined at positions.
+	 */
 	@Test
 	public void testCreationWithNullValues() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(
@@ -37,6 +41,10 @@ public class TestSingleStaticDataSet {
 		assertEquals("A VALUE", dataSet.getValue(2));
 	}
 
+	/**
+	 * Tests the creation of a {@code SingleStaticDataSet}, which has explicitly
+	 * {@code null} values defined.
+	 */
 	@Test
 	public void testCreationNullPlaceHolder() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(null,
@@ -51,6 +59,10 @@ public class TestSingleStaticDataSet {
 		assertNull(dataSet.getValue(5));
 	}
 
+	/**
+	 * Tests the creation of a {@code SingleStaticDataSet}, which has undefined
+	 * positions and position overwriting.
+	 */
 	@Test
 	public void testCreationWithUndefinedPositions() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(null,
@@ -66,6 +78,10 @@ public class TestSingleStaticDataSet {
 		assertNull(dataSet.getValue(5));
 	}
 
+	/**
+	 * Tests the creation of a {@code SingleStaticDataSet} using just the values
+	 * (i.e. objects).
+	 */
 	@Test
 	public void testCreationWithObjects() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet("value", 1,
@@ -79,6 +95,10 @@ public class TestSingleStaticDataSet {
 		assertEquals(500.0, dataSet.getValue(5));
 	}
 
+	/**
+	 * Tests the implementation of the
+	 * {@link SingleStaticDataSet#hasNamedValue(String)} method.
+	 */
 	@Test
 	public void testHasNamedValue() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(null,
@@ -92,6 +112,10 @@ public class TestSingleStaticDataSet {
 		assertFalse(dataSet.hasNamedValue("noName"));
 	}
 
+	/**
+	 * Tests the implementation of the {@link SingleStaticDataSet#iterate()}
+	 * method.
+	 */
 	@Test
 	public void testIteration() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(null,

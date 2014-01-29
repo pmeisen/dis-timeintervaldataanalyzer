@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
+import net.meisen.dissertation.model.dataretriever.EmptyDataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
 
 /**
@@ -18,6 +19,8 @@ import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
  * @see BaseDataRetriever
  */
 public class DataRetrieverDataSet implements IDataSet {
+	private final static DataCollection<String> EMPTYCOLL = new EmptyDataCollection<String>();
+
 	private final BaseDataRetriever retriever;
 	private final IQueryConfiguration query;
 
@@ -49,8 +52,8 @@ public class DataRetrieverDataSet implements IDataSet {
 	}
 
 	/**
-	 * Gets the {@code DataCollection} which can itereate accross all the data
-	 * of the {@code DataSet}.
+	 * Gets the {@code DataCollection} which can iterate over all the data of
+	 * the {@code DataSet}.
 	 * 
 	 * @return the {@code DataCollection} of the underlying
 	 *         {@code DataRetriever}
@@ -58,7 +61,7 @@ public class DataRetrieverDataSet implements IDataSet {
 	@SuppressWarnings("unchecked")
 	protected DataCollection<String> getCollection() {
 		if (retriever == null) {
-			return null;
+			return EMPTYCOLL;
 		} else if (coll == null) {
 			coll = (DataCollection<String>) retriever.retrieve(query);
 		}

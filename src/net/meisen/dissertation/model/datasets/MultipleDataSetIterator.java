@@ -3,7 +3,14 @@ package net.meisen.dissertation.model.datasets;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class DataSetIterator implements IClosableIterator<IDataRecord> {
+/**
+ * A {@code MultipleDataSetIterator} is used to iterate over the {@code DataRecord}
+ * instances of different {@code DataSets}.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class MultipleDataSetIterator implements IClosableIterator<IDataRecord> {
 
 	private final IDataSet[] dataSets;
 	private final int amount;
@@ -11,15 +18,37 @@ public class DataSetIterator implements IClosableIterator<IDataRecord> {
 	private Iterator<IDataRecord> curIterator = null;
 	private int curDataSet = 0;
 
-	public DataSetIterator(final IDataSet dataSet) {
+	/**
+	 * A constructor which creates an {@code Iterator} for just the specified
+	 * {@code DataSet}. Instead it might make more sense to just call
+	 * {@code IDataSet#iterate()}.
+	 * 
+	 * @param dataSet
+	 *            the {@code DataSet} to iterate over
+	 */
+	public MultipleDataSetIterator(final IDataSet dataSet) {
 		this(dataSet == null ? null : new IDataSet[] { dataSet });
 	}
 
-	public DataSetIterator(final Collection<IDataSet> dataSets) {
+	/**
+	 * Constructor to create an {@code Iterator} to iterate over several
+	 * {@code DataSet} instances.
+	 * 
+	 * @param dataSets
+	 *            the several {@code DataSet} instances to iterate over
+	 */
+	public MultipleDataSetIterator(final Collection<IDataSet> dataSets) {
 		this(dataSets == null ? null : dataSets.toArray(new IDataSet[] {}));
 	}
 
-	public DataSetIterator(final IDataSet... dataSets) {
+	/**
+	 * Constructor to create an {@code Iterator} to iterate over several
+	 * {@code DataSet} instances.
+	 * 
+	 * @param dataSets
+	 *            the several {@code DataSet} instances to iterate over
+	 */
+	public MultipleDataSetIterator(final IDataSet... dataSets) {
 		final int amount;
 		if (dataSets == null) {
 			amount = 0;
@@ -98,7 +127,7 @@ public class DataSetIterator implements IClosableIterator<IDataRecord> {
 	@Override
 	public void close() {
 		if (curIterator != null && curIterator instanceof IClosableIterator) {
-			((IClosableIterator) curIterator).close();
+			((IClosableIterator<?>) curIterator).close();
 		}
 	}
 }

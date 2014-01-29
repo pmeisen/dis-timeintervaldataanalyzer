@@ -23,11 +23,12 @@ import net.meisen.dissertation.impl.naturals.TestIntegerNaturals;
 import net.meisen.dissertation.impl.naturals.TestIntegerNaturalsFactory;
 import net.meisen.dissertation.impl.naturals.TestLongNaturals;
 import net.meisen.dissertation.impl.naturals.TestLongNaturalsFactory;
+import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
 import net.meisen.dissertation.model.datasets.TestDataRetrieverDataSet;
-import net.meisen.dissertation.model.datasets.TestDataSetIterator;
+import net.meisen.dissertation.model.datasets.TestMultipleDataSetIterator;
 import net.meisen.dissertation.model.datasets.TestSingleStaticDataSet;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
@@ -99,10 +100,10 @@ import org.junit.runners.Suite;
 
 		// Test the dataSets
 		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
-		TestDataSetIterator.class,
+		TestMultipleDataSetIterator.class,
 
 		// Test the different created instances
-		TestMetaDataModel.class,
+		TestMetaDataModel.class, TestDataModel.class,
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,

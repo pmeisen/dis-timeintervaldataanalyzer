@@ -8,11 +8,21 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-public class TestDataSetIterator {
+/**
+ * Tests the iteration across multiple {@code DataSet} instances using a
+ * {@code MultipleDataSetIterator}.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class TestMultipleDataSetIterator {
 
+	/**
+	 * Tests the iteration over no {@code DataSet}.
+	 */
 	@Test
 	public void testEmptyIterator() {
-		final DataSetIterator iterator = new DataSetIterator();
+		final MultipleDataSetIterator iterator = new MultipleDataSetIterator();
 
 		for (int i = 0; i < 100; i++) {
 			assertFalse(iterator.hasNext());
@@ -27,9 +37,12 @@ public class TestDataSetIterator {
 		}
 	}
 
+	/**
+	 * Tests the iteration over an empty {@code DataSet}.
+	 */
 	@Test
 	public void testEmptyDataSetIterator() {
-		final DataSetIterator iterator = new DataSetIterator(
+		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
 				new SingleStaticDataSet());
 
 		for (int i = 0; i < 100; i++) {
@@ -48,9 +61,13 @@ public class TestDataSetIterator {
 		}
 	}
 
+	/**
+	 * Test the iteration over a {@code DataSet} with a single
+	 * {@code DataRecord}.
+	 */
 	@Test
 	public void testSingleDataSetIterator() {
-		final DataSetIterator iterator = new DataSetIterator(
+		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
 				new SingleStaticDataSet("myValue"));
 
 		for (int i = 0; i < 100; i++) {
@@ -70,9 +87,12 @@ public class TestDataSetIterator {
 		}
 	}
 
+	/**
+	 * Tests the iteration over several {@code DataSet} instanances.
+	 */
 	@Test
 	public void testMultipleDataSetIterator() {
-		final DataSetIterator iterator = new DataSetIterator(
+		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
 				new SingleStaticDataSet("myValue", "anotherValue", 5),
 				new SingleStaticDataSet(new SingleStaticDataSetEntry(1, "#1",
 						"THE VALUE IS 1"), new SingleStaticDataSetEntry(2,

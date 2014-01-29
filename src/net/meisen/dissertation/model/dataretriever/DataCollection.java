@@ -55,6 +55,20 @@ public abstract class DataCollection<D> {
 	 *            the names to be set, cannot be {@code null}
 	 */
 	protected void setNames(final D[] names) {
+		setNames(names == null ? (Collection<D>) null : Arrays.asList(names));
+	}
+
+	/**
+	 * Set the names of the data of the collection. The names can only be set
+	 * once and only if those are not set during construction (see
+	 * {@link #DataCollection(Object[])}). If not set during construction, the
+	 * names have to be set directly after it (i.e. no other method should be
+	 * called prior to the setting).
+	 * 
+	 * @param names
+	 *            the names to be set, cannot be {@code null}
+	 */
+	protected void setNames(final Collection<D> names) {
 		if (this.names != null) {
 			throw new IllegalStateException(
 					"The names of a DataCollection cannot be modified after those are defined once.");
@@ -62,7 +76,10 @@ public abstract class DataCollection<D> {
 			return;
 		}
 
-		this.names = Collections.unmodifiableList(Arrays.asList(names));
+		final List<D> nameList = new ArrayList<D>();
+		nameList.addAll(names);
+
+		this.names = Collections.unmodifiableList(nameList);
 	}
 
 	/**
@@ -189,7 +206,7 @@ public abstract class DataCollection<D> {
 	 * 
 	 * @param pos
 	 *            the position to be validated
-	 *            
+	 * 
 	 * @return {@code true} if the position is a valid position, otherwise
 	 *         {@code false}
 	 */

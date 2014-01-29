@@ -2,11 +2,25 @@ package net.meisen.dissertation.model.datasets;
 
 import java.util.Iterator;
 
+/**
+ * This class defines an {@code Iterator} used to iterate over a
+ * {@code SingleStaticDataSet}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class SingleStaticDataSetIterator implements Iterator<IDataRecord> {
 
 	private SingleStaticDataSet dataSet;
 	private int current = 0;
 
+	/**
+	 * Creates an {@code Iterator} used to iterate over the specified
+	 * {@code  SingleStaticDataSet}.
+	 * 
+	 * @param dataSet
+	 *            the {@code SingleStaticDataSet} to iterate over
+	 */
 	public SingleStaticDataSetIterator(final SingleStaticDataSet dataSet) {
 		this.dataSet = dataSet;
 	}

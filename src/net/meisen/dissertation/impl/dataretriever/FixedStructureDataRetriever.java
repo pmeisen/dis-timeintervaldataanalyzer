@@ -13,6 +13,18 @@ import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
  * 
  */
 public class FixedStructureDataRetriever extends BaseDataRetriever {
+	/**
+	 * The name of the field added when using the default configuration
+	 */
+	public final static String DEF_NAME = "RANDOM_INTEGER";
+
+	/**
+	 * Constructs a {@code FixedStructureDataRetriever} using the specified
+	 * default configuration.
+	 */
+	public FixedStructureDataRetriever() {
+		this(null);
+	}
 
 	/**
 	 * Constructor used to create a new instance of a
@@ -37,7 +49,7 @@ public class FixedStructureDataRetriever extends BaseDataRetriever {
 		// create a configuration with just one random integer value
 		final FixedStructureDataRetrieverConfig defConfig = new FixedStructureDataRetrieverConfig();
 		final FixedStructureDataRetrieverConfigEntry entry = new FixedStructureDataRetrieverConfigEntry();
-		entry.setName("RANDOM_INTEGER");
+		entry.setName(DEF_NAME);
 		entry.setType(Integer.class);
 		defConfig.addEntry(entry);
 

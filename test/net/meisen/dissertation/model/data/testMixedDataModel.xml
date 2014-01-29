@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+  <bean id="dataModelId" class="net.meisen.dissertation.model.data.DataModel" />
+
+  <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+    <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
+      <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
+        <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
+          <bean class="net.meisen.dissertation.impl.dataretriever.DbConnectionConfig">    
+            <property name="type" value="jdbc"/>
+            <property name="url" value="jdbc:hsqldb:hsql://localhost:6666/tidaTestData"/>
+            <property name="driver" value="org.hsqldb.jdbcDriver"/>
+            <property name="username" value="SA"/>
+            <property name="password" value=""/>
+          </bean>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="net.meisen.dissertation.model.dataretriever.IQueryConfiguration">
+      <bean class="net.meisen.dissertation.impl.dataretriever.DbQueryConfig">
+        <property name="query">
+          <value>SELECT * FROM TB_TESTDATA</value>
+        </property>
+        <property name="language" value="sql"/>
+      </bean>
+    </constructor-arg>
+  </bean>
+
+  <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+    <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
+      <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
+        <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
+          <bean class="net.meisen.dissertation.impl.dataretriever.DbConnectionConfig">    
+            <property name="type" value="jdbc"/>
+            <property name="url" value="jdbc:hsqldb:hsql://localhost:6666/tidaTestData"/>
+            <property name="driver" value="org.hsqldb.jdbcDriver"/>
+            <property name="username" value="SA"/>
+            <property name="password" value=""/>
+          </bean>
+        </constructor-arg>
+      </bean>
+    </constructor-arg>
+    <constructor-arg type="net.meisen.dissertation.model.dataretriever.IQueryConfiguration">
+      <bean class="net.meisen.dissertation.impl.dataretriever.DbQueryConfig">
+        <property name="query">
+          <value>SELECT FIXED, NULL AS NVL, COUNTER, NULL AS LAST FROM TB_TESTDATA</value>
+        </property>
+        <property name="language" value="sql"/>
+      </bean>
+    </constructor-arg>
+  </bean>
+
+  <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
+    <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
+      <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+          <constructor-arg type="int" value="1" />
+          <constructor-arg type="java.lang.String" value="COUNTER" />
+          <constructor-arg type="java.lang.Object">
+            <value type="java.lang.Integer">1</value>
+          </constructor-arg>
+        </bean>
+      </array>
+    </constructor-arg>
+  </bean>
+
+  <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
+    <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
+      <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+          <constructor-arg type="int" value="1" />
+          <constructor-arg type="java.lang.String" value="FIXED" />
+          <constructor-arg type="java.lang.Object">
+            <value type="java.lang.String">ANOTHER FIXED VALUE</value>
+          </constructor-arg>
+        </bean>
+
+        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+          <constructor-arg type="int" value="3" />
+          <constructor-arg type="java.lang.String" value="COUNTER" />
+          <constructor-arg type="java.lang.Object">
+            <value type="java.lang.Integer">2</value>
+          </constructor-arg>
+        </bean>
+      </array>
+    </constructor-arg>
+  </bean>
+</beans>

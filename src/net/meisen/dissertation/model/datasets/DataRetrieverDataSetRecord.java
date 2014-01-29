@@ -29,7 +29,7 @@ public class DataRetrieverDataSetRecord implements IDataRecord {
 
 	@Override
 	public Object getValue(final int position) {
-		return record.getDataByPos(position);
+		return record.getDataByPos(position - 1);
 	}
 
 	@Override
@@ -45,5 +45,15 @@ public class DataRetrieverDataSetRecord implements IDataRecord {
 	@Override
 	public int getSize() {
 		return record.getSize();
+	}
+
+	@Override
+	public String toString() {
+		return record == null ? null : record.toString();
+	}
+
+	@Override
+	public boolean isValidPosition(int position) {
+		return position > 0 && position <= record.getSize();
 	}
 }

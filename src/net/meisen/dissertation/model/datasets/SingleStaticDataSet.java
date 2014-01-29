@@ -2,21 +2,38 @@ package net.meisen.dissertation.model.datasets;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * An implementation of a {@code DataSet} with just one single
+ * {@code DataRecord}. The {@code DataSet} is defined by it's
+ * {@code SingleStaticDataSetEntries}.
+ * 
+ * @author pmeisen
+ * 
+ * @see SingleStaticDataSetEntry
+ * 
+ */
 public class SingleStaticDataSet implements IDataSet, IDataRecord {
 
 	private final SingleStaticDataSetEntry[] entries;
 
-	public SingleStaticDataSet(final Object... objects) {
+	/**
+	 * Constructor to create a {@code SingleStaticDataSet} for the specified
+	 * {@code values}. The entries will be generated for each value and
+	 * positioned by insertion-order.
+	 * 
+	 * @param values
+	 *            the values of the {@code SingleStaticDataSet}
+	 */
+	public SingleStaticDataSet(final Object... values) {
 
-		if (objects == null) {
+		if (values == null) {
 			this.entries = new SingleStaticDataSetEntry[0];
 		} else {
-			this.entries = new SingleStaticDataSetEntry[objects.length];
-			for (int i = 0; i < objects.length; i++) {
-				final Object object = objects[i];
+			this.entries = new SingleStaticDataSetEntry[values.length];
+			for (int i = 0; i < values.length; i++) {
+				final Object object = values[i];
 				if (object != null) {
 					this.entries[i] = new SingleStaticDataSetEntry(i, object);
 				}
@@ -24,6 +41,26 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 		}
 	}
 
+	/**
+	 * Constructor to create a {@code SingleStaticDataSet} for the specified
+	 * {@code entries}.
+	 * 
+	 * @param entries
+	 *            the entries of the {@code SingleStaticDataSet}
+	 */
+	public SingleStaticDataSet(
+			final Collection<SingleStaticDataSetEntry> entries) {
+		this(entries == null ? null : entries
+				.toArray(new SingleStaticDataSetEntry[] {}));
+	}
+
+	/**
+	 * Constructor to create a {@code SingleStaticDataSet} for the specified
+	 * {@code entries}.
+	 * 
+	 * @param entries
+	 *            the entries of the {@code SingleStaticDataSet}
+	 */
 	public SingleStaticDataSet(final SingleStaticDataSetEntry... entries) {
 		final int initCapacity;
 
@@ -77,12 +114,6 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 		}
 	}
 
-	public SingleStaticDataSet(
-			final Collection<SingleStaticDataSetEntry> entries) {
-		this(entries == null ? null : entries
-				.toArray(new SingleStaticDataSetEntry[] {}));
-	}
-
 	@Override
 	public Object getValue(final String name) {
 		if (name == null) {
@@ -131,6 +162,14 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 		return position > 0 && position <= getSize();
 	}
 
+	/**
+	 * Gets the value of the entry.
+	 * 
+	 * @param entry
+	 *            the entry to get the value for
+	 * 
+	 * @return the value of the entry
+	 */
 	protected Object getValue(final SingleStaticDataSetEntry entry) {
 		if (entry == null) {
 			return null;

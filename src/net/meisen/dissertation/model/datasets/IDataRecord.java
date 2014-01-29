@@ -47,6 +47,19 @@ public interface IDataRecord {
 	public Object getValue(final String name) throws RuntimeException;
 
 	/**
+	 * Checks if a position is valid for {@code this} {@code DataRecord}. A
+	 * position is {@code 1}-based.
+	 * 
+	 * @param position
+	 *            the position to be checked
+	 * 
+	 * @return {@code true} if a value for the {@code position} can be retrieved
+	 *         (i.e. no exception is thrown) for {@code this} {@code DataRecord}
+	 *         , otherwise {@code false}
+	 */
+	public boolean isValidPosition(final int position);
+
+	/**
 	 * Gets the amount of data (i.e. positions)
 	 * 
 	 * @return the amount of data (i.e. positions)
