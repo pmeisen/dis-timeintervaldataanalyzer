@@ -18,7 +18,19 @@
     <dataset>
       <entry position="1" class="java.util.Date" name="date" value="20.01.1981 08:07:00" />
       <entry position="2" name="name" value="Philipp" />
-      <entry position="3" name="status" value="1" />
+      <entry position="3" class="java.lang.String" name="status" value="1" />
+    </dataset>
+    
+    <dataset>
+      <entry name="double" value="12.5" />
+      <entry name="string" value="Philipp" />
+      <entry name="integer" value="1" />
+      <entry name="date" value="20.01.1981" />
+      
+      <entry name="intLong" type="long" value="1" />
+      <entry name="intDouble" type="double" value="1" />
+      <entry name="intBigInt" type="bigInt" value="1" />
+      <entry name="intBigDec" type="bigDec" value="1" />
     </dataset>
   </data>
 </model>

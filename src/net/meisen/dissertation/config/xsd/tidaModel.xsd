@@ -15,6 +15,13 @@
       <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_]*(\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*" />
     </xs:restriction>
   </xs:simpleType>
+  
+  <xs:simpleType name="nonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+      <xs:pattern value="[^\s]+" />
+    </xs:restriction>
+  </xs:simpleType>
 
   <xs:element name="model">
     <xs:complexType>
@@ -114,6 +121,7 @@
                     <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
                     <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
+                        <xs:attribute name="type" type="nonEmptyString" use="optional" />
                         <xs:attribute name="class" type="javaClass" use="optional" />
                         <xs:attribute name="value" type="xs:string" use="optional" />
                         <xs:attribute name="name" type="xs:string" use="optional" />

@@ -59,6 +59,19 @@ public class DataModel implements IDataSet {
 		return true;
 	}
 
+	/**
+	 * Checks if there is at least one {@code DataSet} within the
+	 * {@code DataModel} which has the specified {@code name}, i.e.
+	 * {@link IDataSet#hasNamedValue(String)} returns {@code true}.
+	 * 
+	 * @param name
+	 *            the name to be checked
+	 * 
+	 * @return {@code true} if there is at least one {@code DataSet} with the
+	 *         {@code name}, otherwise {@code false}
+	 * 
+	 * @see IDataSet
+	 */
 	public boolean hasNamedValueOnce(final String name) {
 		if (dataSets == null) {
 			return false;
@@ -94,6 +107,19 @@ public class DataModel implements IDataSet {
 		return true;
 	}
 
+	/**
+	 * Checks if there is at least one {@code DataSet} within the
+	 * {@code DataModel} with the specified {@code position}, i.e.
+	 * {@link IDataSet#isValidPosition(int)} returns {@code true}.
+	 * 
+	 * @param position
+	 *            the position to be checked
+	 * 
+	 * @return {@code true} if there is at least one {@code DataSet} with the
+	 *         {@code position}, otherwise {@code false}
+	 * 
+	 * @see IDataSet
+	 */
 	public boolean isValidPositionOnce(int position) {
 		if (dataSets == null) {
 			return false;

@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.data;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -32,6 +33,8 @@ public class TimeIntervalDataAnalyzerModel {
 	 */
 	public TimeIntervalDataAnalyzerModel() {
 		this(null, null);
+		
+		BigDecimal d;
 	}
 
 	/**
@@ -83,5 +86,9 @@ public class TimeIntervalDataAnalyzerModel {
 
 	public MetaDataModel getMetaDataModel() {
 		return metaDataModel;
+	}
+	
+	public DataModel getDataModel() {
+		return dataModel;
 	}
 }

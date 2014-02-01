@@ -3,6 +3,9 @@ package net.meisen.dissertation.config.xslt;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +15,9 @@ import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
+import net.meisen.general.genmisc.types.Classes;
+import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Strings;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 
 /**
@@ -122,6 +128,68 @@ public class DefaultValues {
 		d.put("fxd", FixedStructureDataRetriever.class.getName());
 
 		return d;
+	}
+
+	/**
+	 * Determines the class to be used for the specified {@code type}.
+	 * 
+	 * @param type
+	 *            the type to specify the class for
+	 * 
+	 * @return the string representation of the class to be used for the
+	 *         {@code type}
+	 */
+	public static String determineTypeClass(final String type) {
+		if ("int".equalsIgnoreCase(type)) {
+			return "int";
+		} else if ("long".equalsIgnoreCase(type)) {
+			return "long";
+		} else if ("double".equalsIgnoreCase(type)) {
+			return "double";
+		} else if ("date".equalsIgnoreCase(type)) {
+			return Date.class.getName();
+		} else if ("bigInt".equalsIgnoreCase(type)) {
+			return BigInteger.class.getName();
+		} else if ("bigDec".equalsIgnoreCase(type)) {
+			return BigDecimal.class.getName();
+		} else if (Classes.getClass(type, false) != null) {
+			return type;
+		} else {
+			throw new IllegalArgumentException(
+					"The type '"
+							+ type
+							+ "' is not supported please try to specify the class using the class attribute.");
+		}
+	}
+
+	/**
+	 * Determines the class to be used for the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to specify the class for
+	 * 
+	 * @return the string representation of the class to be used for the
+	 *         {@code value}
+	 */
+	public static String determineValueClass(final String value) {
+
+		if (value == null || "".equals(value.trim())) {
+			return String.class.getName();
+		} else if (Strings.isInteger(value) != null) {
+			return "int";
+		} else if (Strings.isLong(value) != null) {
+			return "long";
+		} else if (Strings.isDouble(value) != null) {
+			return "double";
+		} else if (Strings.isBigInteger(value) != null) {
+			return BigInteger.class.getName();
+		} else if (Strings.isBigDecimal(value) != null) {
+			return BigDecimal.class.getName();
+		} else if (Dates.isDate(value) != null) {
+			return Date.class.getName();
+		} else {
+			return String.class.getName();
+		}
 	}
 
 	/**

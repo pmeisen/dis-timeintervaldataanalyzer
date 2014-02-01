@@ -147,11 +147,17 @@
                   </constructor-arg>
                   <constructor-arg type="java.lang.Object">
                     <xsl:choose>
-                      <xsl:when test="@value and @class">
-                        <xsl:variable name="valueClass" select="@class" />
+                      <xsl:when test="@value">
+                        <xsl:variable name="valueClass">
+                          <xsl:choose>  
+                            <xsl:when test="@class"><xsl:value-of select="@class" /></xsl:when>
+                            <xsl:when test="@type"><xsl:value-of select="mdef:determineTypeClass(@type)" /></xsl:when>
+                            <xsl:otherwise><xsl:value-of select="mdef:determineValueClass(@value)" /></xsl:otherwise>
+                          </xsl:choose>
+                        </xsl:variable>
+                        
                         <value type="{$valueClass}"><xsl:value-of select="@value" /></value>
                       </xsl:when>
-                      <xsl:when test="@value"><value type="java.lang.String"><xsl:value-of select="@value" /></value></xsl:when>
                       <xsl:otherwise><null /></xsl:otherwise>
                     </xsl:choose>
                   </constructor-arg>

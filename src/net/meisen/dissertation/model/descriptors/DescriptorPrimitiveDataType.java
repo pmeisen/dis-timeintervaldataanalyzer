@@ -1,8 +1,6 @@
 package net.meisen.dissertation.model.descriptors;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
+import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
@@ -30,7 +28,8 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 	 * @param id
 	 *            the identifier of the descriptor
 	 */
-	public DescriptorPrimitiveDataType(final DescriptorModel<I> model, final I id) {
+	public DescriptorPrimitiveDataType(final DescriptorModel<I> model,
+			final I id) {
 		super(model, id);
 	}
 
@@ -67,87 +66,7 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 	 *         primitive type
 	 */
 	public D mapToDataType(final Object value) {
-
-		if (value == null) {
-			return null;
-		}
-
-		final Class<D> clazz = getPrimitiveDataType();
-
-		if (clazz.equals(value.getClass())) {
-			return castToType(value);
-		} else if (Number.class.isAssignableFrom(clazz)) {
-			@SuppressWarnings("unchecked")
-			final Class<? extends Number> numClazz = (Class<? extends Number>) clazz;
-			final Number number = (Number) value;
-			final Number result = castToNumber(number, numClazz);
-
-			// check the result
-			if (result != null) {
-				final Class<?> srcClazz = number.getClass();
-				final Number cmpNumber = castToNumber(result, number.getClass());
-
-				if (cmpNumber.equals(number)) {
-					return castToType(result);
-				}
-				/*
-				 * There is a problem with the BigDecimal the equality depends
-				 * on how it is created, i.e. using new BigDecimal(...) or
-				 * BigDecimal.valueOf(...). The castToNumber method uses the
-				 * valueOf, therefore here we check the constructor.
-				 */
-				else if (BigDecimal.class.equals(srcClazz)
-						&& new BigDecimal(result.doubleValue()).equals(number)) {
-					return castToType(result);
-				}
-			}
-		}
-
-		// if we came so far there is no hope
-		return null;
-	}
-
-	/**
-	 * Method which maps a {@code number} to the specified {@code clazz}. The
-	 * specified {@code clazz} is another {@code Number}.
-	 * 
-	 * @param number
-	 *            the number to be casted
-	 * @param clazz
-	 *            the {@code Number}-class to cast the {@code number} to
-	 * 
-	 * @return the casted {@code number} or {@code null} if a cast wasn't
-	 *         possible
-	 */
-	protected Number castToNumber(final Number number,
-			final Class<? extends Number> clazz) {
-		final Number result;
-
-		if (number == null) {
-			return null;
-		} else if (number.getClass().equals(clazz)) {
-			return number;
-		} else if (Byte.class.equals(clazz)) {
-			result = number.byteValue();
-		} else if (Short.class.equals(clazz)) {
-			result = number.shortValue();
-		} else if (Integer.class.equals(clazz)) {
-			result = number.intValue();
-		} else if (Long.class.equals(clazz)) {
-			result = number.longValue();
-		} else if (Float.class.equals(clazz)) {
-			result = number.floatValue();
-		} else if (Double.class.equals(clazz)) {
-			result = number.doubleValue();
-		} else if (BigInteger.class.equals(clazz)) {
-			result = BigInteger.valueOf(number.longValue());
-		} else if (BigDecimal.class.equals(clazz)) {
-			result = BigDecimal.valueOf(number.doubleValue());
-		} else {
-			return null;
-		}
-
-		return result;
+		return Numbers.mapToDataType(value, getPrimitiveDataType());
 	}
 
 	/**
@@ -155,7 +74,7 @@ public abstract class DescriptorPrimitiveDataType<D extends Object, T extends De
 	 * 
 	 * @param value
 	 *            the value to be casted
-	 *            
+	 * 
 	 * @return the casted value
 	 */
 	protected D castToType(final Object value) {

@@ -5,11 +5,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -332,10 +335,11 @@ public class TestXsltTidaModel {
 		int count = 0;
 		while (it.hasNext()) {
 			final IDataRecord record = it.next();
-			assertEquals(3, record.getSize());
 			count++;
 
 			if (count == 1) {
+				assertEquals(3, record.getSize());
+
 				assertEquals(Dates.createDateFromString("20.01.1981 08:00",
 						"dd.MM.yyyy HH:mm"), record.getValue(1));
 				assertEquals("Tobias", record.getValue(2));
@@ -343,6 +347,8 @@ public class TestXsltTidaModel {
 
 				assertFalse(record.hasNamedValue("status"));
 			} else if (count == 2) {
+				assertEquals(3, record.getSize());
+
 				assertEquals(Dates.createDateFromString("20.01.1981 08:07",
 						"dd.MM.yyyy HH:mm"), record.getValue(1));
 				assertEquals("Philipp", record.getValue(2));
@@ -350,9 +356,24 @@ public class TestXsltTidaModel {
 
 				assertTrue(record.hasNamedValue("status"));
 				assertEquals("1", record.getValue("status"));
+			} else if (count == 3) {
+				assertEquals(8, record.getSize());
+
+				assertEquals(12.5d, record.getValue("double"));
+				assertEquals("Philipp", record.getValue("string"));
+				assertEquals(1, record.getValue("integer"));
+				assertEquals(
+						Dates.createDateFromString("20.01.1981", "dd.MM.yyyy"),
+						record.getValue("date"));
+
+				assertEquals(1l, record.getValue("intLong"));
+				assertEquals(1.0d, (Double) record.getValue("intDouble"), 0.0d);
+				assertEquals(new BigInteger("1"), record.getValue("intBigInt"));
+				assertEquals(new BigDecimal("1"), record.getValue("intBigDec"));
+			} else {
+				fail("Count cannot have a value of '" + count + "'");
 			}
 		}
-		assertEquals(2, count);
 
 		// cleanUp
 		it.close();

@@ -1,6 +1,7 @@
 package net.meisen.dissertation;
 
 import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
+import net.meisen.dissertation.config.xslt.TestDefaultValues;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.dataretriever.TestDbDataRetriever;
@@ -50,6 +51,9 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+
+		// Test the utilities
+		TestDefaultValues.class,
 
 		// Test general helper
 		TestDb.class,
