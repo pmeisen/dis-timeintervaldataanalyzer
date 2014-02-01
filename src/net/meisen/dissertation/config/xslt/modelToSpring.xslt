@@ -14,6 +14,7 @@
   
   <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
+  <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
   <xsl:variable name="timeIntervalDataAnalyzerModelId" select="mdef:getId('TIMEINTERVALDATAANALYZERMODEL_ID')" />
 
@@ -128,10 +129,51 @@
         </property>
       </bean>
       
+      <!-- create the structure -->
+      <bean id="{$dataStructureId}" class="net.meisen.dissertation.model.data.DataStructure">
+        <constructor-arg type="net.meisen.dissertation.model.datastructure.StructureEntry[]">
+          <xsl:choose>
+          
+            <xsl:when test="mns:structure/node()">
+              <array value-type="net.meisen.dissertation.model.datastructure.StructureEntry">
+                <xsl:for-each select="mns:structure/node()[not(self::text()[not(normalize-space())])]">
+                  <xsl:choose>
+                  
+                    <xsl:when test="local-name() = 'meta'">
+                      <bean class="net.meisen.dissertation.model.datastructure.MetaStructureEntry">
+                        <constructor-arg type="java.lang.String" value="HALLO" />
+                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                      </bean>
+                    </xsl:when>
+                    
+                    <xsl:when test="local-name() = 'key'">
+                      <bean class="net.meisen.dissertation.model.datastructure.KeyStructureEntry">
+                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                      </bean>
+                    </xsl:when>
+                    
+                    <xsl:when test="local-name() = 'interval'">
+                      <bean class="net.meisen.dissertation.model.datastructure.IntervalStructureEntry">
+                        <constructor-arg type="net.meisen.dissertation.model.datastructure.IntervalStructureEntry$IntervalStructureEntryType" value="START" />
+                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                      </bean>
+                    </xsl:when>
+                    
+                    <xsl:otherwise><xsl:message terminate="no">Invalid element with name '<xsl:value-of select ="local-name()" />' found, it will be skipped!</xsl:message></xsl:otherwise>
+                  </xsl:choose>
+                </xsl:for-each>
+              </array>
+            </xsl:when>
+            
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </constructor-arg>
+      </bean>
+      
       <!-- create the dataModel -->
       <bean id="{$dataModelId}" class="net.meisen.dissertation.model.data.DataModel" />
       
-      <!-- add the different dataSets -->      
+      <!-- add the static dataSets -->
       <xsl:for-each select="mns:data/mns:dataset[not(@dataretriever)]">
         <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
           <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
@@ -150,6 +192,9 @@
                       <xsl:when test="@value">
                         <xsl:variable name="valueClass">
                           <xsl:choose>  
+                            <xsl:when test="@class and @type">
+                              <xsl:message terminate="yes">Please specify only a class or a type!</xsl:message>
+                            </xsl:when>
                             <xsl:when test="@class"><xsl:value-of select="@class" /></xsl:when>
                             <xsl:when test="@type"><xsl:value-of select="mdef:determineTypeClass(@type)" /></xsl:when>
                             <xsl:otherwise><xsl:value-of select="mdef:determineValueClass(@value)" /></xsl:otherwise>
@@ -168,6 +213,7 @@
         </bean>
       </xsl:for-each>
       
+      <!-- add the dataSets getting the data from dataRetrievers -->
       <xsl:for-each select="mns:data/mns:dataset[@dataretriever]">
         <xsl:variable name="dataretriever" select="@dataretriever" />
 
@@ -218,6 +264,28 @@
       <constructor-arg type="java.lang.Class" value="{$class}" />
       <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
     </bean>
+  </xsl:template>
+  
+  <!--
+    Template to create the common constructor values of a StructureEntry
+    -->
+  <xsl:template name="beanStructureEntryConsutructorArgs">
+    <xsl:if test="not(@name) and not(@position)">
+      <xsl:message terminate="yes">A structure must have at least a name or a position.</xsl:message>
+    </xsl:if>
+  
+    <constructor-arg type="int">
+      <xsl:choose>
+        <xsl:when test="@position"><value><xsl:value-of select="@position" /></value></xsl:when>
+        <xsl:otherwise><value>-1</value></xsl:otherwise>
+      </xsl:choose>
+    </constructor-arg>
+    <constructor-arg type="java.lang.String">
+      <xsl:choose>
+        <xsl:when test="@name"><value><xsl:value-of select="@name" /></value></xsl:when>
+        <xsl:otherwise><null /></xsl:otherwise>
+      </xsl:choose>
+    </constructor-arg>
   </xsl:template>
   
   <!--

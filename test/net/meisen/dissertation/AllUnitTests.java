@@ -25,6 +25,7 @@ import net.meisen.dissertation.impl.naturals.TestIntegerNaturalsFactory;
 import net.meisen.dissertation.impl.naturals.TestLongNaturals;
 import net.meisen.dissertation.impl.naturals.TestLongNaturalsFactory;
 import net.meisen.dissertation.model.data.TestDataModel;
+import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
@@ -107,7 +108,7 @@ import org.junit.runners.Suite;
 		TestMultipleDataSetIterator.class,
 
 		// Test the different created instances
-		TestMetaDataModel.class, TestDataModel.class,
+		TestMetaDataModel.class, TestDataStructure.class, TestDataModel.class,
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,

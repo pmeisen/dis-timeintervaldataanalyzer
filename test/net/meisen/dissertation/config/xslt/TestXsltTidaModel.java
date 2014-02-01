@@ -37,6 +37,7 @@ import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.model.data.DataModel;
+import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -155,20 +156,17 @@ public class TestXsltTidaModel {
 		try {
 			modulesHolder = configuration.loadDelayed("tidaModelBeans", res);
 		} catch (final BeanCreationException e) {
-			throw SpringHelper.getNoneSpringBeanException(e,
-					RuntimeException.class);
+			final RuntimeException innerE = SpringHelper
+					.getNoneSpringBeanException(e, RuntimeException.class);
+
+			if (innerE == null) {
+				throw e;
+			} else {
+				throw innerE;
+			}
 		}
 	}
 
-	/**
-	 * Gets the model created by the specified {@code xml}.
-	 * 
-	 * @param xml
-	 *            the path to the xml with the {@code MetaDataModel} to be
-	 *            loaded
-	 * 
-	 * @return the loaded {@code MetaDataModel}
-	 */
 	private MetaDataModel getMetaDataModel(final String xml) {
 		setModulesHolder(xml);
 		return modulesHolder.getModule(DefaultValues.METADATAMODEL_ID);
@@ -179,14 +177,16 @@ public class TestXsltTidaModel {
 		return modulesHolder.getModule(DefaultValues.DATAMODEL_ID);
 	}
 
+	private DataStructure getDataStructure(final String xml) {
+		setModulesHolder(xml);
+		return modulesHolder.getModule(DefaultValues.DATASTRUCTURE_ID);
+	}
+
 	/**
 	 * Tests the replacement of the default {@code IndexedCollectionFactory}.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the file cannot be tansformed
 	 */
 	@Test
-	public void testDefaultFactories() throws TransformationFailedException {
+	public void testDefaultFactories() {
 		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
 		final Class<?> res = model.getIndexedCollectionFactory().getClass();
 
@@ -196,12 +196,9 @@ public class TestXsltTidaModel {
 
 	/**
 	 * Tests the replacement of the default {@code IndexedCollectionFactory}.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the file cannot be transformed
 	 */
 	@Test
-	public void testChangedFactories() throws TransformationFailedException {
+	public void testChangedFactories() {
 		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
 		final Class<?> res = model.getIndexedCollectionFactory().getClass();
 
@@ -212,12 +209,9 @@ public class TestXsltTidaModel {
 	/**
 	 * Tests the implementation of {@link MetaDataModel#getDescriptorModels()}
 	 * and {@link MetaDataModel#getDescriptorModel(String)}.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the file cannot be transformed
 	 */
 	@Test
-	public void testGetDescriptorModel() throws TransformationFailedException {
+	public void testGetDescriptorModel() {
 		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
 
 		assertEquals(2, model.getDescriptorModels().size());
@@ -233,12 +227,9 @@ public class TestXsltTidaModel {
 	 * Tests the implementation of
 	 * {@link MetaDataModel#getDescriptor(String, Object)} and
 	 * {@link MetaDataModel#getDescriptorByValue(String, Object)}.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the file cannot be transformed
 	 */
 	@Test
-	public void testGetDescriptor() throws TransformationFailedException {
+	public void testGetDescriptor() {
 		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/descriptors.xml");
 
 		assertEquals(5, model.getDescriptors().size());
@@ -261,13 +252,9 @@ public class TestXsltTidaModel {
 
 	/**
 	 * Tests the implementation of an extension.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the file cannot be transformed
 	 */
 	@Test
-	public void testDescriptorModelExtension()
-			throws TransformationFailedException {
+	public void testDescriptorModelExtension() {
 		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/extendedDescriptors.xml");
 
 		assertNotNull(model.getDescriptorModel("D4"));
@@ -297,17 +284,31 @@ public class TestXsltTidaModel {
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
 	}
 
+	@Test
+	public void testEmptyStructure() {
+		final DataStructure structure = getDataStructure("/net/meisen/dissertation/config/xslt/emptyStructure.xml");
+		assertEquals(0, structure.getSize());
+	}
+
+	@Test
+	public void testStructure() {
+		final DataStructure structure = getDataStructure("/net/meisen/dissertation/config/xslt/structure.xml");
+		assertEquals(9, structure.getSize());
+	}
+	
+	@Test
+	public void testStructureWithoutBinding() {
+		thrown.expect(NoSuchBeanDefinitionException.class);
+		thrown.expectMessage(JUnitMatchers.containsString("No bean named"));
+		
+		getDataStructure("/net/meisen/dissertation/config/xslt/invalidStructureWithoutBinding.xml");
+	}
+
 	/**
 	 * Tests the retrieval of no defined data.
-	 * 
-	 * @throws TransformationFailedException
-	 *             if the xml cannot be read
-	 * @throws ParseException
-	 *             if a comparison value cannot be parsed
 	 */
 	@Test
-	public void testNoData() throws TransformationFailedException,
-			ParseException {
+	public void testNoData() {
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/noDataSets.xml");
 		final Iterator<IDataRecord> it = model.iterate();
 

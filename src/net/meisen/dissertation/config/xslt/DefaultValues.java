@@ -39,6 +39,11 @@ public class DefaultValues {
 	public static final String DATAMODEL_ID = "dataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code DataStructure}.
+	 */
+	public static final String DATASTRUCTURE_ID = "dataStructure";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code TimeIntervalDataAnalyzerModel}.
 	 */
 	public static final String TIMEINTERVALDATAANALYZERMODEL_ID = "timeIntervalDataAnalyzerModel";

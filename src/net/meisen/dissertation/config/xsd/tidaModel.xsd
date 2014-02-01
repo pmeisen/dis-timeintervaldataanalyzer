@@ -108,7 +108,30 @@
         
         <xs:element name="structure" minOccurs="0">
           <xs:complexType>
+            <xs:sequence>
 
+              <xs:element name="meta" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:complexContent>
+                    <xs:extension base="structurelement">
+                      <xs:attribute name="descriptor" type="identifier" use="required" />
+                    </xs:extension>
+                  </xs:complexContent>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="interval" minOccurs="0" maxOccurs="2">
+                <xs:complexType>
+                  <xs:complexContent>
+                    <xs:extension base="structurelement">
+                      <xs:attribute name="type" type="identifier" use="required" />
+                    </xs:extension>
+                  </xs:complexContent>
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="key" minOccurs="0" maxOccurs="unbounded" type="structurelement" />
+            </xs:sequence>
           </xs:complexType>
         </xs:element>
         
@@ -124,7 +147,7 @@
                         <xs:attribute name="type" type="nonEmptyString" use="optional" />
                         <xs:attribute name="class" type="javaClass" use="optional" />
                         <xs:attribute name="value" type="xs:string" use="optional" />
-                        <xs:attribute name="name" type="xs:string" use="optional" />
+                        <xs:attribute name="name" type="nonEmptyString" use="optional" />
                         <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
                       </xs:complexType>
                     </xs:element>
@@ -147,6 +170,11 @@
     <xs:attribute name="id" type="identifier" use="required" />
     <xs:attribute name="name" type="xs:string" use="optional" />
     <xs:attribute name="idfactory" type="javaClass" use="optional" />
+  </xs:complexType>
+  
+  <xs:complexType name="structurelement">
+    <xs:attribute name="name" type="nonEmptyString" use="optional" />
+    <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
   </xs:complexType>
   
   <xs:element name="object" type="descriptor" />

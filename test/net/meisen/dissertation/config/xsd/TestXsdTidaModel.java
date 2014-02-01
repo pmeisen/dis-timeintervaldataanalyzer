@@ -94,6 +94,20 @@ public class TestXsdTidaModel {
 	}
 
 	/**
+	 * Tests the validation of the structure element within the xml-
+	 * 
+	 * @throws ValidationFailedException
+	 *             if the validation is invalid
+	 */
+	@Test
+	public void testDefinitionOfStructure() throws ValidationFailedException {
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineEmptyStructure.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineStructure.xml");
+	}
+
+	/**
 	 * Tests the definition of the data-section within the XML.
 	 * 
 	 * @throws ValidationFailedException
@@ -141,7 +155,7 @@ public class TestXsdTidaModel {
 				"/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml",
 				"The content of element 'meta' is not complete");
 	}
-	
+
 	/**
 	 * Helper method to validate the cause of a {@code SAXParseException}.
 	 * 
