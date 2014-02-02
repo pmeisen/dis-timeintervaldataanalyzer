@@ -10,7 +10,7 @@ import org.apache.http.protocol.HttpContext;
 import net.meisen.general.server.http.listener.api.IServlet;
 import net.meisen.general.server.settings.pojos.Extension;
 
-public class TIDAServerServlet implements IServlet {
+public class TidaServerServlet implements IServlet {
 
 	@Override
 	public void initialize(final Extension e) {

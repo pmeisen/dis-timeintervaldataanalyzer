@@ -17,5 +17,5 @@
   <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-misc.xml" />
 
   <!-- load some other beans into the configuration, which are only needed for running -->
-  <sbc:loader id="tidaBeans" selector="tidaBeans.xml" />
+  <sbc:loader id="tidaModules" selector="net/meisen/dissertation/config/sbconfigurator-tidaModules.xml" />
 </beans>

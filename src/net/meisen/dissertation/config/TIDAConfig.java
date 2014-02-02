@@ -6,6 +6,6 @@ package net.meisen.dissertation.config;
  * @author pmeisen
  * 
  */
-public class TIDAConfig {
+public class TidaConfig {
 	// nothing just needed to identify the context of the configuration
 }

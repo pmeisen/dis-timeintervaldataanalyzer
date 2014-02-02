@@ -39,7 +39,7 @@ import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.time.TestRawTemporalModel;
 import net.meisen.dissertation.model.time.TestRawTimeIntervalFactory;
 import net.meisen.dissertation.model.time.TestRawTimePointFactory;
-import net.meisen.dissertation.server.TestTIDAServer;
+import net.meisen.dissertation.server.TestTidaServer;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -114,7 +114,7 @@ import org.junit.runners.Suite;
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
 
 		// Test the server
-		TestTIDAServer.class })
+		TestTidaServer.class })
 public class AllUnitTests {
 
 }

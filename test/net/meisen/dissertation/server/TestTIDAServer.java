@@ -2,10 +2,10 @@ package net.meisen.dissertation.server;
 
 import org.junit.Test;
 
-public class TestTIDAServer {
+public class TestTidaServer {
 
 	@Test
 	public void test() {
-//		TIDAServer server = new TIDAServer();
+		TidaServer.create();
 	}
 }

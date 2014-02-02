@@ -16,7 +16,7 @@
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
-  <xsl:variable name="timeIntervalDataAnalyzerModelId" select="mdef:getId('TIMEINTERVALDATAANALYZERMODEL_ID')" />
+  <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
     <xsl:variable name="modelId">
@@ -141,7 +141,7 @@
                   
                     <xsl:when test="local-name() = 'meta'">
                       <bean class="net.meisen.dissertation.model.datastructure.MetaStructureEntry">
-                        <constructor-arg type="java.lang.String" value="HALLO" />
+                        <constructor-arg type="java.lang.String"><value><xsl:value-of select="@descriptor" /></value></constructor-arg>
                         <xsl:call-template name="beanStructureEntryConsutructorArgs" />
                       </bean>
                     </xsl:when>
@@ -154,7 +154,7 @@
                     
                     <xsl:when test="local-name() = 'interval'">
                       <bean class="net.meisen.dissertation.model.datastructure.IntervalStructureEntry">
-                        <constructor-arg type="net.meisen.dissertation.model.datastructure.IntervalStructureEntry$IntervalStructureEntryType" value="START" />
+                        <constructor-arg type="java.lang.String"><value><xsl:value-of select="@type" /></value></constructor-arg>
                         <xsl:call-template name="beanStructureEntryConsutructorArgs" />
                       </bean>
                     </xsl:when>
@@ -230,8 +230,8 @@
         </bean>
       </xsl:for-each>
       
-      <!-- create the timeIntervalDataAnalyzerModel -->
-      <bean id="{$timeIntervalDataAnalyzerModelId}" class="net.meisen.dissertation.model.data.TimeIntervalDataAnalyzerModel">
+      <!-- create the tidaModel -->
+      <bean id="{$tidaModelId}" class="net.meisen.dissertation.model.data.TidaModel">
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
       </bean>

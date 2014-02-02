@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.data;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -9,7 +8,7 @@ import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class TimeIntervalDataAnalyzerModel {
+public class TidaModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -22,6 +21,10 @@ public class TimeIntervalDataAnalyzerModel {
 	@Autowired
 	@Qualifier(DefaultValues.DATAMODEL_ID)
 	private DataModel dataModel;
+	
+	@Autowired
+	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
+	private DataStructure dataStructure;
 
 	private final String id;
 	private final String name;
@@ -31,10 +34,8 @@ public class TimeIntervalDataAnalyzerModel {
 	 * instance must be wired prior to it's usage to ensure that a
 	 * {@code baseIndexedCollectionFactory} is available.
 	 */
-	public TimeIntervalDataAnalyzerModel() {
+	public TidaModel() {
 		this(null, null);
-		
-		BigDecimal d;
 	}
 
 	/**
@@ -45,7 +46,7 @@ public class TimeIntervalDataAnalyzerModel {
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
 	 */
-	public TimeIntervalDataAnalyzerModel(final String id) {
+	public TidaModel(final String id) {
 		this(id, null);
 	}
 
@@ -61,7 +62,7 @@ public class TimeIntervalDataAnalyzerModel {
 	 *            the name of the {@code MetaDataModel}, if {@code null} the
 	 *            name will be equal to the {@code id}
 	 */
-	public TimeIntervalDataAnalyzerModel(final String id, final String name) {
+	public TidaModel(final String id, final String name) {
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
 	}
@@ -84,11 +85,15 @@ public class TimeIntervalDataAnalyzerModel {
 		return name;
 	}
 
-	public MetaDataModel getMetaDataModel() {
+	protected MetaDataModel getMetaDataModel() {
 		return metaDataModel;
 	}
-	
-	public DataModel getDataModel() {
+
+	protected DataModel getDataModel() {
 		return dataModel;
+	}
+
+	protected DataStructure getDataStructure() {
+		return dataStructure;
 	}
 }

@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.meisen.dissertation.config.TIDAConfig;
+import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
 import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
@@ -43,6 +43,10 @@ import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
+import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Dates;
@@ -63,7 +67,7 @@ import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -76,7 +80,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 @RunWith(JUnitConfigurationRunner.class)
-@ContextClass(TIDAConfig.class)
+@ContextClass(TidaConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
 public class TestXsltTidaModel {
 
@@ -154,8 +158,8 @@ public class TestXsltTidaModel {
 		}
 
 		try {
-			modulesHolder = configuration.loadDelayed("tidaModelBeans", res);
-		} catch (final BeanCreationException e) {
+			modulesHolder = configuration.loadDelayed("tidaXsltModelLoader", res);
+		} catch (final FatalBeanException e) {
 			final RuntimeException innerE = SpringHelper
 					.getNoneSpringBeanException(e, RuntimeException.class);
 
@@ -284,23 +288,90 @@ public class TestXsltTidaModel {
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
 	}
 
+	/**
+	 * Tests the creation of an empty {@code DataStructure} using the xslt.
+	 */
 	@Test
 	public void testEmptyStructure() {
 		final DataStructure structure = getDataStructure("/net/meisen/dissertation/config/xslt/emptyStructure.xml");
 		assertEquals(0, structure.getSize());
 	}
 
+	/**
+	 * Tests the creation of a {@code DataStructure} using the xslt.
+	 */
 	@Test
 	public void testStructure() {
-		final DataStructure structure = getDataStructure("/net/meisen/dissertation/config/xslt/structure.xml");
-		assertEquals(9, structure.getSize());
+		final DataStructure s = getDataStructure("/net/meisen/dissertation/config/xslt/structure.xml");
+		assertEquals(9, s.getSize());
+
+		// check the read types
+		assertEquals(4, s.getEntriesByClass(MetaStructureEntry.class).size());
+		assertEquals(3, s.getEntriesByClass(KeyStructureEntry.class).size());
+		assertEquals(2, s.getEntriesByClass(IntervalStructureEntry.class)
+				.size());
+
+		// get the meta-values
+		for (final MetaStructureEntry e : s
+				.getEntriesByClass(MetaStructureEntry.class)) {
+			if ("meta1".equals(e.getName())) {
+				assertEquals("D1", e.getDescriptor());
+				assertEquals(-1, e.getPosition());
+			} else if ("meta2".equals(e.getName())) {
+				assertEquals("D2", e.getDescriptor());
+				assertEquals(2, e.getPosition());
+			} else if ("meta3".equals(e.getName())) {
+				assertEquals("D3", e.getDescriptor());
+				assertEquals(-1, e.getPosition());
+			} else if ("meta4".equals(e.getName())) {
+				assertEquals("D4", e.getDescriptor());
+				assertEquals(-1, e.getPosition());
+			} else {
+				fail("Entry with invalid name '" + e.getName() + "' found");
+			}
+		}
+
+		// get the keys
+		for (final KeyStructureEntry e : s
+				.getEntriesByClass(KeyStructureEntry.class)) {
+			if ("autoid1".equals(e.getName())) {
+				assertEquals(-1, e.getPosition());
+			} else if ("autoid2".equals(e.getName())) {
+				assertEquals(-1, e.getPosition());
+			} else if (e.getPosition() == 3) {
+				assertNull(e.getName());
+			} else {
+				fail("Entry with invalid name '" + e.getName()
+						+ "' with position '" + e.getPosition() + "' found");
+			}
+		}
+
+		// get the interval
+		for (final IntervalStructureEntry e : s
+				.getEntriesByClass(IntervalStructureEntry.class)) {
+			if ("intervalend".equals(e.getName())) {
+				assertEquals(-1, e.getPosition());
+				assertEquals(IntervalType.END, e.getType());
+			} else if (e.getPosition() == 1) {
+				assertNull(e.getName());
+				assertEquals(IntervalType.START, e.getType());
+			} else {
+				fail("Entry with invalid name '" + e.getName()
+						+ "' with position '" + e.getPosition() + "' found");
+			}
+		}
 	}
-	
+
+	/**
+	 * Tests the definition of a {@code DataStructure} element without any
+	 * binding, i.e. without a name or a position
+	 */
 	@Test
 	public void testStructureWithoutBinding() {
-		thrown.expect(NoSuchBeanDefinitionException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("No bean named"));
-		
+		thrown.expect(RuntimeException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("xslt could not transform"));
+
 		getDataStructure("/net/meisen/dissertation/config/xslt/invalidStructureWithoutBinding.xml");
 	}
 

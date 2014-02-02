@@ -46,7 +46,7 @@ public class DefaultValues {
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code TimeIntervalDataAnalyzerModel}.
 	 */
-	public static final String TIMEINTERVALDATAANALYZERMODEL_ID = "timeIntervalDataAnalyzerModel";
+	public static final String TIDAMODEL_ID = "timeIntervalDataAnalyzerModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IndexedCollectionFactory}.

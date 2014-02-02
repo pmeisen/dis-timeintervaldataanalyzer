@@ -4,8 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        					   http://dev.meisen.net/sbconfigurator/ns http://dev.meisen.net/xsd/sbconfigurator/sbconfigurator-ns.xsd">
 
-  <!-- loader to load a model -->
-  <sbc:loader id="tidaModelBeans" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="false" loadFromWorkingDir="true"
-              selector="tidaModels.xml"  
-              xslt="net/meisen/dissertation/config/xslt/modelToSpring.xslt"/>
+  <!-- loader to load a model, by default nothing is loaded -->
+  <sbc:loader id="tidaXsltModelLoader" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="false" loadFromWorkingDir="false"
+              selector="tidaModels.xml" xslt="net/meisen/dissertation/config/xslt/modelToSpring.xslt"/>
 </beans>

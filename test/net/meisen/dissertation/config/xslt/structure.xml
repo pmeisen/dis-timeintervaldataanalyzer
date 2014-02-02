@@ -6,7 +6,7 @@
 
   <structure>
     <meta name="meta1" descriptor="D1" />
-    <meta name="meta2" descriptor="D2" />
+    <meta name="meta2" position="2" descriptor="D2" />
     <meta name="meta3" descriptor="D3" />
     <meta name="meta4" descriptor="D4" />
     
@@ -15,7 +15,7 @@
     
     <key name="autoid1" />
     <key name="autoid2" />
-    <key name="autoid3" />
+    <key position="3" />
   </structure>
   
   <data />
