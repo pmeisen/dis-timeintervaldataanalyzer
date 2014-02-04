@@ -36,6 +36,9 @@ public class DescriptorModel<I extends Object> {
 	private final Class<? extends Descriptor> descriptorClass;
 	private final IIdsFactory<I> idsFactory;
 
+	private NullDescriptor<I> nullDescriptor = null;
+	private boolean supportsNullDescriptor = false;
+
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
@@ -209,37 +212,86 @@ public class DescriptorModel<I extends Object> {
 
 	/**
 	 * Creates a {@code Descriptor} with the specified {@code value} using the
-	 * definitions of {@code this} model.
+	 * definitions of {@code this} model. <br/>
+	 * <br/>
+	 * 
+	 * <b>Note</b> (considering {@code null}-values):<br/>
+	 * If {@code null} will be passed and {@code null} values are supported
+	 * (i.e. {@link #supportsNullDescriptor()} returns {@code true}) the method
+	 * will return an instance of a {@code NullDescriptor}. A
+	 * {@code NullDescriptor} does not have to be created and is only created
+	 * once whenever needed. Therefore the method can be called several times
+	 * without throwing an exception if {@code null} is passed as {@code value}
+	 * and if it is supported.
 	 * 
 	 * @param value
 	 *            the value to be added
 	 * 
-	 * @return the created {@code Descriptor}
+	 * @return the created {@code Descriptor} or the {@code NullDescriptor} of
+	 *         this {@code DescriptorModel} if supported and {@code null} is
+	 *         passed
 	 * 
 	 * @see Descriptor
+	 * @see NullDescriptor
 	 */
 	public <D> Descriptor<D, ?, I> createDescriptor(final D value) {
-		final Class<?> valueType = value.getClass();
 
-		// get the constructor
-		final Constructor<? extends Descriptor> constructor = findConstructor(
-				descriptorClass, valueType);
+		if (value == null) {
+			@SuppressWarnings("unchecked")
+			final Descriptor<D, ?, I> descriptor = (Descriptor<D, ?, I>) getNullDescriptor();
+			return descriptor;
+		} else {
 
-		// create the instance and assign an id and a value
-		final Descriptor descriptor;
-		try {
-			descriptor = constructor.newInstance(this, idsFactory.getId(),
-					value);
-		} catch (final Exception e) {
-			exceptionRegistry.throwException(DescriptorModelException.class,
-					1000, e, descriptorClass.getName());
-			return null;
+			final Class<?> valueType = value.getClass();
+
+			// get the constructor
+			final Constructor<? extends Descriptor> constructor = findConstructor(
+					descriptorClass, valueType);
+
+			// create the instance and assign an id and a value
+			final Descriptor descriptor;
+			try {
+				descriptor = constructor.newInstance(this, idsFactory.getId(),
+						value);
+			} catch (final Exception e) {
+				exceptionRegistry.throwException(
+						DescriptorModelException.class, 1000, e,
+						descriptorClass.getName());
+				return null;
+			}
+			addDescriptor(descriptor);
+
+			@SuppressWarnings("unchecked")
+			final Descriptor<D, ?, I> typedDescriptor = (Descriptor<D, ?, I>) descriptor;
+			return typedDescriptor;
 		}
-		addDescriptor(descriptor);
+	}
 
-		@SuppressWarnings("unchecked")
-		final Descriptor<D, ?, I> typedDescriptor = (Descriptor<D, ?, I>) descriptor;
-		return typedDescriptor;
+	public boolean supportsNullDescriptor() {
+		return supportsNullDescriptor;
+	}
+
+	public void setSupportsNullDescriptor(final boolean supportsNull) {
+		this.supportsNullDescriptor = supportsNull;
+	}
+
+	public NullDescriptor<I> getNullDescriptor() {
+
+		if (!supportsNullDescriptor()) {
+			exceptionRegistry.throwRuntimeException(
+					DescriptorModelException.class, 1004, getId());
+		}
+
+		// make sure we have a nullDescriptor
+		if (nullDescriptor == null) {
+			nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
+		}
+
+		return nullDescriptor;
+	}
+
+	public I getNullDescriptorId() {
+		return getNullDescriptor().getId();
 	}
 
 	/**
@@ -265,8 +317,15 @@ public class DescriptorModel<I extends Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptor(final I id) {
-		return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(0,
-				id);
+
+		if (id == null) {
+			throw new IllegalStateException("MICE ERROR HERE");
+		} else if (supportsNullDescriptor() && id.equals(getNullDescriptorId())) {
+			return nullDescriptor;
+		} else {
+			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
+					0, id);
+		}
 	}
 
 	/**
@@ -282,8 +341,13 @@ public class DescriptorModel<I extends Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptorByValue(final Object value) {
-		return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(1,
-				value);
+
+		if (supportsNullDescriptor() && value == null) {
+			return nullDescriptor;
+		} else {
+			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
+					1, value);
+		}
 	}
 
 	/**

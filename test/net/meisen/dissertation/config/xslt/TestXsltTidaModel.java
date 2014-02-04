@@ -9,7 +9,6 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,7 +18,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -27,7 +25,7 @@ import java.util.regex.Pattern;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
-import net.meisen.dissertation.help.Db;
+import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
@@ -50,27 +48,17 @@ import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Dates;
-import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
 import net.meisen.general.sbconfigurator.config.exception.TransformationFailedException;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransformer;
-import net.meisen.general.sbconfigurator.helper.SpringHelper;
-import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Test to test the transformation of a model using xslt and the interpretation
@@ -79,10 +67,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author pmeisen
  * 
  */
-@RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TidaConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-public class TestXsltTidaModel {
+public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 	/**
 	 * the default xslt transformer used for testing
@@ -94,81 +81,21 @@ public class TestXsltTidaModel {
 	 */
 	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-	@Autowired(required = true)
-	@Qualifier("coreConfiguration")
-	private DefaultConfiguration configuration;
-
-	/**
-	 * Rule to evaluate exceptions
-	 */
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	private Locale oldDefault;
-	private IModuleHolder modulesHolder;
-	private Db db;
-
 	/**
 	 * Initializes the {@code transformer} to point to the correct {@code xslt}.
-	 * Furthermore it ensures that we have {@code Locale.US} so that comparisons
-	 * of errors will fit.
-	 * 
-	 * @throws InvalidXsltException
-	 *             if the xslt is invalid
 	 */
 	@Before
-	public void init() throws InvalidXsltException {
-		oldDefault = Locale.getDefault();
-		Locale.setDefault(Locale.US);
-
-		transformer = (DefaultXsltTransformer) configuration
+	public void init() {
+		transformer = (DefaultXsltTransformer) ((DefaultConfiguration) configuration)
 				.getXsltTransformer();
-		transformer
-				.setXsltTransformer("/net/meisen/dissertation/config/xslt/modelToSpring.xslt");
-
-	}
-
-	/**
-	 * Helper method to load the specified database.
-	 * 
-	 * @param classpathDb
-	 *            the path to the database
-	 * 
-	 * @return the created {@code DB}.
-	 * 
-	 * @throws IOException
-	 *             if the path leads to an exception
-	 */
-	protected Db getDb(final String classpathDb) throws IOException {
-		if (db != null) {
-			db.shutDownDb();
-		}
-
-		db = new Db();
-		db.addDb("tidaTestData", classpathDb);
-		db.setUpDb();
-
-		return db;
-	}
-
-	private void setModulesHolder(final String xml) {
-		final InputStream res = getClass().getResourceAsStream(xml);
-		if (modulesHolder != null) {
-			modulesHolder.release();
-		}
-
 		try {
-			modulesHolder = configuration.loadDelayed("tidaXsltModelLoader", res);
-		} catch (final FatalBeanException e) {
-			final RuntimeException innerE = SpringHelper
-					.getNoneSpringBeanException(e, RuntimeException.class);
-
-			if (innerE == null) {
-				throw e;
-			} else {
-				throw innerE;
-			}
+			transformer
+					.setXsltTransformer("/net/meisen/dissertation/config/xslt/modelToSpring.xslt");
+		} catch (final InvalidXsltException e) {
+			e.printStackTrace();
+			fail("Unexpected exception '" + e.getMessage() + "'");
 		}
+
 	}
 
 	private MetaDataModel getMetaDataModel(final String xml) {
@@ -315,16 +242,16 @@ public class TestXsltTidaModel {
 		for (final MetaStructureEntry e : s
 				.getEntriesByClass(MetaStructureEntry.class)) {
 			if ("meta1".equals(e.getName())) {
-				assertEquals("D1", e.getDescriptor());
+				assertEquals("D1", e.getDescriptorModel());
 				assertEquals(-1, e.getPosition());
 			} else if ("meta2".equals(e.getName())) {
-				assertEquals("D2", e.getDescriptor());
+				assertEquals("D2", e.getDescriptorModel());
 				assertEquals(2, e.getPosition());
 			} else if ("meta3".equals(e.getName())) {
-				assertEquals("D3", e.getDescriptor());
+				assertEquals("D3", e.getDescriptorModel());
 				assertEquals(-1, e.getPosition());
 			} else if ("meta4".equals(e.getName())) {
-				assertEquals("D4", e.getDescriptor());
+				assertEquals("D4", e.getDescriptorModel());
 				assertEquals(-1, e.getPosition());
 			} else {
 				fail("Entry with invalid name '" + e.getName() + "' found");
@@ -640,22 +567,6 @@ public class TestXsltTidaModel {
 		} catch (UnsupportedEncodingException e) {
 			// ignore
 			return null;
-		}
-	}
-
-	/**
-	 * CleansUp by releasing the {@code ModulesHolder} and shutting down the
-	 * {@code Db}.
-	 */
-	@After
-	public void cleanUp() {
-		Locale.setDefault(oldDefault);
-
-		if (modulesHolder != null) {
-			modulesHolder.release();
-		}
-		if (db != null) {
-			db.shutDownDb();
 		}
 	}
 }

@@ -1,0 +1,14 @@
+100,000 records:
+SELECT
+  ROWNUM
+, D1 
+, D2 
+FROM TB_RANDOM
+
+
+100,000 records:
+SELECT
+  ROWNUM
+, D1 
+, D2 
+FROM TB_FIXED

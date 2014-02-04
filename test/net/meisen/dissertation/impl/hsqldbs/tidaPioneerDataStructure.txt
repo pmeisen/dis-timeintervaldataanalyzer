@@ -1,0 +1,15 @@
+4883 records:
+SELECT
+  start_time
+, end_time
+, symbol_id
+, symbol
+FROM TB_INTERVALS
+
+160 records:
+SELECT
+  wnd_start_time
+, wnd_label_id
+, wnd_end_time
+, wnd_label
+FROM TB_WINDOWS

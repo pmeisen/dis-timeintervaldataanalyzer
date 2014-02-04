@@ -18,26 +18,55 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * A {@code TidaModelLoader} is an instance used to load {@code TidaModel} from
+ * a XML-configuration.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TidaModelLoader {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TidaModelLoader.class);
 
+	/**
+	 * The {@code ExceptionRegistry} used to handle exceptions.
+	 */
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	protected IExceptionRegistry exceptionRegistry;
 
+	/**
+	 * The loaded configuration used to load the {@code TidaModel} instances
+	 * using {@link IConfiguration#loadDelayed(String, InputStream)}.
+	 */
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")
 	protected IConfiguration configuration;
 
 	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
 
+	/**
+	 * Helper method to load the modules defined by the specified {@code is}.
+	 * The loaded {@code ModuleHolder} is kept internally within a {@code Map}.
+	 * 
+	 * @param id
+	 *            the identifier used to refer to the {@code ModuleHolder}
+	 *            instance
+	 * @param is
+	 *            the {@code InputStream} to load the modules from
+	 * 
+	 * @return the loaded {@code ModuleHolder}
+	 * 
+	 * @throws RuntimeException
+	 *             if the specified resource is invalid or falsely defined
+	 */
 	protected IModuleHolder getModuleHolder(final String id,
 			final InputStream is) {
 
 		IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder == null) {
-			moduleHolder = configuration.loadDelayed("tidaModelLoader", is);
+			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader", is);
 			moduleHolders.put(id, moduleHolder);
 
 			if (LOG.isInfoEnabled()) {
@@ -50,6 +79,9 @@ public class TidaModelLoader {
 		return moduleHolder;
 	}
 
+	/**
+	 * Unloads all the loaded {@code TidaModel} instances.
+	 */
 	public synchronized void unloadAll() {
 		for (final IModuleHolder moduleHolder : moduleHolders.values()) {
 			moduleHolder.release();
@@ -63,6 +95,14 @@ public class TidaModelLoader {
 		moduleHolders.clear();
 	}
 
+	/**
+	 * Unload the specified {@code TidaModel} instance and all the related
+	 * stuff.
+	 * 
+	 * @param id
+	 *            the identifier of the {@code TidaModel} to be unloaded, the
+	 *            identifier is specified when loading the {@code TidaModel}
+	 */
 	public synchronized void unload(final String id) {
 		final IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder != null) {
@@ -75,6 +115,17 @@ public class TidaModelLoader {
 		}
 	}
 
+	/**
+	 * Loads a {@code TidaModel} from the specified {@code classPathResource}.
+	 * 
+	 * @param id
+	 *            the identifier of the loaded instance used to refer to it when
+	 *            releasing the {@code TidaModel}
+	 * @param file
+	 *            the {@code File} to load the {@code TidaModel} from
+	 * 
+	 * @return the loaded instance of the {@code TidaModel}
+	 */
 	public TidaModel load(final String id, final File file) {
 		try {
 			return load(id, new FileInputStream(file));
@@ -84,10 +135,32 @@ public class TidaModelLoader {
 		}
 	}
 
+	/**
+	 * Loads a {@code TidaModel} from the specified {@code classPathResource}.
+	 * 
+	 * @param id
+	 *            the identifier of the loaded instance used to refer to it when
+	 *            releasing the {@code TidaModel}
+	 * @param classPathResource
+	 *            the classpath location to load the {@code TidaModel} from
+	 * 
+	 * @return the loaded instance of the {@code TidaModel}
+	 */
 	public TidaModel load(final String id, final String classPathResource) {
 		return load(id, getClass().getResourceAsStream(classPathResource));
 	}
 
+	/**
+	 * Loads a {@code TidaModel} from the specified {@code is}.
+	 * 
+	 * @param id
+	 *            the identifier of the loaded instance used to refer to it when
+	 *            releasing the {@code TidaModel}
+	 * @param is
+	 *            the {@code InputStream} to load the {@code TidaModel} from
+	 * 
+	 * @return the loaded instance of the {@code TidaModel}
+	 */
 	public synchronized TidaModel load(final String id, final InputStream is) {
 		final TidaModel model = getModuleHolder(id, is).getModule(
 				DefaultValues.TIDAMODEL_ID);

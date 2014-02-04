@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
+       
+       id="tidaGhTasks" name="Tasksmodel">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="db_ghTasks">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaGhTasks" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <meta>
+    <descriptors>
+      <resource id="PER" name="person" null="true" />
+      <string id="LOC" name="location" null="true" />
+      <string id="TYP" name="tasktype" null="true" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="PER" dataretriever="db_ghTasks">
+        <db:query language="sql">SELECT LASTNAME || ', ' || FISRTNAME || ' (' || PERSONNR || ')' AS FULLNAME FROM TB_DIM_PERSON</db:query>
+      </entry>
+      <entry descriptor="LOC" dataretriever="db_ghTasks">
+        <db:query language="sql">SELECT WORKAREA || ' (' || DEPARTMENT || ')' AS FULLLOC FROM TB_DIM_LOCATION</db:query>
+      </entry>
+      <entry descriptor="TYP" dataretriever="db_ghTasks">
+        <db:query language="sql">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
+      </entry>
+    </entries>
+  </meta>
+    
+  <structure>
+    <meta name="FULLNAME" descriptor="PER" />
+    <meta name="FULLLOC" descriptor="LOC" />
+    <meta name="TYPE" descriptor="TYP" />
+    
+    <interval name="TASKSTART" type="start" />
+    <interval name="TASKEND" type="end" />
+  </structure>
+           
+  <data>
+    <dataset dataretriever="db_ghTasks">
+      <db:query>SELECT
+                    I.INTERVAL_START   AS TASKSTART
+                  , I.INTERVAL_END     AS TASKEND
+                  , P.LASTNAME || ', ' || P.FISRTNAME || ' (' || P.PERSONNR || ')' AS FULLNAME
+                  , L.WORKAREA || ' (' || L.DEPARTMENT || ')'                      AS FULLLOC
+                  , T.TYPE             AS TYPE
+                FROM
+                    TB_INTERVALS     I
+                  , TB_DIM_TASKTYPE  T
+                  , TB_DIM_LOCATION  L
+                  , TB_DIM_PERSON    P
+                WHERE
+                      I.DIM_KEY_LOCATION = L.KEY_LOCATION
+                  AND I.DIM_KEY_PERSON   = P.KEY_PERSON
+                  AND I.DIM_KEY_TASKTYPE = T.KEY_TASKTYPE
+      </db:query>
+    </dataset>
+  </data>
+</model>

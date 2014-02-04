@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
+       
+       id="tidaPioneer" name="Pioneermodel">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="db_pioneer">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaPioneerData" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <meta>
+    <descriptors>
+      <string id="SYMBOL" name="symbol" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="SYMBOL" dataretriever="db_pioneer">
+        <db:query language="sql">SELECT DISTINCT symbol FROM TB_INTERVALS</db:query>
+      </entry>
+    </entries>
+  </meta>
+    
+  <structure>   
+    <meta position="3" descriptor="SYMBOL" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+           
+  <data>
+    <dataset dataretriever="db_pioneer">
+      <db:query>SELECT  start_time, end_time, symbol FROM TB_INTERVALS</db:query>
+    </dataset>
+  </data>
+</model>

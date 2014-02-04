@@ -251,6 +251,12 @@
         <xsl:otherwise><xsl:value-of select="@id"/></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="supportsNullDescriptor">
+      <xsl:choose>
+        <xsl:when test="@null"><xsl:value-of select="@null"/></xsl:when>
+        <xsl:otherwise>false</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:variable name="idFactory">
       <xsl:choose>
         <xsl:when test="@idfactory"><xsl:value-of select="@idfactory"/></xsl:when>
@@ -263,6 +269,8 @@
       <constructor-arg type="java.lang.String" value="{$name}" />
       <constructor-arg type="java.lang.Class" value="{$class}" />
       <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
+      
+      <property name="supportsNullDescriptor" value="{$supportsNullDescriptor}" />
     </bean>
   </xsl:template>
   

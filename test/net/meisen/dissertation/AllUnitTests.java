@@ -27,6 +27,7 @@ import net.meisen.dissertation.impl.naturals.TestLongNaturalsFactory;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
+import net.meisen.dissertation.model.data.TestTidaModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
 import net.meisen.dissertation.model.datasets.TestDataRetrieverDataSet;
@@ -36,6 +37,8 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.tida.TestMetaIndexDimension;
+import net.meisen.dissertation.model.loader.TestTidaModelLoader;
 import net.meisen.dissertation.model.time.TestRawTemporalModel;
 import net.meisen.dissertation.model.time.TestRawTimeIntervalFactory;
 import net.meisen.dissertation.model.time.TestRawTimePointFactory;
@@ -112,6 +115,12 @@ import org.junit.runners.Suite;
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
+
+		// Test the index used for the TimeIntervalData
+		TestMetaIndexDimension.class,
+		
+		// Test the final model and the loader for it
+		TestTidaModelLoader.class, TestTidaModel.class,
 
 		// Test the server
 		TestTidaServer.class })

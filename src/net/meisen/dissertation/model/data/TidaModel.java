@@ -3,17 +3,32 @@ package net.meisen.dissertation.model.data;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.model.datasets.IClosableIterator;
+import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.tida.TidaIndex;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * A {@code TidaModel} is used to combine the {@code MetaDataModel}, the
+ * {@code DataModel} and the {@code DataStructure}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TidaModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
-
+	
+	@Autowired
+	@Qualifier(DefaultValues.INDEXFACTORY_ID)
+	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
+	
 	@Autowired
 	@Qualifier(DefaultValues.METADATAMODEL_ID)
 	private MetaDataModel metaDataModel;
@@ -21,7 +36,7 @@ public class TidaModel {
 	@Autowired
 	@Qualifier(DefaultValues.DATAMODEL_ID)
 	private DataModel dataModel;
-	
+
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
@@ -85,14 +100,47 @@ public class TidaModel {
 		return name;
 	}
 
+	public void validate() {
+
+	}
+
+	public void initialize() {
+		final DataStructure structure = getDataStructure();
+		final MetaDataModel metaDataModel = getMetaDataModel();
+		final TidaIndex idx = new TidaIndex(structure, metaDataModel, baseIndexedCollectionFactory);
+
+		// check the data and add it to the initialize index
+		final IClosableIterator<IDataRecord> it = dataModel.iterate();
+		while (it.hasNext()) {
+			idx.index(it.next());
+		}
+
+		it.close();
+	}
+
+	/**
+	 * Gets the {@code MetaDataModel} of the {@code TidaModel}.
+	 * 
+	 * @return the {@code MetaDataModel} of the {@code TidaModel}
+	 */
 	protected MetaDataModel getMetaDataModel() {
 		return metaDataModel;
 	}
 
+	/**
+	 * Gets the {@code DataModel} of the {@code TidaModel}.
+	 * 
+	 * @return the {@code DataModel} of the {@code TidaModel}
+	 */
 	protected DataModel getDataModel() {
 		return dataModel;
 	}
 
+	/**
+	 * Gets the {@code DataStructure} of the {@code TidaModel}.
+	 * 
+	 * @return the {@code DataStructure} of the {@code TidaModel}
+	 */
 	protected DataStructure getDataStructure() {
 		return dataStructure;
 	}

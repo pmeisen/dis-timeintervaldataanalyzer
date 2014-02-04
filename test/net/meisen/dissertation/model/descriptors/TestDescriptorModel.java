@@ -2,13 +2,14 @@ package net.meisen.dissertation.model.descriptors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfig;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfigEntry;
@@ -28,12 +29,8 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,29 +45,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
 @SystemProperty(property = "testBeans.selector", value = "net/meisen/dissertation/model/descriptors/testDescriptorModel.xml")
-public class TestDescriptorModel {
+public class TestDescriptorModel extends ExceptionBasedTest {
 
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")
 	private DefaultConfiguration configuration;
-
-	/**
-	 * Rule to evaluate exceptions
-	 */
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	private Locale oldDefault;
-
-	/**
-	 * Make sure we have {@code Locale.US} so that comparisons of errors will
-	 * fit
-	 */
-	@Before
-	public void setUp() {
-		oldDefault = Locale.getDefault();
-		Locale.setDefault(Locale.US);
-	}
 
 	/**
 	 * Tests the implementation {@code DescriptorModel#getId()} and
@@ -327,11 +306,32 @@ public class TestDescriptorModel {
 		modelLongIds.addDescriptor(desc);
 	}
 
-	/**
-	 * Reset the {@code Locale}
-	 */
-	@After
-	public void cleanUp() {
-		Locale.setDefault(oldDefault);
+	@Test
+	public void testCreateUsingNull() {
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory());
+		model.setSupportsNullDescriptor(true);
+
+		final Descriptor<?, ?, Integer> descriptor = model
+				.createDescriptor(null);
+
+		assertTrue(descriptor instanceof NullDescriptor);
+		assertNull(descriptor.getValue());
+		assertNotNull(model.getNullDescriptor());
+		assertEquals(model.getNullDescriptor(), descriptor);
+	}
+
+	@Test
+	public void testInvalidCreateUsingNull() {
+		thrown.expect(DescriptorModelException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("Null-values are not supported by the model 'ModelId'"));
+
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory());
+		configuration.wireInstance(model);
+		model.createDescriptor(null);
 	}
 }

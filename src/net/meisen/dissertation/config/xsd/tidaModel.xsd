@@ -168,6 +168,7 @@
 
   <xs:complexType name="descriptor">
     <xs:attribute name="id" type="identifier" use="required" />
+    <xs:attribute name="null" type="xs:boolean" use="optional" />
     <xs:attribute name="name" type="xs:string" use="optional" />
     <xs:attribute name="idfactory" type="javaClass" use="optional" />
   </xs:complexType>
