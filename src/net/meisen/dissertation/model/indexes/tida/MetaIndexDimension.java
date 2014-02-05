@@ -1,5 +1,8 @@
 package net.meisen.dissertation.model.indexes.tida;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
@@ -9,15 +12,23 @@ import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 
 public class MetaIndexDimension<I> {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(MetaIndexDimension.class);
 
 	private final DescriptorModel<I> model;
 	private final MetaStructureEntry metaEntry;
 
 	private final IIndexedCollection index;
 
+	private MetaDataHandling metaDataHandling;
+
 	public MetaIndexDimension(final MetaStructureEntry metaEntry,
 			final DescriptorModel<I> model,
 			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+		if (model == null) {
+			throw new NullPointerException("The model cannot be null.");
+		}
+
 		this.metaEntry = metaEntry;
 		this.model = model;
 
@@ -26,6 +37,9 @@ public class MetaIndexDimension<I> {
 				IndexBitmapSlice.class, "getId");
 		indexKeyDef.overrideType(0, model.getIdClass());
 		this.index = baseIndexedCollectionFactory.create(indexKeyDef);
+
+		// set the default value
+		setMetaDataHandling((MetaDataHandling) null);
 	}
 
 	public void add(final int recId, final IDataRecord rec) {
@@ -74,15 +88,21 @@ public class MetaIndexDimension<I> {
 	}
 
 	protected I getIdForValue(final Object value) {
-		final Descriptor<?, ?, I> desc = model.getDescriptorByValue(value);
-
+		Descriptor<?, ?, I> desc = model.getDescriptorByValue(value);
 		if (desc == null) {
-			// TODO we could add it couldn't we?!
-			throw new NullPointerException("The value '" + value
-					+ "' doesn't have any descriptor.");
-		} else {
-			return desc.getId();
+			final MetaDataHandling metaDataHandling = getMetaDataHandling();
+
+			if (MetaDataHandling.CREATEDESCRIPTOR.equals(metaDataHandling)) {				
+				desc = model.createDescriptor(value);
+			} else if (MetaDataHandling.FAILONERROR.equals(metaDataHandling)) {
+				throw new NullPointerException("The value '" + value
+						+ "' doesn't have any descriptor.");
+			} else if (MetaDataHandling.HANDLEASNULL.equals(metaDataHandling)) {
+				desc = model.getNullDescriptor();
+			}
 		}
+
+		return desc.getId();
 	}
 
 	protected I getIdFromRecord(final IDataRecord record) {
@@ -101,5 +121,14 @@ public class MetaIndexDimension<I> {
 		}
 
 		return getIdForValue(value);
+	}
+
+	public MetaDataHandling getMetaDataHandling() {
+		return metaDataHandling;
+	}
+
+	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
+		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
+				.find(null) : metaDataHandling;
 	}
 }

@@ -6,6 +6,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.tida.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.tida.TidaIndex;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -24,11 +25,11 @@ public class TidaModel {
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
-	
+
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
-	
+
 	@Autowired
 	@Qualifier(DefaultValues.METADATAMODEL_ID)
 	private MetaDataModel metaDataModel;
@@ -43,6 +44,8 @@ public class TidaModel {
 
 	private final String id;
 	private final String name;
+
+	private MetaDataHandling metaDataHandling;
 
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
@@ -80,6 +83,9 @@ public class TidaModel {
 	public TidaModel(final String id, final String name) {
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
+
+		// set the default value
+		setMetaDataHandling((MetaDataHandling) null);
 	}
 
 	/**
@@ -107,15 +113,16 @@ public class TidaModel {
 	public void initialize() {
 		final DataStructure structure = getDataStructure();
 		final MetaDataModel metaDataModel = getMetaDataModel();
-		final TidaIndex idx = new TidaIndex(structure, metaDataModel, baseIndexedCollectionFactory);
+		final TidaIndex idx = new TidaIndex(structure, metaDataModel,
+				baseIndexedCollectionFactory);
 
 		// check the data and add it to the initialize index
 		final IClosableIterator<IDataRecord> it = dataModel.iterate();
 		while (it.hasNext()) {
 			idx.index(it.next());
 		}
-
 		it.close();
+		
 	}
 
 	/**
@@ -123,7 +130,7 @@ public class TidaModel {
 	 * 
 	 * @return the {@code MetaDataModel} of the {@code TidaModel}
 	 */
-	protected MetaDataModel getMetaDataModel() {
+	public MetaDataModel getMetaDataModel() {
 		return metaDataModel;
 	}
 
@@ -132,7 +139,7 @@ public class TidaModel {
 	 * 
 	 * @return the {@code DataModel} of the {@code TidaModel}
 	 */
-	protected DataModel getDataModel() {
+	public DataModel getDataModel() {
 		return dataModel;
 	}
 
@@ -141,7 +148,20 @@ public class TidaModel {
 	 * 
 	 * @return the {@code DataStructure} of the {@code TidaModel}
 	 */
-	protected DataStructure getDataStructure() {
+	public DataStructure getDataStructure() {
 		return dataStructure;
+	}
+
+	public MetaDataHandling getMetaDataHandling() {
+		return metaDataHandling;
+	}
+
+	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
+		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
+				.find(null) : metaDataHandling;
+	}
+
+	public void setMetaDataHandling(final String metaDataHandling) {
+		setMetaDataHandling(MetaDataHandling.find(metaDataHandling));
 	}
 }

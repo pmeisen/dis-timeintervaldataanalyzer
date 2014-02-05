@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
+       
+       id="tidaStaticIndexModel" name="StaticIndexModel">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="fxd_random">
+        <fxd:record>
+          <fxd:field name="RND_INTEGER" type="java.lang.Integer" />
+          <fxd:field name="FXD_NAME" value="Edison" type="java.lang.String" />
+        </fxd:record>
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <meta>
+    <descriptors>
+      <string id="FIXED" name="fixed" />
+      <integer id="RANDOMINT" name="randomInteger" failonduplicates="false" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="FIXED" value="Philipp" />
+      <entry descriptor="FIXED" value="Debbie" />
+      <entry descriptor="FIXED" value="Edison" />
+            
+      <entry descriptor="RANDOMINT" dataretriever="fxd_random">
+        <fxd:query amount="100000" />
+      </entry>
+    </entries>
+  </meta>
+
+  <structure>
+    <meta name="FXD_NAME" descriptor="FIXED" />
+    <meta name="RND_INTEGER" descriptor="RANDOMINT" />
+  </structure>
+           
+  <data metahandling="create">
+    <dataset dataretriever="fxd_random">
+      <fxd:query amount="100000" />
+    </dataset>
+  </data>
+</model>

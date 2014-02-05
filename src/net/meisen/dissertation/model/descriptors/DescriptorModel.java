@@ -37,6 +37,7 @@ public class DescriptorModel<I extends Object> {
 	private final IIdsFactory<I> idsFactory;
 
 	private NullDescriptor<I> nullDescriptor = null;
+	private boolean failOnDuplicates = true;
 	private boolean supportsNullDescriptor = false;
 
 	@Autowired
@@ -267,6 +268,25 @@ public class DescriptorModel<I extends Object> {
 		}
 	}
 
+	/**
+	 * Gets the amount of descriptors in this {@code DescriptorModel}. If all
+	 * descriptors are needed anyways it makes more sense to get those using
+	 * {@code #getDescriptors()} and count the retrieved {@code Collection}.
+	 * 
+	 * @return the amount of descriptors
+	 */
+	public int size() {
+		return getDescriptorIndex().size();
+	}
+
+	public boolean isFailOnDuplicates() {
+		return failOnDuplicates;
+	}
+
+	public void setFailOnDuplicates(final boolean failOnDuplicates) {
+		this.failOnDuplicates = failOnDuplicates;
+	}
+
 	public boolean supportsNullDescriptor() {
 		return supportsNullDescriptor;
 	}
@@ -388,11 +408,11 @@ public class DescriptorModel<I extends Object> {
 			added = getDescriptorIndex().addObject(descriptor);
 		} catch (final Exception e) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
-					1003, descriptor, getId());
+					1003, e, descriptor, getId());
 		}
 
 		// make sure it was added
-		if (!added) {
+		if (!added && isFailOnDuplicates()) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor, getId());
 		}
@@ -458,16 +478,5 @@ public class DescriptorModel<I extends Object> {
 				return constructor;
 			}
 		}
-	}
-
-	/**
-	 * Gets the amount of descriptors in this {@code DescriptorModel}. If all
-	 * descriptors are needed anyways it makes more sense to get those using
-	 * {@code #getDescriptors()} and count the retrieved {@code Collection}.
-	 * 
-	 * @return the amount of descriptors
-	 */
-	public int size() {
-		return getDescriptorIndex().size();
 	}
 }

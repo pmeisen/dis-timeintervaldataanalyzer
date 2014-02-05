@@ -10,16 +10,20 @@ import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TidaIndex {
+	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
 	private final List<MetaIndexDimension<?>> dimensions;
 
-	int id;
+	private int id;
+	private MetaDataHandling metaDataHandling;
 
 	public TidaIndex(final DataStructure structure,
 			final MetaDataModel metaDataModel,
 			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
-
 		final List<MetaIndexDimension<?>> idxDimensions = new ArrayList<MetaIndexDimension<?>>();
 		final List<MetaStructureEntry> metaEntries = structure
 				.getEntriesByClass(MetaStructureEntry.class);
@@ -32,21 +36,39 @@ public class TidaIndex {
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
 					descModel, baseIndexedCollectionFactory);
+			idxDim.setMetaDataHandling(metaDataHandling);
 			idxDimensions.add(idxDim);
 		}
 
 		this.id = 0;
 		this.dimensions = idxDimensions;
+
+		// set the default value
+		setMetaDataHandling((MetaDataHandling) null);
 	}
 
 	public TidaIndex(final List<MetaIndexDimension<?>> idxDimensions) {
-		this.dimensions = idxDimensions;
+		this.dimensions = idxDimensions == null ? new ArrayList<MetaIndexDimension<?>>()
+				: idxDimensions;
 	}
 
 	public void index(final IDataRecord record) {
 		for (final MetaIndexDimension<?> dim : dimensions) {
 			dim.add(id, record);
 			id++;
+		}
+	}
+
+	public MetaDataHandling getMetaDataHandling() {
+		return metaDataHandling;
+	}
+
+	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
+		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
+				.find(null) : metaDataHandling;
+
+		for (final MetaIndexDimension<?> dimension : dimensions) {
+			dimension.setMetaDataHandling(this.metaDataHandling);
 		}
 	}
 }

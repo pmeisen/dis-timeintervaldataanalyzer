@@ -76,6 +76,11 @@
   </meta>
     
   <structure />
-            
-  <data />
+  
+  <!-- MetaDataHandling is optional and can be of the following values (case-insensitive):
+        + handleAsNull, null
+        + createDescriptor, create, add
+        + failOnError, fail
+    -->
+  <data metahandling="create" />
 </model>

@@ -93,7 +93,8 @@ import org.junit.runners.Suite;
 		TestUuIdsFactory.class,
 
 		// Test the descriptors
-		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
+		TestDescriptorPrimitiveDataType.class,
+		TestDoubleDescriptor.class,
 		TestIntegerDescriptor.class,
 		TestLongDescriptor.class,
 		TestGeneralDescriptor.class,
@@ -104,7 +105,8 @@ import org.junit.runners.Suite;
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
-		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
+		TestDbDataRetriever.class,
+		TestFixedStructureDataRetriever.class,
 
 		// Test the dataSets
 		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
@@ -116,14 +118,13 @@ import org.junit.runners.Suite;
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
 
-		// Test the index used for the TimeIntervalData
-		TestMetaIndexDimension.class,
-		
-		// Test the final model and the loader for it
-		TestTidaModelLoader.class, TestTidaModel.class,
+		// Test the loader, the index and the final model
+		TestTidaModelLoader.class, TestMetaIndexDimension.class,
+		TestTidaModel.class,
 
 		// Test the server
-		TestTidaServer.class })
+		TestTidaServer.class
+		})
 public class AllUnitTests {
 
 }

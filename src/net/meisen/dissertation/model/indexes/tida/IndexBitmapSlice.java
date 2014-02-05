@@ -47,4 +47,8 @@ public class IndexBitmapSlice<I> {
 	public int[] get() {
 		return bitmap.toArray();
 	}
+
+	public int count() {
+		return bitmap.cardinality();
+	}
 }

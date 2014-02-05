@@ -63,6 +63,7 @@ public class DbBasedTest extends ExceptionBasedTest {
 	public void cleanUpDb() {
 		if (db != null) {
 			db.shutDownDb();
+			db = null;
 		}
 	}
 }

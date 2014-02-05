@@ -231,9 +231,18 @@
       </xsl:for-each>
       
       <!-- create the tidaModel -->
+      <xsl:variable name="metahandling">
+        <xsl:choose>
+          <xsl:when test="@metahandling"><xsl:value-of select="@metahandling"/></xsl:when>
+          <xsl:otherwise></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      
       <bean id="{$tidaModelId}" class="net.meisen.dissertation.model.data.TidaModel">
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
+        
+        <property name="metaDataHandling" value="{$metahandling}" />
       </bean>
     </beans>
   </xsl:template>
@@ -257,6 +266,12 @@
         <xsl:otherwise>false</xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="failOnDuplicates">
+      <xsl:choose>
+        <xsl:when test="@failonduplicates"><xsl:value-of select="@failonduplicates"/></xsl:when>
+        <xsl:otherwise>true</xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:variable name="idFactory">
       <xsl:choose>
         <xsl:when test="@idfactory"><xsl:value-of select="@idfactory"/></xsl:when>
@@ -271,6 +286,7 @@
       <constructor-arg type="net.meisen.dissertation.model.idfactories.IIdsFactory"><bean class="{$idFactory}" /></constructor-arg>
       
       <property name="supportsNullDescriptor" value="{$supportsNullDescriptor}" />
+      <property name="failOnDuplicates" value="{$failOnDuplicates}" />
     </bean>
   </xsl:template>
   

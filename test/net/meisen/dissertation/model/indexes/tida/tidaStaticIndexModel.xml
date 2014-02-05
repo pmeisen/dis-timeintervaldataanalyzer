@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="tidaStaticIndexModel" name="StaticIndexModel">
+
+  <meta>
+    <descriptors>
+      <string id="FAMILY" name="family" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="FAMILY" value="Hajo" />
+      <entry descriptor="FAMILY" value="Uschi" />
+      <entry descriptor="FAMILY" value="Edison" />
+      <entry descriptor="FAMILY" value="Linus" />
+      <entry descriptor="FAMILY" value="Hannah" />
+      <entry descriptor="FAMILY" value="Lasse" />
+      <entry descriptor="FAMILY" value="Silas" />
+      <entry descriptor="FAMILY" value="Rasmus" />
+      <entry descriptor="FAMILY" value="Philipp" />
+      <entry descriptor="FAMILY" value="Tobias" />
+      <entry descriptor="FAMILY" value="Holger" />
+      <entry descriptor="FAMILY" value="Andrea" />
+      <entry descriptor="FAMILY" value="Deborah" />
+      <entry descriptor="FAMILY" value="Nicole" />
+      <entry descriptor="FAMILY" value="Jörg" />
+      <entry descriptor="FAMILY" value="Stephanie" />
+    </entries>
+  </meta>
+    
+  <structure>
+    <meta position="1" descriptor="FAMILY" />
+  </structure>
+           
+  <data>
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Philipp"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Deborah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Deborah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Deborah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Deborah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Stephanie"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Stephanie"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Philipp"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Stephanie"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>    
+  </data>
+</model>

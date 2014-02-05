@@ -57,7 +57,13 @@ public class ModuleAndDbBasedTest extends ModuleBasedTest {
 	 * CleansUp by shutting down the {@code Db}.
 	 */
 	@After
-	public void cleanUpDb() {
+	public void cleanUpModulesAndDb() {
+		super.cleanUpModules();
 		dbBasedTest.cleanUpDb();
+	}
+	
+	@Override
+	public void cleanUpModules() {
+		// do nothing
 	}
 }

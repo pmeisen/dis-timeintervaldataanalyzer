@@ -76,6 +76,7 @@ public class ModuleBasedTest extends ExceptionBasedTest {
 	public void cleanUpModules() {
 		if (modulesHolder != null) {
 			modulesHolder.release();
+			modulesHolder = null;
 		}
 	}
 }
