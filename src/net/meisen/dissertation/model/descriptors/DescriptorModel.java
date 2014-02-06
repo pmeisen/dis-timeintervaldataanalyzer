@@ -279,23 +279,78 @@ public class DescriptorModel<I extends Object> {
 		return getDescriptorIndex().size();
 	}
 
+	/**
+	 * Gets the behavior of the {@code DescriptorModel} whenever a
+	 * {@code Descriptor} is created using {@link #createDescriptor(Object)}
+	 * which already exists. If no exception is thrown, i.e. the method returns
+	 * {@code false}, the already created {@code Descriptor} is returned instead
+	 * of creating another one.
+	 * 
+	 * @return {@code true} if the {@code DescriptorModel} throws an exception,
+	 *         otherwise {@code false}
+	 */
 	public boolean isFailOnDuplicates() {
 		return failOnDuplicates;
 	}
 
+	/**
+	 * Defines if the {@code DescriptorModel} should throw an exception whenever
+	 * a {@code Descriptor} is created using {@link #createDescriptor(Object)}.
+	 * If no exception is thrown, i.e. set the value to {@code false}, the
+	 * already created {@code Descriptor} is returned instead of creating
+	 * another one.
+	 * 
+	 * @param failOnDuplicates
+	 *            {@code true} if the {@code DescriptorModel} should throw an
+	 *            exception, otherwise {@code false}
+	 */
 	public void setFailOnDuplicates(final boolean failOnDuplicates) {
 		this.failOnDuplicates = failOnDuplicates;
 	}
 
+	/**
+	 * Gets the behavior of the {@code DescriptorModel} considering {@code null}
+	 * values. If {@code true} is returned, {@code null} values can be added,
+	 * i.e. {@link #createDescriptor(Object)} can be called with {@code null}.
+	 * 
+	 * @return {@code true} if {@code null} values are supported, otherwise
+	 *         {@code false}
+	 */
 	public boolean supportsNullDescriptor() {
 		return supportsNullDescriptor;
 	}
 
+	/**
+	 * Defines if the {@code DescriptorModel} supports {@code null} values. If
+	 * set to {@code true} {@code null} values can be added, i.e.
+	 * {@link #createDescriptor(Object)} can be called with {@code null}.
+	 * 
+	 * @param supportsNull
+	 *            {@code true} if {@code null} values are supported, otherwise
+	 *            {@code false}
+	 */
 	public void setSupportsNullDescriptor(final boolean supportsNull) {
 		this.supportsNullDescriptor = supportsNull;
 	}
 
-	public NullDescriptor<I> getNullDescriptor() {
+	/**
+	 * Gets the {@code Descriptor} which is used to identify {@code null}
+	 * values. There is exactly one such {@code NullDescriptor} created for a
+	 * {@code DescriptorModel} whenever the {@code DescriptorModel} supports
+	 * {@code null} values.
+	 * 
+	 * @return the {@code NullDescriptor} of {@code this}, cannot be
+	 *         {@code null}
+	 * 
+	 * @throws DescriptorModelException
+	 *             if the {@code DescriptorModel} doesn't support {@code null}
+	 *             values
+	 * 
+	 * @see NullDescriptor
+	 * @see #supportsNullDescriptor()
+	 */
+	public NullDescriptor<I> getNullDescriptor()
+			throws DescriptorModelException {
 
 		if (!supportsNullDescriptor()) {
 			exceptionRegistry.throwRuntimeException(
@@ -310,6 +365,22 @@ public class DescriptorModel<I extends Object> {
 		return nullDescriptor;
 	}
 
+	/**
+	 * Gets the identifier of the {@code Descriptor} which is used to identify
+	 * {@code null} values. There is exactly one such {@code NullDescriptor}
+	 * created for a {@code DescriptorModel} whenever the
+	 * {@code DescriptorModel} supports {@code null} values.
+	 * 
+	 * @return the identifier of the {@code NullDescriptor} of {@code this},
+	 *         cannot be {@code null}
+	 * 
+	 * @throws DescriptorModelException
+	 *             if the {@code DescriptorModel} doesn't support {@code null}
+	 *             values
+	 * 
+	 * @see NullDescriptor
+	 * @see #supportsNullDescriptor()
+	 */
 	public I getNullDescriptorId() {
 		return getNullDescriptor().getId();
 	}

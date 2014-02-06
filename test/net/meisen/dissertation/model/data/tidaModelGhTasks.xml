@@ -2,12 +2,10 @@
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
-       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
+                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
        
        id="tidaGhTasks" name="Tasksmodel">
 
@@ -23,7 +21,7 @@
     <descriptors>
       <resource id="PER" name="person" null="true" />
       <string id="LOC" name="location" null="true" />
-      <string id="TYP" name="tasktype" null="true" />
+      <string id="TYP" name="tasktype" null="true" failonduplicates="false" />
     </descriptors>
     
     <entries>
@@ -34,7 +32,7 @@
         <db:query language="sql">SELECT WORKAREA || ' (' || DEPARTMENT || ')' AS FULLLOC FROM TB_DIM_LOCATION</db:query>
       </entry>
       <entry descriptor="TYP" dataretriever="db_ghTasks">
-        <db:query language="sql">SELECT DISTINCT TYPE FROM TB_DIM_TASKTYPE</db:query>
+        <db:query language="sql">SELECT TYPE FROM TB_DIM_TASKTYPE</db:query>
       </entry>
     </entries>
   </meta>
@@ -48,7 +46,7 @@
     <interval name="TASKEND" type="end" />
   </structure>
            
-  <data>
+  <data metahandling="create">
     <dataset dataretriever="db_ghTasks">
       <db:query>SELECT
                     I.INTERVAL_START   AS TASKSTART

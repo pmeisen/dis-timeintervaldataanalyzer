@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.tida;
+package net.meisen.dissertation.model.indexes.datarecord;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,6 +20,7 @@ import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -65,9 +66,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 			for (int k = 0; k < 10; k++) {
 
 				// do it twice to make sure that there are no side-effects
-				idx.add(k + (i - 1) * 10,
+				idx.index(k + (i - 1) * 10,
 						new SingleStaticDataSet(desc.getValue()));
-				idx.add(k + (i - 1) * 10,
+				idx.index(k + (i - 1) * 10,
 						new SingleStaticDataSet(desc.getValue()));
 			}
 
@@ -94,7 +95,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
 				.load("mh_tidaStaticIndexModel",
-						"/net/meisen/dissertation/model/indexes/tida/tidaStaticIndexModel.xml");
+						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticIndexModel.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();
@@ -112,7 +113,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
-			idx.add(i, rec);
+			idx.index(i, rec);
 			i++;
 		}
 		it.close();
@@ -138,7 +139,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
 		final TidaModel model = loader
 				.load("mh_tidaRandomIndexModel",
-						"/net/meisen/dissertation/model/indexes/tida/tidaRandomIndexModel.xml");
+						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomIndexModel.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();
@@ -179,8 +180,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 			}
 
 			// add the record
-			fixedIdx.add(i, rec);
-			randomIdx.add(i, rec);
+			fixedIdx.index(i, rec);
+			randomIdx.index(i, rec);
 			i++;
 		}
 		it.close();

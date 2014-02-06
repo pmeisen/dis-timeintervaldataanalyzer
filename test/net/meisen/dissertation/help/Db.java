@@ -251,7 +251,7 @@ public class Db {
 		for (final String dbName : dbNames) {
 			dbs.put(dbName, path);
 		}
-		setUpDb(dbs);
+		setUpDb(dbs, false);
 
 		// if asked for lets wait
 		if (waitAndWrap) {
@@ -293,7 +293,18 @@ public class Db {
 	 * Start the database
 	 */
 	public void setUpDb() {
-		setUpDb(dbs);
+		setUpDb(false);
+	}
+
+	/**
+	 * Start the database.
+	 * 
+	 * @param wait
+	 *            decide if the thread should sleep while the database is
+	 *            running
+	 */
+	public void setUpDb(final boolean wait) {
+		setUpDb(dbs, wait);
 	}
 
 	/**
@@ -301,8 +312,11 @@ public class Db {
 	 * 
 	 * @param dbs
 	 *            the databases to be added
+	 * @param wait
+	 *            decide if the thread should sleep while the database is
+	 *            running
 	 */
-	protected void setUpDb(final Map<String, File> dbs) {
+	protected void setUpDb(final Map<String, File> dbs, final boolean wait) {
 
 		// make sure it's not running
 		hSqlDb.shutdown();
@@ -318,6 +332,18 @@ public class Db {
 
 		// start the server
 		hSqlDb.start();
+
+		// if asked for lets wait
+		if (wait) {
+			while (hSqlDb.getServerThread() != null) {
+				try {
+					Thread.sleep(100);
+				} catch (final InterruptedException e) {
+					// end it
+					break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -421,8 +447,7 @@ public class Db {
 			dbs = args;
 		}
 
-		final File dbLoc = new File(
-				"test/net/meisen/dissertation/impl/hsqldbs");
+		final File dbLoc = new File("test/net/meisen/dissertation/impl/hsqldbs");
 
 		System.out.println("Going to start the following databases:");
 		for (final String arg : dbs) {
@@ -438,4 +463,5 @@ public class Db {
 		// just call it for cleanUp
 		db.shutDownDb();
 	}
+
 }

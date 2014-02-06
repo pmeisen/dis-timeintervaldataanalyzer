@@ -134,7 +134,7 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 
 	@Override
 	public Object getValue(final int position) {
-		if (position < 1 || position > getSize()) {
+		if (!isValidPosition(position)) {
 			throw new IllegalArgumentException("The position '" + position
 					+ "' is invalid.");
 		} else {
@@ -159,7 +159,7 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 
 	@Override
 	public boolean isValidPosition(final int position) {
-		return position > 0 && position <= getSize();
+		return !(position < 1 || position > getSize());
 	}
 
 	/**

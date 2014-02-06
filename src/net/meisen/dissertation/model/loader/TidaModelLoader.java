@@ -63,6 +63,9 @@ public class TidaModelLoader {
 	 */
 	protected IModuleHolder getModuleHolder(final String id,
 			final InputStream is) {
+		if (is == null) {
+			// TODO throw exception
+		}
 
 		IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder == null) {

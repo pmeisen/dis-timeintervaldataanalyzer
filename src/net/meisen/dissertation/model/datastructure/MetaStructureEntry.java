@@ -18,7 +18,8 @@ public class MetaStructureEntry extends StructureEntry {
 	 *            the id of the {@code DescriptorModel} which is bound to
 	 *            {@code this} entry
 	 * @param name
-	 *            the name to be based on, should not be {@code null}
+	 *            the name of the field of the {@code DataRecord}, should not be
+	 *            {@code null}
 	 */
 	public MetaStructureEntry(final String descriptorModel, final String name) {
 		this(descriptorModel, name, -1);
@@ -32,8 +33,8 @@ public class MetaStructureEntry extends StructureEntry {
 	 *            the id of the {@code DescriptorModel} which is bound to
 	 *            {@code this} entry
 	 * @param position
-	 *            the position to be based on, should be a value larger than
-	 *            {@code 0}
+	 *            the position within the {@code DataRecord}, should be a value
+	 *            larger than {@code 0}
 	 */
 	public MetaStructureEntry(final String descriptorModel, final int position) {
 		this(descriptorModel, null, position);
@@ -47,11 +48,11 @@ public class MetaStructureEntry extends StructureEntry {
 	 *            the id of the {@code DescriptorModel} which is bound to
 	 *            {@code this} entry
 	 * @param name
-	 *            the name to be based on, can be {@code null} if a position
-	 *            larger than {@code 0} is specified
+	 *            the name of the field of the {@code DataRecord}, can be
+	 *            {@code null} if a position larger than {@code 0} is specified
 	 * @param position
-	 *            the position to be based on, can a value smaller than
-	 *            {@code 1} if a name is specified
+	 *            the position within the {@code DataRecord}, can a value
+	 *            smaller than {@code 1} if a name is specified
 	 */
 	public MetaStructureEntry(final String descriptorModel, final String name,
 			final int position) {

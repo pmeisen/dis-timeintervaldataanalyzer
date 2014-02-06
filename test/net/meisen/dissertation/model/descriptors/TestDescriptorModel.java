@@ -306,6 +306,9 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		modelLongIds.addDescriptor(desc);
 	}
 
+	/**
+	 * Test the creation of a {@code Descriptor} using a {@code null} value.
+	 */
 	@Test
 	public void testCreateUsingNull() {
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
@@ -322,6 +325,10 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		assertEquals(model.getNullDescriptor(), descriptor);
 	}
 
+	/**
+	 * Test the creation of a {@code Descriptor} using a {@code null} value,
+	 * which is not supported by the {@code DescriptorModel}.
+	 */
 	@Test
 	public void testInvalidCreateUsingNull() {
 		thrown.expect(DescriptorModelException.class);

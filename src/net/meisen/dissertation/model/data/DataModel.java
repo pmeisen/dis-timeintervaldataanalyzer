@@ -3,21 +3,21 @@ package net.meisen.dissertation.model.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.model.datasets.MultipleDataSetIterator;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datasets.IDataSet;
-import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.dissertation.model.datasets.MultipleDataSetIterator;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The class represents the {@code DataModel}. It can be used to iterate over
+ * all the {@code DataSet} instances.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DataModel implements IDataSet {
-
-	@Autowired
-	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
-	private IExceptionRegistry exceptionRegistry;
 
 	@Autowired(required = false)
 	private List<IDataSet> dataSets = new ArrayList<IDataSet>();
@@ -90,7 +90,7 @@ public class DataModel implements IDataSet {
 	}
 
 	@Override
-	public boolean isValidPosition(int position) {
+	public boolean isValidPosition(final int position) {
 		if (dataSets == null) {
 			return false;
 		} else if (dataSets.size() == 0) {
@@ -120,7 +120,7 @@ public class DataModel implements IDataSet {
 	 * 
 	 * @see IDataSet
 	 */
-	public boolean isValidPositionOnce(int position) {
+	public boolean isValidPositionOnce(final int position) {
 		if (dataSets == null) {
 			return false;
 		} else if (dataSets.size() == 0) {

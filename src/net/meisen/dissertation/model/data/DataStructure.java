@@ -5,12 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.datastructure.StructureEntry;
-import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * A {@code DataStructure} adds the semantics and the bindings to the data. That
@@ -21,11 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class DataStructure {
-
-	@Autowired
-	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
-	private IExceptionRegistry exceptionRegistry;
-
 	private List<StructureEntry> entryList;
 
 	/**

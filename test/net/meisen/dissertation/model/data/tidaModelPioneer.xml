@@ -19,24 +19,24 @@
 
   <meta>
     <descriptors>
-      <string id="SYMBOL" name="symbol" />
+      <string id="SYMBOL" name="symbol" failonduplicates="false" />
     </descriptors>
     
     <entries>
       <entry descriptor="SYMBOL" dataretriever="db_pioneer">
-        <db:query language="sql">SELECT DISTINCT symbol FROM TB_INTERVALS</db:query>
+        <db:query language="sql">SELECT symbol FROM TB_INTERVALS</db:query>
       </entry>
     </entries>
   </meta>
-    
-  <structure>   
+
+  <structure>
     <meta position="3" descriptor="SYMBOL" />
     
     <interval position="1" type="start" />
     <interval position="2" type="end" />
   </structure>
            
-  <data>
+  <data metahandling="fail">
     <dataset dataretriever="db_pioneer">
       <db:query>SELECT  start_time, end_time, symbol FROM TB_INTERVALS</db:query>
     </dataset>

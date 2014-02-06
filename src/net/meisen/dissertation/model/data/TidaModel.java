@@ -5,11 +5,12 @@ import java.util.UUID;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
-import net.meisen.dissertation.model.indexes.tida.MetaDataHandling;
-import net.meisen.dissertation.model.indexes.tida.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -21,14 +22,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class TidaModel {
+	private final static Logger LOG = LoggerFactory.getLogger(TidaModel.class);
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
-
-	@Autowired
-	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
 
 	@Autowired
 	@Qualifier(DefaultValues.METADATAMODEL_ID)
@@ -111,10 +109,7 @@ public class TidaModel {
 	}
 
 	public void initialize() {
-		final DataStructure structure = getDataStructure();
-		final MetaDataModel metaDataModel = getMetaDataModel();
-		final TidaIndex idx = new TidaIndex(structure, metaDataModel,
-				baseIndexedCollectionFactory);
+		final TidaIndex idx = new TidaIndex(this);
 
 		// check the data and add it to the initialize index
 		final IClosableIterator<IDataRecord> it = dataModel.iterate();
@@ -122,7 +117,11 @@ public class TidaModel {
 			idx.index(it.next());
 		}
 		it.close();
-		
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(idx.getStatistic());
+		}
+
 	}
 
 	/**

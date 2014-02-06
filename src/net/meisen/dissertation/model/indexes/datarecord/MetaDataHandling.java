@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.tida;
+package net.meisen.dissertation.model.indexes.datarecord;
 
 import java.util.ArrayList;
 import java.util.Arrays;

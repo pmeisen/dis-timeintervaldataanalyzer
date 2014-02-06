@@ -37,7 +37,8 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.tida.TestMetaIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.loader.TestTidaModelLoader;
 import net.meisen.dissertation.model.time.TestRawTemporalModel;
 import net.meisen.dissertation.model.time.TestRawTimeIntervalFactory;
@@ -93,8 +94,7 @@ import org.junit.runners.Suite;
 		TestUuIdsFactory.class,
 
 		// Test the descriptors
-		TestDescriptorPrimitiveDataType.class,
-		TestDoubleDescriptor.class,
+		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
 		TestIntegerDescriptor.class,
 		TestLongDescriptor.class,
 		TestGeneralDescriptor.class,
@@ -105,26 +105,29 @@ import org.junit.runners.Suite;
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
-		TestDbDataRetriever.class,
-		TestFixedStructureDataRetriever.class,
+		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
 
 		// Test the dataSets
 		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
 		TestMultipleDataSetIterator.class,
 
 		// Test the different created instances
-		TestMetaDataModel.class, TestDataStructure.class, TestDataModel.class,
+		TestDataStructure.class, TestMetaDataModel.class, TestDataModel.class,
 
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
 
-		// Test the loader, the index and the final model
-		TestTidaModelLoader.class, TestMetaIndexDimension.class,
+		// Test the loader
+		TestTidaModelLoader.class,
+
+		// Test the indexes
+		TestMetaIndexDimension.class, TestMetaIndex.class,
+
+		// Test the model
 		TestTidaModel.class,
 
 		// Test the server
-		TestTidaServer.class
-		})
+		TestTidaServer.class })
 public class AllUnitTests {
 
 }

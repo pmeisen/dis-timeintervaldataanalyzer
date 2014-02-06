@@ -7,17 +7,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Locale;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
+import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
+import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -25,12 +29,8 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -45,30 +45,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
 @SystemProperty(property = "testBeans.selector", value = "?")
-public class TestMetaDataModel {
+public class TestMetaDataModel extends ExceptionBasedTest {
 	private final static String testXmlModel = "/net/meisen/dissertation/model/data/testMetaDataModel.xml";
 
 	@Autowired(required = true)
 	@Qualifier("coreConfiguration")
 	private IConfiguration configuration;
-
-	/**
-	 * Rule to evaluate exceptions
-	 */
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
-	private Locale oldDefault;
-
-	/**
-	 * Make sure we have {@code Locale.US} so that comparisons of errors will
-	 * fit
-	 */
-	@Before
-	public void setUp() {
-		oldDefault = Locale.getDefault();
-		Locale.setDefault(Locale.US);
-	}
 
 	/**
 	 * Helper method for the test to create a {@code MetaDataModel}.
@@ -220,10 +202,109 @@ public class TestMetaDataModel {
 	}
 
 	/**
-	 * Reset the {@code Locale}
+	 * Tests the creation of a {@code MetaIndexDimension} using a
+	 * {@code MetaStructureEntry} with a valid position.
 	 */
-	@After
-	public void cleanUp() {
-		Locale.setDefault(oldDefault);
+	@Test
+	public void testCreateDimensionById() {
+		final MetaDataModel model = createTestModel();
+		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 1);
+		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+
+		assertEquals(0, dim.getAmountOfSlices());
+		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
+				dim.getMetaDataHandling());
+		assertEquals(0, dim.getByValue("unknown").length);
+		for (int i = 0; i < 100; i++) {
+			dim.index(i, new SingleStaticDataSet("unknown"));
+			assertEquals(i + 1, dim.getByValue("unknown").length);
+		}
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} using a
+	 * {@code MetaStructureEntry} with a valid name.
+	 */
+	@Test
+	public void testCreateDimensionByName() {
+		final MetaDataModel model = createTestModel();
+		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1",
+				"myName");
+		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+
+		assertEquals(0, dim.getAmountOfSlices());
+		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
+				dim.getMetaDataHandling());
+		assertEquals(0, dim.getByValue("unknown").length);
+		for (int i = 0; i < 100; i++) {
+			dim.index(i, new SingleStaticDataSet(new SingleStaticDataSetEntry(
+					"myName", "unknown")));
+			assertEquals(i + 1, dim.getByValue("unknown").length);
+		}
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} using a
+	 * {@code MetaStructureEntry} with an invalid position.
+	 */
+	@Test
+	public void testExceptionCreateDimensionByInvalidId() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("The position '2' is invalid."));
+
+		final MetaDataModel model = createTestModel();
+		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 2);
+		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+
+		dim.index(1, new SingleStaticDataSet("unknown"));
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} using a
+	 * {@code MetaStructureEntry} with an invalid name.
+	 */
+	@Test
+	public void testExceptionCreateDimensionByInvalidName() {
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("The name 'myName' is not available within the dataset."));
+
+		final MetaDataModel model = createTestModel();
+		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1",
+				"myName");
+		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+
+		dim.index(1, new SingleStaticDataSet("unknown"));
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} using {@code null} as
+	 * {@code MetaStructureEntry}, which should lead to an exception.
+	 */
+	@Test
+	public void testExceptionNullCreateDimension() {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("The metaEntry cannot be null."));
+
+		final MetaDataModel model = createTestModel();
+		model.createDimension(null);
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} referring to an
+	 * invalid {@code DescriptorModel}.
+	 */
+	@Test
+	public void testExceptionCreatingForInvalidModel() {
+		thrown.expect(MetaDataModelException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("A meta-structure is defined to use the model with id 'ID_UNKNOWN', it cannot be found."));
+
+		final MetaDataModel model = createTestModel();
+		final MetaStructureEntry metaEntry = new MetaStructureEntry(
+				"ID_UNKNOWN", "myName");
+		model.createDimension(metaEntry);
 	}
 }
