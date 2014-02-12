@@ -3,8 +3,7 @@ package net.meisen.dissertation.model.data;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.model.datasets.IClosableIterator;
-import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -37,13 +36,20 @@ public class TidaModel {
 	private DataModel dataModel;
 
 	@Autowired
+	@Qualifier(DefaultValues.INTERVALMODEL_ID)
+	private IntervalModel intervalModel;
+
+	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
 
 	private final String id;
 	private final String name;
 
+	private TidaIndex idx;
+
 	private MetaDataHandling metaDataHandling;
+	private IntervalDataHandling intervalDataHandling;
 
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
@@ -84,6 +90,7 @@ public class TidaModel {
 
 		// set the default value
 		setMetaDataHandling((MetaDataHandling) null);
+		setIntervalDataHandling((IntervalDataHandling) null);
 	}
 
 	/**
@@ -108,20 +115,26 @@ public class TidaModel {
 
 	}
 
+	public boolean isInitialized() {
+		return this.idx != null;
+	}
+
 	public void initialize() {
-		final TidaIndex idx = new TidaIndex(this);
 
-		// check the data and add it to the initialize index
-		final IClosableIterator<IDataRecord> it = dataModel.iterate();
-		while (it.hasNext()) {
-			idx.index(it.next());
+		if (isInitialized()) {
+			// TODO add exception already initialized
 		}
-		it.close();
 
+		// create the index
+		this.idx = new TidaIndex(this);
+
+		// add the data from the model
+		this.idx.index(dataModel);
+
+		// print the statistic after initialization
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(idx.getStatistic());
 		}
-
 	}
 
 	/**
@@ -143,6 +156,15 @@ public class TidaModel {
 	}
 
 	/**
+	 * Gets the {@code IntervalModel} of the {@code TidaModel}.
+	 * 
+	 * @return the {@code IntervalModel} of the {@code TidaModel}
+	 */
+	public IntervalModel getIntervalModel() {
+		return intervalModel;
+	}
+
+	/**
 	 * Gets the {@code DataStructure} of the {@code TidaModel}.
 	 * 
 	 * @return the {@code DataStructure} of the {@code TidaModel}
@@ -158,9 +180,32 @@ public class TidaModel {
 	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
 		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
 				.find(null) : metaDataHandling;
+
+		// let the index know
+		if (isInitialized()) {
+			this.idx.setMetaDataHandling(this.metaDataHandling);
+		}
 	}
 
-	public void setMetaDataHandling(final String metaDataHandling) {
+	public void setMetaDataHandlingByString(final String metaDataHandling) {
 		setMetaDataHandling(MetaDataHandling.find(metaDataHandling));
+	}
+
+	public IntervalDataHandling getIntervalDataHandling() {
+		return intervalDataHandling;
+	}
+
+	public void setIntervalDataHandling(final IntervalDataHandling handling) {
+		this.intervalDataHandling = handling == null ? IntervalDataHandling
+				.find(null) : handling;
+
+		// let the index know
+		if (isInitialized()) {
+			this.idx.setIntervalDataHandling(this.intervalDataHandling);
+		}
+	}
+
+	public void setIntervalDataHandlingByString(final String handling) {
+		setIntervalDataHandling(IntervalDataHandling.find(handling));
 	}
 }

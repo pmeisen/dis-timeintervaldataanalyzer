@@ -14,8 +14,10 @@
   
   <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
+  <xsl:variable name="intervalModelId" select="mdef:getId('INTERVALMODEL_ID')" />
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
+  <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
@@ -37,6 +39,12 @@
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultIndexedCollectionFactory()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable> 
+    <xsl:variable name="mapperFactory">
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:factories/mns:mappers/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:mappers/@implementation" /></xsl:when>
+        <xsl:otherwise><xsl:value-of select="mdef:getDefaultMappersFactory()" /></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable> 
   
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -44,6 +52,9 @@
       
       <!-- create the IndexFactory to be used -->
       <bean id="{$indexFactoryId}" class="{$indexedFactory}" />
+      
+      <!-- create the mapperFactory to be used -->
+      <bean id="{$mapperFactoryId}" class="{$mapperFactory}" />
       
       <!-- create all the defined dataRetrievers -->
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">
@@ -129,7 +140,11 @@
         </property>
       </bean>
       
-      <!-- create the structure -->
+      <!-- create the intervalModel -->
+      <bean id="{$intervalModelId}" class="net.meisen.dissertation.model.data.IntervalModel">
+      </bean>
+      
+      <!-- create the dataStructure -->
       <bean id="{$dataStructureId}" class="net.meisen.dissertation.model.data.DataStructure">
         <constructor-arg type="net.meisen.dissertation.model.datastructure.StructureEntry[]">
           <xsl:choose>
@@ -233,7 +248,13 @@
       <!-- create the tidaModel -->
       <xsl:variable name="metahandling">
         <xsl:choose>
-          <xsl:when test="@metahandling"><xsl:value-of select="@metahandling"/></xsl:when>
+          <xsl:when test="mns:data/@metahandling"><xsl:value-of select="mns:data/@metahandling"/></xsl:when>
+          <xsl:otherwise></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="intervalhandling">
+        <xsl:choose>
+          <xsl:when test="mns:data/@intervalhandling"><xsl:value-of select="mns:data/@intervalhandling"/></xsl:when>
           <xsl:otherwise></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
@@ -242,7 +263,8 @@
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
         
-        <property name="metaDataHandling" value="{$metahandling}" />
+        <property name="metaDataHandlingByString" value="{$metahandling}" />
+        <property name="intervalDataHandlingByString" value="{$intervalhandling}" />
       </bean>
     </beans>
   </xsl:template>

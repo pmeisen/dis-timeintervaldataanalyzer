@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
+import net.meisen.dissertation.config.xslt.mock.MockMapperFactory;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
@@ -34,9 +35,12 @@ import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.DataStructure;
+import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -98,6 +102,11 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 	}
 
+	private TidaModel getTidaModel(final String xml) {
+		setModulesHolder(xml);
+		return modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+	}
+
 	private MetaDataModel getMetaDataModel(final String xml) {
 		setModulesHolder(xml);
 		return modulesHolder.getModule(DefaultValues.METADATAMODEL_ID);
@@ -106,6 +115,11 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	private DataModel getDataModel(final String xml) {
 		setModulesHolder(xml);
 		return modulesHolder.getModule(DefaultValues.DATAMODEL_ID);
+	}
+
+	private IntervalModel getIntervalModel(final String xml) {
+		setModulesHolder(xml);
+		return modulesHolder.getModule(DefaultValues.INTERVALMODEL_ID);
 	}
 
 	private DataStructure getDataStructure(final String xml) {
@@ -118,11 +132,18 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testDefaultFactories() {
-		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
-		final Class<?> res = model.getIndexedCollectionFactory().getClass();
+		final TidaModel model = getTidaModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
+		Class<?> res;
 
+		// check the default IndexedCollectionFactory
+		res = model.getMetaDataModel().getIndexedCollectionFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
 				res.equals(IndexedCollectionFactory.class));
+
+		// check the default MapperFactory
+		res = model.getIntervalModel().getMapperFactory().getClass();
+		assertTrue("Instance of '" + res.getName() + "'",
+				res.equals(MapperFactory.class));
 	}
 
 	/**
@@ -130,11 +151,16 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testChangedFactories() {
-		final MetaDataModel model = getMetaDataModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
-		final Class<?> res = model.getIndexedCollectionFactory().getClass();
+		final TidaModel model = getTidaModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
+		Class<?> res;
 
+		res = model.getMetaDataModel().getIndexedCollectionFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
 				res.equals(MockIndexedCollectionFactory.class));
+
+		res = model.getIntervalModel().getMapperFactory().getClass();
+		assertTrue("Instance of '" + res.getName() + "'",
+				res.equals(MockMapperFactory.class));
 	}
 
 	/**
@@ -308,7 +334,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testNoData() {
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/noDataSets.xml");
-		final Iterator<IDataRecord> it = model.iterate();
+		final Iterator<IDataRecord> it = model.iterator();
 
 		assertFalse(it.hasNext());
 	}
@@ -328,7 +354,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	public void testSingleData() throws TransformationFailedException,
 			ParseException {
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/singleStaticDataSets.xml");
-		final IClosableIterator<IDataRecord> it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterator();
 
 		// count the entries
 		int count = 0;
@@ -399,7 +425,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		getDb("/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
 
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/dbDataSets.xml");
-		final IClosableIterator<IDataRecord> it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterator();
 
 		// get the expected
 		final Set<Integer> expected = new HashSet<Integer>();

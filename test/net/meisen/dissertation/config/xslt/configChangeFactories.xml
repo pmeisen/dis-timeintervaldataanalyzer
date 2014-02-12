@@ -8,6 +8,8 @@
   <config>
     <factories>
       <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory" />
+      
+      <mappers implementation="net.meisen.dissertation.config.xslt.mock.MockMapperFactory" />
     </factories>
   </config>
   

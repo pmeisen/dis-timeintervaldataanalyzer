@@ -23,7 +23,7 @@ public class DataModel implements IDataSet {
 	private List<IDataSet> dataSets = new ArrayList<IDataSet>();
 
 	@Override
-	public IClosableIterator<IDataRecord> iterate() {
+	public IClosableIterator<IDataRecord> iterator() {
 		return new MultipleDataSetIterator(dataSets);
 	}
 

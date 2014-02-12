@@ -37,7 +37,7 @@ public class FixedStructureDataCollection extends DataCollection<String> {
 	}
 
 	@Override
-	public FixedStructureDataIterator iterate() {
+	public FixedStructureDataIterator iterator() {
 		return new FixedStructureDataIterator(this);
 	}
 

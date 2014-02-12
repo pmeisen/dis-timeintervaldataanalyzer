@@ -19,7 +19,7 @@ import java.util.List;
  * 
  * @param <D>
  */
-public abstract class DataCollection<D> {
+public abstract class DataCollection<D> implements Iterable<DataRecord<D>> {
 
 	private List<D> names = null;
 
@@ -43,6 +43,9 @@ public abstract class DataCollection<D> {
 	public DataCollection(final D[] names) {
 		setNames(names);
 	}
+	
+	@Override
+	public abstract DataIterator<D> iterator();
 
 	/**
 	 * Set the names of the data of the collection. The names can only be set
@@ -152,15 +155,6 @@ public abstract class DataCollection<D> {
 	}
 
 	/**
-	 * Gets an {@code DataIterator} to iterate through the data of the
-	 * collection.
-	 * 
-	 * @return an {@code DataIterator} to iterate through the data of
-	 *         {@code this} collection
-	 */
-	public abstract DataIterator<D> iterate();
-
-	/**
 	 * This method should be called whenever the collection is not used anymore.
 	 * It releases all bound resources of the {@code DataCollection}.
 	 */
@@ -174,7 +168,7 @@ public abstract class DataCollection<D> {
 	 *         {@code this} collection
 	 */
 	public List<DataRecord<D>> get() {
-		final Iterator<DataRecord<D>> it = iterate();
+		final Iterator<DataRecord<D>> it = iterator();
 		final ArrayList<DataRecord<D>> data = new ArrayList<DataRecord<D>>();
 
 		while (it.hasNext()) {
@@ -228,7 +222,7 @@ public abstract class DataCollection<D> {
 	 */
 	public <T> Collection<T> transform(final int position) {
 		final ArrayList<T> data = new ArrayList<T>();
-		final Iterator<DataRecord<D>> it = iterate();
+		final Iterator<DataRecord<D>> it = iterator();
 		if (it == null) {
 			return data;
 		}

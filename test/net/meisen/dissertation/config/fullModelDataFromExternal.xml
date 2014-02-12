@@ -20,6 +20,14 @@
             + net.meisen.dissertation.impl.indexes.IndexedCollectionFactory
         -->
       <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+      
+      <!-- Define the factory to be used to determine which MapperFactory
+           to be used.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.impl.time.mapper.MapperFactory
+        -->
+      <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory" />
     </factories>
     
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
@@ -56,8 +64,16 @@
   </config>
 
   <meta>
+    <!-- As identifier-factory the following implementations are available:
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
+          
+         The null-attribute (true or false) defines if null values are allowed within 
+         the model. 
+      -->
     <descriptors>
-      <resource id="R1" name="person" />
+      <resource id="R1" name="person" null="false" idfactory="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" />
       <resource id="R2" name="toy" />
       <resource id="R3" />
     
@@ -85,5 +101,15 @@
     </entries>
   </meta>
   
-  <data />
+  <!-- MetaDataHandling (i.e. what has to be done if no Descriptor is available so far)
+       is optional and can be one of the following values (case-insensitive):
+        + handleAsNull, null
+        + createDescriptor, create, add
+        + failOnError, fail
+        
+       IntervalDataHandling (i.e. what has to be done if an interval-value is null)
+        + boundariesWhenNull, boundaries
+        + failOnNull, fail
+    -->
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
 </model>

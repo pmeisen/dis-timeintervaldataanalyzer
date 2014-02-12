@@ -67,7 +67,7 @@ public class TestDataRetrieverDataSet {
 		}
 
 		// check the data access and the available data
-		final Iterator<IDataRecord> it = retriever.iterate();
+		final Iterator<IDataRecord> it = retriever.iterator();
 		int counter = 0;
 		while (it.hasNext()) {
 			final IDataRecord data = it.next();

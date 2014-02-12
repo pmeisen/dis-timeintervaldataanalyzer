@@ -24,7 +24,7 @@ public class DataRetrieverDataSetIterator implements
 	 * @param collection
 	 */
 	public DataRetrieverDataSetIterator(final DataCollection<String> collection) {
-		this.it = collection.iterate();
+		this.it = collection.iterator();
 	}
 
 	@Override

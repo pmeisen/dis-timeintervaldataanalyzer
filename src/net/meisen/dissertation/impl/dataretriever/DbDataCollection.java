@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * A {@code DbDataCollection} is a database's data collection, i.e. a collection
  * which contains the data retrieved from a database using a {@code query}. The
  * collection does not cache any data, i.e. a new iterator (pointing to the
- * database's data) is opened for every call to {@link #iterate()}. Furthermore
+ * database's data) is opened for every call to {@link #iterator()}. Furthermore
  * every call to {@link #get()} reloads the data from the database.
  * 
  * @author pmeisen
@@ -148,7 +148,7 @@ public class DbDataCollection extends DataCollection<String> {
 	}
 
 	@Override
-	public DbDataIterator iterate() {
+	public DbDataIterator iterator() {
 		try {
 			final ResultSet rs = statement.executeQuery();
 			return new DbDataIterator(this, rs);

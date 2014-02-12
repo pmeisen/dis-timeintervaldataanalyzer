@@ -90,7 +90,7 @@ public class MockDataCollection<D> extends DataCollection<D> {
 	}
 
 	@Override
-	public DataIterator<D> iterate() {
+	public DataIterator<D> iterator() {
 		return new MockDataIterator<D>(this, amountOfData);
 	}
 

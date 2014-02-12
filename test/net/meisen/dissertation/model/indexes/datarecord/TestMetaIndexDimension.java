@@ -10,7 +10,12 @@ import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
+import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
+import net.meisen.dissertation.impl.idfactories.UuIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.MapIndexedCollection;
+import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
+import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -20,7 +25,6 @@ import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -89,6 +93,39 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	}
 
 	/**
+	 * Tests the selected indexes for the {@code MetaIndexDimension} which is
+	 * used to index the different slices.
+	 */
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testIndexSelection() {
+		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		DescriptorModel<?> model;
+		MetaIndexDimension<?> idx;
+
+		// test for integers
+		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
+				new IntegerIdsFactory(), idxFactory);
+		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
+				idxFactory);
+		assertEquals(TroveIntIndexedCollection.class, idx.getIndexClass());
+
+		// test for longs
+		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
+				new LongIdsFactory(), idxFactory);
+		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
+				idxFactory);
+		assertEquals(TroveLongIndexedCollection.class, idx.getIndexClass());
+
+		// test for UUIDs
+		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
+				new UuIdsFactory(), idxFactory);
+		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
+				idxFactory);
+		assertEquals(MapIndexedCollection.class, idx.getIndexClass());
+	}
+
+	/**
 	 * Tests the usage when loading a static model.
 	 */
 	@Test
@@ -109,7 +146,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 				metaStructures.get(0), descModel,
 				new IndexedCollectionFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
-				.iterate();
+				.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
@@ -167,7 +204,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 				randomStructure, randomDescModel, idxFactory);
 
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
-				.iterate();
+				.iterator();
 		int i = 0;
 		int added = 0;
 		while (it.hasNext()) {

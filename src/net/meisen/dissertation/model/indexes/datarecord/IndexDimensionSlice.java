@@ -17,6 +17,7 @@ import com.googlecode.javaewah.EWAHCompressedBitmap;
  * @author pmeisen
  * 
  * @param <I>
+ *            the type of the identifier used to identify the slice
  */
 public class IndexDimensionSlice<I> implements
 		Comparable<IndexDimensionSlice<I>> {

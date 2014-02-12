@@ -242,7 +242,6 @@ public class DescriptorModel<I extends Object> {
 			final Descriptor<D, ?, I> descriptor = (Descriptor<D, ?, I>) getNullDescriptor();
 			return descriptor;
 		} else {
-
 			final Class<?> valueType = value.getClass();
 
 			// get the constructor

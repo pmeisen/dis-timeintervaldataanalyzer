@@ -113,7 +113,7 @@ public class TestSingleStaticDataSet {
 	}
 
 	/**
-	 * Tests the implementation of the {@link SingleStaticDataSet#iterate()}
+	 * Tests the implementation of the {@link SingleStaticDataSet#iterator()}
 	 * method.
 	 */
 	@Test
@@ -124,7 +124,7 @@ public class TestSingleStaticDataSet {
 						3, "anotherName", 3));
 
 		// get the iterator
-		final SingleStaticDataSetIterator it = dataSet.iterate();
+		final SingleStaticDataSetIterator it = dataSet.iterator();
 
 		// there should be one value
 		for (int i = 0; i < 10; i++) {

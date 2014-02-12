@@ -21,7 +21,7 @@ public class EmptyDataCollection<D> extends DataCollection<D> {
 	}
 
 	@Override
-	public DataIterator<D> iterate() {
+	public DataIterator<D> iterator() {
 		return new DataIterator<D>() {
 
 			@Override

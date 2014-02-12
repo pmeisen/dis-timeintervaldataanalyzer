@@ -1,7 +1,5 @@
 package net.meisen.dissertation.model.datasets;
 
-import java.util.Iterator;
-
 /**
  * A set of data, whereby the data is represented by so called
  * {@code DataRecords}.
@@ -11,7 +9,7 @@ import java.util.Iterator;
  * @see IDataRecord
  * 
  */
-public interface IDataSet {
+public interface IDataSet extends Iterable<IDataRecord> {
 
 	/**
 	 * Checks if the {@code DataSet} has values for the specified {@code name}.
@@ -35,12 +33,4 @@ public interface IDataSet {
 	 *         set, otherwise {@code false}
 	 */
 	public boolean isValidPosition(final int position);
-
-	/**
-	 * Gets an {@code Iterator} to iterate over the {@code DataRecord} instances
-	 * of the {@code DataSet}.
-	 * 
-	 * @return {@code Iterator} to iterate over the {@code DataRecord} instances
-	 */
-	public Iterator<IDataRecord> iterate();
 }

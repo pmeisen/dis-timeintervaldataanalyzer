@@ -14,7 +14,10 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.general.genmisc.types.Classes;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Strings;
@@ -32,6 +35,11 @@ public class DefaultValues {
 	 * created {@code MetaDataModel}.
 	 */
 	public static final String METADATAMODEL_ID = "metaDataModel";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code IntervalModel}.
+	 */
+	public static final String INTERVALMODEL_ID = "intervalModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code DataModel}.
@@ -52,6 +60,11 @@ public class DefaultValues {
 	 * created {@code IndexedCollectionFactory}.
 	 */
 	public static final String INDEXFACTORY_ID = "indexFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code MapperFactory}.
+	 */
+	public static final String MAPPERFACTORY_ID = "mapperFactory";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -79,9 +92,22 @@ public class DefaultValues {
 	 * Gets the default {@code BaseIndexedCollectionFactory} to be used.
 	 * 
 	 * @return the default {@code BaseIndexedCollectionFactory} to be used
+	 * 
+	 * @see BaseIndexedCollectionFactory
 	 */
 	public static String getDefaultIndexedCollectionFactory() {
 		return IndexedCollectionFactory.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code MapperFactory} to be used.
+	 * 
+	 * @return the default {@code MapperFactory} to be used
+	 * 
+	 * @see BaseMapperFactory
+	 */
+	public static String getDefaultMappersFactory() {
+		return MapperFactory.class.getName();
 	}
 
 	/**

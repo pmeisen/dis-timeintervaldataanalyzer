@@ -40,6 +40,18 @@
                         <xs:attribute name="implementation" type="javaClass" use="required" />
                       </xs:complexType>
                     </xs:element>
+                    
+                    <xs:element name="mappers" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="implementation" type="javaClass" use="required" />
+                      </xs:complexType>
+                    </xs:element>
+                    
+                    <xs:element name="granularities" minOccurs="0">
+                      <xs:complexType>
+                        <xs:attribute name="implementation" type="javaClass" use="required" />
+                      </xs:complexType>
+                    </xs:element>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
@@ -59,13 +71,6 @@
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                </xs:complexType>
-              </xs:element>
-              
-              <xs:element name="interval" minOccurs="0">
-                <xs:complexType>
-                  <xs:attribute name="granularity" type="javaClass" use="optional" />
-                  <xs:attribute name="naturals" type="javaClass" use="optional" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -159,6 +164,7 @@
             </xs:sequence>
             
             <xs:attribute name="metahandling" type="xs:string" use="optional" />
+            <xs:attribute name="intervalhandling" type="xs:string" use="optional" />
           </xs:complexType>
         </xs:element>
       </xs:sequence>

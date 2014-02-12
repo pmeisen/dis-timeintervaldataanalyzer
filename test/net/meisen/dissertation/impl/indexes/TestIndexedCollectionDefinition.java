@@ -41,7 +41,6 @@ public class TestIndexedCollectionDefinition {
 				TestIndexedCollectionDefinition.class);
 		IndexedCollectionDefinition def;
 
-		// create some SimpleIndexedCollection
 		def = new IndexedCollectionDefinition(SimpleIndexedCollection.class);
 		assertTrue(def.create(keyDef) instanceof SimpleIndexedCollection);
 		assertEquals(keyDef, def.create(keyDef).getKeyDefinition());

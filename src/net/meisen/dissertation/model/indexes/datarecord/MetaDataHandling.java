@@ -1,7 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
@@ -34,15 +33,17 @@ public enum MetaDataHandling {
 
 	private MetaDataHandling(final String... synonyms) {
 		this.synonyms = new ArrayList<String>();
-		this.synonyms.add(this.name());
+		this.synonyms.add(this.name().toLowerCase());
 
 		if (synonyms != null) {
-			this.synonyms.addAll(Arrays.asList(synonyms));
+			for (final String synonym : synonyms) {
+				this.synonyms.add(synonym.toLowerCase());
+			}
 		}
 	}
 
 	private boolean isSynonym(final String name) {
-		return this.synonyms.contains(name);
+		return this.synonyms.contains(name.toLowerCase());
 	}
 
 	/**

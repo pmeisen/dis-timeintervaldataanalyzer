@@ -77,7 +77,7 @@ public class TestDataModel {
 		}
 
 		// test the iteration
-		final IClosableIterator<IDataRecord> it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterator();
 		int counter = 0;
 		while (it.hasNext()) {
 			counter++;
@@ -126,7 +126,7 @@ public class TestDataModel {
 		}
 
 		// check the values
-		final IClosableIterator<IDataRecord> it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			i++;
@@ -189,7 +189,7 @@ public class TestDataModel {
 		}
 
 		// check the values
-		final IClosableIterator<IDataRecord> it = model.iterate();
+		final IClosableIterator<IDataRecord> it = model.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			i++;

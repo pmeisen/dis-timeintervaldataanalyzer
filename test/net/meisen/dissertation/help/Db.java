@@ -324,6 +324,10 @@ public class Db {
 		// add the tidaGhTasks database
 		int i = 0;
 		for (final Entry<String, File> e : dbs.entrySet()) {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Adding database '" + e.getKey() + "'...");
+			}
+
 			hSqlDb.setDatabaseName(i, e.getKey());
 			hSqlDb.setDatabasePath(i,
 					"file:" + Files.getCanonicalPath(e.getValue()) + e.getKey());
@@ -331,7 +335,13 @@ public class Db {
 		}
 
 		// start the server
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Starting HSqlDbMs...");
+		}
 		hSqlDb.start();
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("HSqlDbMs is started!");
+		}
 
 		// if asked for lets wait
 		if (wait) {

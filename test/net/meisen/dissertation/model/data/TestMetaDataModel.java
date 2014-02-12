@@ -209,7 +209,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	public void testCreateDimensionById() {
 		final MetaDataModel model = createTestModel();
 		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 1);
-		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
 		assertEquals(0, dim.getAmountOfSlices());
 		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
@@ -230,7 +230,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 		final MetaDataModel model = createTestModel();
 		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1",
 				"myName");
-		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
 		assertEquals(0, dim.getAmountOfSlices());
 		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
@@ -255,7 +255,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 
 		final MetaDataModel model = createTestModel();
 		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 2);
-		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
 		dim.index(1, new SingleStaticDataSet("unknown"));
 	}
@@ -273,7 +273,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 		final MetaDataModel model = createTestModel();
 		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1",
 				"myName");
-		final MetaIndexDimension<?> dim = model.createDimension(metaEntry);
+		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
 		dim.index(1, new SingleStaticDataSet("unknown"));
 	}
@@ -289,7 +289,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 				.containsString("The metaEntry cannot be null."));
 
 		final MetaDataModel model = createTestModel();
-		model.createDimension(null);
+		model.createIndexDimension(null);
 	}
 
 	/**
@@ -305,6 +305,6 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 		final MetaDataModel model = createTestModel();
 		final MetaStructureEntry metaEntry = new MetaStructureEntry(
 				"ID_UNKNOWN", "myName");
-		model.createDimension(metaEntry);
+		model.createIndexDimension(metaEntry);
 	}
 }

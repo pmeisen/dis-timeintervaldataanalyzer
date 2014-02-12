@@ -38,7 +38,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 
 		final MetaIndex metaIndex = new MetaIndex(model);
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
-				.iterate();
+				.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
@@ -65,7 +65,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 		// create the indexes
 		final MetaIndex metaIndex = new MetaIndex(model);
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
-				.iterate();
+				.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();

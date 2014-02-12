@@ -10,20 +10,19 @@ import net.meisen.dissertation.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestGeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestIntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestLongDescriptor;
+import net.meisen.dissertation.impl.idfactories.TestByteIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
+import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
+import net.meisen.dissertation.impl.indexes.TestIndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
-import net.meisen.dissertation.impl.naturals.TestBigIntegerNaturals;
-import net.meisen.dissertation.impl.naturals.TestBigIntegerNaturalsFactory;
-import net.meisen.dissertation.impl.naturals.TestIntegerNaturals;
-import net.meisen.dissertation.impl.naturals.TestIntegerNaturalsFactory;
-import net.meisen.dissertation.impl.naturals.TestLongNaturals;
-import net.meisen.dissertation.impl.naturals.TestLongNaturalsFactory;
+import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
+import net.meisen.dissertation.impl.time.mapper.TestDateNormalizer;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
@@ -40,9 +39,8 @@ import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.loader.TestTidaModelLoader;
-import net.meisen.dissertation.model.time.TestRawTemporalModel;
-import net.meisen.dissertation.model.time.TestRawTimeIntervalFactory;
-import net.meisen.dissertation.model.time.TestRawTimePointFactory;
+import net.meisen.dissertation.model.time.mapper.TestBaseMapperFactory;
+import net.meisen.dissertation.model.time.timeline.TestTimelineDefinition;
 import net.meisen.dissertation.server.TestTidaServer;
 
 import org.junit.runner.RunWith;
@@ -63,23 +61,6 @@ import org.junit.runners.Suite;
 		// Test general helper
 		TestDb.class,
 
-		// Test the naturals
-		TestIntegerNaturals.class,
-		TestLongNaturals.class,
-		TestBigIntegerNaturals.class,
-
-		// Test the factories for naturals
-		TestIntegerNaturalsFactory.class,
-		TestLongNaturalsFactory.class,
-		TestBigIntegerNaturalsFactory.class,
-
-		// Test the factories for the point and interval
-		TestRawTimePointFactory.class,
-		TestRawTimeIntervalFactory.class,
-
-		// Test the temporal model
-		TestRawTemporalModel.class,
-
 		// Test indexes
 		TestCompositeIndexKey.class,
 		TestIndexKeyDefinition.class,
@@ -88,7 +69,12 @@ import org.junit.runners.Suite;
 		TestNestedIndexedCollection.class,
 		TestMultipleIndexedCollection.class,
 
+		// Test the factory for the indexes
+		TestIndexedCollectionFactory.class,
+
 		// Test the id factories
+		TestByteIdsFactory.class,
+		TestShortIdsFactory.class,
 		TestIntegerIdsFactory.class,
 		TestLongIdsFactory.class,
 		TestUuIdsFactory.class,
@@ -102,6 +88,16 @@ import org.junit.runners.Suite;
 
 		// Test the descriptorModel
 		TestDescriptorModel.class,
+
+		// Test the timeline
+		TestTimelineDefinition.class,
+		
+		// Test the time mapper
+		TestDateNormalizer.class,
+		TestDateMapper.class,
+		
+		// Test the time factory
+		TestBaseMapperFactory.class,
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,

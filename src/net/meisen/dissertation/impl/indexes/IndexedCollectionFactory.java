@@ -57,7 +57,11 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 		final Class<? extends IndexedCollection> collClazz;
 
 		// we have some really nice implementations for the primitives
-		if (isIntPrimitiveType(clazz)) {
+		if (isBytePrimitiveType(clazz)) {
+			collClazz = TroveByteIndexedCollection.class;
+		} else if (isShortPrimitiveType(clazz)) {
+			collClazz = TroveShortIndexedCollection.class;
+		} else if (isIntPrimitiveType(clazz)) {
 			collClazz = TroveIntIndexedCollection.class;
 		} else if (isLongPrimitiveType(clazz)) {
 			collClazz = TroveLongIndexedCollection.class;

@@ -34,7 +34,7 @@ public class MetaDataModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
+	private BaseIndexedCollectionFactory indexedCollectionFactory;
 
 	private IIndexedCollection descriptorModels;
 
@@ -62,7 +62,7 @@ public class MetaDataModel {
 			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
 
 		// set the factories
-		this.baseIndexedCollectionFactory = baseIndexedCollectionFactory;
+		this.indexedCollectionFactory = baseIndexedCollectionFactory;
 	}
 
 	/**
@@ -282,7 +282,7 @@ public class MetaDataModel {
 	 *         {@code MetaDataModel}
 	 */
 	public BaseIndexedCollectionFactory getIndexedCollectionFactory() {
-		return baseIndexedCollectionFactory;
+		return indexedCollectionFactory;
 	}
 
 	/**
@@ -316,15 +316,19 @@ public class MetaDataModel {
 	 *            the {@code DataStructure} to create the
 	 *            {@code MetaIndexDimensions} for
 	 * 
-	 * @return the created {@code MetaIndexDimensions}
+	 * @return the created {@code MetaIndexDimensions} indexed by a
+	 *         {@code IndexedCollection}
 	 * 
+	 * @see IIndexedCollection
 	 * @see MetaIndexDimension
 	 */
-	public List<MetaIndexDimension<?>> createDimensions(
-			final DataStructure structure) {
-		final List<MetaIndexDimension<?>> idxDimensions = new ArrayList<MetaIndexDimension<?>>();
+	public IIndexedCollection createIndex(final DataStructure structure) {
+		final IndexKeyDefinition key = new IndexKeyDefinition(
+				MetaIndexDimension.class, "getModelId");
+		final IIndexedCollection index = getIndexedCollectionFactory().create(
+				key);
 		if (structure == null) {
-			return idxDimensions;
+			return index;
 		}
 
 		// get all the MetaStructureEntries
@@ -333,10 +337,10 @@ public class MetaDataModel {
 
 		// create a MetaIndexDimension for each MetaStructureEntry
 		for (final MetaStructureEntry metaEntry : metaEntries) {
-			idxDimensions.add(createDimension(metaEntry));
+			index.addObject(createIndexDimension(metaEntry));
 		}
 
-		return idxDimensions;
+		return index;
 	}
 
 	/**
@@ -352,7 +356,7 @@ public class MetaDataModel {
 	 * @throws NullPointerException
 	 *             if {@code metaEntry} is {@code null}
 	 */
-	public MetaIndexDimension<?> createDimension(
+	public MetaIndexDimension<?> createIndexDimension(
 			final MetaStructureEntry metaEntry) {
 		if (metaEntry == null) {
 			throw new NullPointerException("The metaEntry cannot be null.");
@@ -369,7 +373,7 @@ public class MetaDataModel {
 		// create an IndexDimension for the MetaInformation
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
-				descModel, baseIndexedCollectionFactory);
+				descModel, getIndexedCollectionFactory());
 
 		return idxDim;
 	}

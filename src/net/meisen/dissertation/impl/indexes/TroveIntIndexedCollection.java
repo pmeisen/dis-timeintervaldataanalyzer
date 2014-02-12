@@ -27,7 +27,7 @@ public class TroveIntIndexedCollection extends IndexedCollection {
 	 */
 	public TroveIntIndexedCollection(final IndexKeyDefinition keyDefinition) {
 		super(keyDefinition);
-
+		
 		if (!keyDefinition.isSingleTypedKey(Integer.class)) {
 			throw new IllegalArgumentException(
 					"The key must be a single Integer");

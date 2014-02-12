@@ -80,7 +80,7 @@ public class DataRetrieverDataSet implements IDataSet {
 	}
 
 	@Override
-	public Iterator<IDataRecord> iterate() {
+	public Iterator<IDataRecord> iterator() {
 		return new DataRetrieverDataSetIterator(getCollection());
 	}
 }

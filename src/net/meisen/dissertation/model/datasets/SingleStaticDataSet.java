@@ -179,7 +179,7 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 	}
 
 	@Override
-	public SingleStaticDataSetIterator iterate() {
+	public SingleStaticDataSetIterator iterator() {
 		return new SingleStaticDataSetIterator(this);
 	}
 

@@ -220,7 +220,7 @@ public class TestDbDataRetriever {
 				.setQuery("SELECT * FROM TB_TESTDATA WHERE COUNTER < 10");
 		queryConfiguration.setLanguage("sql");
 		final DbDataCollection res = db.retrieve(queryConfiguration);
-		final DbDataIterator it = res.iterate();
+		final DbDataIterator it = res.iterator();
 
 		// check the iteration, it should not change the cursor
 		int counter = 0;

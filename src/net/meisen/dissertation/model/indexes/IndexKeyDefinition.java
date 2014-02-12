@@ -52,7 +52,7 @@ public class IndexKeyDefinition {
 			throw new NullPointerException("objectClass cannot be null.");
 		}
 
-		this.objectClass = objectClass;
+		this.objectClass = primitiveTypeMapper(objectClass);
 		this.getterMethods = null;
 		this.getterTypes = null;
 		this.overridenTypes = null;
@@ -82,7 +82,7 @@ public class IndexKeyDefinition {
 		}
 
 		this.idResolver = null;
-		this.objectClass = objectClass;
+		this.objectClass = primitiveTypeMapper(objectClass);
 		this.size = getterMethods.length;
 
 		this.getterMethods = new Method[size];

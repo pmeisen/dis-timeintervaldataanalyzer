@@ -36,7 +36,7 @@
     <interval position="2" type="end" />
   </structure>
            
-  <data metahandling="fail">
+  <data metahandling="fail" intervalhandling="fail">
     <dataset dataretriever="db_pioneer">
       <db:query>SELECT  start_time, end_time, symbol FROM TB_INTERVALS</db:query>
     </dataset>

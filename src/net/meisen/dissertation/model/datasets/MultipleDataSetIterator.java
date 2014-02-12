@@ -93,7 +93,7 @@ public class MultipleDataSetIterator implements IClosableIterator<IDataRecord> {
 
 			// if we don't have an iterator get the current one
 			if (curIterator == null) {
-				curIterator = dataSet.iterate();
+				curIterator = dataSet.iterator();
 				return hasNext();
 			}
 			// check if the iterator has a next one

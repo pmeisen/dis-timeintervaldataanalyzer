@@ -6,13 +6,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
+/**
+ * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
+ * {@code DataRecords} efficient considering the querying time.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TidaIndex {
+	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 	private final static int STATISTIC_THRESHOLD = 30;
+
 	private final Map<Class<? extends DataRecordIndex>, DataRecordIndex> indexes;
 
 	private int dataId;
@@ -27,13 +41,48 @@ public class TidaIndex {
 		indexes.put(IntervalIndex.class, new IntervalIndex(model));
 
 		// set the default values
-		setMetaDataHandling((MetaDataHandling) null);
+		setMetaDataHandling(model.getMetaDataHandling());
+		setIntervalDataHandling(model.getIntervalDataHandling());
 	}
 
 	public void index(final IDataRecord record) {
 		for (final DataRecordIndex idx : indexes.values()) {
 			idx.index(dataId, record);
+
+			//@formatter:off
+			/*
+			 * dataId cannot be:
+			 *  - negative or 
+			 *  - greater than Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits
+			 */
+			//@formatter:on
 			dataId++;
+		}
+	}
+
+	public void index(final DataModel dataModel) {
+
+		// log the start
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Start adding of records from dataModel...");
+		}
+
+		// check the data and add it to the initialize index
+		final IClosableIterator<IDataRecord> it = dataModel.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			index(it.next());
+			i++;
+
+			if (LOG.isDebugEnabled() && (i % 10000 == 0)) {
+				LOG.debug("... added " + i + " records from dataModel...");
+			}
+		}
+		it.close();
+
+		// log the finalization
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Finished adding of " + i + " records from dataModel.");
 		}
 	}
 
@@ -41,13 +90,21 @@ public class TidaIndex {
 		return getIndex(MetaIndex.class).getMetaDataHandling();
 	}
 
-	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
-		getIndex(MetaIndex.class).setMetaDataHandling(metaDataHandling);
+	public void setMetaDataHandling(final MetaDataHandling handling) {
+		getIndex(MetaIndex.class).setMetaDataHandling(handling);
+	}
+
+	public IntervalDataHandling getIntervalDataHandling() {
+		return getIndex(IntervalIndex.class).getIntervalDataHandling();
+	}
+
+	public void setIntervalDataHandling(final IntervalDataHandling handling) {
+		getIndex(IntervalIndex.class).setIntervalDataHandling(handling);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected <T extends DataRecordIndex> T getIndex(final Class<T> clazz) {
-		return (T) indexes.get(MetaIndex.class);
+		return (T) indexes.get(clazz);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -73,7 +130,7 @@ public class TidaIndex {
 			Collections.sort(sortedSlices, Collections.reverseOrder());
 			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
 			
-			// output the data use a threshold of 50 max
+			// output the data use the threshold defined by STATISTIC_THRESHOLD
 			int i = 0;
 			for (final IndexDimensionSlice<?> slice : sortedSlices) {
 				final Object sliceId = slice.getId();

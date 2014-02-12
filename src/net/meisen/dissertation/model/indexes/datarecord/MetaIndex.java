@@ -1,12 +1,14 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
+
+import com.google.common.base.Objects;
 
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.IIndexedCollection;
 
 /**
  * A {@code MetaIndex} is used to index meta information associated to data. It
@@ -18,7 +20,7 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
  */
 public class MetaIndex implements DataRecordIndex {
 
-	private final List<MetaIndexDimension<?>> metaDimensions;
+	private final IIndexedCollection dimensionsIndex;
 
 	private MetaDataHandling metaDataHandling;
 
@@ -50,8 +52,8 @@ public class MetaIndex implements DataRecordIndex {
 	public MetaIndex(final MetaDataModel metaDataModel,
 			final DataStructure dataStructure) {
 
-		// create the dimensions using the {@code MetaDataModel}
-		this.metaDimensions = metaDataModel.createDimensions(dataStructure);
+		// create the dimensions using the MetaDataModel
+		this.dimensionsIndex = metaDataModel.createIndex(dataStructure);
 
 		// set the default values
 		setMetaDataHandling((MetaDataHandling) null);
@@ -59,7 +61,7 @@ public class MetaIndex implements DataRecordIndex {
 
 	@Override
 	public void index(final int dataId, final IDataRecord record) {
-		for (final MetaIndexDimension<?> dim : metaDimensions) {
+		for (final MetaIndexDimension<?> dim : getDimensions()) {
 			dim.index(dataId, record);
 		}
 	}
@@ -80,10 +82,20 @@ public class MetaIndex implements DataRecordIndex {
 	 *            the {@code MetaDataHandling} to be used
 	 */
 	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
-		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
-				.find(null) : metaDataHandling;
+		final MetaDataHandling newMetaDataHandling;
+		if (this.metaDataHandling == null) {
+			newMetaDataHandling = metaDataHandling;
+		} else {
+			newMetaDataHandling = metaDataHandling == null ? MetaDataHandling
+					.find(null) : metaDataHandling;
+			if (Objects.equal(this.metaDataHandling, newMetaDataHandling)) {
+				return;
+			}
+		}
 
-		for (final MetaIndexDimension<?> dim : metaDimensions) {
+		// set the new value and apply it to all other
+		this.metaDataHandling = newMetaDataHandling;
+		for (final MetaIndexDimension<?> dim : getDimensions()) {
 			dim.setMetaDataHandling(this.metaDataHandling);
 		}
 	}
@@ -94,10 +106,16 @@ public class MetaIndex implements DataRecordIndex {
 	 * @return the amount of dimensions indexed
 	 */
 	public int getAmountOfDimensions() {
-		return metaDimensions.size();
+		return dimensionsIndex.size();
 	}
 
-	public List<MetaIndexDimension<?>> getDimensions() {
-		return Collections.unmodifiableList(metaDimensions);
+	/**
+	 * Gets the dimensions of the {@code MetaIndex} as collection.
+	 * 
+	 * @return the dimensions of the {@ode MetaIndex}
+	 */
+	@SuppressWarnings("unchecked")
+	protected Collection<MetaIndexDimension<?>> getDimensions() {
+		return (Collection<MetaIndexDimension<?>>) dimensionsIndex.getAll();
 	}
 }

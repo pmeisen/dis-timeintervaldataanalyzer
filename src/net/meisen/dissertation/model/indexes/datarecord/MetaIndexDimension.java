@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author pmeisen
  * 
  * @param <I>
- *            the type of the object indexed
+ *            the type of the indexed values
  */
 public class MetaIndexDimension<I> {
 	private final static Logger LOG = LoggerFactory
@@ -46,7 +46,7 @@ public class MetaIndexDimension<I> {
 	 * @param model
 	 *            the {@code DescriptorModel} referred by the
 	 *            {@code MetaStructureEntry}
-	 * @param baseIndexedCollectionFactory
+	 * @param indexedCollectionFactory
 	 *            the {@code BaseIndexedCollectionFactory} used to decide which
 	 *            index should be used for referring to the different
 	 *            {@code IndexBitmapSlice} instances
@@ -56,7 +56,7 @@ public class MetaIndexDimension<I> {
 	 */
 	public MetaIndexDimension(final MetaStructureEntry metaEntry,
 			final DescriptorModel<I> model,
-			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+			final BaseIndexedCollectionFactory indexedCollectionFactory) {
 		if (model == null) {
 			throw new NullPointerException("The model cannot be null.");
 		} else if (metaEntry == null) {
@@ -68,7 +68,7 @@ public class MetaIndexDimension<I> {
 					+ metaEntry.getDescriptorModel() + "'.");
 		} else if (LOG.isTraceEnabled()) {
 			LOG.trace("Creating MetaIndexDimension for '"
-					+ metaEntry.getDescriptorModel() + "'.");
+					+ metaEntry.getDescriptorModel() + "'...");
 		}
 
 		// set the values
@@ -79,10 +79,19 @@ public class MetaIndexDimension<I> {
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
 				IndexDimensionSlice.class, "getId");
 		indexKeyDef.overrideType(0, model.getIdClass());
-		this.index = baseIndexedCollectionFactory.create(indexKeyDef);
+		this.index = indexedCollectionFactory.create(indexKeyDef);
 
 		// set the default value
 		setMetaDataHandling((MetaDataHandling) null);
+
+		// log the successful creation
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Created MetaIndexDimension for '"
+					+ metaEntry.getDescriptorModel() + "' with index '"
+					+ this.index.getClass().getName()
+					+ "' for identifiers of model of type '"
+					+ model.getIdClass().getName() + "'.");
+		}
 	}
 
 	/**
@@ -316,5 +325,15 @@ public class MetaIndexDimension<I> {
 	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
 		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
 				.find(null) : metaDataHandling;
+	}
+
+	/**
+	 * Gets the class of the {@ode Index} using to index the different
+	 * slices of the {@code MetaIndexDimension}.
+	 * 
+	 * @return the class of the {@ode Index}
+	 */
+	protected Class<? extends IIndexedCollection> getIndexClass() {
+		return index.getClass();
 	}
 }

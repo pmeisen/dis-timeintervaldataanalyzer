@@ -49,7 +49,7 @@ public class IntegerIdsFactory implements IOrderedIdsFactory<Integer> {
 	public synchronized Integer getId() {
 		final int id = nextId;
 
-		// check if we had a overflow
+		// check if we had an overflow
 		if (id < 0) {
 			exceptionRegistry.throwException(IdsFactoryException.class, 1000,
 					getClass().getName());
