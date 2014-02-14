@@ -246,6 +246,7 @@ public abstract class BaseMapperFactory {
 			}
 			final Object[] wrapped = wrapObjects(start, end, granularity,
 					parameters);
+
 			try {
 				return ctor.newInstance(wrapped);
 			} catch (final Exception e) {
@@ -437,7 +438,7 @@ public abstract class BaseMapperFactory {
 
 		// combine the objects
 		objects[0] = start;
-		objects[1] = start;
+		objects[1] = end;
 		objects[2] = granularity;
 		for (int i = 0; i < pSize; i++) {
 			objects[i + 3] = parameters[i];

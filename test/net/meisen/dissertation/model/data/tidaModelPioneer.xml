@@ -17,6 +17,10 @@
     </dataretrievers>
   </config>
 
+  <time>
+    <timeline start="0" duration="10000" />
+  </time>
+
   <meta>
     <descriptors>
       <string id="SYMBOL" name="symbol" failonduplicates="false" />
@@ -38,7 +42,7 @@
            
   <data metahandling="fail" intervalhandling="fail">
     <dataset dataretriever="db_pioneer">
-      <db:query>SELECT  start_time, end_time, symbol FROM TB_INTERVALS</db:query>
+      <db:query>SELECT start_time, end_time, symbol FROM TB_INTERVALS</db:query>
     </dataset>
   </data>
 </model>

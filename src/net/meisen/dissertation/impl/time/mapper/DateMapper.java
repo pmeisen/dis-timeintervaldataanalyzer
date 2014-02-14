@@ -2,7 +2,8 @@ package net.meisen.dissertation.impl.time.mapper;
 
 import java.util.Date;
 
-import net.meisen.dissertation.impl.time.mapper.DateNormalizer.RoundType;
+import net.meisen.dissertation.model.time.DateNormalizer;
+import net.meisen.dissertation.model.time.DateNormalizer.RoundType;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Dates;
@@ -15,7 +16,7 @@ import net.meisen.general.genmisc.types.Dates;
  * 
  */
 public class DateMapper extends BaseMapper<Date> {
-	private final static DateNormalizer normalizer = new DateNormalizer();
+	private final static DateNormalizer normalizer = DateNormalizer.instance();
 
 	/**
 	 * This constructor creates a {@code DateMapper} which maps data to

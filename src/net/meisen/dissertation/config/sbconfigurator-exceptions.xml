@@ -19,8 +19,10 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.DataRetrieverException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
-        <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 
+        <entry key="net.meisen.dissertation.exceptions.TimeGranularityFactoryException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />               
       </map>
     </property>
   </bean>

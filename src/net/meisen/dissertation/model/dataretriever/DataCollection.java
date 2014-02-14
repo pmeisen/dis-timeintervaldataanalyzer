@@ -274,4 +274,9 @@ public abstract class DataCollection<D> implements Iterable<DataRecord<D>> {
 
 		return transform(position);
 	}
+	
+	@Override
+	public String toString() {
+		return names == null ? null : names.toString();
+	}
 }

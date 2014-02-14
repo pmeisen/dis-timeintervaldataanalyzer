@@ -132,7 +132,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
 				.load("mh_tidaStaticIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticIndexModel.xml");
+						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();
@@ -176,7 +176,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
 		final TidaModel model = loader
 				.load("mh_tidaRandomIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomIndexModel.xml");
+						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();

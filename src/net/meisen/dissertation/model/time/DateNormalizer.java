@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.time.mapper;
+package net.meisen.dissertation.model.time;
 
 import java.util.Date;
 
@@ -9,9 +9,6 @@ import net.meisen.dissertation.model.time.granularity.MilliSecond;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Numbers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Helper class to normalize dates to long values.
  * 
@@ -19,9 +16,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class DateNormalizer {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(DateNormalizer.class);
-	
+	private final static DateNormalizer normalizer = new DateNormalizer();
+
 	/**
 	 * Defines the types of rounding, which might be needed by the concrete
 	 * implementations.
@@ -47,9 +43,18 @@ public class DateNormalizer {
 	private final boolean supportsLeapSeconds;
 
 	/**
+	 * Gets the instance of a {@code DateNormalizer}.
+	 * 
+	 * @return the instance
+	 */
+	public static DateNormalizer instance() {
+		return normalizer;
+	}
+
+	/**
 	 * Default constructor.
 	 */
-	public DateNormalizer() {
+	private DateNormalizer() {
 
 		// check for leap-seconds
 		supportsLeapSeconds = getLeapSeconds(new Date()) > 0;
@@ -128,31 +133,7 @@ public class DateNormalizer {
 	 */
 	protected long normalizeDateBased(final Date date,
 			final RoundType roundType, final IDateBasedGranularity granularity) {
-
-		// get the formats
-		final String[] formats = granularity.getFormat();
-		final int amountOfFormats = formats.length;
-
-		// get the values for the formats
-		final long[] values = new long[amountOfFormats];
-		for (int i = 0; i < amountOfFormats; i++) {
-			final String format = formats[i];
-
-			// set the values
-			try {
-				values[i] = Long.parseLong(Dates.createStringFromDate(date,
-						format));
-			} catch (final NumberFormatException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("Could not apply the format '" + format
-							+ "' to the date '" + date
-							+ "' to retrieve a valid long value.");
-				}
-				values[i] = -1;
-			}
-		}
-
-		return granularity.determineRepresentor(values);
+		return granularity.determineRepresentor(date);
 	}
 
 	/**
@@ -306,6 +287,51 @@ public class DateNormalizer {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Transforms the specified {@code date} by adding the {@code duration} to
+	 * it. The {@code duration} is thereby defined in the {@code from}
+	 * -granularity. The specified {@code roundType} is used in case rounding is
+	 * needed.
+	 * 
+	 * @param date
+	 *            the {@code Date} to add the duration to
+	 * @param duration
+	 *            the duration to be transformed
+	 * @param durationGranularity
+	 *            the granularity the duration is specified in
+	 * @param roundType
+	 *            the rounding type if rounding is needed
+	 * 
+	 * @return the transformed {@code Date} in the {@code to}-granularity
+	 */
+	public Date addDuration(final Date date, final long duration,
+			final ITimeGranularity durationGranularity,
+			final RoundType roundType) {
+
+		if (durationGranularity == null) {
+			throw new NullPointerException(
+					"Cannot transform any value if from is null.");
+		} else if (isSecondBased(durationGranularity)) {
+			final ISecondBasedGranularity g = (ISecondBasedGranularity) durationGranularity;
+			final double m = getMultiplier(g, MilliSecond.instance());
+
+			// calculate the result
+			double res = m * duration;		
+			if (RoundType.CEIL.equals(roundType)) {
+				res = Math.ceil(res);
+			} else if (RoundType.FLOOR.equals(roundType)) {
+				res = Math.floor(res);
+			}
+
+			return new Date(date.getTime() + Math.round(res));
+		} else if (isDateBased(durationGranularity)) {
+			final IDateBasedGranularity g = (IDateBasedGranularity) durationGranularity;
+			return g.getFormat().modify(date, duration);
+		} else {
+			return date;
+		}
 	}
 
 	/**

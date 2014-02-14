@@ -21,8 +21,8 @@ import net.meisen.dissertation.impl.indexes.TestIndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
+import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
-import net.meisen.dissertation.impl.time.mapper.TestDateNormalizer;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
@@ -36,9 +36,14 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.loader.TestTidaModelLoader;
+import net.meisen.dissertation.model.time.TestDateNormalizer;
+import net.meisen.dissertation.model.time.granularity.TestDateBasedHelper;
+import net.meisen.dissertation.model.time.granularity.TestDateFormat;
+import net.meisen.dissertation.model.time.granularity.TestMinute;
 import net.meisen.dissertation.model.time.mapper.TestBaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TestTimelineDefinition;
 import net.meisen.dissertation.server.TestTidaServer;
@@ -80,7 +85,8 @@ import org.junit.runners.Suite;
 		TestUuIdsFactory.class,
 
 		// Test the descriptors
-		TestDescriptorPrimitiveDataType.class, TestDoubleDescriptor.class,
+		TestDescriptorPrimitiveDataType.class,
+		TestDoubleDescriptor.class,
 		TestIntegerDescriptor.class,
 		TestLongDescriptor.class,
 		TestGeneralDescriptor.class,
@@ -89,13 +95,17 @@ import org.junit.runners.Suite;
 		// Test the descriptorModel
 		TestDescriptorModel.class,
 
-		// Test the timeline
-		TestTimelineDefinition.class,
-		
-		// Test the time mapper
+		// Tests the formatting of dates, granularities, and the factory
+		TestDateFormat.class,
+		TestDateBasedHelper.class,
+		TestMinute.class,
+		TestTimeGranularityFactory.class,
+
+		// Test the normalizer, the timeline and the mapper
 		TestDateNormalizer.class,
+		TestTimelineDefinition.class,
 		TestDateMapper.class,
-		
+
 		// Test the time factory
 		TestBaseMapperFactory.class,
 
@@ -116,8 +126,9 @@ import org.junit.runners.Suite;
 		// Test the loader
 		TestTidaModelLoader.class,
 
-		// Test the indexes
+		// Test the tida-indexes
 		TestMetaIndexDimension.class, TestMetaIndex.class,
+		TestIntervalIndex.class,
 
 		// Test the model
 		TestTidaModel.class,

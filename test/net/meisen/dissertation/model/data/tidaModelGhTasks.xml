@@ -17,6 +17,10 @@
     </dataretrievers>
   </config>
 
+  <time>
+    <timeline start="01.01.2008" end="31.12.2012" granularity="MINUTE" />
+  </time>
+
   <meta>
     <descriptors>
       <resource id="PER" name="person" null="true" />
@@ -42,15 +46,15 @@
     <meta name="FULLLOC" descriptor="LOC" />
     <meta name="TYPE" descriptor="TYP" />
     
-    <interval name="TASKSTART" type="start" />
-    <interval name="TASKEND" type="end" />
+    <interval name="INTERVAL_START" type="start" />
+    <interval name="INTERVAL_END" type="end" />
   </structure>
            
   <data metahandling="create">
     <dataset dataretriever="db_ghTasks">
       <db:query>SELECT
-                    I.INTERVAL_START   AS TASKSTART
-                  , I.INTERVAL_END     AS TASKEND
+                    I.INTERVAL_START
+                  , I.INTERVAL_END
                   , P.LASTNAME || ', ' || P.FISRTNAME || ' (' || P.PERSONNR || ')' AS FULLNAME
                   , L.WORKAREA || ' (' || L.DEPARTMENT || ')'                      AS FULLLOC
                   , T.TYPE             AS TYPE

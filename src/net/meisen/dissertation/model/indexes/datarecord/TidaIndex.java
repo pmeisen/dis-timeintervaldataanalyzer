@@ -112,11 +112,13 @@ public class TidaIndex {
 		final String nl = System.getProperty("line.separator");
 
 		final MetaIndex metaIdx = getIndex(MetaIndex.class);
+		final IntervalIndex intervalIdx = getIndex(IntervalIndex.class);
+
+		String stat = "";
 
 		// @formatter:off
-		String stat = "";
 		stat += "TidaIndex statistic: " + nl;
-		stat += "- MetaIndex with " + metaIdx.getAmountOfDimensions() + " dimensions:" + nl;
+		stat += "- MetaIndex with " + metaIdx.getAmountOfDimensions() + " dimension(s):" + nl;
 		for (final MetaIndexDimension<?> dim : metaIdx.getDimensions()) {
 			final int amountOfSlices = dim.getAmountOfSlices();
 			stat += "  - " + dim.getModelId() + " (" + amountOfSlices + " slices)" + nl;
@@ -138,7 +140,34 @@ public class TidaIndex {
 				final Descriptor value = model.getDescriptor(sliceId);
 				
 				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.get().length) + " records)" + nl;
+				if (++i > STATISTIC_THRESHOLD) {
+					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
+					break;
+				}
+			}
+		}
+		
+		stat += "- IntervalIndex with " + intervalIdx.getAmountOfPartitions() + " partition(s):" + nl;
+		for (final IntervalIndexPartition part : intervalIdx.getPartitions()) {
+			final int amountOfSlices = part.getAmountOfSlices();
+			stat += "  - " + part.getPartitionId() + " (" + amountOfSlices + " slices)" + nl;
+			if (amountOfSlices == 0) {
+				break;
+			}
+			
+			// sort the data ascending
+			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
+			sortedSlices.addAll(part.getSlices());
+			Collections.sort(sortedSlices, Collections.reverseOrder());
+			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
+			
+			// output the data use the threshold defined by STATISTIC_THRESHOLD
+			int i = 0;
+			for (final IndexDimensionSlice<?> slice : sortedSlices) {
+				final Object sliceId = slice.getId();
+				final String value = part.getFormattedId(sliceId);
 				
+				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.get().length) + " records)" + nl;
 				if (++i > STATISTIC_THRESHOLD) {
 					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
 					break;

@@ -1,9 +1,12 @@
 package net.meisen.dissertation.model.time.granularity;
 
+import java.util.Date;
+
 /**
  * 0.001 seconds
  */
-public class MilliSecond implements ISecondBasedGranularity {
+public class MilliSecond implements ISecondBasedGranularity,
+		IDateBasedGranularity {
 	private static final MilliSecond instance = new MilliSecond();
 
 	private MilliSecond() {
@@ -41,5 +44,20 @@ public class MilliSecond implements ISecondBasedGranularity {
 	@Override
 	public int expFractionOfSeconds() {
 		return 3;
+	}
+
+	@Override
+	public DateFormat getFormat() {
+		return DateFormat.MILLISECOND;
+	}
+
+	@Override
+	public long determineRepresentor(final Date date) {
+		return date.getTime();
+	}
+
+	@Override
+	public Date resolveRepresenter(final long value) {
+		return new Date(value);
 	}
 }

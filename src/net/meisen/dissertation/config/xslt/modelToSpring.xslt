@@ -18,6 +18,8 @@
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
+  <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARTYFACTORY_ID')" />
+  <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
@@ -44,17 +46,27 @@
         <xsl:when test="//mns:config/mns:factories/mns:mappers/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:mappers/@implementation" /></xsl:when>
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultMappersFactory()" /></xsl:otherwise>
       </xsl:choose>
-    </xsl:variable> 
+    </xsl:variable>
+    <xsl:variable name="granularityFactory">
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:factories/mns:granularities/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:granularities/@implementation" /></xsl:when>
+        <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularitiesFactory()" /></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    
   
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
       
-      <!-- create the IndexFactory to be used -->
+      <!-- create the indexFactory to be used -->
       <bean id="{$indexFactoryId}" class="{$indexedFactory}" />
       
       <!-- create the mapperFactory to be used -->
       <bean id="{$mapperFactoryId}" class="{$mapperFactory}" />
+      
+      <!-- create the granularitiesFactory to be used -->
+      <bean id="{$granularityFactoryId}" class="{$granularityFactory}" />
       
       <!-- create all the defined dataRetrievers -->
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">
@@ -75,6 +87,59 @@
           </constructor-arg>
         </bean>
       </xsl:for-each>
+      
+      <!-- create the timelineDefinition -->
+      <bean id="{$timelineDefinitionId}" class="net.meisen.dissertation.model.time.timeline.TimelineDefinition">
+        <constructor-arg type="java.lang.String">
+          <xsl:choose>
+            <xsl:when test="mns:time/mns:timeline/@start"><value><xsl:value-of select="mns:time/mns:timeline/@start" /></value></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>            
+        </constructor-arg>
+        <constructor-arg type="java.lang.String">
+          <xsl:choose>
+            <xsl:when test="mns:time/mns:timeline/@end"><value><xsl:value-of select="mns:time/mns:timeline/@end" /></value></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>            
+        </constructor-arg>
+        <constructor-arg type="net.meisen.dissertation.model.time.granularity.ITimeGranularity">
+          <xsl:variable name="granularity">
+            <xsl:choose>
+              <xsl:when test="mns:time/mns:timeline/@granularity"><xsl:value-of select="mns:time/mns:timeline/@granularity" /></xsl:when>
+              <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularity()" /></xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+          <bean factory-bean="{$granularityFactoryId}" factory-method="find">
+            <constructor-arg type="java.lang.String" value="{$granularity}" />
+          </bean>       
+        </constructor-arg>
+      </bean>
+      
+      <!-- modify the timelineDefinition if needed -->
+      <xsl:if test="mns:time/mns:timeline/@duration">
+        <xsl:variable name="durationgranularity">
+          <xsl:choose>
+            <xsl:when test="mns:time/mns:timeline/@durationgranularity"><xsl:value-of select="mns:time/mns:timeline/@durationgranularity" /></xsl:when>
+            <xsl:when test="mns:time/mns:timeline/@granularity"><xsl:value-of select="mns:time/mns:timeline/@granularity" /></xsl:when>
+            <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularity()" /></xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
+
+        <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+          <property name="targetMethod" value="setDuration" />
+          <property name="targetObject" ref="{$timelineDefinitionId}" />
+          <property name="type" value="factory" />
+          <property name="arguments">
+            <list>
+              <value type=""><xsl:value-of select="mns:time/mns:timeline/@duration" /></value>
+              <value type="net.meisen.dissertation.model.time.timeline.TimelineDefinition.Position">START</value>
+              <bean factory-bean="{$granularityFactoryId}" factory-method="find">
+                <constructor-arg type="java.lang.String" value="{$durationgranularity}" />
+              </bean>
+            </list>
+          </property>
+        </bean>
+      </xsl:if>
       
       <!-- create all the descriptorModels -->
       <xsl:for-each select="mns:meta/mns:descriptors">
@@ -142,6 +207,9 @@
       
       <!-- create the intervalModel -->
       <bean id="{$intervalModelId}" class="net.meisen.dissertation.model.data.IntervalModel">
+        <constructor-arg type="net.meisen.dissertation.model.time.timeline.TimelineDefinition">
+          <ref bean="{$timelineDefinitionId}" />
+        </constructor-arg>
       </bean>
       
       <!-- create the dataStructure -->
@@ -174,7 +242,7 @@
                       </bean>
                     </xsl:when>
                     
-                    <xsl:otherwise><xsl:message terminate="no">Invalid element with name '<xsl:value-of select ="local-name()" />' found, it will be skipped!</xsl:message></xsl:otherwise>
+                    <xsl:otherwise><xsl:message terminate="no">Invalid element with name '<xsl:value-of select="local-name()" />' found, it will be skipped!</xsl:message></xsl:otherwise>
                   </xsl:choose>
                 </xsl:for-each>
               </array>

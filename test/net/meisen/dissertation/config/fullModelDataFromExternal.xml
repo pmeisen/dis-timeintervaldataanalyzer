@@ -62,7 +62,11 @@
       </dataretriever>
     </dataretrievers>
   </config>
-
+  
+  <time>
+    <timeline start="01.04.2010" end="29.04.2010" granularity="MINUTE" />
+  </time>
+  
   <meta>
     <!-- As identifier-factory the following implementations are available:
           + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory

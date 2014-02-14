@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       
+       id="tidaRandom">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="db_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaTestDateIntervals" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <time>
+    <timeline start="01.01.2000" end="31.12.2009" granularity="MONTH" />
+  </time>
+
+  <structure>
+    <interval position="2" type="start" />
+    <interval position="3" type="end" />
+  </structure>
+           
+  <data metahandling="create">
+    <dataset dataretriever="db_test">
+      <db:query>SELECT ROWNUM, D1, D2 FROM TB_RANDOM</db:query>
+    </dataset>
+  </data>
+</model>

@@ -168,7 +168,7 @@ public abstract class BaseMapper<T> {
 	 * </ul>
 	 * 
 	 * @return the type to be used best, if one of the methods is called without
-	 *         being appropriate an error will must likely be thrown
+	 *         being appropriate, an error will most likely be thrown
 	 */
 	public Class<?> getTargetType() {
 		return targetType;
@@ -187,7 +187,7 @@ public abstract class BaseMapper<T> {
 	 * 
 	 * @return the mapped value (as byte)
 	 */
-	public byte mapToByte(final T from) {
+	public byte mapToByte(final Object from) {
 		return Numbers.castToByte(mapToLong(from));
 	}
 
@@ -204,7 +204,7 @@ public abstract class BaseMapper<T> {
 	 * 
 	 * @return the mapped value (as short)
 	 */
-	public short mapToShort(final T from) {
+	public short mapToShort(final Object from) {
 		return Numbers.castToShort(mapToLong(from));
 	}
 
@@ -221,7 +221,7 @@ public abstract class BaseMapper<T> {
 	 * 
 	 * @return the mapped value (as int)
 	 */
-	public int mapToInt(final T from) {
+	public int mapToInt(final Object from) {
 		return Numbers.castToInt(mapToLong(from));
 	}
 
@@ -234,8 +234,36 @@ public abstract class BaseMapper<T> {
 	 * 
 	 * @return the mapped value (as long)
 	 */
-	public long mapToLong(final T from) {
-		return normalize(map(from));
+	public long mapToLong(final Object from) {
+		return normalize(map(validate(from)));
+	}
+
+	/**
+	 * Validates the specified {@code o} to be a valid object to be mapped by
+	 * {@code this}. The default implementation checks if the object is of the
+	 * type specified by {@link #getTargetType()}.
+	 * 
+	 * @param o
+	 *            the object to be checked
+	 * @return the object of a type which can be mapped
+	 * 
+	 * @throws NullPointerException
+	 *             if the {@code o} is {@code null}
+	 * @throws IllegalArgumentException
+	 *             if the specified {@code o} cannot be mapped
+	 */
+	@SuppressWarnings("unchecked")
+	protected T validate(final Object o) throws IllegalArgumentException,
+			NullPointerException {
+		if (o == null) {
+			throw new NullPointerException("The null-value cannot be mapped.");
+		} else if (getMappedType().isAssignableFrom(o.getClass())) {
+			return (T) o;
+		} else {
+			throw new IllegalArgumentException("The class '"
+					+ getMappedType().getName() + "' is not assignable from '"
+					+ o.getClass().getName() + "'.");
+		}
 	}
 
 	/**
@@ -354,7 +382,7 @@ public abstract class BaseMapper<T> {
 
 	/**
 	 * This is the concrete implementation of the demapping used to map a
-	 * denormalized value to the concrete value.
+	 * normalized value to the concrete value.
 	 * 
 	 * @param value
 	 *            the denormalized value

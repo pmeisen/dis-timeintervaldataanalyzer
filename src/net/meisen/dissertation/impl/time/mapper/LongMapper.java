@@ -45,6 +45,15 @@ public class LongMapper extends BaseMapper<Long> {
 	}
 
 	@Override
+	protected Long validate(final Object o) {
+		if (o instanceof Number) {
+			return ((Number) o).longValue();
+		} else {
+			return super.validate(o);
+		}
+	}
+
+	@Override
 	public Long demap(final long value) {
 		return value;
 	}
@@ -52,7 +61,7 @@ public class LongMapper extends BaseMapper<Long> {
 	@Override
 	public String toString() {
 		return "Mapper for values between '" + demap(getStart()) + " "
-				+ getGranularity() + "' - '" + demap(getEnd()) + " " + getGranularity()
-				+ "'";
+				+ getGranularity() + "' - '" + demap(getEnd()) + " "
+				+ getGranularity() + "'";
 	}
 }

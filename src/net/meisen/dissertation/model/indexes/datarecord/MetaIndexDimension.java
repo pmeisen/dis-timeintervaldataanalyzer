@@ -82,7 +82,7 @@ public class MetaIndexDimension<I> {
 		this.index = indexedCollectionFactory.create(indexKeyDef);
 
 		// set the default value
-		setMetaDataHandling((MetaDataHandling) null);
+		setMetaDataHandling(null);
 
 		// log the successful creation
 		if (LOG.isTraceEnabled()) {

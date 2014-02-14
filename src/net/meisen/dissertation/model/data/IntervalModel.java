@@ -3,18 +3,36 @@ package net.meisen.dissertation.model.data;
 import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.IntervalModelException;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ByteIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.intervalindex.LongIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
+import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
+import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The model for the intervals within the Tida-system.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class IntervalModel {
+
+	@Autowired
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	private IExceptionRegistry exceptionRegistry;
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
@@ -24,45 +42,81 @@ public class IntervalModel {
 	@Qualifier(DefaultValues.MAPPERFACTORY_ID)
 	private BaseMapperFactory mapperFactory;
 
+	@Autowired
+	@Qualifier(DefaultValues.TIMELINEDEFINITION_ID)
+	private TimelineDefinition timeline;
+
 	/**
-	 * Creates a {@code IntervalModel}. The instance must be wired prior to it's
-	 * usage to ensure that a {@code baseIndexedCollectionFactory} is available.
+	 * Creates a {@code IntervalModel} which must be completly wired prior to
+	 * it's usage to ensure that a {@code indexedCollectionFactory} is
+	 * available.
 	 */
 	public IntervalModel() {
-		this(null, null);
+		this(null, null, null);
+	}
+
+	/**
+	 * Creates a {@code IntervalModel}. The instance must be wired prior to it's
+	 * usage to ensure that a {@code indexedCollectionFactory} is available.
+	 * 
+	 * @param timeline
+	 *            the {@code TimelineDefinition} for the model, can be
+	 *            {@code null} if so a default {@code TimelineDefinition} will
+	 *            be created and might be reset by auto-wiring.
+	 */
+	public IntervalModel(final TimelineDefinition timeline) {
+		this(timeline, null, null);
 	}
 
 	/**
 	 * Creates a {@code IntervalModel} with the specified
-	 * {@code baseIndexedCollectionFactory}, which should not be {@code null}.
-	 * If the {@code baseIndexedCollectionFactory} should be {@code null} use
-	 * another constructor and read its information.
+	 * {@code indexedCollectionFactory}, which should not be {@code null}. If
+	 * the {@code indexedCollectionFactory} should be {@code null} use another
+	 * constructor and read its information.
 	 * 
+	 * @param timeline
+	 *            the {@code TimelineDefinition} for the model, can be
+	 *            {@code null} if so a default {@code TimelineDefinition} will
+	 *            be created and might be reset by auto-wiring.
 	 * @param indexedCollectionFactory
 	 *            the {@code BaseIndexedCollectionFactory} used to determine the
 	 *            indexes to be used
+	 * @param mapperFactory
+	 *            the {@code MapperFactory} to be used which is used to create
+	 *            the {@code Mapper} instances needed
 	 * 
 	 * @see BaseIndexedCollectionFactory
+	 * @see BaseMapperFactory
 	 */
-	public IntervalModel(
+	public IntervalModel(final TimelineDefinition timeline,
 			final BaseIndexedCollectionFactory indexedCollectionFactory,
 			final BaseMapperFactory mapperFactory) {
+
+		// set the definition of the timeline
+		this.timeline = timeline == null ? new TimelineDefinition() : timeline;
 
 		// set the factories
 		this.indexedCollectionFactory = indexedCollectionFactory;
 		this.mapperFactory = mapperFactory;
 	}
 
+	/**
+	 * Creates a index with the different partitions of the timeline.
+	 * 
+	 * @param structure
+	 *            the defined {@code DataStructure} with the intervals defined
+	 * @return the created index
+	 */
 	public IIndexedCollection createIndex(final DataStructure structure) {
 
-		// TODO define the method needed for indexing - this are just the
-		// dimensions so maybe a hierarchy?!
-		final IndexKeyDefinition key = new IndexKeyDefinition(
-				IntervalIndexDimension.class, "");
-		final IIndexedCollection index = getIndexedCollectionFactory().create(
-				key);
+		// make sure needed stuff is known
 		if (structure == null) {
-			return index;
+			return getIndexedCollectionFactory().create(
+					new IndexKeyDefinition(IntervalIndexPartition.class,
+							"getStartAsByte"));
+		} else if (timeline == null) {
+			exceptionRegistry
+					.throwException(IntervalModelException.class, 1001);
 		}
 
 		// determine the start and end of the dataRecord
@@ -70,38 +124,93 @@ public class IntervalModel {
 				.getEntriesByClass(IntervalStructureEntry.class);
 
 		// search for start and end
-		IntervalStructureEntry start = null, end = null;
+		IntervalStructureEntry startEntry = null, endEntry = null;
 		for (final IntervalStructureEntry entry : entries) {
 			final IntervalType type = entry.getType();
 
 			// determine the start and end of the interval
 			if (IntervalType.START.equals(type)) {
-				if (start != null) {
-					// TODO add exception
+				if (startEntry != null) {
+					exceptionRegistry.throwException(
+							IntervalModelException.class, 1002);
 				}
-				start = entry;
+				startEntry = entry;
 			} else if (IntervalType.END.equals(type)) {
-				if (end != null) {
-					// TODO add exception
+				if (endEntry != null) {
+					exceptionRegistry.throwException(
+							IntervalModelException.class, 1003);
 				}
-				end = entry;
+				endEntry = entry;
 			} else {
-				// TODO add exception
+				exceptionRegistry.throwException(IntervalModelException.class,
+						1004, entry);
 			}
 		}
 
-		// add the different dimensions to the index
-		createIndexDimension(start, end);
+		// create the mapper (right now for the completely timeline, it might be
+		// better to partition the timeline later)
+		final BaseMapper<?> mapper = createMapper(timeline.getStart(),
+				timeline.getEnd());
+
+		// create the partition
+		final IntervalIndexPartition part = createIndexPartition(mapper,
+				startEntry, endEntry);
+
+		// create the index
+		final IndexKeyDefinition key = new IndexKeyDefinition(part.getClass(),
+				"getId");
+		final IIndexedCollection index = getIndexedCollectionFactory().create(
+				key);
+
+		// add the different partition to the index
+		index.addObject(part);
 
 		return index;
 	}
 
-	public IntervalIndexDimension createIndexDimension(
-			final IntervalStructureEntry start, final IntervalStructureEntry end) {
-		final IntervalIndexDimension dim = new IntervalIndexDimension(start,
-				end, getIndexedCollectionFactory());
+	/**
+	 * Creates a partition using the specified {@code mapper} and the specified
+	 * entries.
+	 * 
+	 * @param mapper
+	 *            the {@code Mapper} to be used
+	 * @param startEntry
+	 *            the {@code start}-entry which defines were to retrieve the
+	 *            data from
+	 * @param endEntry
+	 *            the {@code end}-entry which defines were to retrieve the data
+	 *            from
+	 * 
+	 * @return the created partition
+	 */
+	public IntervalIndexPartition createIndexPartition(
+			final BaseMapper<?> mapper,
+			final IntervalStructureEntry startEntry,
+			final IntervalStructureEntry endEntry) {
+		if (startEntry == null) {
+			exceptionRegistry
+					.throwException(IntervalModelException.class, 1005);
+		} else if (endEntry == null) {
+			exceptionRegistry
+					.throwException(IntervalModelException.class, 1006);
+		} else if (mapper == null) {
 
-		return dim;
+		}
+
+		// create the IntervalIndex depending on the mapper
+		if (Byte.class.equals(mapper.getTargetType())) {
+			return new ByteIntervalIndexPartition(mapper, startEntry, endEntry,
+					getIndexedCollectionFactory());
+		} else if (Short.class.equals(mapper.getTargetType())) {
+			return new ShortIntervalIndexPartition(mapper, startEntry,
+					endEntry, getIndexedCollectionFactory());
+		} else if (Integer.class.equals(mapper.getTargetType())) {
+			return new IntIntervalIndexPartition(mapper, startEntry, endEntry,
+					getIndexedCollectionFactory());
+		} else {
+			return new LongIntervalIndexPartition(mapper, startEntry, endEntry,
+					getIndexedCollectionFactory());
+		}
 	}
 
 	/**
@@ -116,7 +225,54 @@ public class IntervalModel {
 		return indexedCollectionFactory;
 	}
 
+	/**
+	 * Gets the {@code MapperFactory} used to create mappers which map values of
+	 * the interval-model to it's internal representation.
+	 * 
+	 * @return the {@code MapperFactory} used to used to create mappers which
+	 *         map values of the interval-model to it's internal representation
+	 * 
+	 * @see BaseMapperFactory
+	 */
 	public BaseMapperFactory getMapperFactory() {
 		return mapperFactory;
+	}
+
+	/**
+	 * Gets the {@ode Mapper} to be used for the specified {@code start}
+	 * and {@code end}.
+	 * 
+	 * @param start
+	 *            the start value of the mapper
+	 * @param end
+	 *            the end value of the mapper
+	 * 
+	 * @return the {@code Mapper to be used}
+	 * 
+	 * @see BaseMapper
+	 */
+	protected BaseMapper<?> createMapper(final Object start, final Object end) {
+		final BaseMapperFactory factory = getMapperFactory();
+		if (factory == null) {
+			exceptionRegistry
+					.throwException(IntervalModelException.class, 1000);
+			return null;
+		} else if (timeline == null) {
+			exceptionRegistry
+					.throwException(IntervalModelException.class, 1001);
+			return null;
+		} else {
+			return factory.createWithObjects(start, end,
+					timeline.getGranularity());
+		}
+	}
+
+	/**
+	 * Gets the {@code TimelineDefinition} used by {@code this} instance.
+	 * 
+	 * @return the {@code TimelineDefinition}
+	 */
+	public TimelineDefinition getTimelineDefinition() {
+		return timeline;
 	}
 }

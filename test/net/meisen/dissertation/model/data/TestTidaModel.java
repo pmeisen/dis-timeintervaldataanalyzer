@@ -49,18 +49,18 @@ public class TestTidaModel extends DbBasedTest {
 		loader.unloadAll();
 	}
 
-	// @Test
-	// public void testLoadTasks() throws IOException {
-	//
-	// // start the needed Database
-	// getDb("tidaGhTasks",
-	// "/net/meisen/dissertation/impl/hsqldbs/tidaGhTasks.zip");
-	//
-	// final TidaModel model = loader.load("mh_tidaGhTasks",
-	// "/net/meisen/dissertation/model/data/tidaModelGhTasks.xml");
-	//
-	// model.initialize();
-	//
-	// loader.unloadAll();
-	// }
+//	@Test
+//	public void testLoadTasks() throws IOException {
+//
+//		// start the needed Database
+//		getDb("tidaGhTasks",
+//				"/net/meisen/dissertation/impl/hsqldbs/tidaGhTasks.zip");
+//
+//		final TidaModel model = loader.load("mh_tidaGhTasks",
+//				"/net/meisen/dissertation/model/data/tidaModelGhTasks.xml");
+//
+//		model.initialize();
+//
+//		loader.unloadAll();
+//	}
 }

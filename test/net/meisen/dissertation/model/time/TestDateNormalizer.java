@@ -1,10 +1,10 @@
-package net.meisen.dissertation.impl.time.mapper;
+package net.meisen.dissertation.model.time;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import net.meisen.dissertation.impl.time.mapper.DateNormalizer;
+import net.meisen.dissertation.model.time.DateNormalizer;
 import net.meisen.dissertation.model.time.granularity.Day;
 import net.meisen.dissertation.model.time.granularity.DeciSecond;
 import net.meisen.dissertation.model.time.granularity.FortNight;
@@ -35,7 +35,7 @@ public class TestDateNormalizer {
 	 */
 	@Test
 	public void testCompare() {
-		final DateNormalizer n = new DateNormalizer();
+		final DateNormalizer n = DateNormalizer.instance();
 
 		assertEquals(0, n.compare(Second.instance(), Second.instance()));
 		assertEquals(0,
@@ -62,7 +62,7 @@ public class TestDateNormalizer {
 	 */
 	@Test
 	public void testIsMoreDetailled() {
-		final DateNormalizer n = new DateNormalizer();
+		final DateNormalizer n = DateNormalizer.instance();
 
 		// equal instances for all values
 		assertFalse(n.isMoreDetailed(DeciSecond.instance(),
@@ -91,7 +91,7 @@ public class TestDateNormalizer {
 	 */
 	@Test
 	public void testGetMultiplier() {
-		final DateNormalizer n = new DateNormalizer();
+		final DateNormalizer n = DateNormalizer.instance();
 		double m;
 
 		// equal instances for all values

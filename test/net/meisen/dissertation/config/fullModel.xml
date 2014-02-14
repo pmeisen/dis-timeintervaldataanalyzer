@@ -34,8 +34,7 @@
   </config>
   
   <time>
-    <timeline start="" end="" granularity="" />
-    
+    <timeline start="20.01.1981" duration="100" granularity="YEAR" />
   </time>
 
   <meta>

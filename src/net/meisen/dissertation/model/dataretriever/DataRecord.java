@@ -168,6 +168,7 @@ public class DataRecord<D> {
 
 	@Override
 	public String toString() {
-		return record == null ? null : record.toString();
+		return (record == null ? null : record.toString()) + " ("
+				+ (collection == null ? null : collection.toString()) + ")";
 	}
 }

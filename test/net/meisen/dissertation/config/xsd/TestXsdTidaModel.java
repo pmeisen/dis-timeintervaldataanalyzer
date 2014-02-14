@@ -31,32 +31,6 @@ public class TestXsdTidaModel {
 	private DefaultXsdValidator xsdValidator = new DefaultXsdValidator();
 
 	/**
-	 * Tests a full model to be validated without any exception.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testFullModel() throws ValidationFailedException {
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/fullModel.xml");
-	}
-
-	/**
-	 * Tests a full model using external data to be validated without any
-	 * exception.
-	 * 
-	 * @throws ValidationFailedException
-	 *             if the validation is invalid
-	 */
-	@Test
-	public void testFullModelDataFromExternal()
-			throws ValidationFailedException {
-		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
-	}
-
-	/**
 	 * Tests the simpliest configuration, i.e. just intervals.
 	 * 
 	 * @throws ValidationFailedException
@@ -65,7 +39,7 @@ public class TestXsdTidaModel {
 	@Test
 	public void testSimpliestModel() throws ValidationFailedException {
 		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/xsd/simpliestModel.xml");
+				.validateFromClasspath("/net/meisen/dissertation/config/simpliestModel.xml");
 	}
 
 	/**
@@ -154,6 +128,50 @@ public class TestXsdTidaModel {
 		assertException(
 				"/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml",
 				"The content of element 'meta' is not complete");
+	}
+
+	/**
+	 * Tests the validation of the structure element within the xml-
+	 * 
+	 * @throws ValidationFailedException
+	 *             if the validation is invalid
+	 */
+	@Test
+	public void testDefinitionOfTimeline() throws ValidationFailedException {
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineTimelineWithDuration.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineTimelineWithDateStartEnd.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineTimelineWithLongStartEnd.xml");
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/xsd/defineTimelineMixed.xml");
+	}
+
+	/**
+	 * Tests a full model to be validated without any exception.
+	 * 
+	 * @throws ValidationFailedException
+	 *             if the validation is invalid
+	 */
+	@Test
+	public void testFullModel() throws ValidationFailedException {
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/fullModel.xml");
+	}
+
+	/**
+	 * Tests a full model using external data to be validated without any
+	 * exception.
+	 * 
+	 * @throws ValidationFailedException
+	 *             if the validation is invalid
+	 */
+	@Test
+	public void testFullModelDataFromExternal()
+			throws ValidationFailedException {
+		xsdValidator
+				.validateFromClasspath("/net/meisen/dissertation/config/fullModelDataFromExternal.xml");
 	}
 
 	/**

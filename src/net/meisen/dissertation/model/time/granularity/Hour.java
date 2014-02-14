@@ -1,9 +1,11 @@
 package net.meisen.dissertation.model.time.granularity;
 
+import java.util.Date;
+
 /**
  * 60 minutes or 3,600 seconds
  */
-public class Hour implements ISecondBasedGranularity {
+public class Hour implements ISecondBasedGranularity, IDateBasedGranularity {
 	private static final Hour instance = new Hour();
 
 	private Hour() {
@@ -27,12 +29,12 @@ public class Hour implements ISecondBasedGranularity {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return getClass().getSimpleName();
 	}
-	
+
 	@Override
 	public int seconds() {
 		return 3600;
@@ -41,5 +43,20 @@ public class Hour implements ISecondBasedGranularity {
 	@Override
 	public int expFractionOfSeconds() {
 		return -1;
+	}
+
+	@Override
+	public DateFormat getFormat() {
+		return DateFormat.HOUR;
+	}
+
+	@Override
+	public long determineRepresentor(final Date date) {
+		return Math.round(Math.floor(date.getTime() / (seconds() * 1000.0)));
+	}
+
+	@Override
+	public Date resolveRepresenter(final long value) {
+		return new Date(value * seconds() * 1000);
 	}
 }

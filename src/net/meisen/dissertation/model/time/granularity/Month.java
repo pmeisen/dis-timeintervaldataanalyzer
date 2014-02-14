@@ -44,12 +44,9 @@ public class Month implements IDateBasedGranularity {
 	}
 
 	@Override
-	public String[] getFormat() {
-		return new String[] { "yyyy", "MM" };
-	}
-
-	@Override
-	public long determineRepresentor(final long[] values) {
+	public long determineRepresentor(final Date date) {
+		final long[] values = helper().getFormats(
+				new DateFormat[] { DateFormat.YEAR, DateFormat.MONTH }, date);
 		return 12 * values[0] + values[1];
 	}
 
@@ -63,5 +60,19 @@ public class Month implements IDateBasedGranularity {
 		} catch (final ParseException e) {
 			throw new IllegalStateException("Unreachable point of code");
 		}
+	}
+	
+	@Override
+	public DateFormat getFormat() {
+		return DateFormat.MONTH;
+	}
+
+	/**
+	 * Gets the instance of the {@code DateBasedHelper} to be used.
+	 * 
+	 * @return the instance of the {@code DateBasedHelper} to be used
+	 */
+	public DateBasedHelper helper() {
+		return helper;
 	}
 }

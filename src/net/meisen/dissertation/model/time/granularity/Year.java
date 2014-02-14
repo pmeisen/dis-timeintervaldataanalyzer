@@ -43,12 +43,10 @@ public class Year implements IDateBasedGranularity {
 	}
 
 	@Override
-	public String[] getFormat() {
-		return new String[] { "yyyy" };
-	}
+	public long determineRepresentor(final Date date) {
+		final long[] values = helper().getFormats(
+				new DateFormat[] { DateFormat.YEAR }, date);
 
-	@Override
-	public long determineRepresentor(final long[] values) {
 		return values[0];
 	}
 
@@ -59,5 +57,19 @@ public class Year implements IDateBasedGranularity {
 		} catch (final ParseException e) {
 			throw new IllegalStateException("Unreachable point of code");
 		}
+	}
+	
+	@Override
+	public DateFormat getFormat() {
+		return DateFormat.YEAR;
+	}
+
+	/**
+	 * Gets the instance of the {@code DateBasedHelper} to be used.
+	 * 
+	 * @return the instance of the {@code DateBasedHelper} to be used
+	 */
+	public DateBasedHelper helper() {
+		return helper;
 	}
 }

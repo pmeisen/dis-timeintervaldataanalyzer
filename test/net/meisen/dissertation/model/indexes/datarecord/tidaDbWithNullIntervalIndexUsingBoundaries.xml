@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       
+       id="tidaRandom">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="db_test">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaTestDateIntervals" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <time>
+    <timeline start="01.01.1970" end="01.01.1970 23:59:00" granularity="MINUTE" />
+  </time>
+
+  <structure>
+    <interval position="2" type="start" />
+    <interval position="3" type="end" />
+  </structure>
+
+  <data metahandling="create" intervalhandling="boundaries">
+    <dataset dataretriever="db_test">
+      <db:query>
+          SELECT ROWNUM, D1, D2 FROM TB_FIXED WHERE ROWNUM &lt; 2
+        UNION ALL
+          SELECT 2, TIMESTAMP_WITH_ZONE(TIMESTAMP '1970-01-01 18:07:58-0:00'), NULL FROM (VALUES(0))
+        UNION ALL
+          SELECT 3, NULL, TIMESTAMP_WITH_ZONE(TIMESTAMP '1970-01-01 05:22:12-0:00') FROM (VALUES(0))
+      </db:query>
+    </dataset>
+  </data>
+</model>

@@ -56,7 +56,7 @@ public class MetaIndex implements DataRecordIndex {
 		this.dimensionsIndex = metaDataModel.createIndex(dataStructure);
 
 		// set the default values
-		setMetaDataHandling((MetaDataHandling) null);
+		setMetaDataHandling(null);
 	}
 
 	@Override

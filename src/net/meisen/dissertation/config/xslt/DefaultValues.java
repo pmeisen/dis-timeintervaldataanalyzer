@@ -14,10 +14,20 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
+import net.meisen.dissertation.model.data.DataModel;
+import net.meisen.dissertation.model.data.DataStructure;
+import net.meisen.dissertation.model.data.IntervalModel;
+import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
+import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
+import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
+import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 import net.meisen.general.genmisc.types.Classes;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Strings;
@@ -33,38 +43,66 @@ public class DefaultValues {
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code MetaDataModel}.
+	 * 
+	 * @see MetaDataModel
 	 */
 	public static final String METADATAMODEL_ID = "metaDataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IntervalModel}.
+	 * 
+	 * @see IntervalModel
 	 */
 	public static final String INTERVALMODEL_ID = "intervalModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code DataModel}.
+	 * 
+	 * @see DataModel
 	 */
 	public static final String DATAMODEL_ID = "dataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code DataStructure}.
+	 * 
+	 * @see DataStructure
 	 */
 	public static final String DATASTRUCTURE_ID = "dataStructure";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code TimeIntervalDataAnalyzerModel}.
+	 * 
+	 * @see TidaModel
 	 */
 	public static final String TIDAMODEL_ID = "timeIntervalDataAnalyzerModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IndexedCollectionFactory}.
+	 * 
+	 * @see BaseIndexedCollectionFactory
 	 */
 	public static final String INDEXFACTORY_ID = "indexFactory";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code MapperFactory}.
+	 * 
+	 * @see BaseMapperFactory
 	 */
 	public static final String MAPPERFACTORY_ID = "mapperFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code TimeGranularityFactory}.
+	 * 
+	 * @see ITimeGranularityFactory
+	 */
+	public static final String GRANULARTYFACTORY_ID = "granularityFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code TimelineDefinition}.
+	 * 
+	 * @see TimelineDefinition
+	 */
+	public static final String TIMELINEDEFINITION_ID = "timelineDefinition";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -111,6 +149,17 @@ public class DefaultValues {
 	}
 
 	/**
+	 * Get the default {@code TimeGranularityFactory} to be used.
+	 * 
+	 * @return the {@code TimeGranularityFactory} to be used if none is defined.
+	 * 
+	 * @see ITimeGranularityFactory
+	 */
+	public static String getDefaultGranularitiesFactory() {
+		return TimeGranularityFactory.class.getName();
+	}
+
+	/**
 	 * Gets the class of the {@code IdFactory} to be used for the descriptors.
 	 * 
 	 * @return the class of the {@code IdFactory} to be used for the descriptors
@@ -144,6 +193,20 @@ public class DefaultValues {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the default {@code TimeGranularity} used for the
+	 * {@code TimelineDefinition} if non is defined.
+	 * 
+	 * @return the default {@code TimeGranularity} used for the
+	 *         {@code TimelineDefinition}
+	 * 
+	 * @see ITimeGranularity
+	 * @see TimelineDefinition
+	 */
+	public static String getDefaultGranularity() {
+		return Second.class.getName();
 	}
 
 	/**

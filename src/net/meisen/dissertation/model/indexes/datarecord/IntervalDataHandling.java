@@ -19,7 +19,13 @@ public enum IntervalDataHandling {
 	/**
 	 * Fail if one of the values is {@code null}.
 	 */
-	FAILONNULL("fail");
+	FAILONNULL("fail"),
+	/**
+	 * Uses the start value for the end value if the end is {@code null} or uses
+	 * the end value for the start value if the start is {@code null}. If both
+	 * are {@code null} the {@link #BOUNDARIESWHENNULL} strategy is applied.
+	 */
+	USEOTHER("other", "others");
 
 	private final List<String> synonyms;
 

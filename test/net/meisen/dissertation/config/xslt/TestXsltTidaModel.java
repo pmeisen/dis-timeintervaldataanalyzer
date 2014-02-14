@@ -15,6 +15,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +52,12 @@ import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.time.granularity.DateFormat;
+import net.meisen.dissertation.model.time.granularity.Hour;
+import net.meisen.dissertation.model.time.granularity.Minute;
+import net.meisen.dissertation.model.time.granularity.Second;
+import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
+import net.meisen.general.genmisc.types.Classes;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.config.exception.InvalidXsltException;
@@ -446,6 +453,147 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 		// cleanUp
 		it.close();
+	}
+
+	/**
+	 * Tests the default {@code TimelineDefinition}.
+	 */
+	@Test
+	public void testDefaultTimelineOfIntervalModel() {
+		final Date now = Dates.truncateDate(Dates.now());
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/simpliestModel.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		// check the correctness of the default timeline
+		assertEquals(Date.class, def.getType());
+		assertEquals(Classes.getClass(DefaultValues.getDefaultGranularity()),
+				def.getGranularity().getClass());
+		assertEquals(now.getTime(), def.<Date> getStart().getTime(), 1000);
+		assertEquals(DateFormat.YEAR.modify(now, 1).getTime(), def
+				.<Date> getEnd().getTime(), 1000);
+	}
+
+	/**
+	 * Tests the reading of a {@code TimelineDefinition} using date values for
+	 * start and end.
+	 */
+	@Test
+	public void testTimelineWithStartEndDate() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithStartEnd.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(Minute.instance(), def.getGranularity());
+		assertEquals(Dates.isDate("01.04.2010", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(Dates.isDate("29.04.2010", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
+	}
+
+	/**
+	 * Tests the reading of a {@code TimelineDefinition} using long values for
+	 * start and end.
+	 */
+	@Test
+	public void testTimelineWithStartEndLong() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithStartEndLongs.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Long.class, def.getType());
+		assertEquals(DefaultValues.getDefaultGranularity(), def
+				.getGranularity().getClass().getName());
+		assertEquals(1500l, def.getStart());
+		assertEquals(10000l, def.getEnd());
+	}
+
+	/**
+	 * Tests the usage of a {@code TimelineDefinition} with just a start.
+	 */
+	@Test
+	public void testTimelineWithStartOnly() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithStartOnly.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(Second.instance(), def.getGranularity());
+		assertEquals(
+				Dates.isDate("01.04.2010 08:07:55", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(
+				Dates.isDate("01.04.2011 08:07:55", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
+	}
+
+	/**
+	 * Tests the usage of a {@code TimelineDefinition} with just an end.
+	 */
+	@Test
+	public void testTimelineWithEndOnly() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithEndOnly.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(Hour.instance(), def.getGranularity());
+		assertEquals(
+				Dates.isDate("28.02.2007 08:00:12", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(
+				Dates.isDate("29.02.2008 08:00:12", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
+	}
+
+	/**
+	 * Tests the usage of a {@code TimelineDefinition} with a duration.
+	 */
+	@Test
+	public void testTimelineWithDuration() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithDuration.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(Minute.instance(), def.getGranularity());
+		assertEquals(Dates.isDate("20.01.1981", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(
+				Dates.isDate("20.01.1981 01:40:00", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
+	}
+
+	/**
+	 * Tests the usage of a {@code TimelineDefinition} with a duration and a
+	 * modified granularity for the duration.
+	 */
+	@Test
+	public void testTimelineWithDurationAndDurationGranularity() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineWithDurationAndDurationGranularity.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(Minute.instance(), def.getGranularity());
+		assertEquals(Dates.isDate("20.01.1981", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(Dates.isDate("20.01.2081", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
+	}
+
+	/**
+	 * Tests the definition of a mixed timeline, i.e. a date and long value in
+	 * use.
+	 */
+	@Test
+	public void testMixedTimeline() {
+		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/xslt/timelineMixed.xml");
+		final TimelineDefinition def = model.getTimelineDefinition();
+
+		assertEquals(Date.class, def.getType());
+		assertEquals(DefaultValues.getDefaultGranularity(), def
+				.getGranularity().getClass().getName());
+		assertEquals(
+				Dates.isDate("22.08.2013 15:00:00", Dates.GENERAL_TIMEZONE),
+				def.getStart());
+		assertEquals(
+				Dates.isDate("22.08.2013 15:10:00", Dates.GENERAL_TIMEZONE),
+				def.getEnd());
 	}
 
 	/**
