@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
+
 import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
@@ -26,4 +28,8 @@ public interface DataRecordIndex {
 	 * index considering e.g. storage
 	 */
 	public void optimize();
+
+	public void saveToDisk(final File location);
+
+	public void loadFromDisk();
 }

@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,13 +26,21 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSli
  * 
  */
 public class TidaIndex {
-	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 	private final static int STATISTIC_THRESHOLD = 30;
+	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
 	private final Map<Class<? extends DataRecordIndex>, DataRecordIndex> indexes;
 
 	private int dataId;
 
+	/**
+	 * Creates an index for the passed {@code model}.
+	 * 
+	 * @param model
+	 *            the {@code TidaModel} to be added
+	 * 
+	 * @see TidaModel
+	 */
 	public TidaIndex(final TidaModel model) {
 		this.dataId = 0;
 		this.indexes = new HashMap<Class<? extends DataRecordIndex>, DataRecordIndex>();
@@ -46,6 +55,12 @@ public class TidaIndex {
 		setIntervalDataHandling(model.getIntervalDataHandling());
 	}
 
+	/**
+	 * Indexes the passed {@code record}.
+	 * 
+	 * @param record
+	 *            the record to be indexed
+	 */
 	public void index(final IDataRecord record) {
 		for (final DataRecordIndex idx : indexes.values()) {
 			idx.index(dataId, record);
@@ -59,12 +74,31 @@ public class TidaIndex {
 			//@formatter:on
 			dataId++;
 		}
-		
+
+		// optimize all the indexes, because the initial data is added
 		for (final DataRecordIndex idx : indexes.values()) {
 			idx.optimize();
 		}
 	}
+	
+	public void saveToDisk(final File location) {
+		for (final DataRecordIndex idx : indexes.values()) {
+			idx.saveToDisk(location);
+		}
+	}
 
+	public void loadFromDisk() {
+		for (final DataRecordIndex idx : indexes.values()) {
+			idx.loadFromDisk();
+		}
+	}
+
+	/**
+	 * Indexes the data available within the {@code DataModel}.
+	 * 
+	 * @param dataModel
+	 *            the {@code DataModel} to retrieve data from
+	 */
 	public void index(final DataModel dataModel) {
 
 		// log the start
@@ -77,10 +111,11 @@ public class TidaIndex {
 		int i = 0;
 		while (it.hasNext()) {
 			index(it.next());
-			i++;
 
-			if (LOG.isDebugEnabled() && (i % 10000 == 0)) {
-				LOG.debug("... added " + i + " records from dataModel...");
+			if (LOG.isDebugEnabled()) {
+				if ((++i % 10000 == 0)) {
+					LOG.debug("... added " + i + " records from dataModel...");
+				}
 			}
 		}
 		it.close();
@@ -91,29 +126,65 @@ public class TidaIndex {
 		}
 	}
 
+	/**
+	 * Gets the {@code MetaDataHandling} defined for the index.
+	 * 
+	 * @return the {@code MetaDataHandling} defined for the index
+	 */
 	public MetaDataHandling getMetaDataHandling() {
 		return getIndex(MetaIndex.class).getMetaDataHandling();
 	}
 
+	/**
+	 * Sets the {@code MetaDataHandling} for the index.
+	 * 
+	 * @param handling
+	 *            the {@code MetaDataHandling} to be used
+	 */
 	public void setMetaDataHandling(final MetaDataHandling handling) {
 		getIndex(MetaIndex.class).setMetaDataHandling(handling);
 	}
 
+	/**
+	 * Gets the {@code IntervalDataHandling} defined for the index.
+	 * 
+	 * @return the {@code IntervalDataHandling} defined for the index
+	 */
 	public IntervalDataHandling getIntervalDataHandling() {
 		return getIndex(IntervalIndex.class).getIntervalDataHandling();
 	}
 
+	/**
+	 * Sets the {@code IntervalDataHandling} for the index.
+	 * 
+	 * @param handling
+	 *            the {@code IntervalDataHandling} to be used
+	 */
 	public void setIntervalDataHandling(final IntervalDataHandling handling) {
 		getIndex(IntervalIndex.class).setIntervalDataHandling(handling);
 	}
 
+	/**
+	 * Gets a specific instance of a used {@code DataRecordIndex} within
+	 * {@code this}.
+	 * 
+	 * @param clazz
+	 *            the class of the {@code DataRecordIndex} to be retrieved
+	 * 
+	 * @return the {@code DataRecordIndex} used within {@code this} instance
+	 */
 	@SuppressWarnings("unchecked")
 	protected <T extends DataRecordIndex> T getIndex(final Class<T> clazz) {
 		return (T) indexes.get(clazz);
 	}
 
+	/**
+	 * Creates a string which prints a statistics for the {@code TidaIndex}.
+	 * 
+	 * @return a string which can be printed to show a statistic
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public String getStatistic() {
+	public String toStatistic() {
 		final String nl = System.getProperty("line.separator");
 
 		final MetaIndex metaIdx = getIndex(MetaIndex.class);

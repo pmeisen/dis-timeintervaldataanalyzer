@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.Collection;
 
 import com.google.common.base.Objects;
@@ -126,5 +127,18 @@ public class IntervalIndex implements DataRecordIndex {
 		for (final IntervalIndexPartition part : getPartitions()) {
 			part.optimize();
 		}
+	}
+
+	@Override
+	public void saveToDisk(final File location) {
+		for (final IntervalIndexPartition part : getPartitions()) {
+			part.saveToDisk(location);
+		}
+	}
+
+	@Override
+	public void loadFromDisk() {
+		// TODO Auto-generated method stub
+
 	}
 }

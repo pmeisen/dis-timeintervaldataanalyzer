@@ -45,6 +45,7 @@ public class TestTidaModel extends DbBasedTest {
 				model.getIntervalDataHandling());
 
 		model.initialize();
+		model.loadData();
 
 		loader.unloadAll();
 	}

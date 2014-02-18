@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.Collection;
 
 import com.google.common.base.Objects;
@@ -124,5 +125,17 @@ public class MetaIndex implements DataRecordIndex {
 		for (final MetaIndexDimension<?> dim : getDimensions()) {
 			dim.optimize();
 		}
+	}
+
+	@Override
+	public void saveToDisk(File location) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadFromDisk() {
+		// TODO Auto-generated method stub
+		
 	}
 }

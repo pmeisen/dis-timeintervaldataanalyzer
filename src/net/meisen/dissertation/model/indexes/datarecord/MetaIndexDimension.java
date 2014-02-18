@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.Collection;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
@@ -335,5 +336,15 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		for (final IndexDimensionSlice<I> slice : getSlices()) {
 			slice.optimize();
 		}
+	}
+
+	@Override
+	public void saveToDisk(File location) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void loadFromDisk() {
+		// TODO Auto-generated method stub
 	}
 }

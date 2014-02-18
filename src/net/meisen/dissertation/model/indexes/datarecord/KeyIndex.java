@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.List;
 
 import net.meisen.dissertation.model.data.DataStructure;
@@ -28,6 +29,18 @@ public class KeyIndex implements DataRecordIndex {
 
 	@Override
 	public void optimize() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void saveToDisk(File location) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadFromDisk() {
 		// TODO Auto-generated method stub
 		
 	}

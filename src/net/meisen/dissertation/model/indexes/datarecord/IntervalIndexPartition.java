@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Date;
 
@@ -330,5 +331,18 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 		for (final IndexDimensionSlice<?> slice : getSlices()) {
 			slice.optimize();
 		}
+	}
+
+	@Override
+	public void saveToDisk(final File location) {
+		for (final IndexDimensionSlice<?> slice : getSlices()) {
+			System.out.println(slice.getId() + " " + slice.getBitmap());
+//			slice.getBitmap().serialize(out)
+		}
+	}
+
+	@Override
+	public void loadFromDisk() {
+		// TODO implement
 	}
 }

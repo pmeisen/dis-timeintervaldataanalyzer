@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.data;
 
+import java.io.File;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -128,13 +129,29 @@ public class TidaModel {
 		// create the index
 		this.idx = new TidaIndex(this);
 
-		// add the data from the model
-		this.idx.index(dataModel);
-
 		// print the statistic after initialization
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(idx.getStatistic());
+			LOG.debug(idx.toStatistic());
 		}
+	}
+
+	public void saveToDisk(final File location) {
+		if (!isInitialized()) {
+			// TODO add exception not initialized
+		}
+		
+		this.idx.saveToDisk(location);
+	}
+
+	public void loadFromDisk() {
+
+	}
+
+	/**
+	 * Loads all the data specified by the {@code DataModel}.
+	 */
+	public void loadData() {
+		this.idx.index(dataModel);
 	}
 
 	/**
