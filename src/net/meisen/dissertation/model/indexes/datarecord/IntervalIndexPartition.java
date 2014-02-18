@@ -6,10 +6,13 @@ import java.util.Date;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
-import net.meisen.dissertation.model.indexes.IIndexedCollection;
+import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +34,7 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 
 	private final IntervalStructureEntry startEntry;
 	private final IntervalStructureEntry endEntry;
-	private final IIndexedCollection index;
+	private final IRangeQueryOptimized index;
 
 	private IntervalDataHandling intervalDataHandling;
 
@@ -44,7 +47,9 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	 *            the {@code Mapper} which defines the start and end value, as
 	 *            well as the type of the indexed values
 	 * @param start
+	 *            the {@code entry} which defines the start
 	 * @param end
+	 *            the {@code entry} which defines the end
 	 * @param indexedCollectionFactory
 	 *            the {@code indexedCollectionFactory} to create the needed
 	 *            indexes
@@ -70,7 +75,11 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
 				IndexDimensionSlice.class, "getId");
 		indexKeyDef.overrideType(0, getType());
-		this.index = indexedCollectionFactory.create(indexKeyDef);
+		this.index = indexedCollectionFactory
+				.createRangeQueryOptimized(indexKeyDef);
+
+		// the maximum value of the index is defined by the mapper
+		this.index.setMaxValue(this.mapper.getNormEndAsLong());
 
 		// set the default intervalDataHandling
 		setIntervalDataHandling(null);
@@ -138,6 +147,20 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 		}
 	}
 
+	/**
+	 * Casts the slices of this instance to a {@code IIndexDimensionSlice}
+	 * -array.
+	 * 
+	 * @param slices
+	 *            the slices to be cast
+	 * 
+	 * @return the array as array of {@code IIndexDimensionSlice}
+	 */
+	protected IIndexDimensionSlice[] castSlices(final Object[] slices) {
+		return Objects.castArray(slices, IIndexDimensionSlice.class);
+	}
+
+	@Override
 	public void index(final int dataId, final IDataRecord rec) {
 		if (rec == null) {
 			return;
@@ -298,7 +321,14 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	 * 
 	 * @return the created index
 	 */
-	protected IIndexedCollection getIndex() {
+	protected IRangeQueryOptimized getIndex() {
 		return index;
+	}
+
+	@Override
+	public void optimize() {
+		for (final IndexDimensionSlice<?> slice : getSlices()) {
+			slice.optimize();
+		}
 	}
 }

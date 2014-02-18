@@ -15,6 +15,7 @@ import net.meisen.dissertation.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
+import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionFactory;
@@ -73,6 +74,7 @@ import org.junit.runners.Suite;
 		TestIndexedCollectionDefinition.class,
 		TestNestedIndexedCollection.class,
 		TestMultipleIndexedCollection.class,
+		TestIntArrayCollection.class,
 
 		// Test the factory for the indexes
 		TestIndexedCollectionFactory.class,
@@ -111,7 +113,8 @@ import org.junit.runners.Suite;
 
 		// Test the dataRetrievers
 		TestDataCollection.class, TestDataRecord.class,
-		TestDbDataRetriever.class, TestFixedStructureDataRetriever.class,
+		TestDbDataRetriever.class,
+		TestFixedStructureDataRetriever.class,
 
 		// Test the dataSets
 		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,

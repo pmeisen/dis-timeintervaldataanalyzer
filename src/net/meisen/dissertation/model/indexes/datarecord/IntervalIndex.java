@@ -120,4 +120,11 @@ public class IntervalIndex implements DataRecordIndex {
 	protected Collection<IntervalIndexPartition> getPartitions() {
 		return (Collection<IntervalIndexPartition>) timeIndex.getAll();
 	}
+
+	@Override
+	public void optimize() {
+		for (final IntervalIndexPartition part : getPartitions()) {
+			part.optimize();
+		}
+	}
 }

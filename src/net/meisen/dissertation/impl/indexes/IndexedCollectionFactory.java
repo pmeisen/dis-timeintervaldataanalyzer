@@ -5,6 +5,7 @@ import java.util.HashMap;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
+import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
@@ -18,26 +19,40 @@ import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 
 	@Override
-	public IPrefixKeySeparatable createPrefixSeparatable(
-			final IndexKeyDefinition keyDef,
-			final IndexedCollectionDefinition[] collDefs) {
-		return new NestedIndexedCollection(keyDef, collDefs);
+	public IRangeQueryOptimized createRangeQueryOptimized(
+			final IndexKeyDefinition keyDef) {
+		final int keySize = keyDef.getSize();
+		if (keySize != 1) {
+			throw new UnsupportedOperationException(
+					"A rangeQueryOptimized-indexes doesn't support multiple key values.");
+		}
+
+		final Class<?> clazz = keyDef.getType(0);
+		if (isBytePrimitiveType(clazz)) {
+			return new IntArrayCollection(keyDef);
+		} else if (isShortPrimitiveType(clazz)) {
+			return new IntArrayCollection(keyDef);
+		} else if (isIntPrimitiveType(clazz)) {
+			return new IntArrayCollection(keyDef);
+		} else {
+			throw new UnsupportedOperationException(
+					"Cannot find any implementation for rangeQueryOptimized-indexes and '"
+							+ clazz + "' values.");
+		}
 	}
 
 	@Override
-	public IMultipleKeySupport createMultipleKeySupport(
-			final IndexKeyDefinition... keyDefs) {
-
-		// determine the best index for each key defined
-		final int keySize = keyDefs.length;
-		final IndexedCollectionDefinition[] collDefs = new IndexedCollectionDefinition[keySize];
-		for (int i = 0; i < keySize; i++) {
-			final IndexKeyDefinition keyDef = keyDefs[i];
-			final IndexedCollectionDefinition collDef = createIndexedCollectionDefinition(keyDef);
-			collDefs[i] = collDef;
-		}
-
+	protected IMultipleKeySupport createMultipleKeySupport(
+			final IndexKeyDefinition[] keyDefs,
+			final IndexedCollectionDefinition[] collDefs) {
 		return new MultipleIndexedCollection(keyDefs, collDefs);
+	}
+
+	@Override
+	protected IPrefixKeySeparatable createPrefixSeparatable(
+			final IndexKeyDefinition keyDef,
+			final IndexedCollectionDefinition[] collDefs) {
+		return new NestedIndexedCollection(keyDef, collDefs);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.indexes;
 
-
 /**
  * Factory to create a {@code IndexedCollection}.
  * 
@@ -48,17 +47,12 @@ public abstract class BaseIndexedCollectionFactory {
 		if (expected == null || IIndexedCollection.class.equals(expected)) {
 			final IndexedCollectionDefinition collDef = createIndexedCollectionDefinition(keyDef);
 			return (T) collDef.create(keyDef);
-		} else if (IMultipleKeySupport.class.isAssignableFrom(expected)) {
+		} else if (IMultipleKeySupport.class.equals(expected)) {
 			return (T) createMultipleKeySupport(new IndexKeyDefinition[] { keyDef });
-		} else if (IPrefixKeySeparatable.class.isAssignableFrom(expected)) {
-
-			final int keySize = keyDef.getSize();
-			final IndexedCollectionDefinition[] collDefs = new IndexedCollectionDefinition[keySize];
-			for (int i = 0; i < keySize; i++) {
-				final Class<?> clazz = keyDef.getType(i);
-				collDefs[i] = createIndexedCollectionDefinition(clazz);
-			}
-			return (T) createPrefixSeparatable(keyDef, collDefs);
+		} else if (IPrefixKeySeparatable.class.equals(expected)) {
+			return (T) createPrefixSeparatable(keyDef);
+		} else if (IRangeQueryOptimized.class.equals(expected)) {
+			return (T) createRangeQueryOptimized(keyDef);
 		} else {
 			throw new IllegalArgumentException("Cannot create an instance of '"
 					+ expected.getName()
@@ -68,18 +62,25 @@ public abstract class BaseIndexedCollectionFactory {
 
 	/**
 	 * Creates a {@code PrefixKeySeparatable} instance based on the specified
-	 * {@code IndexKeyDefinitions} and the {@code IndexedCollectionDefinition}.
+	 * {@code IndexKeyDefinition}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinitions} defining the key
-	 * @param collDefs
-	 *            the {@code IndexedCollectionDefinition}
+	 * 
 	 * 
 	 * @return the {@code PrefixKeySeparatable} index
 	 */
-	public abstract IPrefixKeySeparatable createPrefixSeparatable(
-			final IndexKeyDefinition keyDef,
-			final IndexedCollectionDefinition[] collDefs);
+	public IPrefixKeySeparatable createPrefixSeparatable(
+			final IndexKeyDefinition keyDef) {
+		final int keySize = keyDef.getSize();
+		final IndexedCollectionDefinition[] collDefs = new IndexedCollectionDefinition[keySize];
+		for (int i = 0; i < keySize; i++) {
+			final Class<?> clazz = keyDef.getType(i);
+			collDefs[i] = createIndexedCollectionDefinition(clazz);
+		}
+
+		return createPrefixSeparatable(keyDef, collDefs);
+	}
 
 	/**
 	 * Creates an instance of a {@code IndexedCollection} with
@@ -94,8 +95,68 @@ public abstract class BaseIndexedCollectionFactory {
 	 * @see IIndexedCollection
 	 * @see IMultipleKeySupport
 	 */
-	public abstract IMultipleKeySupport createMultipleKeySupport(
-			final IndexKeyDefinition... keyDefs);
+	public IMultipleKeySupport createMultipleKeySupport(
+			final IndexKeyDefinition... keyDefs) {
+
+		// determine the best index for each key defined
+		final int keySize = keyDefs.length;
+		final IndexedCollectionDefinition[] collDefs = new IndexedCollectionDefinition[keySize];
+		for (int i = 0; i < keySize; i++) {
+			final IndexKeyDefinition keyDef = keyDefs[i];
+			final IndexedCollectionDefinition collDef = createIndexedCollectionDefinition(keyDef);
+			collDefs[i] = collDef;
+		}
+
+		return createMultipleKeySupport(keyDefs, collDefs);
+	}
+
+	/**
+	 * Creates an index which is optimized for range queries for the specified
+	 * {@code IndexKeyDefinition}.
+	 * 
+	 * @param keyDef
+	 *            the {@code IndexKeyDefinition} to create the
+	 *            {@code IRangeQueryOptimized} index for
+	 *            
+	 * @return the created index
+	 */
+	public abstract IRangeQueryOptimized createRangeQueryOptimized(
+			final IndexKeyDefinition keyDef);
+
+	/**
+	 * Creates a {@code PrefixKeySeparatable} instance based on the specified
+	 * {@code IndexKeyDefinition} and the {@code IndexedCollectionDefinition}.
+	 * 
+	 * @param keyDef
+	 *            the {@code IndexKeyDefinitions} defining the key
+	 * @param collDefs
+	 *            the {@code IndexedCollectionDefinition}
+	 * 
+	 * @return the {@code PrefixKeySeparatable} index
+	 */
+	protected abstract IPrefixKeySeparatable createPrefixSeparatable(
+			final IndexKeyDefinition keyDef,
+			final IndexedCollectionDefinition[] collDefs);
+
+	/**
+	 * Creates an instance of a {@code IndexedCollection} with
+	 * {@code MultipleKeySupport} for the specified {@code keyDefs} and the best
+	 * {@code collDefs}.
+	 * 
+	 * @param keyDefs
+	 *            the {@code IndexKeyDefinitions} defining the different keys
+	 * @param collDefs
+	 *            the {@code IndexedCollectionDefinition}
+	 * 
+	 * @return the created {@code IndexedCollection} with
+	 *         {@code MultipleKeySupport}
+	 * 
+	 * @see IIndexedCollection
+	 * @see IMultipleKeySupport
+	 */
+	protected abstract IMultipleKeySupport createMultipleKeySupport(
+			final IndexKeyDefinition[] keyDefs,
+			final IndexedCollectionDefinition[] collDefs);
 
 	/**
 	 * Determines which {@code IndexedCollection} to be used for the specified

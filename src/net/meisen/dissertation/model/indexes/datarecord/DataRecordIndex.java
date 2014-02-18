@@ -20,4 +20,10 @@ public interface DataRecordIndex {
 	 *            the {@code DataRecord} to be indexed
 	 */
 	public void index(final int dataId, final IDataRecord record);
+
+	/**
+	 * Method which should be called after all data is added to optimize the
+	 * index considering e.g. storage
+	 */
+	public void optimize();
 }

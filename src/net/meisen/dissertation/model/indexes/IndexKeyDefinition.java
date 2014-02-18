@@ -298,7 +298,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a byte key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code byte} or {@code Byte}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the byte key for
@@ -329,7 +329,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a short key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code short} or {@code Short}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the short key for
@@ -360,7 +360,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a int key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code int} or {@code Integer}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the int key for
@@ -391,7 +391,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a long key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code long} or {@code Long}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the long key for
@@ -422,7 +422,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a float key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code float} or {@code Float}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the float key for
@@ -453,7 +453,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a char key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code char} or {@code Character}, otherwise the
-	 * passed value (i.e. the {@object}) cannot be interpreted as such.
+	 * passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the char key for
@@ -484,8 +484,7 @@ public class IndexKeyDefinition {
 	/**
 	 * Generate a boolean key based on the passed {@code object}. The passed
 	 * {@code object} must be a {@code boolean} or {@code Boolean}, otherwise
-	 * the passed value (i.e. the {@object}) cannot be interpreted as
-	 * such.
+	 * the passed value (i.e. the {@code object}) cannot be interpreted as such.
 	 * 
 	 * @param object
 	 *            the object to create the boolean key for
@@ -593,6 +592,18 @@ public class IndexKeyDefinition {
 		} else {
 			return objectClass.isAssignableFrom(mappedClazz);
 		}
+	}
+
+	/**
+	 * Gets the key of the specified {@code object}.
+	 * 
+	 * @param object
+	 *            the object to retrieve the key from
+	 *            
+	 * @return the key of the object
+	 */
+	public Object getObjectKey(final Object object) {
+		return getValue(object, Object.class);
 	}
 
 	/**

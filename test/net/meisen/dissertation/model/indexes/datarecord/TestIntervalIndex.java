@@ -13,10 +13,14 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -81,8 +85,6 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 		for (final IndexDimensionSlice<?> slice : part.getSlices()) {
 			assertTrue(slice.count() > 0);
 		}
-
-		loader.unloadAll();
 	}
 
 	/**
@@ -125,8 +127,6 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 				fail("Invalid value with i = " + i);
 			}
 		}
-
-		loader.unloadAll();
 	}
 
 	/**
@@ -163,7 +163,115 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 				assertEquals(1, slice.count());
 			}
 		}
+	}
 
+	/**
+	 * Tests the combination and retrieval of slices.
+	 * 
+	 * @throws IOException
+	 *             if a file cannot be read
+	 */
+	@Test
+	public void testGetAndCombinations() throws IOException {
+		final IntervalIndex idx = initDb("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
+				"tidaDbWithNullIntervalIndexUsingOther.xml");
+
+		// check if there is just one partition
+		assertEquals(1, idx.getAmountOfPartitions());
+		final IntervalIndexPartition part = idx.getPartitions().iterator()
+				.next();
+
+		// test the type (the amount of values)
+		assertEquals(Short.class, part.getType());
+		assertTrue(part instanceof ShortIntervalIndexPartition);
+		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
+
+		IIndexDimensionSlice[] slices;
+		CombinedIndexDimensionSlice combined;
+
+		// or combine
+		combined = shortPart.or((short) 60, (short) 65);
+		assertEquals(2, combined.count());
+		combined = shortPart.or((short) 100, (short) 65);
+		assertEquals(0, combined.count());
+
+		// and combine
+		combined = shortPart.and((short) 60, (short) 65);
+		assertEquals(1, combined.count());
+		combined = shortPart.and((short) 300, (short) 300);
+		assertEquals(2, combined.count());
+		combined = shortPart.and((short) 100, (short) 65);
+		assertEquals(0, combined.count());
+
+		// get
+		slices = shortPart.getSlices((short) 60, (short) 65);
+		assertEquals(6, slices.length);
+		slices = shortPart.getSlices((short) 100, (short) 65);
+		assertEquals(0, slices.length);
+	}
+
+	/**
+	 * Tests the combination and retrieval of slices with {@code null} slices.
+	 * 
+	 * @throws IOException
+	 *             if a file cannot be read
+	 */
+	@Test
+	public void testGetAndCombinationsWithNulls() throws IOException {
+		final IntervalIndex idx = initDb("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
+				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
+
+		// check if there is just one partition
+		assertEquals(1, idx.getAmountOfPartitions());
+		final IntervalIndexPartition part = idx.getPartitions().iterator()
+				.next();
+
+		// test the type (the amount of values)
+		assertEquals(Short.class, part.getType());
+		assertTrue(part instanceof ShortIntervalIndexPartition);
+		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
+
+		IIndexDimensionSlice[] slices;
+		CombinedIndexDimensionSlice combined;
+
+		// or combine
+		combined = shortPart.or((short) 322, (short) 340);
+		assertEquals(1, combined.count());
+		combined = shortPart.or((short) 323, (short) 340);
+		assertEquals(0, combined.count());
+		combined = shortPart.or((short) 320, (short) 100);
+		assertEquals(0, combined.count());
+
+		// and combine
+		combined = shortPart.and((short) 320, (short) 340);
+		assertEquals(0, combined.count());
+		combined = shortPart.and((short) 323, (short) 340);
+		assertEquals(0, combined.count());
+		combined = shortPart.and((short) 320, (short) 100);
+		assertEquals(0, combined.count());
+
+		// get
+		slices = shortPart.getSlices((short) 320, (short) 340);
+		assertEquals(21, slices.length);
+		for (short i = 0; i < slices.length; i++) {
+			if (i > 2) {
+				assertNull(slices[i]);
+			} else {
+				assertTrue(slices[i].getClass().getName(),
+						slices[i] instanceof IndexDimensionSlice);
+				assertEquals((short) (i + 320),
+						((IndexDimensionSlice<?>) slices[i]).getId());
+			}
+		}
+	}
+
+	/**
+	 * Cleanup after the test
+	 */
+	@After
+	public void unload() {
 		loader.unloadAll();
 	}
 }

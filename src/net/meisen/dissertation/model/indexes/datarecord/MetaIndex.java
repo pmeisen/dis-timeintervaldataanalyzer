@@ -118,4 +118,11 @@ public class MetaIndex implements DataRecordIndex {
 	protected Collection<MetaIndexDimension<?>> getDimensions() {
 		return (Collection<MetaIndexDimension<?>>) dimensionsIndex.getAll();
 	}
+
+	@Override
+	public void optimize() {
+		for (final MetaIndexDimension<?> dim : getDimensions()) {
+			dim.optimize();
+		}
+	}
 }

@@ -3,8 +3,10 @@ package net.meisen.dissertation.model.indexes.datarecord.intervalindex;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.IndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 
 /**
@@ -44,7 +46,7 @@ public class IntIntervalIndexPartition extends IntervalIndexPartition {
 		final int normEnd = get(end, false);
 		setInterval(normStart, normEnd, dataId);
 	}
-	
+
 	/**
 	 * Gets the start of the timeline (included) as {@code int}.
 	 * 
@@ -83,6 +85,63 @@ public class IntIntervalIndexPartition extends IntervalIndexPartition {
 	}
 
 	/**
+	 * And-combines the slices for the specified {@code start} (included) to
+	 * {@code end} (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the result of the combination of the specified slices (by and)
+	 */
+	public CombinedIndexDimensionSlice and(final int start, final int end) {
+
+		// combine the slices
+		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
+		combinedSlice.and(getIndex().getObjectsByStartAndEnd(start, end));
+
+		// return the result
+		return combinedSlice;
+	}
+
+	/**
+	 * Or-combines the slices for the specified {@code start} (included) to
+	 * {@code end} (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the result of the combination of the specified slices (by or)
+	 */
+	public CombinedIndexDimensionSlice or(final int start, final int end) {
+
+		// combine the slices
+		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
+		combinedSlice.or(getIndex().getObjectsByStartAndEnd(start, end));
+
+		// return the result
+		return combinedSlice;
+	}
+
+	/**
+	 * Get the slices for the specified {@code start} (included) to {@code end}
+	 * (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the slices, which might be {@code null} if no data is there yet
+	 */
+	public IIndexDimensionSlice[] getSlices(final int start, final int end) {
+		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
+	}
+
+	/**
 	 * Gets a slice of the partition, i.e. a bitmap which defines which records
 	 * have the value of the specified slice set (i.e. {@code 1}) and which
 	 * don't (i.e. {@code 0}).
@@ -114,12 +173,12 @@ public class IntIntervalIndexPartition extends IntervalIndexPartition {
 		final IIndexedCollection index = getIndex();
 
 		for (int i = normStart; i < normEnd + 1; i++) {
-			IndexDimensionSlice<Integer> slice = getSliceById(i);
+			final IndexDimensionSlice<Integer> slice = getSliceById(i);
 			if (slice == null) {
-				slice = new IndexDimensionSlice<Integer>(i);
-				index.addObject(slice);
+				index.addObject(new IndexDimensionSlice<Integer>(i, recId));
+			} else {
+				slice.set(recId);
 			}
-			slice.set(recId);
 		}
 	}
 }

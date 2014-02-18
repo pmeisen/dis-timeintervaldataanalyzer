@@ -25,4 +25,10 @@ public class KeyIndex implements DataRecordIndex {
 	public void index(final int dataId, final IDataRecord record) {
 		// TODO Auto-generated method stub
 	}
+
+	@Override
+	public void optimize() {
+		// TODO Auto-generated method stub
+		
+	}
 }

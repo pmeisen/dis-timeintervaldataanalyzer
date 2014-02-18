@@ -15,6 +15,7 @@ import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 
 /**
  * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
@@ -57,6 +58,10 @@ public class TidaIndex {
 			 */
 			//@formatter:on
 			dataId++;
+		}
+		
+		for (final DataRecordIndex idx : indexes.values()) {
+			idx.optimize();
 		}
 	}
 

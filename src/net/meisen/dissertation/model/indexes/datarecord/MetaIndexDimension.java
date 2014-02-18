@@ -10,6 +10,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            the type of the indexed values
  */
-public class MetaIndexDimension<I> {
+public class MetaIndexDimension<I> implements DataRecordIndex {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(MetaIndexDimension.class);
 
@@ -114,15 +115,7 @@ public class MetaIndexDimension<I> {
 		return model;
 	}
 
-	/**
-	 * Indexes the specified {@code DataRecord} under the specified
-	 * {@code recId}.
-	 * 
-	 * @param recId
-	 *            the identifier used system wide for the specified record
-	 * @param rec
-	 *            the {@code DataRecord} to be indexed
-	 */
+	@Override
 	public void index(final int recId, final IDataRecord rec) {
 		if (rec == null) {
 			return;
@@ -132,12 +125,12 @@ public class MetaIndexDimension<I> {
 		final I id = getIdFromRecord(rec);
 
 		// create or get the slices
-		IndexDimensionSlice<I> slice = getSliceById(id);
+		final IndexDimensionSlice<I> slice = getSliceById(id);
 		if (slice == null) {
-			slice = new IndexDimensionSlice<I>(id);
-			index.addObject(slice);
+			index.addObject(new IndexDimensionSlice<I>(id, recId));
+		} else {
+			slice.set(recId);
 		}
-		slice.set(recId);
 	}
 
 	/**
@@ -335,5 +328,12 @@ public class MetaIndexDimension<I> {
 	 */
 	protected Class<? extends IIndexedCollection> getIndexClass() {
 		return index.getClass();
+	}
+
+	@Override
+	public void optimize() {
+		for (final IndexDimensionSlice<I> slice : getSlices()) {
+			slice.optimize();
+		}
 	}
 }

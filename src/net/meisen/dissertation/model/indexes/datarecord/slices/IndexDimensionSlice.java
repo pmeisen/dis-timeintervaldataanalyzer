@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.datarecord;
+package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import java.util.Arrays;
 
@@ -20,7 +20,7 @@ import com.googlecode.javaewah.EWAHCompressedBitmap;
  *            the type of the identifier used to identify the slice
  */
 public class IndexDimensionSlice<I> implements
-		Comparable<IndexDimensionSlice<I>> {
+		Comparable<IndexDimensionSlice<I>>, IIndexDimensionSlice {
 
 	private final I id;
 	private EWAHCompressedBitmap bitmap;
@@ -33,8 +33,27 @@ public class IndexDimensionSlice<I> implements
 	 *            the identifier the slice stands for
 	 */
 	public IndexDimensionSlice(final I sliceId) {
+		this(sliceId, null);
+	}
+
+	/**
+	 * Creates a slice with no the specified {@code recId} added (i.e.
+	 * everything is set to {@code 0}) for the specified {@code sliceId}.
+	 * 
+	 * @param sliceId
+	 *            the identifier the slice stands for
+	 * @param recordIds
+	 *            the identifiers of the records to be set
+	 */
+	public IndexDimensionSlice(final I sliceId, final int... recordIds) {
 		this.id = sliceId;
-		this.bitmap = null;
+
+		if (recordIds != null) {
+			Arrays.sort(recordIds);
+			this.bitmap = EWAHCompressedBitmap.bitmapOf(recordIds);
+		} else {
+			this.bitmap = IIndexDimensionSlice.EMPTY_BITMAP;
+		}
 	}
 
 	/**
@@ -61,7 +80,7 @@ public class IndexDimensionSlice<I> implements
 
 		// sort the data and create the bitmap
 		Arrays.sort(recordIds);
-		or(EWAHCompressedBitmap.bitmapOf(recordIds));
+		bitmap = bitmap.or(EWAHCompressedBitmap.bitmapOf(recordIds));
 	}
 
 	/**
@@ -72,42 +91,15 @@ public class IndexDimensionSlice<I> implements
 	 *            the identifiers of the record to be set
 	 */
 	public void set(final int recId) {
-		or(EWAHCompressedBitmap.bitmapOf(recId));
+		bitmap = bitmap.or(EWAHCompressedBitmap.bitmapOf(recId));
 	}
 
-	/**
-	 * Method to {@code or}-combine the {@code recBitmap} with the current one
-	 * of {@code this} slice.
-	 * 
-	 * @param recBitmap
-	 *            the bitmap to {@code or}-combine with
-	 */
-	protected void or(final EWAHCompressedBitmap recBitmap) {
-
-		if (bitmap == null) {
-			bitmap = recBitmap;
-		} else {
-			bitmap = bitmap.or(recBitmap);
-		}
-
-		// cleanUp
-		bitmap.trim();
-	}
-
-	/**
-	 * Gets an array of all the set records identifiers.
-	 * 
-	 * @return an array of all the set records
-	 */
+	@Override
 	public int[] get() {
 		return bitmap.toArray();
 	}
 
-	/**
-	 * Counts how many values are set.
-	 * 
-	 * @return the amount of set values
-	 */
+	@Override
 	public int count() {
 		return bitmap.cardinality();
 	}
@@ -124,5 +116,20 @@ public class IndexDimensionSlice<I> implements
 			final boolean larger = get().length >= slice.get().length;
 			return larger ? 1 : -1;
 		}
+	}
+
+	@Override
+	public EWAHCompressedBitmap getBitmap() {
+		return bitmap;
+	}
+
+	@Override
+	public String toString() {
+		return id.toString() + " (" + bitmap + ")";
+	}
+
+	@Override
+	public void optimize() {
+		bitmap.trim();
 	}
 }

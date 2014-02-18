@@ -4,6 +4,7 @@ import net.meisen.dissertation.performance.indexes.TestIntegerIndexedCollectionP
 import net.meisen.dissertation.performance.indexes.TestLongIndexedCollectionPerformance;
 import net.meisen.dissertation.performance.indexes.TestNestedIndexedCollectionPerformance;
 import net.meisen.dissertation.performance.indexes.TestStringIndexedCollectionPerformance;
+import net.meisen.dissertation.performance.iteration.TestIteration;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -21,7 +22,10 @@ import org.junit.runners.Suite;
 		TestIntegerIndexedCollectionPerformance.class,
 		TestLongIndexedCollectionPerformance.class,
 		TestStringIndexedCollectionPerformance.class,
-		TestNestedIndexedCollectionPerformance.class })
+		TestNestedIndexedCollectionPerformance.class,
+
+		// some miscellanious performances
+		TestIteration.class, })
 public class AllPerformanceTests {
 
 }
