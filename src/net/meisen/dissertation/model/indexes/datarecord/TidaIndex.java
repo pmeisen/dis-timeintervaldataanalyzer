@@ -1,15 +1,14 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -17,6 +16,12 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Identifier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
@@ -25,13 +30,14 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSli
  * @author pmeisen
  * 
  */
-public class TidaIndex {
+public class TidaIndex implements IPersistable {
 	private final static int STATISTIC_THRESHOLD = 30;
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
 	private final Map<Class<? extends DataRecordIndex>, DataRecordIndex> indexes;
 
 	private int dataId;
+	private Group persistentGroup = null;
 
 	/**
 	 * Creates an index for the passed {@code model}.
@@ -76,20 +82,15 @@ public class TidaIndex {
 		}
 
 		// optimize all the indexes, because the initial data is added
-		for (final DataRecordIndex idx : indexes.values()) {
-			idx.optimize();
-		}
-	}
-	
-	public void saveToDisk(final File location) {
-		for (final DataRecordIndex idx : indexes.values()) {
-			idx.saveToDisk(location);
-		}
+		optimize();
 	}
 
-	public void loadFromDisk() {
+	/**
+	 * Method used to optimize the index considering mainly storage.
+	 */
+	public void optimize() {
 		for (final DataRecordIndex idx : indexes.values()) {
-			idx.loadFromDisk();
+			idx.optimize();
 		}
 	}
 
@@ -204,7 +205,7 @@ public class TidaIndex {
 			
 			// sort the data ascending
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
-			sortedSlices.addAll(dim.getSlices());
+			sortedSlices.addAll(Arrays.asList(dim.getSlices()));
 			Collections.sort(sortedSlices, Collections.reverseOrder());
 			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
 			
@@ -233,7 +234,7 @@ public class TidaIndex {
 			
 			// sort the data ascending
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
-			sortedSlices.addAll(part.getSlices());
+			sortedSlices.addAll(Arrays.asList(part.getSlices()));
 			Collections.sort(sortedSlices, Collections.reverseOrder());
 			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
 			
@@ -253,5 +254,34 @@ public class TidaIndex {
 		// @formatter:on
 
 		return stat;
+	}
+
+	@Override
+	public void save(final BasePersistor persistor) {
+		// nothing to save, the indexes are added via registration
+	}
+
+	@Override
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream) {
+		throw new IllegalStateException("The '" + getClass().getSimpleName()
+				+ "' does not save anything which should be loaded.");
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
+		
+		for (final DataRecordIndex idx : indexes.values()) {
+			final String name = idx.getClass().getSimpleName().toLowerCase();
+			final Group indexGroup = group.append(name);
+
+			persistor.register(indexGroup, idx);
+		}
+	}
+	
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

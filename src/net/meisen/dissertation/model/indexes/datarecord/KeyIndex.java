@@ -1,16 +1,25 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
+import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Identifier;
 
 public class KeyIndex implements DataRecordIndex {
 	private final List<KeyIndexDimension> keyDimensions;
 
+	private Group persistentGroup = null;
+	
 	public KeyIndex(final TidaModel model) {
 
 		// get the DataStructure which defines how the index has to look like
@@ -30,18 +39,27 @@ public class KeyIndex implements DataRecordIndex {
 	@Override
 	public void optimize() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void saveToDisk(File location) {
+	public void save(final BasePersistor basePersistor) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
-	public void loadFromDisk() {
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

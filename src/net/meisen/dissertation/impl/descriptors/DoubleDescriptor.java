@@ -111,11 +111,6 @@ public class DoubleDescriptor<I extends Object> extends
 	}
 
 	@Override
-	public String toString() {
-		return "" + value;
-	}
-
-	@Override
 	public DoubleDescriptor<I> clone() {
 		return new DoubleDescriptor<I>(getModel(), getId(), value);
 	}
@@ -128,5 +123,15 @@ public class DoubleDescriptor<I extends Object> extends
 	@Override
 	public boolean valueEquals(final DoubleDescriptor<I> descriptor) {
 		return descriptor.value == value;
+	}
+	
+	@Override
+	public String toString() {
+		return getValueStringRepresentative();
+	}
+
+	@Override
+	public String getValueStringRepresentative() {
+		return "" + value;
 	}
 }

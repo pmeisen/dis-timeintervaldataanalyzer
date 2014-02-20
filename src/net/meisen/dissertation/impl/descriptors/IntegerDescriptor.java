@@ -80,9 +80,14 @@ public class IntegerDescriptor<I extends Object> extends
 	public Integer getValue() {
 		return value;
 	}
-
+	
 	@Override
 	public String toString() {
+		return getValueStringRepresentative();
+	}
+
+	@Override
+	public String getValueStringRepresentative() {
 		return "" + value;
 	}
 

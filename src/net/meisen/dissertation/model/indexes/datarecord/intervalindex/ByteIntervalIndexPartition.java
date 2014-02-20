@@ -5,9 +5,9 @@ import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
+import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * An {@code IntervalIndexPartition} is normally defined as a partition (or the
@@ -137,8 +137,13 @@ public class ByteIntervalIndexPartition extends IntervalIndexPartition {
 	 * 
 	 * @return the slices, which might be {@code null} if no data is there yet
 	 */
-	public IIndexDimensionSlice[] getSlices(final byte start, final byte end) {
+	public IndexDimensionSlice<?>[] getSlices(final byte start, final byte end) {
 		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
+	}
+
+	@Override
+	public IndexDimensionSlice<?>[] getSlices() {
+		return getSlices(getStart(), getEnd());
 	}
 
 	/**
@@ -173,10 +178,17 @@ public class ByteIntervalIndexPartition extends IntervalIndexPartition {
 		for (byte i = normStart; i < normEnd + 1; i++) {
 			final IndexDimensionSlice<Byte> slice = getSliceById(i);
 			if (slice == null) {
-				index.addObject(new IndexDimensionSlice<Byte>(i, recId));
+				index.addObject(createSlice(i, recId));
 			} else {
 				slice.set(recId);
 			}
 		}
+	}
+
+	@Override
+	protected IndexDimensionSlice<Byte> createSlice(final Number sliceId,
+			final int... recordIds) {
+		return new IndexDimensionSlice<Byte>(Numbers.castToByte(sliceId),
+				recordIds);
 	}
 }

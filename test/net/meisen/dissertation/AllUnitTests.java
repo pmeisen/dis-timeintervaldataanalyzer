@@ -15,13 +15,14 @@ import net.meisen.dissertation.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
-import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
+import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
 import net.meisen.dissertation.model.data.TestDataModel;
@@ -37,10 +38,13 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
+import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.loader.TestTidaModelLoader;
+import net.meisen.dissertation.model.persistence.TestBasePersistor;
+import net.meisen.dissertation.model.persistence.TestGroup;
+import net.meisen.dissertation.model.persistence.TestIdentifier;
 import net.meisen.dissertation.model.time.TestDateNormalizer;
 import net.meisen.dissertation.model.time.granularity.TestDateBasedHelper;
 import net.meisen.dissertation.model.time.granularity.TestDateFormat;
@@ -66,6 +70,12 @@ import org.junit.runners.Suite;
 
 		// Test general helper
 		TestDb.class,
+
+		// Test persistence
+		TestGroup.class,
+		TestIdentifier.class,
+		TestBasePersistor.class,
+		TestZipPersistor.class,
 
 		// Test indexes
 		TestCompositeIndexKey.class,
@@ -131,7 +141,7 @@ import org.junit.runners.Suite;
 
 		// Test the tida-indexes
 		TestMetaIndexDimension.class, TestMetaIndex.class,
-		TestIntervalIndex.class,
+		TestIntervalIndexPartition.class,
 
 		// Test the model
 		TestTidaModel.class,

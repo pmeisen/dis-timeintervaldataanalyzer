@@ -6,7 +6,9 @@
        id="myModel">
 
   <config>
-    <factories>
+    <persistor implementation="net.meisen.dissertation.config.xslt.mock.MockPersistor" />
+    
+    <factories>    
       <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory" />
       
       <mappers implementation="net.meisen.dissertation.config.xslt.mock.MockMapperFactory" />

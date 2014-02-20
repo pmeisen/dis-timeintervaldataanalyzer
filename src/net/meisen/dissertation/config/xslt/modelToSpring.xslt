@@ -12,6 +12,7 @@
 
   <xsl:output method="xml" indent="yes" />
   
+  <xsl:variable name="persistorId" select="mdef:getId('persistor_ID')" />
   <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
   <xsl:variable name="intervalModelId" select="mdef:getId('INTERVALMODEL_ID')" />
@@ -53,7 +54,12 @@
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularitiesFactory()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-    
+    <xsl:variable name="persistor">
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:persistor/@implementation"><xsl:value-of select="//mns:config/mns:persistor/@implementation" /></xsl:when>
+        <xsl:otherwise><xsl:value-of select="mdef:getDefaultPersistor()" /></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
   
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -67,6 +73,9 @@
       
       <!-- create the granularitiesFactory to be used -->
       <bean id="{$granularityFactoryId}" class="{$granularityFactory}" />
+      
+      <!-- create the persistor -->
+      <bean id="{$persistorId}" class="{$persistor}" />
       
       <!-- create all the defined dataRetrievers -->
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">

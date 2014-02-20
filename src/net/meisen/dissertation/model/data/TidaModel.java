@@ -7,6 +7,8 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.slf4j.Logger;
@@ -43,6 +45,10 @@ public class TidaModel {
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
+
+	@Autowired
+	@Qualifier(DefaultValues.persistor_ID)
+	private BasePersistor persistor;
 
 	private final String id;
 	private final String name;
@@ -129,22 +135,13 @@ public class TidaModel {
 		// create the index
 		this.idx = new TidaIndex(this);
 
+		// register the entities which might want to persist data
+		persistor.register(new Group("indexes"), this.idx);
+
 		// print the statistic after initialization
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(idx.toStatistic());
 		}
-	}
-
-	public void saveToDisk(final File location) {
-		if (!isInitialized()) {
-			// TODO add exception not initialized
-		}
-		
-		this.idx.saveToDisk(location);
-	}
-
-	public void loadFromDisk() {
-
 	}
 
 	/**
@@ -190,10 +187,26 @@ public class TidaModel {
 		return dataStructure;
 	}
 
+	/**
+	 * Gets the handling used for meta-data, i.e. if the meta-data found in the
+	 * data cannot be mapped to any defined meta-data.
+	 * 
+	 * @return the handling used for meta-data
+	 * 
+	 * @see MetaDataHandling
+	 */
 	public MetaDataHandling getMetaDataHandling() {
 		return metaDataHandling;
 	}
 
+	/**
+	 * Sets the handling of the meta-data.
+	 * 
+	 * @param metaDataHandling
+	 *            the handling of the meta-data
+	 * 
+	 * @see MetaDataHandling
+	 */
 	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
 		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
 				.find(null) : metaDataHandling;
@@ -204,14 +217,39 @@ public class TidaModel {
 		}
 	}
 
+	/**
+	 * Sets the handling of the meta-data.
+	 * 
+	 * @param metaDataHandling
+	 *            the handling of the meta-data
+	 * 
+	 * @see MetaDataHandling
+	 */
 	public void setMetaDataHandlingByString(final String metaDataHandling) {
 		setMetaDataHandling(MetaDataHandling.find(metaDataHandling));
 	}
 
+	/**
+	 * Gets the handling of the interval-data, i.e. if {@code null} values are
+	 * found.
+	 * 
+	 * @return the handling of the interval-data
+	 * 
+	 * @see IntervalDataHandling
+	 */
 	public IntervalDataHandling getIntervalDataHandling() {
 		return intervalDataHandling;
 	}
 
+	/**
+	 * Sets the handling of the interval-data, i.e. if {@code null} values are
+	 * found.
+	 * 
+	 * @param handling
+	 *            the handling of the interval-data
+	 * 
+	 * @see IntervalDataHandling
+	 */
 	public void setIntervalDataHandling(final IntervalDataHandling handling) {
 		this.intervalDataHandling = handling == null ? IntervalDataHandling
 				.find(null) : handling;
@@ -222,7 +260,34 @@ public class TidaModel {
 		}
 	}
 
+	/**
+	 * Sets the handling of the interval-data, i.e. if {@code null} values are
+	 * found.
+	 * 
+	 * @param handling
+	 *            the handling of the interval-data
+	 * 
+	 * @see IntervalDataHandling
+	 */
 	public void setIntervalDataHandlingByString(final String handling) {
 		setIntervalDataHandling(IntervalDataHandling.find(handling));
+	}
+
+	public void save(final String location) {
+		if (!isInitialized()) {
+			// TODO add exception not initialized
+		}
+
+		// save the data to the specified location
+		persistor.save(location);
+	}
+
+	/**
+	 * Get the instance defined to persist data.
+	 * 
+	 * @return the instance defined to persist data
+	 */
+	public BasePersistor getPersistor() {
+		return persistor;
 	}
 }

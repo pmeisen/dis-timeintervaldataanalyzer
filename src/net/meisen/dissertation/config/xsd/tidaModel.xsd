@@ -47,6 +47,12 @@
         <xs:element name="config" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
+            
+              <xs:element name="persistor" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
 
               <xs:element name="factories" minOccurs="0">
                 <xs:complexType>

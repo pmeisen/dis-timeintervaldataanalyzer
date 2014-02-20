@@ -3,6 +3,8 @@ package net.meisen.dissertation.model.indexes.datarecord;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,6 +18,7 @@ import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.MapIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
+import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -26,6 +29,7 @@ import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
+import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -166,6 +170,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		for (i = 0; i < vals.length; i++) {
 			assertEquals(exp[i], idx.getSliceByValue(vals[i]).count());
 		}
+
+		loader.unloadAll();
 	}
 
 	/**
@@ -178,12 +184,15 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 				.load("mh_tidaRandomIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
+		// get the defined model and the structure
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();
 		final DescriptorModel<?> fixedDescModel = metaModel
 				.getDescriptorModel("FIXED");
 		final DescriptorModel<?> randomDescModel = metaModel
 				.getDescriptorModel("RANDOMINT");
+
+		// get the defined metaStructures
 		final List<MetaStructureEntry> metaStructures = structure
 				.getEntriesByClass(MetaStructureEntry.class);
 		final MetaStructureEntry fixedStructure = metaStructures.get(0);
@@ -194,7 +203,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		final int prevSize = randomDescModel.size();
 		assertTrue("Found " + prevSize, prevSize <= 100000);
 
-		// create the indexes
+		// create the indexDimensions
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension fixedIdx = new MetaIndexDimension(
 				fixedStructure, fixedDescModel, idxFactory);
@@ -203,6 +212,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		final MetaIndexDimension randomIdx = new MetaIndexDimension(
 				randomStructure, randomDescModel, idxFactory);
 
+		// add the data to the indexDimensions
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -231,5 +241,61 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		assertEquals(1, fixedIdx.getAmountOfSlices());
 		assertTrue("Created " + randomIdx.getAmountOfSlices(),
 				randomIdx.getAmountOfSlices() <= 100000);
+
+		loader.unloadAll();
+	}
+
+	@Test
+	public void testSaveAndLoad() throws IOException {
+		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		final TidaModel model = loader
+				.load("mh_tidaStaticIndexModel",
+						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
+
+		// get the defined model and the structure
+		final MetaDataModel metaModel = model.getMetaDataModel();
+		final DataStructure structure = model.getDataStructure();
+		final DescriptorModel<?> descModel = metaModel
+				.getDescriptorModel("FAMILY");
+
+		// get the defined metaStructures
+		final List<MetaStructureEntry> metaStructures = structure
+				.getEntriesByClass(MetaStructureEntry.class);
+		final MetaStructureEntry metaStructure = metaStructures.get(0);
+
+		// get the index
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final MetaIndexDimension idx = new MetaIndexDimension(metaStructure,
+				descModel, idxFactory);
+		
+		// add data
+		final IClosableIterator<IDataRecord> it = model.getDataModel()
+				.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			final IDataRecord rec = it.next();
+			idx.index(i, rec);
+			i++;
+		}
+		it.close();
+		
+
+		// the testing persistor we use here
+		final Group group = new Group("meta");
+		final ZipPersistor persistor = new ZipPersistor();
+		persistor.register(group, idx);
+
+		// create a temporary file and save it
+		final String prefixFile = UUID.randomUUID().toString();
+		final File tmpFile = File.createTempFile(prefixFile, ".zip");
+		assertTrue(tmpFile.length() == 0);
+
+		/*
+		 * save the metadata, the save method of fixedIdx should be triggered
+		 * via the registration
+		 */
+		persistor.save(tmpFile.toString());
+
+		loader.unloadAll();
 	}
 }

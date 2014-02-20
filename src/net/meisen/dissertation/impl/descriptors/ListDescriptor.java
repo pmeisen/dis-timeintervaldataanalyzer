@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.general.genmisc.types.Strings;
 
 /**
  * Simple test-{@code Descriptor} to handle {@code List} instances.
@@ -100,11 +101,16 @@ public class ListDescriptor<I extends Object> extends
 
 	@Override
 	public ListDescriptor<I> clone() {
-		return null;
+		return this;
 	}
 
 	@Override
 	public String toString() {
-		return null;
+		return getValueStringRepresentative();
+	}
+
+	@Override
+	public String getValueStringRepresentative() {
+		return Strings.join(",", values);
 	}
 }

@@ -1,7 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
-
+import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
@@ -11,7 +10,7 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
  * @author pmeisen
  * 
  */
-public interface DataRecordIndex {
+public interface DataRecordIndex extends IPersistable {
 
 	/**
 	 * Method to add a {@code DataRecord} to the index.
@@ -28,8 +27,4 @@ public interface DataRecordIndex {
 	 * index considering e.g. storage
 	 */
 	public void optimize();
-
-	public void saveToDisk(final File location);
-
-	public void loadFromDisk();
 }

@@ -1,15 +1,19 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
-
-import com.google.common.base.Objects;
 
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
+import com.google.common.base.Objects;
 
 /**
  * An {@code IntervalIndex} is used to index intervals read from a
@@ -27,6 +31,7 @@ public class IntervalIndex implements DataRecordIndex {
 	private final IIndexedCollection timeIndex;
 
 	private IntervalDataHandling intervalDataHandling;
+	private Group persistentGroup = null;
 
 	/**
 	 * Creates an {@code IntervalIndex} for the {@code TidaModel}. The
@@ -130,15 +135,30 @@ public class IntervalIndex implements DataRecordIndex {
 	}
 
 	@Override
-	public void saveToDisk(final File location) {
+	public void save(final BasePersistor persistor)
+			throws ForwardedRuntimeException {
+		// nothing to save, the partitions are added via registration
+	}
+
+	@Override
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream)
+			throws ForwardedRuntimeException {
+		throw new IllegalStateException("The '" + getClass().getSimpleName()
+				+ "' does not save anything which should be loaded.");
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
+		
 		for (final IntervalIndexPartition part : getPartitions()) {
-			part.saveToDisk(location);
+			persistor.register(group.append("" + part.getId()), part);
 		}
 	}
 
 	@Override
-	public void loadFromDisk() {
-		// TODO Auto-generated method stub
-
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

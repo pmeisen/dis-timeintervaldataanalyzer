@@ -1,9 +1,13 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
@@ -12,6 +16,10 @@ import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +36,7 @@ import org.slf4j.LoggerFactory;
  *            the type of the indexed values
  */
 public class MetaIndexDimension<I> implements DataRecordIndex {
+	private final static String EXTENSION = ".slice";
 	private final static Logger LOG = LoggerFactory
 			.getLogger(MetaIndexDimension.class);
 
@@ -37,6 +46,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	private final IIndexedCollection index;
 
 	private MetaDataHandling metaDataHandling;
+	private Group persistentGroup = null;
 
 	/**
 	 * Constructor used to create a {@code MetaIndexDimension} for the specified
@@ -173,8 +183,10 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	 * @return the slices of the {@code MetaIndexDimension}
 	 */
 	@SuppressWarnings("unchecked")
-	public Collection<IndexDimensionSlice<I>> getSlices() {
-		return (Collection<IndexDimensionSlice<I>>) index.getAll();
+	public IndexDimensionSlice<I>[] getSlices() {
+		final Collection<?> all = index.getAll();
+		return (IndexDimensionSlice<I>[]) index.getAll().toArray(
+				new IndexDimensionSlice<?>[all.size()]);
 	}
 
 	/**
@@ -339,12 +351,72 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	}
 
 	@Override
-	public void saveToDisk(File location) {
-		// TODO Auto-generated method stub
+	public void save(final BasePersistor persistor) {
+
+		for (final IndexDimensionSlice<I> slice : getSlices()) {
+			if (slice == null) {
+				continue;
+			}
+
+			// if we have a slice persist it
+			final Descriptor<?, ?, I> desc = model.getDescriptor(slice.getId());
+			final String fileName = desc.getValueStringRepresentative()  + "?"
+					+ EXTENSION;
+			final Identifier id = new Identifier(fileName, persistentGroup);
+			final DataOutputStream out = new DataOutputStream(
+					persistor.openForWrite(id));
+
+			try {
+				slice.getBitmap().serialize(out);
+			} catch (final IOException e) {
+				throw new ForwardedRuntimeException(PersistorException.class,
+						1003, e, e.getMessage());
+			}
+
+			persistor.close(id);
+		}
 	}
 
 	@Override
-	public void loadFromDisk() {
-		// TODO Auto-generated method stub
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream) {
+
+		// get the InputStream
+		final DataInputStream in = new DataInputStream(inputStream);
+
+		// get the identifier
+		final String valueString = identifier.getId().replace(EXTENSION, "");
+		final I id = getIdForValue(valueString);
+
+		// check if the slice is already indexed
+		if (index.getObject(id) != null) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					"The identifier '" + id + "' ('" + valueString
+							+ "') already exists.");
+		}
+
+		// create the slice
+		final IndexDimensionSlice<I> slice = new IndexDimensionSlice<I>(id);
+
+		// load the slice from the InputStream
+		try {
+			slice.getBitmap().deserialize(in);
+		} catch (final IOException e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
+
+		// add the slice
+		index.addObject(slice);
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
+	}
+
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

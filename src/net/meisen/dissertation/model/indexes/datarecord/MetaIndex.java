@@ -1,15 +1,18 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.Collection;
-
-import com.google.common.base.Objects;
 
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.Identifier;
+
+import com.google.common.base.Objects;
 
 /**
  * A {@code MetaIndex} is used to index meta information associated to data. It
@@ -24,6 +27,7 @@ public class MetaIndex implements DataRecordIndex {
 	private final IIndexedCollection dimensionsIndex;
 
 	private MetaDataHandling metaDataHandling;
+	private Group persistentGroup = null;
 
 	/**
 	 * Constructor to create the {@code MetaIndex} for the specified
@@ -128,14 +132,28 @@ public class MetaIndex implements DataRecordIndex {
 	}
 
 	@Override
-	public void saveToDisk(File location) {
-		// TODO Auto-generated method stub
-		
+	public void save(final BasePersistor persistor) {
+		// nothing to save, the dimension are added via registration
 	}
 
 	@Override
-	public void loadFromDisk() {
-		// TODO Auto-generated method stub
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream) {
+		throw new IllegalStateException("The '" + getClass().getSimpleName()
+				+ "' does not save anything which should be loaded.");
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
 		
+		for (final MetaIndexDimension<?> dim : getDimensions()) {
+			persistor.register(group.append("" + dim.getModelId()), dim);
+		}
+	}
+	
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

@@ -5,10 +5,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
+import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -17,6 +20,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDime
 import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
+import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -25,28 +29,55 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Tests the implementation of the {@code IntervalIndex}.
+ * Tests the implementation of the {@code IntervalIndexPartition}.
  * 
  * @author pmeisen
  * 
  */
 @ContextClass(TidaConfig.class)
 @ContextFile("sbconfigurator-core.xml")
-public class TestIntervalIndex extends ModuleAndDbBasedTest {
+public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 
 	@Autowired
 	private TidaModelLoader loader;
 
-	private IntervalIndex initDb(final String dbName, final String dbPath,
+	private TidaModel loadModel(final String dbName, final String dbPath,
 			final String modelPath) throws IOException {
+		loader.unloadAll();
+
 		getDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/" + dbPath);
 
 		// load the model
-		final TidaModel model = loader.load("mh_testModel",
+		return loader.load(UUID.randomUUID().toString(),
 				"/net/meisen/dissertation/model/indexes/datarecord/"
 						+ modelPath);
+	}
+
+	private IntervalIndexPartition createPartition(final TidaModel model)
+			throws IOException {
 		final IntervalIndex idx = new IntervalIndex(model);
 		idx.setIntervalDataHandling(model.getIntervalDataHandling());
+
+		// check if there is just one partition
+		assertEquals(1, idx.getAmountOfPartitions());
+		final IntervalIndexPartition part = idx.getPartitions().iterator()
+				.next();
+
+		return part;
+	}
+
+	private IntervalIndexPartition loadAndCreate(final String dbName,
+			final String dbPath, final String modelPath) throws IOException {
+		final TidaModel model = loadModel(dbName, dbPath, modelPath);
+		return createPartition(model);
+	}
+
+	private IntervalIndexPartition loadAndIndex(final String dbName,
+			final String dbPath, final String modelPath) throws IOException {
+		final TidaModel model = loadModel(dbName, dbPath, modelPath);
+		final IntervalIndexPartition part = createPartition(model);
+
+		// add the data to the partition
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -54,12 +85,23 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 			final IDataRecord rec = it.next();
 
 			// add the record
-			idx.index(i, rec);
+			part.index(i, rec);
 			i++;
 		}
 		it.close();
 
-		return idx;
+		return part;
+	}
+
+	private int count(final IIndexDimensionSlice[] slices) {
+		int counter = 0;
+		for (final IIndexDimensionSlice slice : slices) {
+			if (slice != null) {
+				counter++;
+			}
+		}
+
+		return counter;
 	}
 
 	/**
@@ -70,13 +112,9 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIntervalIndexFromDb() throws IOException {
-		final IntervalIndex idx = initDb("tidaTestDateIntervals",
-				"tidaTestDateIntervals.zip", "tidaRandomDbIntervalIndex.xml");
-
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final IntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
+		final IntervalIndexPartition part = loadAndIndex(
+				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
+				"tidaRandomDbIntervalIndex.xml");
 
 		// 12 Month in 10 years, random linear data
 		assertEquals(120, part.getAmountOfSlices());
@@ -95,14 +133,9 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesBoundaries() throws IOException {
-		final IntervalIndex idx = initDb("tidaTestDateIntervals",
-				"tidaTestDateIntervals.zip",
+		final IntervalIndexPartition part = loadAndIndex(
+				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
-
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final IntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, part.getType());
@@ -137,14 +170,9 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesOther() throws IOException {
-		final IntervalIndex idx = initDb("tidaTestDateIntervals",
-				"tidaTestDateIntervals.zip",
+		final IntervalIndexPartition part = loadAndIndex(
+				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
-
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final IntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, part.getType());
@@ -173,14 +201,9 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinations() throws IOException {
-		final IntervalIndex idx = initDb("tidaTestDateIntervals",
-				"tidaTestDateIntervals.zip",
+		final IntervalIndexPartition part = loadAndIndex(
+				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
-
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final IntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, part.getType());
@@ -219,14 +242,9 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinationsWithNulls() throws IOException {
-		final IntervalIndex idx = initDb("tidaTestDateIntervals",
-				"tidaTestDateIntervals.zip",
+		final IntervalIndexPartition part = loadAndIndex(
+				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
-
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final IntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, part.getType());
@@ -265,6 +283,53 @@ public class TestIntervalIndex extends ModuleAndDbBasedTest {
 						((IndexDimensionSlice<?>) slices[i]).getId());
 			}
 		}
+	}
+
+	/**
+	 * Tests the saving and loading of a {@code IntervalIndexPartition}.
+	 * 
+	 * @throws IOException
+	 *             if a file cannot be read or created
+	 */
+	@Test
+	public void testSaveAndLoad() throws IOException {
+		final Group group = new Group("index");
+
+		// the testing persistor we use here
+		final ZipPersistor persistor = new ZipPersistor();
+
+		// create a temporary file and save it
+		final String prefixFile = UUID.randomUUID().toString();
+		final File tmpFile = File.createTempFile(prefixFile, ".zip");
+		assertTrue(tmpFile.length() == 0);
+
+		// create an instance which
+		final String dbName = "tidaTestDateIntervals";
+		final String dbPath = "tidaTestDateIntervals.zip";
+		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
+
+		// create a saver instance
+		final IntervalIndexPartition idxPart = loadAndIndex(dbName, dbPath,
+				modelPath);
+		assertEquals(676, count(idxPart.getSlices()));
+		persistor.register(group, idxPart);
+
+		// save and check
+		persistor.save(tmpFile.toString());
+		assertTrue(tmpFile.length() > 0);
+
+		// unregister to make it available for a new instance
+		assertEquals(idxPart, persistor.unregister(group));
+
+		// create a loader instance
+		final IntervalIndexPartition crtPart = loadAndCreate(dbName, dbPath,
+				modelPath);
+		assertEquals(0, count(crtPart.getSlices()));
+		persistor.register(group, crtPart);
+
+		// load the stuff
+		persistor.load(tmpFile.toString());
+		assertEquals(676, count(crtPart.getSlices()));
 	}
 
 	/**

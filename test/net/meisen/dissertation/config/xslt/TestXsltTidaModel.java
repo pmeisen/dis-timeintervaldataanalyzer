@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
 import net.meisen.dissertation.config.xslt.mock.MockMapperFactory;
+import net.meisen.dissertation.config.xslt.mock.MockPersistor;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
@@ -36,6 +37,7 @@ import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.DataStructure;
@@ -151,6 +153,11 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		res = model.getIntervalModel().getMapperFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
 				res.equals(MapperFactory.class));
+
+		// check the default Persistor
+		res = model.getPersistor().getClass();
+		assertTrue("Instance of '" + res.getName() + "'",
+				res.equals(ZipPersistor.class));
 	}
 
 	/**
@@ -168,6 +175,10 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		res = model.getIntervalModel().getMapperFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
 				res.equals(MockMapperFactory.class));
+
+		res = model.getPersistor().getClass();
+		assertTrue("Instance of '" + res.getName() + "'",
+				res.equals(MockPersistor.class));
 	}
 
 	/**

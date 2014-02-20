@@ -1,17 +1,23 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
-import java.util.Collection;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
+import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Objects;
 
@@ -29,6 +35,7 @@ import org.slf4j.LoggerFactory;
 public abstract class IntervalIndexPartition implements DataRecordIndex {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(IntervalIndexPartition.class);
+	private final static String EXTENSION = ".slice";
 
 	@SuppressWarnings("rawtypes")
 	private final BaseMapper mapper;
@@ -38,6 +45,7 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	private final IRangeQueryOptimized index;
 
 	private IntervalDataHandling intervalDataHandling;
+	private Group persistentGroup = null;
 
 	/**
 	 * Constructor to create a partition using the specified {@code Mapper}, the
@@ -157,8 +165,8 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	 * 
 	 * @return the array as array of {@code IIndexDimensionSlice}
 	 */
-	protected IIndexDimensionSlice[] castSlices(final Object[] slices) {
-		return Objects.castArray(slices, IIndexDimensionSlice.class);
+	protected IndexDimensionSlice<?>[] castSlices(final Object[] slices) {
+		return Objects.castArray(slices, IndexDimensionSlice.class);
 	}
 
 	@Override
@@ -175,12 +183,11 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 		final boolean nullValues = start == null || end == null;
 
 		if (nullValues) {
-			if (IntervalDataHandling.FAILONNULL
-					.equals(getIntervalDataHandling())) {
+			final IntervalDataHandling handling = getIntervalDataHandling();
+			if (IntervalDataHandling.FAILONNULL.equals(handling)) {
 				throw new NullPointerException(
 						"Configuration does not allow null values within an interval.");
-			} else if (IntervalDataHandling.USEOTHER
-					.equals(getIntervalDataHandling())) {
+			} else if (IntervalDataHandling.USEOTHER.equals(handling)) {
 
 				// set the values to be equal
 				start = start == null ? end : start;
@@ -256,10 +263,21 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	 * 
 	 * @return the slices of the {@code IntervalIndexPartition}
 	 */
-	@SuppressWarnings("unchecked")
-	public Collection<IndexDimensionSlice<?>> getSlices() {
-		return (Collection<IndexDimensionSlice<?>>) index.getAll();
-	}
+	public abstract IndexDimensionSlice<?>[] getSlices();
+
+	/**
+	 * Method to create a slice with the specified id and the specified set
+	 * records.
+	 * 
+	 * @param sliceId
+	 *            the identifier of the slice
+	 * @param recordIds
+	 *            the records to be marked as part of the slice
+	 * 
+	 * @return the created {@code IndexDimensionSlice}
+	 */
+	protected abstract IndexDimensionSlice<?> createSlice(final Number sliceId,
+			final int... recordIds);
 
 	/**
 	 * Get the defined {@code IntervalDataHandling}.
@@ -329,20 +347,84 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	@Override
 	public void optimize() {
 		for (final IndexDimensionSlice<?> slice : getSlices()) {
-			slice.optimize();
+			if (slice != null) {
+				slice.optimize();
+			}
 		}
 	}
 
 	@Override
-	public void saveToDisk(final File location) {
+	public void save(final BasePersistor persistor)
+			throws ForwardedRuntimeException {
+
 		for (final IndexDimensionSlice<?> slice : getSlices()) {
-			System.out.println(slice.getId() + " " + slice.getBitmap());
-//			slice.getBitmap().serialize(out)
+			if (slice == null) {
+				continue;
+			}
+
+			// if we have a slice persist it
+			final String fileName = slice.getId().toString() + EXTENSION;
+			final Identifier id = new Identifier(fileName, persistentGroup);
+			final DataOutputStream out = new DataOutputStream(
+					persistor.openForWrite(id));
+
+			try {
+				slice.getBitmap().serialize(out);
+			} catch (final IOException e) {
+				throw new ForwardedRuntimeException(PersistorException.class,
+						1003, e, e.getMessage());
+			}
+
+			persistor.close(id);
 		}
 	}
 
 	@Override
-	public void loadFromDisk() {
-		// TODO implement
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream)
+			throws ForwardedRuntimeException {
+
+		// get the InputStream
+		final DataInputStream in = new DataInputStream(inputStream);
+
+		// get the identifier
+		final String idString = identifier.getId().replace(EXTENSION, "");
+		final Long id;
+		try {
+			id = new Long(idString);
+		} catch (final NumberFormatException e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
+
+		// check if the slice is already indexed
+		if (getIndex().getObject(id) != null) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					"The identifier '" + id + "' already exists.");
+		}
+
+		// create the slice
+		final IndexDimensionSlice<?> slice = createSlice(id);
+
+		// load the slice from the InputStream
+		try {
+			slice.getBitmap().deserialize(in);
+		} catch (final IOException e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
+
+		// add the slice
+		getIndex().addObject(slice);
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
+	}
+
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

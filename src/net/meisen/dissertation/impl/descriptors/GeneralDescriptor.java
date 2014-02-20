@@ -49,9 +49,14 @@ public class GeneralDescriptor<I extends Object> extends
 	public Object getValue() {
 		return value;
 	}
-
+	
 	@Override
 	public String toString() {
+		return getValueStringRepresentative();
+	}
+
+	@Override
+	public String getValueStringRepresentative() {
 		return value == null ? null : value.toString();
 	}
 

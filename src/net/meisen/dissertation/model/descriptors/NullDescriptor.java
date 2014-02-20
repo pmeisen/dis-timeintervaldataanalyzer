@@ -64,4 +64,9 @@ public class NullDescriptor<I extends Object> extends
 		return name;
 	}
 
+	@Override
+	public String getValueStringRepresentative() {
+		return null;
+	}
+
 }
