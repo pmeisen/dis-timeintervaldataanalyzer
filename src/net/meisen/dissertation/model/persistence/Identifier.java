@@ -9,8 +9,11 @@ import net.meisen.general.genmisc.types.Objects;
  * 
  */
 public class Identifier {
+	private static final String VALIDATION_EXPR = "[A-Za-z0-9_\\-\\.]+";
+
 	private final Group group;
 	private final String id;
+	private String comment;
 
 	/**
 	 * Creates an identifier with the specified {@code id} in the specified
@@ -39,8 +42,26 @@ public class Identifier {
 	 * @see Group
 	 */
 	public Identifier(final String id, final Group group) {
+		validate(id);
+
 		this.id = id;
-		this.group = group;
+		this.group = group == null ? new Group() : group;
+	}
+
+	/**
+	 * Validates the id to be used
+	 * 
+	 * @param id
+	 *            the id to be used
+	 */
+	protected void validate(final String id) {
+		if (id == null) {
+			return;
+		} else if (!id.matches(VALIDATION_EXPR)) {
+			throw new IllegalArgumentException("The id '" + id
+					+ "' is invalid considering the validation expression '"
+					+ VALIDATION_EXPR + "'.");
+		}
 	}
 
 	/**
@@ -129,5 +150,24 @@ public class Identifier {
 
 			return new Identifier(id, Group.createFromString(group, separator));
 		}
+	}
+
+	/**
+	 * Get the specified comment for the identifier.
+	 * 
+	 * @return the comment for the identifier
+	 */
+	public String getComment() {
+		return comment;
+	}
+
+	/**
+	 * Sets the comment for the identifier
+	 * 
+	 * @param comment
+	 *            the comment for the identifier
+	 */
+	public void setComment(final String comment) {
+		this.comment = comment;
 	}
 }

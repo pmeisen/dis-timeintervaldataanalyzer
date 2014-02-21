@@ -52,7 +52,7 @@ public class IndexDimensionSlice<I> implements
 			Arrays.sort(recordIds);
 			this.bitmap = EWAHCompressedBitmap.bitmapOf(recordIds);
 		} else {
-			this.bitmap = IIndexDimensionSlice.EMPTY_BITMAP;
+			this.bitmap = EWAHCompressedBitmap.bitmapOf();
 		}
 	}
 

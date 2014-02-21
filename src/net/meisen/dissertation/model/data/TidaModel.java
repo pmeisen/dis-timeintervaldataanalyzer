@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.data;
 
-import java.io.File;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -137,11 +136,6 @@ public class TidaModel {
 
 		// register the entities which might want to persist data
 		persistor.register(new Group("indexes"), this.idx);
-
-		// print the statistic after initialization
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(idx.toStatistic());
-		}
 	}
 
 	/**
@@ -149,6 +143,14 @@ public class TidaModel {
 	 */
 	public void loadData() {
 		this.idx.index(dataModel);
+		
+		// optimize the indexes after the loading
+		this.idx.optimize();
+
+		// print the statistic after data loading
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(idx.toStatistic());
+		}
 	}
 
 	/**

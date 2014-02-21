@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,9 +81,6 @@ public class TidaIndex implements IPersistable {
 			//@formatter:on
 			dataId++;
 		}
-
-		// optimize all the indexes, because the initial data is added
-		optimize();
 	}
 
 	/**
@@ -113,10 +111,8 @@ public class TidaIndex implements IPersistable {
 		while (it.hasNext()) {
 			index(it.next());
 
-			if (LOG.isDebugEnabled()) {
-				if ((++i % 10000 == 0)) {
-					LOG.debug("... added " + i + " records from dataModel...");
-				}
+			if (++i % 10000 == 0 && LOG.isDebugEnabled()) {
+				LOG.debug("... added " + i + " records from dataModel...");
 			}
 		}
 		it.close();
@@ -200,7 +196,7 @@ public class TidaIndex implements IPersistable {
 			final int amountOfSlices = dim.getAmountOfSlices();
 			stat += "  - " + dim.getModelId() + " (" + amountOfSlices + " slices)" + nl;
 			if (amountOfSlices == 0) {
-				break;
+				continue;
 			}
 			
 			// sort the data ascending
@@ -229,18 +225,39 @@ public class TidaIndex implements IPersistable {
 			final int amountOfSlices = part.getAmountOfSlices();
 			stat += "  - " + part.getPartitionId() + " (" + amountOfSlices + " slices)" + nl;
 			if (amountOfSlices == 0) {
-				break;
+				continue;
 			}
 			
 			// sort the data ascending
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
 			sortedSlices.addAll(Arrays.asList(part.getSlices()));
-			Collections.sort(sortedSlices, Collections.reverseOrder());
+			Collections.sort(sortedSlices, new Comparator<IndexDimensionSlice>() {
+				
+				@Override
+				public int compare(IndexDimensionSlice o1,
+						IndexDimensionSlice o2) {
+					
+					if (o2 == null && o1 == null) {
+						return 0;
+					}else if (o2 == null || o1 == null) {
+						return o2==null ? -1 : 1;
+					}  else {
+						return o2.compareTo(o1);
+		            }
+		        }
+			});
+			if (sortedSlices.get(0) == null) {
+				continue;
+			}
 			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
 			
 			// output the data use the threshold defined by STATISTIC_THRESHOLD
 			int i = 0;
 			for (final IndexDimensionSlice<?> slice : sortedSlices) {
+				if (slice == null) {
+					break;
+				}
+				
 				final Object sliceId = slice.getId();
 				final String value = part.getFormattedId(sliceId);
 				
@@ -271,7 +288,7 @@ public class TidaIndex implements IPersistable {
 	@Override
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		this.persistentGroup = group;
-		
+
 		for (final DataRecordIndex idx : indexes.values()) {
 			final String name = idx.getClass().getSimpleName().toLowerCase();
 			final Group indexGroup = group.append(name);
@@ -279,7 +296,7 @@ public class TidaIndex implements IPersistable {
 			persistor.register(indexGroup, idx);
 		}
 	}
-	
+
 	@Override
 	public Group getPersistentGroup() {
 		return persistentGroup;

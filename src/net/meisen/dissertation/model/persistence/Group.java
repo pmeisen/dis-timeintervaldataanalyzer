@@ -13,6 +13,8 @@ import net.meisen.general.genmisc.types.Strings;
  * 
  */
 public class Group {
+	private static final String VALIDATION_EXPR = "[A-Za-z0-9_\\-]+";
+
 	/**
 	 * Default separator used if none is defined.
 	 */
@@ -34,7 +36,32 @@ public class Group {
 	 *            the items which make up the path
 	 */
 	public Group(final String... items) {
+		// validate the selected items
+		validate(this.items);
+
 		this.items = items == null ? new String[0] : items;
+	}
+
+	/**
+	 * Validate the strings used as group.
+	 * 
+	 * @param items
+	 *            the array of strings
+	 */
+	protected void validate(final String[] items) {
+		if (items == null || (items.length == 1 && "".equals(items[0]))) {
+			return;
+		} else {
+			for (final String item : items) {
+				if (!item.matches(VALIDATION_EXPR)) {
+					throw new IllegalArgumentException(
+							"The group '"
+									+ item
+									+ "' is invalid considering the validation expression '"
+									+ VALIDATION_EXPR + "'.");
+				}
+			}
+		}
 	}
 
 	/**

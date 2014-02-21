@@ -127,11 +127,6 @@ public class DoubleDescriptor<I extends Object> extends
 	
 	@Override
 	public String toString() {
-		return getValueStringRepresentative();
-	}
-
-	@Override
-	public String getValueStringRepresentative() {
 		return "" + value;
 	}
 }

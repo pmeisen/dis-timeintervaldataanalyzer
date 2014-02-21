@@ -4,7 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
+import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -360,14 +362,14 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 
 			// if we have a slice persist it
 			final Descriptor<?, ?, I> desc = model.getDescriptor(slice.getId());
-			final String fileName = desc.getValueStringRepresentative()  + "?"
-					+ EXTENSION;
+			final String fileName = UUID.randomUUID().toString() + EXTENSION;
 			final Identifier id = new Identifier(fileName, persistentGroup);
-			final DataOutputStream out = new DataOutputStream(
-					persistor.openForWrite(id));
+			id.setComment(desc.toString());
 
+			final OutputStream out = persistor.openForWrite(id);
 			try {
-				slice.getBitmap().serialize(out);
+				persistor.writeObject(out, desc.getValue());
+				slice.getBitmap().serialize(new DataOutputStream(out));
 			} catch (final IOException e) {
 				throw new ForwardedRuntimeException(PersistorException.class,
 						1003, e, e.getMessage());
@@ -381,17 +383,22 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	public void load(final BasePersistor persistor,
 			final Identifier identifier, final InputStream inputStream) {
 
-		// get the InputStream
-		final DataInputStream in = new DataInputStream(inputStream);
-
-		// get the identifier
-		final String valueString = identifier.getId().replace(EXTENSION, "");
-		final I id = getIdForValue(valueString);
+		// read the value
+		final Object value;
+		try {
+			value = persistor.readObject(inputStream);
+		} catch (final Exception e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
+		
+		// get the identifier for the value
+		final I id = getIdForValue(value);
 
 		// check if the slice is already indexed
 		if (index.getObject(id) != null) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
-					"The identifier '" + id + "' ('" + valueString
+					"The identifier '" + id + "' ('" + value
 							+ "') already exists.");
 		}
 
@@ -400,7 +407,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 
 		// load the slice from the InputStream
 		try {
-			slice.getBitmap().deserialize(in);
+			slice.getBitmap().deserialize(new DataInputStream(inputStream));		
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());

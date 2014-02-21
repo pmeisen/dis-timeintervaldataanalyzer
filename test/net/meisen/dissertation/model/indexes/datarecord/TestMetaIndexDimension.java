@@ -28,6 +28,7 @@ import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -245,8 +246,21 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		loader.unloadAll();
 	}
 
+	/**
+	 * Tests the saving and loading of a {@code MetaIndexDimension}.
+	 * 
+	 * @throws IOException
+	 *             if the temporary file cannot be created
+	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testSaveAndLoad() throws IOException {
+
+		// the testing persistor we use here
+		final Group group = new Group("meta");
+		final ZipPersistor persistor = new ZipPersistor();
+
+		// get the model and the factory we use
 		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
 		final TidaModel model = loader
 				.load("mh_tidaStaticIndexModel",
@@ -263,27 +277,23 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 				.getEntriesByClass(MetaStructureEntry.class);
 		final MetaStructureEntry metaStructure = metaStructures.get(0);
 
-		// get the index
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		final MetaIndexDimension idx = new MetaIndexDimension(metaStructure,
-				descModel, idxFactory);
-		
+		// get the save-index
+		@SuppressWarnings({ "rawtypes" })
+		final MetaIndexDimension saveIdx = new MetaIndexDimension(
+				metaStructure, descModel, idxFactory);
+		assertEquals(0, saveIdx.getAmountOfSlices());
+
 		// add data
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
-			idx.index(i, rec);
+			saveIdx.index(i, rec);
 			i++;
 		}
 		it.close();
-		
-
-		// the testing persistor we use here
-		final Group group = new Group("meta");
-		final ZipPersistor persistor = new ZipPersistor();
-		persistor.register(group, idx);
+		assertTrue(saveIdx.getAmountOfSlices() > 0);
 
 		// create a temporary file and save it
 		final String prefixFile = UUID.randomUUID().toString();
@@ -291,11 +301,35 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		assertTrue(tmpFile.length() == 0);
 
 		/*
-		 * save the metadata, the save method of fixedIdx should be triggered
-		 * via the registration
+		 * save the metadata, the save method of saveIdx should be triggered via
+		 * the registration
 		 */
+		persistor.register(group, saveIdx);
 		persistor.save(tmpFile.toString());
+		persistor.unregister(group);
+
+		// get the load-index
+		@SuppressWarnings({ "rawtypes" })
+		final MetaIndexDimension loadIdx = new MetaIndexDimension(
+				metaStructure, descModel, idxFactory);
+		assertEquals(0, loadIdx.getAmountOfSlices());
+
+		/*
+		 * load the metadata from the saved file
+		 */
+		persistor.register(group, loadIdx);
+		persistor.load(tmpFile.toString());
+		persistor.unregister(group);
+
+		// check the loaded data
+		assertEquals(saveIdx.getAmountOfSlices(), loadIdx.getAmountOfSlices());
+		for (final IndexDimensionSlice<?> slice : loadIdx.getSlices()) {
+			assertEquals(slice.getBitmap(), saveIdx.getSliceById(slice.getId())
+					.getBitmap());
+		}
 
 		loader.unloadAll();
+		
+		assertTrue(tmpFile.delete());
 	}
 }

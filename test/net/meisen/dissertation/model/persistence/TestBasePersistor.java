@@ -2,9 +2,17 @@ package net.meisen.dissertation.model.persistence;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.UUID;
+
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
@@ -143,5 +151,48 @@ public class TestBasePersistor extends ExceptionBasedTest {
 		// execute the method
 		persistor.register(group, new MockPersistable());
 		persistor.register(group, new MockPersistable());
+	}
+
+	/**
+	 * Tests the implementation of reading and writing values.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be created or accessed
+	 * @throws ClassNotFoundException
+	 *             if a object cannot be resolved
+	 */
+	@Test
+	public void testReadWriteStuff() throws IOException, ClassNotFoundException {
+		final File tmpFile = File.createTempFile(UUID.randomUUID().toString(),
+				".test");
+
+		final FileOutputStream fos = new FileOutputStream(tmpFile);
+
+		// write some values
+		persistor.writeByte(fos, (byte) 2);
+		persistor.writeInt(fos, 2000);
+		persistor.writeLong(fos, Long.MAX_VALUE);
+		persistor.writeString(fos, "This is a δόφί String");
+		persistor.writeObject(fos, new String("Hi there δόφί"));
+		persistor.writeObject(fos, null);
+		persistor.writeObject(fos, new String("I'm another"));
+		persistor.writeInt(fos, Integer.MIN_VALUE);
+
+		fos.flush();
+		fos.close();
+
+		final FileInputStream fis = new FileInputStream(tmpFile);
+		assertEquals((byte) 2, persistor.readByte(fis));
+		assertEquals(2000, persistor.readInt(fis));
+		assertEquals(Long.MAX_VALUE, persistor.readLong(fis));
+		assertEquals("This is a δόφί String", persistor.readString(fis));
+		assertEquals("Hi there δόφί", persistor.readObject(fis));
+		assertNull(persistor.readObject(fis));
+		assertEquals("I'm another", persistor.readObject(fis));
+		assertEquals(Integer.MIN_VALUE, persistor.readInt(fis));
+
+		fis.close();
+
+		assertTrue(tmpFile.delete());
 	}
 }

@@ -4,7 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
+import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -19,6 +21,7 @@ import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.genmisc.types.Objects;
 
 import org.slf4j.Logger;
@@ -363,13 +366,15 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 			}
 
 			// if we have a slice persist it
-			final String fileName = slice.getId().toString() + EXTENSION;
+			final String fileName = UUID.randomUUID().toString() + EXTENSION;
 			final Identifier id = new Identifier(fileName, persistentGroup);
-			final DataOutputStream out = new DataOutputStream(
-					persistor.openForWrite(id));
+			id.setComment(mapper.demap(
+					Numbers.castToLong((Number) slice.getId())).toString());
+			final OutputStream out = persistor.openForWrite(id);
 
 			try {
-				slice.getBitmap().serialize(out);
+				persistor.writeObject(out, slice.getId());
+				slice.getBitmap().serialize(new DataOutputStream(out));
 			} catch (final IOException e) {
 				throw new ForwardedRuntimeException(PersistorException.class,
 						1003, e, e.getMessage());
@@ -385,14 +390,10 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 			throws ForwardedRuntimeException {
 
 		// get the InputStream
-		final DataInputStream in = new DataInputStream(inputStream);
-
-		// get the identifier
-		final String idString = identifier.getId().replace(EXTENSION, "");
-		final Long id;
+		final Object id;
 		try {
-			id = new Long(idString);
-		} catch (final NumberFormatException e) {
+			id = persistor.readObject(inputStream);
+		} catch (final Exception e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());
 		}
@@ -401,14 +402,17 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 		if (getIndex().getObject(id) != null) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					"The identifier '" + id + "' already exists.");
+		} else if (id instanceof Number == false) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					"The identifier '" + id + "' is not a number.");
 		}
 
 		// create the slice
-		final IndexDimensionSlice<?> slice = createSlice(id);
+		final IndexDimensionSlice<?> slice = createSlice((Number) id);
 
 		// load the slice from the InputStream
 		try {
-			slice.getBitmap().deserialize(in);
+			slice.getBitmap().deserialize(new DataInputStream(inputStream));
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());

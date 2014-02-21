@@ -309,8 +309,8 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
 
 		// create a saver instance
-		final IntervalIndexPartition idxPart = loadAndIndex(dbName, dbPath,
-				modelPath);
+		final ShortIntervalIndexPartition idxPart = (ShortIntervalIndexPartition) loadAndIndex(
+				dbName, dbPath, modelPath);
 		assertEquals(676, count(idxPart.getSlices()));
 		persistor.register(group, idxPart);
 
@@ -322,14 +322,26 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		assertEquals(idxPart, persistor.unregister(group));
 
 		// create a loader instance
-		final IntervalIndexPartition crtPart = loadAndCreate(dbName, dbPath,
-				modelPath);
+		final ShortIntervalIndexPartition crtPart = (ShortIntervalIndexPartition) loadAndCreate(
+				dbName, dbPath, modelPath);
 		assertEquals(0, count(crtPart.getSlices()));
 		persistor.register(group, crtPart);
 
 		// load the stuff
 		persistor.load(tmpFile.toString());
 		assertEquals(676, count(crtPart.getSlices()));
+
+		// test all the values
+		for (final IndexDimensionSlice<?> slice : idxPart.getSlices()) {
+			if (slice == null) {
+				continue;
+			}
+
+			assertEquals(slice.getBitmap(),
+					crtPart.getSliceById((Short) slice.getId()).getBitmap());
+		}
+
+		assertTrue(tmpFile.delete());
 	}
 
 	/**

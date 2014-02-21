@@ -1,7 +1,9 @@
 package net.meisen.dissertation.model.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import net.meisen.dissertation.config.TidaConfig;
@@ -47,21 +49,32 @@ public class TestTidaModel extends DbBasedTest {
 		model.initialize();
 		model.loadData();
 
+		final File tmpFile = File.createTempFile("pioneer", ".zip");
+		model.save(tmpFile.toString());
+
+		assertTrue(tmpFile.delete());
+
 		loader.unloadAll();
 	}
 
-//	@Test
-//	public void testLoadTasks() throws IOException {
-//
-//		// start the needed Database
-//		getDb("tidaGhTasks",
-//				"/net/meisen/dissertation/impl/hsqldbs/tidaGhTasks.zip");
-//
-//		final TidaModel model = loader.load("mh_tidaGhTasks",
-//				"/net/meisen/dissertation/model/data/tidaModelGhTasks.xml");
-//
-//		model.initialize();
-//
-//		loader.unloadAll();
-//	}
+	@Test
+	public void testLoadTasks() throws IOException {
+
+		// start the needed Database
+		getDb("tidaGhTasks",
+				"/net/meisen/dissertation/impl/hsqldbs/tidaGhTasks.zip");
+
+		final TidaModel model = loader.load("mh_tidaGhTasks",
+				"/net/meisen/dissertation/model/data/tidaModelGhTasks.xml");
+
+		model.initialize();
+		model.loadData();
+
+		final File tmpFile = File.createTempFile("tasks", ".zip");
+		model.save(tmpFile.toString());
+
+		assertTrue(tmpFile.delete());
+
+		loader.unloadAll();
+	}
 }

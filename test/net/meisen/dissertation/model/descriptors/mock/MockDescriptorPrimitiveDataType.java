@@ -71,11 +71,6 @@ public class MockDescriptorPrimitiveDataType<D>
 
 	@Override
 	public String toString() {
-		return getValueStringRepresentative();
-	}
-
-	@Override
-	public String getValueStringRepresentative() {
 		return "" + getValue();
 	}
 }

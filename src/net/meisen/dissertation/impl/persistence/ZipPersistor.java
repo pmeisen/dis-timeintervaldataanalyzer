@@ -70,6 +70,12 @@ public class ZipPersistor extends BasePersistor {
 		}
 
 		// close the handler
+		try {
+			this.zipOutputStream.flush();
+		} catch (final IOException e) {
+			exceptionRegistry.throwException(ZipPersistorException.class, 1014,
+					e);
+		}
 		Streams.closeIO(this.zipOutputStream);
 		Streams.closeIO(fos);
 
@@ -88,13 +94,20 @@ public class ZipPersistor extends BasePersistor {
 
 		// create the entry and return the OutputStream to write to
 		final ZipEntry zipEntry = new ZipEntry(identifier.toString("/"));
+
+		// set the comment if one is defined
+		if (identifier.getComment() != null) {
+			zipEntry.setComment(identifier.getComment());
+		}
+
+		// add the entry to the archive
 		try {
 			this.zipOutputStream.putNextEntry(zipEntry);
 		} catch (final IOException exception) {
 			exceptionRegistry.throwException(ZipPersistorException.class, 1007,
 					identifier);
 		}
-		
+
 		return this.zipOutputStream;
 	}
 
@@ -149,8 +162,8 @@ public class ZipPersistor extends BasePersistor {
 			final IPersistable persistable = getPersistable(identifier
 					.getGroup());
 			if (persistable == null) {
-				// TODO throw exception
-				System.out.println("ERROR");
+				exceptionRegistry.throwException(ZipPersistorException.class,
+						1015, identifier.getGroup());
 			}
 			persistable.load(this, identifier, inputStream);
 
