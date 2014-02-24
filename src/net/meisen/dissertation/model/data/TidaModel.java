@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.data;
 
+import java.io.File;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -143,7 +144,7 @@ public class TidaModel {
 	 */
 	public void loadData() {
 		this.idx.index(dataModel);
-		
+
 		// optimize the indexes after the loading
 		this.idx.optimize();
 
@@ -275,6 +276,14 @@ public class TidaModel {
 		setIntervalDataHandling(IntervalDataHandling.find(handling));
 	}
 
+	public void save(final File location) {
+		if (location == null) {
+			// TODO add exception
+		}
+
+		save(location.toString());
+	}
+
 	public void save(final String location) {
 		if (!isInitialized()) {
 			// TODO add exception not initialized
@@ -291,5 +300,26 @@ public class TidaModel {
 	 */
 	public BasePersistor getPersistor() {
 		return persistor;
+	}
+
+	public void load(final File location) {
+		if (location == null) {
+			// TODO add exception
+		}
+
+		load(location.toString());
+	}
+
+	public void load(final String location) {
+		if (!isInitialized()) {
+			// TODO add exception not initialized
+		}
+
+		// use the persistor to load everything
+		persistor.load(location);
+	}
+	
+	protected TidaIndex getIndex() {
+		return idx;
 	}
 }

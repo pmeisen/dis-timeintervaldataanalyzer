@@ -1,6 +1,8 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -17,9 +20,10 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
-import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +36,9 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class TidaIndex implements IPersistable {
+	private final static String EXTENSION = ".config";
 	private final static int STATISTIC_THRESHOLD = 30;
+
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
 	private final Map<Class<? extends DataRecordIndex>, DataRecordIndex> indexes;
@@ -239,9 +245,9 @@ public class TidaIndex implements IPersistable {
 					
 					if (o2 == null && o1 == null) {
 						return 0;
-					}else if (o2 == null || o1 == null) {
+					} else if (o2 == null || o1 == null) {
 						return o2==null ? -1 : 1;
-					}  else {
+					} else {
 						return o2.compareTo(o1);
 		            }
 		        }
@@ -274,15 +280,42 @@ public class TidaIndex implements IPersistable {
 	}
 
 	@Override
-	public void save(final BasePersistor persistor) {
-		// nothing to save, the indexes are added via registration
+	public void save(final BasePersistor persistor)
+			throws ForwardedRuntimeException {
+
+		// generate an identifier
+		final String id = "general" + EXTENSION;
+		final Identifier identifier = new Identifier(id, persistentGroup);
+		identifier.setComment("General settings of the '"
+				+ getClass().getSimpleName() + "'");
+
+		final OutputStream out = persistor.openForWrite(identifier);
+		try {
+			persistor.writeInt(out, dataId);
+		} catch (final IOException e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1003,
+					e, e.getMessage());
+		}
+		persistor.close(identifier);
 	}
 
 	@Override
 	public void load(final BasePersistor persistor,
-			final Identifier identifier, final InputStream inputStream) {
-		throw new IllegalStateException("The '" + getClass().getSimpleName()
-				+ "' does not save anything which should be loaded.");
+			final Identifier identifier, final InputStream inputStream)
+			throws ForwardedRuntimeException {
+
+		if (dataId > 0 && LOG.isWarnEnabled()) {
+			LOG.debug("Loading an already filled TidaIndex (dataId == "
+					+ dataId + ").");
+		}
+
+		try {
+			dataId = persistor.readInt(inputStream);
+		} catch (final Exception e) {
+			// TODO add the exception
+			// throw new ForwardedRuntimeException(TidaIndexException.class,
+			// ????, e);
+		}
 	}
 
 	@Override
@@ -300,5 +333,9 @@ public class TidaIndex implements IPersistable {
 	@Override
 	public Group getPersistentGroup() {
 		return persistentGroup;
+	}
+
+	public int getNextDataId() {
+		return dataId;
 	}
 }

@@ -366,11 +366,11 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 			}
 
 			// if we have a slice persist it
-			final String fileName = UUID.randomUUID().toString() + EXTENSION;
-			final Identifier id = new Identifier(fileName, persistentGroup);
-			id.setComment(mapper.demap(
+			final String id = UUID.randomUUID().toString() + EXTENSION;
+			final Identifier identifier = new Identifier(id, persistentGroup);
+			identifier.setComment(mapper.demap(
 					Numbers.castToLong((Number) slice.getId())).toString());
-			final OutputStream out = persistor.openForWrite(id);
+			final OutputStream out = persistor.openForWrite(identifier);
 
 			try {
 				persistor.writeObject(out, slice.getId());
@@ -380,7 +380,7 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 						1003, e, e.getMessage());
 			}
 
-			persistor.close(id);
+			persistor.close(identifier);
 		}
 	}
 

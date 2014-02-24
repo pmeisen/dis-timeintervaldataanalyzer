@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -61,23 +62,42 @@ public class ZipPersistor extends BasePersistor {
 
 		// create the ZipOutputStream
 		this.zipOutputStream = new ZipOutputStream(fos);
-		for (final IPersistable persistable : getPersistables().values()) {
-			try {
+
+		final Collection<IPersistable> persistables = getPersistables()
+				.values();
+		try {
+			for (final IPersistable persistable : persistables) {
 				persistable.save(this);
-			} catch (final ForwardedRuntimeException e) {
-				exceptionRegistry.throwRuntimeException(e);
 			}
+		} catch (final ForwardedRuntimeException e) {
+
+			// cleanup without any further exceptions
+			Streams.closeIO(this.zipOutputStream);
+			Streams.closeIO(fos);
+
+			// throw the forwarded exception
+			exceptionRegistry.throwRuntimeException(e);
+		} catch (final RuntimeException e) {
+
+			// cleanup without any further exceptions
+			Streams.closeIO(this.zipOutputStream);
+			Streams.closeIO(fos);
+
+			// throw the exception
+			throw e;
 		}
 
-		// close the handler
+		// try to close the handler fine and handle the exception
 		try {
-			this.zipOutputStream.flush();
+			if (persistables.size() > 0) {
+				this.zipOutputStream.flush();
+				this.zipOutputStream.close();
+			}
+			fos.close();
 		} catch (final IOException e) {
 			exceptionRegistry.throwException(ZipPersistorException.class, 1014,
 					e);
 		}
-		Streams.closeIO(this.zipOutputStream);
-		Streams.closeIO(fos);
 
 		// make sure we are done with the current one
 		this.zipOutputStream = null;
@@ -156,17 +176,36 @@ public class ZipPersistor extends BasePersistor {
 						1013, e, Files.getCanonicalPath(file), entry.getName());
 			}
 
-			// call the persistable to handle the entry
-			final Identifier identifier = Identifier.createFromString(
-					entry.getName(), "/");
-			final IPersistable persistable = getPersistable(identifier
-					.getGroup());
-			if (persistable == null) {
-				exceptionRegistry.throwException(ZipPersistorException.class,
-						1015, identifier.getGroup());
-			}
-			persistable.load(this, identifier, inputStream);
+			try {
 
+				// call the persistable to handle the entry
+				final Identifier identifier = Identifier.createFromString(
+						entry.getName(), "/");
+				final IPersistable persistable = getPersistable(identifier
+						.getGroup());
+				if (persistable == null) {
+					exceptionRegistry.throwException(
+							ZipPersistorException.class, 1015,
+							identifier.getGroup());
+				}
+				persistable.load(this, identifier, inputStream);
+			} catch (final ForwardedRuntimeException e) {
+
+				// close the stream ignore any exception thrown there
+				Streams.closeIO(inputStream);
+
+				// throw the exception
+				exceptionRegistry.throwRuntimeException(e);
+			} catch (final RuntimeException e) {
+
+				// close the stream ignore any exception thrown there
+				Streams.closeIO(inputStream);
+
+				// throw the real exception again
+				throw e;
+			}
+
+			// if we came so far close the stream with an exception handling
 			try {
 				inputStream.close();
 			} catch (final IOException e) {
