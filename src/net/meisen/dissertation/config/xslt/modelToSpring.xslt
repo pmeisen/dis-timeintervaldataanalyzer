@@ -53,6 +53,24 @@
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularitiesFactory()" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="metahandling">
+      <xsl:choose>
+        <xsl:when test="mns:data/@metahandling"><xsl:value-of select="mns:data/@metahandling"/></xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="intervalhandling">
+      <xsl:choose>
+        <xsl:when test="mns:data/@intervalhandling"><xsl:value-of select="mns:data/@intervalhandling"/></xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
+    <xsl:variable name="offlinemode">
+      <xsl:choose>
+        <xsl:when test="@offlinemode"><xsl:value-of select="@offlinemode"/></xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
   
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
@@ -185,7 +203,9 @@
       </xsl:for-each>
       
       <!-- create the MetaDataModel -->
-      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel" />
+      <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel">
+      	<property name="offlineModeByString" value="{$offlinemode}" />
+      </bean>
       
       <!-- add the descriptorModels to the metaDataModel -->
       <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
@@ -312,26 +332,14 @@
         </bean>
       </xsl:for-each>
       
-      <!-- create the tidaModel -->
-      <xsl:variable name="metahandling">
-        <xsl:choose>
-          <xsl:when test="mns:data/@metahandling"><xsl:value-of select="mns:data/@metahandling"/></xsl:when>
-          <xsl:otherwise></xsl:otherwise>
-        </xsl:choose>
-      </xsl:variable>
-      <xsl:variable name="intervalhandling">
-        <xsl:choose>
-          <xsl:when test="mns:data/@intervalhandling"><xsl:value-of select="mns:data/@intervalhandling"/></xsl:when>
-          <xsl:otherwise></xsl:otherwise>
-        </xsl:choose>
-      </xsl:variable>
-      
+      <!-- create the tidaModel -->      
       <bean id="{$tidaModelId}" class="net.meisen.dissertation.model.data.TidaModel">
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
         
         <property name="metaDataHandlingByString" value="{$metahandling}" />
         <property name="intervalDataHandlingByString" value="{$intervalhandling}" />
+      	<property name="offlineModeByString" value="{$offlinemode}" />
       </bean>
     </beans>
   </xsl:template>
@@ -367,6 +375,12 @@
         <xsl:otherwise><xsl:value-of select="mdef:getDefaultIdFactory()"/></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
+    <xsl:variable name="offlinemode">
+      <xsl:choose>
+        <xsl:when test="//@offlinemode"><xsl:value-of select="//@offlinemode"/></xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     
     <bean id="descriptormodel-{$id}" class="net.meisen.dissertation.model.descriptors.DescriptorModel">
       <constructor-arg type="java.lang.String" value="{$id}" />
@@ -376,6 +390,7 @@
       
       <property name="supportsNullDescriptor" value="{$supportsNullDescriptor}" />
       <property name="failOnDuplicates" value="{$failOnDuplicates}" />
+      <property name="offlineModeByString" value="{$offlinemode}" />
     </bean>
   </xsl:template>
   

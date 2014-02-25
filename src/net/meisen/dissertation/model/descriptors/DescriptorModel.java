@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
@@ -14,8 +15,11 @@ import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -31,6 +35,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 @SuppressWarnings("rawtypes")
 public class DescriptorModel<I extends Object> {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(DescriptorModel.class);
+
 	private final String id;
 	private final String name;
 	private final Class<? extends Descriptor> descriptorClass;
@@ -49,6 +56,7 @@ public class DescriptorModel<I extends Object> {
 	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
 
 	private IMultipleKeySupport descriptors;
+	private OfflineMode offlineMode;
 
 	/**
 	 * Constructor to define the {@code id} and the {@code dataType} of the
@@ -117,6 +125,9 @@ public class DescriptorModel<I extends Object> {
 		this.descriptorClass = descriptorClass;
 		this.idsFactory = idsFactory;
 		this.baseIndexedCollectionFactory = baseIndexedCollectionFactory;
+
+		// set default offline mode
+		setOfflineMode(null);
 	}
 
 	/**
@@ -211,10 +222,15 @@ public class DescriptorModel<I extends Object> {
 			// retrieve the data
 			loadedData = loader.transform();
 		} catch (final RuntimeException e) {
-			
-			
-			
-			throw e;
+			if (OfflineMode.FALSE.equals(getOfflineMode())) {
+				throw e;
+			} else {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(
+							"Could not load the descriptors of the DescriptorModel '"
+									+ getId() + "'.", e);
+				}
+			}
 		} finally {
 			if (loader != null) {
 				try {
@@ -570,5 +586,42 @@ public class DescriptorModel<I extends Object> {
 				return constructor;
 			}
 		}
+	}
+
+	/**
+	 * Gets the {@code OfflineMode} defined for the {@code DescriptorModel}.
+	 * 
+	 * @return the {@code OfflineMode}
+	 * 
+	 * @see OfflineMode
+	 */
+	public OfflineMode getOfflineMode() {
+		return offlineMode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode} to be used by the {@code DescriptorModel}.
+	 * 
+	 * @param offlineMode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see OfflineMode
+	 */
+	public void setOfflineMode(final OfflineMode offlineMode) {
+		this.offlineMode = offlineMode == null ? OfflineMode.find(null)
+				: offlineMode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineModeByString(final String mode) {
+		setOfflineMode(OfflineMode.find(mode));
 	}
 }

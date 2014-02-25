@@ -244,6 +244,30 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	}
 
 	/**
+	 * Tests the setting and getting of the {@code OfflineMode}.
+	 */
+	@Test
+	public void testSetAndGetOfOfflineMode() {
+		final MetaDataModel model = createTestModel();
+
+		// check the default
+		assertEquals(OfflineMode.find(null), model.getOfflineMode());
+		for (final DescriptorModel<?> m : model.getDescriptorModels()) {
+			assertEquals(OfflineMode.find(null), m.getOfflineMode());
+		}
+
+		// check the other values
+		for (final OfflineMode mode : OfflineMode.values()) {
+			model.setOfflineMode(mode);
+
+			assertEquals(mode, model.getOfflineMode());
+			for (final DescriptorModel<?> m : model.getDescriptorModels()) {
+				assertEquals(mode, m.getOfflineMode());
+			}
+		}
+	}
+
+	/**
 	 * Tests the creation of a {@code MetaIndexDimension} using a
 	 * {@code MetaStructureEntry} with an invalid position.
 	 */

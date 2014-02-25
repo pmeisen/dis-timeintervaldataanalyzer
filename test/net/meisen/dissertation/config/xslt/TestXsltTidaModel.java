@@ -41,6 +41,7 @@ import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -212,6 +213,27 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertNotNull(model.getDescriptor("D2", 1));
 		assertNotNull(model.getDescriptor("D2", 2));
 		assertNotNull(model.getDescriptor("D2", 3));
+	}
+
+	/**
+	 * Tests the reading of the {@code OfflineMode}.
+	 */
+	@Test
+	public void testOfflineMode() {
+		final TidaModel model = getTidaModel("/net/meisen/dissertation/config/xslt/configOfflineMode.xml");
+
+		assertEquals(OfflineMode.TRUE, model.getOfflineMode());
+
+		final MetaDataModel metaModel = model.getMetaDataModel();
+		assertNotNull(metaModel);
+		assertEquals(OfflineMode.TRUE, metaModel.getOfflineMode());
+
+		final Collection<DescriptorModel<?>> descModels = metaModel
+				.getDescriptorModels();
+		assertEquals(2, descModels.size());
+		for (final DescriptorModel<?> descModel : descModels) {
+			assertEquals(OfflineMode.TRUE, descModel.getOfflineMode());
+		}
 	}
 
 	/**

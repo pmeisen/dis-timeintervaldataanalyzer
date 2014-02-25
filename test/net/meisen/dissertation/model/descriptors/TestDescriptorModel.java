@@ -23,6 +23,7 @@ import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.MultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
+import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.general.sbconfigurator.config.DefaultConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -69,6 +70,26 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 				GeneralDescriptor.class, new IntegerIdsFactory());
 		assertEquals("anotherId", model.getId());
 		assertEquals("anotherName", model.getName());
+	}
+
+	/**
+	 * Test the setting and getting of the {@code OfflineMode}.
+	 */
+	@Test
+	public void testOfflineMode() {
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"id", GeneralDescriptor.class, new IntegerIdsFactory());
+
+		// check the default
+		assertEquals(OfflineMode.find(null), model.getOfflineMode());
+
+		// check setting
+		model.setOfflineMode(OfflineMode.FALSE);
+		assertEquals(OfflineMode.FALSE, model.getOfflineMode());
+		model.setOfflineMode(OfflineMode.AUTO);
+		assertEquals(OfflineMode.AUTO, model.getOfflineMode());
+		model.setOfflineMode(OfflineMode.TRUE);
+		assertEquals(OfflineMode.TRUE, model.getOfflineMode());
 	}
 
 	/**

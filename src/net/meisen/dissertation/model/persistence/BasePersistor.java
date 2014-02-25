@@ -9,7 +9,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -41,12 +43,86 @@ public abstract class BasePersistor {
 	protected IExceptionRegistry exceptionRegistry;
 
 	private final Map<Group, IPersistable> persistables;
+	private final Set<Identifier> excludedIdentifiers;
+	private final Set<Identifier> includedIdentifiers;
 
 	/**
 	 * Default constructor
 	 */
 	public BasePersistor() {
 		persistables = new HashMap<Group, IPersistable>();
+		includedIdentifiers = new HashSet<Identifier>();
+		excludedIdentifiers = new HashSet<Identifier>();
+	}
+
+	/**
+	 * Removes all the currently excluded identifiers and sets the passed
+	 * {@code identifiers} as ignored.
+	 * 
+	 * @param identifiers
+	 *            the identifiers to be excluded
+	 */
+	public void setExcludedIdentifier(final Identifier... identifiers) {
+		clearExcludedIdentifiers();
+		addExcludedIdentifier(identifiers);
+	}
+
+	/**
+	 * Adds the specified {@code identifiers} to the once to be excluded.
+	 * 
+	 * @param identifiers
+	 *            the {@code Identifier} instances to be excluded
+	 */
+	public void addExcludedIdentifier(final Identifier... identifiers) {
+		for (final Identifier identifier : identifiers) {
+			excludedIdentifiers.add(identifier);
+		}
+	}
+
+	/**
+	 * Removes all the identifiers to be excluded.
+	 */
+	public void clearExcludedIdentifiers() {
+		excludedIdentifiers.clear();
+	}
+
+	/**
+	 * Clears the included and excluded identifiers.
+	 */
+	public void clearAllIdentifiers() {
+		clearExcludedIdentifiers();
+		clearIncludedIdentifiers();
+	}
+
+	/**
+	 * Removes all the currently included identifiers and sets the passed
+	 * {@code identifiers} as included.
+	 * 
+	 * @param identifiers
+	 *            the identifiers to be included
+	 */
+	public void setIncludedIdentifier(final Identifier... identifiers) {
+		clearIncludedIdentifiers();
+		addIncludedIdentifier(identifiers);
+	}
+
+	/**
+	 * Adds the specified {@code identifiers} to the once to be included.
+	 * 
+	 * @param identifiers
+	 *            the {@code Identifier} instances to be included
+	 */
+	public void addIncludedIdentifier(final Identifier... identifiers) {
+		for (final Identifier identifier : identifiers) {
+			includedIdentifiers.add(identifier);
+		}
+	}
+
+	/**
+	 * Removes all the currently included identifiers.
+	 */
+	public void clearIncludedIdentifiers() {
+		includedIdentifiers.clear();
 	}
 
 	/**
@@ -178,6 +254,18 @@ public abstract class BasePersistor {
 	 */
 	protected void read(final Identifier identifier, final InputStream is,
 			final MetaData... additionalData) throws ForwardedRuntimeException {
+
+		if (includedIdentifiers.contains(identifier)) {
+			// do nothing it will be included
+		} else if (includedIdentifiers.size() > 0) {
+
+			// the identifiers are limited
+			return;
+		} else if (excludedIdentifiers.contains(identifier)) {
+
+			// the identifier is excluded
+			return;
+		}
 
 		// call the persistable to handle the entry
 		final IPersistable persistable = getPersistable(identifier.getGroup());

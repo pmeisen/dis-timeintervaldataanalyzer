@@ -13,9 +13,7 @@ import java.util.Map;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.IPersistable;
-import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
@@ -95,37 +93,6 @@ public class TidaIndex implements IPersistable {
 	public void optimize() {
 		for (final DataRecordIndex idx : indexes.values()) {
 			idx.optimize();
-		}
-	}
-
-	/**
-	 * Indexes the data available within the {@code DataModel}.
-	 * 
-	 * @param dataModel
-	 *            the {@code DataModel} to retrieve data from
-	 */
-	public void index(final DataModel dataModel) {
-
-		// log the start
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Start adding of records from dataModel...");
-		}
-
-		// check the data and add it to the initialize index
-		final IClosableIterator<IDataRecord> it = dataModel.iterator();
-		int i = 0;
-		while (it.hasNext()) {
-			index(it.next());
-
-			if (++i % 10000 == 0 && LOG.isDebugEnabled()) {
-				LOG.debug("... added " + i + " records from dataModel...");
-			}
-		}
-		it.close();
-
-		// log the finalization
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Finished adding of " + i + " records from dataModel.");
 		}
 	}
 

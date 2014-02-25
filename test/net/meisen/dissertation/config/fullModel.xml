@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
+<!-- OfflineMode (i.e. what should happen if a dataretriever is not available)
+     is optional and can be one of the following values (case-insensitive):
+      + true, y, yes
+      + false, n, no
+      + auto
+  -->
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
@@ -10,6 +16,8 @@
                            http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
                            http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd
                            http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
+       
+       offlinemode="false"
        
        id="myModel" name="My wonderful Model">
 

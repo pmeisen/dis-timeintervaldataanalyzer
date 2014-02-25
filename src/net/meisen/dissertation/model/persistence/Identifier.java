@@ -170,4 +170,9 @@ public class Identifier {
 	public void setComment(final String comment) {
 		this.comment = comment;
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.generateHashCode(3, 17, new Object[] { id, group });
+	}
 }

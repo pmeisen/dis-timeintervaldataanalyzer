@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.IPersistable;
+import net.meisen.dissertation.model.datasets.IClosableIterator;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -56,6 +58,7 @@ public class TidaModel implements IPersistable {
 
 	private MetaDataHandling metaDataHandling;
 	private IntervalDataHandling intervalDataHandling;
+	private OfflineMode offlineMode;
 
 	private Group persistentGroup = null;
 
@@ -97,8 +100,9 @@ public class TidaModel implements IPersistable {
 		this.name = name == null ? id : name;
 
 		// set the default value
-		setMetaDataHandling((MetaDataHandling) null);
-		setIntervalDataHandling((IntervalDataHandling) null);
+		setMetaDataHandling(null);
+		setIntervalDataHandling(null);
+		setOfflineMode(null);
 	}
 
 	/**
@@ -141,7 +145,45 @@ public class TidaModel implements IPersistable {
 	 * Loads all the data specified by the {@code DataModel}.
 	 */
 	public void loadData() {
-		this.idx.index(dataModel);
+
+		// log the start
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Start adding of records from dataModel...");
+		}
+
+		// check the data and add it to the initialize index
+		final IClosableIterator<IDataRecord> it = dataModel.iterator();
+		int i = 0;
+
+		try {
+			while (it.hasNext()) {
+				this.idx.index(it.next());
+
+				if (++i % 10000 == 0 && LOG.isDebugEnabled()) {
+					LOG.debug("... added " + i + " records from dataModel...");
+				}
+			}
+		} catch (final RuntimeException e) {
+
+			/*
+			 * if the OfflineMode isn't enabled or if it's set to auto throw the
+			 * exception, otherwise we just log it
+			 */
+			if (OfflineMode.TRUE.equals(getOfflineMode())) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Failed to add data.", e);
+				}
+			} else {
+				throw e;
+			}
+		} finally {
+			it.close();
+		}
+
+		// log the finalization
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Finished adding of " + i + " records from dataModel.");
+		}
 
 		// optimize the indexes after the loading
 		this.idx.optimize();
@@ -231,6 +273,48 @@ public class TidaModel implements IPersistable {
 	}
 
 	/**
+	 * Gets the current setting of the {@code OfflineMode}.
+	 * 
+	 * @return the settings of the {@code OfflineMode}
+	 * 
+	 * @see OfflineMode
+	 */
+	public OfflineMode getOfflineMode() {
+		return offlineMode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineMode(final OfflineMode mode) {
+		this.offlineMode = mode == null ? OfflineMode.find(null) : mode;
+
+		final MetaDataModel metaDataModel = getMetaDataModel();
+		if (metaDataModel != null) {
+			metaDataModel.setOfflineMode(this.offlineMode);
+		}
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineModeByString(final String mode) {
+		setOfflineMode(OfflineMode.find(mode));
+	}
+
+	/**
 	 * Gets the handling of the interval-data, i.e. if {@code null} values are
 	 * found.
 	 * 
@@ -282,7 +366,7 @@ public class TidaModel implements IPersistable {
 	protected TidaIndex getIndex() {
 		return idx;
 	}
-	
+
 	public int getNextDataId() {
 		return idx.getNextDataId();
 	}
@@ -304,7 +388,7 @@ public class TidaModel implements IPersistable {
 	@Override
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		this.persistentGroup = group;
-		
+
 		persistor.register(group.append("indexes"), this.idx);
 	}
 

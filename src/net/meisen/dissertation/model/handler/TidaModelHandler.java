@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +17,7 @@ import net.meisen.dissertation.model.persistence.ILocation;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.resources.Xml;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
@@ -25,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 /**
  * A {@code TidaModelHandler} is an instance used to load {@code TidaModel}
@@ -36,6 +40,61 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class TidaModelHandler {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TidaModelHandler.class);
+
+	/**
+	 * Class to keep track of changes on an xml document.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	protected class ManipulatedXml {
+		private byte[] manipulatedXml;
+		private Map<String, String> oldValues = new HashMap<String, String>();
+
+		/**
+		 * Adds the old value of a changed value.
+		 * 
+		 * @param name
+		 *            the name of the changed value
+		 * @param oldValue
+		 *            the old value
+		 */
+		public void addValue(final String name, final String oldValue) {
+			oldValues.put(name, oldValue);
+		}
+
+		/**
+		 * Gets the old value of the specified {@code name}.
+		 * 
+		 * @param name
+		 *            the name to get the old value for
+		 * 
+		 * @return the old value or {@code null} if no old value was set or
+		 *         known
+		 */
+		public String getOldValue(final String name) {
+			return oldValues.get(name);
+		}
+
+		/**
+		 * Gets the manipulated xml.
+		 * 
+		 * @return the manipulated xml
+		 */
+		public byte[] getXml() {
+			return manipulatedXml;
+		}
+
+		/**
+		 * Sets the manipulated xml.
+		 * 
+		 * @param manipulatedXml
+		 *            the manipulated xml
+		 */
+		public void setManipulatedXml(final byte[] manipulatedXml) {
+			this.manipulatedXml = manipulatedXml;
+		}
+	}
 
 	/**
 	 * The {@code ExceptionRegistry} used to handle exceptions.
@@ -203,35 +262,81 @@ public class TidaModelHandler {
 		return model;
 	}
 
+	/**
+	 * Loads a {@code TidaModel} using a persisted {@code location}.
+	 * 
+	 * @param id
+	 *            the id to keep track of the {@code ModuleHolder}
+	 * @param location
+	 *            the {@code Location} to load the {@code TidaModel} from
+	 * 
+	 * @return the loaded {@code TidaModel}
+	 * 
+	 * @see ILocation
+	 */
 	public TidaModel load(final String id, final ILocation location) {
-		final Identifier configId = new Identifier("config.xml");
-		final ZipPersistor persistor = new ZipPersistor();
 
 		// check if a module has the id already
 		if (moduleHolders.get(id) != null) {
 			// TODO throw exception
 		}
 
+		final Identifier configId = new Identifier("config.xml");
+		final ZipPersistor persistor = new ZipPersistor();
+
+		// set the identifiers to be handled
+		persistor.setIncludedIdentifier(configId);
+
 		// just load the MetaData
 		final MetaData config = new MetaData(configId);
 		persistor.load(location, config);
 
-		// now load the model
-		final TidaModel model = loadViaXslt(id, config.getStream());
-				
+		// manipulate the configuration so that it can be used for loading
+		final ManipulatedXml xml = manipulateXmlForLoading(config.getStream());
+
+		// load the xml
+		final ByteArrayInputStream configIs = new ByteArrayInputStream(
+				xml.getXml());
+		final TidaModel model = loadViaXslt(id, configIs);
+
+		// reset the changes made for loading
+		model.setOfflineModeByString(xml.getOldValue("offlinemode"));
+
+		// close the created and used stream
+		Streams.closeIO(configIs);
+
+		// set the identifiers to be handled
+		persistor.clearAllIdentifiers();
+		persistor.addExcludedIdentifier(configId);
+
 		// register the model and load again
 		persistor.register(configId.getGroup().append("model"), model);
 		persistor.load(location);
-		
+
 		return model;
 	}
 
+	/**
+	 * Saves the {@code TidaModel} specified by the {@code id} under the
+	 * specified {@code location}.
+	 * 
+	 * @param id
+	 *            the id of the {@code ModuleHolder} to save the
+	 *            {@code TidaModel} from
+	 * @param location
+	 *            the {@code Location} to store the data
+	 * 
+	 * @see ILocation
+	 */
 	public void save(final String id, final ILocation location) {
 		final Identifier configId = new Identifier("config.xml");
 		final ZipPersistor persistor = new ZipPersistor();
 
 		// get the configuration and the holder
 		final IModuleHolder moduleHolder = moduleHolders.get(id);
+		if (moduleHolder == null) {
+			// TODO throw exception
+		}
 		final byte[] config = configurations.get(id);
 
 		// get the module from the holder
@@ -244,5 +349,62 @@ public class TidaModelHandler {
 
 		// save the data with the additional MetaData
 		persistor.save(location, new MetaData(configId, is));
+	}
+
+	/**
+	 * Manipulates the specified {@code xml} to be used for loading.
+	 * 
+	 * @param xml
+	 *            the xml to be manipulated
+	 * 
+	 * @return the manipulated xml
+	 */
+	protected ManipulatedXml manipulateXmlForLoading(final byte[] xml) {
+		final InputStream bais = new ByteArrayInputStream(xml);
+
+		final ManipulatedXml manipulatedXml = manipulateXmlForLoading(bais);
+		Streams.closeIO(bais);
+
+		return manipulatedXml;
+	}
+
+	/**
+	 * Manipulates the specified {@code xml} to be used for loading.
+	 * 
+	 * @param xml
+	 *            the xml to be manipulated
+	 * 
+	 * @return the manipulated xml
+	 */
+	protected ManipulatedXml manipulateXmlForLoading(final InputStream xml) {
+		final Document doc = Xml.createDocument(xml, true);
+
+		// check if the document could be read
+		if (doc == null) {
+			// TODO throw exception
+		}
+
+		// prepare the result
+		final ManipulatedXml manipulatedXml = new ManipulatedXml();
+
+		// get the root element and it's attributes
+		final Node root = doc.getDocumentElement();
+		final NamedNodeMap nodeAttributes = root.getAttributes();
+
+		// manipulate the offlinemode attribute
+		Node attribute = nodeAttributes.getNamedItem("offlinemode");
+		if (attribute == null) {
+			attribute = doc.createAttribute("offlinemode");
+		} else {
+			manipulatedXml.addValue("offlinemode", attribute.getTextContent());
+		}
+		attribute.setTextContent("auto");
+
+		// make sure it is added
+		nodeAttributes.setNamedItem(attribute);
+
+		manipulatedXml.setManipulatedXml(Xml.createByteArray(doc));
+
+		return manipulatedXml;
 	}
 }

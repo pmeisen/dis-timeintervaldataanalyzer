@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -37,6 +38,7 @@ public class MetaDataModel {
 	private BaseIndexedCollectionFactory indexedCollectionFactory;
 
 	private IIndexedCollection descriptorModels;
+	private OfflineMode offlineMode;
 
 	/**
 	 * Creates a {@code MetaDataModel}. The instance must be wired prior to it's
@@ -63,6 +65,7 @@ public class MetaDataModel {
 
 		// set the factories
 		this.indexedCollectionFactory = baseIndexedCollectionFactory;
+		setOfflineMode(null);
 	}
 
 	/**
@@ -150,6 +153,7 @@ public class MetaDataModel {
 			exceptionRegistry.throwException(MetaDataModelException.class,
 					1005, descriptorModel.getId());
 		} else {
+			descriptorModel.setOfflineMode(getOfflineMode());
 			getDescriptorModelsIndex().addObject(descriptorModel);
 		}
 	}
@@ -376,5 +380,52 @@ public class MetaDataModel {
 				descModel, getIndexedCollectionFactory());
 
 		return idxDim;
+	}
+
+	/**
+	 * Gets the current setting of the {@code OfflineMode}.
+	 * 
+	 * @return the settings of the {@code OfflineMode}
+	 * 
+	 * @see OfflineMode
+	 */
+	public OfflineMode getOfflineMode() {
+		return this.offlineMode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineMode(final OfflineMode mode) {
+		this.offlineMode = mode == null ? OfflineMode.find(null) : mode;
+		
+		// nothing indexed so far, because no factory defined
+		if (getIndexedCollectionFactory() == null) {
+			return;
+		}
+
+		// change the mode for all the models created so far
+		for (final DescriptorModel<?> model : getDescriptorModels()) {
+			model.setOfflineMode(this.offlineMode);
+		}
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineModeByString(final String mode) {
+		setOfflineMode(OfflineMode.find(mode));
 	}
 }
