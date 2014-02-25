@@ -1,15 +1,23 @@
-package net.meisen.dissertation.model.loader;
+package net.meisen.dissertation.model.handler;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.persistence.ILocation;
+import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.dissertation.model.persistence.MetaData;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 
@@ -19,15 +27,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * A {@code TidaModelLoader} is an instance used to load {@code TidaModel} from
- * a XML-configuration.
+ * A {@code TidaModelHandler} is an instance used to load {@code TidaModel}
+ * instances.
  * 
  * @author pmeisen
  * 
  */
-public class TidaModelLoader {
+public class TidaModelHandler {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(TidaModelLoader.class);
+			.getLogger(TidaModelHandler.class);
 
 	/**
 	 * The {@code ExceptionRegistry} used to handle exceptions.
@@ -45,6 +53,7 @@ public class TidaModelLoader {
 	protected IConfiguration configuration;
 
 	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
+	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
 
 	/**
 	 * Helper method to load the modules defined by the specified {@code is}.
@@ -69,8 +78,20 @@ public class TidaModelLoader {
 
 		IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder == null) {
-			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader", is);
+
+			// keep the complete configuration in memory for saving purposes
+			final byte[] config;
+			try {
+				config = Streams.copyStreamToByteArray(is);
+			} catch (final IOException e) {
+				// TODO add exception
+				throw new RuntimeException(e);
+			}
+
+			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader",
+					new ByteArrayInputStream(config));
 			moduleHolders.put(id, moduleHolder);
+			configurations.put(id, config);
 
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Loaded ModuleHolder '" + id + "'.");
@@ -129,9 +150,9 @@ public class TidaModelLoader {
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public TidaModel load(final String id, final File file) {
+	public TidaModel loadViaXslt(final String id, final File file) {
 		try {
-			return load(id, new FileInputStream(file));
+			return loadViaXslt(id, new FileInputStream(file));
 		} catch (final FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			return null;
@@ -149,8 +170,9 @@ public class TidaModelLoader {
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public TidaModel load(final String id, final String classPathResource) {
-		return load(id, getClass().getResourceAsStream(classPathResource));
+	public TidaModel loadViaXslt(final String id, final String classPathResource) {
+		return loadViaXslt(id, getClass()
+				.getResourceAsStream(classPathResource));
 	}
 
 	/**
@@ -164,7 +186,9 @@ public class TidaModelLoader {
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public synchronized TidaModel load(final String id, final InputStream is) {
+	public synchronized TidaModel loadViaXslt(final String id,
+			final InputStream is) {
+
 		final TidaModel model = getModuleHolder(id, is).getModule(
 				DefaultValues.TIDAMODEL_ID);
 
@@ -173,6 +197,52 @@ public class TidaModelLoader {
 					+ "' from ModuleHolder '" + id + "'.");
 		}
 
+		// initialize the model
+		model.initialize();
+
 		return model;
+	}
+
+	public TidaModel load(final String id, final ILocation location) {
+		final Identifier configId = new Identifier("config.xml");
+		final ZipPersistor persistor = new ZipPersistor();
+
+		// check if a module has the id already
+		if (moduleHolders.get(id) != null) {
+			// TODO throw exception
+		}
+
+		// just load the MetaData
+		final MetaData config = new MetaData(configId);
+		persistor.load(location, config);
+
+		// now load the model
+		final TidaModel model = loadViaXslt(id, config.getStream());
+				
+		// register the model and load again
+		persistor.register(configId.getGroup().append("model"), model);
+		persistor.load(location);
+		
+		return model;
+	}
+
+	public void save(final String id, final ILocation location) {
+		final Identifier configId = new Identifier("config.xml");
+		final ZipPersistor persistor = new ZipPersistor();
+
+		// get the configuration and the holder
+		final IModuleHolder moduleHolder = moduleHolders.get(id);
+		final byte[] config = configurations.get(id);
+
+		// get the module from the holder
+		final TidaModel model = moduleHolder
+				.getModule(DefaultValues.TIDAMODEL_ID);
+		persistor.register(configId.getGroup().append("model"), model);
+
+		// write the file
+		final InputStream is = new ByteArrayInputStream(config);
+
+		// save the data with the additional MetaData
+		persistor.save(location, new MetaData(configId, is));
 	}
 }

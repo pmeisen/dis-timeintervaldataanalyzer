@@ -4,6 +4,8 @@ import java.io.OutputStream;
 
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.dissertation.model.persistence.ILocation;
+import net.meisen.dissertation.model.persistence.MetaData;
 
 /**
  * A mock of a {@code BasePersistor}.
@@ -14,19 +16,19 @@ import net.meisen.dissertation.model.persistence.Identifier;
 public class MockPersistor extends BasePersistor {
 
 	@Override
-	public void save(final String location) {
+	public void save(final ILocation location, final MetaData... additionalData) {
 		throw new IllegalStateException(
 				"Method 'save' is not implemented and not to be tested");
 	}
 
 	@Override
-	public void load(final String location) {
+	public void load(final ILocation location, final MetaData... additionalData) {
 		throw new IllegalStateException(
 				"Method 'save' is not implemented and not to be tested");
 	}
 
 	@Override
-	public OutputStream openForWrite(final Identifier identifier) {
+	protected OutputStream _openForWrite(final Identifier identifier) {
 		throw new IllegalStateException(
 				"Method 'save' is not implemented and not to be tested");
 	}

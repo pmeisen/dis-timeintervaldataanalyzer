@@ -7,13 +7,16 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.IPersistable;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Streams;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Base implementation for every {@code persistor}.
+ * Base implementation for every {@code Persistor}.
  * 
  * @author pmeisen
  * 
@@ -48,25 +51,157 @@ public abstract class BasePersistor {
 
 	/**
 	 * Triggers the saving process by creating a persistence unit (e.g. a file)
-	 * under the specified {@code location}.
+	 * under the specified {@code Location}.
 	 * 
 	 * @param location
 	 *            the location specifies were to persist the data
+	 * @param additionalData
+	 *            an array of additional data to be persisted under the
+	 *            specified {@code Identifier}
+	 * 
+	 * @see ILocation
 	 */
-	public abstract void save(final String location);
+	public abstract void save(final ILocation location,
+			final MetaData... additionalData);
 
 	/**
-	 * Loads the data from the specified {@code location}.
+	 * Loads the data from the specified {@code Location}.
 	 * 
 	 * @param location
 	 *            the location to load the data from
+	 * @param additionalData
+	 *            an array of additional data to be read for the specified
+	 *            {@code Identifier}
+	 * 
+	 * @see ILocation
 	 */
-	public abstract void load(final String location);
+	public abstract void load(final ILocation location,
+			final MetaData... additionalData);
+
+	/**
+	 * Searches within the {@code metaData} for the {@code MetaData} with the
+	 * specified {@code identifier}. Returns {@code null} if no {@code MetaData}
+	 * was found.
+	 * 
+	 * @param identifier
+	 *            the {@code Identifier} to find the {@code MetaData} for
+	 * @param metaData
+	 *            the first matching {@code MetaData}
+	 * 
+	 * @return the found {@code MetaData} or {@code null} if nothing was found
+	 */
+	protected MetaData findMetaData(final Identifier identifier,
+			final MetaData... metaData) {
+		if (identifier == null) {
+			return null;
+		} else if (metaData == null || metaData.length == 0) {
+			return null;
+		}
+
+		for (final MetaData md : metaData) {
+			if (identifier.equals(md.getIdentifier())) {
+				return md;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Triggers the saving of the {@code Persistables}.
+	 * 
+	 * @throws ForwardedRuntimeException
+	 *             if the {@code Persistable} throwns an error
+	 * 
+	 * @see IPersistable
+	 */
+	protected void writePersistables() throws ForwardedRuntimeException {
+		final Collection<IPersistable> persistables = getPersistables()
+				.values();
+		for (final IPersistable persistable : persistables) {
+			persistable.save(this);
+		}
+	}
+
+	/**
+	 * Writes the {@code additionalData} using the
+	 * {@link #_openForWrite(Identifier)} and {@link #close(Identifier)}
+	 * implementation.
+	 * 
+	 * @param additionalData
+	 *            the data to be written
+	 */
+	protected void writeMetaData(final MetaData... additionalData) {
+		if (additionalData == null || additionalData.length == 0) {
+			return;
+		}
+
+		for (final MetaData metaData : additionalData) {
+			final Identifier id = metaData.getIdentifier();
+
+			if (getPersistable(id.getGroup()) != null) {
+
+			} else {
+				final OutputStream os = _openForWrite(id);
+				final InputStream is = metaData.getStream();
+
+				// copy the data to the stream
+				try {
+					Streams.copyStream(is, os);
+				} catch (final IOException e) {
+					exceptionRegistry.throwException(PersistorException.class,
+							1007, metaData.getIdentifier());
+				}
+
+				// close the handler again
+				close(id);
+			}
+		}
+	}
+
+	/**
+	 * Helper method to read the data from the specified {@code is} and forward
+	 * them to the {@code Persistable} or save them in the {@code MetaData}
+	 * associated to the {@code identifier}.
+	 * 
+	 * @param identifier
+	 *            the {@code Identifier} to pass the data to
+	 * @param is
+	 *            the {@code InputStream} to read from
+	 * @param additionalData
+	 *            the available {@code MetaData}
+	 * 
+	 * @throws ForwardedRuntimeException
+	 *             if an exception is thrown by the persistable
+	 * 
+	 * @see Identifier
+	 */
+	protected void read(final Identifier identifier, final InputStream is,
+			final MetaData... additionalData) throws ForwardedRuntimeException {
+
+		// call the persistable to handle the entry
+		final IPersistable persistable = getPersistable(identifier.getGroup());
+		final MetaData metaData = findMetaData(identifier, additionalData);
+
+		if (metaData != null && persistable != null) {
+			exceptionRegistry.throwException(PersistorException.class, 1006,
+					identifier.getGroup());
+		} else if (metaData != null) {
+			metaData.setData(is);
+		} else if (persistable != null) {
+			persistable.load(this, identifier, is);
+		} else {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Could not determine any meta nor persistable for the identifier '"
+						+ identifier + "'.");
+			}
+		}
+	}
 
 	/**
 	 * Opens a {@code OutputStream} for the specified {@code identifier}. The
 	 * {@code Group} of the {@code identifier} must be a registered one,
-	 * otherwise an exception should be thrown.
+	 * otherwise an exception is thrown.
 	 * 
 	 * @param identifier
 	 *            the {@code Identifier} which identifies the content to be
@@ -74,7 +209,25 @@ public abstract class BasePersistor {
 	 * 
 	 * @return the {@code OutputStream} used to write the data
 	 */
-	public abstract OutputStream openForWrite(final Identifier identifier);
+	public OutputStream openForWrite(final Identifier identifier) {
+		if (getPersistable(identifier.getGroup()) == null) {
+			exceptionRegistry.throwException(PersistorException.class, 1005,
+					identifier.getGroup());
+		}
+
+		return _openForWrite(identifier);
+	}
+
+	/**
+	 * Opens a {@code OutputStream} for the specified {@code identifier}.
+	 * 
+	 * @param identifier
+	 *            the {@code Identifier} which identifies the content to be
+	 *            written
+	 * 
+	 * @return the {@code OutputStream} used to write the data
+	 */
+	protected abstract OutputStream _openForWrite(final Identifier identifier);
 
 	/**
 	 * Closes the stream created for the {@code Identifier}.

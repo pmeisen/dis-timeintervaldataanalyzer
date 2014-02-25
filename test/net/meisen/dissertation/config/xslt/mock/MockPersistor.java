@@ -4,6 +4,8 @@ import java.io.OutputStream;
 
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.dissertation.model.persistence.ILocation;
+import net.meisen.dissertation.model.persistence.MetaData;
 
 /**
  * Mock of {@code BasePersistor}.
@@ -14,17 +16,17 @@ import net.meisen.dissertation.model.persistence.Identifier;
 public class MockPersistor extends BasePersistor {
 
 	@Override
-	public void save(String location) {
+	public void save(final ILocation location, final MetaData... additionalData) {
 		// empty
 	}
 
 	@Override
-	public void load(String location) {
+	public void load(final ILocation location, final MetaData... additionalData) {
 		// empty
 	}
 
 	@Override
-	public OutputStream openForWrite(Identifier identifier) {
+	protected OutputStream _openForWrite(Identifier identifier) {
 		return null;
 	}
 

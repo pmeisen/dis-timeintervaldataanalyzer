@@ -254,9 +254,27 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	 * @see MetaDataHandling
 	 */
 	protected I getIdForValue(final Object value) {
+		return getIdForValue(value, getMetaDataHandling());
+	}
+
+	/**
+	 * Gets the id of the value using the specified {@code MetaDataHandling}. If
+	 * the {@code handling} is {@code null} the defined handling of {@code this}
+	 * will be used (see {@link #getMetaDataHandling()}).
+	 * 
+	 * @param value
+	 *            the value to get the id for
+	 * @param handling
+	 *            the {@code MetaDataHandling} if the value cannot be resolved
+	 * 
+	 * @return the identifier
+	 */
+	protected I getIdForValue(final Object value,
+			final MetaDataHandling handling) {
 		Descriptor<?, ?, I> desc = model.getDescriptorByValue(value);
 		if (desc == null) {
-			final MetaDataHandling metaDataHandling = getMetaDataHandling();
+			final MetaDataHandling metaDataHandling = handling == null ? getMetaDataHandling()
+					: handling;
 
 			if (MetaDataHandling.CREATEDESCRIPTOR.equals(metaDataHandling)) {
 				desc = model.createDescriptor(value);
@@ -391,9 +409,9 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());
 		}
-		
+
 		// get the identifier for the value
-		final I id = getIdForValue(value);
+		final I id = getIdForValue(value, MetaDataHandling.CREATEDESCRIPTOR);
 
 		// check if the slice is already indexed
 		if (index.getObject(id) != null) {
@@ -407,7 +425,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 
 		// load the slice from the InputStream
 		try {
-			slice.getBitmap().deserialize(new DataInputStream(inputStream));		
+			slice.getBitmap().deserialize(new DataInputStream(inputStream));
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());

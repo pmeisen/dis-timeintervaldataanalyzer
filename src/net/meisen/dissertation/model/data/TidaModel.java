@@ -1,14 +1,17 @@
 package net.meisen.dissertation.model.data;
 
-import java.io.File;
+import java.io.InputStream;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.slf4j.Logger;
@@ -23,7 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author pmeisen
  * 
  */
-public class TidaModel {
+public class TidaModel implements IPersistable {
 	private final static Logger LOG = LoggerFactory.getLogger(TidaModel.class);
 
 	@Autowired
@@ -46,10 +49,6 @@ public class TidaModel {
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
 
-	@Autowired
-	@Qualifier(DefaultValues.persistor_ID)
-	private BasePersistor persistor;
-
 	private final String id;
 	private final String name;
 
@@ -57,6 +56,8 @@ public class TidaModel {
 
 	private MetaDataHandling metaDataHandling;
 	private IntervalDataHandling intervalDataHandling;
+
+	private Group persistentGroup = null;
 
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
@@ -134,9 +135,6 @@ public class TidaModel {
 
 		// create the index
 		this.idx = new TidaIndex(this);
-
-		// register the entities which might want to persist data
-		persistor.register(new Group("indexes"), this.idx);
 	}
 
 	/**
@@ -276,50 +274,42 @@ public class TidaModel {
 		setIntervalDataHandling(IntervalDataHandling.find(handling));
 	}
 
-	public void save(final File location) {
-		if (location == null) {
-			// TODO add exception
-		}
-
-		save(location.toString());
-	}
-
-	public void save(final String location) {
-		if (!isInitialized()) {
-			// TODO add exception not initialized
-		}
-
-		// save the data to the specified location
-		persistor.save(location);
-	}
-
 	/**
-	 * Get the instance defined to persist data.
+	 * Gets the index of the model.
 	 * 
-	 * @return the instance defined to persist data
+	 * @return the used index of the model
 	 */
-	public BasePersistor getPersistor() {
-		return persistor;
-	}
-
-	public void load(final File location) {
-		if (location == null) {
-			// TODO add exception
-		}
-
-		load(location.toString());
-	}
-
-	public void load(final String location) {
-		if (!isInitialized()) {
-			// TODO add exception not initialized
-		}
-
-		// use the persistor to load everything
-		persistor.load(location);
-	}
-	
 	protected TidaIndex getIndex() {
 		return idx;
+	}
+	
+	public int getNextDataId() {
+		return idx.getNextDataId();
+	}
+
+	@Override
+	public void save(final BasePersistor persistor)
+			throws ForwardedRuntimeException {
+		// nothing to save
+	}
+
+	@Override
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream)
+			throws ForwardedRuntimeException {
+		// ignore the loading, it already happened via a loader, otherwise the
+		// model wouldn't exist
+	}
+
+	@Override
+	public void isRegistered(final BasePersistor persistor, final Group group) {
+		this.persistentGroup = group;
+		
+		persistor.register(group.append("indexes"), this.idx);
+	}
+
+	@Override
+	public Group getPersistentGroup() {
+		return persistentGroup;
 	}
 }

@@ -44,10 +44,12 @@
           + net.meisen.dissertation.impl.idfactories.UuIdsFactory
           
          The null-attribute (true or false) defines if null values are allowed within 
-         the model. 
+         the model.
+         The failonduplicates-attributes (true or false) specifies if duplicates are 
+         just ignored or if an exception is thrown.
       -->
     <descriptors>
-      <resource id="R1" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.UuIdsFactory" />
+      <resource id="R1" failonduplicates="true" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.UuIdsFactory" />
       <resource id="R2" null="false" name="toy" idfactory="net.meisen.dissertation.impl.idfactories.UuIdsFactory" />
       <resource id="R3" null="true" />
     

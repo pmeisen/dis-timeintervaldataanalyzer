@@ -11,15 +11,16 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
+import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IIndexDimensionSlice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
-import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -39,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 
 	@Autowired
-	private TidaModelLoader loader;
+	private TidaModelHandler loader;
 
 	private TidaModel loadModel(final String dbName, final String dbPath,
 			final String modelPath) throws IOException {
@@ -48,7 +49,7 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		getDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/" + dbPath);
 
 		// load the model
-		return loader.load(UUID.randomUUID().toString(),
+		return loader.loadViaXslt(UUID.randomUUID().toString(),
 				"/net/meisen/dissertation/model/indexes/datarecord/"
 						+ modelPath);
 	}
@@ -315,7 +316,7 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		persistor.register(group, idxPart);
 
 		// save and check
-		persistor.save(tmpFile.toString());
+		persistor.save(new FileLocation(tmpFile));
 		assertTrue(tmpFile.length() > 0);
 
 		// unregister to make it available for a new instance
@@ -328,7 +329,7 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		persistor.register(group, crtPart);
 
 		// load the stuff
-		persistor.load(tmpFile.toString());
+		persistor.load(new FileLocation(tmpFile));
 		assertEquals(676, count(crtPart.getSlices()));
 
 		// test all the values

@@ -187,15 +187,6 @@ public class IntervalModel {
 			final BaseMapper<?> mapper,
 			final IntervalStructureEntry startEntry,
 			final IntervalStructureEntry endEntry) {
-		if (startEntry == null) {
-			exceptionRegistry
-					.throwException(IntervalModelException.class, 1005);
-		} else if (endEntry == null) {
-			exceptionRegistry
-					.throwException(IntervalModelException.class, 1006);
-		} else if (mapper == null) {
-
-		}
 
 		// create the IntervalIndex depending on the mapper
 		if (Byte.class.equals(mapper.getTargetType())) {

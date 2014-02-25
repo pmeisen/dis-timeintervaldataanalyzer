@@ -28,7 +28,6 @@ import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
-import net.meisen.dissertation.model.data.TestTidaModel;
 import net.meisen.dissertation.model.dataretriever.TestDataCollection;
 import net.meisen.dissertation.model.dataretriever.TestDataRecord;
 import net.meisen.dissertation.model.datasets.TestDataRetrieverDataSet;
@@ -37,11 +36,11 @@ import net.meisen.dissertation.model.datasets.TestSingleStaticDataSet;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
+import net.meisen.dissertation.model.handler.TestTidaModelHandler;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
-import net.meisen.dissertation.model.loader.TestTidaModelLoader;
 import net.meisen.dissertation.model.persistence.TestBasePersistor;
 import net.meisen.dissertation.model.persistence.TestGroup;
 import net.meisen.dissertation.model.persistence.TestIdentifier;
@@ -136,16 +135,13 @@ import org.junit.runners.Suite;
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
 
-		// Test the loader
-		TestTidaModelLoader.class,
-
 		// Test the tida-indexes
 		TestMetaIndexDimension.class, TestMetaIndex.class,
 		TestIntervalIndexPartition.class,
 
-		// Test the model
-		TestTidaModel.class,
-
+		// Test the handler
+		TestTidaModelHandler.class,
+		
 		// Test the server
 		TestTidaServer.class })
 public class AllUnitTests {

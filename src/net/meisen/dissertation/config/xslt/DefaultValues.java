@@ -14,7 +14,6 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
-import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
@@ -24,9 +23,8 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
-import net.meisen.dissertation.model.persistence.BasePersistor;
-import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
+import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
 import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
@@ -106,13 +104,6 @@ public class DefaultValues {
 	 */
 	public static final String TIMELINEDEFINITION_ID = "timelineDefinition";
 	/**
-	 * The name of the module created by the XSLT process, which contains the
-	 * created {@code persistor}.
-	 * 
-	 * @see BasePersistor
-	 */
-	public static final String persistor_ID = "persistor";
-	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;
@@ -177,17 +168,6 @@ public class DefaultValues {
 	 */
 	public static String getDefaultIdFactory() {
 		return IntegerIdsFactory.class.getName();
-	}
-
-	/**
-	 * The implementation to be used for the persistor.
-	 * 
-	 * @return the default implementation to be used if none is specified
-	 * 
-	 * @see BasePersistor
-	 */
-	public static String getDefaultPersistor() {
-		return ZipPersistor.class.getName();
 	}
 
 	/**

@@ -9,7 +9,7 @@
     -->
 
   <!-- define loaders used to load tidaModels -->
-  <bean id="tidaModelLoader" class="net.meisen.dissertation.model.loader.TidaModelLoader" />
+  <bean id="tidaModelHandler" class="net.meisen.dissertation.model.handler.TidaModelHandler" />
   
   <!-- define the tidaServer -->
   <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />

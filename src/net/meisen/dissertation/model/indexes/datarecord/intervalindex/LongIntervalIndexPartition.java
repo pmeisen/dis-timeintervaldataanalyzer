@@ -28,7 +28,9 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 *            the {@code Mapper} which defines the start and end value, as
 	 *            well as the type of the indexed values
 	 * @param start
+	 *            the start entry
 	 * @param end
+	 *            the end entry
 	 * @param indexedCollectionFactory
 	 *            the {@code indexedCollectionFactory} to create the needed
 	 *            indexes

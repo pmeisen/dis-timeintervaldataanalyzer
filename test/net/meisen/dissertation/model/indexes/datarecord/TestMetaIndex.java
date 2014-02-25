@@ -6,8 +6,8 @@ import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
-import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestMetaIndex extends ModuleAndDbBasedTest {
 
 	@Autowired
-	private TidaModelLoader loader;
+	private TidaModelHandler loader;
 
 	/**
 	 * Tests the usage when loading a static model.
@@ -33,7 +33,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
-				.load("mh_tidaStaticIndexModel",
+				.loadViaXslt("mh_tidaStaticIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaIndex metaIndex = new MetaIndex(model);
@@ -59,7 +59,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingRandomIndexModel() {
 		final TidaModel model = loader
-				.load("mh_tidaRandomIndexModel",
+				.loadViaXslt("mh_tidaRandomIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
 		// create the indexes

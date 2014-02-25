@@ -177,11 +177,15 @@ public class DescriptorModel<I extends Object> {
 			final Collection<Object> values) {
 		final List<Descriptor> descriptors = new ArrayList<Descriptor>();
 
-		for (final Object value : values) {
-			descriptors.add(createDescriptor(value));
-		}
+		if (values == null) {
+			return descriptors;
+		} else {
+			for (final Object value : values) {
+				descriptors.add(createDescriptor(value));
+			}
 
-		return descriptors;
+			return descriptors;
+		}
 	}
 
 	/**
@@ -199,14 +203,30 @@ public class DescriptorModel<I extends Object> {
 			final BaseDataRetriever retriever, final IQueryConfiguration query) {
 
 		// get the loader to retrieve the data
-		final DataCollection<?> loader = retriever.retrieve(query);
+		DataCollection<?> loader = null;
+		Collection<Object> loadedData = null;
+		try {
+			loader = retriever.retrieve(query);
 
-		// retrieve the data
-		final Collection<Descriptor> data = createDescriptors(loader
-				.transform());
+			// retrieve the data
+			loadedData = loader.transform();
+		} catch (final RuntimeException e) {
+			
+			
+			
+			throw e;
+		} finally {
+			if (loader != null) {
+				try {
+					loader.release();
+				} catch (final RuntimeException e) {
+					// ignore
+				}
+			}
+		}
 
-		// release the loader
-		loader.release();
+		// create descriptors based on the loadedData
+		final Collection<Descriptor> data = createDescriptors(loadedData);
 
 		return data;
 	}
@@ -409,9 +429,11 @@ public class DescriptorModel<I extends Object> {
 	public Descriptor<?, ?, I> getDescriptor(final I id) {
 
 		if (id == null) {
-			throw new IllegalStateException("MICE ERROR HERE");
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1005);
+			return null;
 		} else if (supportsNullDescriptor() && id.equals(getNullDescriptorId())) {
-			return nullDescriptor;
+			return getNullDescriptor();
 		} else {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					0, id);
@@ -433,7 +455,7 @@ public class DescriptorModel<I extends Object> {
 	public Descriptor<?, ?, I> getDescriptorByValue(final Object value) {
 
 		if (supportsNullDescriptor() && value == null) {
-			return nullDescriptor;
+			return getNullDescriptor();
 		} else {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);

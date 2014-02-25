@@ -18,6 +18,7 @@ import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
 import net.meisen.dissertation.impl.indexes.MapIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
+import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
@@ -28,8 +29,8 @@ import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
-import net.meisen.dissertation.model.loader.TidaModelLoader;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -48,7 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 	@Autowired
-	private TidaModelLoader loader;
+	private TidaModelHandler loader;
 
 	/**
 	 * Tests the usage when creating a random model which is coded.
@@ -136,7 +137,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
-				.load("mh_tidaStaticIndexModel",
+				.loadViaXslt("mh_tidaStaticIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
@@ -182,7 +183,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	public void testUsingRandomIndexModel() {
 		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
 		final TidaModel model = loader
-				.load("mh_tidaRandomIndexModel",
+				.loadViaXslt("mh_tidaRandomIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
 		// get the defined model and the structure
@@ -263,7 +264,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// get the model and the factory we use
 		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
 		final TidaModel model = loader
-				.load("mh_tidaStaticIndexModel",
+				.loadViaXslt("mh_tidaStaticIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		// get the defined model and the structure
@@ -305,7 +306,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		 * the registration
 		 */
 		persistor.register(group, saveIdx);
-		persistor.save(tmpFile.toString());
+		persistor.save(new FileLocation(tmpFile));
 		persistor.unregister(group);
 
 		// get the load-index
@@ -318,7 +319,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		 * load the metadata from the saved file
 		 */
 		persistor.register(group, loadIdx);
-		persistor.load(tmpFile.toString());
+		persistor.load(new FileLocation(tmpFile));
 		persistor.unregister(group);
 
 		// check the loaded data
@@ -329,7 +330,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		}
 
 		loader.unloadAll();
-		
+
 		assertTrue(tmpFile.delete());
 	}
 }

@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.loader.TidaModelLoader;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.server.Server;
 
@@ -22,7 +22,7 @@ public class TidaServer {
 	private Server server;
 
 	@Autowired
-	private TidaModelLoader loader;
+	private TidaModelHandler loader;
 
 	public void unloadAll() {
 		loader.unloadAll();
@@ -33,15 +33,15 @@ public class TidaServer {
 	}
 
 	public TidaModel load(final String id, final File file) {
-		return loader.load(id, file);
+		return loader.loadViaXslt(id, file);
 	}
 
 	public TidaModel load(final String id, final String classPathResource) {
-		return loader.load(id, classPathResource);
+		return loader.loadViaXslt(id, classPathResource);
 	}
 
 	public TidaModel load(final String id, final InputStream is) {
-		return loader.load(id, is);
+		return loader.loadViaXslt(id, is);
 	}
 
 	public void startAsync() {

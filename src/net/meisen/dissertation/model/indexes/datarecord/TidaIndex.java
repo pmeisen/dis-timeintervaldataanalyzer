@@ -335,6 +335,11 @@ public class TidaIndex implements IPersistable {
 		return persistentGroup;
 	}
 
+	/**
+	 * Get the id of the next record which will be added.
+	 * 
+	 * @return the id of the next record added
+	 */
 	public int getNextDataId() {
 		return dataId;
 	}
