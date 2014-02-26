@@ -222,12 +222,16 @@ public class TidaModelHandler {
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
 	public TidaModel loadViaXslt(final String id, final File file) {
-		try {
-			return loadViaXslt(id, new FileInputStream(file));
-		} catch (final FileNotFoundException e) {
-			exceptionRegistry.throwRuntimeException(
-					TidaModelHandlerException.class, 1003, e, file);
-			return null;
+		if (file == null) {
+			return loadViaXslt(id, (InputStream) null);
+		} else {
+			try {
+				return loadViaXslt(id, new FileInputStream(file));
+			} catch (final FileNotFoundException e) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1003, e, file);
+				return null;
+			}
 		}
 	}
 
@@ -243,8 +247,13 @@ public class TidaModelHandler {
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
 	public TidaModel loadViaXslt(final String id, final String classPathResource) {
-		return loadViaXslt(id, getClass()
-				.getResourceAsStream(classPathResource));
+
+		if (classPathResource == null) {
+			return loadViaXslt(id, (InputStream) null);
+		} else {
+			return loadViaXslt(id,
+					getClass().getResourceAsStream(classPathResource));
+		}
 	}
 
 	/**

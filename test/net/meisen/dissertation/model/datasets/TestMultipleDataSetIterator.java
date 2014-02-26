@@ -193,5 +193,8 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 				dbDataSet);
 		assertEquals(1, it.count());
 		it.close();
+		
+		// release the retriever
+		retriever.release();
 	}
 }

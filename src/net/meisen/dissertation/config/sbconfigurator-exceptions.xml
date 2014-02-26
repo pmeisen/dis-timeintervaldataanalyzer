@@ -25,6 +25,12 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.PersistorException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.exceptions.TidaModelHandlerException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.exceptions.TidaIndexException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.exceptions.TidaModelException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.ZipPersistorException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 

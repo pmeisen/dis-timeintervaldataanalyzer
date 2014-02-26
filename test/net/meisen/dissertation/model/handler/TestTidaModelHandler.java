@@ -7,8 +7,10 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.exceptions.TidaModelHandlerException;
 import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.impl.persistence.FileLocation;
@@ -40,6 +42,97 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 	@Autowired
 	private TidaModelHandler loader;
+
+	/**
+	 * Tests the exception to be thrown when loading using a {@code null} as
+	 * classpath.
+	 */
+	@Test
+	public void testExceptionNullClassPath() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("configuration for the moduleHolder 'NullPath' isn't defined");
+
+		loader.loadViaXslt("NullPath", (String) null);
+	}
+
+	/**
+	 * Tests the exception to be thrown when loading using an invalid classpath.
+	 */
+	@Test
+	public void testExceptionInvalidClassPath() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("configuration for the moduleHolder 'InvalidPath' isn't defined");
+
+		loader.loadViaXslt("InvalidPath", "/i/never/exist/???/");
+	}
+
+	/**
+	 * Tests the exception to be thrown when loading using a {@code null} as
+	 * file.
+	 */
+	@Test
+	public void testExceptionNullFile() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("configuration for the moduleHolder 'NullFile' isn't defined");
+
+		loader.loadViaXslt("NullFile", (File) null);
+	}
+
+	/**
+	 * Tests the exception to be thrown when loading using an invalid file.
+	 */
+	@Test
+	public void testExceptionInvalidFile() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("Failed to load the configuration file '???'");
+
+		loader.loadViaXslt("NullFile", new File("???"));
+	}
+
+	/**
+	 * Tests the exception to be thrown when loading using a {@code null} as
+	 * stream.
+	 */
+	@Test
+	public void testExceptionNullStream() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("configuration for the moduleHolder 'NullStream' isn't defined");
+
+		loader.loadViaXslt("NullStream", (InputStream) null);
+	}
+
+	/**
+	 * Tests the exception to be thrown if an identifier for a moduleHolder is
+	 * used multiple times.
+	 */
+	@Test
+	public void testExceptionUsingIdTWhenViaXsltwice() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("moduleHolder with the identifier 'FullModel' is already defined");
+
+		loader.loadViaXslt("FullModel",
+				"/net/meisen/dissertation/config/fullModel.xml");
+		assertTrue("Reached this point", true);
+
+		loader.loadViaXslt("FullModel",
+				"/net/meisen/dissertation/config/fullModel.xml");
+	}
+
+	/**
+	 * Tests the exception to be thrown if an identifier for a moduleHolder is
+	 * used multiple times.
+	 */
+	@Test
+	public void testExceptionUsingIdWhenMixedTwice() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("moduleHolder with the identifier 'FullModel' is already defined");
+
+		loader.loadViaXslt("FullModel",
+				"/net/meisen/dissertation/config/fullModel.xml");
+		assertTrue("Reached this point", true);
+
+		loader.load("FullModel", new FileLocation(new File("")));
+	}
 
 	/**
 	 * Test the xml manipulation done by the loader to load from a persistor.

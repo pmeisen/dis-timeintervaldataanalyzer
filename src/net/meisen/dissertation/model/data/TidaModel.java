@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -123,18 +124,22 @@ public class TidaModel implements IPersistable {
 		return name;
 	}
 
-	public void validate() {
-
-	}
-
+	/**
+	 * Checks if the {@code Model} is initialized.
+	 * 
+	 * @return {@code true} if it is initialized, otherwise {@code false}.
+	 */
 	public boolean isInitialized() {
 		return this.idx != null;
 	}
 
+	/**
+	 * Initializes the model, i.e. get's it ready to work.
+	 */
 	public void initialize() {
 
 		if (isInitialized()) {
-			// TODO add exception already initialized
+			exceptionRegistry.throwException(TidaModelException.class, 1000);
 		}
 
 		// create the index
@@ -146,7 +151,10 @@ public class TidaModel implements IPersistable {
 	 */
 	public void loadData() {
 
-		if (LOG.isDebugEnabled()) {
+		if (!isInitialized()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1001,
+					"loadData");
+		} else if (LOG.isDebugEnabled()) {
 			LOG.debug("Start adding of records from dataModel...");
 		}
 
@@ -363,7 +371,17 @@ public class TidaModel implements IPersistable {
 		return idx;
 	}
 
+	/**
+	 * Get the next identifier used for a record.
+	 * 
+	 * @return the next identifier used for a record
+	 */
 	public int getNextDataId() {
+		if (!isInitialized()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1001,
+					"nextRecordId");
+		}
+
 		return idx.getNextDataId();
 	}
 
@@ -377,12 +395,16 @@ public class TidaModel implements IPersistable {
 	public void load(final BasePersistor persistor,
 			final Identifier identifier, final InputStream inputStream)
 			throws ForwardedRuntimeException {
-		// ignore the loading, it already happened via a loader, otherwise the
-		// model wouldn't exist
+		// nothing to load
 	}
 
 	@Override
 	public void isRegistered(final BasePersistor persistor, final Group group) {
+		if (!isInitialized()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1001,
+					"persistorRegistration");
+		}
+
 		this.persistentGroup = group;
 
 		persistor.register(group.append("indexes"), this.idx);
