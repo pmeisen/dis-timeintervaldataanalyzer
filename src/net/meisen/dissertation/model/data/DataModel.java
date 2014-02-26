@@ -7,6 +7,7 @@ import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datasets.IDataSet;
 import net.meisen.dissertation.model.datasets.MultipleDataSetIterator;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,9 +23,18 @@ public class DataModel implements IDataSet {
 	@Autowired(required = false)
 	private List<IDataSet> dataSets = new ArrayList<IDataSet>();
 
+	private OfflineMode offlineMode;
+
+	/**
+	 * Default constructor
+	 */
+	public DataModel() {
+		setOfflineMode(null);
+	}
+
 	@Override
 	public IClosableIterator<IDataRecord> iterator() {
-		return new MultipleDataSetIterator(dataSets);
+		return new MultipleDataSetIterator(getOfflineMode(), dataSets);
 	}
 
 	/**
@@ -135,5 +145,53 @@ public class DataModel implements IDataSet {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Gets the current setting of the {@code OfflineMode}.
+	 * 
+	 * @return the settings of the {@code OfflineMode}
+	 * 
+	 * @see OfflineMode
+	 */
+	public OfflineMode getOfflineMode() {
+		return offlineMode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineMode(final OfflineMode mode) {
+		this.offlineMode = mode == null ? OfflineMode.find(null) : mode;
+	}
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineModeByString(final String mode) {
+		setOfflineMode(OfflineMode.find(mode));
+	}
+
+	@Override
+	public boolean isOfflineAvailable() {
+		for (final IDataSet dataSet : dataSets) {
+			if (!dataSet.isOfflineAvailable()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

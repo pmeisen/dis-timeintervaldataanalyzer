@@ -1,6 +1,8 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import java.util.Iterator;
+
+import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
  * This class defines an {@code Iterator} used to iterate over a

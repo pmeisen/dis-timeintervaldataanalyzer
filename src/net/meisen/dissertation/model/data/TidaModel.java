@@ -146,7 +146,6 @@ public class TidaModel implements IPersistable {
 	 */
 	public void loadData() {
 
-		// log the start
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Start adding of records from dataModel...");
 		}
@@ -169,13 +168,7 @@ public class TidaModel implements IPersistable {
 			 * if the OfflineMode isn't enabled or if it's set to auto throw the
 			 * exception, otherwise we just log it
 			 */
-			if (OfflineMode.TRUE.equals(getOfflineMode())) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Failed to add data.", e);
-				}
-			} else {
-				throw e;
-			}
+			throw e;
 		} finally {
 			it.close();
 		}
@@ -298,6 +291,9 @@ public class TidaModel implements IPersistable {
 		final MetaDataModel metaDataModel = getMetaDataModel();
 		if (metaDataModel != null) {
 			metaDataModel.setOfflineMode(this.offlineMode);
+		}
+		if (dataModel != null) {
+			dataModel.setOfflineMode(this.offlineMode);
 		}
 	}
 

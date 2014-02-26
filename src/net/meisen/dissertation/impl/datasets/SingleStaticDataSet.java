@@ -1,8 +1,11 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.datasets.IDataSet;
 
 /**
  * An implementation of a {@code DataSet} with just one single
@@ -186,5 +189,10 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 	@Override
 	public int getSize() {
 		return entries.length;
+	}
+	
+	@Override
+	public boolean isOfflineAvailable() {
+		return true;
 	}
 }

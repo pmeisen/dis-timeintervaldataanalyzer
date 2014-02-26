@@ -5,7 +5,7 @@
 
   <bean id="dataModelId" class="net.meisen.dissertation.model.data.DataModel" />
 
-  <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+  <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
     <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
       <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
         <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
@@ -29,7 +29,7 @@
     </constructor-arg>
   </bean>
 
-  <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+  <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
     <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
       <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
         <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
@@ -53,10 +53,10 @@
     </constructor-arg>
   </bean>
 
-  <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
-    <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
-      <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
-        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+  <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSet">
+    <constructor-arg type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry[]">
+      <array value-type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
           <constructor-arg type="int" value="1" />
           <constructor-arg type="java.lang.String" value="COUNTER" />
           <constructor-arg type="java.lang.Object">
@@ -67,10 +67,10 @@
     </constructor-arg>
   </bean>
 
-  <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
-    <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
-      <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
-        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+  <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSet">
+    <constructor-arg type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry[]">
+      <array value-type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
           <constructor-arg type="int" value="1" />
           <constructor-arg type="java.lang.String" value="FIXED" />
           <constructor-arg type="java.lang.Object">
@@ -78,7 +78,7 @@
           </constructor-arg>
         </bean>
 
-        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
           <constructor-arg type="int" value="3" />
           <constructor-arg type="java.lang.String" value="COUNTER" />
           <constructor-arg type="java.lang.Object">

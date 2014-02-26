@@ -1,7 +1,8 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataRecord;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
  * A {@code DataRecord} which wraps a {@link DataRecord} from a

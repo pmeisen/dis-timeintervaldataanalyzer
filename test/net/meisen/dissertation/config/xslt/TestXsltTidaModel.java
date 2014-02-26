@@ -29,6 +29,8 @@ import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
 import net.meisen.dissertation.config.xslt.mock.MockMapperFactory;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
+import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
@@ -43,10 +45,8 @@ import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
-import net.meisen.dissertation.model.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
@@ -227,6 +227,10 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		assertNotNull(metaModel);
 		assertEquals(OfflineMode.TRUE, metaModel.getOfflineMode());
+
+		final DataModel dataModel = model.getDataModel();
+		assertNotNull(dataModel);
+		assertEquals(OfflineMode.TRUE, dataModel.getOfflineMode());
 
 		final Collection<DescriptorModel<?>> descModels = metaModel
 				.getDescriptorModels();

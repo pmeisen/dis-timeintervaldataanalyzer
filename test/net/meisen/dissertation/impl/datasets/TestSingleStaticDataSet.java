@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,6 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSetIterator;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 
 import org.junit.Test;
 

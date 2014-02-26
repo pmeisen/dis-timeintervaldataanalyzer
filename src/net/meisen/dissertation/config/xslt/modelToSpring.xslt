@@ -273,16 +273,18 @@
       </bean>
       
       <!-- create the dataModel -->
-      <bean id="{$dataModelId}" class="net.meisen.dissertation.model.data.DataModel" />
+      <bean id="{$dataModelId}" class="net.meisen.dissertation.model.data.DataModel">
+        <property name="offlineModeByString" value="{$offlinemode}" />
+      </bean>
       
       <!-- add the static dataSets -->
       <xsl:for-each select="mns:data/mns:dataset[not(@dataretriever)]">
-        <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSet">
-          <constructor-arg type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry[]">
-            <array value-type="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+        <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSet">
+          <constructor-arg type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry[]">
+            <array value-type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
               <xsl:for-each select="mns:entry">
               
-                <bean class="net.meisen.dissertation.model.datasets.SingleStaticDataSetEntry">
+                <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
                   <constructor-arg type="int">
                     <value><xsl:choose><xsl:when test="@position"><xsl:value-of select="@position" /></xsl:when><xsl:otherwise>-1</xsl:otherwise></xsl:choose></value>
                   </constructor-arg>
@@ -319,7 +321,7 @@
       <xsl:for-each select="mns:data/mns:dataset[@dataretriever]">
         <xsl:variable name="dataretriever" select="@dataretriever" />
 
-        <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+        <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
           <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
               <ref bean="dataretriever-{$dataretriever}" />
           </constructor-arg>

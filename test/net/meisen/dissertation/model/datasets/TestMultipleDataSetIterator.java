@@ -6,6 +6,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+
+import net.meisen.dissertation.help.DbBasedTest;
+import net.meisen.dissertation.impl.dataretriever.DbConnectionConfig;
+import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
+import net.meisen.dissertation.impl.dataretriever.DbQueryConfig;
+import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry;
+import net.meisen.dissertation.model.data.OfflineMode;
+
+import org.hsqldb.jdbcDriver;
 import org.junit.Test;
 
 /**
@@ -15,14 +27,15 @@ import org.junit.Test;
  * @author pmeisen
  * 
  */
-public class TestMultipleDataSetIterator {
+public class TestMultipleDataSetIterator extends DbBasedTest {
 
 	/**
 	 * Tests the iteration over no {@code DataSet}.
 	 */
 	@Test
 	public void testEmptyIterator() {
-		final MultipleDataSetIterator iterator = new MultipleDataSetIterator();
+		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
+				OfflineMode.FALSE);
 
 		for (int i = 0; i < 100; i++) {
 			assertFalse(iterator.hasNext());
@@ -43,7 +56,7 @@ public class TestMultipleDataSetIterator {
 	@Test
 	public void testEmptyDataSetIterator() {
 		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
-				new SingleStaticDataSet());
+				OfflineMode.TRUE, new SingleStaticDataSet());
 
 		for (int i = 0; i < 100; i++) {
 			assertTrue(iterator.hasNext());
@@ -68,7 +81,7 @@ public class TestMultipleDataSetIterator {
 	@Test
 	public void testSingleDataSetIterator() {
 		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
-				new SingleStaticDataSet("myValue"));
+				OfflineMode.TRUE, new SingleStaticDataSet("myValue"));
 
 		for (int i = 0; i < 100; i++) {
 			assertTrue(iterator.hasNext());
@@ -91,9 +104,10 @@ public class TestMultipleDataSetIterator {
 	 * Tests the iteration over several {@code DataSet} instanances.
 	 */
 	@Test
-	public void testMultipleDataSetIterator() {
+	public void testMultipleStaticDataSetIterator() {
 		final MultipleDataSetIterator iterator = new MultipleDataSetIterator(
-				new SingleStaticDataSet("myValue", "anotherValue", 5),
+				OfflineMode.TRUE, new SingleStaticDataSet("myValue",
+						"anotherValue", 5),
 				new SingleStaticDataSet(new SingleStaticDataSetEntry(1, "#1",
 						"THE VALUE IS 1"), new SingleStaticDataSetEntry(2,
 						"#2", "THE VALUE IS 2"), null));
@@ -127,5 +141,57 @@ public class TestMultipleDataSetIterator {
 		} catch (final Exception e) {
 			assertNotNull(e);
 		}
+	}
+
+	/**
+	 * Tests the iteration over several {@code DataSet} instanances.
+	 * 
+	 * @throws IOException
+	 */
+	@Test
+	public void testMultipleMixedDataSetIterator() throws IOException {
+		getDb("tidaTestData",
+				"/net/meisen/dissertation/impl/hsqldbs/tidaTestData.zip");
+
+		// setup the single static data
+		final SingleStaticDataSet singleDataSet = new SingleStaticDataSet(
+				"myValue", "anotherValue", 5);
+
+		// setup the database connection
+		final DbConnectionConfig config = new DbConnectionConfig();
+		config.setDriver(jdbcDriver.class.getName());
+		config.setUsername("SA");
+		config.setPassword("");
+		config.setType("jdbc");
+		config.setUrl("jdbc:hsqldb:hsql://localhost:6666/tidaTestData");
+		final DbDataRetriever retriever = new DbDataRetriever(config);
+		final DbQueryConfig query = new DbQueryConfig();
+		query.setLanguage("sql");
+		query.setQuery("SELECT FIXED, RANDOM, COUNTER FROM TB_TESTDATA");
+
+		// setup the db data
+		final DataRetrieverDataSet dbDataSet = new DataRetrieverDataSet(
+				retriever, query);
+
+		// check the different modes
+		MultipleDataSetIterator it;
+
+		// test the OfflineMode.FALSE
+		it = new MultipleDataSetIterator(OfflineMode.FALSE, singleDataSet,
+				dbDataSet);
+		assertEquals(10001, it.count());
+		it.close();
+
+		// test the OfflineMode.AUTO
+		it = new MultipleDataSetIterator(OfflineMode.AUTO, singleDataSet,
+				dbDataSet);
+		assertEquals(10001, it.count());
+		it.close();
+
+		// test the OfflineMode.TRUE
+		it = new MultipleDataSetIterator(OfflineMode.TRUE, singleDataSet,
+				dbDataSet);
+		assertEquals(1, it.count());
+		it.close();
 	}
 }

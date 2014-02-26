@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import java.util.UUID;
 

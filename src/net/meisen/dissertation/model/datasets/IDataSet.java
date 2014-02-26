@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.datasets;
 
+import net.meisen.dissertation.model.data.OfflineMode;
+
 /**
  * A set of data, whereby the data is represented by so called
  * {@code DataRecords}.
@@ -33,4 +35,14 @@ public interface IDataSet extends Iterable<IDataRecord> {
 	 *         set, otherwise {@code false}
 	 */
 	public boolean isValidPosition(final int position);
+
+	/**
+	 * Determines if the data is available even if the system is in offlineMode.
+	 * 
+	 * @return {@code true} if the data is available even in offline mode,
+	 *         otherwise {@code false}
+	 * 
+	 * @see OfflineMode
+	 */
+	public boolean isOfflineAvailable();
 }

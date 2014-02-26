@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +8,8 @@ import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.EmptyDataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
+import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.datasets.IDataSet;
 
 /**
  * {@code DataSet} which is used to retrieve the data available from a
@@ -82,5 +84,10 @@ public class DataRetrieverDataSet implements IDataSet {
 	@Override
 	public Iterator<IDataRecord> iterator() {
 		return new DataRetrieverDataSetIterator(getCollection());
+	}
+
+	@Override
+	public boolean isOfflineAvailable() {
+		return false;
 	}
 }

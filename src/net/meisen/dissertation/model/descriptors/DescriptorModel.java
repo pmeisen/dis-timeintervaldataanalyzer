@@ -216,27 +216,34 @@ public class DescriptorModel<I extends Object> {
 		// get the loader to retrieve the data
 		DataCollection<?> loader = null;
 		Collection<Object> loadedData = null;
-		try {
-			loader = retriever.retrieve(query);
 
-			// retrieve the data
-			loadedData = loader.transform();
-		} catch (final RuntimeException e) {
-			if (OfflineMode.FALSE.equals(getOfflineMode())) {
-				throw e;
-			} else {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(
-							"Could not load the descriptors of the DescriptorModel '"
-									+ getId() + "'.", e);
+		// check if we are in offline mode
+		if (OfflineMode.TRUE.equals(getOfflineMode())) {
+			// nothing to be loaded just ignore the call and return nothing
+		} else {
+
+			try {
+				loader = retriever.retrieve(query);
+
+				// retrieve the data
+				loadedData = loader.transform();
+			} catch (final RuntimeException e) {
+				if (OfflineMode.FALSE.equals(getOfflineMode())) {
+					throw e;
+				} else {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(
+								"Could not load the descriptors of the DescriptorModel '"
+										+ getId() + "'.", e);
+					}
 				}
-			}
-		} finally {
-			if (loader != null) {
-				try {
-					loader.release();
-				} catch (final RuntimeException e) {
-					// ignore
+			} finally {
+				if (loader != null) {
+					try {
+						loader.release();
+					} catch (final RuntimeException e) {
+						// ignore
+					}
 				}
 			}
 		}

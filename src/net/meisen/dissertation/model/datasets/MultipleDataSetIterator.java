@@ -3,9 +3,11 @@ package net.meisen.dissertation.model.datasets;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.meisen.dissertation.model.data.OfflineMode;
+
 /**
- * A {@code MultipleDataSetIterator} is used to iterate over the {@code DataRecord}
- * instances of different {@code DataSets}.
+ * A {@code MultipleDataSetIterator} is used to iterate over the
+ * {@code DataRecord} instances of different {@code DataSets}.
  * 
  * @author pmeisen
  * 
@@ -23,39 +25,56 @@ public class MultipleDataSetIterator implements IClosableIterator<IDataRecord> {
 	 * {@code DataSet}. Instead it might make more sense to just call
 	 * {@code IDataSet#iterate()}.
 	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used, i.e. which datasets to
+	 *            iterate
 	 * @param dataSet
 	 *            the {@code DataSet} to iterate over
 	 */
-	public MultipleDataSetIterator(final IDataSet dataSet) {
-		this(dataSet == null ? null : new IDataSet[] { dataSet });
+	public MultipleDataSetIterator(final OfflineMode mode,
+			final IDataSet dataSet) {
+		this(mode, dataSet == null ? null : new IDataSet[] { dataSet });
 	}
 
 	/**
 	 * Constructor to create an {@code Iterator} to iterate over several
 	 * {@code DataSet} instances.
 	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used, i.e. which datasets to
+	 *            iterate
 	 * @param dataSets
 	 *            the several {@code DataSet} instances to iterate over
 	 */
-	public MultipleDataSetIterator(final Collection<IDataSet> dataSets) {
-		this(dataSets == null ? null : dataSets.toArray(new IDataSet[] {}));
+	public MultipleDataSetIterator(final OfflineMode mode,
+			final Collection<IDataSet> dataSets) {
+		this(mode, dataSets == null ? null : dataSets
+				.toArray(new IDataSet[] {}));
 	}
 
 	/**
 	 * Constructor to create an {@code Iterator} to iterate over several
 	 * {@code DataSet} instances.
 	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used, i.e. which datasets to
+	 *            iterate
 	 * @param dataSets
 	 *            the several {@code DataSet} instances to iterate over
 	 */
-	public MultipleDataSetIterator(final IDataSet... dataSets) {
+	public MultipleDataSetIterator(final OfflineMode mode,
+			final IDataSet... dataSets) {
+		final boolean checkOfflineAvailability = OfflineMode.TRUE.equals(mode);
+
 		final int amount;
 		if (dataSets == null) {
 			amount = 0;
 		} else {
 			int counter = 0;
 			for (final IDataSet dataSet : dataSets) {
-				if (dataSet != null) {
+				if (dataSet != null
+						&& (!checkOfflineAvailability || dataSet
+								.isOfflineAvailable())) {
 					counter++;
 				}
 			}
@@ -66,7 +85,9 @@ public class MultipleDataSetIterator implements IClosableIterator<IDataRecord> {
 		this.dataSets = new IDataSet[amount];
 		int counter = 0;
 		for (final IDataSet dataSet : dataSets) {
-			if (dataSet != null) {
+			if (dataSet != null
+					&& (!checkOfflineAvailability || dataSet
+							.isOfflineAvailable())) {
 				this.dataSets[counter] = dataSet;
 				counter++;
 			}
@@ -129,5 +150,26 @@ public class MultipleDataSetIterator implements IClosableIterator<IDataRecord> {
 		if (curIterator != null && curIterator instanceof IClosableIterator) {
 			((IClosableIterator<?>) curIterator).close();
 		}
+	}
+
+	/**
+	 * This method should normally never be used because it needs to <b>iterate
+	 * over all the data</b>, therefore it makes sense to implement the
+	 * iteration and get the count meanwhile (if not only the count is needed).
+	 * 
+	 * @return the counted data
+	 */
+	public int count() {
+		int counter = 0;
+		
+		for (final IDataSet dataSet : dataSets) {
+			final Iterator<IDataRecord> it = dataSet.iterator();
+			while (it.hasNext()) {
+				counter++;
+				it.next();
+			}
+		}
+		
+		return counter;
 	}
 }

@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -9,6 +9,8 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
+import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 
 import org.junit.Test;
 

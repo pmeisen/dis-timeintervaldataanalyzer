@@ -1,8 +1,10 @@
-package net.meisen.dissertation.model.datasets;
+package net.meisen.dissertation.impl.datasets;
 
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.DataIterator;
 import net.meisen.dissertation.model.dataretriever.ICloseableDataIterator;
+import net.meisen.dissertation.model.datasets.IClosableIterator;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
  * Iterator to iterate over a {@code DataRetrieverDataSet}. This is more or less

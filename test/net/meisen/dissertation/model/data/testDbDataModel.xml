@@ -5,7 +5,7 @@
 
   <bean id="dataModelId" class="net.meisen.dissertation.model.data.DataModel" />
 
-  <bean class="net.meisen.dissertation.model.datasets.DataRetrieverDataSet">
+  <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
     <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
       <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
         <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
