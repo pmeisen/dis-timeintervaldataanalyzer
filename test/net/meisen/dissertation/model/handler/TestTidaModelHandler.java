@@ -75,8 +75,14 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertEquals("myModel", model.getId());
 	}
 
+	/**
+	 * Tests the saving and loading using the handler.
+	 * 
+	 * @throws IOException
+	 *             if a file cannot be read
+	 */
 	@Test
-	public void testSaveAndLoad() throws IOException, InterruptedException {
+	public void testSaveAndLoad() throws IOException {
 
 		// start the needed Database
 		getDb("tidaPioneerData",
@@ -114,9 +120,14 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertTrue(tmpFile.delete());
 	}
 
+	/**
+	 * Tests the saving and loading using the handler and an offline database.
+	 * 
+	 * @throws IOException
+	 *             if a file cannot be read
+	 */
 	@Test
-	public void testSaveAndLoadOffline() throws IOException,
-			InterruptedException {
+	public void testSaveAndLoadOffline() throws IOException {
 
 		// start the needed Database
 		final Db db = getDb("tidaPioneerData",

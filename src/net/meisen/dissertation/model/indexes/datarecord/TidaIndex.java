@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.meisen.dissertation.exceptions.PersistorException;
+import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -279,9 +280,8 @@ public class TidaIndex implements IPersistable {
 		try {
 			dataId = persistor.readInt(inputStream);
 		} catch (final Exception e) {
-			// TODO add the exception
-			// throw new ForwardedRuntimeException(TidaIndexException.class,
-			// ????, e);
+			throw new ForwardedRuntimeException(TidaIndexException.class, 1000,
+					e);
 		}
 	}
 

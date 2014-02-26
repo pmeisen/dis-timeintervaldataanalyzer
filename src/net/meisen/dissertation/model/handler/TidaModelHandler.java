@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.TidaModelHandlerException;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.persistence.ILocation;
@@ -132,7 +133,8 @@ public class TidaModelHandler {
 	protected IModuleHolder getModuleHolder(final String id,
 			final InputStream is) {
 		if (is == null) {
-			// TODO throw exception
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1000, id);
 		}
 
 		IModuleHolder moduleHolder = moduleHolders.get(id);
@@ -143,12 +145,19 @@ public class TidaModelHandler {
 			try {
 				config = Streams.copyStreamToByteArray(is);
 			} catch (final IOException e) {
-				// TODO add exception
-				throw new RuntimeException(e);
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1002, id);
+				return null;
 			}
 
+			// load the configuration
+			final InputStream bais = new ByteArrayInputStream(config);
 			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader",
-					new ByteArrayInputStream(config));
+					bais);
+
+			// close the stream silently
+			Streams.closeIO(bais);
+
 			moduleHolders.put(id, moduleHolder);
 			configurations.put(id, config);
 
@@ -156,7 +165,8 @@ public class TidaModelHandler {
 				LOG.info("Loaded ModuleHolder '" + id + "'.");
 			}
 		} else {
-			// TODO throw exception
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1001, id);
 		}
 
 		return moduleHolder;
@@ -175,6 +185,7 @@ public class TidaModelHandler {
 					+ ".");
 		}
 
+		configurations.clear();
 		moduleHolders.clear();
 	}
 
@@ -190,6 +201,7 @@ public class TidaModelHandler {
 		final IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder != null) {
 			moduleHolders.remove(id);
+			configurations.remove(id);
 			moduleHolder.release();
 
 			if (LOG.isInfoEnabled()) {
@@ -213,7 +225,8 @@ public class TidaModelHandler {
 		try {
 			return loadViaXslt(id, new FileInputStream(file));
 		} catch (final FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1003, e, file);
 			return null;
 		}
 	}
@@ -278,7 +291,8 @@ public class TidaModelHandler {
 
 		// check if a module has the id already
 		if (moduleHolders.get(id) != null) {
-			// TODO throw exception
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1001, id);
 		}
 
 		final Identifier configId = new Identifier("config.xml");
@@ -335,7 +349,8 @@ public class TidaModelHandler {
 		// get the configuration and the holder
 		final IModuleHolder moduleHolder = moduleHolders.get(id);
 		if (moduleHolder == null) {
-			// TODO throw exception
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1004, id);
 		}
 		final byte[] config = configurations.get(id);
 
@@ -381,7 +396,8 @@ public class TidaModelHandler {
 
 		// check if the document could be read
 		if (doc == null) {
-			// TODO throw exception
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1005);
 		}
 
 		// prepare the result
