@@ -65,6 +65,13 @@
       <version>0.8.2</version>
     </dependency>
     
+    <!-- parser -->
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>4.2</version>
+    </dependency>
+    
     <!-- logging -->
     <dependency>
       <groupId>org.slf4j</groupId>
