@@ -30,13 +30,13 @@ public class QueryFactory {
 		final QueryGrammarParser parser = new QueryGrammarParser(tokens);
 		
 		// parse the stuff and get the result
-		final SelectContext context = parser.select();
-		IntervalContext intContext = context.interval();
-		
-		
+		final SelectContext selectContext = parser.select();
+		final IntervalContext intContext = selectContext.interval();
+
+		System.out.println(selectContext.getTokens(QueryGrammarParser.TYPE_TIMELINES));
 		System.out.println(intContext.getTokens(QueryGrammarParser.DATE));
 		System.out.println(intContext.getTokens(QueryGrammarParser.INT));
-		System.out.println( intContext.CLOSED_BRACE());
-		System.out.println(context.toStringTree(parser));		
+		
+		System.out.println(selectContext.toStringTree(parser));		
 	}
 }
