@@ -25,21 +25,26 @@ package net.meisen.dissertation.parser.query.generated;
 package net.meisen.dissertation.parser.query.generated;
 }
 
-/*
- * SELECT TIMELINES IN ([START, END]) FILTER BY A='B' OR "C"='D' GROUP BY DESC_ID, "desc name"
- */
-select    : STMT_SELECT (TYPE_TIMELINES | TYPE_RECORDS) OP_IN interval (OP_FILTERBY logic)? (OP_GROUPBY selector_descriptor (SEPARATOR selector_descriptor)*)?;
-logic     : expression ((LOGICAL_OR | LOGICAL_AND) logic)* | BRACKET_ROUND_OPENED logic BRACKET_ROUND_CLOSED;
-expression: selector_descriptor CMP_EQUAL DESC_VALUE | selector_interval (CMP_EQUAL | CMP_SMALLER | CMP_LARGER | CMP_LARGEREQUAL | CMP_SMALLEREQUAL) (DATE | INT);
-interval  : (BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED) (INT SEPARATOR INT | DATE SEPARATOR DATE) (BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED);
+// select statement to select timeSeries or records for a timeWindow (exprInterval)
+exprSelect   : STMT_SELECT selectorSelectType (OP_IN exprInterval)? (OP_FILTERBY exprLogic)? (OP_GROUPBY exprAggregate)? EOF;
+exprAggregate: IDENTIFIER (SEPARATOR IDENTIFIER)*;
+exprLogic    : exprComp+;
+exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
+exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 
-selector_interval    : INTERVAL_START | INTERVAL_END;
-selector_descriptor  : DESC_NAME | IDENTIFIER;
+// define different comparators for metaData
+compDescriptorEqual     : IDENTIFIER CMP_EQUAL DESC_VALUE;
+
+selectorSelectType      : TYPE_TIMESERIES | TYPE_RECORDS;
+selectorDateInterval    : DATE SEPARATOR DATE;
+selectorIntInterval     : INT SEPARATOR INT;
+selectorOpenInterval    : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
+selectorCloseInterval   : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 
 STMT_SELECT   : S E L E C T;
 
-TYPE_TIMELINES: T I M E L I N E S;
-TYPE_RECORDS  : R E C O R D S;
+TYPE_TIMESERIES: T I M E S E R I E S;
+TYPE_RECORDS   : R E C O R D S;
 
 OP_IN       : I N;
 OP_GROUPBY  : G R O U P ' ' B Y;
@@ -47,15 +52,9 @@ OP_FILTERBY : F I L T E R ' ' B Y;
 
 LOGICAL_OR  : O R | '||';
 LOGICAL_AND : A N D | '&&';
+LOGICAL_NOT : N O T | '!';
 
-INTERVAL_START : S T A R T;
-INTERVAL_END   : E N D;
-
-CMP_LARGEREQUAL : '>=';
-CMP_SMALLEREQUAL: '<=';
 CMP_EQUAL       : '=';
-CMP_SMALLER     : '<';
-CMP_LARGER      : '>';
 
 BRACKET_ROUND_OPENED  : '(';
 BRACKET_ROUND_CLOSED  : ')';
@@ -75,11 +74,9 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
 DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE))|.)*? SYM_DESC_VALUE;
-DESC_NAME : SYM_DESC_NAME ((SYM_QUOTE (SYM_DESC_NAME | SYM_QUOTE))|.)*? SYM_DESC_NAME;
 
 WHITESPACE: [ \t\r\n]+ -> skip;
 
-fragment SYM_DESC_NAME  : '"';
 fragment SYM_DESC_VALUE : '\'';
 fragment SYM_QUOTE      : '\\';
 
