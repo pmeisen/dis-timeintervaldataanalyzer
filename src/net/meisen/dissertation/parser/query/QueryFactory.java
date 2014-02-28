@@ -9,18 +9,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 public class QueryFactory {
 
-	private final QueryGenerator generator;
-	private final ParseTreeWalker walker;
-
-	public QueryFactory() {
-
-		// create a generator for queries
-		generator = new QueryGenerator();
-
-		// create a walker which feeds the generator later
-		walker = new ParseTreeWalker();
-	}
-
 	public IQuery parseQuery(final String queryString) {
 		System.out.println(queryString);
 
@@ -36,16 +24,11 @@ public class QueryFactory {
 		// create a parser that feeds off the tokens buffer
 		final QueryGrammarParser parser = new QueryGrammarParser(tokens);
 
-		// create the query for the parser
-		final IQuery query = createQuery(parser);
+		// create a generator for queries
+		final QueryGenerator generator = new QueryGenerator();
 
-		// make sure it is set to null
-		generator.reset();
-
-		return query;
-	}
-
-	protected IQuery createQuery(final QueryGrammarParser parser) {
+		// create a walker which feeds the generator later
+		final ParseTreeWalker walker = new ParseTreeWalker();
 
 		// trigger the generator by a walker (post-parsing)
 		walker.walk(generator, parser.exprSelect());

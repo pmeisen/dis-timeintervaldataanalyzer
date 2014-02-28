@@ -31,25 +31,35 @@ import net.meisen.general.genmisc.types.Strings;
  */
 public class QueryGenerator extends QueryGrammarBaseListener {
 	private IQuery query;
-	private boolean finalized;
+	private boolean finalized = false;
 
 	/**
-	 * Resets the generated query.
+	 * Create the {@code query} and mark the process to be in-progress, i.e.
+	 * {@link #isFinalized()} returns {@code false}.
 	 */
-	public void reset() {
-		this.query = null;
-	}
-
 	@Override
 	public void enterExprSelect(final ExprSelectContext ctx) {
-		if (this.query != null) {
+		if (!this.finalized) {
+			// TODO add exception
+			throw new IllegalStateException(
+					"The parsing is still in progress or already finished.");
+		} else if (this.query != null) {
 			// TODO add exception
 			throw new IllegalStateException(
 					"Cannot parse multiple selects at once.");
 		}
 
-		this.finalized = false;
 		this.query = new SelectQuery();
+	}
+
+	/**
+	 * Checks if the generation is finalized, i.e. {@code true} is returned.
+	 * 
+	 * @return the generation is finalized (i.e. {@code true}), if not finalized
+	 *         {@code false} is returned
+	 */
+	public boolean isFinalized() {
+		return this.finalized;
 	}
 
 	@Override
@@ -97,7 +107,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
-	public void enterExprInterval(final ExprIntervalContext ctx) {
+	public void exitExprInterval(final ExprIntervalContext ctx) {
 
 		// determine the types of the interval
 		final IntervalType openType = IntervalType.resolve(ctx

@@ -74,4 +74,9 @@ public class DescriptorLogicTree {
 			}
 		}
 	}
+
+	public void optimize() {
+		
+		// merge equal logical expressions
+	}
 }

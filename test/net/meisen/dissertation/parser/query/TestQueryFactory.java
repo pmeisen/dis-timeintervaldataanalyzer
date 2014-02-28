@@ -23,13 +23,14 @@ import net.meisen.general.genmisc.types.Dates;
 import org.junit.Test;
 
 /**
- * Tests the implementation of the {@code QueryFactory} and
- * {@code QueryGenerator}.
+ * Tests the implementation of the {@code QueryFactory}, {@code QueryGenerator}
+ * and {@code DescriptorLogicTree}.
  * 
  * @author pmeisen
  * 
  * @see QueryGenerator
  * @see QueryFactory
+ * @see DescriptorLogicTree
  * 
  */
 public class TestQueryFactory {
@@ -251,6 +252,9 @@ public class TestQueryFactory {
 		assertEquals(notHello, and.getChild(1));
 	}
 
+	/**
+	 * Tests the parsing of a more complex logic using {@code not}.
+	 */
 	@Test
 	public void testLogicalComplexNot() {
 		final SelectQuery query = q("select timeseries in [15.06.2014,20.01.2015] filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
@@ -270,6 +274,11 @@ public class TestQueryFactory {
 		assertEquals("NOT(GREETINGS = HI)", order.get(6).toString());
 		assertEquals("AND(NOT(OR(CAKE = APPLE, NOT(CAKE = CHERRY))), NOT(GREETINGS = HI))", order.get(7).toString());
 		// @formatter:on
+	}
+	
+	@Test
+	public void testLogicalOptimization() {
+		
 	}
 
 	@Test

@@ -34,4 +34,8 @@ public class SelectQuery implements IQuery {
 	public DescriptorLogicTree getFilter() {
 		return filter;
 	}
+
+	public void optimize() {
+		
+	}
 }
