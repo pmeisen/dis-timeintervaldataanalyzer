@@ -36,6 +36,6 @@ public class SelectQuery implements IQuery {
 	}
 
 	public void optimize() {
-		
+		filter.optimize();
 	}
 }

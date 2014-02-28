@@ -30,8 +30,31 @@ import net.meisen.general.genmisc.types.Strings;
  * @author pmeisen
  */
 public class QueryGenerator extends QueryGrammarBaseListener {
+	private final boolean optimize;
+
 	private IQuery query;
 	private boolean finalized = false;
+
+	/**
+	 * Generates a {@code QueryGenerator} which will trigger optimization after
+	 * complete generation.
+	 */
+	public QueryGenerator() {
+		this(true);
+	}
+
+	/**
+	 * Generates a {@code QueryGenerator} which will optimize (i.e.
+	 * {@code optimize} is {@code true}) or not optimize (i.e. {@code optimize}
+	 * is {@code false}) the created query.
+	 * 
+	 * @param optimize
+	 *            {@code true} if the created query should be optimized,
+	 *            otherwise {@code false}
+	 */
+	public QueryGenerator(final boolean optimize) {
+		this.optimize = optimize;
+	}
 
 	/**
 	 * Create the {@code query} and mark the process to be in-progress, i.e.
@@ -64,6 +87,10 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprSelect(final ExprSelectContext ctx) {
+		if (optimize) {
+			q(SelectQuery.class).optimize();
+		}
+
 		finalized = true;
 	}
 
