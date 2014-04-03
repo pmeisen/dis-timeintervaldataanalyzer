@@ -14,6 +14,7 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
@@ -23,6 +24,7 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
 import net.meisen.dissertation.model.time.granularity.Second;
@@ -98,6 +100,13 @@ public class DefaultValues {
 	public static final String GRANULARTYFACTORY_ID = "granularityFactory";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code QueryFactory}.
+	 * 
+	 * @see IQueryFactory
+	 */
+	public static final String QUERYFACTORY_ID = "queryFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code TimelineDefinition}.
 	 * 
 	 * @see TimelineDefinition
@@ -151,12 +160,23 @@ public class DefaultValues {
 	/**
 	 * Get the default {@code TimeGranularityFactory} to be used.
 	 * 
-	 * @return the {@code TimeGranularityFactory} to be used if none is defined.
+	 * @return the {@code TimeGranularityFactory} to be used if none is defined
 	 * 
 	 * @see ITimeGranularityFactory
 	 */
 	public static String getDefaultGranularitiesFactory() {
 		return TimeGranularityFactory.class.getName();
+	}
+
+	/**
+	 * Get the default {@code QueryFactory} to be used.
+	 * 
+	 * @return the {@code QueryFactory} to be used if none is defined
+	 * 
+	 * @see IQueryFactory
+	 */
+	public static String getDefaultQueryFactory() {
+		return QueryFactory.class.getName();
 	}
 
 	/**

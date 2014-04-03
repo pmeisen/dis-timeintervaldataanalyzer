@@ -116,6 +116,26 @@ public class TidaModelHandler {
 	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
 
 	/**
+	 * Gets the {@code TidaModel} loaded by the {@code ModuleHolder} with the
+	 * specified id. If no {@code ModuleHolder} with the specified id is known,
+	 * {@code null} is returned.
+	 * 
+	 * @param id
+	 *            the if to moduleHolder to get the {@code TidaModel} for
+	 *            
+	 * @return the {@code TidaModel} or {@code null} if the id is unknown
+	 */
+	public TidaModel getTidaModel(final String id) {
+		final IModuleHolder holder = moduleHolders.get(id);
+
+		if (holder == null) {
+			return null;
+		} else {
+			return holder.getModule(DefaultValues.TIDAMODEL_ID);
+		}
+	}
+
+	/**
 	 * Helper method to load the modules defined by the specified {@code is}.
 	 * The loaded {@code ModuleHolder} is kept internally within a {@code Map}.
 	 * 

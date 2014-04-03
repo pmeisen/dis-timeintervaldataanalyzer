@@ -80,9 +80,9 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	}
 
 	/**
-	 * Gets the value of the {@code DoubleDescriptor}.
+	 * Gets the value of the {@code Descriptor}.
 	 * 
-	 * @return the value of the {@code DoubleDescriptor}
+	 * @return the value of the {@code Descriptor}
 	 */
 	public abstract D getValue();
 

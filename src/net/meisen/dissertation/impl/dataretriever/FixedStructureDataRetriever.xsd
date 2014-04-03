@@ -2,11 +2,8 @@
 
 <xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/fxd" 
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:base="http://dev.meisen.net/xsd/dissertation/model"
            targetNamespace="http://dev.meisen.net/xsd/dissertation/model/fxd" attributeFormDefault="unqualified" elementFormDefault="qualified">
            
-  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
-
   <xs:simpleType name="type">
     <xs:restriction base="xs:string">
       <xs:enumeration value="java.lang.Integer" />

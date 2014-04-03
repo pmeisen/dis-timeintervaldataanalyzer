@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/types" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/types" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+  <xs:simpleType name="identifier">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Za-z][A-Za-z0-9_\-]*" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="javaClass">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_]*(\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="nonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+      <xs:pattern value="[^\s]+" />
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="date">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d\d\.\d\d\.\d\d\d\d \d\d:\d\d:\d\d" />
+      <xs:pattern value="\d\d\.\d\d\.\d\d\d\d" />
+      <xs:pattern value="\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d" />
+      <xs:pattern value="\d\d\d\d\-\d\d\-\d\d" />
+      <xs:pattern value="\d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d" />
+      <xs:pattern value="\d\d/\d\d/\d\d\d\d" />
+      <xs:pattern value="\d\d\d\d\.\d\d\.\d\d \d\d:\d\d:\d\d" />
+      <xs:pattern value="\d\d\d\d\.\d\d\.\d\d" />
+    </xs:restriction>
+  </xs:simpleType>
+    
+  <xs:simpleType name="dateOrNumber">
+    <xs:union memberTypes="date xs:nonNegativeInteger" />
+  </xs:simpleType>
+  
+</xs:schema>

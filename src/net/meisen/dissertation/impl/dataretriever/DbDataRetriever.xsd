@@ -2,10 +2,10 @@
 
 <xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/db" 
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:base="http://dev.meisen.net/xsd/dissertation/model"
+           xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
            targetNamespace="http://dev.meisen.net/xsd/dissertation/model/db" attributeFormDefault="unqualified" elementFormDefault="qualified">
            
-  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
 
   <xs:simpleType name="connectionType">
     <xs:restriction base="xs:string">
@@ -23,7 +23,7 @@
     <xs:complexType>
       <xs:attribute name="type" type="connectionType" use="required" />
       <xs:attribute name="url" type="xs:anyURI" use="required" />
-      <xs:attribute name="driver" type="base:javaClass" use="required" />
+      <xs:attribute name="driver" type="types:javaClass" use="required" />
       <xs:attribute name="username" type="xs:string" use="required" />
       <xs:attribute name="password" type="xs:string" use="required" />
     </xs:complexType>

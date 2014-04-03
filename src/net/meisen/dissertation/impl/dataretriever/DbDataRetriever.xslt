@@ -17,7 +17,7 @@
       <property name="url" value="{$url}"/>
       <property name="driver" value="{$driver}"/>
       <property name="username" value="{$username}"/>
-      <property name="password" value="{password}"/>
+      <property name="password" value="{$password}"/>
     </bean>
   </xsl:template>
   

@@ -37,9 +37,9 @@ public class TestXsdTidaModel {
 	 *             if the validation is invalid
 	 */
 	@Test
-	public void testSimpliestModel() throws ValidationFailedException {
+	public void testSimplestModel() throws ValidationFailedException {
 		xsdValidator
-				.validateFromClasspath("/net/meisen/dissertation/config/simpliestModel.xml");
+				.validateFromClasspath("/net/meisen/dissertation/config/simplestModel.xml");
 	}
 
 	/**

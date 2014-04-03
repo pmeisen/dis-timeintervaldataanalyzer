@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/config" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/config" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
+
+  <xs:element name="config">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="factories" minOccurs="0">
+          <xs:complexType>
+
+            <xs:sequence>
+              <xs:element name="indexes" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="mappers" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="granularities" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="queries" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+
+    </xs:complexType>
+  </xs:element>
+
+
+</xs:schema>

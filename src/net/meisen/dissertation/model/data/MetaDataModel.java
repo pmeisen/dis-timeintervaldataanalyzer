@@ -181,7 +181,7 @@ public class MetaDataModel {
 		final DescriptorModel<I> model = (DescriptorModel<I>) getDescriptorModel(modelId);
 		if (model == null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
-					1002, modelId);
+					1004, modelId);
 		}
 
 		return (Descriptor<?, ?, I>) model.getDescriptor(id);
@@ -210,7 +210,7 @@ public class MetaDataModel {
 		final DescriptorModel<?> model = getDescriptorModel(modelId);
 		if (model == null) {
 			exceptionRegistry.throwException(MetaDataModelException.class,
-					1002, modelId);
+					1004, modelId);
 		}
 
 		return (Descriptor<D, ?, ?>) model.getDescriptorByValue(value);
@@ -404,7 +404,7 @@ public class MetaDataModel {
 	 */
 	public void setOfflineMode(final OfflineMode mode) {
 		this.offlineMode = mode == null ? OfflineMode.find(null) : mode;
-		
+
 		// nothing indexed so far, because no factory defined
 		if (getIndexedCollectionFactory() == null) {
 			return;

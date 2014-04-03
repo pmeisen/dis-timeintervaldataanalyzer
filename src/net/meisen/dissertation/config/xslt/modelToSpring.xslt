@@ -35,24 +35,6 @@
         <xsl:otherwise><xsl:value-of select="$modelId" /></xsl:otherwise>
       </xsl:choose>
     </xsl:variable> 
-    <xsl:variable name="indexedFactory">
-      <xsl:choose>
-        <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:indexes/@implementation" /></xsl:when>
-        <xsl:otherwise><xsl:value-of select="mdef:getDefaultIndexedCollectionFactory()" /></xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable> 
-    <xsl:variable name="mapperFactory">
-      <xsl:choose>
-        <xsl:when test="//mns:config/mns:factories/mns:mappers/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:mappers/@implementation" /></xsl:when>
-        <xsl:otherwise><xsl:value-of select="mdef:getDefaultMappersFactory()" /></xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
-    <xsl:variable name="granularityFactory">
-      <xsl:choose>
-        <xsl:when test="//mns:config/mns:factories/mns:granularities/@implementation"><xsl:value-of select="//mns:config/mns:factories/mns:granularities/@implementation" /></xsl:when>
-        <xsl:otherwise><xsl:value-of select="mdef:getDefaultGranularitiesFactory()" /></xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
     <xsl:variable name="metahandling">
       <xsl:choose>
         <xsl:when test="mns:data/@metahandling"><xsl:value-of select="mns:data/@metahandling"/></xsl:when>
@@ -71,20 +53,50 @@
         <xsl:otherwise></xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-  
+      
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-      
+
       <!-- create the indexFactory to be used -->
-      <bean id="{$indexFactoryId}" class="{$indexedFactory}" />
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation">
+          <xsl:variable name="indexFactory" select="//mns:config/mns:factories/mns:indexes/@implementation" />
+          <bean id="{$indexFactoryId}" class="{$indexFactory}" />        
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$indexFactoryId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultIndexFactoryClass" />
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
       
       <!-- create the mapperFactory to be used -->
-      <bean id="{$mapperFactoryId}" class="{$mapperFactory}" />
-      
-      <!-- create the granularitiesFactory to be used -->
-      <bean id="{$granularityFactoryId}" class="{$granularityFactory}" />
-      
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:factories/mns:mappers/@implementation">
+          <xsl:variable name="mapperFactory" select="//mns:config/mns:factories/mns:mappers/@implementation" />
+          <bean id="{$mapperFactoryId}" class="{$mapperFactory}" />        
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$mapperFactoryId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultMapperFactoryClass" />
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+
+      <!-- create the granularityFactory to be used -->
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:factories/mns:granularities/@implementation">
+          <xsl:variable name="granularityFactory" select="//mns:config/mns:factories/mns:granularities/@implementation" />
+          <bean id="{$granularityFactoryId}" class="{$granularityFactory}" />        
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$granularityFactoryId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultGranularityFactoryClass" />
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+                  
       <!-- create all the defined dataRetrievers -->
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">
         <xsl:variable name="id" select="@id" />

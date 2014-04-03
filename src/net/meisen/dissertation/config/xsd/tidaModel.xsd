@@ -1,44 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model" xmlns:mns="http://dev.meisen.net/xsd/dissertation/model" 
-           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
            targetNamespace="http://dev.meisen.net/xsd/dissertation/model" attributeFormDefault="unqualified" elementFormDefault="qualified">
 
-  <xs:simpleType name="identifier">
-    <xs:restriction base="xs:string">
-      <xs:pattern value="[A-Za-z][A-Za-z0-9_\-]*" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="javaClass">
-    <xs:restriction base="xs:string">
-      <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_]*(\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*" />
-    </xs:restriction>
-  </xs:simpleType>
-  
-  <xs:simpleType name="nonEmptyString">
-    <xs:restriction base="xs:string">
-      <xs:minLength value="1" />
-      <xs:pattern value="[^\s]+" />
-    </xs:restriction>
-  </xs:simpleType>
-  
-  <xs:simpleType name="date">
-    <xs:restriction base="xs:string">
-      <xs:pattern value="\d\d\.\d\d\.\d\d\d\d \d\d:\d\d:\d\d" />
-      <xs:pattern value="\d\d\.\d\d\.\d\d\d\d" />
-      <xs:pattern value="\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d" />
-      <xs:pattern value="\d\d\d\d\-\d\d\-\d\d" />
-      <xs:pattern value="\d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d" />
-      <xs:pattern value="\d\d/\d\d/\d\d\d\d" />
-      <xs:pattern value="\d\d\d\d\.\d\d\.\d\d \d\d:\d\d:\d\d" />
-      <xs:pattern value="\d\d\d\d\.\d\d\.\d\d" />
-    </xs:restriction>
-  </xs:simpleType>
-    
-  <xs:simpleType name="dateOrNumber">
-    <xs:union memberTypes="date xs:nonNegativeInteger" />
-  </xs:simpleType>
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
 
   <xs:element name="model">
     <xs:complexType>
@@ -54,19 +19,19 @@
                   <xs:sequence>
                     <xs:element name="indexes" minOccurs="0">
                       <xs:complexType>
-                        <xs:attribute name="implementation" type="javaClass" use="required" />
+                        <xs:attribute name="implementation" type="types:javaClass" use="required" />
                       </xs:complexType>
                     </xs:element>
                     
                     <xs:element name="mappers" minOccurs="0">
                       <xs:complexType>
-                        <xs:attribute name="implementation" type="javaClass" use="required" />
+                        <xs:attribute name="implementation" type="types:javaClass" use="required" />
                       </xs:complexType>
                     </xs:element>
                     
                     <xs:element name="granularities" minOccurs="0">
                       <xs:complexType>
-                        <xs:attribute name="implementation" type="javaClass" use="required" />
+                        <xs:attribute name="implementation" type="types:javaClass" use="required" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -83,8 +48,8 @@
                           <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
                         </xs:sequence>
 
-                        <xs:attribute name="id" type="identifier" use="required" />
-                        <xs:attribute name="implementation" type="javaClass" use="optional" />
+                        <xs:attribute name="id" type="types:identifier" use="required" />
+                        <xs:attribute name="implementation" type="types:javaClass" use="optional" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -100,11 +65,11 @@
             
               <xs:element name="timeline" minOccurs="0">
                 <xs:complexType>
-                  <xs:attribute name="start" type="dateOrNumber" use="optional" />
-                  <xs:attribute name="end" type="dateOrNumber" use="optional" />
+                  <xs:attribute name="start" type="types:dateOrNumber" use="optional" />
+                  <xs:attribute name="end" type="types:dateOrNumber" use="optional" />
                   <xs:attribute name="duration" type="xs:positiveInteger" use="optional" />
-                  <xs:attribute name="granularity" type="nonEmptyString" use="optional" />
-                  <xs:attribute name="durationgranularity" type="nonEmptyString" use="optional" />
+                  <xs:attribute name="granularity" type="types:nonEmptyString" use="optional" />
+                  <xs:attribute name="durationgranularity" type="types:nonEmptyString" use="optional" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -133,9 +98,9 @@
                           <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
                         </xs:sequence>
 
-                        <xs:attribute name="descriptor" type="identifier" use="required" />
+                        <xs:attribute name="descriptor" type="types:identifier" use="required" />
                         <xs:attribute name="value" type="xs:string" use="optional" />
-                        <xs:attribute name="dataretriever" type="identifier" use="optional" />
+                        <xs:attribute name="dataretriever" type="types:identifier" use="optional" />
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -153,7 +118,7 @@
                 <xs:complexType>
                   <xs:complexContent>
                     <xs:extension base="structurelement">
-                      <xs:attribute name="descriptor" type="identifier" use="required" />
+                      <xs:attribute name="descriptor" type="types:identifier" use="required" />
                     </xs:extension>
                   </xs:complexContent>
                 </xs:complexType>
@@ -163,7 +128,7 @@
                 <xs:complexType>
                   <xs:complexContent>
                     <xs:extension base="structurelement">
-                      <xs:attribute name="type" type="identifier" use="required" />
+                      <xs:attribute name="type" type="types:identifier" use="required" />
                     </xs:extension>
                   </xs:complexContent>
                 </xs:complexType>
@@ -183,16 +148,16 @@
                     <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
                     <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
-                        <xs:attribute name="type" type="nonEmptyString" use="optional" />
-                        <xs:attribute name="class" type="javaClass" use="optional" />
+                        <xs:attribute name="type" type="types:nonEmptyString" use="optional" />
+                        <xs:attribute name="class" type="types:javaClass" use="optional" />
                         <xs:attribute name="value" type="xs:string" use="optional" />
-                        <xs:attribute name="name" type="nonEmptyString" use="optional" />
+                        <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
                         <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>
 
-                  <xs:attribute name="dataretriever" type="identifier" use="optional" />
+                  <xs:attribute name="dataretriever" type="types:identifier" use="optional" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -203,22 +168,22 @@
         </xs:element>
       </xs:sequence>
 
-      <xs:attribute name="id" type="identifier" use="optional" />
+      <xs:attribute name="id" type="types:identifier" use="optional" />
       <xs:attribute name="name" type="xs:string" use="optional" />
       <xs:attribute name="offlinemode" type="xs:string" use="optional" />
     </xs:complexType>
   </xs:element>
 
   <xs:complexType name="descriptor">
-    <xs:attribute name="id" type="identifier" use="required" />
+    <xs:attribute name="id" type="types:identifier" use="required" />
     <xs:attribute name="null" type="xs:boolean" use="optional" />
     <xs:attribute name="failonduplicates" type="xs:boolean" use="optional" />
     <xs:attribute name="name" type="xs:string" use="optional" />
-    <xs:attribute name="idfactory" type="javaClass" use="optional" />
+    <xs:attribute name="idfactory" type="types:javaClass" use="optional" />
   </xs:complexType>
   
   <xs:complexType name="structurelement">
-    <xs:attribute name="name" type="nonEmptyString" use="optional" />
+    <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
     <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
   </xs:complexType>
   

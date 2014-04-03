@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<schemaFactory revisionNumber="124">
+    <schemaDefinition name="SMC" description="" group="SMC" loadOnStartup="false">
+        <activateIncrementalLoad>false</activateIncrementalLoad>
+        <useUnknownMembersInFacts>true</useUnknownMembersInFacts>
+        <autoCleanUpTableColumns>false</autoCleanUpTableColumns>
+        <useFactPartitioning>false</useFactPartitioning>
+        <mmapFacts>false</mmapFacts>
+        <hierarchyUniqueNameStyle>IncludeDimensionName</hierarchyUniqueNameStyle>
+        <jdbcDS driverType="ORACLE" serverName="localhost" portNumber="1521" dbName="db12c" user="TIDA_GH_TASKS" dontAddQuotes="false" password="☁bWVpc2Vu" name="Oracle">
+            <jdbcDatatable fetchSize="1000" id="5cdc6039-574c-4d23-a056-dbf9e1bf509e" tableName="TB_FACTS_TASK_INTERVAL" incrementalLoadColumnName="" partitioningColumnName="">
+                <column name="DIM_DEG_TASKOID" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="DIM_KEY_LOCATION" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="DIM_KEY_PERSON" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="DIM_KEY_TASKTYPE" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="INTERVAL_END" tableType="TIMESTAMP" type="DATE" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="INTERVAL_START" tableType="TIMESTAMP" type="DATE" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="VALUE" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false" nullObjectAsString=""/>
+            </jdbcDatatable>
+            <jdbcDatatable fetchSize="1000" id="b7aad33e-4605-4bdc-a2a2-9ea5082b79e6" tableName="TB_DIM_LOCATION">
+                <column name="DEPARTMENT" tableType="VARCHAR(50)" type="STRING" selected="true" primaryKey="false"/>
+                <column name="KEY_LOCATION" tableType="DECIMAL(38,0)" type="LONG" selected="true" primaryKey="false"/>
+                <column name="WORKAREA" tableType="VARCHAR(50)" type="STRING" selected="true" primaryKey="false"/>
+            </jdbcDatatable>
+        </jdbcDS>
+        <fileCSV directory="C:\data\ghdata\" name="ghdata">
+            <csvDataTable csvseparator=";" csvquotechar="&quot;" csvescape="\" csvstrictQuotes="false" csvignoreLeadingWhiteSpace="true" fileEncoding="UTF-8" id="5a148063-dd1c-4579-a7f4-d3304f4b6d1b" tableName="tida.csv" incrementalLoadColumnName="">
+                <column name="KEY" tableType="STRING" type="STRING" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="PERSON" tableType="STRING" type="STRING" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="TASKTYPE" tableType="STRING" type="STRING" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="WORKAREA" tableType="STRING" type="STRING" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="INTERVAL_START" tableType="STRING" type="DATE" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <column name="INTERVAL_END" tableType="STRING" type="DATE" selected="true" primaryKey="false" nullObjectAsString=""/>
+                <stringDateConverter>yyyy/MM/dd HH:mm:ss</stringDateConverter>
+                <trimStrings>true</trimStrings>
+                <columnSeparator>,</columnSeparator>
+                <commentMarker>#</commentMarker>
+            </csvDataTable>
+        </fileCSV>
+        <timeWizardDimension isDefaultTimeDimension="false" isIndexingByRange="true" from="2008-01-01T00:00:00.000" to="2008-12-31T00:00:00.000" unknownMemberName="" id="2f36e3b9-8319-44e4-8863-3692e78408ea" name="Time">
+            <timeHierarchy hasAllLevel="true" allLevelName="All-L" allMemberName="All-M" name="Interval" isDefault="true" defaultMemberName="">
+                <factAggregationType>MEMBER_AND_ANCESTORS</factAggregationType>
+                <level name="Year" type="YEAR" nameFormat="yyyy">
+                    <useRelativeKey>false</useRelativeKey>
+                </level>
+                <level name="Month" type="MONTH" nameFormat="MM.yyyy">
+                    <useRelativeKey>false</useRelativeKey>
+                </level>
+                <level name="Day" type="DAY" nameFormat="dd.MM.yyyy">
+                    <useRelativeKey>false</useRelativeKey>
+                </level>
+            </timeHierarchy>
+        </timeWizardDimension>
+        <multiLevelDimension dataTableId="5a148063-dd1c-4579-a7f4-d3304f4b6d1b" isTimeDimension="true" isDefaultTimeDimension="false" isIndexingByRange="false" unknownMemberName="" id="32617450-959a-4727-8256-24314eb4b2cb" name="Workarea">
+            <multiLevelHierarchy hasAllLevel="true" allLevelName="All-L" allMemberName="All-M" name="Workarea" isDefault="true" defaultMemberName="">
+                <factAggregationType>MEMBER_AND_ANCESTORS</factAggregationType>
+                <level name="Workarea" nameUnique="true" nameUniqueInParent="true" keyUnique="false">
+                    <nameCol name="WORKAREA"/>
+                    <orderType>BY_NAME</orderType>
+                    <orderKind>ASC</orderKind>
+                </level>
+            </multiLevelHierarchy>
+        </multiLevelDimension>
+        <multiLevelDimension dataTableId="5a148063-dd1c-4579-a7f4-d3304f4b6d1b" isTimeDimension="false" isDefaultTimeDimension="false" isIndexingByRange="false" unknownMemberName="" id="78c6cb92-4a15-4905-97c5-382990a94d52" name="TaskType">
+            <multiLevelHierarchy hasAllLevel="true" allLevelName="All-L" allMemberName="All-M" name="TaskType" isDefault="true" defaultMemberName="">
+                <factAggregationType>MEMBER_AND_ANCESTORS</factAggregationType>
+                <level name="TaskType" nameUnique="true" nameUniqueInParent="true" keyUnique="false">
+                    <nameCol name="TASKTYPE"/>
+                    <orderType>BY_NAME</orderType>
+                    <orderKind>ASC</orderKind>
+                </level>
+            </multiLevelHierarchy>
+        </multiLevelDimension>
+        <multiLevelDimension dataTableId="5a148063-dd1c-4579-a7f4-d3304f4b6d1b" isTimeDimension="false" isDefaultTimeDimension="false" isIndexingByRange="false" unknownMemberName="" id="ccc4d1c6-8001-4b44-8a58-9beb08b2e89f" name="Person">
+            <multiLevelHierarchy hasAllLevel="true" allLevelName="All-L" allMemberName="All-M" name="Person" isDefault="true" defaultMemberName="">
+                <factAggregationType>MEMBER_AND_ANCESTORS</factAggregationType>
+                <level name="Person" nameUnique="true" nameUniqueInParent="true" keyUnique="false">
+                    <nameCol name="PERSON"/>
+                    <orderType>NONE</orderType>
+                    <orderKind>ASC</orderKind>
+                </level>
+            </multiLevelHierarchy>
+        </multiLevelDimension>
+        <cube id="af90a129-4f20-4f92-9f14-1a65e889d6f8" name="Cube">
+            <defaultFacts measureGroupName="Facts" partitioningLevelName="" partitioningType="NONE" dataTableId="5a148063-dd1c-4579-a7f4-d3304f4b6d1b" aggregateDataSourceFacts="false" unresolvedRowsBehavior="ERROR">
+                <measure name="Amount" aggregationType="COUNT">
+                    <rollupHierarchy></rollupHierarchy>
+                    <dataColumn name="KEY"/>
+                    <cellProperties></cellProperties>
+                </measure>
+                <links dimensionId="ccc4d1c6-8001-4b44-8a58-9beb08b2e89f">
+                    <viewLinks>
+                        <fromColumns name="PERSON"/>
+                        <toColumns name="PERSON"/>
+                    </viewLinks>
+                </links>
+                <links dimensionId="78c6cb92-4a15-4905-97c5-382990a94d52">
+                    <viewLinks>
+                        <fromColumns name="TASKTYPE"/>
+                        <toColumns name="TASKTYPE"/>
+                    </viewLinks>
+                </links>
+                <links dimensionId="2f36e3b9-8319-44e4-8863-3692e78408ea">
+                    <viewLinks>
+                        <fromColumns name="Day"/>
+                        <toColumns name="INTERVAL_END"/>
+                        <toColumns name="INTERVAL_START"/>
+                    </viewLinks>
+                </links>
+                <links dimensionId="32617450-959a-4727-8256-24314eb4b2cb">
+                    <viewLinks>
+                        <fromColumns name="WORKAREA"/>
+                        <toColumns name="WORKAREA"/>
+                    </viewLinks>
+                </links>
+            </defaultFacts>
+        </cube>
+        <localization enabled="false"/>
+        <script>
+            <content>-- 
+-- Automatically migrated from an old XML file definition format (v2.0.4 or before) 
+-- 
+
+-- 
+-- Drop all calc. members, sets and functions declared at schema/cube levels 
+-- 
+
+DROP *
+
+
+-- 
+-- Functions 
+-- 
+
+-- 
+-- Sets 
+-- 
+
+-- 
+-- Calculated Measures/Members 
+-- 
+
+</content>
+        </script>
+        <diagramPosition tableId="5cdc6039-574c-4d23-a056-dbf9e1bf509e" left="20" top="20"/>
+    </schemaDefinition>
+</schemaFactory>

@@ -12,11 +12,17 @@
     
     <interval position="1" type="start" />
     <interval name="intervalend" type="end" />
-    
+        
     <key name="autoid1" />
     <key name="autoid2" />
     <key position="3" />
   </structure>
+  
+  <measures>
+    <measure id="" descriptor="D1" />
+    <measure id="" time="count" />
+    <measure id="" time="duration" />
+  </measures>
   
   <data />
 </model>

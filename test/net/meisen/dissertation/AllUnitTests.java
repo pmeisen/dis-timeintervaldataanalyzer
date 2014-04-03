@@ -1,5 +1,6 @@
 package net.meisen.dissertation;
 
+import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestDefaultValues;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
@@ -24,6 +25,8 @@ import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
+import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
+import net.meisen.dissertation.impl.parser.query.select.TestSelectQuery;
 import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
@@ -70,6 +73,9 @@ import org.junit.runners.Suite;
 		// Test general helper
 		TestDb.class,
 
+		// Test the configuration
+		TestConfig.TestConfigSuite.class,
+		
 		// Test persistence
 		TestGroup.class,
 		TestIdentifier.class,
@@ -141,7 +147,10 @@ import org.junit.runners.Suite;
 
 		// Test the handler
 		TestTidaModelHandler.class,
-		
+
+		// Test the query
+		TestQueryFactory.class, TestSelectQuery.class,
+
 		// Test the server
 		TestTidaServer.class })
 public class AllUnitTests {

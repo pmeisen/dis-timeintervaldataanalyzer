@@ -231,10 +231,10 @@ public class DescriptorModel<I extends Object> {
 				if (OfflineMode.FALSE.equals(getOfflineMode())) {
 					throw e;
 				} else {
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(
-								"Could not load the descriptors of the DescriptorModel '"
-										+ getId() + "'.", e);
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Could not load the descriptors (OfflineMode: "
+								+ getOfflineMode()
+								+ ") of the DescriptorModel '" + getId() + "'.");
 					}
 				}
 			} finally {
@@ -482,6 +482,16 @@ public class DescriptorModel<I extends Object> {
 		} else {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);
+		}
+	}
+
+	public Descriptor<?, ?, I> getDescriptorByString(final String stringValue) {
+
+		if (supportsNullDescriptor() && stringValue == null) {
+			return getNullDescriptor();
+		} else {
+
+			return null;
 		}
 	}
 

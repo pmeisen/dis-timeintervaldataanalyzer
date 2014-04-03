@@ -261,6 +261,38 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		}
 	}
 
+	@Test
+	public void testGetDescriptorByString() {
+
+		// create the model
+		final DescriptorModel<Integer> modelIntegerIds = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", LongDescriptor.class,
+				new IntegerIdsFactory(), new IndexedCollectionFactory());
+
+		// add some values
+		for (long i = 1; i < 100; i++) {
+			modelIntegerIds.createDescriptor(100 - i);
+		}
+
+		// get the values by string
+		Descriptor<?, ?, Integer> desc;
+
+		// check the retrieval
+		desc = modelIntegerIds.getDescriptorByString("1");
+		assertEquals(1l, desc.getValue());
+		assertEquals(new Integer(1), desc.getId());
+		
+		desc = modelIntegerIds.getDescriptorByString("100");
+		assertEquals(100l, desc.getValue());
+		assertEquals(new Integer(100), desc.getId());
+
+		desc = modelIntegerIds.getDescriptorByString("0");
+		assertNull(desc);
+		
+		desc = modelIntegerIds.getDescriptorByString("101");
+		assertNull(desc);
+	}
+
 	/**
 	 * Tests the wiring of a {@code DescriptorModel} using {@code Spring}
 	 */

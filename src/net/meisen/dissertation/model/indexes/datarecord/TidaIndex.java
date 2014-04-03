@@ -18,6 +18,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
@@ -26,6 +27,9 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.primitives.Ints;
+import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
  * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
@@ -76,16 +80,16 @@ public class TidaIndex implements IPersistable {
 	public void index(final IDataRecord record) {
 		for (final DataRecordIndex idx : indexes.values()) {
 			idx.index(dataId, record);
-
-			//@formatter:off
-			/*
-			 * dataId cannot be:
-			 *  - negative or 
-			 *  - greater than Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits
-			 */
-			//@formatter:on
-			dataId++;
 		}
+
+		//@formatter:off
+		/*
+		 * dataId cannot be:
+		 *  - negative or 
+		 *  - greater than Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits
+		 */
+		//@formatter:on
+		dataId++;
 	}
 
 	/**
@@ -177,7 +181,7 @@ public class TidaIndex implements IPersistable {
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
 			sortedSlices.addAll(Arrays.asList(dim.getSlices()));
 			Collections.sort(sortedSlices, Collections.reverseOrder());
-			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
+			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
 			
 			// output the data use the threshold defined by STATISTIC_THRESHOLD
 			int i = 0;
@@ -186,7 +190,7 @@ public class TidaIndex implements IPersistable {
 				final DescriptorModel model = dim.getModel();
 				final Descriptor value = model.getDescriptor(sliceId);
 				
-				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.get().length) + " records)" + nl;
+				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
 				if (++i > STATISTIC_THRESHOLD) {
 					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
 					break;
@@ -223,7 +227,7 @@ public class TidaIndex implements IPersistable {
 			if (sortedSlices.get(0) == null) {
 				continue;
 			}
-			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).get().length)).length();
+			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
 			
 			// output the data use the threshold defined by STATISTIC_THRESHOLD
 			int i = 0;
@@ -235,7 +239,7 @@ public class TidaIndex implements IPersistable {
 				final Object sliceId = slice.getId();
 				final String value = part.getFormattedId(sliceId);
 				
-				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.get().length) + " records)" + nl;
+				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
 				if (++i > STATISTIC_THRESHOLD) {
 					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
 					break;
@@ -309,5 +313,40 @@ public class TidaIndex implements IPersistable {
 	 */
 	public int getNextDataId() {
 		return dataId;
+	}
+
+	public Map<String, Integer> doPerformanceTest() {
+		final IntervalIndex interval = this.getIndex(IntervalIndex.class);
+		final MetaIndex meta = this.getIndex(MetaIndex.class);
+		
+		IndexDimensionSlice<?>[] intervalSlices = ((IntIntervalIndexPartition) interval
+				.getPartitions().iterator().next()).getSlices(0, 5 * 1440);
+
+		IndexDimensionSlice<?>[] metaSlices = meta.get("PERSON").getSlices();
+
+		final Map<String, Integer> values = new HashMap<String, Integer>();
+
+		for (final IndexDimensionSlice<?> metaSlice : metaSlices) {
+
+			final EWAHCompressedBitmap metaBitmap = metaSlice.getBitmap();
+			for (final IndexDimensionSlice<?> intervalSlice : intervalSlices) {
+				if (intervalSlice == null) {
+					continue;
+				}
+
+				final EWAHCompressedBitmap intervalBitmap = intervalSlice
+						.getBitmap();
+				if (intervalBitmap != null) {
+					final int car = metaBitmap.andCardinality(intervalSlice
+							.getBitmap());
+					// final String value = metaSlice.getId() + " " +
+					// intervalSlice.getId();
+					//
+					// values.put(value, car);
+				}
+			}
+		}
+
+		return values;
 	}
 }

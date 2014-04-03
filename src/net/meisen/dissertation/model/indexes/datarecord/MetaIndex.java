@@ -130,6 +130,18 @@ public class MetaIndex implements DataRecordIndex {
 			dim.optimize();
 		}
 	}
+	
+	public MetaIndexDimension<?> get(final String modelId) {
+		final MetaIndexDimension<?> dim = (MetaIndexDimension<?>) dimensionsIndex.getObject(modelId);
+		
+		if (dim == null) {
+			// TODO complete
+		} else {
+			
+		}
+		
+		return dim;
+	}
 
 	@Override
 	public void save(final BasePersistor persistor) {

@@ -367,7 +367,7 @@ public class TidaModel implements IPersistable {
 	 * 
 	 * @return the used index of the model
 	 */
-	protected TidaIndex getIndex() {
+	public TidaIndex getIndex() {
 		return idx;
 	}
 
