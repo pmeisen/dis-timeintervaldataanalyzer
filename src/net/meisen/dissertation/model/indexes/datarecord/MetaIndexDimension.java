@@ -45,6 +45,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	private final DescriptorModel<I> model;
 	private final MetaStructureEntry metaEntry;
 
+	private final BaseIndexedCollectionFactory indexedCollectionFactory;
 	private final IIndexedCollection index;
 
 	private MetaDataHandling metaDataHandling;
@@ -88,6 +89,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		// set the values
 		this.metaEntry = metaEntry;
 		this.model = model;
+		this.indexedCollectionFactory = indexedCollectionFactory;
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
@@ -140,7 +142,8 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		// create or get the slices
 		final IndexDimensionSlice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(new IndexDimensionSlice<I>(id, recId));
+			index.addObject(new IndexDimensionSlice<I>(id,
+					indexedCollectionFactory, recId));
 		} else {
 			slice.set(recId);
 		}
@@ -421,7 +424,8 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		}
 
 		// create the slice
-		final IndexDimensionSlice<I> slice = new IndexDimensionSlice<I>(id);
+		final IndexDimensionSlice<I> slice = new IndexDimensionSlice<I>(id,
+				indexedCollectionFactory);
 
 		// load the slice from the InputStream
 		try {

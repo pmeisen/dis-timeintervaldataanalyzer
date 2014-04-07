@@ -1,10 +1,10 @@
-package net.meisen.dissertation.model.indexes.datarecord.intervalindex;
+package net.meisen.dissertation.impl.indexes.datarecord.intervalindex;
 
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Numbers;
@@ -17,7 +17,7 @@ import net.meisen.general.genmisc.types.Numbers;
  * @author pmeisen
  * 
  */
-public class LongIntervalIndexPartition extends IntervalIndexPartition {
+public class IntIntervalIndexPartition extends BaseIntervalIndexPartition {
 
 	/**
 	 * Constructor to create a partition using the specified {@code Mapper}, the
@@ -35,7 +35,7 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 *            the {@code indexedCollectionFactory} to create the needed
 	 *            indexes
 	 */
-	public LongIntervalIndexPartition(final BaseMapper<?> mapper,
+	public IntIntervalIndexPartition(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexedCollectionFactory indexedCollectionFactory) {
@@ -44,45 +44,45 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 
 	@Override
 	public void index(final int dataId, final Object start, final Object end) {
-		final long normStart = get(start, true);
-		final long normEnd = get(end, false);
+		final int normStart = get(start, true);
+		final int normEnd = get(end, false);
 		setInterval(normStart, normEnd, dataId);
 	}
 
 	/**
-	 * Gets the start of the timeline (included) as {@code long}.
+	 * Gets the start of the timeline (included) as {@code int}.
 	 * 
-	 * @return the start of the timeline as {@code long}
+	 * @return the start of the timeline as {@code int}
 	 */
-	public long getStart() {
-		return getMapper().getNormStartAsLong();
+	public int getStart() {
+		return getMapper().getNormStartAsInt();
 	}
 
 	/**
-	 * Gets the end of the timeline (included) as {@code long}.
+	 * Gets the end of the timeline (included) as {@code int}.
 	 * 
-	 * @return the end of the timeline as {@code long}
+	 * @return the end of the timeline as {@code int}
 	 */
-	public long getEnd() {
-		return getMapper().getNormEndAsLong();
+	public int getEnd() {
+		return getMapper().getNormEndAsInt();
 	}
 
 	/**
-	 * Get the value as {@code long}.
+	 * Get the value as {@code int}.
 	 * 
 	 * @param value
-	 *            the value to be mapped to the {@code long}
+	 *            the value to be mapped to the {@code int}
 	 * @param start
 	 *            {@code true} if the value is the start value of the interval,
 	 *            otherwise {@code end}
 	 * 
-	 * @return the mapped value as {@code long}
+	 * @return the mapped value as {@code int}
 	 */
-	protected long get(final Object value, final boolean start) {
+	protected int get(final Object value, final boolean start) {
 		if (value == null) {
 			return start ? getStart() : getEnd();
 		} else {
-			return getMapper().mapToLong(value);
+			return getMapper().mapToInt(value);
 		}
 	}
 
@@ -97,14 +97,9 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 * 
 	 * @return the result of the combination of the specified slices (by and)
 	 */
-	public CombinedIndexDimensionSlice and(final long start, final long end) {
-
-		// combine the slices
-		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
-		combinedSlice.and(getIndex().getObjectsByStartAndEnd(start, end));
-
-		// return the result
-		return combinedSlice;
+	public Bitmap and(final int start, final int end) {
+		return Bitmap.and(getIndexedCollectionFactory(), getIndex()
+				.getObjectsByStartAndEnd(start, end));
 	}
 
 	/**
@@ -118,14 +113,9 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 * 
 	 * @return the result of the combination of the specified slices (by or)
 	 */
-	public CombinedIndexDimensionSlice or(final long start, final long end) {
-
-		// combine the slices
-		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
-		combinedSlice.or(getIndex().getObjectsByStartAndEnd(start, end));
-
-		// return the result
-		return combinedSlice;
+	public Bitmap or(final int start, final int end) {
+		return Bitmap.or(getIndexedCollectionFactory(), getIndex()
+				.getObjectsByStartAndEnd(start, end));
 	}
 
 	/**
@@ -139,7 +129,7 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 * 
 	 * @return the slices, which might be {@code null} if no data is there yet
 	 */
-	public IndexDimensionSlice<?>[] getSlices(final long start, final long end) {
+	public IndexDimensionSlice<?>[] getSlices(final int start, final int end) {
 		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
 	}
 
@@ -161,8 +151,8 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 *         {@code point}
 	 */
 	@SuppressWarnings("unchecked")
-	public IndexDimensionSlice<Long> getSliceById(final long point) {
-		return (IndexDimensionSlice<Long>) getIndex().getObject(point);
+	public IndexDimensionSlice<Integer> getSliceById(final int point) {
+		return (IndexDimensionSlice<Integer>) getIndex().getObject(point);
 	}
 
 	/**
@@ -175,12 +165,12 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	 * @param recId
 	 *            the value to be set to true within the slice
 	 */
-	protected void setInterval(final long normStart, final long normEnd,
+	protected void setInterval(final int normStart, final int normEnd,
 			final int recId) {
 		final IIndexedCollection index = getIndex();
 
-		for (long i = normStart; i < normEnd + 1; i++) {
-			final IndexDimensionSlice<Long> slice = getSliceById(i);
+		for (int i = normStart; i < normEnd + 1; i++) {
+			final IndexDimensionSlice<Integer> slice = getSliceById(i);
 			if (slice == null) {
 				index.addObject(createSlice(i, recId));
 			} else {
@@ -190,9 +180,9 @@ public class LongIntervalIndexPartition extends IntervalIndexPartition {
 	}
 
 	@Override
-	protected IndexDimensionSlice<Long> createSlice(final Number sliceId,
+	protected IndexDimensionSlice<Integer> createSlice(final Number sliceId,
 			final int... recordIds) {
-		return new IndexDimensionSlice<Long>(Numbers.castToLong(sliceId),
-				recordIds);
+		return new IndexDimensionSlice<Integer>(Numbers.castToInt(sliceId),
+				getIndexedCollectionFactory(), recordIds);
 	}
 }

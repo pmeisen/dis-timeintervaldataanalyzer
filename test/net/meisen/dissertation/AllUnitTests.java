@@ -75,7 +75,7 @@ import org.junit.runners.Suite;
 
 		// Test the configuration
 		TestConfig.TestConfigSuite.class,
-		
+
 		// Test persistence
 		TestGroup.class,
 		TestIdentifier.class,
@@ -92,7 +92,7 @@ import org.junit.runners.Suite;
 		TestIntArrayCollection.class,
 
 		// Test the factory for the indexes
-		TestIndexedCollectionFactory.class,
+		TestIndexedCollectionFactory.TestIndexedCollectionFactorySuite.class,
 
 		// Test the id factories
 		TestByteIdsFactory.class,

@@ -132,15 +132,7 @@ public class MetaIndex implements DataRecordIndex {
 	}
 	
 	public MetaIndexDimension<?> get(final String modelId) {
-		final MetaIndexDimension<?> dim = (MetaIndexDimension<?>) dimensionsIndex.getObject(modelId);
-		
-		if (dim == null) {
-			// TODO complete
-		} else {
-			
-		}
-		
-		return dim;
+		return (MetaIndexDimension<?>) dimensionsIndex.getObject(modelId);
 	}
 
 	@Override

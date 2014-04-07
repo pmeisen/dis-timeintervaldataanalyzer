@@ -1,8 +1,8 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
-import java.util.Arrays;
-
-import com.googlecode.javaewah.EWAHCompressedBitmap;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.IBitmapContainer;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -20,10 +20,10 @@ import com.googlecode.javaewah.EWAHCompressedBitmap;
  *            the type of the identifier used to identify the slice
  */
 public class IndexDimensionSlice<I> implements
-		Comparable<IndexDimensionSlice<I>>, IIndexDimensionSlice {
+		Comparable<IndexDimensionSlice<I>>, IBitmapContainer {
 
 	private final I id;
-	private EWAHCompressedBitmap bitmap;
+	private Bitmap bitmap;
 
 	/**
 	 * Creates a slice with no records added (i.e. everything is set to
@@ -31,9 +31,12 @@ public class IndexDimensionSlice<I> implements
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
+	 * @param factory
+	 *            factory used to create bitmap indexes
 	 */
-	public IndexDimensionSlice(final I sliceId) {
-		this(sliceId, null);
+	public IndexDimensionSlice(final I sliceId,
+			final BaseIndexedCollectionFactory factory) {
+		this(sliceId, factory, null);
 	}
 
 	/**
@@ -42,17 +45,18 @@ public class IndexDimensionSlice<I> implements
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
+	 * @param factory
+	 *            factory used to create bitmap indexes
 	 * @param recordIds
 	 *            the identifiers of the records to be set
 	 */
-	public IndexDimensionSlice(final I sliceId, final int... recordIds) {
+	public IndexDimensionSlice(final I sliceId,
+			final BaseIndexedCollectionFactory factory, final int... recordIds) {
 		this.id = sliceId;
+		this.bitmap = factory.createBitmap();
 
 		if (recordIds != null) {
-			Arrays.sort(recordIds);
-			this.bitmap = EWAHCompressedBitmap.bitmapOf(recordIds);
-		} else {
-			this.bitmap = EWAHCompressedBitmap.bitmapOf();
+			this.bitmap.set(recordIds);
 		}
 	}
 
@@ -78,9 +82,7 @@ public class IndexDimensionSlice<I> implements
 			return;
 		}
 
-		// sort the data and create the bitmap
-		Arrays.sort(recordIds);
-		bitmap = bitmap.or(EWAHCompressedBitmap.bitmapOf(recordIds));
+		bitmap.set(recordIds);
 	}
 
 	/**
@@ -91,17 +93,7 @@ public class IndexDimensionSlice<I> implements
 	 *            the identifiers of the record to be set
 	 */
 	public void set(final int recId) {
-		bitmap = bitmap.or(EWAHCompressedBitmap.bitmapOf(recId));
-	}
-
-	@Override
-	public int[] get() {
-		return bitmap.toArray();
-	}
-
-	@Override
-	public int count() {
-		return bitmap.cardinality();
+		bitmap.set(recId);
 	}
 
 	/**
@@ -113,14 +105,27 @@ public class IndexDimensionSlice<I> implements
 		if (slice == null) {
 			return -1;
 		} else {
-			final boolean larger = get().length >= slice.get().length;
-			return larger ? 1 : -1;
-		}
-	}
+			final int[] ids = get();
+			final int[] sliceIds = slice.get();
 
-	@Override
-	public EWAHCompressedBitmap getBitmap() {
-		return bitmap;
+			if (ids.length > sliceIds.length) {
+				return 1;
+			} else if (ids.length < sliceIds.length) {
+				return -1;
+			} else {
+				for (int i = 0; i < ids.length; i++) {
+					if (ids[i] > sliceIds[i]) {
+						return 1;
+					} else if (ids[i] < sliceIds[i]) {
+						return -1;
+					} else {
+						continue;
+					}
+				}
+
+				return 0;
+			}
+		}
 	}
 
 	@Override
@@ -129,7 +134,19 @@ public class IndexDimensionSlice<I> implements
 	}
 
 	@Override
+	public Bitmap getBitmap() {
+		return bitmap;
+	}
+
 	public void optimize() {
-		bitmap.trim();
+		bitmap.optimize();
+	}
+
+	public int[] get() {
+		return bitmap.getIds();
+	}
+
+	public int count() {
+		return bitmap.determineCardinality();
 	}
 }

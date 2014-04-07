@@ -64,10 +64,13 @@ public class SelectQuery implements IQuery {
 
 		// now look for the models and the values
 		for (final ITreeElement te : filters) {
+			System.out.println(te);
+			
 			if (te instanceof DescriptorLeaf) {
 				final DescriptorLeaf leaf = (DescriptorLeaf) te;
 				final DescriptorComperator cmp = leaf.get();
 
+				// get the addressed model
 				final DescriptorModel<?> descModel = metaDataModel
 						.getDescriptorModel(cmp.getId());
 				if (descModel == null) {
@@ -76,9 +79,10 @@ public class SelectQuery implements IQuery {
 							"A metaDataModel with id '" + cmp.getId()
 									+ "' doesn't exist.");
 				}
-
+				
+				// get the addressed descriptor
 				final Descriptor<?, ?, ?> desc = descModel
-						.getDescriptorByValue(cmp.getValue());
+						.getDescriptorByString(cmp.getValue());
 				if (desc == null) {
 					// TODO throw exception
 					throw new IllegalArgumentException(

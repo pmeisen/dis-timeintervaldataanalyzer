@@ -17,6 +17,7 @@ import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
+import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
@@ -261,35 +262,79 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		}
 	}
 
+	/**
+	 * Tests the retrieval of a {@code LongDescriptor} via string using
+	 * {@link DescriptorModel#getDescriptorByString(String)}.
+	 */
 	@Test
-	public void testGetDescriptorByString() {
+	public void testGetLongDescriptorByString() {
 
 		// create the model
-		final DescriptorModel<Integer> modelIntegerIds = new DescriptorModel<Integer>(
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", LongDescriptor.class,
 				new IntegerIdsFactory(), new IndexedCollectionFactory());
 
 		// add some values
 		for (long i = 1; i < 100; i++) {
-			modelIntegerIds.createDescriptor(100 - i);
+			model.createDescriptor(100 - i);
 		}
 
 		// get the values by string
 		Descriptor<?, ?, Integer> desc;
 
 		// check the retrieval
-		desc = modelIntegerIds.getDescriptorByString("1");
+		desc = model.getDescriptorByString("1");
 		assertEquals(1l, desc.getValue());
-		assertEquals(new Integer(1), desc.getId());
-		
-		desc = modelIntegerIds.getDescriptorByString("100");
-		assertEquals(100l, desc.getValue());
-		assertEquals(new Integer(100), desc.getId());
+		assertEquals(new Integer(99), desc.getId());
 
-		desc = modelIntegerIds.getDescriptorByString("0");
+		desc = model.getDescriptorByString("99");
+		assertEquals(99l, desc.getValue());
+		assertEquals(new Integer(1), desc.getId());
+
+		desc = model.getDescriptorByString("0");
 		assertNull(desc);
-		
-		desc = modelIntegerIds.getDescriptorByString("101");
+
+		desc = model.getDescriptorByString("100");
+		assertNull(desc);
+	}
+
+	/**
+	 * Tests the retrieval of a {@code ResourceDescriptor} via string using
+	 * {@link DescriptorModel#getDescriptorByString(String)}.
+	 */
+	@Test
+	public void testGetResourceDescriptorByString() {
+
+		// create the model
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", ResourceDescriptor.class,
+				new IntegerIdsFactory(), new IndexedCollectionFactory());
+		model.setSupportsNullDescriptor(true);
+
+		// add some values
+		model.createDescriptor("Philipp");
+		model.createDescriptor("Tobias");
+		model.createDescriptor("Christian");
+		model.createDescriptor("Marco");
+		model.createDescriptor(null);
+
+		// get the values by string
+		Descriptor<?, ?, Integer> desc;
+
+		// check the retrieval
+		desc = model.getDescriptorByString("Philipp");
+		assertEquals("Philipp", desc.getValue());
+		assertEquals(new Integer(1), desc.getId());
+
+		desc = model.getDescriptorByString("Marco");
+		assertEquals("Marco", desc.getValue());
+		assertEquals(new Integer(4), desc.getId());
+
+		desc = model.getDescriptorByString(null);
+		assertEquals(new Integer(5), desc.getId());
+		assertNull(desc.getValue());
+
+		desc = model.getDescriptorByString("Bodo");
 		assertNull(desc);
 	}
 

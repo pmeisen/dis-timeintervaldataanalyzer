@@ -127,7 +127,11 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		// get the used reference
 		descCmp.setId(ctx.IDENTIFIER().getText());
-
+		
+		//TODO add NULL
+		// ctx.NULL_VALUE()
+		descCmp.setValue(null);
+		
 		// get the value the descriptor should have
 		descCmp.setValue(Strings.trimSequence(ctx.DESC_VALUE().getText(), "'")
 				.replace("\\", ""));

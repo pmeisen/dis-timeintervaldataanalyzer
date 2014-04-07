@@ -44,8 +44,15 @@ public class TestSelectQuery extends ModuleBasedTest {
 	}
 
 	@Test
-	public void testExecution() {
+	public void testExecutionWithSingleFilter() {
 		final SelectQuery query = q("select timeseries from testModel in [15.06.2014,20.01.2015] filter by SCREAMS='3'");
+
+		query.execute(model);
+	}
+	
+	@Test
+	public void testExecutionWithComplexFilter() {
+		final SelectQuery query = q("select timeseries from testModel in [15.06.2014,20.01.2015] filter by (SCREAMS='3' OR SCREAMS='0') AND PERSON='Philipp'");
 
 		query.execute(model);
 	}

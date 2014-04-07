@@ -67,7 +67,7 @@ public class IntervalIndex implements DataRecordIndex {
 
 	@Override
 	public void index(final int dataId, final IDataRecord record) {
-		for (final IntervalIndexPartition part : getPartitions()) {
+		for (final BaseIntervalIndexPartition part : getPartitions()) {
 			part.index(dataId, record);
 		}
 	}
@@ -103,7 +103,7 @@ public class IntervalIndex implements DataRecordIndex {
 
 		// set the new value and apply it to all other
 		this.intervalDataHandling = newIntervalDataHandling;
-		for (final IntervalIndexPartition part : getPartitions()) {
+		for (final BaseIntervalIndexPartition part : getPartitions()) {
 			part.setIntervalDataHandling(this.intervalDataHandling);
 		}
 	}
@@ -123,13 +123,13 @@ public class IntervalIndex implements DataRecordIndex {
 	 * @return the partitions of the {@ode IntervalIndex}
 	 */
 	@SuppressWarnings("unchecked")
-	protected Collection<IntervalIndexPartition> getPartitions() {
-		return (Collection<IntervalIndexPartition>) timeIndex.getAll();
+	protected Collection<BaseIntervalIndexPartition> getPartitions() {
+		return (Collection<BaseIntervalIndexPartition>) timeIndex.getAll();
 	}
 
 	@Override
 	public void optimize() {
-		for (final IntervalIndexPartition part : getPartitions()) {
+		for (final BaseIntervalIndexPartition part : getPartitions()) {
 			part.optimize();
 		}
 	}
@@ -152,7 +152,7 @@ public class IntervalIndex implements DataRecordIndex {
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		this.persistentGroup = group;
 		
-		for (final IntervalIndexPartition part : getPartitions()) {
+		for (final BaseIntervalIndexPartition part : getPartitions()) {
 			persistor.register(group.append("" + part.getId()), part);
 		}
 	}

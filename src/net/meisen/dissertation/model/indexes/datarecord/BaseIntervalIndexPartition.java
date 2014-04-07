@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
  * @author pmeisen
  * 
  */
-public abstract class IntervalIndexPartition implements DataRecordIndex {
+public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(IntervalIndexPartition.class);
+			.getLogger(BaseIntervalIndexPartition.class);
 	private final static String EXTENSION = ".slice";
 
 	@SuppressWarnings("rawtypes")
@@ -46,6 +46,7 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	private final IntervalStructureEntry startEntry;
 	private final IntervalStructureEntry endEntry;
 	private final IRangeQueryOptimized index;
+	private final BaseIndexedCollectionFactory indexedCollectionFactory;
 
 	private IntervalDataHandling intervalDataHandling;
 	private Group persistentGroup = null;
@@ -66,7 +67,7 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	 *            the {@code indexedCollectionFactory} to create the needed
 	 *            indexes
 	 */
-	public IntervalIndexPartition(final BaseMapper<?> mapper,
+	public BaseIntervalIndexPartition(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexedCollectionFactory indexedCollectionFactory) {
@@ -82,6 +83,9 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 
 		// set the mapper
 		this.mapper = mapper;
+
+		// set the factory
+		this.indexedCollectionFactory = indexedCollectionFactory;
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
@@ -430,5 +434,14 @@ public abstract class IntervalIndexPartition implements DataRecordIndex {
 	@Override
 	public Group getPersistentGroup() {
 		return persistentGroup;
+	}
+
+	/**
+	 * Gets the factory used to create collections, i.e. bitmaps in this case.
+	 * 
+	 * @return the factory used to create collections
+	 */
+	protected BaseIndexedCollectionFactory getIndexedCollectionFactory() {
+		return indexedCollectionFactory;
 	}
 }

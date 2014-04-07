@@ -2,7 +2,6 @@ package net.meisen.dissertation.performance.paper.in2014.smc;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
@@ -96,12 +95,11 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		System.out.println("Start...");
 		final Performance performance = new Performance();
 		performance.start();
-		final Map<String, Integer> values = model.getIndex()
-				.doPerformanceTest();
-		final long[] result = performance.stop();
-		System.out.println(values);
-		System.out.println(Longs.asList(result));
 
+		// TODO add performance for queries
+		
+		final long[] result = performance.stop();
+		System.out.println(Longs.asList(result));
 	}
 
 	@After

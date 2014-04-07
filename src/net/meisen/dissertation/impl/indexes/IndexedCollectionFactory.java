@@ -2,6 +2,7 @@ package net.meisen.dissertation.impl.indexes;
 
 import java.util.HashMap;
 
+import net.meisen.dissertation.exceptions.IndexedCollectionFactoryException;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
@@ -9,6 +10,10 @@ import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory to create a {@code IndexedCollection}.
@@ -17,14 +22,69 @@ import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
  * 
  */
 public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(IndexedCollectionFactory.class);
+
+	private IndexedCollectionFactoryConfig config;
+
+	@Override
+	public void setConfig(final Object config) {
+
+		// check if we have a configuration already
+		if (this.config != null) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("The configuration of the factory is already defined, but changed.");
+			}
+		}
+
+		if (config == null) {
+			this.config = new IndexedCollectionFactoryConfig();
+		} else if (config instanceof IndexedCollectionFactoryConfig == false) {
+			if (exceptionRegistry == null) {
+				throw new IllegalArgumentException(
+						"The configuration used for '"
+								+ getClass().getSimpleName()
+								+ "' must be of the type '"
+								+ IndexedCollectionFactoryConfig.class
+										.getName() + "'.");
+			} else {
+				exceptionRegistry.throwException(
+						IndexedCollectionFactoryException.class, 1003,
+						IndexedCollectionFactoryConfig.class.getName());
+			}
+		} else {
+			this.config = (IndexedCollectionFactoryConfig) config;
+		}
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Setting the indexedCollectionFactory with configuration "
+					+ config);
+		}
+	}
+
+	public void setConfig(final IndexedCollectionFactoryConfig config) {
+		setConfig((Object) config);
+	}
+
+	public IndexedCollectionFactoryConfig getConfig() {
+		if (config == null) {
+			this.config = new IndexedCollectionFactoryConfig();
+
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Using default configuration " + this.config);
+			}
+		}
+
+		return this.config;
+	}
 
 	@Override
 	public IRangeQueryOptimized createRangeQueryOptimized(
 			final IndexKeyDefinition keyDef) {
 		final int keySize = keyDef.getSize();
 		if (keySize != 1) {
-			throw new UnsupportedOperationException(
-					"A rangeQueryOptimized-indexes doesn't support multiple key values.");
+			exceptionRegistry.throwRuntimeException(
+					IndexedCollectionFactoryException.class, 1001);
 		}
 
 		final Class<?> clazz = keyDef.getType(0);
@@ -35,9 +95,10 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 		} else if (isIntPrimitiveType(clazz)) {
 			return new IntArrayCollection(keyDef);
 		} else {
-			throw new UnsupportedOperationException(
-					"Cannot find any implementation for rangeQueryOptimized-indexes and '"
-							+ clazz + "' values.");
+			exceptionRegistry.throwRuntimeException(
+					IndexedCollectionFactoryException.class, 1002,
+					clazz == null ? null : clazz.getName());
+			return null;
 		}
 	}
 
@@ -73,13 +134,13 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 
 		// we have some really nice implementations for the primitives
 		if (isBytePrimitiveType(clazz)) {
-			collClazz = TroveByteIndexedCollection.class;
+			collClazz = getConfig().getByteClass();
 		} else if (isShortPrimitiveType(clazz)) {
-			collClazz = TroveShortIndexedCollection.class;
+			collClazz = getConfig().getShortClass();
 		} else if (isIntPrimitiveType(clazz)) {
-			collClazz = TroveIntIndexedCollection.class;
+			collClazz = getConfig().getIntClass();
 		} else if (isLongPrimitiveType(clazz)) {
-			collClazz = TroveLongIndexedCollection.class;
+			collClazz = getConfig().getLongClass();
 		} else {
 			collClazz = null;
 		}
@@ -90,6 +151,21 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 					HashMap.class);
 		} else {
 			return new IndexedCollectionDefinition(collClazz);
+		}
+	}
+
+	@Override
+	public Bitmap createBitmap() {
+
+		final Class<? extends Bitmap> bitmapClazz = getConfig()
+				.getBitmapClass();
+		try {
+			return bitmapClazz.newInstance();
+		} catch (final Exception e) {
+			exceptionRegistry.throwRuntimeException(
+					IndexedCollectionFactoryException.class, 1000,
+					bitmapClazz == null ? null : bitmapClazz.getName());
+			return null;
 		}
 	}
 }

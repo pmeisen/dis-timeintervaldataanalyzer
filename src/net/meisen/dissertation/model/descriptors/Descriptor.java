@@ -86,11 +86,22 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 */
 	public abstract D getValue();
 
+	/**
+	 * Gets a unique string representation for the descriptor. This
+	 * representation is necessary for queries, when filtering for the
+	 * descriptor.
+	 * 
+	 * @return the string representing this value
+	 */
+	public abstract String getUniqueString();
+
 	@Override
 	public abstract T clone();
 
 	@Override
-	public abstract String toString();
+	public String toString() {
+		return getClass().getSimpleName() + ": " + getUniqueString();
+	}
 
 	@Override
 	public boolean equals(final Object o) {

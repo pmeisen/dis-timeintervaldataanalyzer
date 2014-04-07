@@ -18,7 +18,6 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
@@ -27,9 +26,6 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.primitives.Ints;
-import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
  * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
@@ -199,7 +195,7 @@ public class TidaIndex implements IPersistable {
 		}
 		
 		stat += "- IntervalIndex with " + intervalIdx.getAmountOfPartitions() + " partition(s):" + nl;
-		for (final IntervalIndexPartition part : intervalIdx.getPartitions()) {
+		for (final BaseIntervalIndexPartition part : intervalIdx.getPartitions()) {
 			final int amountOfSlices = part.getAmountOfSlices();
 			stat += "  - " + part.getPartitionId() + " (" + amountOfSlices + " slices)" + nl;
 			if (amountOfSlices == 0) {
@@ -313,40 +309,5 @@ public class TidaIndex implements IPersistable {
 	 */
 	public int getNextDataId() {
 		return dataId;
-	}
-
-	public Map<String, Integer> doPerformanceTest() {
-		final IntervalIndex interval = this.getIndex(IntervalIndex.class);
-		final MetaIndex meta = this.getIndex(MetaIndex.class);
-		
-		IndexDimensionSlice<?>[] intervalSlices = ((IntIntervalIndexPartition) interval
-				.getPartitions().iterator().next()).getSlices(0, 5 * 1440);
-
-		IndexDimensionSlice<?>[] metaSlices = meta.get("PERSON").getSlices();
-
-		final Map<String, Integer> values = new HashMap<String, Integer>();
-
-		for (final IndexDimensionSlice<?> metaSlice : metaSlices) {
-
-			final EWAHCompressedBitmap metaBitmap = metaSlice.getBitmap();
-			for (final IndexDimensionSlice<?> intervalSlice : intervalSlices) {
-				if (intervalSlice == null) {
-					continue;
-				}
-
-				final EWAHCompressedBitmap intervalBitmap = intervalSlice
-						.getBitmap();
-				if (intervalBitmap != null) {
-					final int car = metaBitmap.andCardinality(intervalSlice
-							.getBitmap());
-					// final String value = metaSlice.getId() + " " +
-					// intervalSlice.getId();
-					//
-					// values.put(value, car);
-				}
-			}
-		}
-
-		return values;
 	}
 }

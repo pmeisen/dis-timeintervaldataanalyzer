@@ -33,7 +33,7 @@ exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND
 exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 
 // define different comparators for metaData
-compDescriptorEqual     : IDENTIFIER CMP_EQUAL DESC_VALUE;
+compDescriptorEqual     : IDENTIFIER CMP_EQUAL (DESC_VALUE | NULL_VALUE);
 
 selectorModelId         : IDENTIFIER;
 selectorSelectType      : TYPE_TIMESERIES | TYPE_RECORDS;
@@ -76,6 +76,7 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
 DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE))|.)*? SYM_DESC_VALUE;
+NULL_VALUE: N U L L;
 
 WHITESPACE: [ \t\r\n]+ -> skip;
 

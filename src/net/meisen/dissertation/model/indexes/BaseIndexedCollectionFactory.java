@@ -1,5 +1,13 @@
 package net.meisen.dissertation.model.indexes;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.impl.indexes.IndexedCollectionFactoryConfig;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 /**
  * Factory to create a {@code IndexedCollection}.
  * 
@@ -7,6 +15,13 @@ package net.meisen.dissertation.model.indexes;
  * 
  */
 public abstract class BaseIndexedCollectionFactory {
+
+	/**
+	 * {@code exceptionRegistry} used to fire exceptions.
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	protected IExceptionRegistry exceptionRegistry;
 
 	/**
 	 * Creates a {@code IndexedCollection} of type {@code IIndexedCollection}.
@@ -117,11 +132,18 @@ public abstract class BaseIndexedCollectionFactory {
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to create the
 	 *            {@code IRangeQueryOptimized} index for
-	 *            
+	 * 
 	 * @return the created index
 	 */
 	public abstract IRangeQueryOptimized createRangeQueryOptimized(
 			final IndexKeyDefinition keyDef);
+
+	/**
+	 * Creates an empty, i.e. no value is set to true, bitmap.
+	 * 
+	 * @return the created bitmap
+	 */
+	public abstract Bitmap createBitmap();
 
 	/**
 	 * Creates a {@code PrefixKeySeparatable} instance based on the specified
@@ -363,5 +385,9 @@ public abstract class BaseIndexedCollectionFactory {
 		} else {
 			return false;
 		}
+	}
+
+	public void setConfig(final Object config) {
+		// nothing to do this might be implemented by the concrete class
 	}
 }

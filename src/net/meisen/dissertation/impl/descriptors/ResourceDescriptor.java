@@ -48,7 +48,7 @@ public class ResourceDescriptor<I extends Object> extends
 	}
 
 	@Override
-	public String toString() {
+	public String getUniqueString() {
 		return value;
 	}
 }

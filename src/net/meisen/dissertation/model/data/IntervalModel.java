@@ -4,16 +4,16 @@ import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.IntervalModelException;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ByteIntervalIndexPartition;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.LongIntervalIndexPartition;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ByteIntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.intervalindex.LongIntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
@@ -112,7 +112,7 @@ public class IntervalModel {
 		// make sure needed stuff is known
 		if (structure == null) {
 			return getIndexedCollectionFactory().create(
-					new IndexKeyDefinition(IntervalIndexPartition.class,
+					new IndexKeyDefinition(BaseIntervalIndexPartition.class,
 							"getStartAsByte"));
 		} else if (timeline == null) {
 			exceptionRegistry
@@ -153,7 +153,7 @@ public class IntervalModel {
 				timeline.getEnd());
 
 		// create the partition
-		final IntervalIndexPartition part = createIndexPartition(mapper,
+		final BaseIntervalIndexPartition part = createIndexPartition(mapper,
 				startEntry, endEntry);
 
 		// create the index
@@ -183,7 +183,7 @@ public class IntervalModel {
 	 * 
 	 * @return the created partition
 	 */
-	public IntervalIndexPartition createIndexPartition(
+	public BaseIntervalIndexPartition createIndexPartition(
 			final BaseMapper<?> mapper,
 			final IntervalStructureEntry startEntry,
 			final IntervalStructureEntry endEntry) {

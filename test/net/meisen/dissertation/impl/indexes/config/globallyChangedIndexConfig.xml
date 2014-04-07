@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config xmlns="http://dev.meisen.net/xsd/dissertation/config"
+        xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        
+        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd
+                            http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexesFactory.xsd">
+  
+  <factories>
+    <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory">
+      <idx:config bitmap="net.meisen.dissertation.impl.indexes.mock.BitmapMock"
+                  int="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock"
+                  long="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock" />
+    </indexes>
+  </factories>
+</config>

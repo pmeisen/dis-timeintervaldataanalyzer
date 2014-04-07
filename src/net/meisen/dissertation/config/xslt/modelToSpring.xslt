@@ -9,6 +9,7 @@
 
   <xsl:import href="descriptors://includeXslts" />
   <xsl:import href="dataretriever://includeXslts" />
+  <xsl:import href="indexedCollectionFactory://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -62,11 +63,21 @@
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation">
           <xsl:variable name="indexFactory" select="//mns:config/mns:factories/mns:indexes/@implementation" />
-          <bean id="{$indexFactoryId}" class="{$indexFactory}" />        
+          <bean id="{$indexFactoryId}" class="{$indexFactory}">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:factories/mns:indexes/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:otherwise><ref bean="defaultIndexFactoryConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
         </xsl:when>
         <xsl:otherwise>
           <bean id="{$indexFactoryId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
             <property name="beanClass" ref="defaultIndexFactoryClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultIndexFactoryConfig" /></map>
+            </property>
           </bean>
         </xsl:otherwise>
       </xsl:choose>

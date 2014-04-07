@@ -1,18 +1,14 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.List;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
-import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
-import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.BasePersistor;
+import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
 
 public class KeyIndex implements DataRecordIndex {

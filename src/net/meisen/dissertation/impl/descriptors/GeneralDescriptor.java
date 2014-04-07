@@ -51,12 +51,12 @@ public class GeneralDescriptor<I extends Object> extends
 	}
 	
 	@Override
-	public String toString() {
-		return value == null ? null : value.toString();
+	public GeneralDescriptor<I> clone() {
+		return new GeneralDescriptor<I>(getModel(), getId(), value);
 	}
 
 	@Override
-	public GeneralDescriptor<I> clone() {
-		return new GeneralDescriptor<I>(getModel(), getId(), value);
+	public String getUniqueString() {
+		return value.toString();
 	}
 }

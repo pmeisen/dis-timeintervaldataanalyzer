@@ -70,7 +70,7 @@ public class MockDescriptorPrimitiveDataType<D>
 	}
 
 	@Override
-	public String toString() {
-		return "" + getValue();
+	public String getUniqueString() {
+		return getValue().toString();
 	}
 }

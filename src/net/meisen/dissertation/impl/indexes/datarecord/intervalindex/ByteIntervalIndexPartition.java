@@ -1,10 +1,10 @@
-package net.meisen.dissertation.model.indexes.datarecord.intervalindex;
+package net.meisen.dissertation.impl.indexes.datarecord.intervalindex;
 
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalIndexPartition;
-import net.meisen.dissertation.model.indexes.datarecord.slices.CombinedIndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Numbers;
@@ -17,7 +17,7 @@ import net.meisen.general.genmisc.types.Numbers;
  * @author pmeisen
  * 
  */
-public class ShortIntervalIndexPartition extends IntervalIndexPartition {
+public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 
 	/**
 	 * Constructor to create a partition using the specified {@code Mapper}, the
@@ -35,7 +35,7 @@ public class ShortIntervalIndexPartition extends IntervalIndexPartition {
 	 *            the {@code indexedCollectionFactory} to create the needed
 	 *            indexes
 	 */
-	public ShortIntervalIndexPartition(final BaseMapper<?> mapper,
+	public ByteIntervalIndexPartition(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexedCollectionFactory indexedCollectionFactory) {
@@ -44,46 +44,98 @@ public class ShortIntervalIndexPartition extends IntervalIndexPartition {
 
 	@Override
 	public void index(final int dataId, final Object start, final Object end) {
-		final short normStart = get(start, true);
-		final short normEnd = get(end, false);
+		final byte normStart = get(start, true);
+		final byte normEnd = get(end, false);
 		setInterval(normStart, normEnd, dataId);
 	}
 
 	/**
-	 * Gets the start of the timeline (included) as {@code short}.
+	 * Gets the start of the timeline (included) as {@code byte}.
 	 * 
-	 * @return the start of the timeline as {@code short}
+	 * @return the start of the timeline as {@code byte}
 	 */
-	public short getStart() {
-		return getMapper().getNormStartAsShort();
+	public byte getStart() {
+		return getMapper().getNormStartAsByte();
 	}
 
 	/**
-	 * Gets the end of the timeline (included) as {@code short}.
+	 * Gets the end of the timeline (included) as {@code byte}.
 	 * 
-	 * @return the end of the timeline as {@code short}
+	 * @return the end of the timeline as {@code byte}
 	 */
-	public short getEnd() {
-		return getMapper().getNormEndAsShort();
+	public byte getEnd() {
+		return getMapper().getNormEndAsByte();
 	}
 
 	/**
-	 * Get the value as {@code short}.
+	 * Get the value as {@code byte}.
 	 * 
 	 * @param value
-	 *            the value to be mapped to the {@code short}
+	 *            the value to be mapped to the {@code byte}
 	 * @param start
 	 *            {@code true} if the value is the start value of the interval,
 	 *            otherwise {@code end}
 	 * 
-	 * @return the mapped value as {@code short}
+	 * @return the mapped value as {@code byte}
 	 */
-	protected short get(final Object value, final boolean start) {
+	protected byte get(final Object value, final boolean start) {
 		if (value == null) {
 			return start ? getStart() : getEnd();
 		} else {
-			return getMapper().mapToShort(value);
+			return getMapper().mapToByte(value);
 		}
+	}
+
+	/**
+	 * And-combines the slices for the specified {@code start} (included) to
+	 * {@code end} (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the result of the combination of the specified slices (by and)
+	 */
+	public Bitmap and(final byte start, final byte end) {
+		return Bitmap.and(getIndexedCollectionFactory(), getIndex()
+				.getObjectsByStartAndEnd(start, end));
+	}
+
+	/**
+	 * Or-combines the slices for the specified {@code start} (included) to
+	 * {@code end} (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the result of the combination of the specified slices (by or)
+	 */
+	public Bitmap or(final byte start, final byte end) {
+		return Bitmap.or(getIndexedCollectionFactory(), getIndex()
+				.getObjectsByStartAndEnd(start, end));
+	}
+
+	/**
+	 * Get the slices for the specified {@code start} (included) to {@code end}
+	 * (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the slices, which might be {@code null} if no data is there yet
+	 */
+	public IndexDimensionSlice<?>[] getSlices(final byte start, final byte end) {
+		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
+	}
+
+	@Override
+	public IndexDimensionSlice<?>[] getSlices() {
+		return getSlices(getStart(), getEnd());
 	}
 
 	/**
@@ -99,90 +151,26 @@ public class ShortIntervalIndexPartition extends IntervalIndexPartition {
 	 *         {@code point}
 	 */
 	@SuppressWarnings("unchecked")
-	public IndexDimensionSlice<Short> getSliceById(final short point) {
-		return (IndexDimensionSlice<Short>) getIndex().getObject(point);
+	public IndexDimensionSlice<Byte> getSliceById(final byte point) {
+		return (IndexDimensionSlice<Byte>) getIndex().getObject(point);
 	}
 
 	/**
-	 * And-combines the slices for the specified {@code start} (included) to
-	 * {@code end} (included).
-	 * 
-	 * @param start
-	 *            the start point (included)
-	 * @param end
-	 *            the end point (included)
-	 * 
-	 * @return the result of the combination of the specified slices (by and)
-	 */
-	public CombinedIndexDimensionSlice and(final short start, final short end) {
-
-		// combine the slices
-		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
-		combinedSlice.and(getIndex().getObjectsByStartAndEnd(start, end));
-
-		// return the result
-		return combinedSlice;
-	}
-
-	/**
-	 * Or-combines the slices for the specified {@code start} (included) to
-	 * {@code end} (included).
-	 * 
-	 * @param start
-	 *            the start point (included)
-	 * @param end
-	 *            the end point (included)
-	 * 
-	 * @return the result of the combination of the specified slices (by or)
-	 */
-	public CombinedIndexDimensionSlice or(final short start, final short end) {
-
-		// combine the slices
-		final CombinedIndexDimensionSlice combinedSlice = new CombinedIndexDimensionSlice();
-		combinedSlice.or(getIndex().getObjectsByStartAndEnd(start, end));
-
-		// return the result
-		return combinedSlice;
-	}
-
-	/**
-	 * Get the slices for the specified {@code start} (included) to {@code end}
-	 * (included).
-	 * 
-	 * @param start
-	 *            the start point (included)
-	 * @param end
-	 *            the end point (included)
-	 * 
-	 * @return the slices, which might be {@code null} if no data is there yet
-	 */
-	public IndexDimensionSlice<?>[] getSlices(final short start, final short end) {
-		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
-	}
-
-	@Override
-	public IndexDimensionSlice<?>[] getSlices() {
-		return getSlices(getStart(), getEnd());
-	}
-
-	/**
-	 * Sets the specified interval [{@code normStart}, {@code normEnd}] to true.
+	 * Set the values of the interval within the index.
 	 * 
 	 * @param normStart
-	 *            the start of the interval (included)
+	 *            the
 	 * @param normEnd
-	 *            the end of the interval (included)
 	 * @param recId
-	 *            the value to be set to true within the slice
 	 */
-	protected void setInterval(final short normStart, final short normEnd,
+	protected void setInterval(final byte normStart, final byte normEnd,
 			final int recId) {
 		final IIndexedCollection index = getIndex();
 
-		for (short i = normStart; i < normEnd + 1; i++) {
-			final IndexDimensionSlice<Short> slice = getSliceById(i);
+		for (byte i = normStart; i < normEnd + 1; i++) {
+			final IndexDimensionSlice<Byte> slice = getSliceById(i);
 			if (slice == null) {
-				index.addObject(new IndexDimensionSlice<Short>(i, recId));
+				index.addObject(createSlice(i, recId));
 			} else {
 				slice.set(recId);
 			}
@@ -190,9 +178,10 @@ public class ShortIntervalIndexPartition extends IntervalIndexPartition {
 	}
 
 	@Override
-	protected IndexDimensionSlice<Short> createSlice(final Number sliceId,
+	protected IndexDimensionSlice<Byte> createSlice(final Number sliceId,
 			final int... recordIds) {
-		return new IndexDimensionSlice<Short>(Numbers.castToShort(sliceId),
+		return new IndexDimensionSlice<Byte>(Numbers.castToByte(sliceId),
+				getIndexedCollectionFactory(),
 				recordIds);
 	}
 }

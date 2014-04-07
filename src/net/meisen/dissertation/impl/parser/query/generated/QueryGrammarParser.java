@@ -21,12 +21,12 @@ public class QueryGrammarParser extends Parser {
 		OP_GROUPBY=6, OP_FILTERBY=7, LOGICAL_OR=8, LOGICAL_AND=9, LOGICAL_NOT=10, 
 		CMP_EQUAL=11, BRACKET_ROUND_OPENED=12, BRACKET_ROUND_CLOSED=13, BRACKET_SQUARE_OPENED=14, 
 		BRACKET_SQUARE_CLOSED=15, SEPARATOR=16, IDENTIFIER=17, DATE=18, INT=19, 
-		DESC_VALUE=20, WHITESPACE=21;
+		DESC_VALUE=20, NULL_VALUE=21, WHITESPACE=22;
 	public static final String[] tokenNames = {
 		"<INVALID>", "STMT_SELECT", "TYPE_TIMESERIES", "TYPE_RECORDS", "OP_FROM", 
 		"OP_IN", "OP_GROUPBY", "OP_FILTERBY", "LOGICAL_OR", "LOGICAL_AND", "LOGICAL_NOT", 
 		"'='", "'('", "')'", "'['", "']'", "','", "IDENTIFIER", "DATE", "INT", 
-		"DESC_VALUE", "WHITESPACE"
+		"DESC_VALUE", "NULL_VALUE", "WHITESPACE"
 	};
 	public static final int
 		RULE_exprSelect = 0, RULE_exprAggregate = 1, RULE_exprLogic = 2, RULE_exprComp = 3, 
@@ -430,6 +430,7 @@ public class QueryGrammarParser extends Parser {
 		public TerminalNode DESC_VALUE() { return getToken(QueryGrammarParser.DESC_VALUE, 0); }
 		public TerminalNode IDENTIFIER() { return getToken(QueryGrammarParser.IDENTIFIER, 0); }
 		public TerminalNode CMP_EQUAL() { return getToken(QueryGrammarParser.CMP_EQUAL, 0); }
+		public TerminalNode NULL_VALUE() { return getToken(QueryGrammarParser.NULL_VALUE, 0); }
 		public CompDescriptorEqualContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -447,12 +448,18 @@ public class QueryGrammarParser extends Parser {
 	public final CompDescriptorEqualContext compDescriptorEqual() throws RecognitionException {
 		CompDescriptorEqualContext _localctx = new CompDescriptorEqualContext(_ctx, getState());
 		enterRule(_localctx, 10, RULE_compDescriptorEqual);
+		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(80); match(IDENTIFIER);
 			setState(81); match(CMP_EQUAL);
-			setState(82); match(DESC_VALUE);
+			setState(82);
+			_la = _input.LA(1);
+			if ( !(_la==DESC_VALUE || _la==NULL_VALUE) ) {
+			_errHandler.recoverInline(this);
+			}
+			consume();
 			}
 		}
 		catch (RecognitionException re) {
@@ -729,31 +736,31 @@ public class QueryGrammarParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\27g\4\2\t\2\4\3\t"+
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\30g\4\2\t\2\4\3\t"+
 		"\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4"+
 		"\f\t\f\4\r\t\r\3\2\3\2\3\2\3\2\3\2\3\2\5\2!\n\2\3\2\3\2\5\2%\n\2\3\2\3"+
 		"\2\5\2)\n\2\3\2\3\2\3\3\3\3\3\3\7\3\60\n\3\f\3\16\3\63\13\3\3\4\6\4\66"+
 		"\n\4\r\4\16\4\67\3\5\3\5\3\5\3\5\3\5\3\5\3\5\3\5\5\5B\n\5\3\5\3\5\3\5"+
 		"\7\5G\n\5\f\5\16\5J\13\5\3\6\3\6\3\6\5\6O\n\6\3\6\3\6\3\7\3\7\3\7\3\7"+
 		"\3\b\3\b\3\t\3\t\3\n\3\n\3\n\3\n\3\13\3\13\3\13\3\13\3\f\3\f\3\r\3\r\3"+
-		"\r\2\16\2\4\6\b\n\f\16\20\22\24\26\30\2\6\3\2\n\13\3\2\4\5\4\2\16\16\20"+
-		"\20\4\2\17\17\21\21c\2\32\3\2\2\2\4,\3\2\2\2\6\65\3\2\2\2\bA\3\2\2\2\n"+
-		"K\3\2\2\2\fR\3\2\2\2\16V\3\2\2\2\20X\3\2\2\2\22Z\3\2\2\2\24^\3\2\2\2\26"+
-		"b\3\2\2\2\30d\3\2\2\2\32\33\7\3\2\2\33\34\5\20\t\2\34\35\7\6\2\2\35 \5"+
-		"\16\b\2\36\37\7\7\2\2\37!\5\n\6\2 \36\3\2\2\2 !\3\2\2\2!$\3\2\2\2\"#\7"+
-		"\t\2\2#%\5\6\4\2$\"\3\2\2\2$%\3\2\2\2%(\3\2\2\2&\'\7\b\2\2\')\5\4\3\2"+
-		"(&\3\2\2\2()\3\2\2\2)*\3\2\2\2*+\7\2\2\3+\3\3\2\2\2,\61\7\23\2\2-.\7\22"+
-		"\2\2.\60\7\23\2\2/-\3\2\2\2\60\63\3\2\2\2\61/\3\2\2\2\61\62\3\2\2\2\62"+
-		"\5\3\2\2\2\63\61\3\2\2\2\64\66\5\b\5\2\65\64\3\2\2\2\66\67\3\2\2\2\67"+
-		"\65\3\2\2\2\678\3\2\2\28\7\3\2\2\29:\b\5\1\2:;\7\f\2\2;B\5\b\5\2<B\5\f"+
-		"\7\2=>\7\16\2\2>?\5\b\5\2?@\7\17\2\2@B\3\2\2\2A9\3\2\2\2A<\3\2\2\2A=\3"+
-		"\2\2\2BH\3\2\2\2CD\6\5\2\3DE\t\2\2\2EG\5\b\5\2FC\3\2\2\2GJ\3\2\2\2HF\3"+
-		"\2\2\2HI\3\2\2\2I\t\3\2\2\2JH\3\2\2\2KN\5\26\f\2LO\5\22\n\2MO\5\24\13"+
-		"\2NL\3\2\2\2NM\3\2\2\2OP\3\2\2\2PQ\5\30\r\2Q\13\3\2\2\2RS\7\23\2\2ST\7"+
-		"\r\2\2TU\7\26\2\2U\r\3\2\2\2VW\7\23\2\2W\17\3\2\2\2XY\t\3\2\2Y\21\3\2"+
-		"\2\2Z[\7\24\2\2[\\\7\22\2\2\\]\7\24\2\2]\23\3\2\2\2^_\7\25\2\2_`\7\22"+
-		"\2\2`a\7\25\2\2a\25\3\2\2\2bc\t\4\2\2c\27\3\2\2\2de\t\5\2\2e\31\3\2\2"+
-		"\2\n $(\61\67AHN";
+		"\r\2\16\2\4\6\b\n\f\16\20\22\24\26\30\2\7\3\2\n\13\3\2\26\27\3\2\4\5\4"+
+		"\2\16\16\20\20\4\2\17\17\21\21c\2\32\3\2\2\2\4,\3\2\2\2\6\65\3\2\2\2\b"+
+		"A\3\2\2\2\nK\3\2\2\2\fR\3\2\2\2\16V\3\2\2\2\20X\3\2\2\2\22Z\3\2\2\2\24"+
+		"^\3\2\2\2\26b\3\2\2\2\30d\3\2\2\2\32\33\7\3\2\2\33\34\5\20\t\2\34\35\7"+
+		"\6\2\2\35 \5\16\b\2\36\37\7\7\2\2\37!\5\n\6\2 \36\3\2\2\2 !\3\2\2\2!$"+
+		"\3\2\2\2\"#\7\t\2\2#%\5\6\4\2$\"\3\2\2\2$%\3\2\2\2%(\3\2\2\2&\'\7\b\2"+
+		"\2\')\5\4\3\2(&\3\2\2\2()\3\2\2\2)*\3\2\2\2*+\7\2\2\3+\3\3\2\2\2,\61\7"+
+		"\23\2\2-.\7\22\2\2.\60\7\23\2\2/-\3\2\2\2\60\63\3\2\2\2\61/\3\2\2\2\61"+
+		"\62\3\2\2\2\62\5\3\2\2\2\63\61\3\2\2\2\64\66\5\b\5\2\65\64\3\2\2\2\66"+
+		"\67\3\2\2\2\67\65\3\2\2\2\678\3\2\2\28\7\3\2\2\29:\b\5\1\2:;\7\f\2\2;"+
+		"B\5\b\5\2<B\5\f\7\2=>\7\16\2\2>?\5\b\5\2?@\7\17\2\2@B\3\2\2\2A9\3\2\2"+
+		"\2A<\3\2\2\2A=\3\2\2\2BH\3\2\2\2CD\6\5\2\3DE\t\2\2\2EG\5\b\5\2FC\3\2\2"+
+		"\2GJ\3\2\2\2HF\3\2\2\2HI\3\2\2\2I\t\3\2\2\2JH\3\2\2\2KN\5\26\f\2LO\5\22"+
+		"\n\2MO\5\24\13\2NL\3\2\2\2NM\3\2\2\2OP\3\2\2\2PQ\5\30\r\2Q\13\3\2\2\2"+
+		"RS\7\23\2\2ST\7\r\2\2TU\t\3\2\2U\r\3\2\2\2VW\7\23\2\2W\17\3\2\2\2XY\t"+
+		"\4\2\2Y\21\3\2\2\2Z[\7\24\2\2[\\\7\22\2\2\\]\7\24\2\2]\23\3\2\2\2^_\7"+
+		"\25\2\2_`\7\22\2\2`a\7\25\2\2a\25\3\2\2\2bc\t\5\2\2c\27\3\2\2\2de\t\6"+
+		"\2\2e\31\3\2\2\2\n $(\61\67AHN";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

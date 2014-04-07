@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model/indexes" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/model/indexes" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
+
+  <xs:element name="config">
+    <xs:complexType>
+      <xs:attribute name="byte" type="types:javaClass" use="optional" />
+      <xs:attribute name="short" type="types:javaClass" use="optional" />
+      <xs:attribute name="int" type="types:javaClass" use="optional" />
+      <xs:attribute name="long" type="types:javaClass" use="optional" />
+      
+      <xs:attribute name="bitmap" type="types:javaClass" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

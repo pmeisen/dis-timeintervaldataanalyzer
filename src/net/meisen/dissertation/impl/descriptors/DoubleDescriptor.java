@@ -1,10 +1,14 @@
 package net.meisen.dissertation.impl.descriptors;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
 
 /**
- * A {@code Descriptor} defined by a {@code Double} value.
+ * A {@code Descriptor} defined by a {@code Double} value, with at most 5 decimal places.
  * 
  * @author pmeisen
  * 
@@ -14,6 +18,22 @@ import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
  */
 public class DoubleDescriptor<I extends Object> extends
 		DescriptorPrimitiveDataType<Double, DoubleDescriptor<I>, I> {
+	/**
+	 * Formatter used to create the unique string for the double
+	 */
+	protected final static DecimalFormat formatter = new DecimalFormat("0.#####");
+
+	static {
+		
+		// make sure the . and , are used correctly, i.e. US-Format
+		final DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+		symbols.setDecimalSeparator('.');
+		symbols.setGroupingSeparator(',');
+
+		// define the symbols used by the formatter
+		formatter.setDecimalFormatSymbols(symbols);
+	}
+
 	private double value;
 
 	/**
@@ -124,9 +144,9 @@ public class DoubleDescriptor<I extends Object> extends
 	public boolean valueEquals(final DoubleDescriptor<I> descriptor) {
 		return descriptor.value == value;
 	}
-	
+
 	@Override
-	public String toString() {
-		return "" + value;
+	public String getUniqueString() {
+		return formatter.format(value);
 	}
 }

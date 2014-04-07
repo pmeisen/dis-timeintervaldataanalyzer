@@ -485,13 +485,29 @@ public class DescriptorModel<I extends Object> {
 		}
 	}
 
-	public Descriptor<?, ?, I> getDescriptorByString(final String stringValue) {
+	/**
+	 * Gets the {@code Descriptor} having the {@code value} defined as unique
+	 * string.
+	 * 
+	 * @param value
+	 *            the unique string of the {@code Descriptor} to be returned
+	 * @return the {@code Descriptor} with the specified unique string, if no
+	 *         {@code Descriptor} can be found {@code null} is returned
+	 * 
+	 * @see Descriptor#getUniqueString()
+	 */
+	@SuppressWarnings("unchecked")
+	public Descriptor<?, ?, I> getDescriptorByString(final String value) {
 
-		if (supportsNullDescriptor() && stringValue == null) {
-			return getNullDescriptor();
+		if (value == null) {
+			if (supportsNullDescriptor()) {
+				return getNullDescriptor();
+			} else {
+				return null;
+			}
 		} else {
-
-			return null;
+			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
+					2, value);
 		}
 	}
 
@@ -533,13 +549,13 @@ public class DescriptorModel<I extends Object> {
 			added = getDescriptorIndex().addObject(descriptor);
 		} catch (final Exception e) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
-					1003, e, descriptor, getId());
+					1003, e, descriptor.getUniqueString(), getId());
 		}
 
 		// make sure it was added
 		if (!added && isFailOnDuplicates()) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
-					1002, descriptor, getId());
+					1002, descriptor.getUniqueString(), getId());
 		}
 	}
 
@@ -561,12 +577,14 @@ public class DescriptorModel<I extends Object> {
 			final IndexKeyDefinition desIdDef = new IndexKeyDefinition(
 					Descriptor.class, "getId");
 			desIdDef.overrideType(0, getIdClass());
-			final IndexKeyDefinition uniqueDesDef = new IndexKeyDefinition(
+			final IndexKeyDefinition valueDef = new IndexKeyDefinition(
 					Descriptor.class, "getValue");
+			final IndexKeyDefinition stringDef = new IndexKeyDefinition(
+					Descriptor.class, "getUniqueString");
 
 			// create the descriptors index
 			descriptors = baseIndexedCollectionFactory
-					.createMultipleKeySupport(desIdDef, uniqueDesDef);
+					.createMultipleKeySupport(desIdDef, valueDef, stringDef);
 		}
 
 		return descriptors;
