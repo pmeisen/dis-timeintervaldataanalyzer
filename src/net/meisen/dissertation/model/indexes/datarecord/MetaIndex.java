@@ -130,7 +130,15 @@ public class MetaIndex implements DataRecordIndex {
 			dim.optimize();
 		}
 	}
-	
+
+	/**
+	 * Get the {@code IndexDimension} for the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the
+	 * 
+	 * @return the {@code MetaIndexDimension} for the specified {@code modelId}.
+	 */
 	public MetaIndexDimension<?> get(final String modelId) {
 		return (MetaIndexDimension<?>) dimensionsIndex.getObject(modelId);
 	}
@@ -150,12 +158,12 @@ public class MetaIndex implements DataRecordIndex {
 	@Override
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		this.persistentGroup = group;
-		
+
 		for (final MetaIndexDimension<?> dim : getDimensions()) {
 			persistor.register(group.append("" + dim.getModelId()), dim);
 		}
 	}
-	
+
 	@Override
 	public Group getPersistentGroup() {
 		return persistentGroup;

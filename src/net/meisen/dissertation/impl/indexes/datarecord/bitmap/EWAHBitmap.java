@@ -23,10 +23,22 @@ import com.googlecode.javaewah.EWAHCompressedBitmap;
 public class EWAHBitmap extends Bitmap {
 	private EWAHCompressedBitmap bitmap;
 
+	/**
+	 * Default constructor used to create an empty bitmap, i.e. everything is
+	 * set to {@code false}.
+	 */
 	public EWAHBitmap() {
 		this.bitmap = EWAHCompressedBitmap.bitmapOf();
 	}
 
+	/**
+	 * Internally used constructor to create a new instance of a bitmap based on
+	 * a {@code EWAHCompressedBitmap}.
+	 * 
+	 * @param bitmap
+	 *            the {@code EWAHCompressedBitmap} the newly created instance is
+	 *            based on
+	 */
 	protected EWAHBitmap(final EWAHCompressedBitmap bitmap) {
 		this.bitmap = bitmap;
 	}
@@ -85,6 +97,19 @@ public class EWAHBitmap extends Bitmap {
 		return EWAHCompressedBitmap.orCardinality(createArray(true, bitmaps));
 	}
 
+	/**
+	 * Creates an array of {@code EWAHCompressedBitmap} instances and optionally
+	 * adds {@code this}.
+	 * 
+	 * @param addThis
+	 *            {@code true} if the {@code EWAHCompressedBitmap} of
+	 *            {@code this} should be added to the result
+	 * @param bitmaps
+	 *            the bitmaps to be transformed into an array of
+	 *            {@code EWAHCompressedBitmap} instances
+	 * 
+	 * @return the returned array
+	 */
 	protected EWAHCompressedBitmap[] createArray(final boolean addThis,
 			final Bitmap... bitmaps) {
 		final int maxSize = (addThis ? 1 : 0) + bitmaps.length;
@@ -98,6 +123,8 @@ public class EWAHBitmap extends Bitmap {
 
 		// add all the EWAHCompressedBitmap
 		for (final Bitmap bitmap : bitmaps) {
+
+			// null values are ignored
 			if (bitmap instanceof EWAHBitmap) {
 				list.add(((EWAHBitmap) bitmap).bitmap);
 			}

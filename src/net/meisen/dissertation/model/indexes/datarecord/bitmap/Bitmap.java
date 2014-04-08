@@ -11,54 +11,180 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 /**
  * A wrapper for a {@code Bitmap} implementation, e.g.
  * {@code EWAHCompressedBitmap}. The implementation must provide a default
- * constructor, otherwise the creation by the factory fails.
+ * constructor, otherwise the creation by the factory might fail.
  * 
  * @author pmeisen
+ * 
+ * @see BaseIndexFactory
  * 
  */
 public abstract class Bitmap implements IBitmapContainer {
 
+	/**
+	 * The logical types to combine a bitmap with another.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	protected static enum LogicType {
-		AND, OR;
+		/**
+		 * The two bitmaps A and B will be combined using a logical {@code AND}.
+		 */
+		AND,
+		/**
+		 * The two bitmaps A and B will be combined using a logical {@code OR}.
+		 */
+		OR;
 	}
 
+	/**
+	 * Get the set identifiers for the bitmap.
+	 * 
+	 * @return the identifiers set
+	 */
 	public abstract int[] getIds();
 
+	/**
+	 * Determines the cardinality of the bitmap.
+	 * 
+	 * @return the cardinality of the bitmap
+	 */
 	public abstract int determineCardinality();
 
+	/**
+	 * Optimizes the bitmap considering performance and storage.
+	 */
 	public abstract void optimize();
 
+	/**
+	 * Sets the specified identifiers of the {@code Bitmap} to {@code true}.
+	 * 
+	 * @param recordIds
+	 *            the identifiers to be set
+	 */
 	public abstract void set(final int... recordIds);
 
+	/**
+	 * Serializes the bitmap to the specified {@code DataOutputStream}.
+	 * 
+	 * @param out
+	 *            the stream to serialize the bitmap to
+	 * 
+	 * @throws IOException
+	 *             if an exception using the output occurs
+	 */
 	public abstract void serialize(final DataOutputStream out)
 			throws IOException;
 
+	/**
+	 * Deserializes the bitmap from the specified {@code DataInputStream}.
+	 * 
+	 * @param in
+	 *            the stream to deserialize the bitmap from
+	 * 
+	 * @throws IOException
+	 *             if an exception using the input occurs
+	 */
 	public abstract void deserialize(final DataInputStream in)
 			throws IOException;
 
+	/**
+	 * Creates a new bitmap by combining {@code this} and the specified
+	 * {@code bitmaps}.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to be combined with {@code this} using {@code AND}
+	 * @return the combined {@code Bitmap}
+	 */
 	public abstract Bitmap and(final Bitmap... bitmaps);
 
+	/**
+	 * Calculates the cardinality of the bitmap created by combining
+	 * {@code this} and the specified {@code bitmaps}.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to be combined with {@code this} using {@code AND}
+	 * 
+	 * @return the cardinality of the combined {@code Bitmap}
+	 */
 	public abstract int andCardinality(final Bitmap... bitmaps);
 
+	/**
+	 * Creates a new bitmap by combining {@code this} and the specified
+	 * {@code bitmaps}.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to be combined with {@code this} using {@code OR}
+	 * @return the combined {@code Bitmap}
+	 */
 	public abstract Bitmap or(final Bitmap... bitmaps);
 
+	/**
+	 * Calculates the cardinality of the bitmap created by combining
+	 * {@code this} and the specified {@code bitmaps}.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to be combined with {@code this} using {@code OR}
+	 * 
+	 * @return the cardinality of the combined {@code Bitmap}
+	 */
 	public abstract int orCardinality(final Bitmap... bitmaps);
-	
+
 	@Override
 	public Bitmap getBitmap() {
 		return this;
 	}
 
+	/**
+	 * Combines the specified bitmaps using a logical {@code AND}.
+	 * 
+	 * @param factory
+	 *            the {@code IndexFactory} used if a new {@code Bitmap} has to
+	 *            be created
+	 * @param bitmaps
+	 *            the bitmaps to combine
+	 * 
+	 * @return the combined result
+	 */
 	public static Bitmap and(final BaseIndexFactory factory,
 			final Object... bitmaps) {
 		return combine(bitmaps, LogicType.AND, factory);
 	}
 
+	/**
+	 * Combines the specified bitmaps using a logical {@code OR}.
+	 * 
+	 * @param factory
+	 *            the {@code IndexFactory} used if a new {@code Bitmap} has to
+	 *            be created
+	 * @param bitmaps
+	 *            the bitmaps to combine
+	 * 
+	 * @return the combined result
+	 */
 	public static Bitmap or(final BaseIndexFactory factory,
 			final Object... bitmaps) {
 		return combine(bitmaps, LogicType.OR, factory);
 	}
 
+	/**
+	 * Helper method used to combine the specified {@code bitmaps} with each
+	 * other using the specified logical {@code type}. If the array of
+	 * {@code bitmaps} contains a {@code null} it is assumed that this
+	 * represents an empty bitmap, i.e. no value is set to {@code true}.
+	 * 
+	 * @param bitmaps
+	 *            the array of bitmaps to be combined
+	 * @param type
+	 *            the {@code LogicType} used to combine the {@code bitmaps}
+	 * @param factory
+	 *            the {@code IndexFactory} used if a new {@code Bitmap} has to
+	 *            be created
+	 * 
+	 * @return the resulting combined {@code Bitmap}
+	 * 
+	 * @see LogicType
+	 */
 	protected static Bitmap combine(final Object[] bitmaps,
 			final LogicType type, final BaseIndexFactory factory) {
 		final List<Bitmap> others = new ArrayList<Bitmap>();
@@ -112,6 +238,18 @@ public abstract class Bitmap implements IBitmapContainer {
 		}
 	}
 
+	/**
+	 * Helper method used to determine the {@code Bitmap} of the specified
+	 * {@code o}.
+	 * 
+	 * @param o
+	 *            the object to determine the {@code Bitmap} from
+	 * @return the determined {@code Bitmap}, or {@code null} if none could be
+	 *         determined
+	 * 
+	 * @see Bitmap
+	 * @see IBitmapContainer
+	 */
 	protected static Bitmap determineBitmap(final Object o) {
 		if (o instanceof Bitmap) {
 			return (Bitmap) o;

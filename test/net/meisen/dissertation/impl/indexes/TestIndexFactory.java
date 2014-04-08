@@ -29,6 +29,12 @@ import org.junit.runners.Suite;
  */
 public class TestIndexFactory {
 
+	/**
+	 * Tests the general functionality offered by the {@code IndexFactory}.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestGenerallyIndexFactory {
 
 		/**
@@ -77,6 +83,9 @@ public class TestIndexFactory {
 					.getClass());
 		}
 
+		/**
+		 * Tests the creation of an empty bitmap.
+		 */
 		@Test
 		public void testBitmapCreation() {
 			IndexFactory factory;
@@ -101,10 +110,20 @@ public class TestIndexFactory {
 		}
 	}
 
+	/**
+	 * Tests the usage of a default configuration considering the used
+	 * {@code IndexFactory}.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	@ContextClass(TestConfig.class)
 	@ContextFile("test-sbconfigurator-core.xml")
 	public static class TestDefaultIndexConfig extends ModuleBasedTest {
 
+		/**
+		 * Checks the default usage.
+		 */
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/simplestModel.xml");
@@ -125,11 +144,21 @@ public class TestIndexFactory {
 		}
 	}
 
+	/**
+	 * Tests the usage of a globally changed configuration considering the used
+	 * {@code IndexFactory}.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	@ContextClass(TestConfig.class)
 	@ContextFile("test-sbconfigurator-core.xml")
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/impl/indexes/config/globallyChangedIndexConfig.xml")
 	public static class TestGloballyChangedIndexConfig extends ModuleBasedTest {
 
+		/**
+		 * Tests the application of the globally changed configuration.
+		 */
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/simplestModel.xml");
@@ -149,11 +178,21 @@ public class TestIndexFactory {
 		}
 	}
 
+	/**
+	 * Tests the usage of a model-based configuration considering the used
+	 * {@code IndexFactory}.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	@ContextClass(TestConfig.class)
 	@ContextFile("test-sbconfigurator-core.xml")
 	public static class TestModelBasedChangedIndexConfig extends
 			ModuleBasedTest {
 
+		/**
+		 * Tests the application of the changed model-based configuration.
+		 */
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/impl/indexes/config/modelBasedChangedIndexConfig.xml");

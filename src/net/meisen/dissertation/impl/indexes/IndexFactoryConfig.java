@@ -1,18 +1,29 @@
 package net.meisen.dissertation.impl.indexes;
 
 import net.meisen.dissertation.impl.indexes.datarecord.bitmap.EWAHBitmap;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
+import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
+/**
+ * Configuration usable to define the indexes created by the
+ * {@code IndexFactory}. The configuration can be fed from the xml-configuration
+ * as well.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class IndexFactoryConfig {
-
-	private Class<? extends BaseIndexedCollection> byteClass;
-	private Class<? extends BaseIndexedCollection> shortClass;
-	private Class<? extends BaseIndexedCollection> intClass;
-	private Class<? extends BaseIndexedCollection> longClass;
+	private Class<? extends IIndexedCollection> byteClass;
+	private Class<? extends IIndexedCollection> shortClass;
+	private Class<? extends IIndexedCollection> intClass;
+	private Class<? extends IIndexedCollection> longClass;
 
 	private Class<? extends Bitmap> bitmapClass;
 
+	/**
+	 * Creates a default configuration, which can be modified using the
+	 * different getter and setter methods.
+	 */
 	public IndexFactoryConfig() {
 
 		// by default we use all Trove implementations
@@ -23,43 +34,116 @@ public class IndexFactoryConfig {
 		this.bitmapClass = EWAHBitmap.class;
 	}
 
-	public void setByteClass(final Class<? extends BaseIndexedCollection> byteClass) {
+	/**
+	 * Sets the class of the {@code IndexedCollection} to be used for
+	 * collections indexed by byte values.
+	 * 
+	 * @param byteClass
+	 *            the class of the {@code IndexedCollection} to be used for
+	 *            collections indexed by byte values
+	 */
+	public void setByteClass(final Class<? extends IIndexedCollection> byteClass) {
 		this.byteClass = byteClass;
 	}
 
-	public Class<? extends BaseIndexedCollection> getByteClass() {
+	/**
+	 * Gets the class of the {@code IndexedCollection} used for collections
+	 * indexed by byte values.
+	 * 
+	 * @return the class of the {@code IndexedCollection} used for collections
+	 *         indexed by byte values
+	 */
+	public Class<? extends IIndexedCollection> getByteClass() {
 		return byteClass;
 	}
 
+	/**
+	 * Sets the class of the {@code IndexedCollection} to be used for
+	 * collections indexed by short values.
+	 * 
+	 * @param shortClass
+	 *            the class of the {@code IndexedCollection} to be used for
+	 *            collections indexed by short values
+	 */
 	public void setShortClass(
-			final Class<? extends BaseIndexedCollection> shortClass) {
+			final Class<? extends IIndexedCollection> shortClass) {
 		this.shortClass = shortClass;
 	}
 
-	public Class<? extends BaseIndexedCollection> getShortClass() {
+	/**
+	 * Gets the class of the {@code IndexedCollection} used for collections
+	 * indexed by short values.
+	 * 
+	 * @return the class of the {@code IndexedCollection} used for collections
+	 *         indexed by short values
+	 */
+	public Class<? extends IIndexedCollection> getShortClass() {
 		return shortClass;
 	}
 
-	public void setIntClass(final Class<? extends BaseIndexedCollection> intClass) {
+	/**
+	 * Sets the class of the {@code IndexedCollection} to be used for
+	 * collections indexed by int values.
+	 * 
+	 * @param intClass
+	 *            the class of the {@code IndexedCollection} to be used for
+	 *            collections indexed by int values
+	 */
+	public void setIntClass(final Class<? extends IIndexedCollection> intClass) {
 		this.intClass = intClass;
 	}
 
-	public Class<? extends BaseIndexedCollection> getIntClass() {
+	/**
+	 * Gets the class of the {@code IndexedCollection} used for collections
+	 * indexed by int values.
+	 * 
+	 * @return the class of the {@code IndexedCollection} used for collections
+	 *         indexed by int values
+	 */
+	public Class<? extends IIndexedCollection> getIntClass() {
 		return intClass;
 	}
 
-	public void setLongClass(final Class<? extends BaseIndexedCollection> longClass) {
+	/**
+	 * Sets the class of the {@code IndexedCollection} to be used for
+	 * collections indexed by long values.
+	 * 
+	 * @param longClass
+	 *            the class of the {@code IndexedCollection} to be used for
+	 *            collections indexed by long values
+	 */
+	public void setLongClass(final Class<? extends IIndexedCollection> longClass) {
 		this.longClass = longClass;
 	}
 
-	public Class<? extends BaseIndexedCollection> getLongClass() {
+	/**
+	 * Gets the class of the {@code IndexedCollection} used for collections
+	 * indexed by long values.
+	 * 
+	 * @return the class of the {@code IndexedCollection} used for collections
+	 *         indexed by long values
+	 */
+	public Class<? extends IIndexedCollection> getLongClass() {
 		return longClass;
 	}
 
+	/**
+	 * Get the class used to create a new bitmap instance.
+	 * 
+	 * @return the class used to create a new bitmap instance
+	 * 
+	 * @see Bitmap
+	 */
 	public Class<? extends Bitmap> getBitmapClass() {
 		return bitmapClass;
 	}
 
+	/**
+	 * Defines the class to be used to create a new bitmap instance.
+	 * 
+	 * @param bitmapClass
+	 *            the class to be used to create a new bitmap instance
+	 */
 	public void setBitmapClass(final Class<? extends Bitmap> bitmapClass) {
 		this.bitmapClass = bitmapClass;
 	}

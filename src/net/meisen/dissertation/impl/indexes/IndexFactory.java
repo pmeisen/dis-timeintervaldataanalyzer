@@ -4,11 +4,11 @@ import java.util.HashMap;
 
 import net.meisen.dissertation.exceptions.IndexFactoryException;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
@@ -60,10 +60,24 @@ public class IndexFactory extends BaseIndexFactory {
 		}
 	}
 
+	/**
+	 * Defines the configuration to be used. If set to {@code null} a default
+	 * configuration will be applied.
+	 * 
+	 * @param config
+	 *            the configuration to be used
+	 */
 	public void setConfig(final IndexFactoryConfig config) {
 		setConfig((Object) config);
 	}
 
+	/**
+	 * Gets the specified configuration. A default configuration is created, if
+	 * none is defined so far. Therefore this method will never return
+	 * {@code null}.
+	 * 
+	 * @return the configuration used by the {@code IndexFactory}
+	 */
 	public IndexFactoryConfig getConfig() {
 		if (config == null) {
 			this.config = new IndexFactoryConfig();
@@ -128,7 +142,7 @@ public class IndexFactory extends BaseIndexFactory {
 	@Override
 	protected IndexedCollectionDefinition createIndexedCollectionDefinition(
 			final Class<?> clazz) {
-		final Class<? extends BaseIndexedCollection> collClazz;
+		final Class<? extends IIndexedCollection> collClazz;
 
 		// we have some really nice implementations for the primitives
 		if (isBytePrimitiveType(clazz)) {

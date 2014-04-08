@@ -4,6 +4,8 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -14,6 +16,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public abstract class BaseIndexFactory {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(BaseIndexFactory.class);
 
 	/**
 	 * {@code exceptionRegistry} used to fire exceptions.
@@ -23,7 +27,8 @@ public abstract class BaseIndexFactory {
 	protected IExceptionRegistry exceptionRegistry;
 
 	/**
-	 * Creates a {@code BaseIndexedCollection} of type {@code IIndexedCollection}.
+	 * Creates a {@code BaseIndexedCollection} of type
+	 * {@code IIndexedCollection}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to create the
@@ -37,22 +42,22 @@ public abstract class BaseIndexFactory {
 
 	/**
 	 * Creates a {@code BaseIndexedCollection} of the specified {@code expected}
-	 * class. If {@code expected} is {@code null} a {@code BaseIndexedCollection} of
-	 * type {@code IIndexedCollection} will be created (i.e.
-	 * {@code create(keyDef, IIndexedCollection.class)}.
+	 * class. If {@code expected} is {@code null} a
+	 * {@code BaseIndexedCollection} of type {@code IIndexedCollection} will be
+	 * created (i.e. {@code create(keyDef, IIndexedCollection.class)}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to create the
 	 *            {@code BaseIndexedCollection} for
 	 * @param expected
-	 *            the type of the {@code BaseIndexedCollection}, if not supported an
-	 *            exception is thrown
+	 *            the type of the {@code BaseIndexedCollection}, if not
+	 *            supported an exception is thrown
 	 * 
 	 * @return the created {@code BaseIndexedCollection}
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if no {@code BaseIndexedCollection} can be created as defined by
-	 *             {@code expected}
+	 *             if no {@code BaseIndexedCollection} can be created as defined
+	 *             by {@code expected}
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends IIndexedCollection> T create(
@@ -180,8 +185,8 @@ public abstract class BaseIndexFactory {
 			final IndexedCollectionDefinition[] collDefs);
 
 	/**
-	 * Determines which {@code BaseIndexedCollection} to be used for the specified
-	 * {@code keyDef}.
+	 * Determines which {@code BaseIndexedCollection} to be used for the
+	 * specified {@code keyDef}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to determine the
@@ -386,7 +391,23 @@ public abstract class BaseIndexFactory {
 		}
 	}
 
+	/**
+	 * The base implementation does not support any configuration. Therefore the
+	 * default implementation does nothing. If a configuration is supported this
+	 * method should be overwritten.
+	 * 
+	 * @param config
+	 */
 	public void setConfig(final Object config) {
 		// nothing to do this might be implemented by the concrete class
+		if (config != null) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("A configuration '"
+						+ config
+						+ "' was passed to the implementation '"
+						+ getClass().getName()
+						+ "' of an IndexFactory. The configuration is not used, because the base implementation does not support any configuration. Please override the 	appropriate method in the concrete implementation.");
+			}
+		}
 	}
 }

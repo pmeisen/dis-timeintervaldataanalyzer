@@ -34,8 +34,7 @@ public class IndexDimensionSlice<I> implements
 	 * @param factory
 	 *            factory used to create bitmap indexes
 	 */
-	public IndexDimensionSlice(final I sliceId,
-			final BaseIndexFactory factory) {
+	public IndexDimensionSlice(final I sliceId, final BaseIndexFactory factory) {
 		this(sliceId, factory, null);
 	}
 
@@ -50,8 +49,8 @@ public class IndexDimensionSlice<I> implements
 	 * @param recordIds
 	 *            the identifiers of the records to be set
 	 */
-	public IndexDimensionSlice(final I sliceId,
-			final BaseIndexFactory factory, final int... recordIds) {
+	public IndexDimensionSlice(final I sliceId, final BaseIndexFactory factory,
+			final int... recordIds) {
 		this.id = sliceId;
 		this.bitmap = factory.createBitmap();
 
@@ -138,14 +137,27 @@ public class IndexDimensionSlice<I> implements
 		return bitmap;
 	}
 
+	/**
+	 * Optimize the slice considering space and/or performance.
+	 */
 	public void optimize() {
 		bitmap.optimize();
 	}
 
+	/**
+	 * Get the identifiers of the records set for the slice.
+	 * 
+	 * @return the records' identifiers associated to the slice
+	 */
 	public int[] get() {
 		return bitmap.getIds();
 	}
 
+	/**
+	 * Counts the number of records associated to the slice.
+	 * 
+	 * @return the number of records associated to the slice
+	 */
 	public int count() {
 		return bitmap.determineCardinality();
 	}
