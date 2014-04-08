@@ -19,14 +19,14 @@ import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
-import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIndexFactory;
+import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
+import net.meisen.dissertation.impl.indexes.datarecord.bitmap.TestEWAHBitmap;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
-import net.meisen.dissertation.impl.parser.query.select.TestSelectQuery;
 import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
@@ -141,6 +141,9 @@ import org.junit.runners.Suite;
 		// Test the xsd and xslt
 		TestXsdTidaModel.class, TestXsltTidaModel.class,
 
+		// Test some bitmap implementations
+		TestEWAHBitmap.class,
+		
 		// Test the tida-indexes
 		TestMetaIndexDimension.class, TestMetaIndex.class,
 		TestIntervalIndexPartition.class,
@@ -149,7 +152,7 @@ import org.junit.runners.Suite;
 		TestTidaModelHandler.class,
 
 		// Test the query
-		TestQueryFactory.class, TestSelectQuery.class,
+		TestQueryFactory.class, 
 
 		// Test the server
 		TestTidaServer.class })

@@ -64,4 +64,14 @@ public class BitmapMock extends Bitmap {
 	public int orCardinality(final Bitmap... bitmaps) {
 		return 0;
 	}
+
+	@Override
+	public Bitmap invert(int position) {
+		return null;
+	}
+
+	@Override
+	public int invertCardinality(int position) {
+		return 0;
+	}
 }

@@ -47,6 +47,8 @@ STMT_SELECT   : S E L E C T;
 TYPE_TIMESERIES: T I M E S E R I E S;
 TYPE_RECORDS   : R E C O R D S;
 
+NULL_VALUE: N U L L;
+
 OP_FROM     : F R O M;
 OP_IN       : I N;
 OP_GROUPBY  : G R O U P ' ' B Y;
@@ -76,12 +78,11 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
 DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE))|.)*? SYM_DESC_VALUE;
-NULL_VALUE: N U L L;
 
 WHITESPACE: [ \t\r\n]+ -> skip;
 
-fragment SYM_DESC_VALUE : '\'';
-fragment SYM_QUOTE      : '\\';
+fragment SYM_DESC_VALUE    : '\'';
+fragment SYM_QUOTE         : '\\';
 
 /*
  * There is no case insensitive matching, therefore we define

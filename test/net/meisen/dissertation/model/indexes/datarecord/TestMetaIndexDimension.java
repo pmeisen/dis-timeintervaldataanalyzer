@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
@@ -32,6 +33,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -137,8 +139,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
-				.loadViaXslt("mh_tidaStaticIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
 		final DataStructure structure = model.getDataStructure();
@@ -149,8 +150,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idx = new MetaIndexDimension(
-				metaStructures.get(0), descModel,
-				new IndexFactory());
+				metaStructures.get(0), descModel, new IndexFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -183,8 +183,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	public void testUsingRandomIndexModel() {
 		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
-				.loadViaXslt("mh_tidaRandomIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
 		// get the defined model and the structure
 		final MetaDataModel metaModel = model.getMetaDataModel();
@@ -259,13 +258,14 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		// the testing persistor we use here
 		final Group group = new Group("meta");
-		final ZipPersistor persistor = new ZipPersistor();
+		final ZipPersistor persistor = new ZipPersistor(
+				(IExceptionRegistry) configuration
+						.getModule(DefaultValues.EXCEPTIONREGISTRY_ID));
 
 		// get the model and the factory we use
 		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
-				.loadViaXslt("mh_tidaStaticIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		// get the defined model and the structure
 		final MetaDataModel metaModel = model.getMetaDataModel();

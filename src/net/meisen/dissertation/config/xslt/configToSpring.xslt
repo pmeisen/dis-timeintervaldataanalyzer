@@ -11,6 +11,7 @@
   <xsl:output method="xml" indent="yes" />
   
   <xsl:variable name="queryFactoryId" select="cdef:getId('QUERYFACTORY_ID')" />
+  <xsl:variable name="handlerId" select="cdef:getId('HANDLER_ID')" />
     
   <xsl:template match="/cns:config">
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -62,7 +63,7 @@
       <bean id="{$queryFactoryId}" class="{$queryFactory}" />
     
       <!-- define loaders used to load tidaModels -->
-      <bean id="tidaModelHandler" class="net.meisen.dissertation.model.handler.TidaModelHandler" />
+      <bean id="{$handlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler" />
   
       <!-- define the tidaServer -->
       <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />

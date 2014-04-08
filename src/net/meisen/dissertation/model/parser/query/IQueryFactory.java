@@ -1,5 +1,9 @@
 package net.meisen.dissertation.model.parser.query;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.exceptions.QueryParsingException;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
+
 /**
  * Factory to create {@code Query} instances for the specified string.
  * 
@@ -16,7 +20,14 @@ public interface IQueryFactory {
 	 * 
 	 * @return the created {@code Query}
 	 * 
+	 * @throws QueryParsingException
+	 *             if the parsing fails
+	 * 
 	 * @see IQuery
 	 */
-	public IQuery parseQuery(final String queryString);
+	public IQuery parseQuery(final String queryString)
+			throws QueryParsingException;
+
+	public IQueryResult evaluateQuery(final IQuery query,
+			final TidaModelHandler handler) throws QueryEvaluationException;
 }

@@ -88,6 +88,10 @@ public abstract class Bitmap implements IBitmapContainer {
 	public abstract void deserialize(final DataInputStream in)
 			throws IOException;
 
+	public abstract Bitmap invert(final int position);
+	
+	public abstract int invertCardinality(final int position);
+	
 	/**
 	 * Creates a new bitmap by combining {@code this} and the specified
 	 * {@code bitmaps}.
@@ -134,7 +138,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	public Bitmap getBitmap() {
 		return this;
 	}
-
+	
 	/**
 	 * Combines the specified bitmaps using a logical {@code AND}.
 	 * 

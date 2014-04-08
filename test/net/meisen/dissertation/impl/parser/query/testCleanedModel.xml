@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testCleanedModel">
+  
+  <time>
+    <timeline start="01.01.2014" end="31.12.2014" granularity="DAY" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="EVENT" />
+      <string id="PRIORITY" null="true" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="EVENT" value="birthday" />
+      <entry descriptor="EVENT" value="commemoration day" />
+            
+      <entry descriptor="PRIORITY" value="high" />
+      <entry descriptor="PRIORITY" value="normal" />
+      <entry descriptor="PRIORITY" value="low" />
+    </entries>
+  </meta>
+  
+  <structure>   
+    <meta position="3" descriptor="EVENT" />
+    <meta position="4" descriptor="PRIORITY" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create">
+    <dataset>
+      <entry class="java.util.Date" value="28.01.2014" />
+      <entry class="java.util.Date" value="28.01.2014" />
+      <entry class="java.lang.String" value="commemoration day" />
+      <entry class="java.lang.String" value="low" />
+      <entry class="java.lang.String" value="1,200. day of death of 'Kaiser Karls des Großen'" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="20.01.2014" />
+      <entry class="java.util.Date" value="20.01.2014" />
+      <entry class="java.lang.String" value="birthday" />
+      <entry class="java.lang.String" value="high" />
+      <entry class="java.lang.String" value="Philipp's birthday" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="10.03.2014" />
+      <entry class="java.util.Date" value="14.03.2014" />
+      <entry class="java.lang.String" value="event" />
+      <entry class="java.lang.String" value="normal" />
+      <entry class="java.lang.String" value="CeBIT in Hannover" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="20.03.2014" />
+      <entry class="java.util.Date" value="20.06.2014" />
+      <entry class="java.lang.String" value="event" />
+      <entry class="java.lang.String" />
+      <entry class="java.lang.String" value="Beginning of spring" />
+    </dataset>
+  </data>
+</model>

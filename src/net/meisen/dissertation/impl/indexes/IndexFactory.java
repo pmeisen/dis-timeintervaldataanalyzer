@@ -175,7 +175,7 @@ public class IndexFactory extends BaseIndexFactory {
 			return bitmapClazz.newInstance();
 		} catch (final Exception e) {
 			exceptionRegistry.throwRuntimeException(
-					IndexFactoryException.class, 1000,
+					IndexFactoryException.class, 1000, e,
 					bitmapClazz == null ? null : bitmapClazz.getName());
 			return null;
 		}

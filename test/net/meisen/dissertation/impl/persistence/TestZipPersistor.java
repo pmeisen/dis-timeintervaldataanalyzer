@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.meisen.dissertation.config.TestConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.ZipPersistorException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.impl.persistence.mock.MockLoadSinglePersistable;
@@ -21,9 +22,9 @@ import net.meisen.dissertation.impl.persistence.mock.MockSaveSinglePersistable;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
-import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -51,8 +52,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class TestZipPersistor extends ExceptionBasedTest {
 
 	@Autowired(required = true)
-	@Qualifier("coreConfiguration")
-	private IConfiguration configuration;
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	private IExceptionRegistry exceptionRegistry;
 
 	private File tmpDir;
 	private File tmpFile;
@@ -69,7 +70,7 @@ public class TestZipPersistor extends ExceptionBasedTest {
 	public void setUp() throws IOException {
 		tmpDir = new File(System.getProperty(("java.io.tmpdir")));
 		tmpFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
-		persistor = configuration.createInstance(ZipPersistor.class);
+		persistor = new ZipPersistor(exceptionRegistry);
 
 		// make sure the file got created correctly
 		assertTrue(tmpFile.exists());
@@ -228,7 +229,7 @@ public class TestZipPersistor extends ExceptionBasedTest {
 		final String readContent = Streams.readFromStream(file
 				.getInputStream(entry));
 		assertEquals(content, readContent);
-		
+
 		// close the handler
 		file.close();
 	}
@@ -260,7 +261,7 @@ public class TestZipPersistor extends ExceptionBasedTest {
 				.getInputStream(file.getEntry("group/another.file"))));
 		assertEquals("", Streams.readFromStream(file.getInputStream(file
 				.getEntry("suck"))));
-		
+
 		// close the handler
 		file.close();
 	}
@@ -270,6 +271,6 @@ public class TestZipPersistor extends ExceptionBasedTest {
 	 */
 	@After
 	public void cleanUp() {
-		 assertTrue(tmpFile.delete());
+		assertTrue(tmpFile.delete());
 	}
 }

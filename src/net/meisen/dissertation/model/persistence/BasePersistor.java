@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
@@ -22,8 +21,6 @@ import net.meisen.general.genmisc.types.Streams;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Base implementation for every {@code Persistor}.
@@ -38,8 +35,6 @@ public abstract class BasePersistor {
 	/**
 	 * The {@code ExceptionRegistry} used to handle exceptions.
 	 */
-	@Autowired
-	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	protected IExceptionRegistry exceptionRegistry;
 
 	private final Map<Group, IPersistable> persistables;
@@ -47,9 +42,14 @@ public abstract class BasePersistor {
 	private final Set<Identifier> includedIdentifiers;
 
 	/**
-	 * Default constructor
+	 * Constructor specifying the {@code exceptionRegistry} to be used.
+	 * 
+	 * @param exceptionRegistry
+	 *            the {@code exceptionRegistry} to be used
 	 */
-	public BasePersistor() {
+	public BasePersistor(final IExceptionRegistry exceptionRegistry) {
+		this.exceptionRegistry = exceptionRegistry;
+
 		persistables = new HashMap<Group, IPersistable>();
 		includedIdentifiers = new HashSet<Identifier>();
 		excludedIdentifiers = new HashSet<Identifier>();

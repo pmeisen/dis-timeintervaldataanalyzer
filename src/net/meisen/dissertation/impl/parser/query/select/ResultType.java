@@ -14,8 +14,7 @@ public enum ResultType {
 		} else if (ctx.getToken(QueryGrammarParser.TYPE_TIMESERIES, 0) != null) {
 			return ResultType.TIMESERIES;
 		} else {
-			// TODO throw exception
-			throw new IllegalStateException("Invalid ResultType");
+			return null;
 		}
 	}
 }

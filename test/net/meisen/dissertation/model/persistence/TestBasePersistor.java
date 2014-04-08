@@ -14,11 +14,13 @@ import java.io.IOException;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.persistence.mock.MockPersistable;
 import net.meisen.dissertation.model.persistence.mock.MockPersistor;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -49,6 +51,10 @@ public class TestBasePersistor extends ExceptionBasedTest {
 	@Qualifier("coreConfiguration")
 	private IConfiguration configuration;
 
+	@Autowired(required = true)
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	private IExceptionRegistry exceptionRegistry;
+
 	private BasePersistor persistor;
 
 	/**
@@ -57,7 +63,7 @@ public class TestBasePersistor extends ExceptionBasedTest {
 	 */
 	@Before
 	public void init() {
-		persistor = spy(configuration.createInstance(MockPersistor.class));
+		persistor = spy(new MockPersistor(exceptionRegistry));
 	}
 
 	/**

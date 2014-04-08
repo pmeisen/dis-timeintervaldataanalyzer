@@ -113,6 +113,14 @@ public class DefaultValues {
 	 */
 	public static final String TIMELINEDEFINITION_ID = "timelineDefinition";
 	/**
+	 * Id of the {@code BasePersistor} instance to be used.
+	 */
+	public static final String PERSISTOR_ID = "persistorId";
+	/**
+	 * Id of the {@code TidaModelHandler} to be used.
+	 */
+	public static final String HANDLER_ID = "handlerId";
+	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;

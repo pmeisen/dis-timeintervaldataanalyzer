@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.List;
 
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
 public class DescriptorLogicTree {
 	private RootNode root;
@@ -14,6 +15,10 @@ public class DescriptorLogicTree {
 	public DescriptorLogicTree() {
 		this.root = new RootNode();
 		this.currentNode = root;
+	}
+	
+	public LogicalOperatorNode getRoot() {
+		return root;
 	}
 
 	public void attach(final LogicalOperator operator) {
@@ -42,7 +47,7 @@ public class DescriptorLogicTree {
 	public List<ITreeElement> getEvaluationOrder() {
 		final List<ITreeElement> order = new ArrayList<ITreeElement>();
 
-		// check if there even might be an order
+		// check if the root has children, otherwise there is nothing to do
 		if (root.getChildren().size() != 0) {
 
 			final Deque<ITreeElement> stack = new ArrayDeque<ITreeElement>();
@@ -54,11 +59,6 @@ public class DescriptorLogicTree {
 		}
 
 		return order;
-	}
-
-	@Override
-	public String toString() {
-		return root.toString();
 	}
 
 	protected void fillStack(final LogicalOperatorNode node,
@@ -73,6 +73,11 @@ public class DescriptorLogicTree {
 				fillStack((LogicalOperatorNode) child, stack);
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return root.toString();
 	}
 
 	public void optimize() {

@@ -8,6 +8,7 @@ import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -47,6 +48,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.INTERVALMODEL_ID)
 	private IntervalModel intervalModel;
+
+	@Autowired
+	@Qualifier(DefaultValues.INDEXFACTORY_ID)
+	private BaseIndexFactory indexFactory;
 
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
@@ -412,5 +417,14 @@ public class TidaModel implements IPersistable {
 	@Override
 	public Group getPersistentGroup() {
 		return persistentGroup;
+	}
+
+	/**
+	 * Get the {@code IndexFactory} used by the model.
+	 * 
+	 * @return the {@code IndexFactory} used by the model
+	 */
+	public BaseIndexFactory getIndexFactory() {
+		return indexFactory;
 	}
 }

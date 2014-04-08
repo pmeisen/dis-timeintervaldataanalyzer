@@ -6,6 +6,7 @@ import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.ILocation;
 import net.meisen.dissertation.model.persistence.MetaData;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 /**
  * Mock of {@code BasePersistor}.
@@ -14,6 +15,16 @@ import net.meisen.dissertation.model.persistence.MetaData;
  * 
  */
 public class MockPersistor extends BasePersistor {
+
+	/**
+	 * Constructor specifying the {@code exceptionRegistry} to be used.
+	 * 
+	 * @param exceptionRegistry
+	 *            the {@code exceptionRegistry} to be used
+	 */
+	public MockPersistor(IExceptionRegistry exceptionRegistry) {
+		super(exceptionRegistry);
+	}
 
 	@Override
 	public void save(final ILocation location, final MetaData... additionalData) {

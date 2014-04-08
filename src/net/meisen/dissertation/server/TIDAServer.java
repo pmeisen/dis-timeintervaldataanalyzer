@@ -32,16 +32,16 @@ public class TidaServer {
 		loader.unload(id);
 	}
 
-	public TidaModel load(final String id, final File file) {
-		return loader.loadViaXslt(id, file);
+	public TidaModel load(final File file) {
+		return loader.loadViaXslt(file);
 	}
 
-	public TidaModel load(final String id, final String classPathResource) {
-		return loader.loadViaXslt(id, classPathResource);
+	public TidaModel load(final String classPathResource) {
+		return loader.loadViaXslt(classPathResource);
 	}
 
-	public TidaModel load(final String id, final InputStream is) {
-		return loader.loadViaXslt(id, is);
+	public TidaModel load(final InputStream is) {
+		return loader.loadViaXslt(is);
 	}
 
 	public void startAsync() {

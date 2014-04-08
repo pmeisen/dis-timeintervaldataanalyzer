@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
 import net.meisen.dissertation.impl.persistence.FileLocation;
@@ -21,6 +22,7 @@ import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -48,8 +50,8 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		getDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/" + dbPath);
 
 		// load the model
-		return loader.loadViaXslt(UUID.randomUUID().toString(),
-				"/net/meisen/dissertation/model/indexes/datarecord/"
+		return loader
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/"
 						+ modelPath);
 	}
 
@@ -302,7 +304,9 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		final Group group = new Group("index");
 
 		// the testing persistor we use here
-		final ZipPersistor persistor = new ZipPersistor();
+		final ZipPersistor persistor = new ZipPersistor(
+				(IExceptionRegistry) configuration
+						.getModule(DefaultValues.EXCEPTIONREGISTRY_ID));
 
 		// create a temporary file and save it
 		final String prefixFile = UUID.randomUUID().toString();

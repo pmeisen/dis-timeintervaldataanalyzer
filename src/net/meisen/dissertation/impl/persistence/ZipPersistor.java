@@ -18,6 +18,7 @@ import net.meisen.dissertation.model.persistence.ILocation;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 
@@ -28,8 +29,17 @@ import net.meisen.general.genmisc.types.Streams;
  * 
  */
 public class ZipPersistor extends BasePersistor {
-
 	private ZipOutputStream zipOutputStream = null;
+
+	/**
+	 * Constructor specifying the {@code exceptionRegistry} to be used.
+	 * 
+	 * @param exceptionRegistry
+	 *            the {@code exceptionRegistry} to be used
+	 */
+	public ZipPersistor(final IExceptionRegistry exceptionRegistry) {
+		super(exceptionRegistry);
+	}
 
 	@Override
 	public void save(final ILocation location, final MetaData... additionalData) {

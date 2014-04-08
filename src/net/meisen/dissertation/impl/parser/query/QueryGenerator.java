@@ -2,6 +2,7 @@ package net.meisen.dissertation.impl.parser.query;
 
 import java.util.Date;
 
+import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorEqualContext;
@@ -21,6 +22,7 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
@@ -65,9 +67,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void enterExprSelect(final ExprSelectContext ctx) {
 		if (this.query != null) {
-			// TODO add exception
-			throw new IllegalStateException(
-					"Cannot parse multiple selects at once.");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
 		}
 
 		this.query = new SelectQuery();
@@ -127,14 +128,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		// get the used reference
 		descCmp.setId(ctx.IDENTIFIER().getText());
-		
-		//TODO add NULL
-		// ctx.NULL_VALUE()
-		descCmp.setValue(null);
-		
-		// get the value the descriptor should have
-		descCmp.setValue(Strings.trimSequence(ctx.DESC_VALUE().getText(), "'")
-				.replace("\\", ""));
+
+		if (ctx.NULL_VALUE() != null) {
+			descCmp.setValue(null);
+		} else {
+
+			// get the value the descriptor should have
+			descCmp.setValue(Strings.trimSequence(ctx.DESC_VALUE().getText(),
+					"'").replace("\\", ""));
+		}
 
 		q(SelectQuery.class).getFilter().attach(descCmp);
 	}
@@ -155,11 +157,11 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		// create the interval
 		final Interval<?> interval;
 		if (openType == null) {
-			// TODO throw exception
-			throw new IllegalStateException("Invalid IntervalType");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1002, ctx.getText());
 		} else if (closeType == null) {
-			// TODO throw exception
-			throw new IllegalStateException("Invalid IntervalType");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1002, ctx.getText());
 		} else if (dateCtx != null) {
 			interval = new Interval<Date>(
 					new DateIntervalValue(dateCtx.DATE(0)), openType,
@@ -168,9 +170,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			interval = new Interval<Long>(new LongIntervalValue(intCtx.INT(0)),
 					openType, new LongIntervalValue(intCtx.INT(1)), closeType);
 		} else {
-			// TODO throw exception
-			throw new IllegalStateException(
-					"Unable to determine the interval values");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1004, ctx.getText());
 		}
 
 		q(SelectQuery.class).setInterval(interval);
@@ -181,9 +182,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		final ResultType type = ResultType.resolve(ctx);
 
 		if (type == null) {
-			// TODO throw exception
-			throw new NullPointerException(
-					"The resultType cannot be determined.");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1005, ctx.getText());
 		} else {
 			q(SelectQuery.class).setResultType(type);
 		}
@@ -202,8 +202,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@SuppressWarnings("unchecked")
 	protected <T extends IQuery> T q() {
 		if (query == null) {
-			// TODO throw exception
-			throw new NullPointerException("No query");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1006);
 		}
 
 		return (T) query;
@@ -229,8 +229,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 */
 	public IQuery getQuery() {
 		if (!finalized) {
-			// TODO throw exception
-			throw new IllegalStateException("The query isn't finalized yet.");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1007);
 		}
 
 		return query;

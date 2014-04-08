@@ -303,6 +303,32 @@ public class TidaIndex implements IPersistable {
 	}
 
 	/**
+	 * Gets the {@code IndexDimensionSlice} of the specified {@code modelId} and
+	 * the specified descriptor's {@code id}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to get the slice from
+	 * @param id
+	 *            the identifier of the descriptor to get the slice for
+	 * 
+	 * @return the {@code IndexDimensionSlice} for the specified values, or
+	 *         {@code null} if the combination of model and descriptor's
+	 *         identifier refers to an unknown slice
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public IndexDimensionSlice getMetaIndexDimensionSlice(final String modelId,
+			final Object id) {
+		final MetaIndexDimension metaIdxDim = getIndex(MetaIndex.class).get(
+				modelId);
+
+		if (metaIdxDim == null) {
+			return null;
+		} else {
+			return metaIdxDim.getSliceById(id);
+		}
+	}
+
+	/**
 	 * Get the id of the next record which will be added.
 	 * 
 	 * @return the id of the next record added
@@ -310,4 +336,5 @@ public class TidaIndex implements IPersistable {
 	public int getNextDataId() {
 		return dataId;
 	}
+
 }

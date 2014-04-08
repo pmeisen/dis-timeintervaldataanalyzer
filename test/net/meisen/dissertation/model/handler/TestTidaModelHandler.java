@@ -50,9 +50,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testExceptionNullClassPath() {
 		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("configuration for the moduleHolder 'NullPath' isn't defined");
+		thrown.expectMessage("configuration for the moduleHolder isn't defined");
 
-		loader.loadViaXslt("NullPath", (String) null);
+		loader.loadViaXslt((String) null);
 	}
 
 	/**
@@ -61,9 +61,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testExceptionInvalidClassPath() {
 		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("configuration for the moduleHolder 'InvalidPath' isn't defined");
+		thrown.expectMessage("configuration for the moduleHolder isn't defined");
 
-		loader.loadViaXslt("InvalidPath", "/i/never/exist/???/");
+		loader.loadViaXslt("/i/never/exist/???/");
 	}
 
 	/**
@@ -73,9 +73,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testExceptionNullFile() {
 		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("configuration for the moduleHolder 'NullFile' isn't defined");
+		thrown.expectMessage("configuration for the moduleHolder isn't defined");
 
-		loader.loadViaXslt("NullFile", (File) null);
+		loader.loadViaXslt((File) null);
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		thrown.expect(TidaModelHandlerException.class);
 		thrown.expectMessage("Failed to load the configuration file '???'");
 
-		loader.loadViaXslt("NullFile", new File("???"));
+		loader.loadViaXslt(new File("???"));
 	}
 
 	/**
@@ -96,9 +96,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testExceptionNullStream() {
 		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("configuration for the moduleHolder 'NullStream' isn't defined");
+		thrown.expectMessage("configuration for the moduleHolder isn't defined");
 
-		loader.loadViaXslt("NullStream", (InputStream) null);
+		loader.loadViaXslt((InputStream) null);
 	}
 
 	/**
@@ -108,30 +108,12 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testExceptionUsingIdTWhenViaXsltwice() {
 		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("moduleHolder with the identifier 'FullModel' is already defined");
+		thrown.expectMessage("model with the identifier 'myModel' is already defined");
 
-		loader.loadViaXslt("FullModel",
-				"/net/meisen/dissertation/config/fullModel.xml");
+		loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertTrue("Reached this point", true);
 
-		loader.loadViaXslt("FullModel",
-				"/net/meisen/dissertation/config/fullModel.xml");
-	}
-
-	/**
-	 * Tests the exception to be thrown if an identifier for a moduleHolder is
-	 * used multiple times.
-	 */
-	@Test
-	public void testExceptionUsingIdWhenMixedTwice() {
-		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("moduleHolder with the identifier 'FullModel' is already defined");
-
-		loader.loadViaXslt("FullModel",
-				"/net/meisen/dissertation/config/fullModel.xml");
-		assertTrue("Reached this point", true);
-
-		loader.load("FullModel", new FileLocation(new File("")));
+		loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 	}
 
 	/**
@@ -162,8 +144,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 	public void testLoadViaXslt() {
 		assertNotNull(loader);
 
-		final TidaModel model = loader.loadViaXslt("FullModel",
-				"/net/meisen/dissertation/config/fullModel.xml");
+		final TidaModel model = loader
+				.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(model);
 		assertEquals("myModel", model.getId());
 	}
@@ -181,9 +163,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 		getDb("tidaPioneerData",
 				"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
 
-		final TidaModel modelPioneerData1 = loader.loadViaXslt(
-				"mh_tidaPioneerData1",
-				"/net/meisen/dissertation/model/data/tidaModelPioneer.xml");
+		final TidaModel modelPioneerData1 = loader
+				.loadViaXslt("/net/meisen/dissertation/model/data/tidaModelPioneer.xml");
 		assertEquals(MetaDataHandling.FAILONERROR,
 				modelPioneerData1.getMetaDataHandling());
 		assertEquals(IntervalDataHandling.FAILONNULL,
@@ -195,15 +176,16 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// save the data
 		final File tmpFile = File.createTempFile("pioneer", ".zip");
-		loader.save("mh_tidaPioneerData1", new FileLocation(tmpFile));
+		loader.save(modelPioneerData1.getId(), new FileLocation(tmpFile));
 
 		// check if the file exists
 		assertTrue(tmpFile.exists());
 		assertTrue(tmpFile.length() > 0);
 
 		// now load the file
-		final TidaModel modelPioneerData2 = loader.load("mh_tidaPioneerData2",
-				new FileLocation(tmpFile));
+		loader.unload(modelPioneerData1.getId());
+		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
+				tmpFile));
 		assertEquals(modelPioneerData1.getNextDataId(),
 				modelPioneerData2.getNextDataId());
 		assertEquals(modelPioneerData1.getOfflineMode(),
@@ -226,9 +208,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 		final Db db = getDb("tidaPioneerData",
 				"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
 
-		final TidaModel modelPioneerData1 = loader.loadViaXslt(
-				"mh_tidaPioneerData1",
-				"/net/meisen/dissertation/model/data/tidaModelPioneer.xml");
+		final TidaModel modelPioneerData1 = loader
+				.loadViaXslt("/net/meisen/dissertation/model/data/tidaModelPioneer.xml");
 		assertEquals(MetaDataHandling.FAILONERROR,
 				modelPioneerData1.getMetaDataHandling());
 		assertEquals(IntervalDataHandling.FAILONNULL,
@@ -240,7 +221,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// save the data
 		final File tmpFile = File.createTempFile("pioneer", ".zip");
-		loader.save("mh_tidaPioneerData1", new FileLocation(tmpFile));
+		loader.save(modelPioneerData1.getId(), new FileLocation(tmpFile));
 
 		// check if the file exists
 		assertTrue(tmpFile.exists());
@@ -250,8 +231,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 		db.shutDownDb();
 
 		// now load the file
-		final TidaModel modelPioneerData2 = loader.load("mh_tidaPioneerData2",
-				new FileLocation(tmpFile));
+		loader.unload(modelPioneerData1.getId());
+		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
+				tmpFile));
 		assertEquals(modelPioneerData1.getNextDataId(),
 				modelPioneerData2.getNextDataId());
 		assertEquals(modelPioneerData1.getOfflineMode(),

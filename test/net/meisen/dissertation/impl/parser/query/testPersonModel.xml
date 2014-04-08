@@ -6,7 +6,7 @@
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
-       id="testModel">
+       id="testPersonModel">
   
   <time>
     <timeline start="03.03.2014" end="04.03.2014 23:59:00" granularity="MINUTE" />

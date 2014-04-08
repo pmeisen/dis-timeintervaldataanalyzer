@@ -3,9 +3,10 @@ package net.meisen.dissertation.model.persistence.mock;
 import java.io.OutputStream;
 
 import net.meisen.dissertation.model.persistence.BasePersistor;
-import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.ILocation;
+import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 /**
  * A mock of a {@code BasePersistor}.
@@ -14,6 +15,16 @@ import net.meisen.dissertation.model.persistence.MetaData;
  * 
  */
 public class MockPersistor extends BasePersistor {
+
+	/**
+	 * Default constructor.
+	 * 
+	 * @param exceptionRegistry
+	 *            the registry to be used
+	 */
+	public MockPersistor(final IExceptionRegistry exceptionRegistry) {
+		super(exceptionRegistry);
+	}
 
 	@Override
 	public void save(final ILocation location, final MetaData... additionalData) {

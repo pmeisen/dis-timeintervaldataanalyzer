@@ -33,8 +33,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingStaticIndexModel() {
 		final TidaModel model = loader
-				.loadViaXslt("mh_tidaStaticIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaIndex metaIndex = new MetaIndex(model);
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
@@ -59,8 +58,7 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 	@Test
 	public void testUsingRandomIndexModel() {
 		final TidaModel model = loader
-				.loadViaXslt("mh_tidaRandomIndexModel",
-						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
 		// create the indexes
 		final MetaIndex metaIndex = new MetaIndex(model);

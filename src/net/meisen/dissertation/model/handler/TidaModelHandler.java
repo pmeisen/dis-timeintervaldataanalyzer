@@ -122,7 +122,7 @@ public class TidaModelHandler {
 	 * 
 	 * @param id
 	 *            the if to moduleHolder to get the {@code TidaModel} for
-	 *            
+	 * 
 	 * @return the {@code TidaModel} or {@code null} if the id is unknown
 	 */
 	public TidaModel getTidaModel(final String id) {
@@ -139,9 +139,6 @@ public class TidaModelHandler {
 	 * Helper method to load the modules defined by the specified {@code is}.
 	 * The loaded {@code ModuleHolder} is kept internally within a {@code Map}.
 	 * 
-	 * @param id
-	 *            the identifier used to refer to the {@code ModuleHolder}
-	 *            instance
 	 * @param is
 	 *            the {@code InputStream} to load the modules from
 	 * 
@@ -150,34 +147,35 @@ public class TidaModelHandler {
 	 * @throws RuntimeException
 	 *             if the specified resource is invalid or falsely defined
 	 */
-	protected IModuleHolder getModuleHolder(final String id,
-			final InputStream is) {
+	protected IModuleHolder getModuleHolder(final InputStream is) {
 		if (is == null) {
 			exceptionRegistry.throwRuntimeException(
-					TidaModelHandlerException.class, 1000, id);
+					TidaModelHandlerException.class, 1000);
 		}
 
-		IModuleHolder moduleHolder = moduleHolders.get(id);
-		if (moduleHolder == null) {
+		// keep the complete configuration in memory for saving purposes
+		final byte[] config;
+		try {
+			config = Streams.copyStreamToByteArray(is);
+		} catch (final IOException e) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1002);
+			return null;
+		}
 
-			// keep the complete configuration in memory for saving purposes
-			final byte[] config;
-			try {
-				config = Streams.copyStreamToByteArray(is);
-			} catch (final IOException e) {
-				exceptionRegistry.throwRuntimeException(
-						TidaModelHandlerException.class, 1002, id);
-				return null;
-			}
+		// load the configuration
+		final InputStream bais = new ByteArrayInputStream(config);
+		final IModuleHolder moduleHolder = configuration.loadDelayed(
+				"tidaXsltModelLoader", bais);
 
-			// load the configuration
-			final InputStream bais = new ByteArrayInputStream(config);
-			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader",
-					bais);
+		// close the stream silently
+		Streams.closeIO(bais);
 
-			// close the stream silently
-			Streams.closeIO(bais);
+		final TidaModel model = moduleHolder
+				.getModule(DefaultValues.TIDAMODEL_ID);
+		final String id = model.getId();
 
+		if (moduleHolders.get(id) == null) {
 			moduleHolders.put(id, moduleHolder);
 			configurations.put(id, config);
 
@@ -233,20 +231,17 @@ public class TidaModelHandler {
 	/**
 	 * Loads a {@code TidaModel} from the specified {@code classPathResource}.
 	 * 
-	 * @param id
-	 *            the identifier of the loaded instance used to refer to it when
-	 *            releasing the {@code TidaModel}
 	 * @param file
 	 *            the {@code File} to load the {@code TidaModel} from
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public TidaModel loadViaXslt(final String id, final File file) {
+	public TidaModel loadViaXslt(final File file) {
 		if (file == null) {
-			return loadViaXslt(id, (InputStream) null);
+			return loadViaXslt((InputStream) null);
 		} else {
 			try {
-				return loadViaXslt(id, new FileInputStream(file));
+				return loadViaXslt(new FileInputStream(file));
 			} catch (final FileNotFoundException e) {
 				exceptionRegistry.throwRuntimeException(
 						TidaModelHandlerException.class, 1003, e, file);
@@ -258,44 +253,37 @@ public class TidaModelHandler {
 	/**
 	 * Loads a {@code TidaModel} from the specified {@code classPathResource}.
 	 * 
-	 * @param id
-	 *            the identifier of the loaded instance used to refer to it when
-	 *            releasing the {@code TidaModel}
 	 * @param classPathResource
 	 *            the classpath location to load the {@code TidaModel} from
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public TidaModel loadViaXslt(final String id, final String classPathResource) {
+	public TidaModel loadViaXslt(final String classPathResource) {
 
 		if (classPathResource == null) {
-			return loadViaXslt(id, (InputStream) null);
+			return loadViaXslt((InputStream) null);
 		} else {
-			return loadViaXslt(id,
-					getClass().getResourceAsStream(classPathResource));
+			return loadViaXslt(getClass()
+					.getResourceAsStream(classPathResource));
 		}
 	}
 
 	/**
 	 * Loads a {@code TidaModel} from the specified {@code is}.
 	 * 
-	 * @param id
-	 *            the identifier of the loaded instance used to refer to it when
-	 *            releasing the {@code TidaModel}
 	 * @param is
 	 *            the {@code InputStream} to load the {@code TidaModel} from
 	 * 
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
-	public synchronized TidaModel loadViaXslt(final String id,
-			final InputStream is) {
+	public synchronized TidaModel loadViaXslt(final InputStream is) {
 
-		final TidaModel model = getModuleHolder(id, is).getModule(
+		final TidaModel model = getModuleHolder(is).getModule(
 				DefaultValues.TIDAMODEL_ID);
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Loaded TidaModel '" + model.getId()
-					+ "' from ModuleHolder '" + id + "'.");
+					+ "' from ModuleHolder '" + model.getId() + "'.");
 		}
 
 		// initialize the model
@@ -307,8 +295,6 @@ public class TidaModelHandler {
 	/**
 	 * Loads a {@code TidaModel} using a persisted {@code location}.
 	 * 
-	 * @param id
-	 *            the id to keep track of the {@code ModuleHolder}
 	 * @param location
 	 *            the {@code Location} to load the {@code TidaModel} from
 	 * 
@@ -316,16 +302,10 @@ public class TidaModelHandler {
 	 * 
 	 * @see ILocation
 	 */
-	public TidaModel load(final String id, final ILocation location) {
-
-		// check if a module has the id already
-		if (moduleHolders.get(id) != null) {
-			exceptionRegistry.throwRuntimeException(
-					TidaModelHandlerException.class, 1001, id);
-		}
+	public TidaModel load(final ILocation location) {
 
 		final Identifier configId = new Identifier("config.xml");
-		final ZipPersistor persistor = new ZipPersistor();
+		final ZipPersistor persistor = new ZipPersistor(exceptionRegistry);
 
 		// set the identifiers to be handled
 		persistor.setIncludedIdentifier(configId);
@@ -340,7 +320,7 @@ public class TidaModelHandler {
 		// load the xml
 		final ByteArrayInputStream configIs = new ByteArrayInputStream(
 				xml.getXml());
-		final TidaModel model = loadViaXslt(id, configIs);
+		final TidaModel model = loadViaXslt(configIs);
 
 		// reset the changes made for loading
 		model.setOfflineModeByString(xml.getOldValue("offlinemode"));
@@ -373,7 +353,7 @@ public class TidaModelHandler {
 	 */
 	public void save(final String id, final ILocation location) {
 		final Identifier configId = new Identifier("config.xml");
-		final ZipPersistor persistor = new ZipPersistor();
+		final ZipPersistor persistor = new ZipPersistor(exceptionRegistry);
 
 		// get the configuration and the holder
 		final IModuleHolder moduleHolder = moduleHolders.get(id);

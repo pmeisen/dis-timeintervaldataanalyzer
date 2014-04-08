@@ -2,7 +2,6 @@ package net.meisen.dissertation.performance.paper.in2014.smc;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
@@ -34,10 +33,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		getDb(dbName, dbPath);
 
 		// load the model
-		final String id = UUID.randomUUID().toString();
-		loader.loadViaXslt(id, modelPath);
-
-		return id;
+		return loader.loadViaXslt(modelPath).getId();
 	}
 
 	private void persistsModel(final String name) throws IOException {
@@ -61,8 +57,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 
 		// load the persisted instances
 		final File modelLocation = getModelLocation(name);
-		return loader.load(UUID.randomUUID().toString(), new FileLocation(
-				modelLocation));
+		return loader.load(new FileLocation(modelLocation));
 	}
 
 	private File getModelLocation(final String name) {
@@ -97,7 +92,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		performance.start();
 
 		// TODO add performance for queries
-		
+
 		final long[] result = performance.stop();
 		System.out.println(Longs.asList(result));
 	}

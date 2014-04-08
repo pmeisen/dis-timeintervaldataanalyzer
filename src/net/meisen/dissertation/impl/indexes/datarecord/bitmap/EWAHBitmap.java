@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
+import com.google.common.primitives.Ints;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
@@ -76,7 +78,48 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public Bitmap and(final Bitmap... bitmaps) {
+	public EWAHBitmap invert(final int position) {
+
+		// check if we even have a position
+		if (position < 0) {
+			return new EWAHBitmap();
+		}
+
+		// let's get the current positions
+		final int[] current = bitmap.toArray();
+		final int currentSize = current.length;
+
+		// calculate the size of the new array
+		final int invertSize = position + 1 - currentSize;
+		final int[] invert = new int[invertSize];
+
+		final int lastPos = currentSize;
+		int fromPos = 0;
+		int invertPos = 0;
+		for (int i = 0; i <= position; i++) {
+			final int foundPos = Arrays.binarySearch(current, fromPos, lastPos,
+					i);
+
+			if (foundPos > -1) {
+				fromPos = foundPos + 1;
+			} else {
+				fromPos = -1 * (foundPos + 1);
+
+				invert[invertPos] = i;
+				invertPos++;
+			}
+		}
+
+		return new EWAHBitmap(EWAHCompressedBitmap.bitmapOf(invert));
+	}
+
+	@Override
+	public int invertCardinality(final int position) {
+		return invert(position).determineCardinality();
+	}
+
+	@Override
+	public EWAHBitmap and(final Bitmap... bitmaps) {
 		return new EWAHBitmap(EWAHCompressedBitmap.and(createArray(true,
 				bitmaps)));
 	}
@@ -87,7 +130,7 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public Bitmap or(final Bitmap... bitmaps) {
+	public EWAHBitmap or(final Bitmap... bitmaps) {
 		return new EWAHBitmap(
 				EWAHCompressedBitmap.or(createArray(true, bitmaps)));
 	}

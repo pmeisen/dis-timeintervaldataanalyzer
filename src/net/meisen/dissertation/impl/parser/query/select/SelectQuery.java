@@ -2,15 +2,23 @@ package net.meisen.dissertation.impl.parser.query.select;
 
 import java.util.List;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
+import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class SelectQuery implements IQuery {
 
@@ -54,46 +62,15 @@ public class SelectQuery implements IQuery {
 	}
 
 	@Override
-	public void execute(final TidaModel model) {
+	public SelectQueryResult evaluate(final TidaModel model) {
+		final DescriptorLogicEvaluator evaluator = new DescriptorLogicEvaluator(
+				model);
+		final SelectQueryResult queryResult = new SelectQueryResult();
 
-		// get the filters
-		final List<ITreeElement> filters = filter.getEvaluationOrder();
+		final Bitmap filterBitmap = evaluator.evaluateTree(filter);
+		queryResult.setFilterResult(filterBitmap);
 
-		// get the metaDataModels
-		final MetaDataModel metaDataModel = model.getMetaDataModel();
-
-		// now look for the models and the values
-		for (final ITreeElement te : filters) {
-			System.out.println(te);
-			
-			if (te instanceof DescriptorLeaf) {
-				final DescriptorLeaf leaf = (DescriptorLeaf) te;
-				final DescriptorComperator cmp = leaf.get();
-
-				// get the addressed model
-				final DescriptorModel<?> descModel = metaDataModel
-						.getDescriptorModel(cmp.getId());
-				if (descModel == null) {
-					// TODO throw exception
-					throw new IllegalArgumentException(
-							"A metaDataModel with id '" + cmp.getId()
-									+ "' doesn't exist.");
-				}
-				
-				// get the addressed descriptor
-				final Descriptor<?, ?, ?> desc = descModel
-						.getDescriptorByString(cmp.getValue());
-				if (desc == null) {
-					// TODO throw exception
-					throw new IllegalArgumentException(
-							"A descriptor with the value '" + cmp.getValue()
-									+ "' could not be found.");
-				}
-			}
-		}
-
-		final TidaIndex index = model.getIndex();
-
+		return queryResult;
 	}
 
 	@Override
@@ -101,7 +78,14 @@ public class SelectQuery implements IQuery {
 		return modelId;
 	}
 
+	/**
+	 * Sets the {@code modelId} for the query.
+	 * 
+	 * @param modelId
+	 *            the {@code modelId} of the query
+	 */
 	public void setModelId(final String modelId) {
 		this.modelId = modelId;
 	}
+
 }
