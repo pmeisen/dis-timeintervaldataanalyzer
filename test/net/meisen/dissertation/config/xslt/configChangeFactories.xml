@@ -7,7 +7,7 @@
 
   <config>
     <factories>    
-      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexFactory" />
       
       <mappers implementation="net.meisen.dissertation.config.xslt.mock.MockMapperFactory" />
     </factories>

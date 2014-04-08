@@ -6,14 +6,14 @@ import java.util.List;
 
 
 /**
- * A abstract implementation of an {@code IndexedCollection}.
+ * A abstract implementation of an {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
  * @see IIndexedCollection
  * 
  */
-public abstract class IndexedCollection implements IIndexedCollection {
+public abstract class BaseIndexedCollection implements IIndexedCollection {
 	private final IndexKeyDefinition keyDefinition;
 
 	/**
@@ -22,7 +22,7 @@ public abstract class IndexedCollection implements IIndexedCollection {
 	 * @param keyDefinition
 	 *            the {@code IndexKeyDefinition} to be used
 	 */
-	public IndexedCollection(final IndexKeyDefinition keyDefinition) {
+	public BaseIndexedCollection(final IndexKeyDefinition keyDefinition) {
 		this.keyDefinition = keyDefinition;
 	}
 

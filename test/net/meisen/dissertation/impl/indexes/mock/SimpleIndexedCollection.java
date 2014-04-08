@@ -3,15 +3,15 @@ package net.meisen.dissertation.impl.indexes.mock;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * A simple mock of a {@code IndexedCollection}.
+ * A simple mock of a {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
  */
-public class SimpleIndexedCollection extends IndexedCollection {
+public class SimpleIndexedCollection extends BaseIndexedCollection {
 
 	/**
 	 * Simple has a simple constructor.

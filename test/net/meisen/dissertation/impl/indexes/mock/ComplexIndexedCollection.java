@@ -5,16 +5,16 @@ import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * A complex mock of a {@code IndexedCollection}. Complex because it has several
+ * A complex mock of a {@code BaseIndexedCollection}. Complex because it has several
  * constructors.
  * 
  * @author pmeisen
  * 
  */
-public class ComplexIndexedCollection extends IndexedCollection {
+public class ComplexIndexedCollection extends BaseIndexedCollection {
 	private List<Object> params = new ArrayList<Object>();
 
 	/**

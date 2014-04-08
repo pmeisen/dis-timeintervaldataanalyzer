@@ -33,7 +33,7 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.ZipPersistorException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
-        <entry key="net.meisen.dissertation.exceptions.IndexedCollectionFactoryException" 
+        <entry key="net.meisen.dissertation.exceptions.IndexFactoryException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />

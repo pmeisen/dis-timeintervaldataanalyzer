@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.meisen.dissertation.config.TidaConfig;
-import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
+import net.meisen.dissertation.config.xslt.mock.MockIndexFactory;
 import net.meisen.dissertation.config.xslt.mock.MockMapperFactory;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException;
@@ -37,7 +37,7 @@ import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.DataStructure;
@@ -136,17 +136,17 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	}
 
 	/**
-	 * Tests the replacement of the default {@code IndexedCollectionFactory}.
+	 * Tests the replacement of the default {@code IndexFactory}.
 	 */
 	@Test
 	public void testDefaultFactories() {
 		final TidaModel model = getTidaModel("/net/meisen/dissertation/config/xslt/configDefaultFactories.xml");
 		Class<?> res;
 
-		// check the default IndexedCollectionFactory
-		res = model.getMetaDataModel().getIndexedCollectionFactory().getClass();
+		// check the default IndexFactory
+		res = model.getMetaDataModel().getIndexFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
-				res.equals(IndexedCollectionFactory.class));
+				res.equals(IndexFactory.class));
 
 		// check the default MapperFactory
 		res = model.getIntervalModel().getMapperFactory().getClass();
@@ -155,16 +155,16 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	}
 
 	/**
-	 * Tests the replacement of the default {@code IndexedCollectionFactory}.
+	 * Tests the replacement of the default {@code IndexFactory}.
 	 */
 	@Test
 	public void testChangedFactories() {
 		final TidaModel model = getTidaModel("/net/meisen/dissertation/config/xslt/configChangeFactories.xml");
 		Class<?> res;
 
-		res = model.getMetaDataModel().getIndexedCollectionFactory().getClass();
+		res = model.getMetaDataModel().getIndexFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",
-				res.equals(MockIndexedCollectionFactory.class));
+				res.equals(MockIndexFactory.class));
 
 		res = model.getIntervalModel().getMapperFactory().getClass();
 		assertTrue("Instance of '" + res.getName() + "'",

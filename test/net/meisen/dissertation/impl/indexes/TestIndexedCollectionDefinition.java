@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import net.meisen.dissertation.impl.indexes.mock.ComplexIndexedCollection;
 import net.meisen.dissertation.impl.indexes.mock.SimpleIndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 
@@ -31,9 +32,9 @@ public class TestIndexedCollectionDefinition {
 
 	/**
 	 * Tests the creation of a {@code SimpleIndexedCollection} using a
-	 * {@code IndexedCollectionDefinition}. This test includes the auto-adding of
-	 * the {@link IndexedCollectionDefinition#INDEXKEYDEFINITION_PLACEHOLDER} and
-	 * the correct usage.
+	 * {@code IndexedCollectionDefinition}. This test includes the auto-adding
+	 * of the {@link IndexedCollectionDefinition#INDEXKEYDEFINITION_PLACEHOLDER}
+	 * and the correct usage.
 	 */
 	@Test
 	public void testSimpleCreation() {
@@ -43,12 +44,14 @@ public class TestIndexedCollectionDefinition {
 
 		def = new IndexedCollectionDefinition(SimpleIndexedCollection.class);
 		assertTrue(def.create(keyDef) instanceof SimpleIndexedCollection);
-		assertEquals(keyDef, def.create(keyDef).getKeyDefinition());
+		assertEquals(keyDef,
+				((BaseIndexedCollection) def.create(keyDef)).getKeyDefinition());
 
 		def = new IndexedCollectionDefinition(SimpleIndexedCollection.class,
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER);
 		assertTrue(def.create(keyDef) instanceof SimpleIndexedCollection);
-		assertEquals(keyDef, def.create(keyDef).getKeyDefinition());
+		assertEquals(keyDef,
+				((BaseIndexedCollection) def.create(keyDef)).getKeyDefinition());
 	}
 
 	/**

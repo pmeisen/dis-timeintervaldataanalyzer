@@ -5,7 +5,7 @@
                               xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes">
 
   <xsl:template match="idx:config">
-    <bean class="net.meisen.dissertation.impl.indexes.IndexedCollectionFactoryConfig">
+    <bean class="net.meisen.dissertation.impl.indexes.IndexFactoryConfig">
         
       <xsl:if test="@byte"><xsl:variable name="byteClass" select="@byte" /><property name="byteClass" value="{$byteClass}"/></xsl:if>
       <xsl:if test="@short"><xsl:variable name="shortClass" select="@short" /><property name="shortClass" value="{$shortClass}"/></xsl:if>

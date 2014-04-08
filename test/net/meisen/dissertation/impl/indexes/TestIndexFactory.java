@@ -8,13 +8,11 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
+import net.meisen.dissertation.impl.indexes.datarecord.bitmap.EWAHBitmap;
 import net.meisen.dissertation.impl.indexes.mock.BitmapMock;
 import net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock;
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.EWAHBitmap;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
@@ -24,14 +22,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
- * Tests the implementation of {@code IndexedCollectionFactory}.
+ * Tests the implementation of {@code IndexFactory}.
  * 
  * @author pmeisen
  * 
  */
-public class TestIndexedCollectionFactory {
+public class TestIndexFactory {
 
-	public static class TestGenerallyIndexCollectionFactory {
+	public static class TestGenerallyIndexFactory {
 
 		/**
 		 * Tests the creation of an index based on a single key-type.
@@ -39,7 +37,7 @@ public class TestIndexedCollectionFactory {
 		@Test
 		public void testFromTypeCreation() {
 			IndexKeyDefinition keyDef;
-			final IndexedCollectionFactory factory = new IndexedCollectionFactory();
+			final IndexFactory factory = new IndexFactory();
 
 			// Test a byte key
 			keyDef = new IndexKeyDefinition(byte.class);
@@ -81,21 +79,21 @@ public class TestIndexedCollectionFactory {
 
 		@Test
 		public void testBitmapCreation() {
-			IndexedCollectionFactory factory;
-			IndexedCollectionFactoryConfig config;
+			IndexFactory factory;
+			IndexFactoryConfig config;
 			Bitmap bitmap;
 
 			// create a simple bitmap using the default configuration and test
 			// it
-			factory = new IndexedCollectionFactory();
+			factory = new IndexFactory();
 			bitmap = factory.createBitmap();
 			assertNotNull(bitmap);
 			assertEquals(EWAHBitmap.class, bitmap.getClass());
 
 			// create a user-defined bitmap
-			config = new IndexedCollectionFactoryConfig();
+			config = new IndexFactoryConfig();
 			config.setBitmapClass(BitmapMock.class);
-			factory = new IndexedCollectionFactory();
+			factory = new IndexFactory();
 			factory.setConfig(config);
 			bitmap = factory.createBitmap();
 			assertNotNull(bitmap);
@@ -110,12 +108,12 @@ public class TestIndexedCollectionFactory {
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/simplestModel.xml");
-			final IndexedCollectionFactory factory = modulesHolder
+			final IndexFactory factory = modulesHolder
 					.getModule(DefaultValues.INDEXFACTORY_ID);
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexedCollectionFactoryConfig config = factory.getConfig();
+			final IndexFactoryConfig config = factory.getConfig();
 			assertEquals(Bitmap.class, config.getBitmapClass());
 			assertEquals(TroveByteIndexedCollection.class,
 					config.getByteClass());
@@ -135,12 +133,12 @@ public class TestIndexedCollectionFactory {
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/simplestModel.xml");
-			final IndexedCollectionFactory factory = modulesHolder
+			final IndexFactory factory = modulesHolder
 					.getModule(DefaultValues.INDEXFACTORY_ID);
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexedCollectionFactoryConfig config = factory.getConfig();
+			final IndexFactoryConfig config = factory.getConfig();
 			assertEquals(BitmapMock.class, config.getBitmapClass());
 			assertEquals(TroveByteIndexedCollection.class,
 					config.getByteClass());
@@ -159,12 +157,12 @@ public class TestIndexedCollectionFactory {
 		@Test
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/impl/indexes/config/modelBasedChangedIndexConfig.xml");
-			final IndexedCollectionFactory factory = modulesHolder
+			final IndexFactory factory = modulesHolder
 					.getModule(DefaultValues.INDEXFACTORY_ID);
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexedCollectionFactoryConfig config = factory.getConfig();
+			final IndexFactoryConfig config = factory.getConfig();
 			assertEquals(BitmapMock.class, config.getBitmapClass());
 			assertEquals(IndexedCollectionMock.class, config.getByteClass());
 			assertEquals(IndexedCollectionMock.class, config.getShortClass());
@@ -181,10 +179,10 @@ public class TestIndexedCollectionFactory {
 	 * 
 	 */
 	@RunWith(Suite.class)
-	@Suite.SuiteClasses({ TestGenerallyIndexCollectionFactory.class,
+	@Suite.SuiteClasses({ TestGenerallyIndexFactory.class,
 			TestGloballyChangedIndexConfig.class,
 			TestModelBasedChangedIndexConfig.class })
-	public static class TestIndexedCollectionFactorySuite {
+	public static class TestIndexFactorySuite {
 		// just the suite with all the tests defined here
 	}
 }

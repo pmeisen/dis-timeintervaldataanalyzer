@@ -3,7 +3,7 @@ package net.meisen.dissertation.model.indexes;
 import java.util.Collection;
 
 /**
- * An interface for an {@code IndexedCollection}.
+ * An interface for an {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 

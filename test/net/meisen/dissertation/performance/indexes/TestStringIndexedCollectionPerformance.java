@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Tests the performance of the {@code IndexedCollection} with different
+ * Tests the performance of the {@code BaseIndexedCollection} with different
  * {@code IndexKeyDefinition}. It is also possible to add {@code Map}
  * implementations.
  * 

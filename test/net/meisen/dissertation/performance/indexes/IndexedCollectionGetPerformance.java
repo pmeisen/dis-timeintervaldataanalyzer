@@ -9,14 +9,14 @@ import java.util.Map.Entry;
 
 import net.meisen.dissertation.help.Performance;
 import net.meisen.dissertation.help.Performance.ResultHolder;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Abstract implementation to run performance tests concerning the adding of
- * values against a {@code IndexedCollection}.
+ * values against a {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
@@ -27,7 +27,7 @@ public class IndexedCollectionGetPerformance {
 	private Map<String, Map<?, ?>> maps = new LinkedHashMap<String, Map<?, ?>>();
 
 	@Autowired(required = false)
-	private Map<String, IndexedCollection> indexes = new LinkedHashMap<String, IndexedCollection>();
+	private Map<String, BaseIndexedCollection> indexes = new LinkedHashMap<String, BaseIndexedCollection>();
 
 	@Autowired(required = true)
 	@Qualifier("dataGenerator")
@@ -87,7 +87,7 @@ public class IndexedCollectionGetPerformance {
 		}
 
 		// first the indexes
-		for (final Entry<String, IndexedCollection> entry : indexes.entrySet()) {
+		for (final Entry<String, BaseIndexedCollection> entry : indexes.entrySet()) {
 
 			if (entry.getValue().getKeyDefinition().isSingleTypedKey()) {
 				runIndexGetTest(entry.getKey(), entry.getValue(), ids, values);
@@ -118,7 +118,7 @@ public class IndexedCollectionGetPerformance {
 
 		// make sure we have something that can be tested
 		final boolean isMap = idx instanceof Map;
-		final boolean isIndex = idx instanceof IndexedCollection;
+		final boolean isIndex = idx instanceof BaseIndexedCollection;
 		if (!isMap && !isIndex) {
 			throw new IllegalArgumentException("Invalid index");
 		}
@@ -127,7 +127,7 @@ public class IndexedCollectionGetPerformance {
 			final Object d = values[i];
 
 			if (isIndex) {
-				assertTrue(((IndexedCollection) idx).addObject(d));
+				assertTrue(((BaseIndexedCollection) idx).addObject(d));
 			} else if (isMap) {
 				final Object id = ids[i];
 				assertTrue(((Map<Object, Object>) idx).put(id, d) == null);
@@ -145,7 +145,7 @@ public class IndexedCollectionGetPerformance {
 			final Object id = ids[i];
 
 			if (isIndex) {
-				assertNotNull(((IndexedCollection) idx).getObject(id));
+				assertNotNull(((BaseIndexedCollection) idx).getObject(id));
 			} else if (isMap) {
 				assertNotNull(((Map<Object, Object>) idx).get(id));
 			}
@@ -161,7 +161,7 @@ public class IndexedCollectionGetPerformance {
 		if (isMap) {
 			((Map<Integer, Integer>) idx).clear();
 		} else if (isIndex) {
-			((IndexedCollection) idx).removeAll();
+			((BaseIndexedCollection) idx).removeAll();
 		}
 	}
 }

@@ -1,19 +1,19 @@
 package net.meisen.dissertation.impl.indexes;
 
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.impl.indexes.datarecord.bitmap.EWAHBitmap;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.EWAHBitmap;
 
-public class IndexedCollectionFactoryConfig {
+public class IndexFactoryConfig {
 
-	private Class<? extends IndexedCollection> byteClass;
-	private Class<? extends IndexedCollection> shortClass;
-	private Class<? extends IndexedCollection> intClass;
-	private Class<? extends IndexedCollection> longClass;
+	private Class<? extends BaseIndexedCollection> byteClass;
+	private Class<? extends BaseIndexedCollection> shortClass;
+	private Class<? extends BaseIndexedCollection> intClass;
+	private Class<? extends BaseIndexedCollection> longClass;
 
 	private Class<? extends Bitmap> bitmapClass;
 
-	public IndexedCollectionFactoryConfig() {
+	public IndexFactoryConfig() {
 
 		// by default we use all Trove implementations
 		this.byteClass = TroveByteIndexedCollection.class;
@@ -23,36 +23,36 @@ public class IndexedCollectionFactoryConfig {
 		this.bitmapClass = EWAHBitmap.class;
 	}
 
-	public void setByteClass(final Class<? extends IndexedCollection> byteClass) {
+	public void setByteClass(final Class<? extends BaseIndexedCollection> byteClass) {
 		this.byteClass = byteClass;
 	}
 
-	public Class<? extends IndexedCollection> getByteClass() {
+	public Class<? extends BaseIndexedCollection> getByteClass() {
 		return byteClass;
 	}
 
 	public void setShortClass(
-			final Class<? extends IndexedCollection> shortClass) {
+			final Class<? extends BaseIndexedCollection> shortClass) {
 		this.shortClass = shortClass;
 	}
 
-	public Class<? extends IndexedCollection> getShortClass() {
+	public Class<? extends BaseIndexedCollection> getShortClass() {
 		return shortClass;
 	}
 
-	public void setIntClass(final Class<? extends IndexedCollection> intClass) {
+	public void setIntClass(final Class<? extends BaseIndexedCollection> intClass) {
 		this.intClass = intClass;
 	}
 
-	public Class<? extends IndexedCollection> getIntClass() {
+	public Class<? extends BaseIndexedCollection> getIntClass() {
 		return intClass;
 	}
 
-	public void setLongClass(final Class<? extends IndexedCollection> longClass) {
+	public void setLongClass(final Class<? extends BaseIndexedCollection> longClass) {
 		this.longClass = longClass;
 	}
 
-	public Class<? extends IndexedCollection> getLongClass() {
+	public Class<? extends BaseIndexedCollection> getLongClass() {
 		return longClass;
 	}
 

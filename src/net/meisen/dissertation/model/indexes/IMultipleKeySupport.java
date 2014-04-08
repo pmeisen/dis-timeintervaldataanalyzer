@@ -2,9 +2,9 @@ package net.meisen.dissertation.model.indexes;
 
 
 /**
- * This interface describes the property of an {@code IndexedCollection}, which
+ * This interface describes the property of an {@code BaseIndexedCollection}, which
  * identifies that multiple {@code IndexKeyDefinition} instances can be defined.
- * The {@code IndexedCollection} defines based on the passed values which
+ * The {@code BaseIndexedCollection} defines based on the passed values which
  * internal structure should be used.
  * 
  * @author pmeisen

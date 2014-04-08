@@ -7,7 +7,7 @@ import java.util.List;
 
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.general.genmisc.types.Numbers;
 
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * @author pmeisen
  * 
  */
-public class IntArrayCollection extends IndexedCollection implements
+public class IntArrayCollection extends BaseIndexedCollection implements
 		IRangeQueryOptimized {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(IntArrayCollection.class);

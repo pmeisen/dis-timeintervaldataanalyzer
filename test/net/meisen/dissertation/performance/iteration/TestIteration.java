@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.help.Performance;
 import net.meisen.dissertation.help.Performance.ResultHolder;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.performance.iteration.mock.LongKey;
@@ -31,7 +31,7 @@ public class TestIteration {
 	 */
 	@Before
 	public void createIndex() {
-		final IndexedCollectionFactory factory = new IndexedCollectionFactory();
+		final IndexFactory factory = new IndexFactory();
 		final IndexKeyDefinition keyDef = new IndexKeyDefinition(LongKey.class,
 				"getKey");
 

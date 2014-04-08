@@ -5,16 +5,16 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * An implementation of a {@code IndexedCollection} based on a
+ * An implementation of a {@code BaseIndexedCollection} based on a
  * {@code Int2ObjectOpenHashMap}.
  * 
  * @author pmeisen
  * 
  */
-public class FastUtilIntIndexedCollection extends IndexedCollection {
+public class FastUtilIntIndexedCollection extends BaseIndexedCollection {
 
 	private final Int2ObjectOpenHashMap<Object> fastUtilMap;
 

@@ -1,6 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.IBitmapContainer;
 
@@ -35,7 +35,7 @@ public class IndexDimensionSlice<I> implements
 	 *            factory used to create bitmap indexes
 	 */
 	public IndexDimensionSlice(final I sliceId,
-			final BaseIndexedCollectionFactory factory) {
+			final BaseIndexFactory factory) {
 		this(sliceId, factory, null);
 	}
 
@@ -51,7 +51,7 @@ public class IndexDimensionSlice<I> implements
 	 *            the identifiers of the records to be set
 	 */
 	public IndexDimensionSlice(final I sliceId,
-			final BaseIndexedCollectionFactory factory, final int... recordIds) {
+			final BaseIndexFactory factory, final int... recordIds) {
 		this.id = sliceId;
 		this.bitmap = factory.createBitmap();
 

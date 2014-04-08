@@ -6,7 +6,7 @@
         xmlns:cdef="net.meisen.dissertation.config.xslt.DefaultValues"
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <xsl:import href="indexedCollectionFactory://includeXslts" />
+  <xsl:import href="indexFactory://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -20,7 +20,7 @@
       <xsl:variable name="indexFactory">
         <xsl:choose>
           <xsl:when test="//cns:factories/cns:indexes/@implementation"><xsl:value-of select="//cns:config/cns:factories/cns:indexes/@implementation" /></xsl:when>
-          <xsl:otherwise><xsl:value-of select="cdef:getDefaultIndexedCollectionFactory()" /></xsl:otherwise>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultIndexFactory()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
       <xsl:variable name="mapperFactory">
@@ -55,7 +55,7 @@
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
-        <property name="class" value="net.meisen.dissertation.impl.indexes.IndexedCollectionFactoryConfig" />
+        <property name="class" value="net.meisen.dissertation.impl.indexes.IndexFactoryConfig" />
       </bean>
 
       <!-- create the queryFactory to be used -->

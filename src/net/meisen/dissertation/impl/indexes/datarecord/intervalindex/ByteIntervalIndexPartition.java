@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.indexes.datarecord.intervalindex;
 
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
@@ -22,7 +22,7 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	/**
 	 * Constructor to create a partition using the specified {@code Mapper}, the
 	 * {@code start}- and {@code end}-entry and the specified
-	 * {@code indexedCollectionFactory} to create the needed indexes.
+	 * {@code IndexFactory} to create the needed indexes.
 	 * 
 	 * @param mapper
 	 *            the {@code Mapper} which defines the start and end value, as
@@ -31,15 +31,15 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 *            the start entry
 	 * @param end
 	 *            the end entry
-	 * @param indexedCollectionFactory
-	 *            the {@code indexedCollectionFactory} to create the needed
+	 * @param indexFactory
+	 *            the {@code IndexFactory} to create the needed
 	 *            indexes
 	 */
 	public ByteIntervalIndexPartition(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
-			final BaseIndexedCollectionFactory indexedCollectionFactory) {
-		super(mapper, start, end, indexedCollectionFactory);
+			final BaseIndexFactory indexFactory) {
+		super(mapper, start, end, indexFactory);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @return the result of the combination of the specified slices (by and)
 	 */
 	public Bitmap and(final byte start, final byte end) {
-		return Bitmap.and(getIndexedCollectionFactory(), getIndex()
+		return Bitmap.and(getIndexFactory(), getIndex()
 				.getObjectsByStartAndEnd(start, end));
 	}
 
@@ -114,7 +114,7 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @return the result of the combination of the specified slices (by or)
 	 */
 	public Bitmap or(final byte start, final byte end) {
-		return Bitmap.or(getIndexedCollectionFactory(), getIndex()
+		return Bitmap.or(getIndexFactory(), getIndex()
 				.getObjectsByStartAndEnd(start, end));
 	}
 
@@ -181,7 +181,7 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	protected IndexDimensionSlice<Byte> createSlice(final Number sliceId,
 			final int... recordIds) {
 		return new IndexDimensionSlice<Byte>(Numbers.castToByte(sliceId),
-				getIndexedCollectionFactory(),
+				getIndexFactory(),
 				recordIds);
 	}
 }

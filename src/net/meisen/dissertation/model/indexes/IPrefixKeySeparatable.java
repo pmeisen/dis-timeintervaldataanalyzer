@@ -4,7 +4,7 @@ import java.util.List;
 
 
 /**
- * This interface describes the property of an {@code IndexedCollection}, which
+ * This interface describes the property of an {@code BaseIndexedCollection}, which
  * identifies that a key can be separated to query for data. <br/>
  * <br/>
  * <b>Example:</b><br/>
@@ -28,7 +28,7 @@ public interface IPrefixKeySeparatable extends IIndexedCollection {
 	 * 
 	 * @param keys
 	 *            the keys to resolve the object or the
-	 *            {@code IndexedCollection}
+	 *            {@code BaseIndexedCollection}
 	 * 
 	 * @return all the objects, if the key is a <i>full</i> key, i.e. one that
 	 *         resolves down to the leaves, a {@code List} with exactly one item

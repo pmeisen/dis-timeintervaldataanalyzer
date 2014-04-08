@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 
 /**
  * A wrapper for a {@code Bitmap} implementation, e.g.
@@ -16,7 +16,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
  * @author pmeisen
  * 
  */
-public abstract class Bitmap {
+public abstract class Bitmap implements IBitmapContainer {
 
 	protected static enum LogicType {
 		AND, OR;
@@ -43,19 +43,24 @@ public abstract class Bitmap {
 	public abstract Bitmap or(final Bitmap... bitmaps);
 
 	public abstract int orCardinality(final Bitmap... bitmaps);
+	
+	@Override
+	public Bitmap getBitmap() {
+		return this;
+	}
 
-	public static Bitmap and(final BaseIndexedCollectionFactory factory,
+	public static Bitmap and(final BaseIndexFactory factory,
 			final Object... bitmaps) {
 		return combine(bitmaps, LogicType.AND, factory);
 	}
 
-	public static Bitmap or(final BaseIndexedCollectionFactory factory,
+	public static Bitmap or(final BaseIndexFactory factory,
 			final Object... bitmaps) {
 		return combine(bitmaps, LogicType.OR, factory);
 	}
 
 	protected static Bitmap combine(final Object[] bitmaps,
-			final LogicType type, final BaseIndexedCollectionFactory factory) {
+			final LogicType type, final BaseIndexFactory factory) {
 		final List<Bitmap> others = new ArrayList<Bitmap>();
 		Bitmap first = null;
 

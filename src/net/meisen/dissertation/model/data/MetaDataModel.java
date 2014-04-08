@@ -9,7 +9,7 @@ import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
@@ -35,14 +35,14 @@ public class MetaDataModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexedCollectionFactory indexedCollectionFactory;
+	private BaseIndexFactory indexFactory;
 
 	private IIndexedCollection descriptorModels;
 	private OfflineMode offlineMode;
 
 	/**
 	 * Creates a {@code MetaDataModel}. The instance must be wired prior to it's
-	 * usage to ensure that a {@code baseIndexedCollectionFactory} is available.
+	 * usage to ensure that a {@code baseIndexFactory} is available.
 	 */
 	public MetaDataModel() {
 		this(null);
@@ -50,21 +50,20 @@ public class MetaDataModel {
 
 	/**
 	 * Creates a {@code MetaDataModel} with the specified
-	 * {@code baseIndexedCollectionFactory}, which should not be {@code null}.
-	 * If the {@code baseIndexedCollectionFactory} should be {@code null} use
-	 * another constructor and read it's information.
+	 * {@code baseIndexFactory}, which should not be {@code null}. If the
+	 * {@code baseIndexFactory} should be {@code null} use another constructor
+	 * and read it's information.
 	 * 
-	 * @param baseIndexedCollectionFactory
-	 *            the {@code BaseIndexedCollectionFactory} used to determine the
-	 *            indexes to be used
+	 * @param baseIndexFactory
+	 *            the {@code baseIndexFactory} used to determine the indexes to
+	 *            be used
 	 * 
-	 * @see BaseIndexedCollectionFactory
+	 * @see BaseIndexFactory
 	 */
-	public MetaDataModel(
-			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+	public MetaDataModel(final BaseIndexFactory baseIndexFactory) {
 
 		// set the factories
-		this.indexedCollectionFactory = baseIndexedCollectionFactory;
+		this.indexFactory = baseIndexFactory;
 		setOfflineMode(null);
 	}
 
@@ -278,35 +277,35 @@ public class MetaDataModel {
 	}
 
 	/**
-	 * Gets the {@code baseIndexedCollectionFactory} specified for the
-	 * {@code MetaDataModel}. This method should never return {@code null} if
-	 * the {@code MetaDataModel} is assumed to be initialized.
+	 * Gets the {@code baseIndexFactory} specified for the {@code MetaDataModel}
+	 * . This method should never return {@code null} if the
+	 * {@code MetaDataModel} is assumed to be initialized.
 	 * 
-	 * @return the {@code baseIndexedCollectionFactory} specified for the
+	 * @return the {@code baseIndexFactory} specified for the
 	 *         {@code MetaDataModel}
 	 */
-	public BaseIndexedCollectionFactory getIndexedCollectionFactory() {
-		return indexedCollectionFactory;
+	public BaseIndexFactory getIndexFactory() {
+		return indexFactory;
 	}
 
 	/**
 	 * Gets the {@code Index} used to index the different
 	 * {@code DescriptorModel} instances. This method never returns {@code null}
-	 * , but throws an exception if the {@code baseIndexedCollectionFactory} 
-	 * isn't defined by wiring or construction.
+	 * , but throws an exception if the {@code baseIndexFactory} isn't defined
+	 * by wiring or construction.
 	 * 
 	 * @return the {@code Index} used to index the different
 	 *         {@code DescriptorModel} instances
 	 * 
 	 * @throws RuntimeException
-	 *             can throw any exception if the
-	 *             {@code baseIndexedCollectionFactory} is {@code null}
+	 *             can throw any exception if the {@code baseIndexFactory} is
+	 *             {@code null}
 	 */
 	public IIndexedCollection getDescriptorModelsIndex() {
 		if (descriptorModels == null) {
 			final IndexKeyDefinition key = new IndexKeyDefinition(
 					DescriptorModel.class, "getId");
-			descriptorModels = getIndexedCollectionFactory().create(key);
+			descriptorModels = getIndexFactory().create(key);
 		}
 
 		return descriptorModels;
@@ -321,7 +320,7 @@ public class MetaDataModel {
 	 *            {@code MetaIndexDimensions} for
 	 * 
 	 * @return the created {@code MetaIndexDimensions} indexed by a
-	 *         {@code IndexedCollection}
+	 *         {@code BaseIndexedCollection}
 	 * 
 	 * @see IIndexedCollection
 	 * @see MetaIndexDimension
@@ -329,8 +328,7 @@ public class MetaDataModel {
 	public IIndexedCollection createIndex(final DataStructure structure) {
 		final IndexKeyDefinition key = new IndexKeyDefinition(
 				MetaIndexDimension.class, "getModelId");
-		final IIndexedCollection index = getIndexedCollectionFactory().create(
-				key);
+		final IIndexedCollection index = getIndexFactory().create(key);
 		if (structure == null) {
 			return index;
 		}
@@ -377,7 +375,7 @@ public class MetaDataModel {
 		// create an IndexDimension for the MetaInformation
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
-				descModel, getIndexedCollectionFactory());
+				descModel, getIndexFactory());
 
 		return idxDim;
 	}
@@ -406,7 +404,7 @@ public class MetaDataModel {
 		this.offlineMode = mode == null ? OfflineMode.find(null) : mode;
 
 		// nothing indexed so far, because no factory defined
-		if (getIndexedCollectionFactory() == null) {
+		if (getIndexFactory() == null) {
 			return;
 		}
 

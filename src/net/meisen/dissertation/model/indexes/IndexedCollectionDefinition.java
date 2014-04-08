@@ -3,20 +3,20 @@ package net.meisen.dissertation.model.indexes;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
-
 /**
  * The {@code IndexedCollectionDefinition} is used to define a
  * {@code IndexedCollection} used when building {@code IndexedCollection}
  * instances. The definition defines the {@code IndexedCollection} to be used
  * for a specific part of a {@code IndexKeyDefinition}.
  * 
- * @see IndexedCollection
+ * @see IIndexedCollection
  * @see IndexKeyDefinition
  * 
  * @author pmeisen
  * 
  */
 public class IndexedCollectionDefinition {
+
 	/**
 	 * A placeholder for the concrete {@code IndexKeyDefinition} when creating
 	 * the {@code IndexedCollection}. This placeholder should only be used once
@@ -33,7 +33,7 @@ public class IndexedCollectionDefinition {
 	private final Object[] args;
 	private final int placeHolderIdx;
 	private final Class<?>[] types;
-	private final Constructor<? extends IndexedCollection> ctor;
+	private final Constructor<? extends IIndexedCollection> ctor;
 	private final Class<? extends IIndexedCollection> type;
 
 	/**
@@ -77,9 +77,10 @@ public class IndexedCollectionDefinition {
 			final Class<?>[] types, final Object[] args) {
 		if (type == null) {
 			throw new NullPointerException("The type must be specified.");
-		} else if (!IndexedCollection.class.isAssignableFrom(type)) {
+		} else if (!IIndexedCollection.class.isAssignableFrom(type)) {
 			throw new IllegalArgumentException(
-					"The type must be a extended implementation of a IndexedCollection.");
+					"The type must be a extended implementation of a '"
+							+ IIndexedCollection.class.getName() + "'.");
 		}
 		this.type = type;
 
@@ -131,10 +132,10 @@ public class IndexedCollectionDefinition {
 
 		// get the constructor to be used
 		@SuppressWarnings("unchecked")
-		final Constructor<? extends IndexedCollection>[] ctors = (Constructor<? extends IndexedCollection>[]) type
+		final Constructor<? extends IIndexedCollection>[] ctors = (Constructor<? extends IIndexedCollection>[]) type
 				.getConstructors();
-		Constructor<? extends IndexedCollection> usableCtor = null;
-		for (final Constructor<? extends IndexedCollection> ctor : ctors) {
+		Constructor<? extends IIndexedCollection> usableCtor = null;
+		for (final Constructor<? extends IIndexedCollection> ctor : ctors) {
 			if (checkConstructor(ctor)) {
 				usableCtor = ctor;
 				break;
@@ -160,7 +161,7 @@ public class IndexedCollectionDefinition {
 	 *         {@code false}
 	 */
 	protected boolean checkConstructor(
-			final Constructor<? extends IndexedCollection> ctor) {
+			final Constructor<? extends IIndexedCollection> ctor) {
 		final Class<?>[] pTypes = ctor.getParameterTypes();
 
 		// the parameters should match
@@ -240,7 +241,7 @@ public class IndexedCollectionDefinition {
 	 *            instance
 	 * @return the new instance of the {@code IndexKeyDefinition}
 	 */
-	public <T extends IndexedCollection> T create(
+	public <T extends IIndexedCollection> T create(
 			final IndexKeyDefinition keyDef) {
 
 		// create the parameterlist

@@ -15,7 +15,7 @@ import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.impl.idfactories.UuIdsFactory;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.indexes.MapIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
@@ -56,7 +56,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testUsingCreatedRandomModel() {
-		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		final IndexFactory idxFactory = new IndexFactory();
 		final MetaStructureEntry entry = new MetaStructureEntry("ID", 1);
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ID", "MODEL", GeneralDescriptor.class,
@@ -105,7 +105,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	@Test
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void testIndexSelection() {
-		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		final IndexFactory idxFactory = new IndexFactory();
 		DescriptorModel<?> model;
 		MetaIndexDimension<?> idx;
 
@@ -150,7 +150,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idx = new MetaIndexDimension(
 				metaStructures.get(0), descModel,
-				new IndexedCollectionFactory());
+				new IndexFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -181,7 +181,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testUsingRandomIndexModel() {
-		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
 				.loadViaXslt("mh_tidaRandomIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
@@ -262,7 +262,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		final ZipPersistor persistor = new ZipPersistor();
 
 		// get the model and the factory we use
-		final IndexedCollectionFactory idxFactory = new IndexedCollectionFactory();
+		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
 				.loadViaXslt("mh_tidaStaticIndexModel",
 						"/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");

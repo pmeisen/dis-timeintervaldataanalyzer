@@ -23,13 +23,13 @@
 
   <config>
     <factories>
-      <!-- Define the factory to be used to determine which IndexedCollectionFactory
+      <!-- Define the factory to be used to determine which IndexFactory
            to be used.
            
            The following factories are available by default:
-            + net.meisen.dissertation.impl.indexes.IndexedCollectionFactory
+            + net.meisen.dissertation.impl.indexes.IndexFactory
         -->
-      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory" />
       
       <!-- Define the factory to be used to determine which MapperFactory
            to be used.

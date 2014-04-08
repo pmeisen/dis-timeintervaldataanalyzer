@@ -20,7 +20,7 @@ import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
-import net.meisen.dissertation.impl.indexes.TestIndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.TestIndexFactory;
 import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
@@ -92,7 +92,7 @@ import org.junit.runners.Suite;
 		TestIntArrayCollection.class,
 
 		// Test the factory for the indexes
-		TestIndexedCollectionFactory.TestIndexedCollectionFactorySuite.class,
+		TestIndexFactory.TestIndexFactorySuite.class,
 
 		// Test the id factories
 		TestByteIdsFactory.class,

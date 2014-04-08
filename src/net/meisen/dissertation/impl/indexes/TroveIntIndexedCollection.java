@@ -6,16 +6,16 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * An implementation of a {@code IndexedCollection} based on a
+ * An implementation of a {@code BaseIndexedCollection} based on a
  * {@code TIntObjectHashMap}.
  * 
  * @author pmeisen
  * 
  */
-public class TroveIntIndexedCollection extends IndexedCollection {
+public class TroveIntIndexedCollection extends BaseIndexedCollection {
 
 	private final TIntObjectHashMap<Object> troveMap;
 

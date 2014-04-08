@@ -14,7 +14,7 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
@@ -45,7 +45,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	private final DescriptorModel<I> model;
 	private final MetaStructureEntry metaEntry;
 
-	private final BaseIndexedCollectionFactory indexedCollectionFactory;
+	private final BaseIndexFactory indexFactory;
 	private final IIndexedCollection index;
 
 	private MetaDataHandling metaDataHandling;
@@ -61,17 +61,16 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 	 * @param model
 	 *            the {@code DescriptorModel} referred by the
 	 *            {@code MetaStructureEntry}
-	 * @param indexedCollectionFactory
-	 *            the {@code BaseIndexedCollectionFactory} used to decide which
-	 *            index should be used for referring to the different
-	 *            {@code IndexBitmapSlice} instances
+	 * @param indexFactory
+	 *            the {@code IndexFactory} used to decide which index should be
+	 *            used for referring to the different {@code IndexBitmapSlice}
+	 *            instances
 	 * 
 	 * @see MetaStructureEntry
 	 * @see DescriptorModel
 	 */
 	public MetaIndexDimension(final MetaStructureEntry metaEntry,
-			final DescriptorModel<I> model,
-			final BaseIndexedCollectionFactory indexedCollectionFactory) {
+			final DescriptorModel<I> model, final BaseIndexFactory indexFactory) {
 		if (model == null) {
 			throw new NullPointerException("The model cannot be null.");
 		} else if (metaEntry == null) {
@@ -89,13 +88,13 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		// set the values
 		this.metaEntry = metaEntry;
 		this.model = model;
-		this.indexedCollectionFactory = indexedCollectionFactory;
+		this.indexFactory = indexFactory;
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
 				IndexDimensionSlice.class, "getId");
 		indexKeyDef.overrideType(0, model.getIdClass());
-		this.index = indexedCollectionFactory.create(indexKeyDef);
+		this.index = indexFactory.create(indexKeyDef);
 
 		// set the default value
 		setMetaDataHandling(null);
@@ -142,8 +141,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 		// create or get the slices
 		final IndexDimensionSlice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(new IndexDimensionSlice<I>(id,
-					indexedCollectionFactory, recId));
+			index.addObject(new IndexDimensionSlice<I>(id, indexFactory, recId));
 		} else {
 			slice.set(recId);
 		}
@@ -425,7 +423,7 @@ public class MetaIndexDimension<I> implements DataRecordIndex {
 
 		// create the slice
 		final IndexDimensionSlice<I> slice = new IndexDimensionSlice<I>(id,
-				indexedCollectionFactory);
+				indexFactory);
 
 		// load the slice from the InputStream
 		try {

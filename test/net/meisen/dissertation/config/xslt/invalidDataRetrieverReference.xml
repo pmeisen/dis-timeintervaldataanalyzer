@@ -11,7 +11,7 @@
 
   <config>
     <factories>
-      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexedCollectionFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory" />
     </factories>
     
     <dataretrievers>

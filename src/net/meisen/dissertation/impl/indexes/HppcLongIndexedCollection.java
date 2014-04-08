@@ -4,18 +4,18 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 import com.carrotsearch.hppc.LongObjectOpenHashMap;
 
 /**
- * An implementation of a {@code IndexedCollection} based on a
+ * An implementation of a {@code BaseIndexedCollection} based on a
  * {@code LongObjectOpenHashMap}.
  * 
  * @author pmeisen
  * 
  */
-public class HppcLongIndexedCollection extends IndexedCollection {
+public class HppcLongIndexedCollection extends BaseIndexedCollection {
 
 	private final LongObjectOpenHashMap<Object> hppcMap;
 

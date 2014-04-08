@@ -2,13 +2,13 @@ package net.meisen.dissertation.impl.indexes;
 
 import java.util.HashMap;
 
-import net.meisen.dissertation.exceptions.IndexedCollectionFactoryException;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.exceptions.IndexFactoryException;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
@@ -16,16 +16,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory to create a {@code IndexedCollection}.
+ * Factory to create a {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
  */
-public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
+public class IndexFactory extends BaseIndexFactory {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(IndexedCollectionFactory.class);
+			.getLogger(IndexFactory.class);
 
-	private IndexedCollectionFactoryConfig config;
+	private IndexFactoryConfig config;
 
 	@Override
 	public void setConfig(final Object config) {
@@ -38,37 +38,35 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 		}
 
 		if (config == null) {
-			this.config = new IndexedCollectionFactoryConfig();
-		} else if (config instanceof IndexedCollectionFactoryConfig == false) {
+			this.config = new IndexFactoryConfig();
+		} else if (config instanceof IndexFactoryConfig == false) {
 			if (exceptionRegistry == null) {
 				throw new IllegalArgumentException(
 						"The configuration used for '"
 								+ getClass().getSimpleName()
 								+ "' must be of the type '"
-								+ IndexedCollectionFactoryConfig.class
-										.getName() + "'.");
+								+ IndexFactoryConfig.class.getName() + "'.");
 			} else {
-				exceptionRegistry.throwException(
-						IndexedCollectionFactoryException.class, 1003,
-						IndexedCollectionFactoryConfig.class.getName());
+				exceptionRegistry.throwException(IndexFactoryException.class,
+						1003, IndexFactoryConfig.class.getName());
 			}
 		} else {
-			this.config = (IndexedCollectionFactoryConfig) config;
+			this.config = (IndexFactoryConfig) config;
 		}
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Setting the indexedCollectionFactory with configuration "
-					+ config);
+			LOG.debug("Setting the '" + getClass().getName()
+					+ "' with configuration " + config);
 		}
 	}
 
-	public void setConfig(final IndexedCollectionFactoryConfig config) {
+	public void setConfig(final IndexFactoryConfig config) {
 		setConfig((Object) config);
 	}
 
-	public IndexedCollectionFactoryConfig getConfig() {
+	public IndexFactoryConfig getConfig() {
 		if (config == null) {
-			this.config = new IndexedCollectionFactoryConfig();
+			this.config = new IndexFactoryConfig();
 
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Using default configuration " + this.config);
@@ -84,7 +82,7 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 		final int keySize = keyDef.getSize();
 		if (keySize != 1) {
 			exceptionRegistry.throwRuntimeException(
-					IndexedCollectionFactoryException.class, 1001);
+					IndexFactoryException.class, 1001);
 		}
 
 		final Class<?> clazz = keyDef.getType(0);
@@ -96,8 +94,8 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 			return new IntArrayCollection(keyDef);
 		} else {
 			exceptionRegistry.throwRuntimeException(
-					IndexedCollectionFactoryException.class, 1002,
-					clazz == null ? null : clazz.getName());
+					IndexFactoryException.class, 1002, clazz == null ? null
+							: clazz.getName());
 			return null;
 		}
 	}
@@ -130,7 +128,7 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 	@Override
 	protected IndexedCollectionDefinition createIndexedCollectionDefinition(
 			final Class<?> clazz) {
-		final Class<? extends IndexedCollection> collClazz;
+		final Class<? extends BaseIndexedCollection> collClazz;
 
 		// we have some really nice implementations for the primitives
 		if (isBytePrimitiveType(clazz)) {
@@ -163,7 +161,7 @@ public class IndexedCollectionFactory extends BaseIndexedCollectionFactory {
 			return bitmapClazz.newInstance();
 		} catch (final Exception e) {
 			exceptionRegistry.throwRuntimeException(
-					IndexedCollectionFactoryException.class, 1000,
+					IndexFactoryException.class, 1000,
 					bitmapClazz == null ? null : bitmapClazz.getName());
 			return null;
 		}

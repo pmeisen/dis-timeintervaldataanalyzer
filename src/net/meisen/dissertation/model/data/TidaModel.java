@@ -65,8 +65,8 @@ public class TidaModel implements IPersistable {
 
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
-	 * instance must be wired prior to it's usage to ensure that a
-	 * {@code baseIndexedCollectionFactory} is available.
+	 * instance must be wired prior to it's usage to ensure that an
+	 * {@code IndexFactory} is available.
 	 */
 	public TidaModel() {
 		this(null, null);
@@ -75,7 +75,7 @@ public class TidaModel implements IPersistable {
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with the specified
 	 * {@code id}, the instance must be wired prior to it's usage to ensure that
-	 * a {@code baseIndexedCollectionFactory} is available.
+	 * an {@code IndexFactory}
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}
@@ -87,8 +87,7 @@ public class TidaModel implements IPersistable {
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with the specified
 	 * {@code id} and the specified {@code name}, the instance must be wired
-	 * prior to it's usage to ensure that a {@code baseIndexedCollectionFactory}
-	 * is available.
+	 * prior to it's usage to ensure that an {@code IndexFactory} is available.
 	 * 
 	 * @param id
 	 *            the identifier used for the {@code MetaDataModel}

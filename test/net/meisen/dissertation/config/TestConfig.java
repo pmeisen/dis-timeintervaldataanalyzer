@@ -3,12 +3,12 @@ package net.meisen.dissertation.config;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory;
+import net.meisen.dissertation.config.xslt.mock.MockIndexFactory;
 import net.meisen.dissertation.config.xslt.mock.MockMapperFactory;
 import net.meisen.dissertation.config.xslt.mock.MockQueryFactory;
 import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
@@ -79,7 +79,7 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.INDEXFACTORY_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(),
-					o instanceof IndexedCollectionFactory);
+					o instanceof IndexFactory);
 
 			o = modulesHolder.getModule(DefaultValues.MAPPERFACTORY_ID);
 			assertNotNull(o);
@@ -112,7 +112,7 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.INDEXFACTORY_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(),
-					o instanceof MockIndexedCollectionFactory);
+					o instanceof MockIndexFactory);
 
 			o = modulesHolder.getModule(DefaultValues.MAPPERFACTORY_ID);
 			assertNotNull(o);

@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
@@ -23,7 +23,7 @@ import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
@@ -79,9 +79,9 @@ public class DefaultValues {
 	public static final String TIDAMODEL_ID = "timeIntervalDataAnalyzerModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
-	 * created {@code IndexedCollectionFactory}.
+	 * created {@code IndexFactory}.
 	 * 
-	 * @see BaseIndexedCollectionFactory
+	 * @see BaseIndexFactory
 	 */
 	public static final String INDEXFACTORY_ID = "indexFactory";
 	/**
@@ -136,14 +136,14 @@ public class DefaultValues {
 	}
 
 	/**
-	 * Gets the default {@code BaseIndexedCollectionFactory} to be used.
+	 * Gets the default {@code IndexFactory} to be used.
 	 * 
-	 * @return the default {@code BaseIndexedCollectionFactory} to be used
+	 * @return the default {@code IndexFactory} to be used
 	 * 
-	 * @see BaseIndexedCollectionFactory
+	 * @see BaseIndexFactory
 	 */
-	public static String getDefaultIndexedCollectionFactory() {
-		return IndexedCollectionFactory.class.getName();
+	public static String getDefaultIndexFactory() {
+		return IndexFactory.class.getName();
 	}
 
 	/**

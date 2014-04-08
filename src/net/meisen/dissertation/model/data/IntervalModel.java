@@ -10,7 +10,7 @@ import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.LongInterva
 import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
@@ -36,7 +36,7 @@ public class IntervalModel {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexedCollectionFactory indexedCollectionFactory;
+	private BaseIndexFactory indexFactory;
 
 	@Autowired
 	@Qualifier(DefaultValues.MAPPERFACTORY_ID)
@@ -48,8 +48,7 @@ public class IntervalModel {
 
 	/**
 	 * Creates a {@code IntervalModel} which must be completly wired prior to
-	 * it's usage to ensure that a {@code indexedCollectionFactory} is
-	 * available.
+	 * it's usage to ensure that a {@code indexFactory} is available.
 	 */
 	public IntervalModel() {
 		this(null, null, null);
@@ -57,7 +56,7 @@ public class IntervalModel {
 
 	/**
 	 * Creates a {@code IntervalModel}. The instance must be wired prior to it's
-	 * usage to ensure that a {@code indexedCollectionFactory} is available.
+	 * usage to ensure that a {@code indexFactory} is available.
 	 * 
 	 * @param timeline
 	 *            the {@code TimelineDefinition} for the model, can be
@@ -69,34 +68,33 @@ public class IntervalModel {
 	}
 
 	/**
-	 * Creates a {@code IntervalModel} with the specified
-	 * {@code indexedCollectionFactory}, which should not be {@code null}. If
-	 * the {@code indexedCollectionFactory} should be {@code null} use another
-	 * constructor and read its information.
+	 * Creates a {@code IntervalModel} with the specified {@code indexFactory},
+	 * which should not be {@code null}. If the {@code indexFactory} should be
+	 * {@code null} use another constructor and read its information.
 	 * 
 	 * @param timeline
 	 *            the {@code TimelineDefinition} for the model, can be
 	 *            {@code null} if so a default {@code TimelineDefinition} will
 	 *            be created and might be reset by auto-wiring.
-	 * @param indexedCollectionFactory
-	 *            the {@code BaseIndexedCollectionFactory} used to determine the
-	 *            indexes to be used
+	 * @param indexFactory
+	 *            the {@code IndexFactory} used to determine the indexes to be
+	 *            used
 	 * @param mapperFactory
 	 *            the {@code MapperFactory} to be used which is used to create
 	 *            the {@code Mapper} instances needed
 	 * 
-	 * @see BaseIndexedCollectionFactory
+	 * @see BaseIndexFactory
 	 * @see BaseMapperFactory
 	 */
 	public IntervalModel(final TimelineDefinition timeline,
-			final BaseIndexedCollectionFactory indexedCollectionFactory,
+			final BaseIndexFactory indexFactory,
 			final BaseMapperFactory mapperFactory) {
 
 		// set the definition of the timeline
 		this.timeline = timeline == null ? new TimelineDefinition() : timeline;
 
 		// set the factories
-		this.indexedCollectionFactory = indexedCollectionFactory;
+		this.indexFactory = indexFactory;
 		this.mapperFactory = mapperFactory;
 	}
 
@@ -111,7 +109,7 @@ public class IntervalModel {
 
 		// make sure needed stuff is known
 		if (structure == null) {
-			return getIndexedCollectionFactory().create(
+			return getIndexFactory().create(
 					new IndexKeyDefinition(BaseIntervalIndexPartition.class,
 							"getStartAsByte"));
 		} else if (timeline == null) {
@@ -159,8 +157,7 @@ public class IntervalModel {
 		// create the index
 		final IndexKeyDefinition key = new IndexKeyDefinition(part.getClass(),
 				"getId");
-		final IIndexedCollection index = getIndexedCollectionFactory().create(
-				key);
+		final IIndexedCollection index = getIndexFactory().create(key);
 
 		// add the different partition to the index
 		index.addObject(part);
@@ -191,29 +188,28 @@ public class IntervalModel {
 		// create the IntervalIndex depending on the mapper
 		if (Byte.class.equals(mapper.getTargetType())) {
 			return new ByteIntervalIndexPartition(mapper, startEntry, endEntry,
-					getIndexedCollectionFactory());
+					getIndexFactory());
 		} else if (Short.class.equals(mapper.getTargetType())) {
 			return new ShortIntervalIndexPartition(mapper, startEntry,
-					endEntry, getIndexedCollectionFactory());
+					endEntry, getIndexFactory());
 		} else if (Integer.class.equals(mapper.getTargetType())) {
 			return new IntIntervalIndexPartition(mapper, startEntry, endEntry,
-					getIndexedCollectionFactory());
+					getIndexFactory());
 		} else {
 			return new LongIntervalIndexPartition(mapper, startEntry, endEntry,
-					getIndexedCollectionFactory());
+					getIndexFactory());
 		}
 	}
 
 	/**
-	 * Gets the {@code baseIndexedCollectionFactory} specified for the
-	 * {@code IntervalModel}. This method should never return {@code null} if
-	 * the {@code IntervalModel} is assumed to be initialized.
+	 * Gets the {@code indexFactory} specified for the {@code IntervalModel}.
+	 * This method should never return {@code null} if the {@code IntervalModel}
+	 * is assumed to be initialized.
 	 * 
-	 * @return the {@code baseIndexedCollectionFactory} specified for the
-	 *         {@code IntervalModel}
+	 * @return the {@code indexFactory} specified for the {@code IntervalModel}
 	 */
-	public BaseIndexedCollectionFactory getIndexedCollectionFactory() {
-		return indexedCollectionFactory;
+	public BaseIndexFactory getIndexFactory() {
+		return indexFactory;
 	}
 
 	/**

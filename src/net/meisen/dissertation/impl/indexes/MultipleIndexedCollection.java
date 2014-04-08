@@ -7,19 +7,19 @@ import java.util.List;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 
 /**
  * A {@code MultipleIndexedCollection} implements the {@code MultipleKeySupport}
  * . This means that this collection can support several
- * {@code IndexKeyDefinitions} to add an object to the {@code IndexedCollection}
+ * {@code IndexKeyDefinitions} to add an object to the {@code BaseIndexedCollection}
  * .
  * 
  * @author pmeisen
  * 
  */
-public class MultipleIndexedCollection extends IndexedCollection implements
+public class MultipleIndexedCollection extends BaseIndexedCollection implements
 		IMultipleKeySupport {
 
 	private final IIndexedCollection[] idx;
@@ -30,7 +30,7 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 	 * {@code IndexedCollectionDefinition}.<br/>
 	 * <br/>
 	 * <b>Note:</b><br/>
-	 * In that case the {@code IndexedCollection} should be created directly.
+	 * In that case the {@code BaseIndexedCollection} should be created directly.
 	 * 
 	 * @param keyDefinition
 	 * @param collDefinition
@@ -85,7 +85,7 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 		this.size = keyDefinitions.length;
 
 		// create the different indexes
-		idx = new IndexedCollection[this.size];
+		idx = new BaseIndexedCollection[this.size];
 		for (int i = 0; i < this.size; i++) {
 			idx[i] = collDefinitions[i].create(keyDefinitions[i]);
 		}
@@ -180,7 +180,7 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 	 * Gets the object associated to the specified keys.
 	 * 
 	 * @param idx
-	 *            the {@code IndexedCollection} to get the associated object
+	 *            the {@code BaseIndexedCollection} to get the associated object
 	 *            from
 	 * @param values
 	 *            the values to get the object for
@@ -196,19 +196,19 @@ public class MultipleIndexedCollection extends IndexedCollection implements
 	 * Get the index used for the {@code IndexKey} at position {@code pos}.
 	 * 
 	 * @param pos
-	 *            the position to get the {@code IndexedCollection} for
+	 *            the position to get the {@code BaseIndexedCollection} for
 	 * 
-	 * @return the {@code IndexedCollection} for the specified position
+	 * @return the {@code BaseIndexedCollection} for the specified position
 	 */
 	public IIndexedCollection getIndexedCollection(final int pos) {
 		return idx[pos];
 	}
 
 	/**
-	 * Gets a {@code List} of all the {@code IndexedCollection} of {@code this}
+	 * Gets a {@code List} of all the {@code BaseIndexedCollection} of {@code this}
 	 * {@code MultipleIndexedCollection}.
 	 * 
-	 * @return all the {@code IndexedCollection} of {@code this}
+	 * @return all the {@code BaseIndexedCollection} of {@code this}
 	 *         {@code MultipleIndexedCollection}
 	 */
 	public List<IIndexedCollection> getAllIndexedCollection() {

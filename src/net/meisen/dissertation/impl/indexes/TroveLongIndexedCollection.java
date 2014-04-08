@@ -5,16 +5,16 @@ import java.util.Collection;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * An implementation of a {@code IndexedCollection} based on a
+ * An implementation of a {@code BaseIndexedCollection} based on a
  * {@code TLongObjectHashMap}.
  * 
  * @author pmeisen
  * 
  */
-public class TroveLongIndexedCollection extends IndexedCollection {
+public class TroveLongIndexedCollection extends BaseIndexedCollection {
 
 	private final TLongObjectHashMap<Object> troveMap;
 

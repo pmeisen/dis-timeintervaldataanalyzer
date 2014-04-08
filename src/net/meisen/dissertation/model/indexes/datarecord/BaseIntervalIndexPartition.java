@@ -11,7 +11,7 @@ import java.util.UUID;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
@@ -46,7 +46,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	private final IntervalStructureEntry startEntry;
 	private final IntervalStructureEntry endEntry;
 	private final IRangeQueryOptimized index;
-	private final BaseIndexedCollectionFactory indexedCollectionFactory;
+	private final BaseIndexFactory indexFactory;
 
 	private IntervalDataHandling intervalDataHandling;
 	private Group persistentGroup = null;
@@ -54,7 +54,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	/**
 	 * Constructor to create a partition using the specified {@code Mapper}, the
 	 * {@code start}- and {@code end}-entry and the specified
-	 * {@code indexedCollectionFactory} to create the needed indexes.
+	 * {@code indexFactory} to create the needed indexes.
 	 * 
 	 * @param mapper
 	 *            the {@code Mapper} which defines the start and end value, as
@@ -63,14 +63,13 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	 *            the {@code entry} which defines the start
 	 * @param end
 	 *            the {@code entry} which defines the end
-	 * @param indexedCollectionFactory
-	 *            the {@code indexedCollectionFactory} to create the needed
-	 *            indexes
+	 * @param indexFactory
+	 *            the {@code IndexFactory} to create the needed indexes
 	 */
 	public BaseIntervalIndexPartition(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
-			final BaseIndexedCollectionFactory indexedCollectionFactory) {
+			final BaseIndexFactory indexFactory) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Creating " + getClass().getSimpleName() + " for '"
 					+ mapper.demap(mapper.getStart()) + " - "
@@ -85,14 +84,13 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 		this.mapper = mapper;
 
 		// set the factory
-		this.indexedCollectionFactory = indexedCollectionFactory;
+		this.indexFactory = indexFactory;
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
 				IndexDimensionSlice.class, "getId");
 		indexKeyDef.overrideType(0, getType());
-		this.index = indexedCollectionFactory
-				.createRangeQueryOptimized(indexKeyDef);
+		this.index = indexFactory.createRangeQueryOptimized(indexKeyDef);
 
 		// the maximum value of the index is defined by the mapper
 		this.index.setMaxValue(this.mapper.getNormEndAsLong());
@@ -437,11 +435,12 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	}
 
 	/**
-	 * Gets the factory used to create collections, i.e. bitmaps in this case.
+	 * Gets the factory used to create indexes, i.e. bitmaps or indexed
+	 * collections.
 	 * 
-	 * @return the factory used to create collections
+	 * @return the factory used to create indexes
 	 */
-	protected BaseIndexedCollectionFactory getIndexedCollectionFactory() {
-		return indexedCollectionFactory;
+	protected BaseIndexFactory getIndexFactory() {
+		return indexFactory;
 	}
 }

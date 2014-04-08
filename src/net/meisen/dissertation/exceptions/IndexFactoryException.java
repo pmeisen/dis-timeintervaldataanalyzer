@@ -1,12 +1,16 @@
 package net.meisen.dissertation.exceptions;
 
+import net.meisen.dissertation.impl.indexes.IndexFactory;
+
 /**
- * Exception thrown whenever a {@code ZipPersistor} has a problem.
+ * Exception thrown whenever a {@code IndexFactory} has a problem.
+ * 
+ * @see IndexFactory
  * 
  * @author pmeisen
  * 
  */
-public class IndexedCollectionFactoryException extends RuntimeException {
+public class IndexFactoryException extends RuntimeException {
 	private static final long serialVersionUID = 7268719248335330247L;
 
 	/**
@@ -16,7 +20,7 @@ public class IndexedCollectionFactoryException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public IndexedCollectionFactoryException(final String message) {
+	public IndexFactoryException(final String message) {
 		super(message);
 	}
 
@@ -29,7 +33,7 @@ public class IndexedCollectionFactoryException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public IndexedCollectionFactoryException(final String message, final Throwable t) {
+	public IndexFactoryException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

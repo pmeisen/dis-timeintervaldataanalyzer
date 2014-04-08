@@ -3,14 +3,14 @@ package net.meisen.dissertation.impl.indexes.mock;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * Mock of a {@code IndexedCollection}.
+ * Mock of a {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  */
-public class IndexedCollectionMock extends IndexedCollection {
+public class IndexedCollectionMock extends BaseIndexedCollection {
 
 	/**
 	 * Needed constructor.

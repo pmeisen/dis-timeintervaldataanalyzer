@@ -20,7 +20,7 @@ import net.meisen.dissertation.impl.descriptors.LongDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactory;
+import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.indexes.MultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
@@ -101,7 +101,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// create a model using an integerIdsFactory
 		final DescriptorModel<Integer> modelIntIds = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 
 		// check some settings
 		assertTrue(modelIntIds.getDescriptorIndex() instanceof MultipleIndexedCollection);
@@ -113,7 +113,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 
 		final DescriptorModel<Long> modelLongIds = new DescriptorModel<Long>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 
 		// check some settings
 		assertTrue(modelLongIds.getDescriptorIndex() instanceof MultipleIndexedCollection);
@@ -134,7 +134,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// create a model using an integerIdsFactory
 		final DescriptorModel<Integer> model1 = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 
 		// create a bunch of descriptors
 		for (int i = 1; i < 100; i++) {
@@ -149,7 +149,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 
 		final DescriptorModel<Long> model2 = new DescriptorModel<Long>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 
 		// create a bunch of descriptors
 		for (long i = 1; i < 100; i++) {
@@ -174,10 +174,10 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// DescriptorModel
 		final DescriptorModel<Long> modelLongIds1 = new DescriptorModel<Long>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 		final DescriptorModel<Long> modelLongIds2 = new DescriptorModel<Long>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 
 		// add some descriptors created by the one into the other
 		for (long i = 1; i < 100; i++) {
@@ -193,7 +193,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	public void testGetDescriptor() {
 		final DescriptorModel<Long> modelLongIds = new DescriptorModel<Long>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 
 		for (long i = 1; i < 100; i++) {
 			modelLongIds.createDescriptor(100 - i);
@@ -224,7 +224,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 				99);
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 		model.createDescriptors(retriever, query);
 		for (int i = 1; i < 100; i++) {
 			final Descriptor<?, ?, ?> descriptor = model.getDescriptor(i);
@@ -247,7 +247,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	public void testGetDescriptorByValue() {
 		final DescriptorModel<Long> modelLongIds = new DescriptorModel<Long>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 
 		for (long i = 1; i < 100; i++) {
 			modelLongIds.createDescriptor(100 - i);
@@ -272,7 +272,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// create the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 
 		// add some values
 		for (long i = 1; i < 100; i++) {
@@ -308,7 +308,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// create the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", ResourceDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 		model.setSupportsNullDescriptor(true);
 
 		// add some values
@@ -392,11 +392,11 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 		// create to models one to create a descriptor and add it to the other
 		final DescriptorModel<Integer> modelIntIds = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", IntegerDescriptor.class,
-				new IntegerIdsFactory(), new IndexedCollectionFactory());
+				new IntegerIdsFactory(), new IndexFactory());
 		configuration.wireInstance(modelIntIds);
 		final DescriptorModel<Long> modelLongIds = new DescriptorModel<Long>(
 				"ModelId", "ModelName", LongDescriptor.class,
-				new LongIdsFactory(), new IndexedCollectionFactory());
+				new LongIdsFactory(), new IndexFactory());
 		configuration.wireInstance(modelLongIds);
 
 		// add an invalid descriptor to the model

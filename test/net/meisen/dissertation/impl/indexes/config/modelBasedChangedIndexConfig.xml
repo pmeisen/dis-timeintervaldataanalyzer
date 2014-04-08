@@ -5,11 +5,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         
         xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                            http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexesFactory.xsd">
+                            http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd">
 
   <config>
     <factories>    
-      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexedCollectionFactory">
+      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexFactory">
         <idx:config bitmap="net.meisen.dissertation.impl.indexes.mock.BitmapMock"
                     byte="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock"
                     short="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock" />

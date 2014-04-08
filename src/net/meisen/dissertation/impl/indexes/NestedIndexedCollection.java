@@ -7,23 +7,23 @@ import java.util.List;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IndexKey;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * A {@code NestedIndexedCollection} is a {@code IndexedCollection} which uses
- * several other {@code IndexedCollection} to index an object (i.e each value of
- * a multiple key is resolved to an own {@code IndexedCollection}.
+ * A {@code NestedIndexedCollection} is a {@code BaseIndexedCollection} which uses
+ * several other {@code BaseIndexedCollection} to index an object (i.e each value of
+ * a multiple key is resolved to an own {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
  */
-public class NestedIndexedCollection extends IndexedCollection implements
+public class NestedIndexedCollection extends BaseIndexedCollection implements
 		IPrefixKeySeparatable {
 
 	private final IndexedCollectionDefinition[] definitions;
-	private final IndexedCollection root;
+	private final BaseIndexedCollection root;
 
 	/**
 	 * Helper to put an object and it's identifier in one instance.
@@ -82,7 +82,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 
 	/**
 	 * Constructor to pass the {@code IndexKeyDefinition} and the definitions of
-	 * the {@code IndexedCollection} nested.
+	 * the {@code BaseIndexedCollection} nested.
 	 * 
 	 * @param keyDefinition
 	 *            the {@code IndexKeyDefinition} to define the key of this
@@ -124,7 +124,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 		final IndexKey<?> key = getKeyDefinition().getKey(object);
 		final Object[] values = key.getValues();
 
-		final IndexedCollection collection = getCollection(values, true);
+		final BaseIndexedCollection collection = getCollection(values, true);
 		final Object lastValue = values[values.length - 1];
 
 		return collection.addObject(new Wrapper<Object>(lastValue, object));
@@ -135,7 +135,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 		final IndexKey<?> key = getKeyDefinition().getKey(object);
 		final Object[] values = key.getValues();
 
-		final IndexedCollection collection = getCollection(values, false);
+		final BaseIndexedCollection collection = getCollection(values, false);
 		final Object lastValue = values[values.length - 1];
 
 		collection.removeObject(new Wrapper<Object>(lastValue, object));
@@ -146,20 +146,20 @@ public class NestedIndexedCollection extends IndexedCollection implements
 	 * values.
 	 * 
 	 * @param values
-	 *            the values to find the {@code IndexedCollection} defined by,
+	 *            the values to find the {@code BaseIndexedCollection} defined by,
 	 *            can be just some prefix values (e.g. the first four on a six
 	 *            sized index)
 	 * @param create
-	 *            {@code true} if the path to the {@code IndexedCollection}
+	 *            {@code true} if the path to the {@code BaseIndexedCollection}
 	 *            should be created, otherwise {@code false}
 	 * 
-	 * @return the found or created {@code IndexedCollection} or {@code null} if
+	 * @return the found or created {@code BaseIndexedCollection} or {@code null} if
 	 *         it couldn't be found
 	 */
-	protected IndexedCollection getCollection(final Object[] values,
+	protected BaseIndexedCollection getCollection(final Object[] values,
 			final boolean create) {
 
-		IndexedCollection collection = this.root;
+		BaseIndexedCollection collection = this.root;
 
 		// if we have a full definition we cannot use the last key
 		final int lastValue = values.length
@@ -169,7 +169,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 
 			// get the collection behind this value
 			@SuppressWarnings("unchecked")
-			Wrapper<IndexedCollection> c = (Wrapper<IndexedCollection>) collection
+			Wrapper<BaseIndexedCollection> c = (Wrapper<BaseIndexedCollection>) collection
 					.getObject(key);
 
 			// create a new collection if there isn't one yet
@@ -205,7 +205,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 					"The size of the specified values cannot be more detailed than the definitions size.");
 		}
 
-		final IndexedCollection collection = getCollection(values, false);
+		final BaseIndexedCollection collection = getCollection(values, false);
 		if (collection == null) {
 			return null;
 		} else {
@@ -235,7 +235,7 @@ public class NestedIndexedCollection extends IndexedCollection implements
 				l.add(o);
 			}
 		} else {
-			final IndexedCollection collection = getCollection(values, false);
+			final BaseIndexedCollection collection = getCollection(values, false);
 
 			// get all the values from all the collections
 			if (collection != null) {
@@ -248,21 +248,21 @@ public class NestedIndexedCollection extends IndexedCollection implements
 
 	/**
 	 * Helper method which calls itself recursively to get all the elements of
-	 * the {@code IndexedCollection} passed. That means that the tree of
-	 * {@code IndexedCollection} is resolved down to the leaves and the list
+	 * the {@code BaseIndexedCollection} passed. That means that the tree of
+	 * {@code BaseIndexedCollection} is resolved down to the leaves and the list
 	 * {@code l} is filled with those.
 	 * 
 	 * @param collection
-	 *            the {@code IndexedCollection} to start from
+	 *            the {@code BaseIndexedCollection} to start from
 	 * @param l
 	 *            the {@code List} to be filled
 	 */
-	protected void getAll(final IndexedCollection collection,
+	protected void getAll(final BaseIndexedCollection collection,
 			final List<Object> l) {
 		for (final Object o : collection.getAll()) {
 			final Object w = ((Wrapper<?>) o).get();
-			if (w instanceof IndexedCollection) {
-				getAll((IndexedCollection) w, l);
+			if (w instanceof BaseIndexedCollection) {
+				getAll((BaseIndexedCollection) w, l);
 			} else {
 				l.add(w);
 			}
@@ -278,11 +278,11 @@ public class NestedIndexedCollection extends IndexedCollection implements
 	}
 
 	/**
-	 * Creates an instance of the defined {@code IndexedCollection} using the
+	 * Creates an instance of the defined {@code BaseIndexedCollection} using the
 	 * {@code NestedCollectionDefinition} at position {@code nr}.
 	 * 
 	 * @param id
-	 *            the identifier used to identify the {@code IndexedCollection}
+	 *            the identifier used to identify the {@code BaseIndexedCollection}
 	 * @param nr
 	 *            the number of the {@code NestedCollectionDefinition} to be
 	 *            used
@@ -290,13 +290,13 @@ public class NestedIndexedCollection extends IndexedCollection implements
 	 * @return an instance of a {@code Wrapper} which is used to pass the
 	 *         {@code id} and the created instance
 	 */
-	protected Wrapper<IndexedCollection> create(final Object id, final int nr) {
+	protected Wrapper<BaseIndexedCollection> create(final Object id, final int nr) {
 		final IndexedCollectionDefinition def = this.definitions[nr];
 		final IndexKeyDefinition keyDef = new IndexKeyDefinition(Wrapper.class,
 				"getId");
-		final IndexedCollection idx = def.create(keyDef);
+		final BaseIndexedCollection idx = def.create(keyDef);
 
-		return new Wrapper<IndexedCollection>(id, idx);
+		return new Wrapper<BaseIndexedCollection>(id, idx);
 	}
 	
 	@Override

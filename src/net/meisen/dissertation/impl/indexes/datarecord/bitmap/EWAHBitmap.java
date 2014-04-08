@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.datarecord.bitmap;
+package net.meisen.dissertation.impl.indexes.datarecord.bitmap;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 

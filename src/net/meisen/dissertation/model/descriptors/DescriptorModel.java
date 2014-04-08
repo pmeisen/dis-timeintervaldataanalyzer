@@ -12,7 +12,7 @@ import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
-import net.meisen.dissertation.model.indexes.BaseIndexedCollectionFactory;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
@@ -53,7 +53,7 @@ public class DescriptorModel<I extends Object> {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexedCollectionFactory baseIndexedCollectionFactory;
+	private BaseIndexFactory indexFactory;
 
 	private IMultipleKeySupport descriptors;
 	private OfflineMode offlineMode;
@@ -112,19 +112,18 @@ public class DescriptorModel<I extends Object> {
 	 * @param idsFactory
 	 *            the {@code IIdsFactory} used to create indexes for the
 	 *            {@code Descriptor}
-	 * @param baseIndexedCollectionFactory
-	 *            the {@code BaseIndexedCollectionFactory} which determines what
-	 *            index to be used for the {@code Descriptor}
+	 * @param indexFactory
+	 *            the {@code IndexFactory} which determines what index to be
+	 *            used for the {@code Descriptor}
 	 */
 	public DescriptorModel(final String id, final String name,
 			final Class<? extends Descriptor> descriptorClass,
-			final IIdsFactory<I> idsFactory,
-			final BaseIndexedCollectionFactory baseIndexedCollectionFactory) {
+			final IIdsFactory<I> idsFactory, final BaseIndexFactory indexFactory) {
 		this.id = id;
 		this.name = name;
 		this.descriptorClass = descriptorClass;
 		this.idsFactory = idsFactory;
-		this.baseIndexedCollectionFactory = baseIndexedCollectionFactory;
+		this.indexFactory = indexFactory;
 
 		// set default offline mode
 		setOfflineMode(null);
@@ -562,15 +561,15 @@ public class DescriptorModel<I extends Object> {
 	/**
 	 * Gets the {@code Index} used to index the different {@code Descriptor}
 	 * instances. This method never returns {@code null}, but throws an
-	 * exception if the {@code baseIndexedCollectionFactory} isn't defined by
-	 * wiring or construction.
+	 * exception if the {@code indexFactory} isn't defined by wiring or
+	 * construction.
 	 * 
 	 * @return the {@code Index} used to index the different {@code Descriptor}
 	 *         instances
 	 * 
 	 * @throws RuntimeException
-	 *             can throw any exception if the
-	 *             {@code baseIndexedCollectionFactory} is {@code null}
+	 *             can throw any exception if the {@code indexFactory} is
+	 *             {@code null}
 	 */
 	protected IMultipleKeySupport getDescriptorIndex() {
 		if (descriptors == null) {
@@ -583,8 +582,8 @@ public class DescriptorModel<I extends Object> {
 					Descriptor.class, "getUniqueString");
 
 			// create the descriptors index
-			descriptors = baseIndexedCollectionFactory
-					.createMultipleKeySupport(desIdDef, valueDef, stringDef);
+			descriptors = indexFactory.createMultipleKeySupport(desIdDef,
+					valueDef, stringDef);
 		}
 
 		return descriptors;

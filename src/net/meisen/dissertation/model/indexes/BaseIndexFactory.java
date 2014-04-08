@@ -1,7 +1,6 @@
 package net.meisen.dissertation.model.indexes;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.impl.indexes.IndexedCollectionFactoryConfig;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -9,12 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Factory to create a {@code IndexedCollection}.
+ * Factory to create a {@code BaseIndexedCollection}.
  * 
  * @author pmeisen
  * 
  */
-public abstract class BaseIndexedCollectionFactory {
+public abstract class BaseIndexFactory {
 
 	/**
 	 * {@code exceptionRegistry} used to fire exceptions.
@@ -24,35 +23,35 @@ public abstract class BaseIndexedCollectionFactory {
 	protected IExceptionRegistry exceptionRegistry;
 
 	/**
-	 * Creates a {@code IndexedCollection} of type {@code IIndexedCollection}.
+	 * Creates a {@code BaseIndexedCollection} of type {@code IIndexedCollection}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to create the
-	 *            {@code IndexedCollection} for
+	 *            {@code BaseIndexedCollection} for
 	 * 
-	 * @return the created {@code IndexedCollection}
+	 * @return the created {@code BaseIndexedCollection}
 	 */
 	public IIndexedCollection create(final IndexKeyDefinition keyDef) {
 		return create(keyDef, IIndexedCollection.class);
 	}
 
 	/**
-	 * Creates a {@code IndexedCollection} of the specified {@code expected}
-	 * class. If {@code expected} is {@code null} a {@code IndexedCollection} of
+	 * Creates a {@code BaseIndexedCollection} of the specified {@code expected}
+	 * class. If {@code expected} is {@code null} a {@code BaseIndexedCollection} of
 	 * type {@code IIndexedCollection} will be created (i.e.
 	 * {@code create(keyDef, IIndexedCollection.class)}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to create the
-	 *            {@code IndexedCollection} for
+	 *            {@code BaseIndexedCollection} for
 	 * @param expected
-	 *            the type of the {@code IndexedCollection}, if not supported an
+	 *            the type of the {@code BaseIndexedCollection}, if not supported an
 	 *            exception is thrown
 	 * 
-	 * @return the created {@code IndexedCollection}
+	 * @return the created {@code BaseIndexedCollection}
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if no {@code IndexedCollection} can be created as defined by
+	 *             if no {@code BaseIndexedCollection} can be created as defined by
 	 *             {@code expected}
 	 */
 	@SuppressWarnings("unchecked")
@@ -98,13 +97,13 @@ public abstract class BaseIndexedCollectionFactory {
 	}
 
 	/**
-	 * Creates an instance of a {@code IndexedCollection} with
+	 * Creates an instance of a {@code BaseIndexedCollection} with
 	 * {@code MultipleKeySupport} for the specified {@code keyDefs}.
 	 * 
 	 * @param keyDefs
 	 *            the {@code IndexKeyDefinitions} defining the different keys
 	 * 
-	 * @return the created {@code IndexedCollection} with
+	 * @return the created {@code BaseIndexedCollection} with
 	 *         {@code MultipleKeySupport}
 	 * 
 	 * @see IIndexedCollection
@@ -161,7 +160,7 @@ public abstract class BaseIndexedCollectionFactory {
 			final IndexedCollectionDefinition[] collDefs);
 
 	/**
-	 * Creates an instance of a {@code IndexedCollection} with
+	 * Creates an instance of a {@code BaseIndexedCollection} with
 	 * {@code MultipleKeySupport} for the specified {@code keyDefs} and the best
 	 * {@code collDefs}.
 	 * 
@@ -170,7 +169,7 @@ public abstract class BaseIndexedCollectionFactory {
 	 * @param collDefs
 	 *            the {@code IndexedCollectionDefinition}
 	 * 
-	 * @return the created {@code IndexedCollection} with
+	 * @return the created {@code BaseIndexedCollection} with
 	 *         {@code MultipleKeySupport}
 	 * 
 	 * @see IIndexedCollection
@@ -181,15 +180,15 @@ public abstract class BaseIndexedCollectionFactory {
 			final IndexedCollectionDefinition[] collDefs);
 
 	/**
-	 * Determines which {@code IndexedCollection} to be used for the specified
+	 * Determines which {@code BaseIndexedCollection} to be used for the specified
 	 * {@code keyDef}.
 	 * 
 	 * @param keyDef
 	 *            the {@code IndexKeyDefinition} to determine the
-	 *            {@code IndexedCollection} for
+	 *            {@code BaseIndexedCollection} for
 	 * 
 	 * @return a {@code IndexedCollectionDefinition} which defines the
-	 *         {@code IndexedCollection} to be used
+	 *         {@code BaseIndexedCollection} to be used
 	 * 
 	 * @see IndexedCollectionDefinition
 	 * @see IIndexedCollection
@@ -199,16 +198,16 @@ public abstract class BaseIndexedCollectionFactory {
 			final IndexKeyDefinition keyDef);
 
 	/**
-	 * Determines the {@code IndexedCollection} to be used for the specified
+	 * Determines the {@code BaseIndexedCollection} to be used for the specified
 	 * {@code clazz}. This method searches from the default
-	 * {@code IndexedCollection}, the best fitting once for the specified
+	 * {@code BaseIndexedCollection}, the best fitting once for the specified
 	 * index-values (i.e. the class of the index-class).
 	 * 
 	 * @param clazz
-	 *            the index-class to get the {@code IndexedCollection} for
+	 *            the index-class to get the {@code BaseIndexedCollection} for
 	 * 
 	 * @return a {@code IndexedCollectionDefinition} which defines the
-	 *         {@code IndexedCollection} to be used
+	 *         {@code BaseIndexedCollection} to be used
 	 * 
 	 * @see IndexedCollectionDefinition
 	 * @see IIndexedCollection

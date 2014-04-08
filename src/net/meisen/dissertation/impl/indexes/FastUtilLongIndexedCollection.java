@@ -4,16 +4,16 @@ import java.util.Collection;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * An implementation of a {@code IndexedCollection} based on a
+ * An implementation of a {@code BaseIndexedCollection} based on a
  * {@code FastUtilLongIndexedCollection}.
  * 
  * @author pmeisen
  * 
  */
-public class FastUtilLongIndexedCollection extends IndexedCollection {
+public class FastUtilLongIndexedCollection extends BaseIndexedCollection {
 
 	private final Long2ObjectOpenHashMap<Object> fastUtilMap;
 

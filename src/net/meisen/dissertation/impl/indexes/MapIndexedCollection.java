@@ -5,18 +5,18 @@ import java.util.Map;
 
 import net.meisen.dissertation.model.indexes.IndexKey;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.IndexedCollection;
+import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 
 /**
- * An implementation of a {@code IndexedCollection} which uses a {@code Map} in
+ * An implementation of a {@code BaseIndexedCollection} which uses a {@code Map} in
  * the background.
  * 
  * @author pmeisen
  * 
- * @see IndexedCollection
+ * @see BaseIndexedCollection
  * 
  */
-public class MapIndexedCollection extends IndexedCollection {
+public class MapIndexedCollection extends BaseIndexedCollection {
 	private Map<IndexKey<?>, Object> index;
 
 	/**

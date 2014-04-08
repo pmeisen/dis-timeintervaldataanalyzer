@@ -9,7 +9,7 @@
 
   <xsl:import href="descriptors://includeXslts" />
   <xsl:import href="dataretriever://includeXslts" />
-  <xsl:import href="indexedCollectionFactory://includeXslts" />
+  <xsl:import href="indexFactory://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
