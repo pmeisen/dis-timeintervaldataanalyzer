@@ -71,7 +71,7 @@ public class DescriptorLogicEvaluator {
 			}
 		}
 
-		final Bitmap evalResult = evaluator.evaluate(node.get(), members);
+		final Bitmap evalResult = evaluator.evaluateOperator(node.get(), members);
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Evaluated logic '" + node.get() + "' for members '"
@@ -81,7 +81,7 @@ public class DescriptorLogicEvaluator {
 		return evalResult;
 	}
 
-	protected Bitmap evaluate(final LogicalOperator lo,
+	protected Bitmap evaluateOperator(final LogicalOperator lo,
 			final List<Bitmap> intermediateBitmaps) {
 
 		if (LogicalOperator.NOT.equals(lo)) {

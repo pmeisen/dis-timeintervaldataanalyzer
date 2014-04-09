@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
-import com.google.common.primitives.Ints;
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
 /**
@@ -78,10 +76,10 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public EWAHBitmap invert(final int position) {
+	public EWAHBitmap invert(final int pos) {
 
 		// check if we even have a position
-		if (position < 0) {
+		if (pos < 0) {
 			return new EWAHBitmap();
 		}
 
@@ -89,22 +87,36 @@ public class EWAHBitmap extends Bitmap {
 		final int[] current = bitmap.toArray();
 		final int currentSize = current.length;
 
-		// calculate the size of the new array
-		final int invertSize = position + 1 - currentSize;
-		final int[] invert = new int[invertSize];
+		// determine the amount of set positions
+		final int posPos = Arrays.binarySearch(current, pos) + 1;
 
+		// calculate the size of the new array
+		final int invertSize = pos + 1 + (currentSize - posPos)
+				+ (posPos < 1 ? 1 : -1) * posPos;
+
+		// create the result and a meaningful synonym in the context
+		final int[] invert = new int[invertSize];
 		final int lastPos = currentSize;
-		int fromPos = 0;
-		int invertPos = 0;
-		for (int i = 0; i <= position; i++) {
+		final int finalPos = Math.max(currentSize, pos + 1);
+
+		// iterate over all the positions and invert those
+		int fromPos = 0, invertPos = 0;
+		for (int i = 0; i < finalPos; i++) {
 			final int foundPos = Arrays.binarySearch(current, fromPos, lastPos,
 					i);
 
 			if (foundPos > -1) {
 				fromPos = foundPos + 1;
+
+				// add it if we are at a position not to be inverted
+				if (i > pos) {
+					invert[invertPos] = i;
+					invertPos++;
+				}
 			} else {
 				fromPos = -1 * (foundPos + 1);
 
+				// add the inverted value
 				invert[invertPos] = i;
 				invertPos++;
 			}
