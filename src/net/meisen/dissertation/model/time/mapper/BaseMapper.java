@@ -209,7 +209,7 @@ public abstract class BaseMapper<T> {
 	}
 
 	/**
-	 * Map the specified {@code from} to a {@code int}. The method returns a
+	 * Map the specified {@code from} to an {@code int}. The method returns a
 	 * normalized value.<br/>
 	 * <br/>
 	 * <b>Note:</b><br/>

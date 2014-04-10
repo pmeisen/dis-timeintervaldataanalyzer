@@ -28,16 +28,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An {@code IntervalIndexPartition} is normally defined as a partition (or the
- * whole) timeline. The size of the partition is defined by a {@code Mapper},
- * which is used to map the data-values to the underlying part of the timeline.
+ * An {@code IntervalIndex} is normally defined as an index for a mapper. The
+ * size of the index is defined by a {@code Mapper}, which is used to map the
+ * data-values to the underlying timeline.
  * 
  * @author pmeisen
  * 
  */
-public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
+public abstract class BaseIntervalIndex implements IDataRecordIndex {
 	private final static Logger LOG = LoggerFactory
-			.getLogger(BaseIntervalIndexPartition.class);
+			.getLogger(BaseIntervalIndex.class);
 	private final static String EXTENSION = ".slice";
 
 	@SuppressWarnings("rawtypes")
@@ -52,7 +52,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	private Group persistentGroup = null;
 
 	/**
-	 * Constructor to create a partition using the specified {@code Mapper}, the
+	 * Constructor to create an index using the specified {@code Mapper}, the
 	 * {@code start}- and {@code end}-entry and the specified
 	 * {@code indexFactory} to create the needed indexes.
 	 * 
@@ -66,7 +66,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	 * @param indexFactory
 	 *            the {@code IndexFactory} to create the needed indexes
 	 */
-	public BaseIntervalIndexPartition(final BaseMapper<?> mapper,
+	public BaseIntervalIndex(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexFactory indexFactory) {
@@ -104,32 +104,22 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 					+ mapper.demap(mapper.getStart()) + " - "
 					+ mapper.demap(mapper.getEnd()) + "' with index '"
 					+ this.index.getClass().getName()
-					+ "' for identifiers of the partition of type '"
+					+ "' for identifiers of the intervalIndex of type '"
 					+ getType().getName() + "'.");
 		}
 	}
 
 	/**
-	 * Gets a unique identifier for the partition on the timeline (if the
-	 * partitions are disjunct).
+	 * Gets a readable version of the start.
 	 * 
-	 * @return a unique identifier for the partition
+	 * @return a readable version of the start
 	 */
-	public long getId() {
-		return mapper.getStart();
-	}
-
-	/**
-	 * Gets a readable version of the partition's identifier.
-	 * 
-	 * @return a readable version of the partition's identifier
-	 */
-	public String getPartitionId() {
+	public String getFormattedStart() {
 		return getFormattedId(getMapper().getNormStartAsLong());
 	}
 
 	/**
-	 * Formats an id of a slice of the interval's partition nicely.
+	 * Formats an id of a slice of the interval's index nicely.
 	 * 
 	 * @param id
 	 *            the identifier of a slice to be formatted
@@ -145,7 +135,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	}
 
 	/**
-	 * Formats an id of a slice of the interval's partition nicely.
+	 * Formats an id of a slice of the interval's index nicely.
 	 * 
 	 * @param id
 	 *            the identifier of a slice to be formatted
@@ -255,7 +245,7 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	}
 
 	/**
-	 * Gets the amounts of slices, i.e. different values within the partition.
+	 * Gets the amounts of slices, i.e. different values within the index.
 	 * 
 	 * @return the amounts of slices
 	 */
@@ -264,9 +254,9 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	}
 
 	/**
-	 * Gets the slices of the {@code IntervalIndexPartition}.
+	 * Gets the slices of the {@code IntervalIndex}.
 	 * 
-	 * @return the slices of the {@code IntervalIndexPartition}
+	 * @return the slices of the {@code IntervalIndex}
 	 */
 	public abstract IndexDimensionSlice<?>[] getSlices();
 
@@ -330,6 +320,27 @@ public abstract class BaseIntervalIndexPartition implements DataRecordIndex {
 	public IntervalStructureEntry getEndEntry() {
 		return endEntry;
 	}
+
+	/**
+	 * Gets the interval dimensions for the specified {@code start} and
+	 * {@code end} values.
+	 * 
+	 * @param start
+	 *            the start of the values to be retrieved
+	 * @param end
+	 *            the end of the values to be retrieved
+	 * @param startInclusive
+	 *            {@code true} to define the start value to be inclusive,
+	 *            otherwise it is exclusive
+	 * @param endInclusive
+	 *            {@code true} to define the start value to be inclusive,
+	 *            otherwise it is exclusive
+	 * 
+	 * @return the slices between
+	 */
+	public abstract IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+			final Object start, final Object end, final boolean startInclusive,
+			final boolean endInclusive);
 
 	/**
 	 * Gets the {@code Mapper}.

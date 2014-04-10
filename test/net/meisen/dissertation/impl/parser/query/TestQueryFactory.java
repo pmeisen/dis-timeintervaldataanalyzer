@@ -228,7 +228,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 * Tests the created {@code DescriptorLogicTree} when no filter is defined.
 	 */
 	public void testParsingOfNoFilter() {
-		final SelectQuery query = q("select timeSeries from model in [15.06.2014,20.01.2015]");
+		final SelectQuery query = q("select timeSeries from model in [01.01.2014,30.12.2014]");
 
 		assertEquals("model", query.getModelId());
 
@@ -244,7 +244,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testParsingOfSingleValueFilter() {
-		final SelectQuery query = q("select timeSeries from model in [15.06.2014,20.01.2015] filter by singleEqual='singleEqualValue'");
+		final SelectQuery query = q("select timeSeries from model in [01.01.2014,30.12.2014] filter by singleEqual='singleEqualValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -262,7 +262,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testParsingOfSingleValueWithBracketsFilter() {
-		final SelectQuery query = q("select timeSeries from model in [15.06.2014,20.01.2015] filter by (((bracketsSingleEqual='bracketsSingleEqualValue')))");
+		final SelectQuery query = q("select timeSeries from model in [01.01.2014,30.12.2014] filter by (((bracketsSingleEqual='bracketsSingleEqualValue')))");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -279,7 +279,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleLinkage() {
-		final SelectQuery query = q("select timeSeries from model in [15.06.2014,20.01.2015] filter by first='firstValue' AND second='secondValue' OR third='thirdValue'");
+		final SelectQuery query = q("select timeSeries from model in [01.01.2014,30.12.2014] filter by first='firstValue' AND second='secondValue' OR third='thirdValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -323,7 +323,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleNot() {
-		final SelectQuery query = q("select timeseries from model in [15.06.2014,20.01.2015] filter by NOT HALLO='500' AND !HELLO='LALA'");
+		final SelectQuery query = q("select timeseries from model in [01.01.2014,30.12.2014] filter by NOT HALLO='500' AND !HELLO='LALA'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -367,7 +367,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testLogicalComplexNot() {
-		final SelectQuery query = q("select timeseries from model in [15.06.2014,20.01.2015] filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
+		final SelectQuery query = q("select timeseries from model in [01.01.2014,30.12.2014] filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -388,9 +388,12 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		// @formatter:on
 	}
 
+	/**
+	 * Tests the usage of nested (i.e. brackets) and combined filters.
+	 */
 	@Test
 	public void testNestedAndCombinedFilters() {
-		final SelectQuery query = q("select timeseries from testModel in [15.06.2014,20.01.2015] filter by (LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') AND (SCREAMS='12' OR PERSON='Debbie' OR LOCATION='Undefined')");
+		final SelectQuery query = q("select timeseries from testModel in [01.01.2014,30.12.2014] filter by (LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') AND (SCREAMS='12' OR PERSON='Debbie' OR LOCATION='Undefined')");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -416,7 +419,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleOptimization() {
-		final SelectQuery query = q("select timeseries from model in [15.06.2014,20.01.2015] filter by first='1' AND second='2' AND third='3'");
+		final SelectQuery query = q("select timeseries from model in [01.01.2014,30.12.2014] filter by first='1' AND second='2' AND third='3'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -429,7 +432,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testLogicalComplexOptimization() {
-		final SelectQuery query = q("select timeseries from model in [15.06.2014,20.01.2015] filter by (first='1' OR second='2') AND (third='3' OR firth='4') AND fifth='5' AND (sixth='6' OR (seventh='7' AND eight='8'))");
+		final SelectQuery query = q("select timeseries from model in [01.01.2014,30.12.2014] filter by (first='1' OR second='2') AND (third='3' OR firth='4') AND fifth='5' AND (sixth='6' OR (seventh='7' AND eight='8'))");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ITreeElement> order = tree.getEvaluationOrder();
@@ -463,7 +466,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		thrown.expect(QueryParsingException.class);
 		thrown.expectMessage("syntax error was found at 1:56");
 
-		q("select timeseries from model in [15.06.2014,20.01.2015] select timeseries from model in [15.06.2014,20.01.2015]");
+		q("select timeseries from model in [01.01.2014,30.12.2014] select timeseries from model in [01.01.2014,30.12.2014]");
 	}
 
 	/**
@@ -474,7 +477,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		thrown.expect(QueryParsingException.class);
 		thrown.expectMessage("syntax error was found at 1:23");
 
-		q("select timeseries from (select timeseries from model in [15.06.2014,20.01.2015]) in [15.06.2014,20.01.2015]");
+		q("select timeseries from (select timeseries from model in [01.01.2014,30.12.2014]) in [01.01.2014,30.12.2014]");
 	}
 
 	/**
@@ -483,7 +486,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testExecutionWithSingleFilter() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by SCREAMS='3'";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by SCREAMS='3'";
 
 		// load the model
 		m(xml);
@@ -494,6 +497,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(1, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 2) > -1);
@@ -508,7 +512,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testExecutionWithComplexFilter() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by (SCREAMS='3' OR SCREAMS='0') AND PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by (SCREAMS='3' OR SCREAMS='0') AND PERSON='Philipp'";
 
 		// load the model
 		m(xml);
@@ -519,6 +523,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(3, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 2) > -1);
@@ -534,7 +539,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testExecutionWithUnusedValueFilterOr() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by SCREAMS='Undefined' OR PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by SCREAMS='Undefined' OR PERSON='Philipp'";
 
 		// load the model
 		m(xml);
@@ -545,6 +550,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(3, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 2) > -1);
@@ -560,7 +566,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testExecutionWithUnusedValueFilterAnd() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by SCREAMS='Undefined' AND PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by SCREAMS='Undefined' AND PERSON='Philipp'";
 
 		// load the model
 		m(xml);
@@ -571,6 +577,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(0, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 2) > -1);
@@ -579,10 +586,13 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertFalse(Arrays.binarySearch(filterRes, 5) > -1);
 	}
 
+	/**
+	 * Tests the usage of a nested, i.e. using brakets, filtering.
+	 */
 	@Test
 	public void testNestedFiltering() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by (LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') OR (SCREAMS='12' OR (PERSON='Debbie' AND LOCATION='Aachen') OR LOCATION='Undefined')";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by (LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') OR (SCREAMS='12' OR (PERSON='Debbie' AND LOCATION='Aachen') OR LOCATION='Undefined')";
 
 		// load the model
 		m(xml);
@@ -593,6 +603,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(4, filterRes.length);
 		assertTrue(Arrays.binarySearch(filterRes, 0) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 2) > -1);
@@ -601,10 +612,13 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertTrue(Arrays.binarySearch(filterRes, 5) > -1);
 	}
 
+	/**
+	 * Tests the implementation of NOT within a filter.
+	 */
 	@Test
-	public void testNotSelection() {
+	public void testSimpleNotSelection() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by NOT((LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') OR (SCREAMS='12' OR (PERSON='Debbie' AND LOCATION='Aachen') OR LOCATION='Undefined'))";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by NOT((LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') OR (SCREAMS='12' OR (PERSON='Debbie' AND LOCATION='Aachen') OR LOCATION='Undefined'))";
 
 		// load the model
 		m(xml);
@@ -615,6 +629,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(2, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 2) > -1);
@@ -623,10 +638,33 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertFalse(Arrays.binarySearch(filterRes, 5) > -1);
 	}
 
+	/**
+	 * Tests the usage of several NOT operations.
+	 */
+	@Test
+	public void testSeveralNotSelection() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by NOT(LOCATION='Aachen') AND NOT(PERSON='Philipp')";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectQueryResult res = (SelectQueryResult) factory
+				.evaluateQuery(q(query), loader);
+
+		// check the result's filter
+		final int[] filterRes = res.getFilterResult().getIds();
+		assertEquals(0, filterRes.length);
+	}
+
+	/**
+	 * Tests the selection using a {@code NULL} value.
+	 */
 	@Test
 	public void testNullSelection() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testCleanedModel.xml";
-		final String query = "select timeseries from testCleanedModel in [15.06.2014,20.01.2015] filter by PRIORITY=NULL";
+		final String query = "select timeseries from testCleanedModel in [01.01.2014,30.12.2014] filter by PRIORITY=NULL";
 
 		// load the model
 		m(xml);
@@ -649,7 +687,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testInvalidModel() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testInvalidModel in [15.06.2014,20.01.2015] filter by INVALID='3' OR SCREAMS='0' AND PERSON='Philipp'";
+		final String query = "select timeseries from testInvalidModel in [01.01.2014,30.12.2014] filter by INVALID='3' OR SCREAMS='0' AND PERSON='Philipp'";
 
 		thrown.expect(QueryEvaluationException.class);
 		thrown.expectMessage("Unable to find a model with identifier 'testInvalidModel'");
@@ -667,7 +705,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testInvalidDescriptor() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [15.06.2014,20.01.2015] filter by INVALID='3' OR SCREAMS='0' AND PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [01.01.2014,30.12.2014] filter by INVALID='3' OR SCREAMS='0' AND PERSON='Philipp'";
 
 		thrown.expect(QueryEvaluationException.class);
 		thrown.expectMessage("Descriptors with identifiers 'INVALID' cannot be found");

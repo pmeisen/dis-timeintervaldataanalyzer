@@ -23,6 +23,10 @@ public enum IntervalType {
 	public String toString(final boolean asOpen) {
 		return asOpen ? open : close;
 	}
+	
+	public boolean isInclusive() {
+		return INCLUDE.equals(this);
+	}
 
 	/**
 	 * Determine the type of the interval based on the passed context of the

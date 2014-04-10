@@ -4,16 +4,14 @@ import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.IntervalModelException;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ByteIntervalIndexPartition;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.IntIntervalIndexPartition;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.LongIntervalIndexPartition;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ByteIntervalIndex;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.IntIntervalIndex;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.LongIntervalIndex;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndex;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndex;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
@@ -99,20 +97,17 @@ public class IntervalModel {
 	}
 
 	/**
-	 * Creates a index with the different partitions of the timeline.
+	 * Creates a {@code IntervalIndex} for the timeline.
 	 * 
 	 * @param structure
 	 *            the defined {@code DataStructure} with the intervals defined
-	 * @return the created index
+	 * 
+	 * @return the created {@code IntervalIndex}
 	 */
-	public IIndexedCollection createIndex(final DataStructure structure) {
+	public BaseIntervalIndex createIndex(final DataStructure structure) {
 
 		// make sure needed stuff is known
-		if (structure == null) {
-			return getIndexFactory().create(
-					new IndexKeyDefinition(BaseIntervalIndexPartition.class,
-							"getStartAsByte"));
-		} else if (timeline == null) {
+		if (timeline == null) {
 			exceptionRegistry
 					.throwException(IntervalModelException.class, 1001);
 		}
@@ -145,60 +140,29 @@ public class IntervalModel {
 			}
 		}
 
-		// create the mapper (right now for the completely timeline, it might be
-		// better to partition the timeline later)
+		// create the mapper
 		final BaseMapper<?> mapper = createMapper(timeline.getStart(),
 				timeline.getEnd());
 
-		// create the partition
-		final BaseIntervalIndexPartition part = createIndexPartition(mapper,
-				startEntry, endEntry);
-
 		// create the index
-		final IndexKeyDefinition key = new IndexKeyDefinition(part.getClass(),
-				"getId");
-		final IIndexedCollection index = getIndexFactory().create(key);
-
-		// add the different partition to the index
-		index.addObject(part);
-
-		return index;
-	}
-
-	/**
-	 * Creates a partition using the specified {@code mapper} and the specified
-	 * entries.
-	 * 
-	 * @param mapper
-	 *            the {@code Mapper} to be used
-	 * @param startEntry
-	 *            the {@code start}-entry which defines were to retrieve the
-	 *            data from
-	 * @param endEntry
-	 *            the {@code end}-entry which defines were to retrieve the data
-	 *            from
-	 * 
-	 * @return the created partition
-	 */
-	public BaseIntervalIndexPartition createIndexPartition(
-			final BaseMapper<?> mapper,
-			final IntervalStructureEntry startEntry,
-			final IntervalStructureEntry endEntry) {
+		final BaseIntervalIndex index;
 
 		// create the IntervalIndex depending on the mapper
 		if (Byte.class.equals(mapper.getTargetType())) {
-			return new ByteIntervalIndexPartition(mapper, startEntry, endEntry,
+			index = new ByteIntervalIndex(mapper, startEntry, endEntry,
 					getIndexFactory());
 		} else if (Short.class.equals(mapper.getTargetType())) {
-			return new ShortIntervalIndexPartition(mapper, startEntry,
-					endEntry, getIndexFactory());
+			index = new ShortIntervalIndex(mapper, startEntry, endEntry,
+					getIndexFactory());
 		} else if (Integer.class.equals(mapper.getTargetType())) {
-			return new IntIntervalIndexPartition(mapper, startEntry, endEntry,
+			index = new IntIntervalIndex(mapper, startEntry, endEntry,
 					getIndexFactory());
 		} else {
-			return new LongIntervalIndexPartition(mapper, startEntry, endEntry,
+			index = new LongIntervalIndex(mapper, startEntry, endEntry,
 					getIndexFactory());
 		}
+
+		return index;
 	}
 
 	/**
@@ -226,8 +190,8 @@ public class IntervalModel {
 	}
 
 	/**
-	 * Gets the {@ode Mapper} to be used for the specified {@code start}
-	 * and {@code end}.
+	 * Gets the {@code Mapper} to be used for the specified {@code start} and
+	 * {@code end}.
 	 * 
 	 * @param start
 	 *            the start value of the mapper

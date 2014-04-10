@@ -11,7 +11,7 @@ import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
 
-public class KeyIndex implements DataRecordIndex {
+public class KeyIndex implements IDataRecordIndex {
 	private final List<KeyIndexDimension> keyDimensions;
 
 	private Group persistentGroup = null;

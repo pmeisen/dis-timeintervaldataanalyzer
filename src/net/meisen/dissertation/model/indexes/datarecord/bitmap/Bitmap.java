@@ -65,6 +65,13 @@ public abstract class Bitmap implements IBitmapContainer {
 	public abstract void set(final int... recordIds);
 
 	/**
+	 * Creates a deep-copy of the {@code Bitmap}.
+	 * 
+	 * @return a deep-copy of the {@code Bitmap}
+	 */
+	public abstract Bitmap copy();
+
+	/**
 	 * Serializes the bitmap to the specified {@code DataOutputStream}.
 	 * 
 	 * @param out
@@ -88,10 +95,28 @@ public abstract class Bitmap implements IBitmapContainer {
 	public abstract void deserialize(final DataInputStream in)
 			throws IOException;
 
+	/**
+	 * Inverts the bitmap up to the specified {@code position}, i.e.
+	 * {@code 0 - position}.
+	 * 
+	 * @param position
+	 *            the position to invert the bitmaps up to
+	 * 
+	 * @return the inverted bitmap
+	 */
 	public abstract Bitmap invert(final int position);
-	
+
+	/**
+	 * Determines the cardinality of the inverted bitmap up to the specified
+	 * {@code position}, i.e. {@code 0 - position}.
+	 * 
+	 * @param position
+	 *            the position to invert the bitmaps up to
+	 * 
+	 * @return the cardinality of the inverted {@code Bitmap}
+	 */
 	public abstract int invertCardinality(final int position);
-	
+
 	/**
 	 * Creates a new bitmap by combining {@code this} and the specified
 	 * {@code bitmaps}.
@@ -138,7 +163,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	public Bitmap getBitmap() {
 		return this;
 	}
-	
+
 	/**
 	 * Combines the specified bitmaps using a logical {@code AND}.
 	 * 

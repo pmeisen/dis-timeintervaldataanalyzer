@@ -132,24 +132,46 @@ public class EWAHBitmap extends Bitmap {
 
 	@Override
 	public EWAHBitmap and(final Bitmap... bitmaps) {
-		return new EWAHBitmap(EWAHCompressedBitmap.and(createArray(true,
-				bitmaps)));
+		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
+		if (array.length > 1) {
+			return new EWAHBitmap(EWAHCompressedBitmap.and(array));
+		} else if (array.length > 0) {
+			return copy();
+		} else {
+			return new EWAHBitmap();
+		}
 	}
 
 	@Override
 	public int andCardinality(final Bitmap... bitmaps) {
-		return EWAHCompressedBitmap.andCardinality(createArray(true, bitmaps));
+		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
+		if (array.length > 0) {
+			return EWAHCompressedBitmap.andCardinality(array);
+		} else {
+			return 0;
+		}
 	}
 
 	@Override
 	public EWAHBitmap or(final Bitmap... bitmaps) {
-		return new EWAHBitmap(
-				EWAHCompressedBitmap.or(createArray(true, bitmaps)));
+		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
+		if (array.length > 1) {
+			return new EWAHBitmap(EWAHCompressedBitmap.or(array));
+		} else if (array.length > 0) {
+			return copy();
+		} else {
+			return new EWAHBitmap();
+		}
 	}
 
 	@Override
 	public int orCardinality(final Bitmap... bitmaps) {
-		return EWAHCompressedBitmap.orCardinality(createArray(true, bitmaps));
+		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
+		if (array.length > 0) {
+			return EWAHCompressedBitmap.orCardinality(array);
+		} else {
+			return 0;
+		}
 	}
 
 	/**
@@ -204,5 +226,20 @@ public class EWAHBitmap extends Bitmap {
 	@Override
 	public String toString() {
 		return bitmap.toString();
+	}
+
+	@Override
+	public EWAHBitmap clone() {
+		return copy();
+	}
+
+	@Override
+	public EWAHBitmap copy() {
+		try {
+			return new EWAHBitmap(bitmap.clone());
+		} catch (final CloneNotSupportedException e) {
+			// ignore
+			return null;
+		}
 	}
 }

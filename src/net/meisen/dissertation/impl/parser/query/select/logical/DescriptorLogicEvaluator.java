@@ -18,6 +18,12 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A evaluator to evaluate a {@code DescriptorLogicTree} based on a {@code TidaModel}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DescriptorLogicEvaluator {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(DescriptorLogicEvaluator.class);
@@ -26,6 +32,11 @@ public class DescriptorLogicEvaluator {
 	private final TidaIndex index;
 	private final MetaDataModel metaDataModel;
 
+	/**
+	 * The evaluator
+	 * 
+	 * @param model
+	 */
 	public DescriptorLogicEvaluator(final TidaModel model) {
 
 		// get the metaDataModels
@@ -38,6 +49,17 @@ public class DescriptorLogicEvaluator {
 		indexFactory = model.getIndexFactory();
 	}
 
+	/**
+	 * Calculates the bitmap representing the selected records of the specified
+	 * filter, i.e. a single instance of the {@code Bitmap}. The created bitmap
+	 * is an own instance, i.e. it is cloned or especially created using and/or
+	 * operations.
+	 * 
+	 * @param tree
+	 *            the filter to be applied
+	 * 
+	 * @return a bitmap representing the selected records
+	 */
 	public Bitmap evaluateTree(final DescriptorLogicTree tree) {
 		final LogicalOperatorNode root = tree.getRoot();
 
@@ -47,14 +69,21 @@ public class DescriptorLogicEvaluator {
 
 		// check if the root has children, otherwise there is nothing to do
 		if (tree.getRoot().getChildren().size() != 0) {
-			return evaluateNode(root, this);
+			return evaluateNode(root);
 		} else {
 			return null;
 		}
 	}
 
-	protected Bitmap evaluateNode(final LogicalOperatorNode node,
-			final DescriptorLogicEvaluator evaluator) {
+	/**
+	 * Evaluates a specific {@code node} of the tree.
+	 * 
+	 * @param node
+	 *            the node to be evaluated
+	 * 
+	 * @return evaluates a specific {@code node} of the tree
+	 */
+	protected Bitmap evaluateNode(final LogicalOperatorNode node) {
 		final List<Bitmap> members = new ArrayList<Bitmap>();
 
 		final List<ITreeElement> children = node.getChildren();
@@ -62,16 +91,16 @@ public class DescriptorLogicEvaluator {
 			final ITreeElement child = children.get(i - 1);
 
 			if (child instanceof LogicalOperatorNode) {
-				members.add(evaluateNode((LogicalOperatorNode) child, evaluator));
+				members.add(evaluateNode((LogicalOperatorNode) child));
 			} else if (child instanceof DescriptorLeaf) {
-				members.add(evaluator.evaluate((DescriptorLeaf) child));
+				members.add(evaluateDescriptorLeaf((DescriptorLeaf) child));
 			} else {
 				throw new ForwardedRuntimeException(
 						QueryEvaluationException.class, 1006, child);
 			}
 		}
 
-		final Bitmap evalResult = evaluator.evaluateOperator(node.get(), members);
+		final Bitmap evalResult = evaluateOperator(node.get(), members);
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Evaluated logic '" + node.get() + "' for members '"
@@ -81,6 +110,16 @@ public class DescriptorLogicEvaluator {
 		return evalResult;
 	}
 
+	/**
+	 * Evaluates the result of a {@code LogicalOperator}.
+	 * 
+	 * @param lo
+	 *            the {@code LogicalOperator} to be evaluated
+	 * @param intermediateBitmaps
+	 *            the current results
+	 * 
+	 * @return the result of the application of the {@code LogicalOperator}
+	 */
 	protected Bitmap evaluateOperator(final LogicalOperator lo,
 			final List<Bitmap> intermediateBitmaps) {
 
@@ -117,7 +156,15 @@ public class DescriptorLogicEvaluator {
 		}
 	}
 
-	protected Bitmap evaluate(final DescriptorLeaf leaf) {
+	/**
+	 * Evaluates the result of the selection of a {@code Descriptor}.
+	 * 
+	 * @param leaf
+	 *            the {@code DescriptorLeaf} to be evaluated
+	 * 
+	 * @return the result of the selection of the {@code Descriptor}
+	 */
+	protected Bitmap evaluateDescriptorLeaf(final DescriptorLeaf leaf) {
 
 		final DescriptorComperator cmp = leaf.get();
 
@@ -144,7 +191,7 @@ public class DescriptorLogicEvaluator {
 			if (slice == null) {
 				return indexFactory.createBitmap();
 			} else {
-				return slice.getBitmap();
+				return slice.getBitmap().copy();
 			}
 		}
 	}

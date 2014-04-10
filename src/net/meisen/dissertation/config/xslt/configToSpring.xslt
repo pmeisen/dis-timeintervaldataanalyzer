@@ -7,6 +7,7 @@
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
   <xsl:import href="indexFactory://includeXslts" />
+  <xsl:import href="mapperFactory://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -47,8 +48,8 @@
       <bean id="defaultIndexFactoryClass" class="java.lang.String"><constructor-arg value="{$indexFactory}" /></bean>
       <bean id="defaultMapperFactoryClass" class="java.lang.String"><constructor-arg value="{$mapperFactory}" /></bean>
       <bean id="defaultGranularityFactoryClass" class="java.lang.String"><constructor-arg value="{$granularityFactory}" /></bean>
-      
-      <!-- define the default configuration defined -->
+            
+      <!-- define the default configuration defined for the indexFactory -->
       <bean id="defaultIndexFactoryConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
         <property name="bean">
           <xsl:choose>
@@ -56,7 +57,18 @@
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
-        <property name="class" value="net.meisen.dissertation.impl.indexes.IndexFactoryConfig" />
+        <property name="class" value="net.meisen.dissertation.model.indexes.IIndexFactoryConfig" />
+      </bean>
+      
+      <!-- define the default configuration defined for the mapperFactory -->
+      <bean id="defaultMapperFactoryConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:config/cns:factories/cns:mappers/node()"><xsl:apply-imports /></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.time.mapper.IMapperFactoryConfig" />
       </bean>
 
       <!-- create the queryFactory to be used -->

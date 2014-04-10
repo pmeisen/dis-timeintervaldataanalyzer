@@ -40,7 +40,7 @@ public class TidaIndex implements IPersistable {
 
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
-	private final Map<Class<? extends DataRecordIndex>, DataRecordIndex> indexes;
+	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
 
 	private int dataId;
 	private Group persistentGroup = null;
@@ -55,12 +55,13 @@ public class TidaIndex implements IPersistable {
 	 */
 	public TidaIndex(final TidaModel model) {
 		this.dataId = 0;
-		this.indexes = new HashMap<Class<? extends DataRecordIndex>, DataRecordIndex>();
+		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
 
 		// add the dimensions of the MetaDataModel, Key and Interval
 		indexes.put(MetaIndex.class, new MetaIndex(model));
 		indexes.put(KeyIndex.class, new KeyIndex(model));
-		indexes.put(IntervalIndex.class, new IntervalIndex(model));
+		indexes.put(BaseIntervalIndex.class, model.getIntervalModel()
+				.createIndex(model.getDataStructure()));
 
 		// set the default values
 		setMetaDataHandling(model.getMetaDataHandling());
@@ -74,7 +75,7 @@ public class TidaIndex implements IPersistable {
 	 *            the record to be indexed
 	 */
 	public void index(final IDataRecord record) {
-		for (final DataRecordIndex idx : indexes.values()) {
+		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.index(dataId, record);
 		}
 
@@ -92,7 +93,7 @@ public class TidaIndex implements IPersistable {
 	 * Method used to optimize the index considering mainly storage.
 	 */
 	public void optimize() {
-		for (final DataRecordIndex idx : indexes.values()) {
+		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.optimize();
 		}
 	}
@@ -122,7 +123,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the {@code IntervalDataHandling} defined for the index
 	 */
 	public IntervalDataHandling getIntervalDataHandling() {
-		return getIndex(IntervalIndex.class).getIntervalDataHandling();
+		return getIndex(BaseIntervalIndex.class).getIntervalDataHandling();
 	}
 
 	/**
@@ -132,20 +133,20 @@ public class TidaIndex implements IPersistable {
 	 *            the {@code IntervalDataHandling} to be used
 	 */
 	public void setIntervalDataHandling(final IntervalDataHandling handling) {
-		getIndex(IntervalIndex.class).setIntervalDataHandling(handling);
+		getIndex(BaseIntervalIndex.class).setIntervalDataHandling(handling);
 	}
 
 	/**
-	 * Gets a specific instance of a used {@code DataRecordIndex} within
+	 * Gets a specific instance of a used {@code IDataRecordIndex} within
 	 * {@code this}.
 	 * 
 	 * @param clazz
-	 *            the class of the {@code DataRecordIndex} to be retrieved
+	 *            the class of the {@code IDataRecordIndex} to be retrieved
 	 * 
-	 * @return the {@code DataRecordIndex} used within {@code this} instance
+	 * @return the {@code IDataRecordIndex} used within {@code this} instance
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends DataRecordIndex> T getIndex(final Class<T> clazz) {
+	protected <T extends IDataRecordIndex> T getIndex(final Class<T> clazz) {
 		return (T) indexes.get(clazz);
 	}
 
@@ -159,7 +160,7 @@ public class TidaIndex implements IPersistable {
 		final String nl = System.getProperty("line.separator");
 
 		final MetaIndex metaIdx = getIndex(MetaIndex.class);
-		final IntervalIndex intervalIdx = getIndex(IntervalIndex.class);
+		final BaseIntervalIndex intervalIdx = getIndex(BaseIntervalIndex.class);
 
 		String stat = "";
 
@@ -194,17 +195,13 @@ public class TidaIndex implements IPersistable {
 			}
 		}
 		
-		stat += "- IntervalIndex with " + intervalIdx.getAmountOfPartitions() + " partition(s):" + nl;
-		for (final BaseIntervalIndexPartition part : intervalIdx.getPartitions()) {
-			final int amountOfSlices = part.getAmountOfSlices();
-			stat += "  - " + part.getPartitionId() + " (" + amountOfSlices + " slices)" + nl;
-			if (amountOfSlices == 0) {
-				continue;
-			}
-			
+		final int amountOfSlices = intervalIdx.getAmountOfSlices();
+		stat += "- IntervalIndex for " + intervalIdx.getFormattedStart() + " (" + amountOfSlices + " slices)" + nl;
+		if (amountOfSlices != 0) {
+		
 			// sort the data ascending
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
-			sortedSlices.addAll(Arrays.asList(part.getSlices()));
+			sortedSlices.addAll(Arrays.asList(intervalIdx.getSlices()));
 			Collections.sort(sortedSlices, new Comparator<IndexDimensionSlice>() {
 				
 				@Override
@@ -220,25 +217,24 @@ public class TidaIndex implements IPersistable {
 		            }
 		        }
 			});
-			if (sortedSlices.get(0) == null) {
-				continue;
-			}
-			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
-			
-			// output the data use the threshold defined by STATISTIC_THRESHOLD
-			int i = 0;
-			for (final IndexDimensionSlice<?> slice : sortedSlices) {
-				if (slice == null) {
-					break;
-				}
+			if (sortedSlices.get(0) != null) {
+				final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
 				
-				final Object sliceId = slice.getId();
-				final String value = part.getFormattedId(sliceId);
-				
-				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
-				if (++i > STATISTIC_THRESHOLD) {
-					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
-					break;
+				// output the data use the threshold defined by STATISTIC_THRESHOLD
+				int i = 0;
+				for (final IndexDimensionSlice<?> slice : sortedSlices) {
+					if (slice == null) {
+						break;
+					}
+					
+					final Object sliceId = slice.getId();
+					final String value = intervalIdx.getFormattedId(sliceId);
+					
+					stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
+					if (++i > STATISTIC_THRESHOLD) {
+						stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
+						break;
+					}
 				}
 			}
 		}
@@ -289,7 +285,7 @@ public class TidaIndex implements IPersistable {
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		this.persistentGroup = group;
 
-		for (final DataRecordIndex idx : indexes.values()) {
+		for (final IDataRecordIndex idx : indexes.values()) {
 			final String name = idx.getClass().getSimpleName().toLowerCase();
 			final Group indexGroup = group.append(name);
 
@@ -328,6 +324,14 @@ public class TidaIndex implements IPersistable {
 		}
 	}
 
+	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+			final Object start, final Object end, final boolean startInclusive,
+			final boolean endInclusive) {
+		final BaseIntervalIndex idx = getIndex(BaseIntervalIndex.class);
+		return idx.getIntervalIndexDimensionSlices(start, end, startInclusive,
+				endInclusive);
+	}
+
 	/**
 	 * Get the id of the next record which will be added.
 	 * 
@@ -336,5 +340,4 @@ public class TidaIndex implements IPersistable {
 	public int getNextDataId() {
 		return dataId;
 	}
-
 }

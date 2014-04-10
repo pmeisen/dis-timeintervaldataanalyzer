@@ -397,8 +397,9 @@ public abstract class BaseIndexFactory {
 	 * method should be overwritten.
 	 * 
 	 * @param config
+	 *            the configuration to be used
 	 */
-	public void setConfig(final Object config) {
+	public void setConfig(final IIndexFactoryConfig config) {
 		// nothing to do this might be implemented by the concrete class
 		if (config != null) {
 			if (LOG.isInfoEnabled()) {
@@ -406,7 +407,7 @@ public abstract class BaseIndexFactory {
 						+ config
 						+ "' was passed to the implementation '"
 						+ getClass().getName()
-						+ "' of an IndexFactory. The configuration is not used, because the base implementation does not support any configuration. Please override the 	appropriate method in the concrete implementation.");
+						+ "' of an IndexFactory. The configuration is not used, because the base implementation does not support any configuration. Please override the appropriate method in the concrete implementation.");
 			}
 		}
 	}

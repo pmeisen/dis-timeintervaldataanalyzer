@@ -22,7 +22,7 @@ import com.google.common.base.Objects;
  * @author pmeisen
  * 
  */
-public class MetaIndex implements DataRecordIndex {
+public class MetaIndex implements IDataRecordIndex {
 
 	private final IIndexedCollection dimensionsIndex;
 

@@ -8,11 +8,15 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Classes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * An abstract implementation of a {@code MapperFactory} which is used to create
@@ -24,6 +28,13 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseMapperFactory {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseMapperFactory.class);
+
+	/**
+	 * {@code exceptionRegistry} used to fire exceptions.
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	protected IExceptionRegistry exceptionRegistry;
 
 	private final Map<Class<?>, Class<? extends BaseMapper<?>>> mappers = new HashMap<Class<?>, Class<? extends BaseMapper<?>>>();
 
@@ -62,6 +73,13 @@ public abstract class BaseMapperFactory {
 		}
 
 		return true;
+	}
+	
+	/**
+	 * Removes all the specified mappers.
+	 */
+	public void removeAllMapper() {
+		mappers.clear();
 	}
 
 	/**
@@ -476,6 +494,27 @@ public abstract class BaseMapperFactory {
 			return Double.class;
 		} else {
 			return clazz;
+		}
+	}
+
+	/**
+	 * The base implementation does not support any configuration. Therefore the
+	 * default implementation does nothing. If a configuration is supported this
+	 * method should be overwritten.
+	 * 
+	 * @param config
+	 *            the configuration to be used
+	 */
+	public void setConfig(final IMapperFactoryConfig config) {
+		// nothing to do this might be implemented by the concrete class
+		if (config != null) {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("A configuration '"
+						+ config
+						+ "' was passed to the implementation '"
+						+ getClass().getName()
+						+ "' of an MapperFactory. The configuration is not used, because the base implementation does not support any configuration. Please override the appropriate method in the concrete implementation.");
+			}
 		}
 	}
 }

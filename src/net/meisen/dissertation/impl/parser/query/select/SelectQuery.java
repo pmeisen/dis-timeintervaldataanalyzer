@@ -1,24 +1,10 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import java.util.List;
-
-import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
-import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
-import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
-import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.descriptors.Descriptor;
-import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.parser.query.IQuery;
-import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class SelectQuery implements IQuery {
 
@@ -67,8 +53,15 @@ public class SelectQuery implements IQuery {
 				model);
 		final SelectQueryResult queryResult = new SelectQueryResult();
 
+		// determine the filter results
 		final Bitmap filterBitmap = evaluator.evaluateTree(filter);
 		queryResult.setFilterResult(filterBitmap);
+
+		// determine the IntervalIndexDimensionSlices
+		final boolean startInclusive = interval.getOpenType().isInclusive();
+		final boolean endInclusive = interval.getCloseType().isInclusive();
+		model.getIndex().getIntervalIndexDimensionSlices(interval.getStart(),
+				interval.getEnd(), startInclusive, endInclusive);
 
 		return queryResult;
 	}

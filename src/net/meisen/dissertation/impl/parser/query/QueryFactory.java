@@ -115,7 +115,6 @@ public class QueryFactory implements IQueryFactory {
 	@Override
 	public IQueryResult evaluateQuery(final IQuery query,
 			final TidaModelHandler handler) throws QueryEvaluationException {
-
 		final String modelId = query.getModelId();
 
 		// get the model

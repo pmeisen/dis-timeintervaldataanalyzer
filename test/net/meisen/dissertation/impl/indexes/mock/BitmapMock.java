@@ -74,4 +74,9 @@ public class BitmapMock extends Bitmap {
 	public int invertCardinality(int position) {
 		return 0;
 	}
+
+	@Override
+	public Bitmap copy() {
+		return this;
+	}
 }

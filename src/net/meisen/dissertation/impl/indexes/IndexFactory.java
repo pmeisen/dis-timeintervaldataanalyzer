@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import net.meisen.dissertation.exceptions.IndexFactoryException;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.indexes.IIndexFactoryConfig;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
@@ -28,7 +29,7 @@ public class IndexFactory extends BaseIndexFactory {
 	private IndexFactoryConfig config;
 
 	@Override
-	public void setConfig(final Object config) {
+	public void setConfig(final IIndexFactoryConfig config) {
 
 		// check if we have a configuration already
 		if (this.config != null) {
@@ -61,14 +62,12 @@ public class IndexFactory extends BaseIndexFactory {
 	}
 
 	/**
-	 * Defines the configuration to be used. If set to {@code null} a default
-	 * configuration will be applied.
+	 * Gets the configuration of the factory.
 	 * 
-	 * @param config
-	 *            the configuration to be used
+	 * @return the configuration of the factory
 	 */
-	public void setConfig(final IndexFactoryConfig config) {
-		setConfig((Object) config);
+	public IIndexFactoryConfig getConfig() {
+		return getConfiguration();
 	}
 
 	/**
@@ -78,7 +77,7 @@ public class IndexFactory extends BaseIndexFactory {
 	 * 
 	 * @return the configuration used by the {@code IndexFactory}
 	 */
-	public IndexFactoryConfig getConfig() {
+	public IndexFactoryConfig getConfiguration() {
 		if (config == null) {
 			this.config = new IndexFactoryConfig();
 
@@ -146,13 +145,13 @@ public class IndexFactory extends BaseIndexFactory {
 
 		// we have some really nice implementations for the primitives
 		if (isBytePrimitiveType(clazz)) {
-			collClazz = getConfig().getByteClass();
+			collClazz = getConfiguration().getByteClass();
 		} else if (isShortPrimitiveType(clazz)) {
-			collClazz = getConfig().getShortClass();
+			collClazz = getConfiguration().getShortClass();
 		} else if (isIntPrimitiveType(clazz)) {
-			collClazz = getConfig().getIntClass();
+			collClazz = getConfiguration().getIntClass();
 		} else if (isLongPrimitiveType(clazz)) {
-			collClazz = getConfig().getLongClass();
+			collClazz = getConfiguration().getLongClass();
 		} else {
 			collClazz = null;
 		}
@@ -169,7 +168,7 @@ public class IndexFactory extends BaseIndexFactory {
 	@Override
 	public Bitmap createBitmap() {
 
-		final Class<? extends Bitmap> bitmapClazz = getConfig()
+		final Class<? extends Bitmap> bitmapClazz = getConfiguration()
 				.getBitmapClass();
 		try {
 			return bitmapClazz.newInstance();

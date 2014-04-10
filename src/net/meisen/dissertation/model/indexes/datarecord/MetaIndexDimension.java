@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            the type of the indexed values
  */
-public class MetaIndexDimension<I> implements DataRecordIndex {
+public class MetaIndexDimension<I> implements IDataRecordIndex {
 	private final static String EXTENSION = ".slice";
 	private final static Logger LOG = LoggerFactory
 			.getLogger(MetaIndexDimension.class);

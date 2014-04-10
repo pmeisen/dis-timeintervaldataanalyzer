@@ -25,6 +25,10 @@
 
               <xs:element name="mappers" minOccurs="0">
                 <xs:complexType>
+                  <xs:sequence>
+                    <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+                  
                   <xs:attribute name="implementation" type="types:javaClass" use="required" />
                 </xs:complexType>
               </xs:element>

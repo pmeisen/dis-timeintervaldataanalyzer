@@ -8,7 +8,7 @@
                             http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd">
   
   <factories>
-    <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexFactory">
+    <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
       <idx:config bitmap="net.meisen.dissertation.impl.indexes.mock.BitmapMock"
                   int="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock"
                   long="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock" />

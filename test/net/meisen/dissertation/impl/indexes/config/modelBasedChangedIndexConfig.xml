@@ -9,7 +9,7 @@
 
   <config>
     <factories>    
-      <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexFactory">
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
         <idx:config bitmap="net.meisen.dissertation.impl.indexes.mock.BitmapMock"
                     byte="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock"
                     short="net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock" />

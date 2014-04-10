@@ -10,7 +10,7 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
  * @author pmeisen
  * 
  */
-public interface DataRecordIndex extends IPersistable {
+public interface IDataRecordIndex extends IPersistable {
 
 	/**
 	 * Method to add a {@code DataRecord} to the index.

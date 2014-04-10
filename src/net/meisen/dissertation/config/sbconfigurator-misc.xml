@@ -7,4 +7,5 @@
   <bean class="net.meisen.dissertation.config.xslt.DataRetrieverXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.DescriptorsXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.IndexFactoryXsltResolver" />
+  <bean class="net.meisen.dissertation.config.xslt.MapperFactoryXsltResolver" />
 </beans>

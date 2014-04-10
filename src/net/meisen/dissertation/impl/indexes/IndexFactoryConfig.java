@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.indexes;
 
 import net.meisen.dissertation.impl.indexes.datarecord.bitmap.EWAHBitmap;
+import net.meisen.dissertation.model.indexes.IIndexFactoryConfig;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
@@ -12,7 +13,7 @@ import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
  * @author pmeisen
  * 
  */
-public class IndexFactoryConfig {
+public class IndexFactoryConfig implements IIndexFactoryConfig {
 	private Class<? extends IIndexedCollection> byteClass;
 	private Class<? extends IIndexedCollection> shortClass;
 	private Class<? extends IIndexedCollection> intClass;

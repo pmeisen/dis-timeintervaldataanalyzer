@@ -86,7 +86,7 @@ public class DefaultValues {
 	public static final String INDEXFACTORY_ID = "indexFactory";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
-	 * created {@code MapperFactory}.
+	 * created {@code BaseMapperFactory}.
 	 * 
 	 * @see BaseMapperFactory
 	 */

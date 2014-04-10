@@ -10,6 +10,7 @@
   <xsl:import href="descriptors://includeXslts" />
   <xsl:import href="dataretriever://includeXslts" />
   <xsl:import href="indexFactory://includeXslts" />
+  <xsl:import href="mapperFactory://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -86,13 +87,23 @@
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:mappers/@implementation">
           <xsl:variable name="mapperFactory" select="//mns:config/mns:factories/mns:mappers/@implementation" />
-          <bean id="{$mapperFactoryId}" class="{$mapperFactory}" />        
+          <bean id="{$mapperFactoryId}" class="{$mapperFactory}">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:factories/mns:mappers/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:otherwise><ref bean="defaultMapperFactoryConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
         </xsl:when>
-        <xsl:otherwise>
+        <xsl:otherwise>          
           <bean id="{$mapperFactoryId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
             <property name="beanClass" ref="defaultMapperFactoryClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultMapperFactoryConfig" /></map>
+            </property>
           </bean>
-        </xsl:otherwise>
+        </xsl:otherwise>        
       </xsl:choose>
 
       <!-- create the granularityFactory to be used -->

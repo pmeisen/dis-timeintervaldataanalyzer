@@ -132,8 +132,8 @@ public class TestIndexFactory {
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexFactoryConfig config = factory.getConfig();
-			assertEquals(Bitmap.class, config.getBitmapClass());
+			final IndexFactoryConfig config = factory.getConfiguration();
+			assertEquals(EWAHBitmap.class, config.getBitmapClass());
 			assertEquals(TroveByteIndexedCollection.class,
 					config.getByteClass());
 			assertEquals(TroveShortIndexedCollection.class,
@@ -167,7 +167,7 @@ public class TestIndexFactory {
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexFactoryConfig config = factory.getConfig();
+			final IndexFactoryConfig config = factory.getConfiguration();
 			assertEquals(BitmapMock.class, config.getBitmapClass());
 			assertEquals(TroveByteIndexedCollection.class,
 					config.getByteClass());
@@ -201,7 +201,7 @@ public class TestIndexFactory {
 			assertNotNull(factory);
 
 			// get the configuration
-			final IndexFactoryConfig config = factory.getConfig();
+			final IndexFactoryConfig config = factory.getConfiguration();
 			assertEquals(BitmapMock.class, config.getBitmapClass());
 			assertEquals(IndexedCollectionMock.class, config.getByteClass());
 			assertEquals(IndexedCollectionMock.class, config.getShortClass());
@@ -219,7 +219,7 @@ public class TestIndexFactory {
 	 */
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses({ TestGenerallyIndexFactory.class,
-			TestGloballyChangedIndexConfig.class,
+			TestDefaultIndexConfig.class, TestGloballyChangedIndexConfig.class,
 			TestModelBasedChangedIndexConfig.class })
 	public static class TestIndexFactorySuite {
 		// just the suite with all the tests defined here

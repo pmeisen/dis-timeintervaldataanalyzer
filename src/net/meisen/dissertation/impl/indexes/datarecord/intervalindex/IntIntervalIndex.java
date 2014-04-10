@@ -3,26 +3,26 @@ package net.meisen.dissertation.impl.indexes.datarecord.intervalindex;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Numbers;
 
 /**
- * An {@code IntervalIndexPartition} is normally defined as a partition (or the
- * whole) timeline. The size of the partition is defined by a {@code Mapper},
- * which is used to map the data-values to the underlying part of the timeline.
+ * An {@code IntervalIndex} is normally defined as a index (for the whole)
+ * timeline. The size of the index is defined by a {@code Mapper}, which is used
+ * to map the data-values to the underlying part of the timeline.
  * 
  * @author pmeisen
  * 
  */
-public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
+public class IntIntervalIndex extends BaseIntervalIndex {
 
 	/**
-	 * Constructor to create a partition using the specified {@code Mapper}, the
+	 * Constructor to create an index using the specified {@code Mapper}, the
 	 * {@code start}- and {@code end}-entry and the specified
-	 * {@code indexFactory} to create the needed indexes.
+	 * {@code IndexFactory} to create the needed indexes.
 	 * 
 	 * @param mapper
 	 *            the {@code Mapper} which defines the start and end value, as
@@ -32,9 +32,9 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @param end
 	 *            the end entry
 	 * @param indexFactory
-	 *            the {@code IndexFactory} to create the needed indexes
+	 *            the {@code indexFactory} to create the needed indexes
 	 */
-	public ShortIntervalIndexPartition(final BaseMapper<?> mapper,
+	public IntIntervalIndex(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexFactory indexFactory) {
@@ -43,63 +43,46 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 
 	@Override
 	public void index(final int dataId, final Object start, final Object end) {
-		final short normStart = get(start, true);
-		final short normEnd = get(end, false);
+		final int normStart = get(start, true);
+		final int normEnd = get(end, false);
 		setInterval(normStart, normEnd, dataId);
 	}
 
 	/**
-	 * Gets the start of the timeline (included) as {@code short}.
+	 * Gets the start of the timeline (included) as {@code int}.
 	 * 
-	 * @return the start of the timeline as {@code short}
+	 * @return the start of the timeline as {@code int}
 	 */
-	public short getStart() {
-		return getMapper().getNormStartAsShort();
+	public int getStart() {
+		return getMapper().getNormStartAsInt();
 	}
 
 	/**
-	 * Gets the end of the timeline (included) as {@code short}.
+	 * Gets the end of the timeline (included) as {@code int}.
 	 * 
-	 * @return the end of the timeline as {@code short}
+	 * @return the end of the timeline as {@code int}
 	 */
-	public short getEnd() {
-		return getMapper().getNormEndAsShort();
+	public int getEnd() {
+		return getMapper().getNormEndAsInt();
 	}
 
 	/**
-	 * Get the value as {@code short}.
+	 * Get the value as {@code int}.
 	 * 
 	 * @param value
-	 *            the value to be mapped to the {@code short}
+	 *            the value to be mapped to the {@code int}
 	 * @param start
 	 *            {@code true} if the value is the start value of the interval,
 	 *            otherwise {@code end}
 	 * 
-	 * @return the mapped value as {@code short}
+	 * @return the mapped value as {@code int}
 	 */
-	protected short get(final Object value, final boolean start) {
+	protected int get(final Object value, final boolean start) {
 		if (value == null) {
 			return start ? getStart() : getEnd();
 		} else {
-			return getMapper().mapToShort(value);
+			return getMapper().mapToInt(value);
 		}
-	}
-
-	/**
-	 * Gets a slice of the partition, i.e. a bitmap which defines which records
-	 * have the value of the specified slice set (i.e. {@code 1}) and which
-	 * don't (i.e. {@code 0}).
-	 * 
-	 * @param point
-	 *            the identifier of the value, i.e. the identifier of the value
-	 *            of the partition to retrieve the information for
-	 * @return a bitmap with the identifiers of the records set to {@code 1} if
-	 *         and only if the record's value is referred by the specified
-	 *         {@code point}
-	 */
-	@SuppressWarnings("unchecked")
-	public IndexDimensionSlice<Short> getSliceById(final short point) {
-		return (IndexDimensionSlice<Short>) getIndex().getObject(point);
 	}
 
 	/**
@@ -113,7 +96,7 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * 
 	 * @return the result of the combination of the specified slices (by and)
 	 */
-	public Bitmap and(final short start, final short end) {
+	public Bitmap and(final int start, final int end) {
 		return Bitmap.and(getIndexFactory(), getIndex()
 				.getObjectsByStartAndEnd(start, end));
 	}
@@ -129,7 +112,7 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * 
 	 * @return the result of the combination of the specified slices (by or)
 	 */
-	public Bitmap or(final short start, final short end) {
+	public Bitmap or(final int start, final int end) {
 		return Bitmap.or(getIndexFactory(),
 				getIndex().getObjectsByStartAndEnd(start, end));
 	}
@@ -145,13 +128,30 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * 
 	 * @return the slices, which might be {@code null} if no data is there yet
 	 */
-	public IndexDimensionSlice<?>[] getSlices(final short start, final short end) {
+	public IndexDimensionSlice<?>[] getSlices(final int start, final int end) {
 		return castSlices(getIndex().getObjectsByStartAndEnd(start, end));
 	}
 
 	@Override
 	public IndexDimensionSlice<?>[] getSlices() {
 		return getSlices(getStart(), getEnd());
+	}
+
+	/**
+	 * Gets a slice of the index, i.e. a bitmap which defines which records have
+	 * the value of the specified slice set (i.e. {@code 1}) and which don't
+	 * (i.e. {@code 0}).
+	 * 
+	 * @param point
+	 *            the identifier of the value, i.e. the identifier of the value
+	 *            of the index to retrieve the information for
+	 * @return a bitmap with the identifiers of the records set to {@code 1} if
+	 *         and only if the record's value is referred by the specified
+	 *         {@code point}
+	 */
+	@SuppressWarnings("unchecked")
+	public IndexDimensionSlice<Integer> getSliceById(final int point) {
+		return (IndexDimensionSlice<Integer>) getIndex().getObject(point);
 	}
 
 	/**
@@ -164,12 +164,12 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @param recId
 	 *            the value to be set to true within the slice
 	 */
-	protected void setInterval(final short normStart, final short normEnd,
+	protected void setInterval(final int normStart, final int normEnd,
 			final int recId) {
 		final IIndexedCollection index = getIndex();
 
-		for (short i = normStart; i < normEnd + 1; i++) {
-			final IndexDimensionSlice<Short> slice = getSliceById(i);
+		for (int i = normStart; i < normEnd + 1; i++) {
+			final IndexDimensionSlice<Integer> slice = getSliceById(i);
 			if (slice == null) {
 				index.addObject(createSlice(i, recId));
 			} else {
@@ -179,9 +179,26 @@ public class ShortIntervalIndexPartition extends BaseIntervalIndexPartition {
 	}
 
 	@Override
-	protected IndexDimensionSlice<Short> createSlice(final Number sliceId,
+	protected IndexDimensionSlice<Integer> createSlice(final Number sliceId,
 			final int... recordIds) {
-		return new IndexDimensionSlice<Short>(Numbers.castToShort(sliceId),
+		return new IndexDimensionSlice<Integer>(Numbers.castToInt(sliceId),
 				getIndexFactory(), recordIds);
+	}
+
+	@Override
+	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+			final Object start, final Object end, final boolean startInclusive,
+			final boolean endInclusive) {
+		int startInt = getMapper().mapToInt(start);
+		int endInt = getMapper().mapToInt(end);
+		
+		if (!startInclusive) {
+			startInt = Numbers.castToInt(startInt + 1);
+		}
+		if (!endInclusive) {
+			endInt = Numbers.castToInt(endInt - 1);
+		}
+
+		return getSlices(startInt, endInt);
 	}
 }

@@ -3,24 +3,24 @@ package net.meisen.dissertation.impl.indexes.datarecord.intervalindex;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndexPartition;
+import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Numbers;
 
 /**
- * An {@code IntervalIndexPartition} is normally defined as a partition (or the
- * whole) timeline. The size of the partition is defined by a {@code Mapper},
- * which is used to map the data-values to the underlying part of the timeline.
+ * An {@code IntervalIndex} is normally defined as a index (for the whole)
+ * timeline. The size of the index is defined by a {@code Mapper}, which is used
+ * to map the data-values to the underlying part of the timeline.
  * 
  * @author pmeisen
  * 
  */
-public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
+public class ByteIntervalIndex extends BaseIntervalIndex {
 
 	/**
-	 * Constructor to create a partition using the specified {@code Mapper}, the
+	 * Constructor to create a index using the specified {@code Mapper}, the
 	 * {@code start}- and {@code end}-entry and the specified
 	 * {@code IndexFactory} to create the needed indexes.
 	 * 
@@ -32,10 +32,9 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @param end
 	 *            the end entry
 	 * @param indexFactory
-	 *            the {@code IndexFactory} to create the needed
-	 *            indexes
+	 *            the {@code IndexFactory} to create the needed indexes
 	 */
-	public ByteIntervalIndexPartition(final BaseMapper<?> mapper,
+	public ByteIntervalIndex(final BaseMapper<?> mapper,
 			final IntervalStructureEntry start,
 			final IntervalStructureEntry end,
 			final BaseIndexFactory indexFactory) {
@@ -45,7 +44,7 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	@Override
 	public void index(final int dataId, final Object start, final Object end) {
 		final byte normStart = get(start, true);
-		final byte normEnd = get(end, false);
+		final byte normEnd = get(end, false);		
 		setInterval(normStart, normEnd, dataId);
 	}
 
@@ -74,7 +73,8 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 *            the value to be mapped to the {@code byte}
 	 * @param start
 	 *            {@code true} if the value is the start value of the interval,
-	 *            otherwise {@code end}
+	 *            and {@code false} if the value is the {@code end} of the
+	 *            interval
 	 * 
 	 * @return the mapped value as {@code byte}
 	 */
@@ -114,8 +114,8 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	 * @return the result of the combination of the specified slices (by or)
 	 */
 	public Bitmap or(final byte start, final byte end) {
-		return Bitmap.or(getIndexFactory(), getIndex()
-				.getObjectsByStartAndEnd(start, end));
+		return Bitmap.or(getIndexFactory(),
+				getIndex().getObjectsByStartAndEnd(start, end));
 	}
 
 	/**
@@ -139,13 +139,13 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	}
 
 	/**
-	 * Gets a slice of the partition, i.e. a bitmap which defines which records
-	 * have the value of the specified slice set (i.e. {@code 1}) and which
-	 * don't (i.e. {@code 0}).
+	 * Gets a slice of the index, i.e. a bitmap which defines which records have
+	 * the value of the specified slice set (i.e. {@code 1}) and which don't
+	 * (i.e. {@code 0}).
 	 * 
 	 * @param point
 	 *            the identifier of the value, i.e. the identifier of the value
-	 *            of the partition to retrieve the information for
+	 *            of the index to retrieve the information for
 	 * @return a bitmap with the identifiers of the records set to {@code 1} if
 	 *         and only if the record's value is referred by the specified
 	 *         {@code point}
@@ -181,7 +181,24 @@ public class ByteIntervalIndexPartition extends BaseIntervalIndexPartition {
 	protected IndexDimensionSlice<Byte> createSlice(final Number sliceId,
 			final int... recordIds) {
 		return new IndexDimensionSlice<Byte>(Numbers.castToByte(sliceId),
-				getIndexFactory(),
-				recordIds);
+				getIndexFactory(), recordIds);
+	}
+
+	@Override
+	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+			final Object start, final Object end, final boolean startInclusive,
+			final boolean endInclusive) {
+				
+		byte startByte = getMapper().mapToByte(start);
+		byte endByte = getMapper().mapToByte(end);
+
+		if (!startInclusive) {
+			startByte = Numbers.castToByte(startByte + 1);
+		}
+		if (!endInclusive) {
+			endByte = Numbers.castToByte(endByte - 1);
+		}
+
+		return getSlices(startByte, endByte);
 	}
 }

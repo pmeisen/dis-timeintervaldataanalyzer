@@ -12,7 +12,7 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndexPartition;
+import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndex;
 import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -31,14 +31,14 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Tests the implementation of the {@code IntervalIndexPartition}.
+ * Tests the implementation of the {@code IntervalIndex}.
  * 
  * @author pmeisen
  * 
  */
 @ContextClass(TidaConfig.class)
 @ContextFile("sbconfigurator-core.xml")
-public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
+public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 
 	@Autowired
 	private TidaModelHandler loader;
@@ -55,31 +55,27 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 						+ modelPath);
 	}
 
-	private BaseIntervalIndexPartition createPartition(final TidaModel model)
+	private BaseIntervalIndex createIndex(final TidaModel model)
 			throws IOException {
-		final IntervalIndex idx = new IntervalIndex(model);
+		final BaseIntervalIndex idx = model.getIntervalModel().createIndex(
+				model.getDataStructure());
 		idx.setIntervalDataHandling(model.getIntervalDataHandling());
 
-		// check if there is just one partition
-		assertEquals(1, idx.getAmountOfPartitions());
-		final BaseIntervalIndexPartition part = idx.getPartitions().iterator()
-				.next();
-
-		return part;
+		return idx;
 	}
 
-	private BaseIntervalIndexPartition loadAndCreate(final String dbName,
+	private BaseIntervalIndex loadAndCreate(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-		return createPartition(model);
+		return createIndex(model);
 	}
 
-	private BaseIntervalIndexPartition loadAndIndex(final String dbName,
+	private BaseIntervalIndex loadAndIndex(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-		final BaseIntervalIndexPartition part = createPartition(model);
+		final BaseIntervalIndex idx = createIndex(model);
 
-		// add the data to the partition
+		// add the data to the index
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -87,12 +83,12 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 			final IDataRecord rec = it.next();
 
 			// add the record
-			part.index(i, rec);
+			idx.index(i, rec);
 			i++;
 		}
 		it.close();
 
-		return part;
+		return idx;
 	}
 
 	private int count(final IndexDimensionSlice<?>[] slices) {
@@ -114,15 +110,14 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIntervalIndexFromDb() throws IOException {
-		final BaseIntervalIndexPartition part = loadAndIndex(
-				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
-				"tidaRandomDbIntervalIndex.xml");
+		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip", "tidaRandomDbIntervalIndex.xml");
 
 		// 12 Month in 10 years, random linear data
-		assertEquals(120, part.getAmountOfSlices());
+		assertEquals(120, idx.getAmountOfSlices());
 
 		// there should be at least one value for each slice
-		for (final IndexDimensionSlice<?> slice : part.getSlices()) {
+		for (final IndexDimensionSlice<?> slice : idx.getSlices()) {
 			assertTrue(slice.count() > 0);
 		}
 	}
@@ -135,20 +130,20 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesBoundaries() throws IOException {
-		final BaseIntervalIndexPartition part = loadAndIndex(
-				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
+		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
 
 		// test the type (the amount of values)
-		assertEquals(Short.class, part.getType());
-		assertTrue(part instanceof ShortIntervalIndexPartition);
+		assertEquals(Short.class, idx.getType());
+		assertTrue(idx instanceof ShortIntervalIndex);
 
 		// check the results within the day
-		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
-		assertEquals(0, shortPart.getStart());
-		assertEquals(1439, shortPart.getEnd());
-		for (short i = shortPart.getStart(); i < shortPart.getEnd(); i++) {
-			final IndexDimensionSlice<Short> slice = shortPart.getSliceById(i);
+		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
+		assertEquals(0, shortidx.getStart());
+		assertEquals(1439, shortidx.getEnd());
+		for (short i = shortidx.getStart(); i < shortidx.getEnd(); i++) {
+			final IndexDimensionSlice<Short> slice = shortidx.getSliceById(i);
 
 			if (i >= 0 && i <= 60) {
 				assertEquals("Bad value for " + i, 2, slice.count());
@@ -172,20 +167,20 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesOther() throws IOException {
-		final BaseIntervalIndexPartition part = loadAndIndex(
-				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
+		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
 
 		// test the type (the amount of values)
-		assertEquals(Short.class, part.getType());
-		assertTrue(part instanceof ShortIntervalIndexPartition);
+		assertEquals(Short.class, idx.getType());
+		assertTrue(idx instanceof ShortIntervalIndex);
 
 		// check the results within the day
-		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
-		assertEquals(0, shortPart.getStart());
-		assertEquals(1439, shortPart.getEnd());
-		for (short i = shortPart.getStart(); i < shortPart.getEnd(); i++) {
-			final IndexDimensionSlice<Short> slice = shortPart.getSliceById(i);
+		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
+		assertEquals(0, shortidx.getStart());
+		assertEquals(1439, shortidx.getEnd());
+		for (short i = shortidx.getStart(); i < shortidx.getEnd(); i++) {
+			final IndexDimensionSlice<Short> slice = shortidx.getSliceById(i);
 
 			if (i >= 0 && i <= 60 || i == 300 || i == 1080) {
 				assertEquals(2, slice.count());
@@ -203,39 +198,39 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinations() throws IOException {
-		final BaseIntervalIndexPartition part = loadAndIndex(
-				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
+		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
 
 		// test the type (the amount of values)
-		assertEquals(Short.class, part.getType());
-		assertTrue(part instanceof ShortIntervalIndexPartition);
-		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
+		assertEquals(Short.class, idx.getType());
+		assertTrue(idx instanceof ShortIntervalIndex);
+		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
 
 		// test combination
 		Bitmap bitmap;
 
 		// or combine
-		bitmap = shortPart.or((short) 60, (short) 65);
+		bitmap = shortidx.or((short) 60, (short) 65);
 		assertEquals(2, bitmap.determineCardinality());
-		bitmap = shortPart.or((short) 100, (short) 65);
+		bitmap = shortidx.or((short) 100, (short) 65);
 		assertEquals(0, bitmap.determineCardinality());
 
 		// and combine
-		bitmap = shortPart.and((short) 60, (short) 65);
+		bitmap = shortidx.and((short) 60, (short) 65);
 		assertEquals(1, bitmap.determineCardinality());
-		bitmap = shortPart.and((short) 300, (short) 300);
+		bitmap = shortidx.and((short) 300, (short) 300);
 		assertEquals(2, bitmap.determineCardinality());
-		bitmap = shortPart.and((short) 100, (short) 65);
+		bitmap = shortidx.and((short) 100, (short) 65);
 		assertEquals(0, bitmap.determineCardinality());
 
 		// test retrieval
 		IndexDimensionSlice<?>[] slices;
 
 		// get
-		slices = shortPart.getSlices((short) 60, (short) 65);
+		slices = shortidx.getSlices((short) 60, (short) 65);
 		assertEquals(6, slices.length);
-		slices = shortPart.getSlices((short) 100, (short) 65);
+		slices = shortidx.getSlices((short) 100, (short) 65);
 		assertEquals(0, slices.length);
 	}
 
@@ -247,39 +242,39 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinationsWithNulls() throws IOException {
-		final BaseIntervalIndexPartition part = loadAndIndex(
-				"tidaTestDateIntervals", "tidaTestDateIntervals.zip",
+		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
 
 		// test the type (the amount of values)
-		assertEquals(Short.class, part.getType());
-		assertTrue(part instanceof ShortIntervalIndexPartition);
-		final ShortIntervalIndexPartition shortPart = (ShortIntervalIndexPartition) part;
+		assertEquals(Short.class, idx.getType());
+		assertTrue(idx instanceof ShortIntervalIndex);
+		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
 
 		// test the logical conjunctions
 		Bitmap combined;
 
 		// or combine
-		combined = shortPart.or((short) 322, (short) 340);
+		combined = shortidx.or((short) 322, (short) 340);
 		assertEquals(1, combined.determineCardinality());
-		combined = shortPart.or((short) 323, (short) 340);
+		combined = shortidx.or((short) 323, (short) 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortPart.or((short) 320, (short) 100);
+		combined = shortidx.or((short) 320, (short) 100);
 		assertEquals(0, combined.determineCardinality());
 
 		// and combine
-		combined = shortPart.and((short) 320, (short) 340);
+		combined = shortidx.and((short) 320, (short) 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortPart.and((short) 323, (short) 340);
+		combined = shortidx.and((short) 323, (short) 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortPart.and((short) 320, (short) 100);
+		combined = shortidx.and((short) 320, (short) 100);
 		assertEquals(0, combined.determineCardinality());
 
 		// test the slices retrieval
 		IndexDimensionSlice<?>[] slices;
 
 		// get
-		slices = shortPart.getSlices((short) 320, (short) 340);
+		slices = shortidx.getSlices((short) 320, (short) 340);
 		assertEquals(21, slices.length);
 		for (short i = 0; i < slices.length; i++) {
 			if (i > 2) {
@@ -294,7 +289,7 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 	}
 
 	/**
-	 * Tests the saving and loading of a {@code IntervalIndexPartition}.
+	 * Tests the saving and loading of a {@code IntervalIndex}.
 	 * 
 	 * @throws IOException
 	 *             if a file cannot be read or created
@@ -319,36 +314,36 @@ public class TestIntervalIndexPartition extends ModuleAndDbBasedTest {
 		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
 
 		// create a saver instance
-		final ShortIntervalIndexPartition idxPart = (ShortIntervalIndexPartition) loadAndIndex(
+		final ShortIntervalIndex idxidx = (ShortIntervalIndex) loadAndIndex(
 				dbName, dbPath, modelPath);
-		assertEquals(676, count(idxPart.getSlices()));
-		persistor.register(group, idxPart);
+		assertEquals(676, count(idxidx.getSlices()));
+		persistor.register(group, idxidx);
 
 		// save and check
 		persistor.save(new FileLocation(tmpFile));
 		assertTrue(tmpFile.length() > 0);
 
 		// unregister to make it available for a new instance
-		assertEquals(idxPart, persistor.unregister(group));
+		assertEquals(idxidx, persistor.unregister(group));
 
 		// create a loader instance
-		final ShortIntervalIndexPartition crtPart = (ShortIntervalIndexPartition) loadAndCreate(
+		final ShortIntervalIndex typedIdx = (ShortIntervalIndex) loadAndCreate(
 				dbName, dbPath, modelPath);
-		assertEquals(0, count(crtPart.getSlices()));
-		persistor.register(group, crtPart);
+		assertEquals(0, count(typedIdx.getSlices()));
+		persistor.register(group, typedIdx);
 
 		// load the stuff
 		persistor.load(new FileLocation(tmpFile));
-		assertEquals(676, count(crtPart.getSlices()));
+		assertEquals(676, count(typedIdx.getSlices()));
 
 		// test all the values
-		for (final IndexDimensionSlice<?> slice : idxPart.getSlices()) {
+		for (final IndexDimensionSlice<?> slice : idxidx.getSlices()) {
 			if (slice == null) {
 				continue;
 			}
 
 			assertEquals(slice.getBitmap(),
-					crtPart.getSliceById((Short) slice.getId()).getBitmap());
+					typedIdx.getSliceById((Short) slice.getId()).getBitmap());
 		}
 
 		assertTrue(tmpFile.delete());
