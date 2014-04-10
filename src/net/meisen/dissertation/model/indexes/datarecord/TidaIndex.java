@@ -324,6 +324,23 @@ public class TidaIndex implements IPersistable {
 		}
 	}
 
+	/**
+	 * Gets the slices of the timeline for the specified range.
+	 * 
+	 * @param start
+	 *            the start of the range
+	 * @param end
+	 *            the end of the range
+	 * @param startInclusive
+	 *            specifies if the start is included (i.e. {@code true}) or
+	 *            excluded (i.e. {@code false})
+	 * @param endInclusive
+	 *            specifies if the end is included (i.e. {@code true}) or
+	 *            excluded (i.e. {@code false})
+	 * 
+	 * @return the slices, which might contain {@code null} and are totally
+	 *         ordered by the timeline
+	 */
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {

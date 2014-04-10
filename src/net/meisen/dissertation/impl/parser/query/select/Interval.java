@@ -1,5 +1,13 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
+/**
+ * Specifies an interval, i.e. something like {@code [1, 5]},
+ * {@code (1000, 5000]}, {@code [1, 5)}, or {@code (1, 8500)}.
+ * 
+ * @author pmeisen
+ * 
+ * @param <T>
+ */
 public class Interval<T> {
 
 	private final IntervalValue<T> start;

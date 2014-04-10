@@ -63,6 +63,8 @@ public class SelectQuery implements IQuery {
 		model.getIndex().getIntervalIndexDimensionSlices(interval.getStart(),
 				interval.getEnd(), startInclusive, endInclusive);
 
+		// TODO Go On! now we have to merge...
+		
 		return queryResult;
 	}
 
