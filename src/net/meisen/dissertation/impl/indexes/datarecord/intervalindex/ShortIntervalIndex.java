@@ -189,16 +189,26 @@ public class ShortIntervalIndex extends BaseIntervalIndex {
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		short startShort = getMapper().mapToShort(start);
-		short endShort = getMapper().mapToShort(end);
 
-		if (!startInclusive) {
-			startShort = Numbers.castToShort(startShort + 1);
-		}
-		if (!endInclusive) {
-			endShort = Numbers.castToShort(endShort - 1);
-		}
-
+		final short startShort = startInclusive ? getMapper().mapToShort(start)
+				: getMapper().shiftToShort(start, 1, false);
+		final short endShort = endInclusive ? getMapper().mapToShort(end)
+				: getMapper().shiftToShort(end, 1, true);
 		return getSlices(startShort, endShort);
+	}
+
+	@Override
+	public Object getValue(final Object start, final boolean startInclusive,
+			final long pos) {
+
+		// determine the position, i.e. the normalized value
+		short valuePos = getMapper().mapToShort(start);
+		if (!startInclusive) {
+			valuePos = Numbers.castToShort(valuePos + pos + 1);
+		} else {
+			valuePos = Numbers.castToShort(valuePos + pos);
+		}
+
+		return getValue(valuePos);
 	}
 }

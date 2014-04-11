@@ -184,21 +184,31 @@ public class LongIntervalIndex extends BaseIntervalIndex {
 		return new IndexDimensionSlice<Long>(Numbers.castToLong(sliceId),
 				getIndexFactory(), recordIds);
 	}
-	
+
 	@Override
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		long startLong = getMapper().mapToLong(start);
-		long endLong = getMapper().mapToLong(end);
-		
+
+		final long startLong = startInclusive ? getMapper().mapToLong(start)
+				: getMapper().shiftToLong(start, 1, false);
+		final long endLong = endInclusive ? getMapper().mapToLong(start)
+				: getMapper().shiftToLong(end, 1, true);
+		return getSlices(startLong, endLong);
+	}
+
+	@Override
+	public Object getValue(final Object start, final boolean startInclusive,
+			final long pos) {
+
+		// determine the position, i.e. the normalized value
+		long valuePos = getMapper().mapToLong(start);
 		if (!startInclusive) {
-			startLong = Numbers.castToLong(startLong + 1);
-		}
-		if (!endInclusive) {
-			endLong = Numbers.castToLong(endLong - 1);
+			valuePos = valuePos + pos + 1;
+		} else {
+			valuePos = valuePos + pos;
 		}
 
-		return getSlices(startLong, endLong);
+		return getValue(valuePos);
 	}
 }

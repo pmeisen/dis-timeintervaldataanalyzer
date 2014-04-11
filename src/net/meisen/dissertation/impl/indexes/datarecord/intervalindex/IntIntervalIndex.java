@@ -189,16 +189,26 @@ public class IntIntervalIndex extends BaseIntervalIndex {
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		int startInt = getMapper().mapToInt(start);
-		int endInt = getMapper().mapToInt(end);
-		
+
+		final int startInt = startInclusive ? getMapper().mapToInt(start)
+				: getMapper().shiftToInt(start, 1, false);
+		final int endInt = endInclusive ? getMapper().mapToInt(start)
+				: getMapper().shiftToInt(end, 1, true);
+		return getSlices(startInt, endInt);
+	}
+
+	@Override
+	public Object getValue(final Object start, final boolean startInclusive,
+			final long pos) {
+
+		// determine the position, i.e. the normalized value
+		int valuePos = getMapper().mapToInt(start);
 		if (!startInclusive) {
-			startInt = Numbers.castToInt(startInt + 1);
-		}
-		if (!endInclusive) {
-			endInt = Numbers.castToInt(endInt - 1);
+			valuePos = Numbers.castToInt(valuePos + pos + 1);
+		} else {
+			valuePos = Numbers.castToInt(valuePos + pos);
 		}
 
-		return getSlices(startInt, endInt);
+		return getValue(valuePos);
 	}
 }

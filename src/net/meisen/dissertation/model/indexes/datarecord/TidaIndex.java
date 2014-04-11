@@ -41,6 +41,9 @@ public class TidaIndex implements IPersistable {
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
 	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
+	private final BaseIntervalIndex intervalIndex;
+	private final MetaIndex metaIndex;
+	private final KeyIndex keyIndex;
 
 	private int dataId;
 	private Group persistentGroup = null;
@@ -57,11 +60,16 @@ public class TidaIndex implements IPersistable {
 		this.dataId = 0;
 		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
 
+		// create the indexes
+		intervalIndex = model.getIntervalModel().createIndex(
+				model.getDataStructure());
+		metaIndex = new MetaIndex(model);
+		keyIndex = new KeyIndex(model);
+
 		// add the dimensions of the MetaDataModel, Key and Interval
-		indexes.put(MetaIndex.class, new MetaIndex(model));
-		indexes.put(KeyIndex.class, new KeyIndex(model));
-		indexes.put(BaseIntervalIndex.class, model.getIntervalModel()
-				.createIndex(model.getDataStructure()));
+		indexes.put(MetaIndex.class, metaIndex);
+		indexes.put(KeyIndex.class, keyIndex);
+		indexes.put(BaseIntervalIndex.class, intervalIndex);
 
 		// set the default values
 		setMetaDataHandling(model.getMetaDataHandling());
@@ -104,7 +112,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the {@code MetaDataHandling} defined for the index
 	 */
 	public MetaDataHandling getMetaDataHandling() {
-		return getIndex(MetaIndex.class).getMetaDataHandling();
+		return metaIndex.getMetaDataHandling();
 	}
 
 	/**
@@ -114,7 +122,7 @@ public class TidaIndex implements IPersistable {
 	 *            the {@code MetaDataHandling} to be used
 	 */
 	public void setMetaDataHandling(final MetaDataHandling handling) {
-		getIndex(MetaIndex.class).setMetaDataHandling(handling);
+		metaIndex.setMetaDataHandling(handling);
 	}
 
 	/**
@@ -123,7 +131,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the {@code IntervalDataHandling} defined for the index
 	 */
 	public IntervalDataHandling getIntervalDataHandling() {
-		return getIndex(BaseIntervalIndex.class).getIntervalDataHandling();
+		return intervalIndex.getIntervalDataHandling();
 	}
 
 	/**
@@ -133,7 +141,7 @@ public class TidaIndex implements IPersistable {
 	 *            the {@code IntervalDataHandling} to be used
 	 */
 	public void setIntervalDataHandling(final IntervalDataHandling handling) {
-		getIndex(BaseIntervalIndex.class).setIntervalDataHandling(handling);
+		intervalIndex.setIntervalDataHandling(handling);
 	}
 
 	/**
@@ -159,15 +167,12 @@ public class TidaIndex implements IPersistable {
 	public String toStatistic() {
 		final String nl = System.getProperty("line.separator");
 
-		final MetaIndex metaIdx = getIndex(MetaIndex.class);
-		final BaseIntervalIndex intervalIdx = getIndex(BaseIntervalIndex.class);
-
 		String stat = "";
 
 		// @formatter:off
 		stat += "TidaIndex statistic: " + nl;
-		stat += "- MetaIndex with " + metaIdx.getAmountOfDimensions() + " dimension(s):" + nl;
-		for (final MetaIndexDimension<?> dim : metaIdx.getDimensions()) {
+		stat += "- MetaIndex with " + metaIndex.getAmountOfDimensions() + " dimension(s):" + nl;
+		for (final MetaIndexDimension<?> dim : metaIndex.getDimensions()) {
 			final int amountOfSlices = dim.getAmountOfSlices();
 			stat += "  - " + dim.getModelId() + " (" + amountOfSlices + " slices)" + nl;
 			if (amountOfSlices == 0) {
@@ -195,13 +200,13 @@ public class TidaIndex implements IPersistable {
 			}
 		}
 		
-		final int amountOfSlices = intervalIdx.getAmountOfSlices();
-		stat += "- IntervalIndex for " + intervalIdx.getFormattedStart() + " (" + amountOfSlices + " slices)" + nl;
+		final int amountOfSlices = intervalIndex.getAmountOfSlices();
+		stat += "- IntervalIndex for " + intervalIndex.getFormattedStart() + " (" + amountOfSlices + " slices)" + nl;
 		if (amountOfSlices != 0) {
 		
 			// sort the data ascending
 			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
-			sortedSlices.addAll(Arrays.asList(intervalIdx.getSlices()));
+			sortedSlices.addAll(Arrays.asList(intervalIndex.getSlices()));
 			Collections.sort(sortedSlices, new Comparator<IndexDimensionSlice>() {
 				
 				@Override
@@ -228,7 +233,7 @@ public class TidaIndex implements IPersistable {
 					}
 					
 					final Object sliceId = slice.getId();
-					final String value = intervalIdx.getFormattedId(sliceId);
+					final String value = intervalIndex.getFormattedId(sliceId);
 					
 					stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
 					if (++i > STATISTIC_THRESHOLD) {
@@ -314,8 +319,7 @@ public class TidaIndex implements IPersistable {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public IndexDimensionSlice getMetaIndexDimensionSlice(final String modelId,
 			final Object id) {
-		final MetaIndexDimension metaIdxDim = getIndex(MetaIndex.class).get(
-				modelId);
+		final MetaIndexDimension metaIdxDim = metaIndex.get(modelId);
 
 		if (metaIdxDim == null) {
 			return null;
@@ -344,9 +348,8 @@ public class TidaIndex implements IPersistable {
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		final BaseIntervalIndex idx = getIndex(BaseIntervalIndex.class);
-		return idx.getIntervalIndexDimensionSlices(start, end, startInclusive,
-				endInclusive);
+		return intervalIndex.getIntervalIndexDimensionSlices(start, end,
+				startInclusive, endInclusive);
 	}
 
 	/**
@@ -356,5 +359,68 @@ public class TidaIndex implements IPersistable {
 	 */
 	public int getNextDataId() {
 		return dataId;
+	}
+
+	/**
+	 * Gets the normalized start value of the index.
+	 * 
+	 * @return the normalized start value of the index
+	 */
+	public long getNormalizedTimeStart() {
+		return intervalIndex.getNormStart();
+	}
+
+	/**
+	 * Gets the normalized end value of the index.
+	 * 
+	 * @return the normalized end value of the index
+	 */
+	public long getNormalizedTimeEnd() {
+		return intervalIndex.getNormEnd();
+	}
+
+	/**
+	 * Gets the time-point value for the specified {@code id}.
+	 * 
+	 * @param id
+	 *            the {@code id} to get the time-point for
+	 * 
+	 * @return the time-point for the specified {@code id}
+	 */
+	public Object getTimePointValue(final Object id) {
+		return intervalIndex.getValue(id);
+	}
+
+	/**
+	 * Gets the time-point value for the specified {@code pos}, which is assumed
+	 * to be relative to the specified {@code start}.
+	 * 
+	 * @param start
+	 *            the start on the timeline to which the specified {@code pos}
+	 *            is relative to
+	 * @param startInclusive
+	 *            determines if the realtive start point is inclusive, or if the
+	 *            next time point is the relative position
+	 * @param pos
+	 *            the position to get the time-point for, relative to the
+	 *            {@code start}
+	 * 
+	 * @return the time-point for the specified {@code id}
+	 */
+	public Object getTimePointValue(final Object start,
+			final boolean startInclusive, final long pos) {
+		return intervalIndex.getValue(start, startInclusive, pos);
+	}
+
+	/**
+	 * Gets a label, i.e. a string, for the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to generate a label for
+	 *            
+	 * @return the label for the specified value
+	 */
+	public String getTimePointLabel(final Object value) {
+		return intervalIndex.getFormattedValue(value);
 	}
 }

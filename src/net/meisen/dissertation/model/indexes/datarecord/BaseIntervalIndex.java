@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -20,7 +19,6 @@ import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
-import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.genmisc.types.Objects;
 
@@ -72,8 +70,10 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 			final BaseIndexFactory indexFactory) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Creating " + getClass().getSimpleName() + " for '"
-					+ mapper.demap(mapper.getStart()) + " - "
-					+ mapper.demap(mapper.getEnd()) + "'...");
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' using granularity '" + mapper.getGranularity()
+					+ "'...");
 		}
 
 		// set the entries
@@ -101,9 +101,9 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 		// log the successful creation
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Created " + getClass().getSimpleName() + " for '"
-					+ mapper.demap(mapper.getStart()) + " - "
-					+ mapper.demap(mapper.getEnd()) + "' with index '"
-					+ this.index.getClass().getName()
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' with index '" + this.index.getClass().getName()
 					+ "' for identifiers of the intervalIndex of type '"
 					+ getType().getName() + "'.");
 		}
@@ -130,7 +130,8 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 		if (id instanceof Number) {
 			return getFormattedId(((Number) id).longValue());
 		} else {
-			return "Invalid '" + id + "'";
+			throw new IllegalArgumentException("Invalid identifier '" + id
+					+ "'.");
 		}
 	}
 
@@ -143,12 +144,18 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 	 * @return the formatted identifier
 	 */
 	public String getFormattedId(final long id) {
-		final Object denStart = getMapper().resolve(id);
-		if (Date.class.isAssignableFrom(getType())) {
-			return Dates.formatDate((Date) denStart, "dd.MM.yyyy HH:mm:ss,SSS");
-		} else {
-			return denStart.toString();
-		}
+		final Object value = getMapper().resolve(id);
+		return getMapper().format(value);
+	}
+
+	/**
+	 * 
+	 * @param value
+	 *            the value to be formatted
+	 * @return the formatted value
+	 */
+	public String getFormattedValue(final Object value) {
+		return getMapper().format(value);
 	}
 
 	/**
@@ -453,5 +460,70 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 	 */
 	protected BaseIndexFactory getIndexFactory() {
 		return indexFactory;
+	}
+
+	/**
+	 * Gets the normalized start value of the index.
+	 * 
+	 * @return the normalized start value of the index
+	 */
+	public long getNormStart() {
+		return getMapper().getNormStartAsLong();
+	}
+
+	/**
+	 * Gets the normalized end value of the index.
+	 * 
+	 * @return the normalized end value of the index
+	 */
+	public long getNormEnd() {
+		return getMapper().getNormEndAsLong();
+	}
+
+	/**
+	 * Gets the value of the timeSlice positioned relatively from the specified
+	 * {@code start}.
+	 * 
+	 * @param start
+	 *            the start value within the timeline.
+	 * @param startInclusive
+	 *            {@code true} to define the start value to be inclusive,
+	 *            otherwise it is exclusive
+	 * @param pos
+	 *            the - relative to the {@code start} - position to determine
+	 *            the formatted value for
+	 * 
+	 * @return the formatted value
+	 */
+	public abstract Object getValue(final Object start,
+			final boolean startInclusive, final long pos);
+
+	/**
+	 * Determines the value associated to the specified {@code normalizedValue}.
+	 * 
+	 * @param normalizedValue
+	 *            the value to get the associated object for
+	 * 
+	 * @return the object associated to the {@code normalizedValue}
+	 */
+	public Object getValue(final long normalizedValue) {
+		return getMapper().resolve(normalizedValue);
+	}
+
+	/**
+	 * Gets the value for the specified {@code id}.
+	 * 
+	 * @param id
+	 *            the identifier to get the associated value for
+	 * 
+	 * @return the associated value to the specified identifier
+	 */
+	public Object getValue(final Object id) {
+		if (id instanceof Number) {
+			return getValue(((Number) id).longValue());
+		} else {
+			throw new IllegalArgumentException("Invalid identifier '" + id
+					+ "'.");
+		}
 	}
 }

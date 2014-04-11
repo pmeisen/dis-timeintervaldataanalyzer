@@ -234,7 +234,21 @@ public class DefaultValues {
 	 * @see TimelineDefinition
 	 */
 	public static String getDefaultGranularity() {
-		return Second.class.getName();
+		return getDefaultGranularityInstance().getClass().getName();
+	}
+
+	/**
+	 * Gets the instance of the default {@code TimeGranularity} used for the
+	 * {@code TimelineDefinition} if non is defined.
+	 * 
+	 * @return the default {@code TimeGranularity} used for the
+	 *         {@code TimelineDefinition}
+	 * 
+	 * @see ITimeGranularity
+	 * @see TimelineDefinition
+	 */
+	public static ITimeGranularity getDefaultGranularityInstance() {
+		return Second.instance();
 	}
 
 	/**

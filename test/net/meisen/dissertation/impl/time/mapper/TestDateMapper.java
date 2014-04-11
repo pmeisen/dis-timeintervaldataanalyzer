@@ -290,6 +290,50 @@ public class TestDateMapper {
 		assertEquals(mapper.getNormStartAsInt(), resInt);
 	}
 
+	/**
+	 * Tests the {@link DateMapper#shiftToLong(Object, int, boolean)}
+	 * implementation.
+	 * 
+	 * @throws ParseException
+	 *             if a date cannot be parsed
+	 */
+	@Test
+	public void testShift() throws ParseException {
+		DateMapper mapper;
+		Date start, end;
+		long res;
+
+		// test byte range
+		start = Dates.parseDate("01.01.1900 00:00:00,000",
+				"dd.MM.yyyy HH:mm:ss,SSS");
+		end = Dates.parseDate("31.12.2000 23:59:59,999",
+				"dd.MM.yyyy HH:mm:ss,SSS");
+
+		mapper = new DateMapper(start, end, Day.instance());
+
+		res = mapper.shiftToLong(Dates.parseDate("01.01.1900", "dd.MM.yyyy"),
+				1, true);
+		assertEquals(0l, res);
+		res = mapper.shiftToLong(Dates.parseDate("02.01.1900", "dd.MM.yyyy"),
+				1, true);
+		assertEquals(0l, res);
+		res = mapper.shiftToLong(Dates.parseDate("02.01.1900", "dd.MM.yyyy"),
+				1, false);
+		assertEquals(2l, res);
+		res = mapper.shiftToLong(Dates.parseDate("02.01.1900", "dd.MM.yyyy"),
+				9, false);
+		assertEquals(10l, res);
+
+		res = mapper.shiftToLong(Dates.parseDate("31.12.2000", "dd.MM.yyyy"),
+				5, false);
+		assertEquals(Dates.parseDate("31.12.2000", "dd.MM.yyyy"),
+				mapper.resolve(res));
+		res = mapper.shiftToLong(Dates.parseDate("24.12.2000", "dd.MM.yyyy"),
+				10, false);
+		assertEquals(Dates.parseDate("31.12.2000", "dd.MM.yyyy"),
+				mapper.resolve(res));
+	}
+
 	private void assertResult(final Date start, final Date end,
 			final ITimeGranularity g, final Date expStart, final Date expEnd) {
 		final DateMapper mapper = new DateMapper(start, end, g);

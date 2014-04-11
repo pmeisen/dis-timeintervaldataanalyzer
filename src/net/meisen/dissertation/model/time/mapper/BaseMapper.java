@@ -269,7 +269,7 @@ public abstract class BaseMapper<T> {
 	/**
 	 * This method contains the concrete mapping implementation of the
 	 * {@code Mapper}. It implements the mapping from {@code from} to a
-	 * specified {@code long} value.
+	 * specified {@code long} value, which is called <b>denormalized</b> value.
 	 * 
 	 * @param from
 	 *            the value to be mapped
@@ -302,6 +302,103 @@ public abstract class BaseMapper<T> {
 		} else {
 			return mappedValue - getStart();
 		}
+	}
+
+	/**
+	 * This method is used to retrieve the <b>normalized</b> shifted value for
+	 * the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to be shifted and normalized
+	 * @param steps
+	 *            a positive value to determine how many steps should be shifted
+	 * @param towardsStart
+	 *            the direction to shift the value to, i.e. {@code true} means
+	 *            that the value will be shifted towards the start, otherwise
+	 *            {@code false} towards the end
+	 * 
+	 * @return the shifted value, whereby the edges are recognized
+	 */
+	public long shiftToLong(final Object value, final int steps,
+			final boolean towardsStart) {
+		final long mappedValue = map(validate(value));
+
+		final long normValue;
+		if (towardsStart) {
+			if (mappedValue > getStart()) {
+				normValue = normalize(mappedValue - steps);
+			} else {
+				normValue = getNormStartAsLong();
+			}
+		} else {
+			if (mappedValue < getEnd()) {
+				normValue = normalize(mappedValue + steps);
+			} else {
+				normValue = getNormEndAsLong();
+			}
+		}
+
+		return normValue;
+	}
+
+	/**
+	 * This method is used to retrieve the <b>normalized</b> shifted value for
+	 * the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to be shifted and normalized
+	 * @param steps
+	 *            a positive value to determine how many steps should be shifted
+	 * @param towardsStart
+	 *            the direction to shift the value to, i.e. {@code true} means
+	 *            that the value will be shifted towards the start, otherwise
+	 *            {@code false} towards the end
+	 * 
+	 * @return the shifted value, whereby the edges are recognized
+	 */
+	public byte shiftToByte(final Object value, final int steps,
+			final boolean towardsStart) {
+		return Numbers.castToByte(shiftToLong(value, steps, towardsStart));
+	}
+
+	/**
+	 * This method is used to retrieve the <b>normalized</b> shifted value for
+	 * the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to be shifted and normalized
+	 * @param steps
+	 *            a positive value to determine how many steps should be shifted
+	 * @param towardsStart
+	 *            the direction to shift the value to, i.e. {@code true} means
+	 *            that the value will be shifted towards the start, otherwise
+	 *            {@code false} towards the end
+	 * 
+	 * @return the shifted value, whereby the edges are recognized
+	 */
+	public short shiftToShort(final Object value, final int steps,
+			final boolean towardsStart) {
+		return Numbers.castToShort(shiftToLong(value, steps, towardsStart));
+	}
+
+	/**
+	 * This method is used to retrieve the <b>normalized</b> shifted value for
+	 * the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the value to be shifted and normalized
+	 * @param steps
+	 *            a positive value to determine how many steps should be shifted
+	 * @param towardsStart
+	 *            the direction to shift the value to, i.e. {@code true} means
+	 *            that the value will be shifted towards the start, otherwise
+	 *            {@code false} towards the end
+	 * 
+	 * @return the shifted value, whereby the edges are recognized
+	 */
+	public int shiftToInt(final Object value, final int steps,
+			final boolean towardsStart) {
+		return Numbers.castToInt(shiftToLong(value, steps, towardsStart));
 	}
 
 	/**
@@ -369,7 +466,7 @@ public abstract class BaseMapper<T> {
 
 	/**
 	 * Resolves the specified normalized value (i.e. the value which was
-	 * returned by {@link #mapToLong(Object)}.
+	 * returned by {@link #mapToLong(Object)}).
 	 * 
 	 * @param value
 	 *            the normalized long value
@@ -382,12 +479,14 @@ public abstract class BaseMapper<T> {
 
 	/**
 	 * This is the concrete implementation of the demapping used to map a
-	 * normalized value to the concrete value.
+	 * <b>denormalize</b> value to the concrete value.
 	 * 
 	 * @param value
 	 *            the denormalized value
 	 * 
 	 * @return the concrete value
+	 * 
+	 * @see #denormalize(long)
 	 */
 	public abstract T demap(final long value);
 
@@ -479,6 +578,40 @@ public abstract class BaseMapper<T> {
 	 */
 	public long getNormEndAsLong() {
 		return distance;
+	}
+
+	/**
+	 * Formats the {@code value} to a readable value. This method gets the real
+	 * value (i.e. the source-value). Use {@link #resolve(long)} to resolve an
+	 * identifier to it's real value prior to calling this method.
+	 * 
+	 * @param value
+	 *            the source-value to be mapped to a formatted value
+	 * 
+	 * @return the formatted value
+	 */
+	@SuppressWarnings("unchecked")
+	public String format(final Object value) {
+		if (value == null) {
+			return null;
+		} else if (getMappedType().isAssignableFrom(value.getClass())) {
+			return formatValue((T) value);
+		} else {
+			throw new IllegalArgumentException("Invalid value '" + value
+					+ "' for mapper '" + getClass().getName() + "'.");
+		}
+	}
+
+	/**
+	 * Formats the value to a string for output.
+	 * 
+	 * @param value
+	 *            the value to be formatted
+	 * 
+	 * @return the formatted value
+	 */
+	protected String formatValue(final T value) {
+		return value == null ? null : value.toString();
 	}
 
 	@Override

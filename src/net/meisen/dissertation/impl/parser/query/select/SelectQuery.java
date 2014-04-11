@@ -1,9 +1,13 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.TimeSeriesEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
+import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.parser.query.IQuery;
 
 public class SelectQuery implements IQuery {
@@ -49,22 +53,25 @@ public class SelectQuery implements IQuery {
 
 	@Override
 	public SelectQueryResult evaluate(final TidaModel model) {
-		final DescriptorLogicEvaluator evaluator = new DescriptorLogicEvaluator(
-				model);
-		final SelectQueryResult queryResult = new SelectQueryResult();
+
+		// the result holder
+		final SelectQueryResult queryResult = new SelectQueryResult(this);
 
 		// determine the filter results
-		final Bitmap filterBitmap = evaluator.evaluateTree(filter);
+		final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
+				model);
+		final Bitmap filterBitmap = descriptorEvaluator.evaluateTree(filter);
 		queryResult.setFilterResult(filterBitmap);
 
 		// determine the IntervalIndexDimensionSlices
-		final boolean startInclusive = interval.getOpenType().isInclusive();
-		final boolean endInclusive = interval.getCloseType().isInclusive();
-		model.getIndex().getIntervalIndexDimensionSlices(interval.getStart(),
-				interval.getEnd(), startInclusive, endInclusive);
+		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
+				model);
+		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator
+				.evaluateFilteredInterval(interval, filterBitmap);
+		queryResult.setTimeSeriesResult(timeSeriesResult);
 
 		// TODO Go On! now we have to merge...
-		
+
 		return queryResult;
 	}
 

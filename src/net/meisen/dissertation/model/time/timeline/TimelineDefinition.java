@@ -2,11 +2,11 @@ package net.meisen.dissertation.model.time.timeline;
 
 import java.util.Date;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.time.DateNormalizer;
 import net.meisen.dissertation.model.time.DateNormalizer.RoundType;
 import net.meisen.dissertation.model.time.granularity.DateFormat;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
-import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.granularity.Year;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Objects;
@@ -45,17 +45,18 @@ public class TimelineDefinition {
 
 	private final ITimeGranularity granularity;
 	private final Class<?> type;
-	
+
 	private Object start;
 	private Object end;
 
 	/**
 	 * The default constructor defines a {@code Timeline} which starts today
-	 * (i.e. a truncated now) and ends in the next year using a grnaularity of
-	 * seconds.
+	 * (i.e. a truncated now) and ends in the next year using a granularity of
+	 * day.
 	 */
 	public TimelineDefinition() {
-		this((String) null, (String) null, Second.instance());
+		this((String) null, (String) null, DefaultValues
+				.getDefaultGranularityInstance());
 		setDuration(OFFSET, Position.START, Year.instance());
 	}
 
@@ -535,5 +536,10 @@ public class TimelineDefinition {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "[" + start + ", " + end + "] : " + granularity;
 	}
 }

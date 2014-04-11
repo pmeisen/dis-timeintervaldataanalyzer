@@ -65,4 +65,9 @@ public class DateMapper extends BaseMapper<Date> {
 				+ "' - '" + Dates.createStringFromDate(demap(getEnd()), format)
 				+ "'";
 	}
+
+	@Override
+	public String formatValue(final Date value) {
+		return Dates.formatDate((Date) value, "dd.MM.yyyy HH:mm:ss,SSS");
+	}
 }

@@ -1,10 +1,15 @@
-package net.meisen.dissertation.impl.parser.query.select.logical;
+package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
+import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
+import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;

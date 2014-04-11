@@ -44,7 +44,7 @@ public class ByteIntervalIndex extends BaseIntervalIndex {
 	@Override
 	public void index(final int dataId, final Object start, final Object end) {
 		final byte normStart = get(start, true);
-		final byte normEnd = get(end, false);		
+		final byte normEnd = get(end, false);
 		setInterval(normStart, normEnd, dataId);
 	}
 
@@ -156,12 +156,14 @@ public class ByteIntervalIndex extends BaseIntervalIndex {
 	}
 
 	/**
-	 * Set the values of the interval within the index.
+	 * Sets the specified interval [{@code normStart}, {@code normEnd}] to true.
 	 * 
 	 * @param normStart
-	 *            the
+	 *            the start of the interval (included)
 	 * @param normEnd
+	 *            the end of the interval (included)
 	 * @param recId
+	 *            the value to be set to true within the slice
 	 */
 	protected void setInterval(final byte normStart, final byte normEnd,
 			final int recId) {
@@ -188,17 +190,26 @@ public class ByteIntervalIndex extends BaseIntervalIndex {
 	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-				
-		byte startByte = getMapper().mapToByte(start);
-		byte endByte = getMapper().mapToByte(end);
 
-		if (!startInclusive) {
-			startByte = Numbers.castToByte(startByte + 1);
-		}
-		if (!endInclusive) {
-			endByte = Numbers.castToByte(endByte - 1);
-		}
-
+		final byte startByte = startInclusive ? getMapper().mapToByte(start)
+				: getMapper().shiftToByte(start, 1, false);
+		final byte endByte = endInclusive ? getMapper().mapToByte(end)
+				: getMapper().shiftToByte(end, 1, true);
 		return getSlices(startByte, endByte);
+	}
+
+	@Override
+	public Object getValue(final Object start, final boolean startInclusive,
+			final long pos) {
+
+		// determine the position, i.e. the normalized value
+		byte valuePos = getMapper().mapToByte(start);
+		if (!startInclusive) {
+			valuePos = Numbers.castToByte(valuePos + pos + 1);
+		} else {
+			valuePos = Numbers.castToByte(valuePos + pos);
+		}
+
+		return getValue(valuePos);
 	}
 }
