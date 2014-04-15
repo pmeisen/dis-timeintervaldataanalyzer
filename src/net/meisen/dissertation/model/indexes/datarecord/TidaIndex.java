@@ -345,11 +345,15 @@ public class TidaIndex implements IPersistable {
 	 * @return the slices, which might contain {@code null} and are totally
 	 *         ordered by the timeline
 	 */
-	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
-			final Object start, final Object end, final boolean startInclusive,
+	public IndexDimensionSlice<?>[] getIntervalIndexSlices(final Object start,
+			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		return intervalIndex.getIntervalIndexDimensionSlices(start, end,
-				startInclusive, endInclusive);
+		return intervalIndex
+				.getSlices(start, end, startInclusive, endInclusive);
+	}
+
+	public IndexDimensionSlice<?>[] getIntervalIndexSlices() {
+		return intervalIndex.getSlices();
 	}
 
 	/**
@@ -417,7 +421,7 @@ public class TidaIndex implements IPersistable {
 	 * 
 	 * @param value
 	 *            the value to generate a label for
-	 *            
+	 * 
 	 * @return the label for the specified value
 	 */
 	public String getTimePointLabel(final Object value) {

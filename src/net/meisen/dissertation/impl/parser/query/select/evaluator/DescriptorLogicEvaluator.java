@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
@@ -24,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A evaluator to evaluate a {@code DescriptorLogicTree} based on a {@code TidaModel}.
+ * A evaluator to evaluate a {@code DescriptorLogicTree} based on a
+ * {@code TidaModel}.
  * 
  * @author pmeisen
  * 
@@ -38,9 +40,11 @@ public class DescriptorLogicEvaluator {
 	private final MetaDataModel metaDataModel;
 
 	/**
-	 * The evaluator
+	 * Constructor to create a evaluator used to evaluate a
+	 * {@code DescriptorLogicTree}, used within the filter condition of a query.
 	 * 
 	 * @param model
+	 *            the {@code TidaModel} to evaluate against
 	 */
 	public DescriptorLogicEvaluator(final TidaModel model) {
 
@@ -182,23 +186,57 @@ public class DescriptorLogicEvaluator {
 		}
 
 		// get the addressed descriptor
-		final Descriptor<?, ?, ?> desc = descModel.getDescriptorByString(cmp
-				.getValue());
-		if (desc == null) {
-			return indexFactory.createBitmap();
+		if (cmp.containsWildchar()) {
+
+			/*
+			 * In the case of wildchars, we have to combine all the descriptors
+			 * hit by the selector, i.e. combine those all with an OR.
+			 */
+			final Collection<?> descriptors = descModel.getDescriptors();
+			final List<Bitmap> bitmaps = new ArrayList<Bitmap>();
+			for (final Object d : descriptors) {
+				final Descriptor<?, ?, ?> desc = (Descriptor<?, ?, ?>) d;
+				if (cmp.matches(desc.getUniqueString())) {
+					final IndexDimensionSlice<?> slice = index
+							.getMetaIndexDimensionSlice(cmp.getId(),
+									desc.getId());
+
+					// add the slice if we have bitmap
+					if (slice != null) {
+						bitmaps.add(slice.getBitmap());
+					}
+				}
+			}
+
+			if (bitmaps.size() == 0) {
+				return indexFactory.createBitmap();
+			} else if (bitmaps.size() == 1) {
+				return bitmaps.get(0).copy();
+			} else {
+				return Bitmap.or(indexFactory, bitmaps.toArray());
+			}
 		} else {
-
-			// use the index to retrieve the slice
-			final IndexDimensionSlice<?> slice = index
-					.getMetaIndexDimensionSlice(cmp.getId(), desc.getId());
-
-			// check if we have a slice, otherwise we assume null
-			if (slice == null) {
+			/*
+			 * We just look for the one string and return the slice of the one
+			 * descriptor
+			 */
+			final Descriptor<?, ?, ?> desc = descModel
+					.getDescriptorByString(cmp.getValue());
+			if (desc == null) {
 				return indexFactory.createBitmap();
 			} else {
-				return slice.getBitmap().copy();
+
+				// use the index to retrieve the slice
+				final IndexDimensionSlice<?> slice = index
+						.getMetaIndexDimensionSlice(cmp.getId(), desc.getId());
+
+				// check if we have a slice, otherwise we assume null
+				if (slice == null) {
+					return indexFactory.createBitmap();
+				} else {
+					return slice.getBitmap().copy();
+				}
 			}
 		}
 	}
-
 }

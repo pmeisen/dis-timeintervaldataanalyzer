@@ -6,7 +6,6 @@ import java.util.Deque;
 import java.util.List;
 
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 
 public class DescriptorLogicTree {
 	private RootNode root;

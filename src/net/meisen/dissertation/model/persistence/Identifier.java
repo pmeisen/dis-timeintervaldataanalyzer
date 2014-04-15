@@ -22,9 +22,9 @@ public class Identifier {
 	 * @param id
 	 *            the id
 	 * @param items
-	 *            the items of the {@code Group}
+	 *            the items of the {@code SelectGroup}
 	 * 
-	 * @see Group
+	 * @see SelectGroup
 	 */
 	public Identifier(final String id, final String... items) {
 		this(id, new Group(items));
@@ -39,7 +39,7 @@ public class Identifier {
 	 * @param group
 	 *            the group
 	 * 
-	 * @see Group
+	 * @see SelectGroup
 	 */
 	public Identifier(final String id, final Group group) {
 		validate(id);

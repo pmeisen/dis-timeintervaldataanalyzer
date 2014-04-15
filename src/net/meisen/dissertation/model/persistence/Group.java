@@ -65,7 +65,7 @@ public class Group {
 	}
 
 	/**
-	 * Creates a new {@code Group} by appending the specified item.
+	 * Creates a new {@code SelectGroup} by appending the specified item.
 	 * 
 	 * @param item
 	 *            the item to append
@@ -133,26 +133,26 @@ public class Group {
 	}
 
 	/**
-	 * Creates a {@code Group} based on a string.
+	 * Creates a {@code SelectGroup} based on a string.
 	 * 
 	 * @param group
 	 *            the string representation of a group
 	 * 
-	 * @return the created {@code Group}
+	 * @return the created {@code SelectGroup}
 	 */
 	public static Group createFromString(final String group) {
 		return createFromString(group, DEF_SEPARTOR);
 	}
 
 	/**
-	 * Creates a {@code Group} based on a string.
+	 * Creates a {@code SelectGroup} based on a string.
 	 * 
 	 * @param group
 	 *            the string representation of a group
 	 * @param separator
 	 *            the separator used within the string
 	 * 
-	 * @return the created {@code Group}
+	 * @return the created {@code SelectGroup}
 	 */
 	public static Group createFromString(final String group,
 			final String separator) {

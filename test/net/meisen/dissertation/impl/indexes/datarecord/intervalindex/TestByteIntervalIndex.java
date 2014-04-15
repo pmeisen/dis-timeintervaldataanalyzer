@@ -47,7 +47,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testInclusionAllSlicesAvailable() {
 		final IndexDimensionSlice<?>[] res = byteIdx
-				.getIntervalIndexDimensionSlices(1001, 1050, true, true);
+				.getSlices(1001, 1050, true, true);
 
 		assertEquals(50, res.length);
 		for (int i = 0; i < 50; i++) {
@@ -62,7 +62,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testInclusionSlicesPartiallyAvailable() {
 		final IndexDimensionSlice<?>[] res = byteIdx
-				.getIntervalIndexDimensionSlices(1001, 1100, true, true);
+				.getSlices(1001, 1100, true, true);
 
 		/*
 		 * We expect to retrieve values for the first 1001 - 1059 (1010 + 49)
@@ -84,7 +84,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testExclusionAllSlicesAvailable() {
 		final IndexDimensionSlice<?>[] res = byteIdx
-				.getIntervalIndexDimensionSlices(1001, 1050, false, false);
+				.getSlices(1001, 1050, false, false);
 
 		assertEquals(48, res.length);
 		for (int i = 0; i < 48; i++) {
@@ -99,7 +99,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testPartialAllSlicesAvailable() {
 		final IndexDimensionSlice<?>[] resLeft = byteIdx
-				.getIntervalIndexDimensionSlices(1021, 1050, true, false);
+				.getSlices(1021, 1050, true, false);
 
 		assertEquals(29, resLeft.length);
 		for (int i = 0; i < 29; i++) {
@@ -107,7 +107,7 @@ public class TestByteIntervalIndex {
 		}
 
 		final IndexDimensionSlice<?>[] resRight = byteIdx
-				.getIntervalIndexDimensionSlices(1021, 1050, false, true);
+				.getSlices(1021, 1050, false, true);
 
 		assertEquals(29, resRight.length);
 		for (int i = 0; i < 29; i++) {
@@ -121,7 +121,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testInclusionInvalidInterval() {
 		final IndexDimensionSlice<?>[] res = byteIdx
-				.getIntervalIndexDimensionSlices(1051, 1050, true, true);
+				.getSlices(1051, 1050, true, true);
 
 		assertEquals(0, res.length);
 	}
@@ -133,7 +133,7 @@ public class TestByteIntervalIndex {
 	@Test
 	public void testExclusionInvalidInterval() {
 		final IndexDimensionSlice<?>[] res = byteIdx
-				.getIntervalIndexDimensionSlices(1050, 1050, false, true);
+				.getSlices(1050, 1050, false, true);
 		assertEquals(0, res.length);
 	}
 }

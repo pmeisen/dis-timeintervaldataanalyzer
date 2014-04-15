@@ -9,13 +9,16 @@ import static org.junit.Assert.assertTrue;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
@@ -23,6 +26,7 @@ import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectQueryResult;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
+import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
@@ -253,7 +257,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		final DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
 		assertEquals("singleEqual", leaf.get().getId());
-		assertEquals("singleEqualValue", leaf.get().getValue());
+		assertEquals("singleEqualValue", leaf.get().getRawValue());
 	}
 
 	/**
@@ -271,7 +275,59 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		final DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
 		assertEquals("bracketsSingleEqual", leaf.get().getId());
-		assertEquals("bracketsSingleEqualValue", leaf.get().getValue());
+		assertEquals("bracketsSingleEqualValue", leaf.get().getRawValue());
+	}
+
+	/**
+	 * Tests the retrieval of a simple group.
+	 */
+	@Test
+	public void testParsingOfNoGroupBy() {
+		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014)");
+		final GroupExpression group = query.getGroup();
+
+		final Set<String> descriptors = group.getDescriptors();
+		assertEquals(0, descriptors.size());
+	}
+
+	/**
+	 * Tests the retrieval of a simple group.
+	 */
+	@Test
+	public void testParsingOfSimpleGroupBy() {
+		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third");
+		final GroupExpression group = query.getGroup();
+
+		final Set<String> descriptors = group.getDescriptors();
+		assertEquals(3, descriptors.size());
+		final Iterator<String> it = descriptors.iterator();
+		assertEquals("first", it.next());
+		assertEquals("second", it.next());
+		assertEquals("third", it.next());
+	}
+
+	/**
+	 * Tests the retrieval of a group with defined exclusions.
+	 */
+	@Test
+	public void testParsingOfGroupByWithExclusion() {
+		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third ignore {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
+		final GroupExpression group = query.getGroup();
+
+		final Set<String> descriptors = group.getDescriptors();
+		assertEquals(3, descriptors.size());
+		final Iterator<String> itDesc = descriptors.iterator();
+		assertEquals("first", itDesc.next());
+		assertEquals("second", itDesc.next());
+		assertEquals("third", itDesc.next());
+
+		assertEquals(1, group.getExclusions().size());
+		final List<DescriptorValue> excls = group.getExclusions().iterator()
+				.next().getValues();
+		assertEquals(3, excls.size());
+		assertEquals("\\hallo\\", excls.get(0).getValue());
+		assertEquals("pleasematch.*", excls.get(1).getValue());
+		assertEquals("formula is a * b", excls.get(2).getValue());
 	}
 
 	/**
@@ -303,11 +359,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the values
 		assertEquals("first", first.get().getId());
-		assertEquals("firstValue", first.get().getValue());
+		assertEquals("firstValue", first.get().getRawValue());
 		assertEquals("second", second.get().getId());
-		assertEquals("secondValue", second.get().getValue());
+		assertEquals("secondValue", second.get().getRawValue());
 		assertEquals("third", third.get().getId());
-		assertEquals("thirdValue", third.get().getValue());
+		assertEquals("thirdValue", third.get().getRawValue());
 
 		assertEquals(LogicalOperator.AND, and.get());
 		assertEquals(first, and.getChild(0));
@@ -347,9 +403,9 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// check the values
 		assertEquals("HALLO", hallo.get().getId());
-		assertEquals("500", hallo.get().getValue());
+		assertEquals("500", hallo.get().getRawValue());
 		assertEquals("HELLO", hello.get().getId());
-		assertEquals("LALA", hello.get().getValue());
+		assertEquals("LALA", hello.get().getRawValue());
 
 		assertEquals(LogicalOperator.NOT, notHallo.get());
 		assertEquals(hallo, notHallo.getChild(0));
@@ -679,6 +735,23 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 2) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 3) > -1);
+	}
+
+	@Test
+	public void testAllTimeSelection() {
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectQueryResult res = (SelectQueryResult) factory
+				.evaluateQuery(q(query), loader);
+
+		// check the result's filter
+		System.out.println(res.getTimeSeriesResult());
 	}
 
 	@Test

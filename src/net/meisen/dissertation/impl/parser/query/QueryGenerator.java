@@ -1,15 +1,22 @@
 package net.meisen.dissertation.impl.parser.query;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorEqualContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueTupelContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorSelectTypeContext;
@@ -20,10 +27,13 @@ import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.LongIntervalValue;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
+import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Strings;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * A generator to generate a {@code Query} from a {@code QueryGrammarParser}.
@@ -123,22 +133,21 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitCompDescriptorEqual(final CompDescriptorEqualContext ctx) {
+		final String id = ctx.IDENTIFIER().getText();
+		final String value = getDescValue(ctx.selectorDescValue());
 
-		final DescriptorComperator descCmp = new DescriptorComperator();
-
-		// get the used reference
-		descCmp.setId(ctx.IDENTIFIER().getText());
-
-		if (ctx.NULL_VALUE() != null) {
-			descCmp.setValue(null);
-		} else {
-
-			// get the value the descriptor should have
-			descCmp.setValue(Strings.trimSequence(ctx.DESC_VALUE().getText(),
-					"'").replace("\\", ""));
-		}
-
+		final DescriptorComperator descCmp = new DescriptorComperator(id, value);
 		q(SelectQuery.class).getFilter().attach(descCmp);
+	}
+
+	@Override
+	public void exitExprGroup(final ExprGroupContext ctx) {
+
+		// validate the created group
+		if (!q(SelectQuery.class).getGroup().isValid()) {
+			// TODO throw exception;
+			throw new IllegalArgumentException("INVALID GROUP");
+		}
 	}
 
 	@Override
@@ -194,6 +203,42 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		q(SelectQuery.class).setModelId(ctx.IDENTIFIER().getText());
 	}
 
+	@Override
+	public void enterExprAggregate(
+			final QueryGrammarParser.ExprAggregateContext ctx) {
+	}
+
+	@Override
+	public void exitExprAggregate(final ExprAggregateContext ctx) {
+		final List<String> identifiers = new ArrayList<String>();
+
+		// get all the defined identifiers
+		for (final TerminalNode identifier : ctx.IDENTIFIER()) {
+			identifiers.add(identifier.getText());
+		}
+
+		// set the retrieved identifiers
+		q(SelectQuery.class).getGroup().setDescriptors(identifiers);
+	}
+
+	@Override
+	public void exitCompGroupIgnore(final CompGroupIgnoreContext ctx) {
+		final GroupExpression groupExpr = q(SelectQuery.class).getGroup();
+		for (final SelectorDescValueTupelContext descValueCtx : ctx
+				.selectorDescValueTupel()) {
+
+			// determine the values
+			final List<String> values = new ArrayList<String>();
+			for (final SelectorDescValueContext selectorDesc : descValueCtx
+					.selectorDescValue()) {
+				values.add(getDescValue(selectorDesc));
+			}
+
+			// add an exclusion
+			groupExpr.addExclusion(values);
+		}
+	}
+
 	/**
 	 * Gets the {@code query} casted to the needed return type.
 	 * 
@@ -245,5 +290,25 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 */
 	public boolean isOptimize() {
 		return optimize;
+	}
+
+	/**
+	 * Gets the defined descriptor value from the parsed string, i.e.
+	 * {@code 'value' => value} or {@code 'v\\al\'ue' => v\al'ue}.
+	 * 
+	 * @param selectorDesc
+	 *            the text to retrieve the descriptor value for
+	 * @return the descriptors value
+	 */
+	protected String getDescValue(final SelectorDescValueContext selectorDesc) {
+		if (selectorDesc.NULL_VALUE() != null) {
+			return null;
+		} else {
+
+			// get the value the descriptor should have
+			final String value = selectorDesc.DESC_VALUE().getText();
+			return Strings.trimSequence(value, "'").replace("\\'", "'")
+					.replace("\\\\", "\\");
+		}
 	}
 }

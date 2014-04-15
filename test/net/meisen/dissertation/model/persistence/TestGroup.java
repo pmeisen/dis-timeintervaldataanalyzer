@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
- * Tests the implementation of {@code Group}.
+ * Tests the implementation of {@code SelectGroup}.
  * 
  * @author pmeisen
  * 
@@ -79,7 +79,7 @@ public class TestGroup {
 	}
 
 	/**
-	 * Tests the creation of a {@code Group} based on a string.
+	 * Tests the creation of a {@code SelectGroup} based on a string.
 	 */
 	@Test
 	public void testCreationFromString() {

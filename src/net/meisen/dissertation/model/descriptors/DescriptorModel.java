@@ -427,13 +427,35 @@ public class DescriptorModel<I extends Object> {
 	}
 
 	/**
-	 * Gets all the {@code Descriptors} of {@code this} model.
+	 * Gets the {@code Descriptors} of {@code this} model. The list does
+	 * <b>not</b> include a {@code NullDescriptor} if one is used by the model.
+	 * To get all descriptors use {@link #getAllDescriptors()}.
 	 * 
 	 * @return all the {@code Descriptors} of {@code this} model
 	 */
 	@SuppressWarnings("unchecked")
 	public Collection<Descriptor<?, ?, I>> getDescriptors() {
 		return (Collection<Descriptor<?, ?, I>>) getDescriptorIndex().getAll();
+	}
+
+	/**
+	 * Gets all the {@code Descriptors} of {@code this} model.
+	 * 
+	 * @return all the {@code Descriptors} of {@code this} model
+	 */
+	public Collection<Descriptor<?, ?, I>> getAllDescriptors() {
+
+		if (supportsNullDescriptor()) {
+
+			// create a list with the null descriptor
+			final List<Descriptor<?, ?, I>> list = new ArrayList<Descriptor<?, ?, I>>();
+			list.add(getNullDescriptor());
+			list.addAll(getDescriptors());
+
+			return list;
+		} else {
+			return getDescriptors();
+		}
 	}
 
 	/**

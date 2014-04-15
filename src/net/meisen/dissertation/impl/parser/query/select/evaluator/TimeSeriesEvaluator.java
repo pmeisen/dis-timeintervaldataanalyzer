@@ -7,27 +7,41 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 
 public class TimeSeriesEvaluator {
-
 	private final TidaIndex index;
-	private BaseIndexFactory indexFactory;
+	private final BaseIndexFactory indexFactory;
+	private final TimelineDefinition timeline;
 
 	public TimeSeriesEvaluator(final TidaModel model) {
 		index = model.getIndex();
 		indexFactory = model.getIndexFactory();
+		timeline = model.getIntervalModel().getTimelineDefinition();
 	}
 
-	public TimeSeriesResult evaluateFilteredInterval(final Interval interval,
+	public TimeSeriesResult evaluateInterval(final Interval interval,
 			final Bitmap filter) {
 
 		// determine the interval
-		final boolean startInclusive = interval.getOpenType().isInclusive();
-		final boolean endInclusive = interval.getCloseType().isInclusive();
-		final IndexDimensionSlice<?>[] timeSlices = index
-				.getIntervalIndexDimensionSlices(interval.getStart(),
-						interval.getEnd(), startInclusive, endInclusive);
-		
+		final boolean startInclusive;
+		final boolean endInclusive;
+		final IndexDimensionSlice<?>[] timeSlices;
+		final Object startPoint;
+
+		if (interval == null) {
+			startInclusive = true;
+			endInclusive = true;
+			timeSlices = index.getIntervalIndexSlices();
+			startPoint = timeline.getStart();
+		} else {
+			startInclusive = interval.getOpenType().isInclusive();
+			endInclusive = interval.getCloseType().isInclusive();
+			timeSlices = index.getIntervalIndexSlices(interval.getStart(),
+					interval.getEnd(), startInclusive, endInclusive);
+			startPoint = interval.getStart();
+		}
+
 		// create the result
 		final TimeSeriesResult result = new TimeSeriesResult(timeSlices.length,
 				indexFactory);
@@ -47,8 +61,8 @@ public class TimeSeriesEvaluator {
 			}
 
 			// create a label for the instance
-			final Object labelValue = index.getTimePointValue(
-					interval.getStart(), startInclusive, pos);
+			final Object labelValue = index.getTimePointValue(startPoint,
+					startInclusive, pos);
 			final String label = index.getTimePointLabel(labelValue);
 			result.setLabel(pos, label, labelValue);
 
@@ -64,5 +78,4 @@ public class TimeSeriesEvaluator {
 
 		return result;
 	}
-
 }

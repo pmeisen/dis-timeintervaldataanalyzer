@@ -37,6 +37,8 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.QueryParsingException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.exceptions.GroupEvaluatorException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />    
         <entry key="net.meisen.dissertation.exceptions.QueryEvaluationException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 

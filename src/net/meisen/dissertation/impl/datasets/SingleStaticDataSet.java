@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.datasets;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -190,9 +191,14 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 	public int getSize() {
 		return entries.length;
 	}
-	
+
 	@Override
 	public boolean isOfflineAvailable() {
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.asList(entries).toString();
 	}
 }

@@ -28,6 +28,11 @@ import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.impl.indexes.datarecord.bitmap.TestEWAHBitmap;
 import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.TestByteIntervalIndex;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
+import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.TestDescriptorValue;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.TestDescriptorLogicEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.TestGroupEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.logical.TestGroupExpression;
 import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
@@ -130,32 +135,41 @@ import org.junit.runners.Suite;
 		TestMapperFactory.TestMapperFactorySuite.class,
 
 		// Test the dataRetrievers
-		TestDataCollection.class, TestDataRecord.class,
+		TestDataCollection.class,
+		TestDataRecord.class,
 		TestDbDataRetriever.class,
 		TestFixedStructureDataRetriever.class,
 
 		// Test the dataSets
-		TestSingleStaticDataSet.class, TestDataRetrieverDataSet.class,
+		TestSingleStaticDataSet.class,
+		TestDataRetrieverDataSet.class,
 		TestMultipleDataSetIterator.class,
 
 		// Test the different created instances
-		TestDataStructure.class, TestMetaDataModel.class, TestDataModel.class,
+		TestDataStructure.class,
+		TestMetaDataModel.class,
+		TestDataModel.class,
 
 		// Test the xsd and xslt
-		TestXsdTidaModel.class, TestXsltTidaModel.class,
+		TestXsdTidaModel.class,
+		TestXsltTidaModel.class,
 
 		// Test some bitmap implementations
 		TestEWAHBitmap.class,
 
 		// Test the tida-indexes
-		TestMetaIndexDimension.class, TestMetaIndex.class,
-		TestBaseIntervalIndex.class, TestByteIntervalIndex.class,
+		TestMetaIndexDimension.class,
+		TestMetaIndex.class,
+		TestBaseIntervalIndex.class,
+		TestByteIntervalIndex.class,
 
 		// Test the handler
 		TestTidaModelHandler.class,
 
 		// Test the query
-		TestQueryFactory.class,
+		TestDescriptorValue.class, TestDescriptorComperator.class,
+		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
+		TestGroupEvaluator.class, TestQueryFactory.class,
 
 		// Test the server
 		TestTidaServer.class })

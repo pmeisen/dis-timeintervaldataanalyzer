@@ -345,7 +345,7 @@ public abstract class BaseIntervalIndex implements IDataRecordIndex {
 	 * 
 	 * @return the slices between
 	 */
-	public abstract IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+	public abstract IndexDimensionSlice<?>[] getSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive);
 

@@ -38,7 +38,7 @@ public class TestIdentifier {
 		assertEquals("my.group.TEST", id.toString("."));
 		assertTrue(id.equals(id));
 		assertTrue(id.equals(new Identifier("TEST", "my", "group")));
-		assertFalse(id.equals(new Identifier("TEST", "my", "Group")));
+		assertFalse(id.equals(new Identifier("TEST", "my", "SelectGroup")));
 		assertFalse(id.equals(null));
 	}
 

@@ -1,18 +1,19 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
 import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.TimeSeriesEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
+import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
 import net.meisen.dissertation.model.parser.query.IQuery;
 
 public class SelectQuery implements IQuery {
 
 	private final DescriptorLogicTree filter;
+	private final GroupExpression group;
 
 	private String modelId;
 	private ResultType type;
@@ -20,6 +21,7 @@ public class SelectQuery implements IQuery {
 
 	public SelectQuery() {
 		filter = new DescriptorLogicTree();
+		group = new GroupExpression();
 	}
 
 	public void setResultType(final ResultType type) {
@@ -63,11 +65,17 @@ public class SelectQuery implements IQuery {
 		final Bitmap filterBitmap = descriptorEvaluator.evaluateTree(filter);
 		queryResult.setFilterResult(filterBitmap);
 
+		// determine the different groups
+		final GroupEvaluator groupEvaluator = new GroupEvaluator(model);
+		final Bitmap[] groupBitmaps = groupEvaluator
+				.evaluateGroupExpression(group);
+
 		// determine the IntervalIndexDimensionSlices
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
 		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator
-				.evaluateFilteredInterval(interval, filterBitmap);
+				.evaluateInterval(interval, filterBitmap);
+
 		queryResult.setTimeSeriesResult(timeSeriesResult);
 
 		// TODO Go On! now we have to merge...
@@ -90,4 +98,12 @@ public class SelectQuery implements IQuery {
 		this.modelId = modelId;
 	}
 
+	/**
+	 * Gets the defined {@code GroupExpresion} for the select query.
+	 * 
+	 * @return the defined {@code GroupExpresion}
+	 */
+	public GroupExpression getGroup() {
+		return group;
+	}
 }

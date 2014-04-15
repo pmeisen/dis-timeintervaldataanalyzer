@@ -426,4 +426,9 @@ public class MetaDataModel {
 	public void setOfflineModeByString(final String mode) {
 		setOfflineMode(OfflineMode.find(mode));
 	}
+	
+	@Override
+	public String toString() {
+		return descriptorModels.toString();
+	}
 }

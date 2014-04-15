@@ -186,7 +186,7 @@ public class IntIntervalIndex extends BaseIntervalIndex {
 	}
 
 	@Override
-	public IndexDimensionSlice<?>[] getIntervalIndexDimensionSlices(
+	public IndexDimensionSlice<?>[] getSlices(
 			final Object start, final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
 
