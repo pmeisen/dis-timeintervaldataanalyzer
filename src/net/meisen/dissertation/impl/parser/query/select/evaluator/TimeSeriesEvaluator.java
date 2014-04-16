@@ -21,7 +21,8 @@ public class TimeSeriesEvaluator {
 	}
 
 	public TimeSeriesResult evaluateInterval(final Interval interval,
-			final Bitmap filter) {
+			final DescriptorLogicResult filterResult,
+			final GroupResult groupResult) {
 
 		// determine the interval
 		final boolean startInclusive;
@@ -54,10 +55,10 @@ public class TimeSeriesEvaluator {
 			final Bitmap resBitmap;
 			if (timeSlice == null) {
 				resBitmap = null;
-			} else if (filter == null) {
+			} else if (filterResult == null) {
 				resBitmap = timeSlice.getBitmap();
 			} else {
-				resBitmap = filter.and(timeSlice.getBitmap());
+				resBitmap = filterResult.getBitmap().and(timeSlice.getBitmap());
 			}
 
 			// create a label for the instance

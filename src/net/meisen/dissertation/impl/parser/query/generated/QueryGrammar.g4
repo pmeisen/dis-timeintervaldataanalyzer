@@ -28,16 +28,17 @@ package net.meisen.dissertation.impl.parser.query.generated;
 // select statement to select timeSeries or records for a timeWindow (exprInterval)
 exprSelect   : STMT_SELECT selectorSelectType OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprLogic)? (OP_GROUPBY exprGroup)? EOF;
 exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
-exprAggregate: IDENTIFIER (SEPARATOR IDENTIFIER)*;
+exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 exprLogic    : exprComp+;
 exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 
 // define different comparators for metaData
-compDescriptorEqual     : IDENTIFIER CMP_EQUAL selectorDescValue;
+compDescriptorEqual     : selectorDescriptorId CMP_EQUAL selectorDescValue;
 compGroupIgnore         : BRACKET_CURLY_OPENED selectorDescValueTupel (SEPARATOR selectorDescValueTupel)* BRACKET_CURLY_CLOSED;
 
-selectorModelId         : IDENTIFIER;
+selectorModelId         : MARKED_ID | ID;
+selectorDescriptorId    : MARKED_ID | ID;
 selectorSelectType      : TYPE_TIMESERIES | TYPE_RECORDS;
 selectorDateInterval    : DATE SEPARATOR DATE;
 selectorIntInterval     : INT SEPARATOR INT;
@@ -46,13 +47,15 @@ selectorCloseInterval   : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 selectorDescValueTupel  : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
 selectorDescValue       : (DESC_VALUE | NULL_VALUE);
 
+MARKED_ID : SYM_IDMARKER ID SYM_IDMARKER;
+
+DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MASK))|~('\''|'\\'))*? SYM_DESC_VALUE;
+NULL_VALUE: N U L L;
+
 STMT_SELECT   : S E L E C T;
 
 TYPE_TIMESERIES: T I M E S E R I E S;
 TYPE_RECORDS   : R E C O R D S;
-
-NULL_VALUE: N U L L;
-DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MASK))|~('\''|'\\'))*? SYM_DESC_VALUE;
 
 OP_FROM     : F R O M;
 OP_IN       : I N;
@@ -84,13 +87,14 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
-IDENTIFIER: [A-Za-z][A-Za-z0-9_\-]*;
+ID        : [A-Za-z][A-Za-z0-9_\-]*;
 
 WHITESPACE: [ \t\r\n]+ -> skip;
 
 fragment SYM_ALL_MASK      : '*';
 fragment SYM_DESC_VALUE    : '\'';
 fragment SYM_QUOTE         : '\\';
+fragment SYM_IDMARKER      : '"';
 
 /*
  * There is no case insensitive matching, therefore we define

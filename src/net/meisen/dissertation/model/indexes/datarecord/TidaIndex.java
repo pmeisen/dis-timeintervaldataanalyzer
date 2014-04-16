@@ -352,6 +352,11 @@ public class TidaIndex implements IPersistable {
 				.getSlices(start, end, startInclusive, endInclusive);
 	}
 
+	/**
+	 * Get the slices of the {@code IntervalIndex}.
+	 * 
+	 * @return the slices of the {@code IntervalIndex}
+	 */
 	public IndexDimensionSlice<?>[] getIntervalIndexSlices() {
 		return intervalIndex.getSlices();
 	}
@@ -362,6 +367,15 @@ public class TidaIndex implements IPersistable {
 	 * @return the id of the next record added
 	 */
 	public int getNextDataId() {
+		return dataId;
+	}
+
+	/**
+	 * Gets the amount of stored records.
+	 * 
+	 * @return the amount of stored records
+	 */
+	public int getAmountOfRecords() {
 		return dataId;
 	}
 

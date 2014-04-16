@@ -8,8 +8,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.meisen.dissertation.impl.parser.query.select.SelectGroup;
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
@@ -239,56 +237,6 @@ public class GroupExpression {
 
 		return net.meisen.general.genmisc.collections.Collections.getPosition(
 				descriptorIds, descId);
-	}
-
-	/**
-	 * Checks if the specified {@code group} should be excluded from the group.
-	 * 
-	 * @param group
-	 *            the group to be checked
-	 *            
-	 * @return {@code true} if it has to be excluded, otherwise {@code false}.
-	 */
-	public boolean excludes(final SelectGroup group) {
-		int groupSize = group.size();
-
-		// check each defined exclusion
-		for (final GroupExclusion exclusion : exclusions) {
-				
-			for (int i = 0; i < groupSize; i++) {
-				/*
-				 * check if the exclusion can be fulfilled by the group,
-				 * otherwise we can skip it directly
-				 */
-				if (exclusion.getAmountOfValues() > groupSize) {
-					continue;
-				}
-				
-				// get the descriptor and the string of it
-				final Descriptor<?, ?, ?> descriptor = group.getDescriptor(i);
-				final String uniqueString = descriptor.getUniqueString();
-				
-				/*
-				 * if we don't match the exclusion we can stop here
-				 */
-				if (!exclusion.getValue(i).matches(uniqueString)) {
-					break;
-				}
-				/*
-				 * check if we reached the end of the exclusion, if so we
-				 * reached the end:
-				 * 
-				 * Example: group = ("Apple", "Philipp") and exclusion = ("A*")
-				 * the exclusion matches and there are not more values defined,
-				 * therefore it has to excluded.
-				 */
-				else if (exclusion.getAmountOfValues() == i + 1) {
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	@Override

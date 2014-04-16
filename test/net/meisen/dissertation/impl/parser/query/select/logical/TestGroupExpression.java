@@ -7,11 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
 
 import net.meisen.dissertation.config.TestConfig;
-import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.parser.query.select.SelectGroup;
-import net.meisen.dissertation.model.data.MetaDataModel;
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -152,48 +148,5 @@ public class TestGroupExpression extends ModuleBasedTest {
 		assertEquals(0, expr.getPosition("DESC1"));
 		assertEquals(1, expr.getPosition("DESC2"));
 		assertEquals(2, expr.getPosition("DESC3"));
-	}
-
-	/**
-	 * Tests the implementation of {@link GroupExpression#excludes(SelectGroup)}
-	 * .
-	 */
-	@Test
-	public void testExcludes() {
-		GroupExpression expr;
-		SelectGroup group;
-
-		// initialize the module
-		setModulesHolder("/net/meisen/dissertation/impl/parser/query/select/evaluator/testPersonModel.xml");
-		final TidaModel model = modulesHolder
-				.getModule(DefaultValues.TIDAMODEL_ID);
-		model.initialize();
-		model.loadData();
-
-		// get the metaData
-		final MetaDataModel metaData = model.getMetaDataModel();
-
-		// test the appending and checking
-		group = new SelectGroup();
-		expr = new GroupExpression("PERSON", "LOCATION", "SCREAMS");
-		expr.addExclusion("P*", "A*");
-
-		// add just one value, which fits but isn't excluded yet
-		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
-		assertFalse(expr.excludes(group));
-
-		// append another value which achieves a fit
-		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
-		assertTrue(expr.excludes(group));
-
-		// test a fast fit - e.g. we don't need to scan the whole group
-		group = new SelectGroup();
-		expr = new GroupExpression("PERSON", "LOCATION", "SCREAMS");
-		expr.addExclusion("P*");
-
-		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
-		assertTrue(expr.excludes(group));
-		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
-		assertTrue(expr.excludes(group));
 	}
 }

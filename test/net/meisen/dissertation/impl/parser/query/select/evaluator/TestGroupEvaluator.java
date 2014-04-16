@@ -2,19 +2,19 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
-import net.meisen.dissertation.impl.parser.query.select.SelectGroup;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.GroupValues;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.Group;
 import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -54,12 +54,51 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 	}
 
 	/**
-	 * Tests the exception to be thrown by the
-	 * {@link GroupEvaluator#getDescriptorValues(String, GroupExpression)}
-	 * implementation, when an invalid model is used.
+	 * Tests the implementation of {@link GroupEvaluator#excludes(Group, List)}
+	 * .
 	 */
 	@Test
-	public void testGetDescriptorValuesWithInvalidModelDescriptor() {
+	public void testExcludes() {
+		GroupExpression expr;
+		Group group;
+
+		// create the evaluator
+		final GroupEvaluator evaluator = new GroupEvaluator(model);
+
+		// get the metaData
+		final MetaDataModel metaData = model.getMetaDataModel();
+
+		// test the appending and checking
+		group = new Group();
+		expr = new GroupExpression("PERSON", "LOCATION", "SCREAMS");
+		expr.addExclusion("P*", "A*");
+
+		// add just one value, which fits but isn't excluded yet
+		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
+		assertFalse(evaluator.excludes(group, expr.getExclusions()));
+
+		// append another value which achieves a fit
+		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
+		assertTrue(evaluator.excludes(group, expr.getExclusions()));
+
+		// test a fast fit - e.g. we don't need to scan the whole group
+		group = new Group();
+		expr = new GroupExpression("PERSON", "LOCATION", "SCREAMS");
+		expr.addExclusion("P*");
+
+		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
+		assertTrue(evaluator.excludes(group, expr.getExclusions()));
+		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
+		assertTrue(evaluator.excludes(group, expr.getExclusions()));
+	}
+
+	/**
+	 * Tests the exception to be thrown by the
+	 * {@link GroupEvaluator#generateGroups(GroupExpression)} implementation,
+	 * when an invalid model is used.
+	 */
+	@Test
+	public void testGenerateGroupsWithInvalidModelDescriptor() {
 		thrown.expect(ForwardedRuntimeException.class);
 		thrown.expect(new TypeSafeMatcher<ForwardedRuntimeException>() {
 			private final String expected = "Number: '1000'";
@@ -79,71 +118,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		final GroupEvaluator evaluator = new GroupEvaluator(model);
 
 		// check a null descriptorId
-		evaluator.getDescriptorValues(null, new GroupExpression());
-	}
-
-	/**
-	 * Tests the exception to be thrown by the
-	 * {@link GroupEvaluator#getDescriptorValues(String, GroupExpression)}
-	 * implementation, when a valid model, but invalid for the group, is used.
-	 */
-	@Test
-	public void testGetDescriptorValuesWithInvalidGroupDescriptor() {
-		thrown.expect(ForwardedRuntimeException.class);
-		thrown.expect(new TypeSafeMatcher<ForwardedRuntimeException>() {
-			private final String expected = "Number: '1001'";
-
-			@Override
-			public void describeTo(final Description description) {
-				description.appendText(expected);
-			}
-
-			@Override
-			public boolean matchesSafely(final ForwardedRuntimeException item) {
-				return item.toString().contains(expected);
-			}
-		});
-
-		// create the evaluator
-		final GroupEvaluator evaluator = new GroupEvaluator(model);
-
-		// check a null descriptorId
-		final GroupExpression expression = new GroupExpression();
-		expression.addDescriptor("IDONTEXIST");
-		evaluator.getDescriptorValues("PERSON", expression);
-	}
-
-	/**
-	 * Tests the
-	 * {@link GroupEvaluator#getDescriptorValues(String, GroupExpression)}
-	 * implementation.
-	 */
-	@Test
-	public void testGetDescriptorValues() {
-		GroupExpression group;
-		GroupValues res;
-
-		// create the evaluator
-		final GroupEvaluator evaluator = new GroupEvaluator(model);
-
-		// check a group with all values (i.e. no exclusion)
-		group = new GroupExpression();
-		group.addDescriptors("PERSON", "LOCATION");
-		res = evaluator.getDescriptorValues("PERSON", group);
-		assertEquals(4, res.size());
-		assertEquals("PERSON", res.getDescriptorModelId());
-
-		// test the location with the null-pointer
-		res = evaluator.getDescriptorValues("LOCATION", group);
-		assertEquals(3, res.size());
-		assertEquals("LOCATION", res.getDescriptorModelId());
-
-		// test the data based descriptor
-		group = new GroupExpression();
-		group.addDescriptors("SCREAMS");
-		res = evaluator.getDescriptorValues("SCREAMS", group);
-		assertEquals(3, res.size());
-		assertEquals("SCREAMS", res.getDescriptorModelId());
+		evaluator.generateGroups(new GroupExpression("UNKNOWN"));
 	}
 
 	/**
@@ -154,7 +129,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 	public void testGenerateGroups() {
 		final MetaDataModel m = model.getMetaDataModel();
 
-		List<SelectGroup> res;
+		List<Group> res;
 		GroupExpression group;
 
 		// create the evaluator
@@ -178,7 +153,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		group = new GroupExpression("SCREAMS", "PERSON");
 		res = evaluator.generateGroups(group);
 		assertEquals(12, res.size());
-		for (final SelectGroup g : res) {
+		for (final Group g : res) {
 			assertEquals(2, g.size());
 			assertTrue(g.getDescriptor(0) instanceof IntegerDescriptor);
 			assertTrue(g.getDescriptor(1) instanceof ResourceDescriptor);
@@ -187,8 +162,9 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		// generate a group for three descriptors
 		group = new GroupExpression("LOCATION", "SCREAMS", "PERSON");
 		res = evaluator.generateGroups(group);
+		System.out.println(res);
 		assertEquals(36, res.size());
-		for (final SelectGroup g : res) {
+		for (final Group g : res) {
 			assertEquals(3, g.size());
 
 			/*
@@ -204,20 +180,19 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		group.addExclusion("*", "P*");
 		res = evaluator.generateGroups(group);
 		assertEquals(9, res.size());
-		for (final SelectGroup g : res) {
+		for (final Group g : res) {
 
 			// the descriptor 'Philipp' should been excluded
 			assertTrue(!g.getDescriptor(1).getUniqueString().equals("Philipp"));
 		}
 
-		// test the exclusion of values
-
+		// test the usage of several exclusions
 		group = new GroupExpression("SCREAMS", "PERSON");
 		group.addExclusion("*", "P*");
 		group.addExclusion("12", "\\**");
 		res = evaluator.generateGroups(group);
 		assertEquals(8, res.size());
-		for (final SelectGroup g : res) {
+		for (final Group g : res) {
 
 			// the descriptor 'Philipp' should been excluded
 			assertTrue(!g.getDescriptor(1).getValue().equals("Philipp"));
@@ -232,6 +207,29 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		group.addExclusion("*");
 		res = evaluator.generateGroups(group);
 		assertEquals(0, res.size());
+
+		// test the exclusion of null
+		group = new GroupExpression("LOCATION", "PERSON");
+		group.addExclusion((String) null);
+		res = evaluator.generateGroups(group);
+		assertEquals(8, res.size());
+		for (final Group g : res) {
+
+			// the null location should not be available
+			assertNotNull(g.getDescriptor(0).getValue());
+		}
+
+		group = new GroupExpression("PERSON", "LOCATION");
+		group.addExclusion("P*", (String) null);
+		res = evaluator.generateGroups(group);
+		assertEquals(11, res.size());
+		for (final Group g : res) {
+
+			// the null location should not be available
+			assertTrue(g.toString(),
+					!g.getDescriptor(0).getValue().equals("Philipp")
+							|| g.getDescriptor(1).getValue() != null);
+		}
 	}
 
 	/**
@@ -245,7 +243,9 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		// create the evaluator
 		final GroupEvaluator evaluator = new GroupEvaluator(model);
 		group = new GroupExpression();
-		evaluator.evaluateGroupExpression(group);
+		assertTrue(group.isValid());
+
+		assertNull(evaluator.evaluateGroupExpression(group));
 	}
 
 	/**
@@ -262,7 +262,24 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		group.setDescriptors("PERSON", "LOCATION");
 		assertTrue(group.isValid());
 
-		evaluator.evaluateGroupExpression(group);
+		final GroupResult res = evaluator.evaluateGroupExpression(group);
+		assertNotNull(res);
+		assertEquals(12, res.size());
+
+		// check the 6-entries we should have
+		GroupResultEntry entry;
+		entry = res.getEntry("Debbie", "Aachen");
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 4) == 0);
+		entry = res.getEntry("*Edison*", "Aachen");
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 5) == 0);
+		entry = res.getEntry("Philipp", null);
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 2) == 0);
+		entry = res.getEntry("Philipp", "Mönchengladbach");
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 1) == 0);
+		entry = res.getEntry("Philipp", "Aachen");
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 3) == 0);
+		entry = res.getEntry("Tobias", "Aachen");
+		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 0) == 0);
 	}
 
 	/**
@@ -281,9 +298,9 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		evaluator.evaluateGroupExpression(group);
 	}
 
-	private void assertContains(final List<SelectGroup> groups,
+	private void assertContains(final List<Group> groups,
 			final Descriptor<String, ?, ?> desc, final int position) {
-		for (final SelectGroup group : groups) {
+		for (final Group group : groups) {
 			if (group.getDescriptor(position).equals(desc)) {
 				return;
 			}

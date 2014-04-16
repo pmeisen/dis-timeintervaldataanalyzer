@@ -389,6 +389,15 @@ public class TidaModel implements IPersistable {
 		return idx.getNextDataId();
 	}
 
+	/**
+	 * Get the amount of stored records.
+	 * 
+	 * @return the amount of stored records
+	 */
+	public int getAmountOfRecords() {
+		return idx.getAmountOfRecords();
+	}
+
 	@Override
 	public void save(final BasePersistor persistor)
 			throws ForwardedRuntimeException {

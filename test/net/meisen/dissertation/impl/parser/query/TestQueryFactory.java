@@ -23,7 +23,8 @@ import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.SelectQueryResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
@@ -471,6 +472,23 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	}
 
 	/**
+	 * Tests the usage of reserved words as identifiers.
+	 */
+	@Test
+	public void testUsageOfReservedWords() {
+		final SelectQuery query = q("select timeseries from \"timeseries\" in [03.03.2014,05.03.2014) filter by \"FROM\"='1'");
+		assertEquals("timeseries", query.getModelId());
+
+		final DescriptorLogicTree tree = query.getFilter();
+		final List<ITreeElement> order = tree.getEvaluationOrder();
+		assertEquals(1, order.size());
+
+		final Object o = order.iterator().next();
+		assertTrue(o instanceof DescriptorLeaf);
+		assertEquals("FROM", ((DescriptorLeaf) o).get().getId());
+	}
+
+	/**
 	 * Tests the logical optimization for a simple query.
 	 */
 	@Test
@@ -537,6 +555,25 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	}
 
 	/**
+	 * Tests no filter.
+	 */
+	@Test
+	public void testExecutionWithNoFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014)";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+
+		// check the result's filter
+		assertNull(res.getFilterResult());
+	}
+
+	/**
 	 * Tests a simple filter.
 	 */
 	@Test
@@ -548,11 +585,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(1, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
@@ -574,11 +611,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(3, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
@@ -601,11 +638,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(3, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
@@ -628,11 +665,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(0, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
@@ -654,11 +691,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(4, filterRes.length);
 		assertTrue(Arrays.binarySearch(filterRes, 0) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
@@ -680,11 +717,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(2, filterRes.length);
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 1) > -1);
@@ -706,11 +743,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertEquals(0, filterRes.length);
 	}
 
@@ -726,15 +763,115 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
-		final int[] filterRes = res.getFilterResult().getIds();
+		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
 		assertFalse(Arrays.binarySearch(filterRes, 0) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 1) > -1);
 		assertFalse(Arrays.binarySearch(filterRes, 2) > -1);
 		assertTrue(Arrays.binarySearch(filterRes, 3) > -1);
+	}
+
+	/**
+	 * Tests the {@code SelectResult} when no {@code group by} is defined.
+	 */
+	@Test
+	public void testNoGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014)";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+
+		// check the result's filter
+		assertNull(res.getGroupResult());
+	}
+
+	/**
+	 * Tests the {@code SelectResult} when a single {@code group by} is defined.
+	 */
+	@Test
+	public void testSimpleGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(4, gRes.size());
+		assertNotNull(gRes.getEntry("Philipp"));
+		assertNotNull(gRes.getEntry("Debbie"));
+		assertNotNull(gRes.getEntry("Tobias"));
+		assertNotNull(gRes.getEntry("Edison"));
+	}
+
+	/**
+	 * Tests the {@code SelectResult} of a statement using two descriptors.
+	 */
+	@Test
+	public void testMultipleGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION, PERSON";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(12, gRes.size());
+		assertNotNull(gRes.getEntry("Aachen", "Philipp"));
+		assertNotNull(gRes.getEntry("Mönchengladbach", "Philipp"));
+		assertNotNull(gRes.getEntry("Undefined", "Philipp"));
+		assertNotNull(gRes.getEntry("Aachen", "Debbie"));
+		assertNotNull(gRes.getEntry("Mönchengladbach", "Debbie"));
+		assertNotNull(gRes.getEntry("Undefined", "Debbie"));
+		assertNotNull(gRes.getEntry("Aachen", "Tobias"));
+		assertNotNull(gRes.getEntry("Mönchengladbach", "Tobias"));
+		assertNotNull(gRes.getEntry("Undefined", "Tobias"));
+		assertNotNull(gRes.getEntry("Aachen", "Edison"));
+		assertNotNull(gRes.getEntry("Mönchengladbach", "Edison"));
+		assertNotNull(gRes.getEntry("Undefined", "Edison"));
+	}
+
+	/**
+	 * Tests a simple {@code group by} expression with some ignored values.
+	 */
+	@Test
+	public void testGroupByWithExclusion() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON ignore {('Philipp'), ('Tobias')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(2, gRes.size());
+		assertNotNull(gRes.getEntry("Debbie"));
+		assertNotNull(gRes.getEntry("Edison"));
 	}
 
 	@Test
@@ -747,8 +884,8 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
 		System.out.println(res.getTimeSeriesResult());
@@ -764,8 +901,8 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectQueryResult res = (SelectQueryResult) factory
-				.evaluateQuery(q(query), loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
 
 		// check the result's filter
 		System.out.println(res.getTimeSeriesResult());

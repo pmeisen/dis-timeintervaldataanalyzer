@@ -69,7 +69,7 @@ public class DescriptorLogicEvaluator {
 	 * 
 	 * @return a bitmap representing the selected records
 	 */
-	public Bitmap evaluateTree(final DescriptorLogicTree tree) {
+	public DescriptorLogicResult evaluateTree(final DescriptorLogicTree tree) {
 		final LogicalOperatorNode root = tree.getRoot();
 
 		if (LOG.isDebugEnabled()) {
@@ -78,7 +78,7 @@ public class DescriptorLogicEvaluator {
 
 		// check if the root has children, otherwise there is nothing to do
 		if (tree.getRoot().getChildren().size() != 0) {
-			return evaluateNode(root);
+			return new DescriptorLogicResult(evaluateNode(root));
 		} else {
 			return null;
 		}
@@ -211,7 +211,7 @@ public class DescriptorLogicEvaluator {
 			if (bitmaps.size() == 0) {
 				return indexFactory.createBitmap();
 			} else if (bitmaps.size() == 1) {
-				return bitmaps.get(0).copy();
+				return bitmaps.get(0);
 			} else {
 				return Bitmap.or(indexFactory, bitmaps.toArray());
 			}
@@ -234,7 +234,7 @@ public class DescriptorLogicEvaluator {
 				if (slice == null) {
 					return indexFactory.createBitmap();
 				} else {
-					return slice.getBitmap().copy();
+					return slice.getBitmap();
 				}
 			}
 		}

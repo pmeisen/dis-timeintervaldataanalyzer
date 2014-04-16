@@ -17,6 +17,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueTupelContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorSelectTypeContext;
@@ -32,8 +33,6 @@ import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Strings;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * A generator to generate a {@code Query} from a {@code QueryGrammarParser}.
@@ -133,7 +132,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitCompDescriptorEqual(final CompDescriptorEqualContext ctx) {
-		final String id = ctx.IDENTIFIER().getText();
+		final String id = getDescriptorModelId(ctx.selectorDescriptorId());
 		final String value = getDescValue(ctx.selectorDescValue());
 
 		final DescriptorComperator descCmp = new DescriptorComperator(id, value);
@@ -200,7 +199,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitSelectorModelId(final SelectorModelIdContext ctx) {
-		q(SelectQuery.class).setModelId(ctx.IDENTIFIER().getText());
+		q(SelectQuery.class).setModelId(getModelId(ctx));
 	}
 
 	@Override
@@ -213,8 +212,9 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		final List<String> identifiers = new ArrayList<String>();
 
 		// get all the defined identifiers
-		for (final TerminalNode identifier : ctx.IDENTIFIER()) {
-			identifiers.add(identifier.getText());
+		for (final SelectorDescriptorIdContext ctxId : ctx
+				.selectorDescriptorId()) {
+			identifiers.add(getDescriptorModelId(ctxId));
 		}
 
 		// set the retrieved identifiers
@@ -309,6 +309,40 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			final String value = selectorDesc.DESC_VALUE().getText();
 			return Strings.trimSequence(value, "'").replace("\\'", "'")
 					.replace("\\\\", "\\");
+		}
+	}
+
+	/**
+	 * Gets the identifier defined by the specified
+	 * {@code SelectorModelIdContext}.
+	 * 
+	 * @param ctx
+	 *            the context to retrieve the identifier from
+	 * 
+	 * @return the identifier defined by the {@code SelectorModelIdContext}
+	 */
+	protected String getModelId(final SelectorModelIdContext ctx) {
+		if (ctx.ID() != null) {
+			return ctx.ID().getText();
+		} else {
+			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
+		}
+	}
+
+	/**
+	 * Gets the identifier defined by the specified
+	 * {@code SelectorDescriptorIdContext}.
+	 * 
+	 * @param ctx
+	 *            the context to retrieve the identifier from
+	 * 
+	 * @return the identifier defined by the {@code SelectorDescriptorIdContext}
+	 */
+	protected String getDescriptorModelId(final SelectorDescriptorIdContext ctx) {
+		if (ctx.ID() != null) {
+			return ctx.ID().getText();
+		} else {
+			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
 		}
 	}
 }

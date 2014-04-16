@@ -2,6 +2,9 @@ package net.meisen.dissertation.impl.parser.query.select;
 
 import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluator;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.TimeSeriesEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
@@ -54,33 +57,9 @@ public class SelectQuery implements IQuery {
 	}
 
 	@Override
-	public SelectQueryResult evaluate(final TidaModel model) {
-
-		// the result holder
-		final SelectQueryResult queryResult = new SelectQueryResult(this);
-
-		// determine the filter results
-		final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
-				model);
-		final Bitmap filterBitmap = descriptorEvaluator.evaluateTree(filter);
-		queryResult.setFilterResult(filterBitmap);
-
-		// determine the different groups
-		final GroupEvaluator groupEvaluator = new GroupEvaluator(model);
-		final Bitmap[] groupBitmaps = groupEvaluator
-				.evaluateGroupExpression(group);
-
-		// determine the IntervalIndexDimensionSlices
-		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
-				model);
-		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator
-				.evaluateInterval(interval, filterBitmap);
-
-		queryResult.setTimeSeriesResult(timeSeriesResult);
-
-		// TODO Go On! now we have to merge...
-
-		return queryResult;
+	public SelectResult evaluate(final TidaModel model) {
+		final SelectEvaluator evaluator = new SelectEvaluator(model);
+		return evaluator.evaluate(this);
 	}
 
 	@Override

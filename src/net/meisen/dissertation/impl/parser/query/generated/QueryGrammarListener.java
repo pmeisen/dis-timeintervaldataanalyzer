@@ -44,6 +44,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprLogic(@NotNull QueryGrammarParser.ExprLogicContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDescriptorId}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorDescriptorId(@NotNull QueryGrammarParser.SelectorDescriptorIdContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorDescriptorId}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorDescriptorId(@NotNull QueryGrammarParser.SelectorDescriptorIdContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprGroup}.
 	 * @param ctx the parse tree
 	 */
@@ -99,17 +110,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprInterval}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprInterval}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorIntInterval}.
 	 * @param ctx the parse tree
 	 */
@@ -119,6 +119,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorIntInterval(@NotNull QueryGrammarParser.SelectorIntIntervalContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprInterval}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprInterval}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorEqual}.

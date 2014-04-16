@@ -6,20 +6,46 @@ import java.util.Deque;
 import java.util.List;
 
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 
+/**
+ * Logic representing a filter definition, based on values of {@code Descriptor}
+ * instances.
+ * 
+ * @author pmeisen
+ * 
+ * @see Descriptor
+ * 
+ */
 public class DescriptorLogicTree {
 	private RootNode root;
 	private LogicalOperatorNode currentNode;
 
+	/**
+	 * Constructor to create an empty logic-tree.
+	 */
 	public DescriptorLogicTree() {
 		this.root = new RootNode();
 		this.currentNode = root;
 	}
-	
+
+	/**
+	 * Gets the root of the tree.
+	 * 
+	 * @return the root of the tree
+	 */
 	public LogicalOperatorNode getRoot() {
 		return root;
 	}
 
+	/**
+	 * Attaches the specified {@code LogicalOperator} to the tree. The
+	 * {@code LogicalOperator} is attached as {@code LogicalOperatorNode} to the
+	 * current node. The <b>current node is changed</b> to be the attached node.
+	 * 
+	 * @param operator
+	 *            the {@code LogicalOperator} to be attached
+	 */
 	public void attach(final LogicalOperator operator) {
 
 		// add a new logicNode
@@ -29,11 +55,26 @@ public class DescriptorLogicTree {
 		this.currentNode = ln;
 	}
 
+	/**
+	 * Attaches the specified {@code DescriptorComperator} to the tree. The
+	 * {@code DescriptorComperator} is attached as is to the current node. The
+	 * <b>current node is not changed</b> to be the attached node.
+	 * 
+	 * @param dc
+	 *            the {@code DescriptorComperator} to be attached
+	 */
 	public void attach(final DescriptorComperator dc) {
 		this.currentNode.attachChild(dc);
 	}
 
-	public void moveUp() {
+	/**
+	 * Moves the current node up to the parent of the current node. If the
+	 * current node is the root node, an exception is thrown.
+	 * 
+	 * @throws IllegalStateException
+	 *             if the method is called and the current node is the root node
+	 */
+	public void moveUp() throws IllegalStateException {
 		final LogicalOperatorNode parent = this.currentNode.getParent();
 		if (parent == null) {
 			throw new IllegalStateException(
@@ -43,6 +84,12 @@ public class DescriptorLogicTree {
 		}
 	}
 
+	/**
+	 * Creates a list of elements of the tree ordered by evaluation order of the
+	 * different nodes of the tree.
+	 * 
+	 * @return a list of elements of the tree ordered by evaluation order
+	 */
 	public List<ITreeElement> getEvaluationOrder() {
 		final List<ITreeElement> order = new ArrayList<ITreeElement>();
 
@@ -60,6 +107,14 @@ public class DescriptorLogicTree {
 		return order;
 	}
 
+	/**
+	 * Helper method to create the evaluation ordered list.
+	 * 
+	 * @param node
+	 *            the current node used to fill the stack
+	 * @param stack
+	 *            the stack to be filled
+	 */
 	protected void fillStack(final LogicalOperatorNode node,
 			final Deque<ITreeElement> stack) {
 
@@ -73,18 +128,28 @@ public class DescriptorLogicTree {
 			}
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return root.toString();
 	}
 
+	/**
+	 * Optimizes the whole tree, so that logical expressions are combined if
+	 * possible.
+	 */
 	public void optimize() {
 
 		// merge equal logical expressions
 		mergeLogicalOperators(root);
 	}
 
+	/**
+	 * Merges the {@code current} node and it's parent if logically possible.
+	 * 
+	 * @param current
+	 *            the node to be checked for merging
+	 */
 	protected void mergeLogicalOperators(final LogicalOperatorNode current) {
 
 		// get the parent
