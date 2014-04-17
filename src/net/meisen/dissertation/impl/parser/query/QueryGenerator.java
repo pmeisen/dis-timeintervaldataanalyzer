@@ -29,7 +29,7 @@ import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.LongIntervalValue;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
@@ -204,12 +204,13 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitSelectorAggrFunction(final SelectorAggrFunctionContext ctx) {
+		final String descModelId = getDescriptorModelId(ctx
+				.selectorDescriptorId());
+
 		final String functionName = ctx.selectorAggrFunctionName().getText();
-		final String descId = getDescriptorModelId(ctx.selectorDescriptorId());
-
-		System.out.println("------>" + functionName + " " + descId);
-
-		resolveAggregationFunction(functionName);
+		final IAggregationFunction aggFunc = resolveAggregationFunction(functionName);
+		
+		q(SelectQuery.class).addMeasure(descModelId, aggFunc);
 	}
 
 	@Override

@@ -15,7 +15,7 @@ import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.Group;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;

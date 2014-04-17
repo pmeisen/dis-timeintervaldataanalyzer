@@ -1,16 +1,23 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.measures.MeasureExpression;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 
 public class SelectQuery implements IQuery {
 
 	private final DescriptorLogicTree filter;
 	private final GroupExpression group;
+	private final List<MeasureExpression> measures;
 
 	private String modelId;
 	private ResultType type;
@@ -19,6 +26,7 @@ public class SelectQuery implements IQuery {
 	public SelectQuery() {
 		filter = new DescriptorLogicTree();
 		group = new GroupExpression();
+		measures = new ArrayList<MeasureExpression>();
 	}
 
 	public void setResultType(final ResultType type) {
@@ -70,7 +78,7 @@ public class SelectQuery implements IQuery {
 	public void setModelId(final String modelId) {
 		this.modelId = modelId;
 	}
-	
+
 	/**
 	 * Gets the defined {@code GroupExpresion} for the select query.
 	 * 
@@ -79,8 +87,13 @@ public class SelectQuery implements IQuery {
 	public GroupExpression getGroup() {
 		return group;
 	}
-	
-	public void getMeasures() {
-		
+
+	public List<MeasureExpression> getMeasures() {
+		return Collections.unmodifiableList(measures);
+	}
+
+	public void addMeasure(final String descModelId,
+			final IAggregationFunction aggFunc) {
+		measures.add(new MeasureExpression(descModelId, aggFunc));
 	}
 }

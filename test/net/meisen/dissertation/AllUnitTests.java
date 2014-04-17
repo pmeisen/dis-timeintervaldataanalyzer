@@ -32,7 +32,7 @@ import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.TestDescriptorLogicEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.TestGroupEvaluator;
-import net.meisen.dissertation.impl.parser.query.select.logical.TestGroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.group.TestGroupExpression;
 import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;

@@ -9,8 +9,8 @@ import java.util.List;
 
 import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExclusion;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExclusion;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;

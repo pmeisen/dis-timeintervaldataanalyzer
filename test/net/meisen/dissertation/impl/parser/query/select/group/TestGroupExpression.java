@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.parser.query.select.logical;
+package net.meisen.dissertation.impl.parser.query.select.group;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -8,6 +8,8 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.help.ModuleBasedTest;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExclusion;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 

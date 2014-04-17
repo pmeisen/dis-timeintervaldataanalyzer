@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.parser.query.select.logical;
+package net.meisen.dissertation.impl.parser.query.select.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -6,9 +6,9 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 	public IIntermediateResult aggregate(final IIntermediateResult prevResult) {
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
-		return getName();
+		return getName().toUpperCase();
 	}
 }

@@ -18,6 +18,10 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.impl.measures.Average;
+import net.meisen.dissertation.impl.measures.Count;
+import net.meisen.dissertation.impl.measures.Max;
+import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
@@ -25,9 +29,9 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
@@ -279,15 +283,49 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertEquals("bracketsSingleEqualValue", leaf.get().getRawValue());
 	}
 
+	/**
+	 * Tests the parsing of a {@code SelectQuery} without any measure.
+	 */
 	@Test
-	public void testMeasures() {
-		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
-		
-		 q("select timeseries of whatsoever(PERSON) from testPersonModel");
-
-		query.getMeasures();
+	public void testNoMeasures() {
+		final SelectQuery query = q("select timeseries from testPersonModel");
+		assertEquals(0, query.getMeasures().size());
 	}
-	
+
+	/**
+	 * Tests the parsing of a {@code SelectQuery} with a single measure.
+	 */
+	@Test
+	public void testSingleMeasure() {
+		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
+		assertEquals(1, query.getMeasures().size());
+		assertTrue(query.getMeasures().get(0).getFunction() instanceof Count);
+		assertEquals("PERSON", query.getMeasures().get(0)
+				.getDescriptorModelId());
+	}
+
+	/**
+	 * Tests the parsing of a {@code SelectQuery} with multiple measures.
+	 */
+	@Test
+	public void testMultipleMeasure() {
+		final SelectQuery query = q("select timeseries of average(PERSON), min(PERSON), max(LOCATION) from testPersonModel");
+
+		assertEquals(3, query.getMeasures().size());
+
+		assertTrue(query.getMeasures().get(0).getFunction() instanceof Average);
+		assertEquals("PERSON", query.getMeasures().get(0)
+				.getDescriptorModelId());
+
+		assertTrue(query.getMeasures().get(1).getFunction() instanceof Min);
+		assertEquals("PERSON", query.getMeasures().get(1)
+				.getDescriptorModelId());
+
+		assertTrue(query.getMeasures().get(2).getFunction() instanceof Max);
+		assertEquals("LOCATION", query.getMeasures().get(2)
+				.getDescriptorModelId());
+	}
+
 	/**
 	 * Tests the retrieval of a simple group.
 	 */
@@ -882,7 +920,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertNotNull(gRes.getEntry("Debbie"));
 		assertNotNull(gRes.getEntry("Edison"));
 	}
-	
+
 	@Test
 	public void testAllTimeSelection() {
 
