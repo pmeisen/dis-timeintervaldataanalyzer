@@ -84,6 +84,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSelectorAggrFunction(@NotNull QueryGrammarParser.SelectorAggrFunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorAggrFunction(@NotNull QueryGrammarParser.SelectorAggrFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -162,6 +175,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -195,6 +221,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

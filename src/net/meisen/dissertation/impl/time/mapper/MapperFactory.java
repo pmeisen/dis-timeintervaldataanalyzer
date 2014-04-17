@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.time.mapper;
 
+import net.meisen.dissertation.exceptions.MapperFactoryException;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.mapper.IMapperFactoryConfig;
@@ -47,8 +48,9 @@ public class MapperFactory extends BaseMapperFactory {
 								+ "' must be of the type '"
 								+ MapperFactoryConfig.class.getName() + "'.");
 			} else {
-				// exceptionRegistry.throwException(MapperFactoryException.class,
-				// 1000, MapperFactoryConfig.class.getName());
+				exceptionRegistry.throwException(MapperFactoryException.class,
+						1000, getClass().getSimpleName(),
+						MapperFactoryConfig.class.getName());
 			}
 		} else {
 			this.config = (MapperFactoryConfig) config;

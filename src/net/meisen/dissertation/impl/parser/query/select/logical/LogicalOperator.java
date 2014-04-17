@@ -1,22 +1,28 @@
 package net.meisen.dissertation.impl.parser.query.select.logical;
 
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
+/**
+ * A {@code LogicalOperator} is used to define logical expressions. The
+ * specified {@code LogicalOperators} are complete in the sense of a Boolean
+ * algebra.
+ * 
+ * @author pmeisen
+ * 
+ */
 public enum LogicalOperator {
-	AND, OR, NOT;
-
-	public static LogicalOperator resolve(final ParserRuleContext ctx) {
-
-		if (ctx.getToken(QueryGrammarParser.LOGICAL_AND, 0) != null) {
-			return AND;
-		} else if (ctx.getToken(QueryGrammarParser.LOGICAL_OR, 0) != null) {
-			return OR;
-		} else if (ctx.getToken(QueryGrammarParser.LOGICAL_NOT, 0) != null) {
-			return NOT;
-		} else {
-			return null;
-		}
-	}
+	/**
+	 * Logical {@code AND}, i.e. {@code 1 && 1} is {@code 1}, everything else is
+	 * {@code 0}.
+	 */
+	AND,
+	/**
+	 * Logical {@code OR}, i.e. {@code 0 && 0} is {@code 0}, everything else is
+	 * {@code 1}.
+	 */
+	OR,
+	/**
+	 * Logical {@code NOT}, i.e. {@code 0} is {@code 1} and {@code 1} is
+	 * {@code 0}.
+	 */
+	NOT;
 }

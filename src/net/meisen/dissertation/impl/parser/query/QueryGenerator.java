@@ -14,6 +14,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueTupelContext;
@@ -30,9 +31,14 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
+import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
+import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Strings;
+
+import org.antlr.v4.runtime.ParserRuleContext;
 
 /**
  * A generator to generate a {@code Query} from a {@code QueryGrammarParser}.
@@ -43,6 +49,7 @@ import net.meisen.general.genmisc.types.Strings;
  * @author pmeisen
  */
 public class QueryGenerator extends QueryGrammarBaseListener {
+	private final AggregationFunctionHandler aggFuncHandler;
 	private final boolean optimize;
 
 	private IQuery query;
@@ -51,9 +58,14 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	/**
 	 * Generates a {@code QueryGenerator} which will trigger optimization after
 	 * complete generation.
+	 * 
+	 * @param aggFuncHandler
+	 *            the {@code AggregationFunctionHandler} used to resolve a used
+	 *            aggregation, can be {@code null} if not functions should be
+	 *            resolved
 	 */
-	public QueryGenerator() {
-		this(true);
+	public QueryGenerator(final AggregationFunctionHandler aggFuncHandler) {
+		this(aggFuncHandler, true);
 	}
 
 	/**
@@ -61,11 +73,17 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * {@code optimize} is {@code true}) or not optimize (i.e. {@code optimize}
 	 * is {@code false}) the created query.
 	 * 
+	 * @param aggFuncHandler
+	 *            the {@code AggregationFunctionHandler} used to resolve a used
+	 *            aggregation, can be {@code null} if not functions should be
+	 *            resolved
 	 * @param optimize
 	 *            {@code true} if the created query should be optimized,
 	 *            otherwise {@code false}
 	 */
-	public QueryGenerator(final boolean optimize) {
+	public QueryGenerator(final AggregationFunctionHandler aggFuncHandler,
+			final boolean optimize) {
+		this.aggFuncHandler = aggFuncHandler;
 		this.optimize = optimize;
 	}
 
@@ -104,7 +122,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void enterExprComp(final ExprCompContext ctx) {
-		final LogicalOperator op = LogicalOperator.resolve(ctx);
+		final LogicalOperator op = resolveLogicalOperator(ctx);
 
 		if (op == null) {
 			// do nothing
@@ -122,7 +140,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 
 		// check the not
-		final LogicalOperator op = LogicalOperator.resolve(ctx);
+		final LogicalOperator op = resolveLogicalOperator(ctx);
 		if (op == null) {
 			// do nothing
 		} else {
@@ -144,8 +162,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		// validate the created group
 		if (!q(SelectQuery.class).getGroup().isValid()) {
-			// TODO throw exception;
-			throw new IllegalArgumentException("INVALID GROUP");
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1008, ctx.getText());
 		}
 	}
 
@@ -153,9 +171,9 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	public void exitExprInterval(final ExprIntervalContext ctx) {
 
 		// determine the types of the interval
-		final IntervalType openType = IntervalType.resolve(ctx
+		final IntervalType openType = resolveIntervalType(ctx
 				.selectorOpenInterval());
-		final IntervalType closeType = IntervalType.resolve(ctx
+		final IntervalType closeType = resolveIntervalType(ctx
 				.selectorCloseInterval());
 
 		// determine the values
@@ -164,19 +182,18 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		// create the interval
 		final Interval<?> interval;
-		if (openType == null) {
-			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1002, ctx.getText());
-		} else if (closeType == null) {
-			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1002, ctx.getText());
-		} else if (dateCtx != null) {
-			interval = new Interval<Date>(
-					new DateIntervalValue(dateCtx.DATE(0)), openType,
-					new DateIntervalValue(dateCtx.DATE(1)), closeType);
+		if (dateCtx != null) {
+			final Date date1 = Dates.isDate(dateCtx.DATE(0).getText(),
+					Dates.GENERAL_TIMEZONE);
+			final Date date2 = Dates.isDate(dateCtx.DATE(1).getText(),
+					Dates.GENERAL_TIMEZONE);
+			interval = new Interval<Date>(new DateIntervalValue(date1),
+					openType, new DateIntervalValue(date2), closeType);
 		} else if (intCtx != null) {
-			interval = new Interval<Long>(new LongIntervalValue(intCtx.INT(0)),
-					openType, new LongIntervalValue(intCtx.INT(1)), closeType);
+			final long val1 = Long.parseLong(intCtx.INT(0).getText());
+			final long val2 = Long.parseLong(intCtx.INT(1).getText());
+			interval = new Interval<Long>(new LongIntervalValue(val1),
+					openType, new LongIntervalValue(val2), closeType);
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1004, ctx.getText());
@@ -186,15 +203,19 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
-	public void exitSelectorSelectType(final SelectorSelectTypeContext ctx) {
-		final ResultType type = ResultType.resolve(ctx);
+	public void exitSelectorAggrFunction(final SelectorAggrFunctionContext ctx) {
+		final String functionName = ctx.selectorAggrFunctionName().getText();
+		final String descId = getDescriptorModelId(ctx.selectorDescriptorId());
 
-		if (type == null) {
-			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1005, ctx.getText());
-		} else {
-			q(SelectQuery.class).setResultType(type);
-		}
+		System.out.println("------>" + functionName + " " + descId);
+
+		resolveAggregationFunction(functionName);
+	}
+
+	@Override
+	public void exitSelectorSelectType(final SelectorSelectTypeContext ctx) {
+		final ResultType type = resolveResultType(ctx);
+		q(SelectQuery.class).setResultType(type);
 	}
 
 	@Override
@@ -322,8 +343,10 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * @return the identifier defined by the {@code SelectorModelIdContext}
 	 */
 	protected String getModelId(final SelectorModelIdContext ctx) {
-		if (ctx.ID() != null) {
-			return ctx.ID().getText();
+		if (ctx.SIMPLE_ID() != null) {
+			return ctx.SIMPLE_ID().getText();
+		} else if (ctx.ENHANCED_ID() != null) {
+			return ctx.ENHANCED_ID().getText();
 		} else {
 			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
 		}
@@ -339,10 +362,120 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * @return the identifier defined by the {@code SelectorDescriptorIdContext}
 	 */
 	protected String getDescriptorModelId(final SelectorDescriptorIdContext ctx) {
-		if (ctx.ID() != null) {
-			return ctx.ID().getText();
+		if (ctx.SIMPLE_ID() != null) {
+			return ctx.SIMPLE_ID().getText();
+		} else if (ctx.ENHANCED_ID() != null) {
+			return ctx.ENHANCED_ID().getText();
 		} else {
 			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
+		}
+	}
+
+	/**
+	 * Resolves the name of the function to the concrete implementation of the
+	 * function.
+	 * 
+	 * @param functionName
+	 *            the name of the function
+	 * 
+	 * @return the instance of the {@code AggregationFunction}
+	 * 
+	 * @throws QueryParsingException
+	 *             if the function cannot be resolved, more detailed the
+	 *             {@code QueryParsingException} is wrapped within a
+	 *             {@code ForwardedRuntimeException}
+	 */
+	protected IAggregationFunction resolveAggregationFunction(
+			final String functionName) throws QueryParsingException {
+		if (aggFuncHandler == null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1010, functionName);
+		}
+
+		final IAggregationFunction func = aggFuncHandler.resolve(functionName);
+		if (func == null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1009, functionName);
+		} else {
+			return func;
+		}
+	}
+
+	/**
+	 * Resolves the {@code LogicalOperator} based on the specified context.
+	 * 
+	 * @param ctx
+	 *            the context used to resolve the
+	 * 
+	 * @return the resolved {@code LogicalOperator}, can be {@code null} if it
+	 *         cannot be resolved
+	 */
+	protected LogicalOperator resolveLogicalOperator(final ParserRuleContext ctx) {
+
+		if (ctx.getToken(QueryGrammarParser.LOGICAL_AND, 0) != null) {
+			return LogicalOperator.AND;
+		} else if (ctx.getToken(QueryGrammarParser.LOGICAL_OR, 0) != null) {
+			return LogicalOperator.OR;
+		} else if (ctx.getToken(QueryGrammarParser.LOGICAL_NOT, 0) != null) {
+			return LogicalOperator.NOT;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Determine the type of the interval based on the passed context of the
+	 * parser.
+	 * 
+	 * @param ctx
+	 *            the context of the parser to be checked
+	 * 
+	 * @return the determined {@code IntervalType}
+	 * 
+	 * @throws QueryParsingException
+	 *             if the {@code IntervalType} cannot be resolved, more detailed
+	 *             the {@code QueryParsingException} is wrapped within a
+	 *             {@code ForwardedRuntimeException}
+	 */
+	protected IntervalType resolveIntervalType(final ParserRuleContext ctx)
+			throws QueryParsingException {
+		if (ctx.getToken(QueryGrammarParser.BRACKET_ROUND_OPENED, 0) != null) {
+			return IntervalType.EXCLUDE;
+		} else if (ctx.getToken(QueryGrammarParser.BRACKET_ROUND_CLOSED, 0) != null) {
+			return IntervalType.EXCLUDE;
+		} else if (ctx.getToken(QueryGrammarParser.BRACKET_SQUARE_OPENED, 0) != null) {
+			return IntervalType.INCLUDE;
+		} else if (ctx.getToken(QueryGrammarParser.BRACKET_SQUARE_CLOSED, 0) != null) {
+			return IntervalType.INCLUDE;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1002, ctx.getText());
+		}
+	}
+
+	/**
+	 * Determines the {@code ResultType} from the context.
+	 * 
+	 * @param ctx
+	 *            the context of the parser to be checked
+	 * 
+	 * @return the resolved {@code ResultType}
+	 * 
+	 * @throws QueryParsingException
+	 *             if the {@code IntervalType} cannot be resolved, more detailed
+	 *             the {@code QueryParsingException} is wrapped within a
+	 *             {@code ForwardedRuntimeException}
+	 */
+	protected ResultType resolveResultType(final SelectorSelectTypeContext ctx)
+			throws QueryParsingException {
+
+		if (ctx.getToken(QueryGrammarParser.TYPE_RECORDS, 0) != null) {
+			return ResultType.RECORDS;
+		} else if (ctx.getToken(QueryGrammarParser.TYPE_TIMESERIES, 0) != null) {
+			return ResultType.TIMESERIES;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1005, ctx.getText());
 		}
 	}
 }

@@ -1,13 +1,19 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class LongIntervalValue extends IntervalValue<Long> {
+/**
+ * A {@code Long} used as a value within an interval.
+ * 
+ * @author pmeisen
+ */
+public class LongIntervalValue extends BaseIntervalValue<Long> {
 
-	public LongIntervalValue(final TerminalNode node) {
-		this(Long.parseLong(node.getText()));
-	}
-
+	/**
+	 * Creates a {@code LongIntervalValue} for the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the {@code Long} of {@code this}
+	 */
 	public LongIntervalValue(final Long value) {
 		super(value);
 	}

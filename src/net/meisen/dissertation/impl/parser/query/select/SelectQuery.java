@@ -1,16 +1,10 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicEvaluator;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.TimeSeriesEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.GroupExpression;
-import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQuery;
 
 public class SelectQuery implements IQuery {
@@ -76,7 +70,7 @@ public class SelectQuery implements IQuery {
 	public void setModelId(final String modelId) {
 		this.modelId = modelId;
 	}
-
+	
 	/**
 	 * Gets the defined {@code GroupExpresion} for the select query.
 	 * 
@@ -84,5 +78,9 @@ public class SelectQuery implements IQuery {
 	 */
 	public GroupExpression getGroup() {
 		return group;
+	}
+	
+	public void getMeasures() {
+		
 	}
 }

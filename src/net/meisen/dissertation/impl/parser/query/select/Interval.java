@@ -10,14 +10,30 @@ package net.meisen.dissertation.impl.parser.query.select;
  */
 public class Interval<T> {
 
-	private final IntervalValue<T> start;
-	private final IntervalValue<T> end;
+	private final BaseIntervalValue<T> start;
+	private final BaseIntervalValue<T> end;
 
 	private final IntervalType openType;
 	private final IntervalType closeType;
 
-	public Interval(final IntervalValue<T> start, final IntervalType openType,
-			final IntervalValue<T> end, final IntervalType closeType) {
+	/**
+	 * Creates an interval with the specified {@code start} and {@code end}
+	 * value. The {@code IntervalType} instances define if the {@code start} and
+	 * {@code end} is excluded or included, i.e. {@code [start, end]},
+	 * {@code (start, end]}, {@code [start, end)} or (start, end)}.
+	 * 
+	 * @param start
+	 *            the start value
+	 * @param openType
+	 *            the type of the start
+	 * @param end
+	 *            the end value
+	 * @param closeType
+	 *            the type of the end
+	 */
+	public Interval(final BaseIntervalValue<T> start,
+			final IntervalType openType, final BaseIntervalValue<T> end,
+			final IntervalType closeType) {
 
 		if (start == null || end == null) {
 			throw new NullPointerException("The start or end cannot be null.");
@@ -34,22 +50,47 @@ public class Interval<T> {
 		this.closeType = closeType;
 	}
 
+	/**
+	 * Gets the value of the start.
+	 * 
+	 * @return the value of the start
+	 */
 	public T getStart() {
 		return this.start.getValue();
 	}
 
+	/**
+	 * Gets the value of the end.
+	 * 
+	 * @return the value of the end
+	 */
 	public T getEnd() {
 		return this.end.getValue();
 	}
 
+	/**
+	 * Gets the {@code IntervalType} of the start.
+	 * 
+	 * @return the {@code IntervalType} of the start
+	 */
 	public IntervalType getOpenType() {
 		return this.openType;
 	}
 
+	/**
+	 * Gets the {@code IntervalType} of the end.
+	 * 
+	 * @return the {@code IntervalType} of the end
+	 */
 	public IntervalType getCloseType() {
 		return this.closeType;
 	}
 
+	/**
+	 * Get the type of the values of the interval.
+	 * 
+	 * @return the type of the values of the interval
+	 */
 	public Class<T> getType() {
 		return start.getType();
 	}

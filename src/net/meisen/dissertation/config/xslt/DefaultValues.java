@@ -1,12 +1,12 @@
 package net.meisen.dissertation.config.xslt;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -14,6 +14,14 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
+import net.meisen.dissertation.impl.measures.Average;
+import net.meisen.dissertation.impl.measures.Count;
+import net.meisen.dissertation.impl.measures.Max;
+import net.meisen.dissertation.impl.measures.Mean;
+import net.meisen.dissertation.impl.measures.Median;
+import net.meisen.dissertation.impl.measures.Min;
+import net.meisen.dissertation.impl.measures.Mode;
+import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
@@ -24,6 +32,8 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
+import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
@@ -97,7 +107,15 @@ public class DefaultValues {
 	 * 
 	 * @see ITimeGranularityFactory
 	 */
-	public static final String GRANULARTYFACTORY_ID = "granularityFactory";
+	public static final String GRANULARITYFACTORY_ID = "granularityFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code AggregationFunctionHandler}.
+	 * 
+	 * @see AggregationFunctionHandler
+	 */
+	public static final String AGGREGATIONFUNCTIONHANDLER_ID = "aggFunctionHandler";
+
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code QueryFactory}.
@@ -267,6 +285,45 @@ public class DefaultValues {
 	}
 
 	/**
+	 * Gets the comma-separated-classes of the default aggregation functions.
+	 * 
+	 * @return the comma-separated-classes of the default aggregation functions
+	 */
+	public static String getDefaultAggregationFunctions() {
+		final StringBuilder res = new StringBuilder();
+
+		String separator = "";
+		for (final Class<? extends IAggregationFunction> clazz : getAggregationFunctions()) {
+			res.append(separator);
+			res.append(clazz.getName());
+			separator = ",";
+		}
+
+		return res.toString();
+	}
+
+	/**
+	 * Method to get the classes of the default concrete
+	 * {@code IAggregationFunction}.
+	 * 
+	 * @return the classes of the default concrete {@code IAggregationFunction}
+	 */
+	public static List<Class<? extends IAggregationFunction>> getAggregationFunctions() {
+		final List<Class<? extends IAggregationFunction>> functions = new ArrayList<Class<? extends IAggregationFunction>>();
+
+		functions.add(Average.class);
+		functions.add(Count.class);
+		functions.add(Max.class);
+		functions.add(Min.class);
+		functions.add(Mean.class);
+		functions.add(Median.class);
+		functions.add(Mode.class);
+		functions.add(Sum.class);
+
+		return functions;
+	}
+
+	/**
 	 * Determines the class to be used for the specified {@code type}.
 	 * 
 	 * @param type
@@ -326,54 +383,5 @@ public class DefaultValues {
 		} else {
 			return String.class.getName();
 		}
-	}
-
-	/**
-	 * Helper method for the XSLT process, which provides the result of a method
-	 * defined by {@code methodName} as string with separators.
-	 * 
-	 * @param methodName
-	 *            the method to be executed
-	 * @param itemSeparator
-	 *            the separator used to separate the items from each other,
-	 *            whereby each item is a tuple (key and value)
-	 * @param keyValueSeparator
-	 *            the separator used to separate the key and the value from each
-	 *            other
-	 * 
-	 * @return the string used to represent the descriptors
-	 * 
-	 * @throws NoSuchMethodException
-	 *             if the specified method does not exist
-	 * @throws SecurityException
-	 *             if the specified method cannot be accessed
-	 * @throws InvocationTargetException
-	 *             if the method cannot be invoked, e.g. is not static
-	 * @throws IllegalAccessException
-	 *             if the method cannot be accessed
-	 * @throws IllegalArgumentException
-	 *             if some argument is invalid
-	 */
-	public static String getCsv(final String methodName,
-			final String itemSeparator, final String keyValueSeparator)
-			throws SecurityException, NoSuchMethodException,
-			IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		String s = "";
-
-		final Method method = DefaultValues.class.getMethod(methodName);
-		@SuppressWarnings("unchecked")
-		final Map<String, String> map = (Map<String, String>) method
-				.invoke(null);
-
-		String separator = "";
-		for (final Entry<String, String> e : map.entrySet()) {
-			s += separator + e.getKey() + keyValueSeparator + e.getValue();
-			if ("".equals(separator)) {
-				separator = itemSeparator;
-			}
-		}
-
-		return s;
 	}
 }

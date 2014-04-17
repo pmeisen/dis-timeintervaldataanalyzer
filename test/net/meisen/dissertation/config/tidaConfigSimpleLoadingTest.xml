@@ -10,4 +10,9 @@
     <granularities implementation="net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory" />
     <queries implementation="net.meisen.dissertation.config.xslt.mock.MockQueryFactory" />
   </factories>
+  
+  <aggregations>
+    <function implementation="net.meisen.dissertation.config.xslt.mock.MockAggregationFunction" />
+    <function implementation="net.meisen.dissertation.config.xslt.mock.MockMinAggregationFunction" />
+  </aggregations>
 </config>

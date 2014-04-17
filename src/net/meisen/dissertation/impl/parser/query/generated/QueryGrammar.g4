@@ -25,20 +25,30 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-// select statement to select timeSeries or records for a timeWindow (exprInterval)
-exprSelect   : STMT_SELECT selectorSelectType OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprLogic)? (OP_GROUPBY exprGroup)? EOF;
-exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
-exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
+/*
+ * Define the different expressions/parts of the statement
+ */
+exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprLogic)? (OP_GROUPBY exprGroup)? EOF;
+exprMeasure  : selectorAggrFunction (SEPARATOR selectorAggrFunction)*;
+exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprLogic    : exprComp+;
 exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
-exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
+exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
+exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 
-// define different comparators for metaData
+/*
+ * Define the different redudant definitions within the parts of the statement
+ */
 compDescriptorEqual     : selectorDescriptorId CMP_EQUAL selectorDescValue;
 compGroupIgnore         : BRACKET_CURLY_OPENED selectorDescValueTupel (SEPARATOR selectorDescValueTupel)* BRACKET_CURLY_CLOSED;
 
-selectorModelId         : MARKED_ID | ID;
-selectorDescriptorId    : MARKED_ID | ID;
+/*
+ * Define special selectors which make up a semantic based on specific tokens, 
+ * a selector is understood - in our case - as an atom, which cannot be a token,
+ * because it's semantic is context based
+ */
+selectorModelId         : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
+selectorDescriptorId    : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorSelectType      : TYPE_TIMESERIES | TYPE_RECORDS;
 selectorDateInterval    : DATE SEPARATOR DATE;
 selectorIntInterval     : INT SEPARATOR INT;
@@ -46,29 +56,58 @@ selectorOpenInterval    : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval   : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 selectorDescValueTupel  : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
 selectorDescValue       : (DESC_VALUE | NULL_VALUE);
+selectorAggrFunctionName: (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
+selectorAggrFunction    : selectorAggrFunctionName BRACKET_ROUND_OPENED selectorDescriptorId BRACKET_ROUND_CLOSED;
 
-MARKED_ID : SYM_IDMARKER ID SYM_IDMARKER;
+/*
+ * Define the different tokens, order is important because of first match, 
+ * i.e.
+ *  - specially marked tokens first, so that the marking is recognized
+ *  - reserved words second
+ *  - general tokens lately
+ */
+// "..." everything marked by quotes should be handled as identifier
+MARKED_ID : SYM_IDMARKER (SIMPLE_ID | ENHANCED_ID) SYM_IDMARKER;
 
+// '...' everything marked by single quotes should be handled as value of a descriptor
 DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MASK))|~('\''|'\\'))*? SYM_DESC_VALUE;
+// NULL used to identify a null descriptor-value
 NULL_VALUE: N U L L;
 
+// reserved word to define a SELECT statement
 STMT_SELECT   : S E L E C T;
 
+// reserved words to define the types of data to select
 TYPE_TIMESERIES: T I M E S E R I E S;
 TYPE_RECORDS   : R E C O R D S;
 
+// reserved words to define special positions in the statement
 OP_FROM     : F R O M;
+OP_OF       : O F;
 OP_IN       : I N;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y;
 
+// reserved words used for logic expressions 
 LOGICAL_OR      : O R | '||';
 LOGICAL_AND     : A N D | '&&';
 LOGICAL_NOT     : N O T | '!';
 LOGICAL_IGNORE  : I G N O R E;
 
+// reserved words used for aggregation functions
+AGGR_COUNT     : C O U N T;
+AGGR_SUM       : S U M;
+AGGR_MIN       : M I N;
+AGGR_MAX       : M A X;
+AGGR_AVERAGE   : A V E R A G E;
+AGGR_MODE      : M O D E;
+AGGR_MEAN      : M E A N;
+AGGR_MEDIAN    : M E D I A N;
+
+// reserved symbols used for comparison
 CMP_EQUAL       : '=';
 
+// reserved symbols used as different types of brakets
 BRACKET_ROUND_OPENED  : '(';
 BRACKET_ROUND_CLOSED  : ')';
 BRACKET_SQUARE_OPENED : '[';
@@ -76,8 +115,10 @@ BRACKET_SQUARE_CLOSED : ']';
 BRACKET_CURLY_OPENED  : '{';
 BRACKET_CURLY_CLOSED  : '}';
 
+// reserved symbol used for separation
 SEPARATOR   : ',';
 
+// define some special data types
 DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
             [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9] |
             [0-9][0-9][0-9][0-9]'-'[0-9][0-9]'-'[0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
@@ -87,10 +128,17 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
-ID        : [A-Za-z][A-Za-z0-9_\-]*;
 
+// define the strings allowed to occure 
+SIMPLE_ID   : [A-Za-z]+;
+ENHANCED_ID : [A-Za-z][A-Za-z0-9_\-]*;
+
+// ignore all not specially mentioned wildspaces
 WHITESPACE: [ \t\r\n]+ -> skip;
 
+/*
+ * Define some special tokens used for wildchars, and special markups.
+ */
 fragment SYM_ALL_MASK      : '*';
 fragment SYM_DESC_VALUE    : '\'';
 fragment SYM_QUOTE         : '\\';

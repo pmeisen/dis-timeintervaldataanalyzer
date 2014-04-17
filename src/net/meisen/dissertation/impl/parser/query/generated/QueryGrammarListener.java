@@ -66,6 +66,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprGroup(@NotNull QueryGrammarParser.ExprGroupContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorAggrFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorAggrFunction(@NotNull QueryGrammarParser.SelectorAggrFunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorAggrFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorAggrFunction(@NotNull QueryGrammarParser.SelectorAggrFunctionContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAggregate}.
 	 * @param ctx the parse tree
 	 */
@@ -132,6 +143,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorAggrFunctionName}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorAggrFunctionName}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorEqual}.
 	 * @param ctx the parse tree
 	 */
@@ -163,6 +185,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDescValueTupel}.

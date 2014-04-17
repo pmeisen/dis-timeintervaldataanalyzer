@@ -4,6 +4,12 @@ import java.util.List;
 
 import net.meisen.general.genmisc.types.Strings;
 
+/**
+ * The root of a {@code DescriptorLogicTree}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class RootNode extends LogicalOperatorNode {
 
 	@Override

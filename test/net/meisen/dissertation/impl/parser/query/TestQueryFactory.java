@@ -279,6 +279,15 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertEquals("bracketsSingleEqualValue", leaf.get().getRawValue());
 	}
 
+	@Test
+	public void testMeasures() {
+		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
+		
+		 q("select timeseries of whatsoever(PERSON) from testPersonModel");
+
+		query.getMeasures();
+	}
+	
 	/**
 	 * Tests the retrieval of a simple group.
 	 */
@@ -873,7 +882,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertNotNull(gRes.getEntry("Debbie"));
 		assertNotNull(gRes.getEntry("Edison"));
 	}
-
+	
 	@Test
 	public void testAllTimeSelection() {
 

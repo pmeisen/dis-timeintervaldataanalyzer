@@ -2,16 +2,22 @@ package net.meisen.dissertation.impl.parser.query.select;
 
 import java.util.Date;
 
-import net.meisen.general.genmisc.types.Dates;
+/**
+ * A {@code Date} used as a value within an interval.
+ * 
+ * @author pmeisen
+ * 
+ * @see Date
+ * 
+ */
+public class DateIntervalValue extends BaseIntervalValue<Date> {
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-public class DateIntervalValue extends IntervalValue<Date> {
-
-	public DateIntervalValue(final TerminalNode node) {
-		this(Dates.isDate(node.getText(), Dates.GENERAL_TIMEZONE));
-	}
-
+	/**
+	 * Creates a {@code DateIntervalValue} for the specified {@code value}.
+	 * 
+	 * @param value
+	 *            the {@code Date} of {@code this}
+	 */
 	public DateIntervalValue(final Date value) {
 		super(value);
 	}

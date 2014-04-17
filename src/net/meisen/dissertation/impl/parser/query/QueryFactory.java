@@ -7,6 +7,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarLexer;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
@@ -38,6 +39,13 @@ public class QueryFactory implements IQueryFactory {
 	protected IExceptionRegistry exceptionRegistry;
 
 	/**
+	 * The handler used to resolve aggregation-functions.
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.AGGREGATIONFUNCTIONHANDLER_ID)
+	protected AggregationFunctionHandler aggFuncHandler;
+
+	/**
 	 * Parses the query using the specified optimization setting.
 	 * 
 	 * @param queryString
@@ -65,7 +73,8 @@ public class QueryFactory implements IQueryFactory {
 			final CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 			// create a generator for queries
-			final QueryGenerator generator = new QueryGenerator(optimize);
+			final QueryGenerator generator = new QueryGenerator(aggFuncHandler,
+					optimize);
 
 			// create a walker which feeds the generator later
 			final ParseTreeWalker walker = new ParseTreeWalker();

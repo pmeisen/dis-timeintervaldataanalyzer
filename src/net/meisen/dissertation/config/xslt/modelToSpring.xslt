@@ -20,7 +20,7 @@
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
-  <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARTYFACTORY_ID')" />
+  <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
@@ -489,29 +489,5 @@
     <xsl:call-template name="beanDescriptorModel">
       <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.ResourceDescriptor</xsl:with-param>
     </xsl:call-template>
-  </xsl:template>
-  
-  <!--
-    Helper methods
-    -->
-  <xsl:template name="mapToEntries">
-    <xsl:param name="list" />
-    <xsl:param name="itemSeparator" />
-    <xsl:param name="keyValueSeparator" />
-    
-    <xsl:variable name="item" select="normalize-space(substring-before(concat($list, $itemSeparator), $itemSeparator))" />
-       
-    <xsl:if test="$item">
-      <xsl:variable name="key" select="substring-before($item, $keyValueSeparator)" />
-      <xsl:variable name="value" select="substring-after($item, $keyValueSeparator)" />
-    
-      <entry key="{$key}" value="{$value}" />
-
-      <xsl:call-template name="mapToEntries">
-        <xsl:with-param name="list" select="substring-after($list, $itemSeparator)" />
-        <xsl:with-param name="itemSeparator" select="$itemSeparator" />
-        <xsl:with-param name="keyValueSeparator" select="$keyValueSeparator" />
-      </xsl:call-template>
-    </xsl:if>
   </xsl:template>
 </xsl:stylesheet>

@@ -1,11 +1,21 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
-
+/**
+ * Defines the different types of intervals possible, i.e. {@code [..., ...)},
+ * {@code (..., ...)}, {@code [..., ...]}, {@code (..., ...]}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public enum IntervalType {
-	INCLUDE("[", "]"), EXCLUDE("(", ")");
+	/**
+	 * Defines the type to be included, i.e. a {@code [} or {@code ]} is used.
+	 */
+	INCLUDE("[", "]"),
+	/**
+	 * Defines the type to be included, i.e. a {@code (} or {@code )} is used.
+	 */
+	EXCLUDE("(", ")");
 
 	private final String open;
 	private final String close;
@@ -20,34 +30,24 @@ public enum IntervalType {
 		return open;
 	}
 
+	/**
+	 * Method which uses the open or close symbol for printing.
+	 * 
+	 * @param asOpen
+	 *            {@code true} if the interval is open, otherwise {@code false}
+	 * 
+	 * @return the string representation of the interval type
+	 */
 	public String toString(final boolean asOpen) {
 		return asOpen ? open : close;
 	}
-	
-	public boolean isInclusive() {
-		return INCLUDE.equals(this);
-	}
 
 	/**
-	 * Determine the type of the interval based on the passed context of the
-	 * parser.
+	 * Determines if the type is an inclusive or exclusive type.
 	 * 
-	 * @param ctx
-	 *            the context of the parser to be checked
-	 * 
-	 * @return the determined {@code IntervalType}
+	 * @return {@code true} if the type is inclusive, otherwise {@code false}
 	 */
-	public static IntervalType resolve(final ParserRuleContext ctx) {
-		if (ctx.getToken(QueryGrammarParser.BRACKET_ROUND_OPENED, 0) != null) {
-			return EXCLUDE;
-		} else if (ctx.getToken(QueryGrammarParser.BRACKET_ROUND_CLOSED, 0) != null) {
-			return EXCLUDE;
-		} else if (ctx.getToken(QueryGrammarParser.BRACKET_SQUARE_OPENED, 0) != null) {
-			return INCLUDE;
-		} else if (ctx.getToken(QueryGrammarParser.BRACKET_SQUARE_CLOSED, 0) != null) {
-			return INCLUDE;
-		} else {
-			return null;
-		}
+	public boolean isInclusive() {
+		return INCLUDE.equals(this);
 	}
 }
