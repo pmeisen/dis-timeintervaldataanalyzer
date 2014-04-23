@@ -11,8 +11,7 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.help.ModuleAndDbBasedTest;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndex;
+import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -20,15 +19,20 @@ import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Numbers;
+import net.meisen.general.sbconfigurator.api.IConfiguration;
+import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Tests the implementation of the {@code IntervalIndex}.
@@ -38,16 +42,23 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @ContextClass(TidaConfig.class)
 @ContextFile("sbconfigurator-core.xml")
-public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
+@RunWith(JUnitConfigurationRunner.class)
+public class TestIntervalIndex extends DbBasedTest {
 
 	@Autowired
 	private TidaModelHandler loader;
+
+	@Autowired(required = true)
+	@Qualifier("coreConfiguration")
+	private IConfiguration configuration;
 
 	private TidaModel loadModel(final String dbName, final String dbPath,
 			final String modelPath) throws IOException {
 		loader.unloadAll();
 
-		getDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/" + dbPath);
+		if (dbName != null && dbPath != null) {
+			getDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/" + dbPath);
+		}
 
 		// load the model
 		return loader
@@ -55,45 +66,27 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 						+ modelPath);
 	}
 
-	private BaseIntervalIndex createIndex(final TidaModel model)
-			throws IOException {
-		final BaseIntervalIndex idx = model.getIntervalModel().createIndex(
-				model.getDataStructure());
-		idx.setIntervalDataHandling(model.getIntervalDataHandling());
-
-		return idx;
-	}
-
-	private BaseIntervalIndex loadAndCreate(final String dbName,
+	private IntervalIndex loadAndIndex(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-		return createIndex(model);
-	}
-
-	private BaseIntervalIndex loadAndIndex(final String dbName,
-			final String dbPath, final String modelPath) throws IOException {
-		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-		final BaseIntervalIndex idx = createIndex(model);
 
 		// add the data to the index
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
-		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
 
 			// add the record
-			idx.index(i, rec);
-			i++;
+			model.getIndex().index(rec);
 		}
 		it.close();
 
-		return idx;
+		return model.getIndex().getIntervalIndex();
 	}
 
-	private int count(final IndexDimensionSlice<?>[] slices) {
+	private int count(final SliceWithDescriptors<?>[] slices) {
 		int counter = 0;
-		for (final IndexDimensionSlice<?> slice : slices) {
+		for (final SliceWithDescriptors<?> slice : slices) {
 			if (slice != null) {
 				counter++;
 			}
@@ -110,14 +103,14 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIntervalIndexFromDb() throws IOException {
-		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip", "tidaRandomDbIntervalIndex.xml");
 
 		// 12 Month in 10 years, random linear data
 		assertEquals(120, idx.getAmountOfSlices());
 
 		// there should be at least one value for each slice
-		for (final IndexDimensionSlice<?> slice : idx.getSlices()) {
+		for (final SliceWithDescriptors<?> slice : idx.getSlices()) {
 			assertTrue(slice.count() > 0);
 		}
 	}
@@ -130,20 +123,20 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesBoundaries() throws IOException {
-		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
-		assertTrue(idx instanceof ShortIntervalIndex);
 
 		// check the results within the day
-		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
-		assertEquals(0, shortidx.getStart());
-		assertEquals(1439, shortidx.getEnd());
-		for (short i = shortidx.getStart(); i < shortidx.getEnd(); i++) {
-			final IndexDimensionSlice<Short> slice = shortidx.getSliceById(i);
+		assertEquals(0, idx.getNormStart());
+		assertEquals(1439, idx.getNormEnd());
+		for (short i = (short) idx.getNormStart(); i < idx.getNormEnd(); i++) {
+			@SuppressWarnings("unchecked")
+			final SliceWithDescriptors<Short> slice = (SliceWithDescriptors<Short>) idx
+					.getSliceById(i);
 
 			if (i >= 0 && i <= 60) {
 				assertEquals("Bad value for " + i, 2, slice.count());
@@ -167,20 +160,20 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesOther() throws IOException {
-		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
-		assertTrue(idx instanceof ShortIntervalIndex);
 
 		// check the results within the day
-		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
-		assertEquals(0, shortidx.getStart());
-		assertEquals(1439, shortidx.getEnd());
-		for (short i = shortidx.getStart(); i < shortidx.getEnd(); i++) {
-			final IndexDimensionSlice<Short> slice = shortidx.getSliceById(i);
+		assertEquals(0, idx.getNormStart());
+		assertEquals(1439, idx.getNormEnd());
+		for (short i = (short) idx.getNormStart(); i < idx.getNormEnd(); i++) {
+			@SuppressWarnings("unchecked")
+			final SliceWithDescriptors<Short> slice = (SliceWithDescriptors<Short>) idx
+					.getSliceById(i);
 
 			if (i >= 0 && i <= 60 || i == 300 || i == 1080) {
 				assertEquals(2, slice.count());
@@ -198,39 +191,37 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinations() throws IOException {
-		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
-		assertTrue(idx instanceof ShortIntervalIndex);
-		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
 
 		// test combination
 		Bitmap bitmap;
 
 		// or combine
-		bitmap = shortidx.or((short) 60, (short) 65);
+		bitmap = idx.or(60, 65);
 		assertEquals(2, bitmap.determineCardinality());
-		bitmap = shortidx.or((short) 100, (short) 65);
+		bitmap = idx.or(100, 65);
 		assertEquals(0, bitmap.determineCardinality());
 
 		// and combine
-		bitmap = shortidx.and((short) 60, (short) 65);
+		bitmap = idx.and(60, 65);
 		assertEquals(1, bitmap.determineCardinality());
-		bitmap = shortidx.and((short) 300, (short) 300);
+		bitmap = idx.and(300, 300);
 		assertEquals(2, bitmap.determineCardinality());
-		bitmap = shortidx.and((short) 100, (short) 65);
+		bitmap = idx.and(100, 65);
 		assertEquals(0, bitmap.determineCardinality());
 
 		// test retrieval
-		IndexDimensionSlice<?>[] slices;
+		SliceWithDescriptors<?>[] slices;
 
 		// get
-		slices = shortidx.getSlices((short) 60, (short) 65);
+		slices = idx.getSlices(60, 65);
 		assertEquals(6, slices.length);
-		slices = shortidx.getSlices((short) 100, (short) 65);
+		slices = idx.getSlices(100, 65);
 		assertEquals(0, slices.length);
 	}
 
@@ -242,48 +233,46 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinationsWithNulls() throws IOException {
-		final BaseIntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
-		assertTrue(idx instanceof ShortIntervalIndex);
-		final ShortIntervalIndex shortidx = (ShortIntervalIndex) idx;
 
 		// test the logical conjunctions
 		Bitmap combined;
 
 		// or combine
-		combined = shortidx.or((short) 322, (short) 340);
+		combined = idx.or(322, 340);
 		assertEquals(1, combined.determineCardinality());
-		combined = shortidx.or((short) 323, (short) 340);
+		combined = idx.or(323, 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortidx.or((short) 320, (short) 100);
+		combined = idx.or(320, 100);
 		assertEquals(0, combined.determineCardinality());
 
 		// and combine
-		combined = shortidx.and((short) 320, (short) 340);
+		combined = idx.and(320, 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortidx.and((short) 323, (short) 340);
+		combined = idx.and(323, 340);
 		assertEquals(0, combined.determineCardinality());
-		combined = shortidx.and((short) 320, (short) 100);
+		combined = idx.and(320, 100);
 		assertEquals(0, combined.determineCardinality());
 
 		// test the slices retrieval
-		IndexDimensionSlice<?>[] slices;
+		SliceWithDescriptors<?>[] slices;
 
 		// get
-		slices = shortidx.getSlices((short) 320, (short) 340);
+		slices = idx.getSlices(320, 340);
 		assertEquals(21, slices.length);
 		for (short i = 0; i < slices.length; i++) {
 			if (i > 2) {
 				assertNull(slices[i]);
 			} else {
 				assertTrue(slices[i].getClass().getName(),
-						slices[i] instanceof IndexDimensionSlice);
+						slices[i] instanceof SliceWithDescriptors);
 				assertEquals((short) (i + 320),
-						((IndexDimensionSlice<?>) slices[i]).getId());
+						((SliceWithDescriptors<?>) slices[i]).getId());
 			}
 		}
 	}
@@ -314,8 +303,7 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
 
 		// create a saver instance
-		final ShortIntervalIndex idxidx = (ShortIntervalIndex) loadAndIndex(
-				dbName, dbPath, modelPath);
+		final IntervalIndex idxidx = loadAndIndex(dbName, dbPath, modelPath);
 		assertEquals(676, count(idxidx.getSlices()));
 		persistor.register(group, idxidx);
 
@@ -327,8 +315,8 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 		assertEquals(idxidx, persistor.unregister(group));
 
 		// create a loader instance
-		final ShortIntervalIndex typedIdx = (ShortIntervalIndex) loadAndCreate(
-				dbName, dbPath, modelPath);
+		final IntervalIndex typedIdx = loadModel(dbName, dbPath, modelPath)
+				.getIndex().getIntervalIndex();
 		assertEquals(0, count(typedIdx.getSlices()));
 		persistor.register(group, typedIdx);
 
@@ -337,7 +325,7 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 		assertEquals(676, count(typedIdx.getSlices()));
 
 		// test all the values
-		for (final IndexDimensionSlice<?> slice : idxidx.getSlices()) {
+		for (final SliceWithDescriptors<?> slice : idxidx.getSlices()) {
 			if (slice == null) {
 				continue;
 			}
@@ -347,6 +335,150 @@ public class TestBaseIntervalIndex extends ModuleAndDbBasedTest {
 		}
 
 		assertTrue(tmpFile.delete());
+	}
+
+	/**
+	 * Tests the inclusion of values using an interval {@code [a, b]}.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testInclusionAllSlicesAvailable() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1050, true,
+				true);
+
+		assertEquals(50, res.length);
+		for (int i = 0; i < 50; i++) {
+			assertEquals(Numbers.castToByte(i + 1), res[i].getId());
+		}
+	}
+
+	/**
+	 * Tests the inclusion of values using an interval {@code [a, b]}, whereby
+	 * not all slices are available.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testInclusionSlicesPartiallyAvailable() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1100, true,
+				true);
+
+		/*
+		 * We expect to retrieve values for the first 1001 - 1059 (1010 + 49)
+		 * entries.
+		 */
+		assertEquals(100, res.length);
+		for (int i = 0; i < 100; i++) {
+			if (i < 59) {
+				assertEquals(Numbers.castToByte(i + 1), res[i].getId());
+			} else {
+				assertNull("Not null: " + i, res[i]);
+			}
+		}
+	}
+
+	/**
+	 * Tests the exclusion of values using an interval {@code (a, b)}.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testExclusionAllSlicesAvailable() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1050, false,
+				false);
+
+		assertEquals(48, res.length);
+		for (int i = 0; i < 48; i++) {
+			assertEquals(Numbers.castToByte(i + 2), res[i].getId());
+		}
+	}
+
+	/**
+	 * Tests the exclusion of values using an interval {@code (a, b]} or
+	 * {@code [a, b)}.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testPartialAllSlicesAvailable() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] resLeft = idx.getSlices(1021, 1050,
+				true, false);
+
+		assertEquals(29, resLeft.length);
+		for (int i = 0; i < 29; i++) {
+			assertEquals(Numbers.castToByte(i + 21), resLeft[i].getId());
+		}
+
+		final SliceWithDescriptors<?>[] resRight = idx.getSlices(1021, 1050,
+				false, true);
+
+		assertEquals(29, resRight.length);
+		for (int i = 0; i < 29; i++) {
+			assertEquals(Numbers.castToByte(i + 22), resRight[i].getId());
+		}
+	}
+
+	/**
+	 * Tests the data retrieval for invalid values, i.e. {@code [1000, 500]}.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testInclusionInvalidInterval() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] res = idx.getSlices(1051, 1050, true,
+				true);
+
+		assertEquals(0, res.length);
+	}
+
+	/**
+	 * Tests the data retrieval for invalid intervals, i.e. {@code (1050, 1050]}
+	 * .
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testExclusionInvalidInterval() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervals.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		final SliceWithDescriptors<?>[] res = idx.getSlices(1050, 1050, false,
+				true);
+		assertEquals(0, res.length);
 	}
 
 	/**

@@ -11,7 +11,6 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
-import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
@@ -28,10 +27,9 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -52,53 +50,6 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 	@Autowired
 	private TidaModelHandler loader;
-
-	/**
-	 * Tests the usage when creating a random model which is coded.
-	 */
-	@Test
-	public void testUsingCreatedRandomModel() {
-		final IndexFactory idxFactory = new IndexFactory();
-		final MetaStructureEntry entry = new MetaStructureEntry("ID", 1);
-		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
-				"ID", "MODEL", GeneralDescriptor.class,
-				new IntegerIdsFactory(), idxFactory);
-
-		for (int i = 0; i < 100000; i++) {
-			final String gen = UUID.randomUUID().toString();
-			model.createDescriptor(gen).getId();
-		}
-
-		final MetaIndexDimension<Integer> idx = new MetaIndexDimension<Integer>(
-				entry, model, idxFactory);
-		for (int i = 1; i <= 100000; i++) {
-			final Descriptor<?, ?, Integer> desc = model.getDescriptor(i);
-
-			// add 10 DataRecords with the value of the model
-			for (int k = 0; k < 10; k++) {
-
-				// do it twice to make sure that there are no side-effects
-				idx.index(k + (i - 1) * 10,
-						new SingleStaticDataSet(desc.getValue()));
-				idx.index(k + (i - 1) * 10,
-						new SingleStaticDataSet(desc.getValue()));
-			}
-
-			// there should be more slices and each should have 10 entries
-			assertEquals(i, idx.getAmountOfSlices());
-			assertEquals(10, idx.getById(i).length);
-		}
-
-		// there should be ten selections for each id, shifted by 10
-		for (int i = 1; i <= 100000; i++) {
-			final int[] pos = idx.getById(i);
-			assertEquals(10, pos.length);
-
-			for (int k = (i - 1) * 10; k < i * 10; k++) {
-				assertEquals(k, pos[k - (i - 1) * 10]);
-			}
-		}
-	}
 
 	/**
 	 * Tests the selected indexes for the {@code MetaIndexDimension} which is
@@ -156,7 +107,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
-			idx.index(i, rec);
+			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
+					model);
+			idx.index(i, dataRec);
 			i++;
 		}
 		it.close();
@@ -226,10 +179,14 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 					.getValue("RND_INTEGER")) == null) {
 				added++;
 			}
+			
+			// create the processedRecord and the needed data
+			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
+					model);
 
 			// add the record
-			fixedIdx.index(i, rec);
-			randomIdx.index(i, rec);
+			fixedIdx.index(i, dataRec);
+			randomIdx.index(i, dataRec);
 			i++;
 		}
 		it.close();
@@ -290,7 +247,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		int i = 0;
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
-			saveIdx.index(i, rec);
+			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
+					model);
+			saveIdx.index(i, dataRec);
 			i++;
 		}
 		it.close();
@@ -324,7 +283,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		// check the loaded data
 		assertEquals(saveIdx.getAmountOfSlices(), loadIdx.getAmountOfSlices());
-		for (final IndexDimensionSlice<?> slice : loadIdx.getSlices()) {
+		for (final Slice<?> slice : loadIdx.getSlices()) {
 			assertEquals(slice.getBitmap(), saveIdx.getSliceById(slice.getId())
 					.getBitmap());
 		}

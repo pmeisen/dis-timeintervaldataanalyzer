@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.datastructure;
 
+import net.meisen.general.genmisc.types.Objects;
+
 /**
  * A {@code StructureEntry} defines an entry within a {@code DataStructure}. It
  * defines the semantics (what is the entry there for) and the binding (where to
@@ -69,5 +71,35 @@ public abstract class StructureEntry {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) {
+			return true;
+		} else if (o == null) {
+			return false;
+		} else if (getClass().equals(o.getClass())) {
+			final StructureEntry e = (StructureEntry) o;
+			return getPosition() == e.getPosition()
+					&& Objects.equals(getName(), e.getName());
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		if (position > 0) {
+			return position;
+		} else {
+			return name.hashCode();
+		}
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + ": "
+				+ (name == null ? position : name);
 	}
 }

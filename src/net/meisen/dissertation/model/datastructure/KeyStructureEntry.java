@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.datastructure;
 
+
 /**
  * An {@code StructureEntry} which marks specific data to be a part of or a key.
  * All {@code KeyStructureEntry} instances of a {@code DataStructure} form the
@@ -46,5 +47,14 @@ public class KeyStructureEntry extends StructureEntry {
 	 */
 	public KeyStructureEntry(final String name, final int position) {
 		super(name, position);
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (super.equals(o)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

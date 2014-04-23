@@ -26,7 +26,6 @@ import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.impl.indexes.datarecord.bitmap.TestEWAHBitmap;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.TestByteIntervalIndex;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorValue;
@@ -48,9 +47,10 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.handler.TestTidaModelHandler;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.TestBaseIntervalIndex;
+import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.TestProcessedDataRecord;
 import net.meisen.dissertation.model.persistence.TestBasePersistor;
 import net.meisen.dissertation.model.persistence.TestGroup;
 import net.meisen.dissertation.model.persistence.TestIdentifier;
@@ -157,15 +157,17 @@ import org.junit.runners.Suite;
 		// Test some bitmap implementations
 		TestEWAHBitmap.class,
 
-		// Test the tida-indexes
-		TestMetaIndexDimension.class,
-		TestMetaIndex.class,
-		TestBaseIntervalIndex.class,
-		TestByteIntervalIndex.class,
-
 		// Test the handler
 		TestTidaModelHandler.class,
 
+		// Test the record pre-processing
+		TestProcessedDataRecord.class,
+		
+		// Test the tida-indexes
+		TestMetaIndexDimension.class,
+		TestMetaIndex.class,
+		TestIntervalIndex.class,
+		
 		// Test the query
 		TestDescriptorValue.class, TestDescriptorComperator.class,
 		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,

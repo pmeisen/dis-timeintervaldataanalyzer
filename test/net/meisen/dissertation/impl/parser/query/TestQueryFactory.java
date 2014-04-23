@@ -293,10 +293,11 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	}
 
 	/**
-	 * Tests the parsing of a {@code SelectQuery} with a single measure.
+	 * Tests the parsing of a {@code SelectQuery} with a single simple measure.
+	 * Simple means that just a function with a descriptor is applied.
 	 */
 	@Test
-	public void testSingleMeasure() {
+	public void testSingleSimpleMeasure() {
 		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
 		assertEquals(1, query.getMeasures().size());
 		assertTrue(query.getMeasures().get(0).getFunction() instanceof Count);
@@ -308,7 +309,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	 * Tests the parsing of a {@code SelectQuery} with multiple measures.
 	 */
 	@Test
-	public void testMultipleMeasure() {
+	public void testMultipleSimpleMeasure() {
 		final SelectQuery query = q("select timeseries of average(PERSON), min(PERSON), max(LOCATION) from testPersonModel");
 
 		assertEquals(3, query.getMeasures().size());
@@ -324,6 +325,15 @@ public class TestQueryFactory extends ExceptionBasedTest {
 		assertTrue(query.getMeasures().get(2).getFunction() instanceof Max);
 		assertEquals("LOCATION", query.getMeasures().get(2)
 				.getDescriptorModelId());
+	}
+
+	@Test
+	public void testComplexMeasure() {
+		SelectQuery query;
+		
+		query = q("select timeseries of max(LOCATION + PERSON) * (average(PERSON) + min(PERSON)) from testPersonModel");
+		System.out.println(query.getMeasures());
+
 	}
 
 	/**

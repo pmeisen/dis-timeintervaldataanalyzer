@@ -4,11 +4,13 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
 
 /**
- * A {@code Descriptor} defined by a {@code Double} value, with at most 5 decimal places.
+ * A {@code Descriptor} defined by a {@code Double} value, with at most 5
+ * decimal places.
  * 
  * @author pmeisen
  * 
@@ -21,10 +23,11 @@ public class DoubleDescriptor<I extends Object> extends
 	/**
 	 * Formatter used to create the unique string for the double
 	 */
-	protected final static DecimalFormat formatter = new DecimalFormat("0.#####");
+	protected final static DecimalFormat formatter = new DecimalFormat(
+			"0.#####");
 
 	static {
-		
+
 		// make sure the . and , are used correctly, i.e. US-Format
 		final DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
 		symbols.setDecimalSeparator('.');
@@ -148,5 +151,15 @@ public class DoubleDescriptor<I extends Object> extends
 	@Override
 	public String getUniqueString() {
 		return formatter.format(value);
+	}
+
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return value;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

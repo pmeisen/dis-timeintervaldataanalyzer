@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="tidaStaticIndexModel" name="StaticIndexModel">
+
+  <meta>
+    <descriptors>
+      <string id="FAMILY" name="family" null="true" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+    
+  <structure>
+    <meta position="1" descriptor="FAMILY" />
+  </structure>
+           
+  <data metahandling="null">
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+  </data>
+</model>

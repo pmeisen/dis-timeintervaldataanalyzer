@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.descriptors;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
@@ -50,5 +51,15 @@ public class ResourceDescriptor<I extends Object> extends
 	@Override
 	public String getUniqueString() {
 		return value;
+	}
+	
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return 1.0;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

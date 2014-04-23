@@ -107,6 +107,7 @@
         
        IntervalDataHandling (i.e. what has to be done if an interval-value is null)
         + boundariesWhenNull, boundaries
+        + useOther, other, others
         + failOnNull, fail
     -->
   <data metahandling="create" intervalhandling="boundariesWhenNull" />

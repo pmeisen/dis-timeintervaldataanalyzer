@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="tidaStaticIndexModel" name="StaticIndexModel">
+
+  <meta>
+    <descriptors>
+      <string id="FAMILY" name="family" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+    
+  <structure>
+    <meta position="1" descriptor="FAMILY" />
+  </structure>
+           
+  <data metahandling="create">
+    <dataset>
+      <entry class="java.lang.String" value="Holger"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hajo"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Hannah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Linus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Uschi"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Jörg"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Nicole"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Stephie"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Tobias"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Andrea"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Lasse"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Silas"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Rasmus"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Deborah"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Edison"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.String" value="Philipp"/>
+    </dataset>
+  </data>
+</model>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+
+       id="tidaRandom">
+
+  <time>
+    <timeline start="1000" end="1100" granularity="DAY" />
+  </time>
+
+  <structure>
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+
+  <data metahandling="create" intervalhandling="boundaries">
+    <dataset>
+      <entry class="java.lang.Long" value="1000"/>
+      <entry class="java.lang.Long" value="1010"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1001"/>
+      <entry class="java.lang.Long" value="1011"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1002"/>
+      <entry class="java.lang.Long" value="1012"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1003"/>
+      <entry class="java.lang.Long" value="1013"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1004"/>
+      <entry class="java.lang.Long" value="1014"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1005"/>
+      <entry class="java.lang.Long" value="1015"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1006"/>
+      <entry class="java.lang.Long" value="1016"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1007"/>
+      <entry class="java.lang.Long" value="1017"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1008"/>
+      <entry class="java.lang.Long" value="1018"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1009"/>
+      <entry class="java.lang.Long" value="1019"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1010"/>
+      <entry class="java.lang.Long" value="1020"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1011"/>
+      <entry class="java.lang.Long" value="1021"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1012"/>
+      <entry class="java.lang.Long" value="1022"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1013"/>
+      <entry class="java.lang.Long" value="1023"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1014"/>
+      <entry class="java.lang.Long" value="1024"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1015"/>
+      <entry class="java.lang.Long" value="1025"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1016"/>
+      <entry class="java.lang.Long" value="1026"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1017"/>
+      <entry class="java.lang.Long" value="1027"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1018"/>
+      <entry class="java.lang.Long" value="1028"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1019"/>
+      <entry class="java.lang.Long" value="1029"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1020"/>
+      <entry class="java.lang.Long" value="1030"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1021"/>
+      <entry class="java.lang.Long" value="1031"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1022"/>
+      <entry class="java.lang.Long" value="1032"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1023"/>
+      <entry class="java.lang.Long" value="1033"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1024"/>
+      <entry class="java.lang.Long" value="1034"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1025"/>
+      <entry class="java.lang.Long" value="1035"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1026"/>
+      <entry class="java.lang.Long" value="1036"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1027"/>
+      <entry class="java.lang.Long" value="1037"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1028"/>
+      <entry class="java.lang.Long" value="1038"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1029"/>
+      <entry class="java.lang.Long" value="1039"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1030"/>
+      <entry class="java.lang.Long" value="1040"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1031"/>
+      <entry class="java.lang.Long" value="1041"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1032"/>
+      <entry class="java.lang.Long" value="1042"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1033"/>
+      <entry class="java.lang.Long" value="1043"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1034"/>
+      <entry class="java.lang.Long" value="1044"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1035"/>
+      <entry class="java.lang.Long" value="1045"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1036"/>
+      <entry class="java.lang.Long" value="1046"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1037"/>
+      <entry class="java.lang.Long" value="1047"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1038"/>
+      <entry class="java.lang.Long" value="1048"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1039"/>
+      <entry class="java.lang.Long" value="1049"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1040"/>
+      <entry class="java.lang.Long" value="1050"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1041"/>
+      <entry class="java.lang.Long" value="1051"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1042"/>
+      <entry class="java.lang.Long" value="1052"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1043"/>
+      <entry class="java.lang.Long" value="1053"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1044"/>
+      <entry class="java.lang.Long" value="1054"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1045"/>
+      <entry class="java.lang.Long" value="1055"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1046"/>
+      <entry class="java.lang.Long" value="1056"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1047"/>
+      <entry class="java.lang.Long" value="1057"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1048"/>
+      <entry class="java.lang.Long" value="1058"/>
+    </dataset>
+    <dataset>
+      <entry class="java.lang.Long" value="1049"/>
+      <entry class="java.lang.Long" value="1059"/>
+    </dataset>
+  </data>
+</model>

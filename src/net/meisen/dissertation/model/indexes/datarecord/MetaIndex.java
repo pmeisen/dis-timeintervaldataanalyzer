@@ -6,13 +6,10 @@ import java.util.Collection;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
-
-import com.google.common.base.Objects;
 
 /**
  * A {@code MetaIndex} is used to index meta information associated to data. It
@@ -26,7 +23,6 @@ public class MetaIndex implements IDataRecordIndex {
 
 	private final IIndexedCollection dimensionsIndex;
 
-	private MetaDataHandling metaDataHandling;
 	private Group persistentGroup = null;
 
 	/**
@@ -59,49 +55,12 @@ public class MetaIndex implements IDataRecordIndex {
 
 		// create the dimensions using the MetaDataModel
 		this.dimensionsIndex = metaDataModel.createIndex(dataStructure);
-
-		// set the default values
-		setMetaDataHandling(null);
 	}
 
 	@Override
-	public void index(final int dataId, final IDataRecord record) {
+	public void index(final int dataId, final ProcessedDataRecord record) {
 		for (final MetaIndexDimension<?> dim : getDimensions()) {
 			dim.index(dataId, record);
-		}
-	}
-
-	/**
-	 * Get the defined {@code MetaDataHandling}.
-	 * 
-	 * @return the defined {@code MetaDataHandling}
-	 */
-	public MetaDataHandling getMetaDataHandling() {
-		return metaDataHandling;
-	}
-
-	/**
-	 * Sets the {@code MetaDataHandling} for the index.
-	 * 
-	 * @param metaDataHandling
-	 *            the {@code MetaDataHandling} to be used
-	 */
-	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
-		final MetaDataHandling newMetaDataHandling;
-		if (this.metaDataHandling == null) {
-			newMetaDataHandling = metaDataHandling;
-		} else {
-			newMetaDataHandling = metaDataHandling == null ? MetaDataHandling
-					.find(null) : metaDataHandling;
-			if (Objects.equal(this.metaDataHandling, newMetaDataHandling)) {
-				return;
-			}
-		}
-
-		// set the new value and apply it to all other
-		this.metaDataHandling = newMetaDataHandling;
-		for (final MetaIndexDimension<?> dim : getDimensions()) {
-			dim.setMetaDataHandling(this.metaDataHandling);
 		}
 	}
 

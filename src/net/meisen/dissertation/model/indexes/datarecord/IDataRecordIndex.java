@@ -20,7 +20,7 @@ public interface IDataRecordIndex extends IPersistable {
 	 * @param record
 	 *            the {@code DataRecord} to be indexed
 	 */
-	public void index(final int dataId, final IDataRecord record);
+	public void index(final int dataId, final ProcessedDataRecord record);
 
 	/**
 	 * Method which should be called after all data is added to optimize the

@@ -28,10 +28,10 @@ package net.meisen.dissertation.impl.parser.query.generated;
 /*
  * Define the different expressions/parts of the statement
  */
-exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprLogic)? (OP_GROUPBY exprGroup)? EOF;
-exprMeasure  : selectorAggrFunction (SEPARATOR selectorAggrFunction)*;
+exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)? EOF;
+exprMeasure  : exprFormula (SEPARATOR exprFormula)*;
+exprFormula  : compAggrFunction | BRACKET_ROUND_OPENED exprFormula BRACKET_ROUND_CLOSED | exprFormula selectorMathOperator exprFormula;
 exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
-exprLogic    : exprComp+;
 exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
 exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
@@ -39,8 +39,11 @@ exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 /*
  * Define the different redudant definitions within the parts of the statement
  */
-compDescriptorEqual     : selectorDescriptorId CMP_EQUAL selectorDescValue;
-compGroupIgnore         : BRACKET_CURLY_OPENED selectorDescValueTupel (SEPARATOR selectorDescValueTupel)* BRACKET_CURLY_CLOSED;
+compDescriptorEqual  : selectorDescriptorId CMP_EQUAL selectorDescValue;
+compDescValueTupel   : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
+compGroupIgnore      : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
+compAggrFunction     : selectorAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
+compDescriptorFormula: selectorDescriptorId | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED | compDescriptorFormula selectorMathOperator compDescriptorFormula;
 
 /*
  * Define special selectors which make up a semantic based on specific tokens, 
@@ -54,10 +57,9 @@ selectorDateInterval    : DATE SEPARATOR DATE;
 selectorIntInterval     : INT SEPARATOR INT;
 selectorOpenInterval    : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval   : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
-selectorDescValueTupel  : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
 selectorDescValue       : (DESC_VALUE | NULL_VALUE);
 selectorAggrFunctionName: (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
-selectorAggrFunction    : selectorAggrFunctionName BRACKET_ROUND_OPENED selectorDescriptorId BRACKET_ROUND_CLOSED;
+selectorMathOperator    : MATH_MULTIPLY | MATH_DIVISION | MATH_PLUS | MATH_MINUS;
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -93,6 +95,12 @@ LOGICAL_OR      : O R | '||';
 LOGICAL_AND     : A N D | '&&';
 LOGICAL_NOT     : N O T | '!';
 LOGICAL_IGNORE  : I G N O R E;
+
+// reserved words used for calculations
+MATH_MULTIPLY   : '*';
+MATH_DIVISION   : '/';
+MATH_PLUS       : '+';
+MATH_MINUS      : '-';
 
 // reserved words used for aggregation functions
 AGGR_COUNT     : C O U N T;

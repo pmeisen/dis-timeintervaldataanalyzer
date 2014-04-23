@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -14,14 +15,13 @@ import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
-import net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.ProcessedDataRecord;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -32,6 +32,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -202,48 +203,6 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	}
 
 	/**
-	 * Tests the creation of a {@code MetaIndexDimension} using a
-	 * {@code MetaStructureEntry} with a valid position.
-	 */
-	@Test
-	public void testCreateDimensionById() {
-		final MetaDataModel model = createTestModel();
-		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 1);
-		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
-
-		assertEquals(0, dim.getAmountOfSlices());
-		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
-				dim.getMetaDataHandling());
-		assertEquals(0, dim.getByValue("unknown").length);
-		for (int i = 0; i < 100; i++) {
-			dim.index(i, new SingleStaticDataSet("unknown"));
-			assertEquals(i + 1, dim.getByValue("unknown").length);
-		}
-	}
-
-	/**
-	 * Tests the creation of a {@code MetaIndexDimension} using a
-	 * {@code MetaStructureEntry} with a valid name.
-	 */
-	@Test
-	public void testCreateDimensionByName() {
-		final MetaDataModel model = createTestModel();
-		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1",
-				"myName");
-		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
-
-		assertEquals(0, dim.getAmountOfSlices());
-		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
-				dim.getMetaDataHandling());
-		assertEquals(0, dim.getByValue("unknown").length);
-		for (int i = 0; i < 100; i++) {
-			dim.index(i, new SingleStaticDataSet(new SingleStaticDataSetEntry(
-					"myName", "unknown")));
-			assertEquals(i + 1, dim.getByValue("unknown").length);
-		}
-	}
-
-	/**
 	 * Tests the setting and getting of the {@code OfflineMode}.
 	 */
 	@Test
@@ -281,7 +240,15 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 		final MetaStructureEntry metaEntry = new MetaStructureEntry("ID1", 2);
 		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
-		dim.index(1, new SingleStaticDataSet("unknown"));
+		// we need a mock of the TidaModel
+		final TidaModel tidaModel = Mockito.mock(TidaModel.class);
+		when(tidaModel.getMetaDataModel()).thenReturn(model);
+		when(tidaModel.getDataStructure()).thenReturn(
+				new DataStructure(metaEntry));
+
+		final ProcessedDataRecord rec = new ProcessedDataRecord(
+				new SingleStaticDataSet("unknown"), tidaModel);
+		dim.index(1, rec);
 	}
 
 	/**
@@ -299,7 +266,16 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 				"myName");
 		final MetaIndexDimension<?> dim = model.createIndexDimension(metaEntry);
 
-		dim.index(1, new SingleStaticDataSet("unknown"));
+		// we need a mock of the TidaModel
+		final TidaModel tidaModel = Mockito.mock(TidaModel.class);
+		when(tidaModel.getMetaDataModel()).thenReturn(model);
+		when(tidaModel.getDataStructure()).thenReturn(
+				new DataStructure(metaEntry));
+
+
+		final ProcessedDataRecord rec = new ProcessedDataRecord(
+				new SingleStaticDataSet("unknown"), tidaModel);
+		dim.index(1, rec);
 	}
 
 	/**

@@ -258,11 +258,6 @@ public class TidaModel implements IPersistable {
 	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
 		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
 				.find(null) : metaDataHandling;
-
-		// let the index know
-		if (isInitialized()) {
-			this.idx.setMetaDataHandling(this.metaDataHandling);
-		}
 	}
 
 	/**
@@ -346,11 +341,6 @@ public class TidaModel implements IPersistable {
 	public void setIntervalDataHandling(final IntervalDataHandling handling) {
 		this.intervalDataHandling = handling == null ? IntervalDataHandling
 				.find(null) : handling;
-
-		// let the index know
-		if (isInitialized()) {
-			this.idx.setIntervalDataHandling(this.intervalDataHandling);
-		}
 	}
 
 	/**

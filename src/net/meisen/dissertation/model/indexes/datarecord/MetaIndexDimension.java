@@ -10,14 +10,13 @@ import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.PersistorException;
-import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
@@ -48,7 +47,6 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	private final BaseIndexFactory indexFactory;
 	private final IIndexedCollection index;
 
-	private MetaDataHandling metaDataHandling;
 	private Group persistentGroup = null;
 
 	/**
@@ -92,12 +90,9 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
-				IndexDimensionSlice.class, "getId");
+				Slice.class, "getId");
 		indexKeyDef.overrideType(0, model.getIdClass());
 		this.index = indexFactory.create(indexKeyDef);
-
-		// set the default value
-		setMetaDataHandling(null);
 
 		// log the successful creation
 		if (LOG.isTraceEnabled()) {
@@ -130,18 +125,21 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int recId, final IDataRecord rec) {
+	public void index(final int recId, final ProcessedDataRecord rec) {
 		if (rec == null) {
 			return;
 		}
 
 		// get the id
-		final I id = getIdFromRecord(rec);
+		@SuppressWarnings("unchecked")
+		final Descriptor<?, ?, I> desc = (Descriptor<?, ?, I>) rec
+				.getDescriptor(metaEntry);
+		final I id = desc.getId();
 
 		// create or get the slices
-		final IndexDimensionSlice<I> slice = getSliceById(id);
+		final Slice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(new IndexDimensionSlice<I>(id, indexFactory, recId));
+			index.addObject(new Slice<I>(id, indexFactory, recId));
 		} else {
 			slice.set(recId);
 		}
@@ -160,8 +158,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 *         {@code valueId}
 	 */
 	@SuppressWarnings("unchecked")
-	public IndexDimensionSlice<I> getSliceById(final I valueId) {
-		return (IndexDimensionSlice<I>) index.getObject(valueId);
+	public Slice<I> getSliceById(final I valueId) {
+		return (Slice<I>) index.getObject(valueId);
 	}
 
 	/**
@@ -175,7 +173,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @return a bitmap with the identifiers of the records set to {@code 1} if
 	 *         and only if the record's value is equal to the {@code value}
 	 */
-	public IndexDimensionSlice<I> getSliceByValue(final Object value) {
+	public Slice<I> getSliceByValue(final Object value) {
 		final I id = getIdForValue(value);
 		return getSliceById(id);
 	}
@@ -186,10 +184,9 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @return the slices of the {@code MetaIndexDimension}
 	 */
 	@SuppressWarnings("unchecked")
-	public IndexDimensionSlice<I>[] getSlices() {
+	public Slice<I>[] getSlices() {
 		final Collection<?> all = index.getAll();
-		return (IndexDimensionSlice<I>[]) index.getAll().toArray(
-				new IndexDimensionSlice<?>[all.size()]);
+		return (Slice<I>[]) index.getAll().toArray(new Slice<?>[all.size()]);
 	}
 
 	/**
@@ -210,8 +207,15 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * 
 	 * @return an array of the records (by identifier) which have the specified
 	 *         {@code value} set
+	 * 
+	 * @throws DescriptorModelException
+	 *             if the {@code DescriptorModel} doesn't support {@code null}
+	 *             values
+	 * @throws NullPointerException
+	 *             if no descriptor for the specified value exists
 	 */
-	public int[] getByValue(final Object value) {
+	public int[] getByValue(final Object value)
+			throws DescriptorModelException, NullPointerException {
 		final I id = getIdForValue(value);
 		return getById(id);
 	}
@@ -227,7 +231,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 *         value - referred by {@code id} - set
 	 */
 	public int[] getById(final I id) {
-		final IndexDimensionSlice<I> slice = getSliceById(id);
+		final Slice<I> slice = getSliceById(id);
 		if (slice == null) {
 			return new int[0];
 		} else {
@@ -243,115 +247,16 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * 
 	 * @return the identifier, which cannot be {@code null}
 	 * 
-	 * @throws NullPointerException
-	 *             if the value to be indexed cannot be found within the
-	 *             {@code DescriptorModel} and
-	 *             {@link MetaDataHandling#FAILONERROR} is selected as
-	 *             handling-strategy
 	 * @throws DescriptorModelException
 	 *             if the {@code DescriptorModel} doesn't support {@code null}
 	 *             values
-	 * 
-	 * @see MetaDataHandling
-	 */
-	protected I getIdForValue(final Object value) {
-		return getIdForValue(value, getMetaDataHandling());
-	}
-
-	/**
-	 * Gets the id of the value using the specified {@code MetaDataHandling}. If
-	 * the {@code handling} is {@code null} the defined handling of {@code this}
-	 * will be used (see {@link #getMetaDataHandling()}).
-	 * 
-	 * @param value
-	 *            the value to get the id for
-	 * @param handling
-	 *            the {@code MetaDataHandling} if the value cannot be resolved
-	 * 
-	 * @return the identifier
-	 */
-	protected I getIdForValue(final Object value,
-			final MetaDataHandling handling) {
-		Descriptor<?, ?, I> desc = model.getDescriptorByValue(value);
-		if (desc == null) {
-			final MetaDataHandling metaDataHandling = handling == null ? getMetaDataHandling()
-					: handling;
-
-			if (MetaDataHandling.CREATEDESCRIPTOR.equals(metaDataHandling)) {
-				desc = model.createDescriptor(value);
-			} else if (MetaDataHandling.FAILONERROR.equals(metaDataHandling)) {
-				throw new NullPointerException("The value '" + value
-						+ "' doesn't have any descriptor.");
-			} else if (MetaDataHandling.HANDLEASNULL.equals(metaDataHandling)) {
-				desc = model.getNullDescriptor();
-			}
-		}
-
-		return desc.getId();
-	}
-
-	/**
-	 * Determines the id of the {@code DataRecord} to be handled by this
-	 * dimension.
-	 * 
-	 * @param record
-	 *            the {@code DataRecord} to determine the id for, cannot be
-	 *            {@code null}
-	 * 
-	 * @return the identifier, which cannot be {@code null}
-	 * 
 	 * @throws NullPointerException
-	 *             if the {@code record} was {@code null}, or if the value to be
-	 *             indexed cannot be found within the {@code DescriptorModel}
-	 *             and {@link MetaDataHandling#FAILONERROR} is selected as
-	 *             handling-strategy
-	 * @throws DescriptorModelException
-	 *             if the {@code DescriptorModel} doesn't support {@code null}
-	 *             values
-	 * 
-	 * @see MetaDataHandling
+	 *             if no descriptor for the specified value exists
 	 */
-	protected I getIdFromRecord(final IDataRecord record)
+	protected I getIdForValue(final Object value)
 			throws DescriptorModelException, NullPointerException {
-		if (record == null) {
-			throw new NullPointerException("The record cannot be null.");
-		}
-
-		final String name = metaEntry.getName();
-
-		// determine the value which is of interest for the record
-		final Object value;
-		if (name == null) {
-			value = record.getValue(metaEntry.getPosition());
-		} else {
-			value = record.getValue(name);
-		}
-
-		return getIdForValue(value);
-	}
-
-	/**
-	 * Get the defined {@code MetaDataHandling}.
-	 * 
-	 * @return the defined {@code MetaDataHandling}
-	 * 
-	 * @see MetaDataHandling
-	 */
-	public MetaDataHandling getMetaDataHandling() {
-		return metaDataHandling;
-	}
-
-	/**
-	 * Set the {@code MetaDataHandling}.
-	 * 
-	 * @param metaDataHandling
-	 *            the {@code MetaDataHandling}
-	 * 
-	 * @see MetaDataHandling
-	 */
-	public void setMetaDataHandling(final MetaDataHandling metaDataHandling) {
-		this.metaDataHandling = metaDataHandling == null ? MetaDataHandling
-				.find(null) : metaDataHandling;
+		final Descriptor<?, ?, I> desc = model.getDescriptorByValue(value);
+		return desc.getId();
 	}
 
 	/**
@@ -366,7 +271,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 
 	@Override
 	public void optimize() {
-		for (final IndexDimensionSlice<I> slice : getSlices()) {
+		for (final Slice<I> slice : getSlices()) {
 			slice.optimize();
 		}
 	}
@@ -374,7 +279,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	@Override
 	public void save(final BasePersistor persistor) {
 
-		for (final IndexDimensionSlice<I> slice : getSlices()) {
+		for (final Slice<I> slice : getSlices()) {
 			if (slice == null) {
 				continue;
 			}
@@ -412,7 +317,9 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		}
 
 		// get the identifier for the value
-		final I id = getIdForValue(value, MetaDataHandling.CREATEDESCRIPTOR);
+		final Descriptor<?, ?, I> desc = model.getDescriptorByValue(value,
+				MetaDataHandling.CREATEDESCRIPTOR);
+		final I id = desc.getId();
 
 		// check if the slice is already indexed
 		if (index.getObject(id) != null) {
@@ -422,8 +329,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		}
 
 		// create the slice
-		final IndexDimensionSlice<I> slice = new IndexDimensionSlice<I>(id,
-				indexFactory);
+		final Slice<I> slice = new Slice<I>(id, indexFactory);
 
 		// load the slice from the InputStream
 		try {

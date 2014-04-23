@@ -1,22 +1,19 @@
 package net.meisen.dissertation.model.data;
 
-import java.util.List;
-
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.IntervalModelException;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ByteIntervalIndex;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.IntIntervalIndex;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.LongIntervalIndex;
-import net.meisen.dissertation.impl.indexes.datarecord.intervalindex.ShortIntervalIndex;
-import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
-import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.datarecord.BaseIntervalIndex;
+import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
+import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -27,6 +24,51 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class IntervalModel {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(IntervalModel.class);
+
+	/**
+	 * A result of a mapping process, i.e. if an interval {@code [start, end]}
+	 * is mapped to a specific
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	public class MappingResult {
+		private final long start;
+		private final long end;
+
+		/**
+		 * Constructor specifying the mapped results.
+		 * 
+		 * @param start
+		 *            the mapped start result
+		 * @param end
+		 *            the mapped end result
+		 */
+		public MappingResult(final long start, final long end) {
+			this.start = start;
+			this.end = end;
+		}
+
+		/**
+		 * Gets the mapped start value.
+		 * 
+		 * @return the mapped start value
+		 */
+		public long getStart() {
+			return start;
+		}
+
+		/**
+		 * Gets the mapped end value.
+		 * 
+		 * @return the mapped end value
+		 */
+		public long getEnd() {
+			return end;
+		}
+	}
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -43,6 +85,8 @@ public class IntervalModel {
 	@Autowired
 	@Qualifier(DefaultValues.TIMELINEDEFINITION_ID)
 	private TimelineDefinition timeline;
+
+	private BaseMapper<?> timelineMapper = null;
 
 	/**
 	 * Creates a {@code IntervalModel} which must be completly wired prior to
@@ -97,14 +141,11 @@ public class IntervalModel {
 	}
 
 	/**
-	 * Creates a {@code IntervalIndex} for the timeline.
+	 * Creates a {@code IndexedCollection} for the timeline.
 	 * 
-	 * @param structure
-	 *            the defined {@code DataStructure} with the intervals defined
-	 * 
-	 * @return the created {@code IntervalIndex}
+	 * @return the created {@code IndexedCollection}
 	 */
-	public BaseIntervalIndex createIndex(final DataStructure structure) {
+	public IRangeQueryOptimized createIndex() {
 
 		// make sure needed stuff is known
 		if (timeline == null) {
@@ -112,54 +153,36 @@ public class IntervalModel {
 					.throwException(IntervalModelException.class, 1001);
 		}
 
-		// determine the start and end of the dataRecord
-		final List<IntervalStructureEntry> entries = structure
-				.getEntriesByClass(IntervalStructureEntry.class);
+		// get the mapper
+		final BaseMapper<?> mapper = getTimelineMapper();
 
-		// search for start and end
-		IntervalStructureEntry startEntry = null, endEntry = null;
-		for (final IntervalStructureEntry entry : entries) {
-			final IntervalType type = entry.getType();
-
-			// determine the start and end of the interval
-			if (IntervalType.START.equals(type)) {
-				if (startEntry != null) {
-					exceptionRegistry.throwException(
-							IntervalModelException.class, 1002);
-				}
-				startEntry = entry;
-			} else if (IntervalType.END.equals(type)) {
-				if (endEntry != null) {
-					exceptionRegistry.throwException(
-							IntervalModelException.class, 1003);
-				}
-				endEntry = entry;
-			} else {
-				exceptionRegistry.throwException(IntervalModelException.class,
-						1004, entry);
-			}
+		// do some logging
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Creating index for '"
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' using granularity '" + mapper.getGranularity()
+					+ "'...");
 		}
 
-		// create the mapper
-		final BaseMapper<?> mapper = createMapper(timeline.getStart(),
-				timeline.getEnd());
-
 		// create the index
-		final BaseIntervalIndex index;
+		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
+				SliceWithDescriptors.class, "getId");
+		indexKeyDef.overrideType(0, mapper.getTargetType());
+		final IRangeQueryOptimized index = indexFactory
+				.createRangeQueryOptimized(indexKeyDef);
 
-		// create the IntervalIndex depending on the mapper
-		if (Byte.class.equals(mapper.getTargetType())) {
-			index = new ByteIntervalIndex(mapper, startEntry, endEntry,
-					getIndexFactory());
-		} else if (Short.class.equals(mapper.getTargetType())) {
-			index = new ShortIntervalIndex(mapper, startEntry, endEntry,
-					getIndexFactory());
-		} else if (Integer.class.equals(mapper.getTargetType())) {
-			index = new IntIntervalIndex(mapper, startEntry, endEntry,
-					getIndexFactory());
-		} else {
-			index = new LongIntervalIndex(mapper, startEntry, endEntry,
-					getIndexFactory());
+		// the maximum value of the index is defined by the mapper
+		index.setMaxValue(mapper.getNormEndAsLong());
+
+		// log the successful creation
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Created index for '"
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' with index '" + index.getClass().getName()
+					+ "' for identifiers of the intervalIndex of type '"
+					+ mapper.getTargetType().getName() + "'.");
 		}
 
 		return index;
@@ -190,6 +213,15 @@ public class IntervalModel {
 	}
 
 	/**
+	 * Creates a mapper useful for the complete defined timeline.
+	 * 
+	 * @return the {@code Mapper} to be used
+	 */
+	public BaseMapper<?> createMapper() {
+		return createMapper(timeline.getStart(), timeline.getEnd());
+	}
+
+	/**
 	 * Gets the {@code Mapper} to be used for the specified {@code start} and
 	 * {@code end}.
 	 * 
@@ -198,11 +230,11 @@ public class IntervalModel {
 	 * @param end
 	 *            the end value of the mapper
 	 * 
-	 * @return the {@code Mapper to be used}
+	 * @return the {@code Mapper} to be used
 	 * 
 	 * @see BaseMapper
 	 */
-	protected BaseMapper<?> createMapper(final Object start, final Object end) {
+	public BaseMapper<?> createMapper(final Object start, final Object end) {
 		final BaseMapperFactory factory = getMapperFactory();
 		if (factory == null) {
 			exceptionRegistry
@@ -225,5 +257,150 @@ public class IntervalModel {
 	 */
 	public TimelineDefinition getTimelineDefinition() {
 		return timeline;
+	}
+
+	/**
+	 * Gets the mapper used to map values to the defined {@code Timeline}.
+	 * 
+	 * @return the mapper used to map values to the defined {@code Timeline}
+	 * 
+	 * @see TimelineDefinition
+	 */
+	public BaseMapper<?> getTimelineMapper() {
+		if (timelineMapper == null) {
+			timelineMapper = createMapper();
+		}
+
+		return timelineMapper;
+	}
+
+	/**
+	 * Maps the {@code [start, end]} interval to the values defined by the
+	 * timeline.
+	 * 
+	 * @param start
+	 *            the start value to be mapped
+	 * @param end
+	 *            the end value to be mapped
+	 * @param handling
+	 *            the {@code IntervalDataHandling} used to map the values
+	 * 
+	 * @return the result of the mapping
+	 * 
+	 * @throws IntervalModelException
+	 *             if a {@code null} value is specified for {@code start} and/or
+	 *             {@code end} and the defined {@code handling} is
+	 *             {@link IntervalDataHandling#FAILONNULL}
+	 */
+	public MappingResult mapToTimeline(final Object start, final Object end,
+			final IntervalDataHandling handling) throws IntervalModelException {
+		final BaseMapper<?> mapper = getTimelineMapper();
+
+		// check for nulls
+		final boolean startIsNull = start == null;
+		final boolean endIsNull = end == null;
+
+		// get the norm values
+		long normStart, normEnd;
+		if (startIsNull || endIsNull) {
+
+			if (IntervalDataHandling.FAILONNULL.equals(handling)) {
+				exceptionRegistry.throwException(IntervalModelException.class,
+						1002, getTimelineMapper().format(start),
+						mapper.format(end));
+				return null;
+			} else if (IntervalDataHandling.USEOTHER.equals(handling)) {
+				if (startIsNull && !endIsNull) {
+					normStart = mapper.mapToLong(end);
+					normEnd = normStart;
+				} else if (startIsNull && endIsNull) {
+					normStart = -1;
+					normEnd = -1;
+				} else if (!startIsNull && endIsNull) {
+					normStart = mapper.mapToLong(start);
+					normEnd = normStart;
+				} else {
+					throw new IllegalStateException(
+							"This state cannot be reached (start: " + start
+									+ ", end: " + end + ")!");
+				}
+			} else if (IntervalDataHandling.BOUNDARIESWHENNULL.equals(handling)) {
+				if (startIsNull) {
+					normStart = mapper.getNormStartAsLong();
+				} else {
+					normStart = mapper.mapToLong(start);
+				}
+				if (endIsNull) {
+					normEnd = mapper.getNormEndAsLong();
+				} else {
+					normEnd = mapper.mapToLong(end);
+				}
+			} else {
+				throw new UnsupportedOperationException(
+						"The intervalHandling '" + handling
+								+ "' is not supported.");
+			}
+		} else {
+			normStart = mapper.mapToLong(start);
+			normEnd = mapper.mapToLong(end);
+		}
+
+		// if one value is invalid both are
+		if (normStart == -1 || normEnd == -1) {
+			normStart = -1;
+			normEnd = -1;
+		}
+		// check if the interval is valid at all
+		else if (normStart > normEnd) {
+			normStart = -1;
+			normEnd = -1;
+		}
+		// check if a value undercut or exceeded the timeline
+		else if (normStart == normEnd) {
+			if (normStart == mapper.getNormEndAsLong()) {
+
+				/*
+				 * If the start wasn't null, check if the start exceeded the
+				 * end. If it exceeds the end, it's an invalid interval
+				 * considering the timeline.
+				 */
+				if (!startIsNull && mapper.isLargerThanEnd(start)) {
+					normStart = -1;
+					normEnd = -1;
+				}
+				/*
+				 * If the start is null, check if the end was a valid value. If
+				 * not the whole interval is invalid.
+				 */
+				else if (startIsNull
+						&& (mapper.isLargerThanEnd(end) || mapper
+								.isSmallerThanStart(end))) {
+					normStart = -1;
+					normEnd = -1;
+				}
+			} else if (normEnd == mapper.getNormStartAsLong()) {
+
+				/*
+				 * If the end wasn't null, check if the value was valid
+				 * considering the start.
+				 */
+				if (!endIsNull && mapper.isSmallerThanStart(end)) {
+					normStart = -1;
+					normEnd = -1;
+				}
+				/*
+				 * If the end is null, check if the start was a valid value. If
+				 * not the whole interval is invalid.
+				 */
+				else if (endIsNull
+						&& (mapper.isLargerThanEnd(start) || mapper
+								.isSmallerThanStart(start))) {
+					normStart = -1;
+					normEnd = -1;
+				}
+			}
+		}
+
+		return new MappingResult(normStart, normEnd);
 	}
 }

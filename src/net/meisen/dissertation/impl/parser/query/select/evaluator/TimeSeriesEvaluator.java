@@ -6,7 +6,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 
 public class TimeSeriesEvaluator {
@@ -27,7 +27,7 @@ public class TimeSeriesEvaluator {
 		// determine the interval
 		final boolean startInclusive;
 		final boolean endInclusive;
-		final IndexDimensionSlice<?>[] timeSlices;
+		final SliceWithDescriptors<?>[] timeSlices;
 		final Object startPoint;
 
 		if (interval == null) {
@@ -49,7 +49,7 @@ public class TimeSeriesEvaluator {
 
 		// iterate over the different slices
 		int pos = 0;
-		for (final IndexDimensionSlice<?> timeSlice : timeSlices) {
+		for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
 
 			// get the result
 			final Bitmap resBitmap;

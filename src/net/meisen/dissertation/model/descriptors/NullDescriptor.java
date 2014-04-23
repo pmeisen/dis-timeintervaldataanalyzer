@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.descriptors;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
+
 /***
  * A special {@code Descriptor} which is used to support {@code null} values
  * within a {@code DescriptorModel}.
@@ -15,7 +17,7 @@ public class NullDescriptor<I extends Object> extends
 	 * The name used when none is defined
 	 */
 	public static final String DEF_NAME = "{null}";
-	
+
 	private final String name;
 
 	/**
@@ -67,5 +69,15 @@ public class NullDescriptor<I extends Object> extends
 	@Override
 	public String getUniqueString() {
 		return null;
+	}
+
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return 0.0;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

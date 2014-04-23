@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.descriptors;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
@@ -85,6 +86,27 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 * @return the value of the {@code Descriptor}
 	 */
 	public abstract D getValue();
+
+	/**
+	 * Gets the fact value for {@code this}.
+	 * 
+	 * @param record
+	 *            the record to determine the fact value for
+	 * 
+	 * @return the fact value for the descriptor
+	 */
+	public abstract double getFactValue(final IDataRecord record);
+
+	/**
+	 * Defines if the {@link #getFactValue(IDataRecord)} is invariant
+	 * considering the record. With other words, if {@code isRecordInvariant()}
+	 * returns {@code true} the call {@code getFactValue(null)} is valid and
+	 * won't throw any exception.
+	 * 
+	 * @return {@code true} if the fact is record invariant, i.e. does not
+	 *         depend on a {@code record}, otherwise {@code false}
+	 */
+	public abstract boolean isRecordInvariant();
 
 	/**
 	 * Gets a unique string representation for the descriptor. This

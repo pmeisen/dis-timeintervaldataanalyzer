@@ -7,17 +7,18 @@ import java.util.List;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompAggrFunctionContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescValueTupelContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorEqualContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueTupelContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
@@ -203,14 +204,18 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
-	public void exitSelectorAggrFunction(final SelectorAggrFunctionContext ctx) {
-		final String descModelId = getDescriptorModelId(ctx
-				.selectorDescriptorId());
+	public void exitCompAggrFunction(final CompAggrFunctionContext ctx) {
+		final CompDescriptorFormulaContext formulaCtx = ctx
+				.compDescriptorFormula();
+
+		// TODO: use the formula's context and get it - will be another tree
 
 		final String functionName = ctx.selectorAggrFunctionName().getText();
 		final IAggregationFunction aggFunc = resolveAggregationFunction(functionName);
-		
-		q(SelectQuery.class).addMeasure(descModelId, aggFunc);
+
+		q(SelectQuery.class).addMeasure("TO DO", aggFunc);
+
+		// TODO: all the aggregation functions can be arranged to - in a tree
 	}
 
 	@Override
@@ -246,8 +251,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitCompGroupIgnore(final CompGroupIgnoreContext ctx) {
 		final GroupExpression groupExpr = q(SelectQuery.class).getGroup();
-		for (final SelectorDescValueTupelContext descValueCtx : ctx
-				.selectorDescValueTupel()) {
+		for (final CompDescValueTupelContext descValueCtx : ctx
+				.compDescValueTupel()) {
 
 			// determine the values
 			final List<String> values = new ArrayList<String>();

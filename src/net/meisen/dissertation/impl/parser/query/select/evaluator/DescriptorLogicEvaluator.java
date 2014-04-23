@@ -18,7 +18,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.slf4j.Logger;
@@ -197,7 +197,7 @@ public class DescriptorLogicEvaluator {
 			for (final Object d : descriptors) {
 				final Descriptor<?, ?, ?> desc = (Descriptor<?, ?, ?>) d;
 				if (cmp.matches(desc.getUniqueString())) {
-					final IndexDimensionSlice<?> slice = index
+					final Slice<?> slice = index
 							.getMetaIndexDimensionSlice(cmp.getId(),
 									desc.getId());
 
@@ -227,7 +227,7 @@ public class DescriptorLogicEvaluator {
 			} else {
 
 				// use the index to retrieve the slice
-				final IndexDimensionSlice<?> slice = index
+				final Slice<?> slice = index
 						.getMetaIndexDimensionSlice(cmp.getId(), desc.getId());
 
 				// check if we have a slice, otherwise we assume null

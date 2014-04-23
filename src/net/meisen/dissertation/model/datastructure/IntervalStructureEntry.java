@@ -1,6 +1,7 @@
 package net.meisen.dissertation.model.datastructure;
 
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * An {@code StructureEntry} used to mark an entry to be part of the interval
@@ -168,5 +169,35 @@ public class IntervalStructureEntry extends StructureEntry {
 	 */
 	public IntervalType getType() {
 		return type;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (super.equals(o)) {
+			final IntervalStructureEntry e = (IntervalStructureEntry) o;
+			return Objects.equals(getType(), e.getType());
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if {@code this} is a start-entry.
+	 * 
+	 * @return {@code true} if {@code this} is a start-entry, otherwise
+	 *         {@code false}
+	 */
+	public boolean isStart() {
+		return IntervalType.START.equals(type);
+	}
+
+	/**
+	 * Checks if {@code this} is an end-entry.
+	 * 
+	 * @return {@code true} if {@code this} is an end-entry, otherwise
+	 *         {@code false}
+	 */
+	public boolean isEnd() {
+		return IntervalType.END.equals(type);
 	}
 }

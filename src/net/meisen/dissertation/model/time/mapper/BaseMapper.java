@@ -16,7 +16,7 @@ public abstract class BaseMapper<T> {
 	private final long start;
 	private final long end;
 	private final long distance;
-	private final Class<?> targetType;
+	private final Class<? extends Number> targetType;
 	private final ITimeGranularity granularity;
 
 	/**
@@ -133,7 +133,8 @@ public abstract class BaseMapper<T> {
 	 * 
 	 * @return the primitive datatype
 	 */
-	protected Class<?> determineType(final long start, final long end) {
+	protected Class<? extends Number> determineType(final long start,
+			final long end) {
 		long distance = end - start;
 
 		// determine the range to be used
@@ -170,7 +171,7 @@ public abstract class BaseMapper<T> {
 	 * @return the type to be used best, if one of the methods is called without
 	 *         being appropriate, an error will most likely be thrown
 	 */
-	public Class<?> getTargetType() {
+	public Class<? extends Number> getTargetType() {
 		return targetType;
 	}
 
@@ -236,6 +237,36 @@ public abstract class BaseMapper<T> {
 	 */
 	public long mapToLong(final Object from) {
 		return normalize(map(validate(from)));
+	}
+
+	/**
+	 * Checks if the value specified by {@code from} is smaller than the actual
+	 * end of the timeline.
+	 * 
+	 * @param from
+	 *            the data to be checked
+	 * 
+	 * @return {@code true} if the value undercuts the start of the timeline,
+	 *         otherwise {@code false}
+	 */
+	public boolean isSmallerThanStart(final Object from) {
+		final long mappedValue = map(validate(from));
+		return mappedValue < getStart();
+	}
+
+	/**
+	 * Checks if the value specified by {@code from} is larger than the actual
+	 * end of the timeline.
+	 * 
+	 * @param from
+	 *            the data to be checked
+	 * 
+	 * @return {@code true} if the value exceeds the end of the timeline,
+	 *         otherwise {@code false}
+	 */
+	public boolean isLargerThanEnd(final Object from) {
+		final long mappedValue = map(validate(from));
+		return mappedValue > getEnd();
 	}
 
 	/**

@@ -29,7 +29,7 @@ public class SelectEvaluator {
 				.evaluateGroupExpression(query.getGroup());
 		queryResult.setGroupResult(groupResult);
 
-		// determine the IntervalIndexDimensionSlices
+		// determine the slice
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
 		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator

@@ -19,24 +19,14 @@ import net.meisen.dissertation.model.indexes.datarecord.bitmap.IBitmapContainer;
  * @param <I>
  *            the type of the identifier used to identify the slice
  */
-public class IndexDimensionSlice<I> implements
-		Comparable<IndexDimensionSlice<I>>, IBitmapContainer {
-
+public abstract class BaseSlice<I extends Object> implements
+		Comparable<BaseSlice<I>>, IBitmapContainer {
 	private final I id;
-	private Bitmap bitmap;
 
 	/**
-	 * Creates a slice with no records added (i.e. everything is set to
-	 * {@code 0}) for the specified {@code sliceId}.
-	 * 
-	 * @param sliceId
-	 *            the identifier the slice stands for
-	 * @param factory
-	 *            factory used to create bitmap indexes
+	 * The {@code Bitmap} of the slice
 	 */
-	public IndexDimensionSlice(final I sliceId, final BaseIndexFactory factory) {
-		this(sliceId, factory, null);
-	}
+	protected final Bitmap bitmap;
 
 	/**
 	 * Creates a slice with no the specified {@code recId} added (i.e.
@@ -49,7 +39,7 @@ public class IndexDimensionSlice<I> implements
 	 * @param recordIds
 	 *            the identifiers of the records to be set
 	 */
-	public IndexDimensionSlice(final I sliceId, final BaseIndexFactory factory,
+	public BaseSlice(final I sliceId, final BaseIndexFactory factory,
 			final int... recordIds) {
 		this.id = sliceId;
 		this.bitmap = factory.createBitmap();
@@ -57,6 +47,7 @@ public class IndexDimensionSlice<I> implements
 		if (recordIds != null) {
 			this.bitmap.set(recordIds);
 		}
+
 	}
 
 	/**
@@ -68,39 +59,8 @@ public class IndexDimensionSlice<I> implements
 		return id;
 	}
 
-	/**
-	 * Marks the specified {@code recordIds} to be set, i.e. the value
-	 * {@code this} slice represents by id is assumed to be set for the
-	 * specified records.
-	 * 
-	 * @param recordIds
-	 *            the identifiers of the records to be set
-	 */
-	public void set(final int... recordIds) {
-		if (recordIds == null || recordIds.length == 0) {
-			return;
-		}
-
-		bitmap.set(recordIds);
-	}
-
-	/**
-	 * Marks the specified {@code recId} to be set, i.e. the value {@code this}
-	 * slice represents by id is assumed to be set for the specified record.
-	 * 
-	 * @param recId
-	 *            the identifiers of the record to be set
-	 */
-	public void set(final int recId) {
-		bitmap.set(recId);
-	}
-
-	/**
-	 * The implementation of comparable compares the amount of slices with each
-	 * other.
-	 */
 	@Override
-	public int compareTo(final IndexDimensionSlice<I> slice) {
+	public int compareTo(final BaseSlice<I> slice) {
 		if (slice == null) {
 			return -1;
 		} else {

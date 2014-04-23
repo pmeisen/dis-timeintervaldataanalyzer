@@ -18,7 +18,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -280,7 +280,7 @@ public class GroupEvaluator {
 			// get all the bitmaps of the slices of the group
 			final List<Bitmap> bitmaps = new ArrayList<Bitmap>(group.size());
 			for (final Descriptor<?, ?, ?> d : group.getDescriptors()) {
-				final IndexDimensionSlice<?> slice = index
+				final Slice<?> slice = index
 						.getMetaIndexDimensionSlice(d.getModelId(), d.getId());
 
 				/*

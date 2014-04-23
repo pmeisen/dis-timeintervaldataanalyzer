@@ -18,7 +18,8 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IndexDimensionSlice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
@@ -40,8 +41,10 @@ public class TidaIndex implements IPersistable {
 
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
+	private final TidaModel model;
+
 	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
-	private final BaseIntervalIndex intervalIndex;
+	private final IntervalIndex intervalIndex;
 	private final MetaIndex metaIndex;
 	private final KeyIndex keyIndex;
 
@@ -57,25 +60,29 @@ public class TidaIndex implements IPersistable {
 	 * @see TidaModel
 	 */
 	public TidaIndex(final TidaModel model) {
+		this.model = model;
 		this.dataId = 0;
 		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
 
 		// create the indexes
-		intervalIndex = model.getIntervalModel().createIndex(
-				model.getDataStructure());
+		intervalIndex = new IntervalIndex(model);
 		metaIndex = new MetaIndex(model);
 		keyIndex = new KeyIndex(model);
 
 		// add the dimensions of the MetaDataModel, Key and Interval
 		indexes.put(MetaIndex.class, metaIndex);
 		indexes.put(KeyIndex.class, keyIndex);
-		indexes.put(BaseIntervalIndex.class, intervalIndex);
-
-		// set the default values
-		setMetaDataHandling(model.getMetaDataHandling());
-		setIntervalDataHandling(model.getIntervalDataHandling());
+		indexes.put(IntervalIndex.class, intervalIndex);
 	}
 
+	protected IntervalIndex getIntervalIndex() {
+		return intervalIndex;
+	}
+	
+	protected MetaIndex getMetaIndex() {
+		return metaIndex;
+	}
+	
 	/**
 	 * Indexes the passed {@code record}.
 	 * 
@@ -83,8 +90,14 @@ public class TidaIndex implements IPersistable {
 	 *            the record to be indexed
 	 */
 	public void index(final IDataRecord record) {
+
+		// let's pre-process the record and map all the values
+		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
+				record, model);
+
+		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
-			idx.index(dataId, record);
+			idx.index(dataId, processedRecord);
 		}
 
 		//@formatter:off
@@ -104,44 +117,6 @@ public class TidaIndex implements IPersistable {
 		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.optimize();
 		}
-	}
-
-	/**
-	 * Gets the {@code MetaDataHandling} defined for the index.
-	 * 
-	 * @return the {@code MetaDataHandling} defined for the index
-	 */
-	public MetaDataHandling getMetaDataHandling() {
-		return metaIndex.getMetaDataHandling();
-	}
-
-	/**
-	 * Sets the {@code MetaDataHandling} for the index.
-	 * 
-	 * @param handling
-	 *            the {@code MetaDataHandling} to be used
-	 */
-	public void setMetaDataHandling(final MetaDataHandling handling) {
-		metaIndex.setMetaDataHandling(handling);
-	}
-
-	/**
-	 * Gets the {@code IntervalDataHandling} defined for the index.
-	 * 
-	 * @return the {@code IntervalDataHandling} defined for the index
-	 */
-	public IntervalDataHandling getIntervalDataHandling() {
-		return intervalIndex.getIntervalDataHandling();
-	}
-
-	/**
-	 * Sets the {@code IntervalDataHandling} for the index.
-	 * 
-	 * @param handling
-	 *            the {@code IntervalDataHandling} to be used
-	 */
-	public void setIntervalDataHandling(final IntervalDataHandling handling) {
-		intervalIndex.setIntervalDataHandling(handling);
 	}
 
 	/**
@@ -180,14 +155,14 @@ public class TidaIndex implements IPersistable {
 			}
 			
 			// sort the data ascending
-			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
+			final List<Slice> sortedSlices = new ArrayList<Slice>();
 			sortedSlices.addAll(Arrays.asList(dim.getSlices()));
 			Collections.sort(sortedSlices, Collections.reverseOrder());
 			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
 			
 			// output the data use the threshold defined by STATISTIC_THRESHOLD
 			int i = 0;
-			for (final IndexDimensionSlice<?> slice : sortedSlices) {
+			for (final Slice<?> slice : sortedSlices) {
 				final Object sliceId = slice.getId();
 				final DescriptorModel model = dim.getModel();
 				final Descriptor value = model.getDescriptor(sliceId);
@@ -205,13 +180,13 @@ public class TidaIndex implements IPersistable {
 		if (amountOfSlices != 0) {
 		
 			// sort the data ascending
-			final List<IndexDimensionSlice> sortedSlices = new ArrayList<IndexDimensionSlice>();
+			final List<SliceWithDescriptors> sortedSlices = new ArrayList<SliceWithDescriptors>();
 			sortedSlices.addAll(Arrays.asList(intervalIndex.getSlices()));
-			Collections.sort(sortedSlices, new Comparator<IndexDimensionSlice>() {
+			Collections.sort(sortedSlices, new Comparator<SliceWithDescriptors>() {
 				
 				@Override
-				public int compare(IndexDimensionSlice o1,
-						IndexDimensionSlice o2) {
+				public int compare(final SliceWithDescriptors o1,
+						final SliceWithDescriptors o2) {
 					
 					if (o2 == null && o1 == null) {
 						return 0;
@@ -227,7 +202,7 @@ public class TidaIndex implements IPersistable {
 				
 				// output the data use the threshold defined by STATISTIC_THRESHOLD
 				int i = 0;
-				for (final IndexDimensionSlice<?> slice : sortedSlices) {
+				for (final SliceWithDescriptors<?> slice : sortedSlices) {
 					if (slice == null) {
 						break;
 					}
@@ -304,20 +279,20 @@ public class TidaIndex implements IPersistable {
 	}
 
 	/**
-	 * Gets the {@code IndexDimensionSlice} of the specified {@code modelId} and
-	 * the specified descriptor's {@code id}.
+	 * Gets the {@code Slice} of the specified {@code modelId} and the specified
+	 * descriptor's {@code id}.
 	 * 
 	 * @param modelId
 	 *            the identifier of the model to get the slice from
 	 * @param id
 	 *            the identifier of the descriptor to get the slice for
 	 * 
-	 * @return the {@code IndexDimensionSlice} for the specified values, or
-	 *         {@code null} if the combination of model and descriptor's
-	 *         identifier refers to an unknown slice
+	 * @return the {@code Slice} for the specified values, or {@code null} if
+	 *         the combination of model and descriptor's identifier refers to an
+	 *         unknown slice
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public IndexDimensionSlice getMetaIndexDimensionSlice(final String modelId,
+	public Slice getMetaIndexDimensionSlice(final String modelId,
 			final Object id) {
 		final MetaIndexDimension metaIdxDim = metaIndex.get(modelId);
 
@@ -345,7 +320,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the slices, which might contain {@code null} and are totally
 	 *         ordered by the timeline
 	 */
-	public IndexDimensionSlice<?>[] getIntervalIndexSlices(final Object start,
+	public SliceWithDescriptors<?>[] getIntervalIndexSlices(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
 		return intervalIndex
@@ -357,7 +332,7 @@ public class TidaIndex implements IPersistable {
 	 * 
 	 * @return the slices of the {@code IntervalIndex}
 	 */
-	public IndexDimensionSlice<?>[] getIntervalIndexSlices() {
+	public SliceWithDescriptors<?>[] getIntervalIndexSlices() {
 		return intervalIndex.getSlices();
 	}
 

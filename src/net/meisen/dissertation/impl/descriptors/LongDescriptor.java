@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
 
@@ -133,5 +134,15 @@ public class LongDescriptor<I extends Object> extends
 	@Override
 	public String getUniqueString() {
 		return formatter.format(value);
+	}
+	
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return value;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

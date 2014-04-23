@@ -4,6 +4,7 @@ import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
@@ -72,5 +73,15 @@ public class MockDescriptorPrimitiveDataType<D>
 	@Override
 	public String getUniqueString() {
 		return getValue().toString();
+	}
+
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return 0.0;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

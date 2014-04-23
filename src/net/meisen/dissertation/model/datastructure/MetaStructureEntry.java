@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.datastructure;
 
+import net.meisen.general.genmisc.types.Objects;
+
 /**
  * A {@code MetaStructureEntry} binds the entry to a {@code DescriptorModel}.
  * 
@@ -70,5 +72,15 @@ public class MetaStructureEntry extends StructureEntry {
 	 */
 	public String getDescriptorModel() {
 		return descriptorModel;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (super.equals(o)) {
+			final MetaStructureEntry e = (MetaStructureEntry) o;
+			return Objects.equals(getDescriptorModel(), e.getDescriptorModel());
+		} else {
+			return false;
+		}
 	}
 }

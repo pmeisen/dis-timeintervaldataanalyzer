@@ -15,7 +15,7 @@ public class KeyIndex implements IDataRecordIndex {
 	private final List<KeyIndexDimension> keyDimensions;
 
 	private Group persistentGroup = null;
-	
+
 	public KeyIndex(final TidaModel model) {
 
 		// get the DataStructure which defines how the index has to look like
@@ -28,7 +28,7 @@ public class KeyIndex implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int dataId, final IDataRecord record) {
+	public void index(final int dataId, final ProcessedDataRecord record) {
 		// TODO Auto-generated method stub
 	}
 

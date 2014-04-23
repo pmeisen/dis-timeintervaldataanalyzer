@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Strings;
@@ -107,5 +108,15 @@ public class ListDescriptor<I extends Object> extends
 	@Override
 	public String getUniqueString() {
 		return Strings.join(",", values);
+	}
+
+	@Override
+	public double getFactValue(final IDataRecord record) {
+		return values.length;
+	}
+
+	@Override
+	public boolean isRecordInvariant() {
+		return true;
 	}
 }

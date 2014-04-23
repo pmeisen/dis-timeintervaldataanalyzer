@@ -16,6 +16,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
+import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.slf4j.Logger;
@@ -504,6 +505,41 @@ public class DescriptorModel<I extends Object> {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);
 		}
+	}
+
+	/**
+	 * Gets the descriptor for the specified value. If the descriptor is not
+	 * found, a strategy based on the passed {@code MetaDataHandling} is
+	 * applied.
+	 * 
+	 * @param value
+	 *            the value of the {@code Descriptor} to be returned
+	 * @param handling
+	 *            the handling strategy
+	 * 
+	 * @return the {@code Descriptor} with the specified {@code value}
+	 * 
+	 * @see MetaDataHandling
+	 */
+	public Descriptor<?, ?, I> getDescriptorByValue(final Object value,
+			final MetaDataHandling handling) {
+
+		// get the descriptor just by value
+		Descriptor<?, ?, I> desc = getDescriptorByValue(value);
+
+		// if not find handle it according to the defined handling
+		if (desc == null) {
+			if (MetaDataHandling.CREATEDESCRIPTOR.equals(handling)) {
+				desc = createDescriptor(value);
+			} else if (MetaDataHandling.FAILONERROR.equals(handling)) {
+				exceptionRegistry.throwException(
+						DescriptorModelException.class, 1006, value);
+			} else if (MetaDataHandling.HANDLEASNULL.equals(handling)) {
+				desc = getNullDescriptor();
+			}
+		}
+
+		return desc;
 	}
 
 	/**
