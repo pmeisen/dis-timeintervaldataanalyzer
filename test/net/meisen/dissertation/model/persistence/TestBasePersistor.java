@@ -68,9 +68,9 @@ public class TestBasePersistor extends ExceptionBasedTest {
 
 	/**
 	 * Tests the implicit call of
-	 * {@link IPersistable#isRegistered(BasePersistor, SelectGroup)} which has to be
+	 * {@link IPersistable#isRegistered(BasePersistor, Group)} which has to be
 	 * triggered by the {@code BasePersistor} whenever an instance is
-	 * registered, i.e. {@link BasePersistor#register(SelectGroup, IPersistable)} is
+	 * registered, i.e. {@link BasePersistor#register(Group, IPersistable)} is
 	 * called.
 	 */
 	@Test
@@ -103,7 +103,7 @@ public class TestBasePersistor extends ExceptionBasedTest {
 	}
 
 	/**
-	 * Tests the implementation of {@link BasePersistor#getPersistable(SelectGroup)}.
+	 * Tests the implementation of {@link BasePersistor#getPersistable(Group)}.
 	 */
 	@Test
 	public void testGetPersistable() {
