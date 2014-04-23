@@ -19,7 +19,6 @@ import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
-import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
 import org.junit.After;
 import org.junit.Test;

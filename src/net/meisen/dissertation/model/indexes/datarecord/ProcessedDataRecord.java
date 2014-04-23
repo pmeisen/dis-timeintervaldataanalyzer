@@ -17,14 +17,29 @@ import net.meisen.dissertation.model.datastructure.StructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
+/**
+ * A processed {@code DataRecord} is a record which is processed by a
+ * {@code TidaModel} definition.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class ProcessedDataRecord {
 	private final IDataRecord raw;
-
 	private final Map<MetaStructureEntry, Descriptor<?, ?, ?>> processedMeta;
 
 	private long start = -1;
 	private long end = -1;
 
+	/**
+	 * Constructor to create a {@code ProcessedDataRecord} based on the
+	 * {@code TidaModel} and the {@code DataRecord}.
+	 * 
+	 * @param raw
+	 *            the {@code DataRecord} to be processed
+	 * @param model
+	 *            the {@code Model} which defines how to process the record
+	 */
 	public ProcessedDataRecord(final IDataRecord raw, final TidaModel model) {
 		this.raw = raw;
 		this.processedMeta = new HashMap<MetaStructureEntry, Descriptor<?, ?, ?>>();
@@ -53,22 +68,56 @@ public class ProcessedDataRecord {
 		}
 	}
 
+	/**
+	 * Gets all the {@code Descriptors} addressed by {@code this} record.
+	 * 
+	 * @return all the {@code Descriptors} addressed by {@code this} record
+	 */
 	public Collection<Descriptor<?, ?, ?>> getAllDescriptors() {
 		return processedMeta.values();
 	}
 
+	/**
+	 * Get the {@code Descriptor} of the specified {@code entry}.
+	 * 
+	 * @param entry
+	 *            the {@code MetaStructureEntry} to get the {@code Descriptor}
+	 *            for
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code entry}
+	 */
 	public Descriptor<?, ?, ?> getDescriptor(final MetaStructureEntry entry) {
 		return processedMeta.get(entry);
 	}
 
+	/**
+	 * Gets the mapped, normalized start value on the timeline of the records
+	 * interval.
+	 * 
+	 * @return the mapped, normalized start value
+	 */
 	public long getStart() {
 		return start;
 	}
 
+	/**
+	 * Gets the mapped, normalized end value on the timeline of the records
+	 * interval.
+	 * 
+	 * @return the mapped, normalized end value
+	 */
 	public long getEnd() {
 		return end;
 	}
 
+	/**
+	 * Gets the interval value for the specified {@code entry}.
+	 * 
+	 * @param entry
+	 *            the entry to get the mapped, normalized value for
+	 * 
+	 * @return the normalized, mapped value for the specified {@code entry}
+	 */
 	public long getIntervalValue(final IntervalStructureEntry entry) {
 		if (entry.isStart()) {
 			return start;
@@ -77,6 +126,11 @@ public class ProcessedDataRecord {
 		}
 	}
 
+	/**
+	 * Get the raw record used to determine the values from.
+	 * 
+	 * @return the raw record used to determine the values from
+	 */
 	public IDataRecord getRawRecord() {
 		return raw;
 	}
