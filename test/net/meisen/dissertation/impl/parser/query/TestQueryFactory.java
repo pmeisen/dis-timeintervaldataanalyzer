@@ -13,11 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
-import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.impl.measures.Average;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.measures.Max;
@@ -35,17 +34,10 @@ import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicT
 import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
-import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Dates;
-import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
-import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
-import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
-import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -121,18 +113,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @see DescriptorLogicTree
  * 
  */
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
-@RunWith(JUnitConfigurationRunner.class)
-public class TestQueryFactory extends ExceptionBasedTest {
+public class TestQueryFactory extends LoaderBasedTest {
 
 	@Autowired
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
 	private QueryFactory factory;
-
-	@Autowired
-	@Qualifier(DefaultValues.HANDLER_ID)
-	private TidaModelHandler loader;
 
 	/**
 	 * Get the factory's result for the {@code query}.
@@ -144,21 +129,6 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@SuppressWarnings("unchecked")
 	protected <T extends IQuery> T q(final String query) {
 		return (T) factory.parseQuery(query);
-	}
-
-	/**
-	 * Helper method to load a specific model.
-	 * 
-	 * @param xml
-	 *            the xml file to be loaded
-	 * 
-	 * @return the loaded model
-	 */
-	protected TidaModel m(final String xml) {
-		final TidaModel model = loader.loadViaXslt(xml);
-		model.loadData();
-
-		return model;
 	}
 
 	/**
@@ -330,7 +300,7 @@ public class TestQueryFactory extends ExceptionBasedTest {
 	@Test
 	public void testComplexMeasure() {
 		SelectQuery query;
-		
+
 		query = q("select timeseries of max(LOCATION + PERSON) * (average(PERSON) + min(PERSON)) from testPersonModel");
 		System.out.println(query.getMeasures());
 
@@ -999,13 +969,5 @@ public class TestQueryFactory extends ExceptionBasedTest {
 
 		// fire the query
 		factory.evaluateQuery(q(query), loader);
-	}
-
-	/**
-	 * Clean up and make sure the models are unloaded
-	 */
-	@After
-	public void cleanUp() {
-		loader.unloadAll();
 	}
 }

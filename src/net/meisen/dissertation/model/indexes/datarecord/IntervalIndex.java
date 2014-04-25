@@ -5,18 +5,20 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.data.IntervalModel;
+import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
@@ -37,25 +39,39 @@ import net.meisen.general.genmisc.types.Objects;
 public class IntervalIndex implements IDataRecordIndex {
 	private final static String EXTENSION = ".slice";
 
+	private final MetaDataModel metaDataModel;
+
 	private final IRangeQueryOptimized index;
 	private final BaseMapper<?> mapper;
 	private final BaseIndexFactory indexFactory;
 
 	private Group persistentGroup = null;
 
+	/**
+	 * Constructor to create an index for the specified {@code TidaModel}.
+	 * 
+	 * @param model
+	 *            the {@code TidaModel} to create the index for
+	 */
 	public IntervalIndex(final TidaModel model) {
-		this(model.getIntervalModel());
+		this(model.getIntervalModel(), model.getMetaDataModel());
 	}
 
 	/**
-	 * Constructor to create an index using the specified {@code Mapper}, the
-	 * {@code start}- and {@code end}-entry and the specified
-	 * {@code indexFactory} to create the needed indexes.
+	 * Constructor to create an index for the specified {@code IntervalModel}.
+	 * 
+	 * @param intervalModel
+	 *            the {@code IntervalModel} to create the index for
+	 * @param metaDataModel
+	 *            the {@code MetaDataModel} is needed to lookup descriptors when
+	 *            loading an index
 	 */
-	public IntervalIndex(final IntervalModel intervalModel) {
+	public IntervalIndex(final IntervalModel intervalModel,
+			final MetaDataModel metaDataModel) {
 		this.mapper = intervalModel.getTimelineMapper();
 		this.indexFactory = intervalModel.getIndexFactory();
 		this.index = intervalModel.createIndex();
+		this.metaDataModel = metaDataModel;
 	}
 
 	/**
@@ -129,7 +145,7 @@ public class IntervalIndex implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int dataId, final ProcessedDataRecord rec) {
+	public void index(final ProcessedDataRecord rec) {
 		if (rec == null) {
 			return;
 		} else if (rec.getStart() < 0 || rec.getEnd() < 0) {
@@ -140,9 +156,9 @@ public class IntervalIndex implements IDataRecordIndex {
 			final SliceWithDescriptors<?> slice = (SliceWithDescriptors<?>) index
 					.getObject(i);
 			if (slice == null) {
-				index.addObject(createSlice(i, dataId));
+				index.addObject(createSlice(i, rec));
 			} else {
-				slice.set(dataId);
+				slice.set(rec.getId(), rec.getAllDescriptors());
 			}
 		}
 	}
@@ -191,10 +207,28 @@ public class IntervalIndex implements IDataRecordIndex {
 	 * @param end
 	 *            the end point (included)
 	 * 
-	 * @return the slices, which might be {@code null} if no data is there yet
+	 * @return the slices, which might contain {@code null} values if no data is
+	 *         added to the slice yet
 	 */
 	public SliceWithDescriptors<?>[] getSlices(final long start, final long end) {
 		return castSlices(index.getObjectsByStartAndEnd(start, end));
+	}
+
+	/**
+	 * Get the slices for the specified {@code start} (included) to {@code end}
+	 * (included).
+	 * 
+	 * @param start
+	 *            the start point (included)
+	 * @param end
+	 *            the end point (included)
+	 * 
+	 * @return the slices, which might contain {@code null} values if no data is
+	 *         added to the slice yet
+	 */
+	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
+			final Object end) {
+		return getSlicesByTimePoints(start, end, true, true);
 	}
 
 	/**
@@ -255,34 +289,56 @@ public class IntervalIndex implements IDataRecordIndex {
 	}
 
 	/**
-	 * Method to create a slice with the specified id and the specified set
-	 * records.
+	 * Method to create an empty slice with the specified id.
 	 * 
 	 * @param sliceId
 	 *            the identifier of the slice
-	 * @param recordIds
-	 *            the records to be marked as part of the slice
+	 * 
+	 * @return the created {@code Slice}
+	 */
+	protected SliceWithDescriptors<?> createSlice(final Number sliceId) {
+
+		// get the type of the slice
+		final Class<? extends Number> clazz = getType();
+
+		// create the slice
+		final SliceWithDescriptors<?> slice;
+		if (Byte.class.equals(clazz)) {
+			slice = new SliceWithDescriptors<Byte>(Numbers.castToByte(sliceId),
+					indexFactory);
+		} else if (Short.class.equals(clazz)) {
+			slice = new SliceWithDescriptors<Short>(
+					Numbers.castToShort(sliceId), indexFactory);
+		} else if (Integer.class.equals(clazz)) {
+			slice = new SliceWithDescriptors<Integer>(
+					Numbers.castToInt(sliceId), indexFactory);
+		} else {
+			slice = new SliceWithDescriptors<Long>(Numbers.castToLong(sliceId),
+					indexFactory);
+		}
+
+		return slice;
+	}
+
+	/**
+	 * Method to create a slice with the specified id and the specified set
+	 * {@code record}.
+	 * 
+	 * @param sliceId
+	 *            the identifier of the slice
+	 * @param record
+	 *            the record to be marked added
 	 * 
 	 * @return the created {@code Slice}
 	 */
 	protected SliceWithDescriptors<?> createSlice(final Number sliceId,
-			final int... recordIds) {
-		final Class<? extends Number> clazz = getType();
+			final ProcessedDataRecord record) {
 
 		// determine the slices types
-		if (Byte.class.equals(clazz)) {
-			return new SliceWithDescriptors<Byte>(Numbers.castToByte(sliceId),
-					indexFactory, recordIds);
-		} else if (Short.class.equals(clazz)) {
-			return new SliceWithDescriptors<Short>(
-					Numbers.castToShort(sliceId), indexFactory, recordIds);
-		} else if (Integer.class.equals(clazz)) {
-			return new SliceWithDescriptors<Integer>(
-					Numbers.castToInt(sliceId), indexFactory, recordIds);
-		} else {
-			return new SliceWithDescriptors<Long>(Numbers.castToLong(sliceId),
-					indexFactory, recordIds);
-		}
+		final SliceWithDescriptors<?> slice = createSlice(sliceId);
+		slice.set(record.getId(), record.getAllDescriptors());
+
+		return slice;
 	}
 
 	/**
@@ -302,7 +358,7 @@ public class IntervalIndex implements IDataRecordIndex {
 	 * 
 	 * @return the slices between
 	 */
-	public SliceWithDescriptors<?>[] getSlices(final Object start,
+	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
 
@@ -340,6 +396,15 @@ public class IntervalIndex implements IDataRecordIndex {
 
 			try {
 				persistor.writeObject(out, slice.getId());
+				persistor.writeInt(out, slice.numberOfModels());
+				for (final String modelId : slice.models()) {
+					persistor.writeString(out, modelId);
+					persistor.writeInt(out, slice.numberOfFacts(modelId));
+					for (final Descriptor<?, ?, ?> desc : slice.facts(modelId)) {
+						persistor.writeObject(out, desc.getValue());
+					}
+				}
+
 				slice.getBitmap().serialize(new DataOutputStream(out));
 			} catch (final IOException e) {
 				throw new ForwardedRuntimeException(PersistorException.class,
@@ -373,8 +438,32 @@ public class IntervalIndex implements IDataRecordIndex {
 					"The identifier '" + id + "' is not a number.");
 		}
 
+		// get the descriptors associated
+		final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
+
+		try {
+			final int nrOfModels = persistor.readInt(inputStream);
+			for (int i = 0; i < nrOfModels; i++) {
+				final String modelId = persistor.readString(inputStream);
+				final int nrOfFacts = persistor.readInt(inputStream);
+
+				for (int k = 0; k < nrOfFacts; k++) {
+					final Object descValue = persistor.readObject(inputStream);
+					final Descriptor<?, ?, ?> desc = metaDataModel
+							.getDescriptorByValue(modelId, descValue,
+									MetaDataHandling.CREATEDESCRIPTOR);
+
+					descriptors.add(desc);
+				}
+			}
+		} catch (final Exception e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
+
 		// create the slice
 		final SliceWithDescriptors<?> slice = createSlice((Number) id);
+		slice.setDescriptors(descriptors);
 
 		// load the slice from the InputStream
 		try {

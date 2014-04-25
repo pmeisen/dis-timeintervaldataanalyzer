@@ -108,8 +108,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
 			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
-					model);
-			idx.index(i, dataRec);
+					model, i);
+			idx.index(dataRec);
 			i++;
 		}
 		it.close();
@@ -179,14 +179,14 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 					.getValue("RND_INTEGER")) == null) {
 				added++;
 			}
-			
+
 			// create the processedRecord and the needed data
 			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
-					model);
+					model, i);
 
 			// add the record
-			fixedIdx.index(i, dataRec);
-			randomIdx.index(i, dataRec);
+			fixedIdx.index(dataRec);
+			randomIdx.index(dataRec);
 			i++;
 		}
 		it.close();
@@ -248,8 +248,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
 			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
-					model);
-			saveIdx.index(i, dataRec);
+					model, i);
+			saveIdx.index(dataRec);
 			i++;
 		}
 		it.close();

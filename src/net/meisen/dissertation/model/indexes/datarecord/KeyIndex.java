@@ -28,7 +28,7 @@ public class KeyIndex implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int dataId, final ProcessedDataRecord record) {
+	public void index(final ProcessedDataRecord record) {
 		// TODO Auto-generated method stub
 	}
 

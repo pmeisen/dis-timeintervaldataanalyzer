@@ -19,6 +19,7 @@ import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
+import net.meisen.dissertation.impl.indexes.TestContinuousIntIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestIndexFactory;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
@@ -51,6 +52,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.indexes.datarecord.TestProcessedDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.slices.TestFactDescriptorSet;
 import net.meisen.dissertation.model.persistence.TestBasePersistor;
 import net.meisen.dissertation.model.persistence.TestGroup;
 import net.meisen.dissertation.model.persistence.TestIdentifier;
@@ -97,6 +99,7 @@ import org.junit.runners.Suite;
 		TestNestedIndexedCollection.class,
 		TestMultipleIndexedCollection.class,
 		TestIntArrayCollection.class,
+		TestContinuousIntIndexedCollection.class,
 
 		// Test the factory for the indexes
 		TestIndexFactory.TestIndexFactorySuite.class,
@@ -162,12 +165,15 @@ import org.junit.runners.Suite;
 
 		// Test the record pre-processing
 		TestProcessedDataRecord.class,
-		
+
+		// Test the index for facts
+		TestFactDescriptorSet.class,
+
 		// Test the tida-indexes
 		TestMetaIndexDimension.class,
 		TestMetaIndex.class,
 		TestIntervalIndex.class,
-		
+
 		// Test the query
 		TestDescriptorValue.class, TestDescriptorComperator.class,
 		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,

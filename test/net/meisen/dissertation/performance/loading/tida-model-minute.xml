@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- OfflineMode (i.e. what should happen if a dataretriever is not available)
+     is optional and can be one of the following values (case-insensitive):
+      + true, y, yes
+      + false, n, no
+      + auto
+  -->
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+
+       offlinemode="false"
+       
+       id="tidaModel" name="Model used for performance test SMC 2014">
+ 
+  <config>
+
+    <dataretrievers>
+      <dataretriever id="db_tida">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tida" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+ 
+  <time>
+    <timeline start="01.01.2008 00:00:00" end="30.12.2008 23:59:00" granularity="MINUTE" />
+  </time>
+
+  <meta>
+    <!-- As identifier-factory the following implementations are available:
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
+          
+         The null-attribute (true or false) defines if null values are allowed within 
+         the model.
+         The failonduplicates-attributes (true or false) specifies if duplicates are 
+         just ignored or if an exception is thrown.
+      -->
+    <descriptors>
+      <resource id="PERSON" failonduplicates="true" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="TASKTYPE" failonduplicates="true" null="false" name="tasktype" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="WORKAREA" failonduplicates="true" null="false" name="workarea" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="PERSON" dataretriever="db_tida">
+        <db:query>SELECT DISTINCT PERSON FROM SMC_DATA</db:query>
+      </entry>
+      <entry descriptor="TASKTYPE" dataretriever="db_tida">
+        <db:query>SELECT DISTINCT TASKTYPE FROM SMC_DATA</db:query>
+      </entry>
+      <entry descriptor="WORKAREA" dataretriever="db_tida">
+        <db:query>SELECT DISTINCT WORKAREA FROM SMC_DATA</db:query>
+      </entry>
+    </entries>
+  </meta>
+    
+  <structure>
+    <meta name="PERSON" descriptor="PERSON" />
+    <meta name="TASKTYPE" descriptor="TASKTYPE" />
+    <meta name="WORKAREA" descriptor="WORKAREA" />
+    
+    <interval name="INTERVAL_START" type="start" />
+    <interval name="INTERVAL_END" type="end" />
+    
+    <key name="KEY" />
+  </structure>
+  
+  <data metahandling="fail" intervalhandling="failOnNull">
+    <dataset dataretriever="db_tida">
+      <db:query>SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA WHERE ROWNUM() &lt; 500000</db:query>
+    </dataset>
+  </data>
+</model>

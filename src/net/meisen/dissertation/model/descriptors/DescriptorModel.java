@@ -501,6 +501,10 @@ public class DescriptorModel<I extends Object> {
 
 		if (supportsNullDescriptor() && value == null) {
 			return getNullDescriptor();
+		} else if (value == null) {
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1004, getId());
+			return null;
 		} else {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);

@@ -6,24 +6,16 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
-import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.NullDescriptor;
-import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
-import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
-import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
-import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Tests the implementation of a {@code ProcessedDataRecord}.
@@ -31,21 +23,16 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author pmeisen
  * 
  */
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
-@RunWith(JUnitConfigurationRunner.class)
-public class TestProcessedDataRecord extends ExceptionBasedTest {
-
-	@Autowired
-	private TidaModelHandler loader;
+public class TestProcessedDataRecord extends LoaderBasedTest {
 
 	/**
 	 * Tests the creation of descriptors by a {@code ProcessedDataRecord}.
 	 */
 	@Test
 	public void testDescriptorCreation() {
-		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/processedDataCreateDescriptor.xml");
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataCreateDescriptor.xml",
+				false);
 
 		// check the pre-requirements
 		assertEquals(MetaDataHandling.CREATEDESCRIPTOR,
@@ -59,13 +46,14 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 
 			// create the processed record for each record of the model
 			final ProcessedDataRecord record = new ProcessedDataRecord(
-					it.next(), model);
+					it.next(), model, counter + 1);
 
 			// the record itself should only have one descriptor
 			assertEquals(1, record.getAllDescriptors().size());
 
 			// increase the counter we processed another record
 			counter++;
+			assertEquals(counter, record.getId());
 
 			// create a set of all the descriptors
 			final Set<Descriptor<?, ?, ?>> curDesc = new HashSet<Descriptor<?, ?, ?>>();
@@ -87,8 +75,9 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 		thrown.expect(DescriptorModelException.class);
 		thrown.expectMessage("descriptor for the value 'Holger' could not be found.");
 
-		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/processedDataFailDescriptor.xml");
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataFailDescriptor.xml",
+				false);
 
 		// check the pre-requirements
 		assertEquals(MetaDataHandling.FAILONERROR, model.getMetaDataHandling());
@@ -99,7 +88,7 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 		assertTrue(it.hasNext());
 
 		// create the processed record for each record of the model
-		new ProcessedDataRecord(it.next(), model);
+		new ProcessedDataRecord(it.next(), model, 1);
 	}
 
 	/**
@@ -107,8 +96,9 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testNullDescriptor() {
-		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/processedDataNullDescriptor.xml");
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataNullDescriptor.xml",
+				false);
 
 		// check the pre-requirements
 		assertEquals(MetaDataHandling.HANDLEASNULL, model.getMetaDataHandling());
@@ -120,7 +110,7 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 
 		// create the processed record for each record of the model
 		final ProcessedDataRecord record = new ProcessedDataRecord(it.next(),
-				model);
+				model, 1);
 		assertTrue(record.getDescriptor((MetaStructureEntry) model
 				.getDataStructure().getEntries().get(0)) instanceof NullDescriptor);
 	}
@@ -131,8 +121,9 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testIntervalMappingUsingUseOther() {
-		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithUseOther.xml");
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithUseOther.xml",
+				false);
 
 		// check the pre-requirements
 		assertEquals(IntervalDataHandling.USEOTHER,
@@ -146,79 +137,79 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 
 		// an interval [110, 200] within the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(10, record.getStart());
 		assertEquals(100, record.getEnd());
 
 		// an interval [1000, 1010] exceeding the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [10, 20] undercutting the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [120, 110] generally invalid
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [20, 10] generally invalid, but undercutting
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [520, 510] generally invalid, but exceeding
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [null, 110] having a null start value
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(10, record.getStart());
 		assertEquals(10, record.getEnd());
 
 		// an interval [110, null] having a null end value
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(10, record.getStart());
 		assertEquals(10, record.getEnd());
 
 		// an interval [null, null] having both values null
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [null, 1000] with null as start and exceeded end
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [1000, null] with null as end and exceeded start
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [null, 10] with null as start and undercutting end
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [10, null] with null as end and undercutting start
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
@@ -232,8 +223,9 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testIntervalMappingUsingBoundaries() {
-		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithBoundaries.xml");
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithBoundaries.xml",
+				false);
 
 		// check the pre-requirements
 		assertEquals(IntervalDataHandling.BOUNDARIESWHENNULL,
@@ -247,91 +239,83 @@ public class TestProcessedDataRecord extends ExceptionBasedTest {
 
 		// an interval [110, 200] within the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(10, record.getStart());
 		assertEquals(100, record.getEnd());
 
 		// an interval [1000, 1010] exceeding the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [10, 20] undercutting the timeline [100, 500]
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [120, 110] generally invalid
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [20, 10] generally invalid, but undercutting
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [520, 510] generally invalid, but exceeding
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [null, 110] having a null start value
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(0, record.getStart());
 		assertEquals(10, record.getEnd());
 
 		// an interval [110, null] having a null end value
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(10, record.getStart());
 		assertEquals(400, record.getEnd());
 
 		// an interval [null, null] having both values null
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(0, record.getStart());
 		assertEquals(400, record.getEnd());
 
 		// an interval [null, 1000] with null as start and exceeded end
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(0, record.getStart());
 		assertEquals(400, record.getEnd());
 
 		// an interval [1000, null] with null as end and exceeded start
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [null, 10] with null as start and undercutting end
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(-1, record.getStart());
 		assertEquals(-1, record.getEnd());
 
 		// an interval [10, null] with null as end and undercutting start
 		assertTrue(it.hasNext());
-		record = new ProcessedDataRecord(it.next(), model);
+		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(0, record.getStart());
 		assertEquals(400, record.getEnd());
 
 		// cleanup
 		it.close();
-	}
-
-	/**
-	 * Make sure all the loaded modules are unloaded.
-	 */
-	@After
-	public void unload() {
-		loader.unloadAll();
 	}
 }

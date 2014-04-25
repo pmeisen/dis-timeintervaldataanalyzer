@@ -27,17 +27,17 @@ public class TestCompositeIndexKey {
 		key2 = new CompositeIndexKey("A", "B", "D");
 		assertTrue(key1.equals(key2));
 		assertTrue(key1.hashCode() == key2.hashCode());
-		
+
 		key1 = new CompositeIndexKey("A", null, "D");
 		key2 = new CompositeIndexKey("A", null, "D");
 		assertTrue(key1.equals(key2));
 		assertTrue(key1.hashCode() == key2.hashCode());
-		
+
 		key1 = new CompositeIndexKey(1, 1.0, 5);
 		key2 = new CompositeIndexKey(1, 1.0, 5);
 		assertTrue(key1.equals(key2));
 		assertTrue(key1.hashCode() == key2.hashCode());
-		
+
 		key1 = new CompositeIndexKey(1, 2, 3);
 		key2 = new CompositeIndexKey(1, 2, 3.0);
 		assertFalse(key1.equals(key2));

@@ -89,6 +89,16 @@
       </bean>
     </constructor-arg>
   </bean>
+  <!-- exclude it, adding takes to long for testing and results show that trove is close to the performance
+  <bean id="idxContinuousIntIndexMethod" class="net.meisen.dissertation.impl.indexes.ContinuousIntIndexedCollection">
+    <constructor-arg type="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+      <bean class="net.meisen.dissertation.model.indexes.IndexKeyDefinition">
+        <constructor-arg type="java.lang.Class"><value>java.lang.Integer</value></constructor-arg>
+        <constructor-arg type="java.lang.String[]"><value>intValue</value></constructor-arg>
+      </bean>
+    </constructor-arg>
+  </bean>
+  -->
   
   <!-- the maps to be tested -->
   <bean id="mapHashMap" class="java.util.HashMap" />

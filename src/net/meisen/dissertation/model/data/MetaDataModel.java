@@ -13,6 +13,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
+import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -213,6 +214,38 @@ public class MetaDataModel {
 		}
 
 		return (Descriptor<D, ?, ?>) model.getDescriptorByValue(value);
+	}
+
+	/**
+	 * Gets the descriptor for the specified value of the specified
+	 * {@code DescriptorModel}. If the descriptor is not found, a strategy based
+	 * on the passed {@code MetaDataHandling} is applied.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel} to look up the
+	 *            value
+	 * @param value
+	 *            the value of the {@code Descriptor} to be returned
+	 * @param handling
+	 *            the handling strategy
+	 * 
+	 * @return the {@code Descriptor} with the specified {@code value}
+	 * @throws MetaDataModelException
+	 * 
+	 * @see MetaDataHandling
+	 */
+	@SuppressWarnings("unchecked")
+	public <D> Descriptor<D, ?, ?> getDescriptorByValue(final String modelId,
+			final D value, final MetaDataHandling handling)
+			throws MetaDataModelException {
+		final DescriptorModel<?> model = getDescriptorModel(modelId);
+		if (model == null) {
+			exceptionRegistry.throwException(MetaDataModelException.class,
+					1004, modelId);
+		}
+
+		return (Descriptor<D, ?, ?>) model
+				.getDescriptorByValue(value, handling);
 	}
 
 	/**
@@ -426,7 +459,7 @@ public class MetaDataModel {
 	public void setOfflineModeByString(final String mode) {
 		setOfflineMode(OfflineMode.find(mode));
 	}
-	
+
 	@Override
 	public String toString() {
 		return descriptorModels.toString();

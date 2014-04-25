@@ -176,8 +176,8 @@ public class IntervalModel {
 		index.setMaxValue(mapper.getNormEndAsLong());
 
 		// log the successful creation
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Created index for '"
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Created index for '"
 					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
 					+ mapper.format(mapper.demap(mapper.getEnd()))
 					+ "' with index '" + index.getClass().getName()

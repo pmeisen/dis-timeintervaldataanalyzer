@@ -5,8 +5,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Arrays;
 import java.util.Collection;
 
-import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
+import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 
 /**
  * An implementation of a {@code BaseIndexedCollection} based on a
@@ -32,7 +32,7 @@ public class TroveIntIndexedCollection extends BaseIndexedCollection {
 			throw new IllegalArgumentException(
 					"The key must be a single Integer");
 		}
-
+		
 		troveMap = new TIntObjectHashMap<Object>();
 	}
 

@@ -344,8 +344,7 @@ public class TidaModelHandler {
 	 * specified {@code location}.
 	 * 
 	 * @param id
-	 *            the id of the {@code ModuleHolder} to save the
-	 *            {@code TidaModel} from
+	 *            the id of the {@code TidaModel} to be saved
 	 * @param location
 	 *            the {@code Location} to store the data
 	 * 

@@ -42,8 +42,8 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
 			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
-					model);
-			metaIndex.index(i, dataRec);
+					model, i);
+			metaIndex.index(dataRec);
 			i++;
 		}
 		it.close();
@@ -70,10 +70,10 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 		while (it.hasNext()) {
 			final IDataRecord rec = it.next();
 			final ProcessedDataRecord dataRec = new ProcessedDataRecord(rec,
-					model);
+					model, i);
 
 			// add the record
-			metaIndex.index(i, dataRec);
+			metaIndex.index(dataRec);
 			i++;
 		}
 		it.close();

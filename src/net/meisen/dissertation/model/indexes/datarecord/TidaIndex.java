@@ -75,14 +75,28 @@ public class TidaIndex implements IPersistable {
 		indexes.put(IntervalIndex.class, intervalIndex);
 	}
 
+	/**
+	 * Gets the {@code IntervalIndex} created.
+	 * 
+	 * @return the {@code IntervalIndex}
+	 * 
+	 * @see IntervalIndex
+	 */
 	protected IntervalIndex getIntervalIndex() {
 		return intervalIndex;
 	}
-	
+
+	/**
+	 * Gets the {@code MetaIndex} created.
+	 * 
+	 * @return the {@code MetaIndex}
+	 * 
+	 * @see MetaIndex
+	 */
 	protected MetaIndex getMetaIndex() {
 		return metaIndex;
 	}
-	
+
 	/**
 	 * Indexes the passed {@code record}.
 	 * 
@@ -93,11 +107,11 @@ public class TidaIndex implements IPersistable {
 
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
-				record, model);
+				record, model, dataId);
 
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
-			idx.index(dataId, processedRecord);
+			idx.index(processedRecord);
 		}
 
 		//@formatter:off
@@ -324,7 +338,7 @@ public class TidaIndex implements IPersistable {
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
 		return intervalIndex
-				.getSlices(start, end, startInclusive, endInclusive);
+				.getSlicesByTimePoints(start, end, startInclusive, endInclusive);
 	}
 
 	/**

@@ -1,29 +1,31 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
-import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.DbBasedTest;
+import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.persistence.FileLocation;
-import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.datasets.IClosableIterator;
-import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.NullDescriptor;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
-import net.meisen.dissertation.model.persistence.Group;
-import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Numbers;
-import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -32,7 +34,6 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Tests the implementation of the {@code IntervalIndex}.
@@ -47,10 +48,6 @@ public class TestIntervalIndex extends DbBasedTest {
 
 	@Autowired
 	private TidaModelHandler loader;
-
-	@Autowired(required = true)
-	@Qualifier("coreConfiguration")
-	private IConfiguration configuration;
 
 	private TidaModel loadModel(final String dbName, final String dbPath,
 			final String modelPath) throws IOException {
@@ -69,17 +66,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	private IntervalIndex loadAndIndex(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-
-		// add the data to the index
-		final IClosableIterator<IDataRecord> it = model.getDataModel()
-				.iterator();
-		while (it.hasNext()) {
-			final IDataRecord rec = it.next();
-
-			// add the record
-			model.getIndex().index(rec);
-		}
-		it.close();
+		model.loadData();
 
 		return model.getIndex().getIntervalIndex();
 	}
@@ -112,6 +99,7 @@ public class TestIntervalIndex extends DbBasedTest {
 		// there should be at least one value for each slice
 		for (final SliceWithDescriptors<?> slice : idx.getSlices()) {
 			assertTrue(slice.count() > 0);
+			assertEquals(slice.numberOfModels(), 0);
 		}
 	}
 
@@ -176,9 +164,9 @@ public class TestIntervalIndex extends DbBasedTest {
 					.getSliceById(i);
 
 			if (i >= 0 && i <= 60 || i == 300 || i == 1080) {
-				assertEquals(2, slice.count());
+				assertEquals("at " + i, 1, slice.count());
 			} else {
-				assertEquals(1, slice.count());
+				assertNull("at " + i, slice);
 			}
 		}
 	}
@@ -203,15 +191,15 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		// or combine
 		bitmap = idx.or(60, 65);
-		assertEquals(2, bitmap.determineCardinality());
+		assertEquals(1, bitmap.determineCardinality());
 		bitmap = idx.or(100, 65);
 		assertEquals(0, bitmap.determineCardinality());
 
 		// and combine
 		bitmap = idx.and(60, 65);
-		assertEquals(1, bitmap.determineCardinality());
+		assertEquals(0, bitmap.determineCardinality());
 		bitmap = idx.and(300, 300);
-		assertEquals(2, bitmap.determineCardinality());
+		assertEquals(1, bitmap.determineCardinality());
 		bitmap = idx.and(100, 65);
 		assertEquals(0, bitmap.determineCardinality());
 
@@ -221,6 +209,11 @@ public class TestIntervalIndex extends DbBasedTest {
 		// get
 		slices = idx.getSlices(60, 65);
 		assertEquals(6, slices.length);
+		assertNotNull(slices[0]);
+		assertNull(slices[1]);
+		assertNull(slices[2]);
+		assertNull(slices[4]);
+		assertNull(slices[5]);
 		slices = idx.getSlices(100, 65);
 		assertEquals(0, slices.length);
 	}
@@ -285,56 +278,48 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testSaveAndLoad() throws IOException {
-		final Group group = new Group("index");
+		final String dbName = "tidaTestDateIntervals";
+		final String dbPath = "tidaTestDateIntervals.zip";
+		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
 
-		// the testing persistor we use here
-		final ZipPersistor persistor = new ZipPersistor(
-				(IExceptionRegistry) configuration
-						.getModule(DefaultValues.EXCEPTIONREGISTRY_ID));
+		// create an instance
+		final TidaModel model = loadModel(dbName, dbPath, modelPath);
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		model.loadData();
+		assertEquals(676, count(idx.getSlices()));
 
 		// create a temporary file and save it
 		final String prefixFile = UUID.randomUUID().toString();
 		final File tmpFile = File.createTempFile(prefixFile, ".zip");
 		assertTrue(tmpFile.length() == 0);
 
-		// create an instance which
-		final String dbName = "tidaTestDateIntervals";
-		final String dbPath = "tidaTestDateIntervals.zip";
-		final String modelPath = "tidaDbWithNullIntervalIndexUsingBoundaries.xml";
-
 		// create a saver instance
-		final IntervalIndex idxidx = loadAndIndex(dbName, dbPath, modelPath);
-		assertEquals(676, count(idxidx.getSlices()));
-		persistor.register(group, idxidx);
-
-		// save and check
-		persistor.save(new FileLocation(tmpFile));
+		loader.save(model.getId(), new FileLocation(tmpFile));
 		assertTrue(tmpFile.length() > 0);
 
-		// unregister to make it available for a new instance
-		assertEquals(idxidx, persistor.unregister(group));
+		// remove all the models loaded so far
+		loader.unloadAll();
 
-		// create a loader instance
-		final IntervalIndex typedIdx = loadModel(dbName, dbPath, modelPath)
-				.getIndex().getIntervalIndex();
-		assertEquals(0, count(typedIdx.getSlices()));
-		persistor.register(group, typedIdx);
+		// load the model
+		final TidaModel loadedModel = loader.load(new FileLocation(tmpFile));
+		final IntervalIndex loadedIdx = loadedModel.getIndex()
+				.getIntervalIndex();
 
-		// load the stuff
-		persistor.load(new FileLocation(tmpFile));
-		assertEquals(676, count(typedIdx.getSlices()));
+		// make sure everything is cleaned
+		assertTrue(tmpFile.delete());
+
+		// validate the saved and loaded model
+		assertEquals(676, count(loadedIdx.getSlices()));
 
 		// test all the values
-		for (final SliceWithDescriptors<?> slice : idxidx.getSlices()) {
+		for (final SliceWithDescriptors<?> slice : idx.getSlices()) {
 			if (slice == null) {
 				continue;
 			}
 
 			assertEquals(slice.getBitmap(),
-					typedIdx.getSliceById((Short) slice.getId()).getBitmap());
+					loadedIdx.getSliceById((Short) slice.getId()).getBitmap());
 		}
-
-		assertTrue(tmpFile.delete());
 	}
 
 	/**
@@ -350,8 +335,8 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1050, true,
-				true);
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
+				1050, true, true);
 
 		assertEquals(50, res.length);
 		for (int i = 0; i < 50; i++) {
@@ -373,8 +358,8 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1100, true,
-				true);
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
+				1100, true, true);
 
 		/*
 		 * We expect to retrieve values for the first 1001 - 1059 (1010 + 49)
@@ -403,8 +388,8 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] res = idx.getSlices(1001, 1050, false,
-				false);
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
+				1050, false, false);
 
 		assertEquals(48, res.length);
 		for (int i = 0; i < 48; i++) {
@@ -426,16 +411,16 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] resLeft = idx.getSlices(1021, 1050,
-				true, false);
+		final SliceWithDescriptors<?>[] resLeft = idx.getSlicesByTimePoints(
+				1021, 1050, true, false);
 
 		assertEquals(29, resLeft.length);
 		for (int i = 0; i < 29; i++) {
 			assertEquals(Numbers.castToByte(i + 21), resLeft[i].getId());
 		}
 
-		final SliceWithDescriptors<?>[] resRight = idx.getSlices(1021, 1050,
-				false, true);
+		final SliceWithDescriptors<?>[] resRight = idx.getSlicesByTimePoints(
+				1021, 1050, false, true);
 
 		assertEquals(29, resRight.length);
 		for (int i = 0; i < 29; i++) {
@@ -456,8 +441,8 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] res = idx.getSlices(1051, 1050, true,
-				true);
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1051,
+				1050, true, true);
 
 		assertEquals(0, res.length);
 	}
@@ -476,9 +461,134 @@ public class TestIntervalIndex extends DbBasedTest {
 		model.loadData();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		final SliceWithDescriptors<?>[] res = idx.getSlices(1050, 1050, false,
-				true);
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1050,
+				1050, false, true);
 		assertEquals(0, res.length);
+	}
+
+	/**
+	 * Tests the association of descriptors to slices.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testDescriptorAssociation() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervalsWithDescriptors.xml");
+		model.loadData();
+
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
+		assertIntervalsWithDescriptors(model, idx);
+	}
+
+	/**
+	 * Tests the saving and loading of descriptors associated to slices.
+	 * 
+	 * @throws IOException
+	 *             if the file cannot be read
+	 */
+	@Test
+	public void testSaveAndLoadWithDescriptorAssociation() throws IOException {
+		final TidaModel model = loadModel(null, null,
+				"tidaDbUsingLongIntervalsWithDescriptors.xml");
+		model.loadData();
+
+		// create a temporary file and save it
+		final String prefixFile = UUID.randomUUID().toString();
+		final File tmpFile = File.createTempFile(prefixFile, ".zip");
+		assertTrue(tmpFile.length() == 0);
+
+		// create a saver instance
+		loader.save(model.getId(), new FileLocation(tmpFile));
+		assertTrue(tmpFile.length() > 0);
+
+		// remove all the models loaded so far
+		loader.unloadAll();
+
+		// load the model
+		final TidaModel loadedModel = loader.load(new FileLocation(tmpFile));
+		final IntervalIndex loadedIdx = loadedModel.getIndex()
+				.getIntervalIndex();
+
+		// make sure everything is cleaned
+		assertTrue(tmpFile.delete());
+
+		// validate the saved and loaded model
+		assertIntervalsWithDescriptors(loadedModel, loadedIdx);
+	}
+
+	private void assertIntervalsWithDescriptors(final TidaModel model,
+			final IntervalIndex idx) {
+
+		// generate equal descriptors for comparison
+		@SuppressWarnings("unchecked")
+		final DescriptorModel<Integer> descModel = (DescriptorModel<Integer>) model
+				.getMetaDataModel().getDescriptorModel("NAME");
+		final NullDescriptor<Integer> nul = new NullDescriptor<Integer>(
+				descModel, 1);
+		final GeneralDescriptor<Integer> philipp = new GeneralDescriptor<Integer>(
+				descModel, 2, "Philipp");
+		final GeneralDescriptor<Integer> edison = new GeneralDescriptor<Integer>(
+				descModel, 3, "Edison");
+		final GeneralDescriptor<Integer> debbie = new GeneralDescriptor<Integer>(
+				descModel, 4, "Debbie");
+
+		// get all slices
+		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1000,
+				1059);
+		assertEquals(60, res.length);
+
+		for (int i = 0; i < res.length; i++) {
+			final SliceWithDescriptors<?> slice = res[i];
+
+			// check the model
+			final List<String> models = slice.createModelList();
+			assertTrue(models.contains("NAME"));
+			assertEquals(1, models.size());
+
+			final List<Descriptor<?, ?, ?>> set = slice
+					.createSortedDescriptorList("NAME");
+			final Set<Descriptor<?, ?, ?>> notExpected = new HashSet<Descriptor<?, ?, ?>>();
+			notExpected.add(nul);
+			notExpected.add(philipp);
+			notExpected.add(edison);
+			notExpected.add(debbie);
+
+			// NULL is set for 1000-1015
+			if (i >= 0 && i <= 15) {
+				notExpected.remove(nul);
+				assertTrue(nul + " contained at " + i + " (" + set + ")",
+						set.contains(nul));
+			}
+
+			// Philipp is set for 1006-1025
+			if (i >= 6 && i <= 25) {
+				notExpected.remove(philipp);
+				assertTrue(philipp + " contained at " + i + " (" + set + ")",
+						set.contains(philipp));
+			}
+
+			// Edison is set for 1016-1040
+			if (i >= 16 && i <= 40) {
+				notExpected.remove(edison);
+				assertTrue(edison + " contained at " + i + " (" + set + ")",
+						set.contains(edison));
+			}
+
+			// Debbie is set for 1016-1040
+			if (i >= 31) {
+				notExpected.remove(debbie);
+				assertTrue(debbie + " contained at " + i + " (" + set + ")",
+						set.contains(debbie));
+			}
+
+			// make sure the notExpected aren't there
+			for (final Descriptor<?, ?, ?> desc : set) {
+				assertFalse("found " + desc + " (" + set + ")",
+						notExpected.contains(desc));
+			}
+		}
 	}
 
 	/**

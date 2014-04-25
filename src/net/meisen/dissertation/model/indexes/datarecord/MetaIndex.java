@@ -58,9 +58,9 @@ public class MetaIndex implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int dataId, final ProcessedDataRecord record) {
+	public void index(final ProcessedDataRecord record) {
 		for (final MetaIndexDimension<?> dim : getDimensions()) {
-			dim.index(dataId, record);
+			dim.index(record);
 		}
 	}
 

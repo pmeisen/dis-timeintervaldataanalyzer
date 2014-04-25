@@ -35,7 +35,7 @@ public class AggregationFunctionHandler {
 	public AggregationFunctionHandler(
 			final Collection<IAggregationFunction> functions) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Setting the aggregation function to be: " + functions);
+			LOG.debug("Setting the aggregation functions to be: " + functions);
 		}
 
 		setFunctions(functions);

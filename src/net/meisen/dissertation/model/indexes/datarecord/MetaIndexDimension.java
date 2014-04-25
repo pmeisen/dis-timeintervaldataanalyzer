@@ -125,7 +125,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	}
 
 	@Override
-	public void index(final int recId, final ProcessedDataRecord rec) {
+	public void index(final ProcessedDataRecord rec) {
 		if (rec == null) {
 			return;
 		}
@@ -139,9 +139,9 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		// create or get the slices
 		final Slice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(new Slice<I>(id, indexFactory, recId));
+			index.addObject(new Slice<I>(id, indexFactory, rec.getId()));
 		} else {
-			slice.set(recId);
+			slice.set(rec.getId());
 		}
 	}
 

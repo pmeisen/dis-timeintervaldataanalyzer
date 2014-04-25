@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.IntervalModel.MappingResult;
@@ -25,8 +28,12 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
  * 
  */
 public class ProcessedDataRecord {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ProcessedDataRecord.class);
+
 	private final IDataRecord raw;
 	private final Map<MetaStructureEntry, Descriptor<?, ?, ?>> processedMeta;
+	private final int id;
 
 	private long start = -1;
 	private long end = -1;
@@ -39,8 +46,12 @@ public class ProcessedDataRecord {
 	 *            the {@code DataRecord} to be processed
 	 * @param model
 	 *            the {@code Model} which defines how to process the record
+	 * @param id
+	 *            the identifier of the record
 	 */
-	public ProcessedDataRecord(final IDataRecord raw, final TidaModel model) {
+	public ProcessedDataRecord(final IDataRecord raw, final TidaModel model,
+			final int id) {
+		this.id = id;
 		this.raw = raw;
 		this.processedMeta = new HashMap<MetaStructureEntry, Descriptor<?, ?, ?>>();
 
@@ -65,6 +76,10 @@ public class ProcessedDataRecord {
 				.getEntriesByClass(MetaStructureEntry.class);
 		for (final MetaStructureEntry entry : metaEntries) {
 			addDescriptor(entry, model);
+		}
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Processing of record finished: " + this);
 		}
 	}
 
@@ -186,19 +201,23 @@ public class ProcessedDataRecord {
 		final IntervalModel intervalModel = model.getIntervalModel();
 		if (intervalModel == null) {
 			return;
+		} else if (startEntry == null || endEntry == null) {
+			this.start = -1;
+			this.end = -1;
+		} else {
+
+			// map the values
+			final Object start = getValue(raw, startEntry);
+			final Object end = getValue(raw, endEntry);
+			final IntervalDataHandling handling = model
+					.getIntervalDataHandling();
+			final MappingResult res = intervalModel.mapToTimeline(start, end,
+					handling);
+
+			// add the results
+			this.start = res.getStart();
+			this.end = res.getEnd();
 		}
-
-		// map the values
-		final Object start = startEntry == null ? null : getValue(raw,
-				startEntry);
-		final Object end = endEntry == null ? null : getValue(raw, endEntry);
-		final IntervalDataHandling handling = model.getIntervalDataHandling();
-		final MappingResult res = intervalModel.mapToTimeline(start, end,
-				handling);
-
-		// add the results
-		this.start = res.getStart();
-		this.end = res.getEnd();
 	}
 
 	/**
@@ -221,5 +240,14 @@ public class ProcessedDataRecord {
 		} else {
 			return record.getValue(name);
 		}
+	}
+
+	/**
+	 * Gets the identifier assigned to the record.
+	 * 
+	 * @return the identifier assigned to the record
+	 */
+	public int getId() {
+		return id;
 	}
 }

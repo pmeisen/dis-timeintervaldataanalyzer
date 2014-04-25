@@ -58,6 +58,7 @@ public interface IIndexedCollection {
 	 *            make up the key
 	 * 
 	 * @return the {@code Object} associated with the specified {@code values}
+	 *         or {@code null} if no value is associated
 	 */
 	public Object getObject(final Object... values);
 

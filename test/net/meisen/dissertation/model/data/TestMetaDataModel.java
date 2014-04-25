@@ -247,8 +247,8 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 				new DataStructure(metaEntry));
 
 		final ProcessedDataRecord rec = new ProcessedDataRecord(
-				new SingleStaticDataSet("unknown"), tidaModel);
-		dim.index(1, rec);
+				new SingleStaticDataSet("unknown"), tidaModel, 1);
+		dim.index(rec);
 	}
 
 	/**
@@ -272,10 +272,9 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 		when(tidaModel.getDataStructure()).thenReturn(
 				new DataStructure(metaEntry));
 
-
 		final ProcessedDataRecord rec = new ProcessedDataRecord(
-				new SingleStaticDataSet("unknown"), tidaModel);
-		dim.index(1, rec);
+				new SingleStaticDataSet("unknown"), tidaModel, 1);
+		dim.index(rec);
 	}
 
 	/**
