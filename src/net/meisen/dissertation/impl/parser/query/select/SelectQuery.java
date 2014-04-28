@@ -8,16 +8,15 @@ import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluato
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.measures.MeasureExpression;
+import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 
 public class SelectQuery implements IQuery {
 
 	private final DescriptorLogicTree filter;
 	private final GroupExpression group;
-	private final List<MeasureExpression> measures;
+	private final List<DescriptorMathTree> measures;
 
 	private String modelId;
 	private ResultType type;
@@ -26,7 +25,7 @@ public class SelectQuery implements IQuery {
 	public SelectQuery() {
 		filter = new DescriptorLogicTree();
 		group = new GroupExpression();
-		measures = new ArrayList<MeasureExpression>();
+		measures = new ArrayList<DescriptorMathTree>();
 	}
 
 	public void setResultType(final ResultType type) {
@@ -88,12 +87,11 @@ public class SelectQuery implements IQuery {
 		return group;
 	}
 
-	public List<MeasureExpression> getMeasures() {
+	public List<DescriptorMathTree> getMeasures() {
 		return Collections.unmodifiableList(measures);
 	}
 
-	public void addMeasure(final String descModelId,
-			final IAggregationFunction aggFunc) {
-		measures.add(new MeasureExpression(descModelId, aggFunc));
+	public void addMeasure(final DescriptorMathTree mathTree) {
+		measures.add(mathTree);
 	}
 }

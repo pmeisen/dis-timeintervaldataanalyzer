@@ -8,7 +8,7 @@ import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
+import net.meisen.dissertation.impl.parser.query.select.logical.ILogicalTreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
 import net.meisen.dissertation.model.data.MetaDataModel;
@@ -95,9 +95,9 @@ public class DescriptorLogicEvaluator {
 	protected Bitmap evaluateNode(final LogicalOperatorNode node) {
 		final List<Bitmap> members = new ArrayList<Bitmap>();
 
-		final List<ITreeElement> children = node.getChildren();
+		final List<ILogicalTreeElement> children = node.getChildren();
 		for (int i = children.size(); i > 0; i--) {
-			final ITreeElement child = children.get(i - 1);
+			final ILogicalTreeElement child = children.get(i - 1);
 
 			if (child instanceof LogicalOperatorNode) {
 				members.add(evaluateNode((LogicalOperatorNode) child));

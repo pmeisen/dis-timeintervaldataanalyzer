@@ -17,10 +17,6 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
-import net.meisen.dissertation.impl.measures.Average;
-import net.meisen.dissertation.impl.measures.Count;
-import net.meisen.dissertation.impl.measures.Max;
-import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
@@ -31,9 +27,14 @@ import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
-import net.meisen.dissertation.impl.parser.query.select.logical.ITreeElement;
+import net.meisen.dissertation.impl.parser.query.select.logical.ILogicalTreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
+import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
+import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Dates;
 
@@ -114,6 +115,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class TestQueryFactory extends LoaderBasedTest {
+	private final static Class<?> mathDescLeaf = net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf.class;
 
 	@Autowired
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
@@ -213,7 +215,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 		assertEquals(0, order.size());
 	}
 
@@ -226,7 +228,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by singleEqual='singleEqualValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 		assertEquals(1, order.size());
 		assertTrue(order.get(0) instanceof DescriptorLeaf);
 
@@ -244,7 +246,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by (((bracketsSingleEqual='bracketsSingleEqualValue')))");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 		assertEquals(1, order.size());
 		assertTrue(order.get(0) instanceof DescriptorLeaf);
 
@@ -270,9 +272,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 	public void testSingleSimpleMeasure() {
 		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
 		assertEquals(1, query.getMeasures().size());
-		assertTrue(query.getMeasures().get(0).getFunction() instanceof Count);
-		assertEquals("PERSON", query.getMeasures().get(0)
-				.getDescriptorModelId());
+
 	}
 
 	/**
@@ -281,29 +281,110 @@ public class TestQueryFactory extends LoaderBasedTest {
 	@Test
 	public void testMultipleSimpleMeasure() {
 		final SelectQuery query = q("select timeseries of average(PERSON), min(PERSON), max(LOCATION) from testPersonModel");
-
 		assertEquals(3, query.getMeasures().size());
 
-		assertTrue(query.getMeasures().get(0).getFunction() instanceof Average);
-		assertEquals("PERSON", query.getMeasures().get(0)
-				.getDescriptorModelId());
+	}
 
-		assertTrue(query.getMeasures().get(1).getFunction() instanceof Min);
-		assertEquals("PERSON", query.getMeasures().get(1)
-				.getDescriptorModelId());
+	@Test
+	public void testArithmeticFactMeasure() {
+		SelectQuery query;
+		List<DescriptorMathTree> measures;
+		DescriptorMathTree measure;
+		List<IMathTreeElement> order;
+		MathOperator mo;
 
-		assertTrue(query.getMeasures().get(2).getFunction() instanceof Max);
-		assertEquals("LOCATION", query.getMeasures().get(2)
-				.getDescriptorModelId());
+		/*
+		 * Multplication prior to addition
+		 */
+		query = q("select timeseries of max(A + B * C) from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(1, measures.size());
+		measure = measures.get(0);
+		order = measure.getEvaluationOrder();
+
+		// check the amount of commands
+		assertEquals(5, order.size());
+
+		// check the types of commands
+		assertEquals(order.toString(), order.get(0).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(1).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(2).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(3).getClass(),
+				MathOperatorNode.class);
+		assertEquals(order.toString(), order.get(4).getClass(),
+				MathOperatorNode.class);
+
+		// check the order of the operators
+		mo = ((MathOperatorNode) order.get(3)).get();
+		assertEquals(mo.getOperator(), ArithmeticOperator.MULTIPLY);
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertEquals(mo.getOperator(), ArithmeticOperator.ADD);
+		assertNull(mo.getFunction());
+
+		/*
+		 * check brackets usage
+		 */
+		query = q("select timeseries of max((A + B) * C) from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(1, measures.size());
+		measure = measures.get(0);
+		order = measure.getEvaluationOrder();
+
+		// check the types of commands
+		assertEquals(order.toString(), order.get(0).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(1).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(2).getClass(),
+				MathOperatorNode.class);
+		assertEquals(order.toString(), order.get(3).getClass(), mathDescLeaf);
+		assertEquals(order.toString(), order.get(4).getClass(),
+				MathOperatorNode.class);
+
+		// check the order of the operators
+		mo = ((MathOperatorNode) order.get(2)).get();
+		assertEquals(mo.getOperator(), ArithmeticOperator.ADD);
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertEquals(mo.getOperator(), ArithmeticOperator.MULTIPLY);
+		assertNull(mo.getFunction());
+
+		/*
+		 * 
+		 */
+		query = q("select timeseries of max((A + B - E) * C - D) from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(1, measures.size());
+		measure = measures.get(0);
+		order = measure.getEvaluationOrder();
+		System.out.println(measure);
+
+		query = q("select timeseries of max((A + B / E) * (C - D)) from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(1, measures.size());
+		measure = measures.get(0);
+		order = measure.getEvaluationOrder();
+		System.out.println(measure);
+
+		query = q("select timeseries of max(LOCATION + (PERSON - WHAT * (ANOTHER + ME) / (DIVISOR * FIVE) + LAST)) from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(1, measures.size());
+		measure = measures.get(0);
+		order = measure.getEvaluationOrder();
+		System.out.println(measure);
+
 	}
 
 	@Test
 	public void testComplexMeasure() {
-		SelectQuery query;
+		final SelectQuery query = q("select timeseries of max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON)) from testPersonModel");
+		final List<DescriptorMathTree> measures = query.getMeasures();
+		assertEquals(1, measures.size());
 
-		query = q("select timeseries of max(LOCATION + PERSON) * (average(PERSON) + min(PERSON)) from testPersonModel");
-		System.out.println(query.getMeasures());
+		final DescriptorMathTree measure = measures.get(0);
+		final List<IMathTreeElement> order = measure.getEvaluationOrder();
 
+		// check the amount of commands
+		assertEquals(12, order.size());
 	}
 
 	/**
@@ -366,7 +447,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by first='firstValue' AND second='secondValue' OR third='thirdValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(5, order.size());
@@ -410,7 +491,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by NOT HALLO='500' AND !HELLO='LALA'");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(5, order.size());
@@ -454,7 +535,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(8, order.size());
@@ -480,7 +561,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries from testModel in [03.03.2014,05.03.2014) filter by (LOCATION='Aachen' AND PERSON='Tobias' AND SCREAMS='0') AND (SCREAMS='12' OR PERSON='Debbie' OR LOCATION='Undefined')");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(8, order.size());
@@ -507,7 +588,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertEquals("timeseries", query.getModelId());
 
 		final DescriptorLogicTree tree = query.getFilter();
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 		assertEquals(1, order.size());
 
 		final Object o = order.iterator().next();
@@ -523,7 +604,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by first='1' AND second='2' AND third='3'");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		assertEquals(4, order.size());
 	}
@@ -536,7 +617,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by (first='1' OR second='2') AND (third='3' OR firth='4') AND fifth='5' AND (sixth='6' OR (seventh='7' AND eight='8'))");
 		final DescriptorLogicTree tree = query.getFilter();
 
-		final List<ITreeElement> order = tree.getEvaluationOrder();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(13, order.size());

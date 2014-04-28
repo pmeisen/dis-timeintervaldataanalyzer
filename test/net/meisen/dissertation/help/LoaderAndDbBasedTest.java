@@ -4,6 +4,12 @@ import java.io.IOException;
 
 import org.junit.After;
 
+/**
+ * Tests which are loader and db based.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class LoaderAndDbBasedTest extends LoaderBasedTest {
 	private final DbBasedTest dbBasedTest = new DbBasedTest();
 

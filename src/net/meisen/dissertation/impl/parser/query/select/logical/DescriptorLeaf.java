@@ -11,7 +11,7 @@ import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
  * @see DescriptorComperator
  * 
  */
-public class DescriptorLeaf implements ITreeElement {
+public class DescriptorLeaf implements ILogicalTreeElement {
 
 	private final DescriptorComperator descriptorComparator;
 

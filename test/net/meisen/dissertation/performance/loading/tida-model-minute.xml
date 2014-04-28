@@ -73,7 +73,7 @@
   
   <data metahandling="fail" intervalhandling="failOnNull">
     <dataset dataretriever="db_tida">
-      <db:query>SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA WHERE ROWNUM() &lt; 500000</db:query>
+      <db:query>SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA WHERE ROWNUM() &lt;= 200000</db:query>
     </dataset>
   </data>
 </model>

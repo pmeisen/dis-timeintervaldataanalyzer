@@ -55,17 +55,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorDescriptorId(@NotNull QueryGrammarParser.SelectorDescriptorIdContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorMathOperator}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectorMathOperator(@NotNull QueryGrammarParser.SelectorMathOperatorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorMathOperator}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectorMathOperator(@NotNull QueryGrammarParser.SelectorMathOperatorContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprGroup}.
 	 * @param ctx the parse tree
 	 */
@@ -108,6 +97,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorDateInterval(@NotNull QueryGrammarParser.SelectorDateIntervalContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorSecondMathOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorSecondMathOperator(@NotNull QueryGrammarParser.SelectorSecondMathOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorSecondMathOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorSecondMathOperator(@NotNull QueryGrammarParser.SelectorSecondMathOperatorContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDescValue}.
@@ -165,6 +165,28 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorFirstMathOperator}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorFirstMathOperator(@NotNull QueryGrammarParser.SelectorFirstMathOperatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorFirstMathOperator}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorFirstMathOperator(@NotNull QueryGrammarParser.SelectorFirstMathOperatorContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMeasureAtom}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMeasureAtom(@NotNull QueryGrammarParser.CompMeasureAtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMeasureAtom}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMeasureAtom(@NotNull QueryGrammarParser.CompMeasureAtomContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorEqual}.
 	 * @param ctx the parse tree
 	 */
@@ -209,17 +231,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprFormula}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprFormula(@NotNull QueryGrammarParser.ExprFormulaContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprFormula}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprFormula(@NotNull QueryGrammarParser.ExprFormulaContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorFormula}.
 	 * @param ctx the parse tree
 	 */
@@ -229,6 +240,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompDescriptorFormula(@NotNull QueryGrammarParser.CompDescriptorFormulaContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorFormulaAtom}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compDescriptorFormulaAtom}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorModelId}.
@@ -251,4 +273,15 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx);
 }

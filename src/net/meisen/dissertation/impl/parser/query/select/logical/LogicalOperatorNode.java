@@ -13,9 +13,9 @@ import net.meisen.general.genmisc.types.Strings;
  * @author pmeisen
  * 
  */
-public class LogicalOperatorNode implements ITreeElement {
+public class LogicalOperatorNode implements ILogicalTreeElement {
 
-	private final List<ITreeElement> children;
+	private final List<ILogicalTreeElement> children;
 	private final LogicalOperator operator;
 
 	private LogicalOperatorNode parent;
@@ -24,7 +24,7 @@ public class LogicalOperatorNode implements ITreeElement {
 	 * Default constructor only be used internally.
 	 */
 	protected LogicalOperatorNode() {
-		this.children = new ArrayList<ITreeElement>();
+		this.children = new ArrayList<ILogicalTreeElement>();
 		this.parent = null;
 		this.operator = null;
 	}
@@ -57,7 +57,7 @@ public class LogicalOperatorNode implements ITreeElement {
 		}
 
 		this.operator = operator;
-		this.children = new ArrayList<ITreeElement>();
+		this.children = new ArrayList<ILogicalTreeElement>();
 		this.parent = parent;
 	}
 
@@ -85,7 +85,7 @@ public class LogicalOperatorNode implements ITreeElement {
 	 * @throws IndexOutOfBoundsException
 	 *             if the i-th child doesn't exist
 	 */
-	public ITreeElement getChild(final int i) throws IndexOutOfBoundsException {
+	public ILogicalTreeElement getChild(final int i) throws IndexOutOfBoundsException {
 		return children.get(i);
 	}
 
@@ -94,8 +94,8 @@ public class LogicalOperatorNode implements ITreeElement {
 	 * 
 	 * @return all the children of the node
 	 */
-	public List<ITreeElement> getChildren() {
-		return new ArrayList<ITreeElement>(children);
+	public List<ILogicalTreeElement> getChildren() {
+		return new ArrayList<ILogicalTreeElement>(children);
 	}
 
 	/**
@@ -112,21 +112,21 @@ public class LogicalOperatorNode implements ITreeElement {
 	/**
 	 * Attaches a child to the end of all the children of {@code this}.
 	 * 
-	 * @param treeElement
+	 * @param logicalTreeElement
 	 *            the child to be attached
 	 */
-	public void attachChild(final ITreeElement treeElement) {
-		this.children.add(treeElement);
+	public void attachChild(final ILogicalTreeElement logicalTreeElement) {
+		this.children.add(logicalTreeElement);
 	}
 
 	/**
 	 * Attaches a child to the start of all the children of {@code this}.
 	 * 
-	 * @param treeElement
+	 * @param logicalTreeElement
 	 *            the child to be attached
 	 */
-	public void attachChildFirst(final ITreeElement treeElement) {
-		this.children.add(0, treeElement);
+	public void attachChildFirst(final ILogicalTreeElement logicalTreeElement) {
+		this.children.add(0, logicalTreeElement);
 	}
 
 	/**

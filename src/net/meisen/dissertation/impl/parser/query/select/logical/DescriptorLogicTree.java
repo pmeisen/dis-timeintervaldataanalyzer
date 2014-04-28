@@ -90,13 +90,13 @@ public class DescriptorLogicTree {
 	 * 
 	 * @return a list of elements of the tree ordered by evaluation order
 	 */
-	public List<ITreeElement> getEvaluationOrder() {
-		final List<ITreeElement> order = new ArrayList<ITreeElement>();
+	public List<ILogicalTreeElement> getEvaluationOrder() {
+		final List<ILogicalTreeElement> order = new ArrayList<ILogicalTreeElement>();
 
 		// check if the root has children, otherwise there is nothing to do
 		if (root.getChildren().size() != 0) {
 
-			final Deque<ITreeElement> stack = new ArrayDeque<ITreeElement>();
+			final Deque<ILogicalTreeElement> stack = new ArrayDeque<ILogicalTreeElement>();
 			fillStack(root, stack);
 
 			while (!stack.isEmpty()) {
@@ -116,11 +116,11 @@ public class DescriptorLogicTree {
 	 *            the stack to be filled
 	 */
 	protected void fillStack(final LogicalOperatorNode node,
-			final Deque<ITreeElement> stack) {
+			final Deque<ILogicalTreeElement> stack) {
 
-		final List<ITreeElement> children = node.getChildren();
+		final List<ILogicalTreeElement> children = node.getChildren();
 		for (int i = children.size(); i > 0; i--) {
-			final ITreeElement child = children.get(i - 1);
+			final ILogicalTreeElement child = children.get(i - 1);
 
 			stack.push(child);
 			if (child instanceof LogicalOperatorNode) {
@@ -158,7 +158,7 @@ public class DescriptorLogicTree {
 				: currentParent.get();
 
 		// get the children
-		final List<ITreeElement> currentChildren = current.getChildren();
+		final List<ILogicalTreeElement> currentChildren = current.getChildren();
 
 		/*
 		 * Check if there is a parent and if so, check if the parent's
@@ -168,7 +168,7 @@ public class DescriptorLogicTree {
 		 */
 		if (currentParentOp != null && currentParentOp.equals(current.get())) {
 			for (int i = currentChildren.size(); i > 0; i--) {
-				final ITreeElement currentChild = currentChildren.get(i - 1);
+				final ILogicalTreeElement currentChild = currentChildren.get(i - 1);
 				currentParent.attachChildFirst(currentChild);
 				currentChild.setParent(currentParent);
 			}
@@ -176,7 +176,7 @@ public class DescriptorLogicTree {
 		}
 
 		// now go for all the children and check if those can be changed
-		for (final ITreeElement currentChild : currentChildren) {
+		for (final ILogicalTreeElement currentChild : currentChildren) {
 
 			// if the child is a LogicalOperatorNode it might be optimizable
 			if (currentChild instanceof LogicalOperatorNode) {

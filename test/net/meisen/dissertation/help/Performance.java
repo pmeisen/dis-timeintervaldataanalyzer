@@ -3,15 +3,19 @@ package net.meisen.dissertation.help;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.lang.ref.WeakReference;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import net.meisen.general.genmisc.types.Dates;
 
 /**
  * Helper class to measure the performance of an algorithm.
@@ -20,6 +24,8 @@ import java.util.Map.Entry;
  * 
  */
 public class Performance {
+	private final static DecimalFormat df = new DecimalFormat(
+			"###,##0.00000####");
 
 	private final ThreadMXBean bean = ManagementFactory.getThreadMXBean();
 
@@ -123,6 +129,8 @@ public class Performance {
 	 * Start the measuring
 	 */
 	public void start() {
+		System.out.println("Performance measuring started at: "
+				+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
 		this.startUser = getUserTime();
 		this.startSystem = getCpuTime();
 	}
@@ -147,6 +155,9 @@ public class Performance {
 		final long diffSystem = endSystem - this.startSystem;
 
 		reset();
+
+		System.out.println("Performance measuring stopped at: "
+				+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
 
 		return new long[] { diffUser, diffSystem };
 	}
@@ -183,6 +194,18 @@ public class Performance {
 		while (ref.get() != null) {
 			System.gc();
 		}
+	}
+
+	/**
+	 * Calculates the specified nanoseconds to seconds.
+	 * 
+	 * @param ns
+	 *            the value to be calculated
+	 * 
+	 * @return the {@code ns} in {@code s}
+	 */
+	public double sec(final long ns) {
+		return ((double) ns) / 1000000000.0;
 	}
 
 	/**
@@ -316,5 +339,29 @@ public class Performance {
 		double roundedVal = (double) Math.round(val * zeros) / zeros;
 
 		return roundedVal;
+	}
+
+	/**
+	 * Prints the passed {@code res} as seconds.
+	 * 
+	 * @param res
+	 *            the result to be printed
+	 * 
+	 * @return the printed result
+	 */
+	public String printSecs(final long[] res) {
+		return formatSecs(sec(res[0])) + ", " + formatSecs(sec(res[1]));
+	}
+
+	/**
+	 * Formats the specified seconds.
+	 * 
+	 * @param val
+	 *            the seconds to be formatted
+	 * 
+	 * @return the formatted seconds
+	 */
+	public String formatSecs(final double val) {
+		return df.format(val) + "s";
 	}
 }

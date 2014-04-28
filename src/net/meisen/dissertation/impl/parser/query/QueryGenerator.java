@@ -7,15 +7,17 @@ import java.util.List;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescValueTupelContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorEqualContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
@@ -32,6 +34,8 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -121,6 +125,73 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		finalized = true;
 	}
 
+	private DescriptorMathTree mathExpr = null;
+
+	@Override
+	public void enterCompMeasure(final CompMeasureContext ctx) {
+
+		// check if we have a new formula
+		if (ctx.getParent() instanceof ExprMeasureContext) {
+
+			// check if one is already running
+			if (mathExpr != null) {
+				System.out.println(mathExpr);
+			}
+
+			mathExpr = new DescriptorMathTree();
+		}
+		// otherwise is just a nested formula
+		else {
+			// nothing to do
+		}
+	}
+
+	@Override
+	public void exitCompMeasure(final CompMeasureContext ctx) {
+
+		// check if we have a measure
+		if (ctx.getParent() instanceof ExprMeasureContext) {
+			q(SelectQuery.class).addMeasure(mathExpr);
+		}
+	}
+
+	@Override
+	public void enterCompDescriptorFormula(
+			final CompDescriptorFormulaContext ctx) {
+		if (ctx.selectorSecondMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorSecondMathOperator());
+			mathExpr.attach(ao);
+		}
+	}
+
+	@Override
+	public void exitCompDescriptorFormula(final CompDescriptorFormulaContext ctx) {
+		if (ctx.selectorSecondMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
+	public void enterCompDescriptorFormulaAtom(
+			final CompDescriptorFormulaAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorFirstMathOperator());
+			mathExpr.attach(ao);
+		} else if (ctx.selectorDescriptorId() != null) {
+			mathExpr.attach(ctx.selectorDescriptorId().getText());
+		}
+	}
+
+	@Override
+	public void exitCompDescriptorFormulaAtom(
+			final CompDescriptorFormulaAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
 	@Override
 	public void enterExprComp(final ExprCompContext ctx) {
 		final LogicalOperator op = resolveLogicalOperator(ctx);
@@ -201,21 +272,6 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 
 		q(SelectQuery.class).setInterval(interval);
-	}
-
-	@Override
-	public void exitCompAggrFunction(final CompAggrFunctionContext ctx) {
-		final CompDescriptorFormulaContext formulaCtx = ctx
-				.compDescriptorFormula();
-
-		// TODO: use the formula's context and get it - will be another tree
-
-		final String functionName = ctx.selectorAggrFunctionName().getText();
-		final IAggregationFunction aggFunc = resolveAggregationFunction(functionName);
-
-		q(SelectQuery.class).addMeasure("TO DO", aggFunc);
-
-		// TODO: all the aggregation functions can be arranged to - in a tree
 	}
 
 	@Override
@@ -424,6 +480,21 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			return LogicalOperator.OR;
 		} else if (ctx.getToken(QueryGrammarParser.LOGICAL_NOT, 0) != null) {
 			return LogicalOperator.NOT;
+		} else {
+			return null;
+		}
+	}
+
+	protected ArithmeticOperator resolveArithmeticOperator(
+			final ParserRuleContext ctx) {
+		if (ctx.getToken(QueryGrammarParser.MATH_PLUS, 0) != null) {
+			return ArithmeticOperator.ADD;
+		} else if (ctx.getToken(QueryGrammarParser.MATH_MINUS, 0) != null) {
+			return ArithmeticOperator.MINUS;
+		} else if (ctx.getToken(QueryGrammarParser.MATH_MULTIPLY, 0) != null) {
+			return ArithmeticOperator.MULTIPLY;
+		} else if (ctx.getToken(QueryGrammarParser.MATH_DIVISION, 0) != null) {
+			return ArithmeticOperator.DIVIDE;
 		} else {
 			return null;
 		}

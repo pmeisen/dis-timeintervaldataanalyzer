@@ -1,20 +1,20 @@
-package net.meisen.dissertation.impl.parser.query.select.logical;
+package net.meisen.dissertation.impl.parser.query.select.measures;
 
 import java.util.List;
 
 import net.meisen.general.genmisc.types.Strings;
 
 /**
- * The root of a {@code DescriptorLogicTree}.
+ * The root of a {@code DescriptorMathTree}.
  * 
  * @author pmeisen
  * 
  */
-public class RootNode extends LogicalOperatorNode {
+public class RootNode extends MathOperatorNode {
 
 	@Override
 	public String toString() {
-		final List<ILogicalTreeElement> children = getChildren();
+		final List<IMathTreeElement> children = getChildren();
 
 		if (children.size() == 0) {
 			return "root";

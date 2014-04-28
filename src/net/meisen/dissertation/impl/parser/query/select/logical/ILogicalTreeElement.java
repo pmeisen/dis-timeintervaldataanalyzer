@@ -6,14 +6,14 @@ package net.meisen.dissertation.impl.parser.query.select.logical;
  * @author pmeisen
  * 
  */
-public interface ITreeElement {
+public interface ILogicalTreeElement {
 
 	/**
 	 * Gets the parent of the {@code TreeElement}.
 	 * 
 	 * @return the parent of the {@code TreeElement}
 	 */
-	public ITreeElement getParent();
+	public ILogicalTreeElement getParent();
 
 	/**
 	 * Sets the parent of the {@code TreeElement}.
