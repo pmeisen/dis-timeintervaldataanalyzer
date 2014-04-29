@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testNumberModel">
+  
+  <time>
+    <timeline start="01.01.2014" end="10.01.2014" granularity="DAY" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <integer id="PAX" />
+      <string id="AIRLINE" null="true" />
+    </descriptors>
+
+    <entries>          
+      <entry descriptor="AIRLINE" value="LH" />
+      <entry descriptor="AIRLINE" value="AB" />
+    </entries>
+  </meta>
+  
+  <structure>   
+    <meta position="3" descriptor="PAX" />
+    <meta position="4" descriptor="AIRLINE" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create">
+    <dataset>
+      <entry class="java.util.Date" value="02.01.2014" />
+      <entry class="java.util.Date" value="02.01.2014" />
+      <entry class="int" value="1239" />
+      <entry class="java.lang.String" value="LH" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="02.01.2014" />
+      <entry class="java.util.Date" value="02.01.2014" />
+      <entry class="int" value="753" />
+      <entry class="java.lang.String" value="AB" />
+    </dataset>
+  </data>
+</model>

@@ -5,6 +5,14 @@ import java.util.List;
 
 import net.meisen.general.genmisc.types.Strings;
 
+/**
+ * A node representing a mathematical expression, i.e. a {@code MathOperator}.
+ * 
+ * @author pmeisen
+ * 
+ * @see MathOperator
+ * 
+ */
 public class MathOperatorNode implements IMathTreeElement {
 
 	private final List<IMathTreeElement> children;

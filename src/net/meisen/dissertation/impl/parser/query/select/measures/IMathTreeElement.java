@@ -1,6 +1,11 @@
 package net.meisen.dissertation.impl.parser.query.select.measures;
 
-
+/**
+ * Element of a tree representing a math-expression.
+ * 
+ * @author pmeisen
+ * 
+ */
 public interface IMathTreeElement {
 
 	/**
@@ -18,5 +23,10 @@ public interface IMathTreeElement {
 	 */
 	public void setParent(final MathOperatorNode parent);
 
+	/**
+	 * Gets the amount of children of the element.
+	 * 
+	 * @return the amount of children of the element
+	 */
 	public int amountOfChildren();
 }

@@ -77,7 +77,7 @@ public class DescriptorLogicEvaluator {
 		}
 
 		// check if the root has children, otherwise there is nothing to do
-		if (tree.getRoot().getChildren().size() != 0) {
+		if (root.getChildren().size() != 0) {
 			return new DescriptorLogicResult(evaluateNode(root));
 		} else {
 			return null;

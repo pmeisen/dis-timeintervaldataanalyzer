@@ -33,12 +33,11 @@ public class SelectEvaluator {
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
 		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator
-				.evaluateInterval(query.getInterval(), filterResult,
-						groupResult);
-
+				.evaluateInterval(query.getInterval(), query.getMeasures(),
+						filterResult, groupResult);
 		queryResult.setTimeSeriesResult(timeSeriesResult);
 
-		// TODO Go On! now we have to merge...
+		// TODO check
 
 		return queryResult;
 	}

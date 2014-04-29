@@ -398,8 +398,9 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 			if (count == 1) {
 				assertEquals(3, record.getSize());
 
-				assertEquals(Dates.createDateFromString("20.01.1981 08:00",
-						"dd.MM.yyyy HH:mm"), record.getValue(1));
+				assertEquals(
+						Dates.parseDate("20.01.1981 08:00", "dd.MM.yyyy HH:mm"),
+						record.getValue(1));
 				assertEquals("Tobias", record.getValue(2));
 				assertEquals(1, record.getValue(3));
 
@@ -407,8 +408,9 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 			} else if (count == 2) {
 				assertEquals(3, record.getSize());
 
-				assertEquals(Dates.createDateFromString("20.01.1981 08:07",
-						"dd.MM.yyyy HH:mm"), record.getValue(1));
+				assertEquals(
+						Dates.parseDate("20.01.1981 08:07", "dd.MM.yyyy HH:mm"),
+						record.getValue(1));
 				assertEquals("Philipp", record.getValue(2));
 				assertEquals("1", record.getValue(3));
 
@@ -420,8 +422,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 				assertEquals(12.5d, record.getValue("double"));
 				assertEquals("Philipp", record.getValue("string"));
 				assertEquals(1, record.getValue("integer"));
-				assertEquals(
-						Dates.createDateFromString("20.01.1981", "dd.MM.yyyy"),
+				assertEquals(Dates.parseDate("20.01.1981", "dd.MM.yyyy"),
 						record.getValue("date"));
 
 				assertEquals(1l, record.getValue("intLong"));

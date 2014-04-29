@@ -1,5 +1,7 @@
 package net.meisen.dissertation.impl.time.series;
 
+import java.util.Locale;
+
 public class TimeSeries {
 	private final String id;
 	private final double[] values;
@@ -19,5 +21,25 @@ public class TimeSeries {
 
 	public double getValue(final int pos) {
 		return values[pos];
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+
+		// add the id of the timeseries
+		sb.append(getId());
+		sb.append(": ");
+
+		// add each label
+		for (int i = 0; i < values.length; i++) {
+			if (i > 0) {
+				sb.append("; ");
+			}
+
+			sb.append(String.format(Locale.US, "%.2f", values[i]));
+		}
+
+		return sb.toString();
 	}
 }

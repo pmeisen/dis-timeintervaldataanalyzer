@@ -26,8 +26,21 @@ public class TimeSeriesResult {
 		labels.setLabel(pos, label, labelValue);
 	}
 
+	public Object getLabelValue(final int pos) {
+		return labels.getLabelValue(pos);
+	}
+
+	public String getLabel(final int pos) {
+		return labels.getLabel(pos);
+	}
+
 	public void setValue(final int pos, final String timeSeriesId,
 			final double value) {
+		final TimeSeries series = getSeries(timeSeriesId);
+		series.setValue(pos, value);
+	}
+
+	public TimeSeries getSeries(final String timeSeriesId) {
 
 		// get the indexed one
 		TimeSeries series = (TimeSeries) timeSeries.getObject(timeSeriesId);
@@ -38,7 +51,7 @@ public class TimeSeriesResult {
 			timeSeries.addObject(series);
 		}
 
-		series.setValue(pos, value);
+		return series;
 	}
 
 	@Override
@@ -47,6 +60,10 @@ public class TimeSeriesResult {
 
 		for (final Object o : timeSeries.getAll()) {
 			final TimeSeries ts = (TimeSeries) o;
+
+			// add the id of the timeseries
+			sb.append(ts.getId());
+			sb.append(": ");
 
 			// add each label
 			for (int i = 0; i < size; i++) {
@@ -61,5 +78,9 @@ public class TimeSeriesResult {
 		}
 
 		return sb.toString();
+	}
+
+	public int size() {
+		return timeSeries.size();
 	}
 }

@@ -14,7 +14,7 @@ import net.meisen.general.genmisc.types.Strings;
  * @see GroupResult
  * 
  */
-public class GroupResultEntry {
+public class GroupResultEntry implements IBitmapResult {
 	private final List<String> group;
 	private final Bitmap bitmap;
 
@@ -51,11 +51,7 @@ public class GroupResultEntry {
 		return group;
 	}
 
-	/**
-	 * Gets the bitmap of the group.
-	 * 
-	 * @return the bitmap of the group
-	 */
+	@Override
 	public Bitmap getBitmap() {
 		return bitmap;
 	}

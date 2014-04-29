@@ -1,7 +1,5 @@
 package net.meisen.dissertation.impl.time.series;
 
-import java.util.Arrays;
-
 import net.meisen.general.genmisc.types.Strings;
 
 public class TimePointLabels {

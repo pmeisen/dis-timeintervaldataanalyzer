@@ -13,7 +13,7 @@ import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
  * @see DescriptorLogicEvaluator
  * 
  */
-public class DescriptorLogicResult {
+public class DescriptorLogicResult implements IBitmapResult {
 	private final Bitmap bitmap;
 
 	/**
@@ -26,12 +26,13 @@ public class DescriptorLogicResult {
 		this.bitmap = bitmap;
 	}
 
-	/**
-	 * Gets the bitmap which determines the selected records.
-	 * 
-	 * @return bitmap which determines the selected records
-	 */
+	@Override
 	public Bitmap getBitmap() {
 		return bitmap;
+	}
+
+	@Override
+	public String toString() {
+		return bitmap == null ? null : bitmap.toString();
 	}
 }

@@ -1,5 +1,9 @@
 package net.meisen.dissertation.model.measures;
 
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+
 /**
  * Interface for an aggregation function. A concrete implementation has to be
  * stateless and thread-safe, i.e. the aggregation function has to be executable
@@ -15,6 +19,11 @@ package net.meisen.dissertation.model.measures;
 public interface IAggregationFunction {
 
 	public String getName();
-	
-	public IIntermediateResult aggregate(final IIntermediateResult prevResult);
+
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final Iterable<Descriptor<?, ?, ?>> descriptors);
+
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final double[] facts);
+
 }

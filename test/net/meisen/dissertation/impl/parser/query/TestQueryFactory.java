@@ -39,6 +39,8 @@ import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathT
 import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
+import net.meisen.dissertation.impl.time.series.TimeSeries;
+import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Dates;
 
@@ -1121,9 +1123,74 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertNotNull(gRes.getEntry("Edison"));
 	}
 
+	/**
+	 * Tests the implementation of the {@link Count} aggregation-function.
+	 */
+	@Test
+	public void testAggregationCount() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of count(PAX) AS PAX, count(PAX + AIRLINE) AS COMPLEX_COUNT from testNumberModel in [01.01.2014,02.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(2, tsRes.size());
+		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 2.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_COUNT");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 2.0, ts.getValue(1), 0.0);
+	}
+
+	/**
+	 * Tests the implementation of the {@link Average} aggregation-function.
+	 */
+	@Test
+	public void testAggregationAverage() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of average(PAX) AS PAX, average(PAX + PAX) AS COMPLEX_AVERAGE from testNumberModel in [01.01.2014,02.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(2, tsRes.size());
+		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 996.0, ts.getValue(1), 0.0);
+		
+		ts = tsRes.getSeries("COMPLEX_AVERAGE");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
+	}
+
 	@Test
 	public void testAllTimeSelection() {
-
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
 		final String query = "select timeseries from testPersonModel";
 
@@ -1140,9 +1207,8 @@ public class TestQueryFactory extends LoaderBasedTest {
 
 	@Test
 	public void testTimeSelection() {
-
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014)";
+		final String query = "select timeseries from testPersonModel in [03.03.2014 16:19:00,03.03.2014 16:20:00] filter by PERSON='Philipp' AND LOCATION='Undefined'";
 
 		// load the model
 		m(xml);
