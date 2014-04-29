@@ -51,4 +51,9 @@ public class DescriptorLeaf implements IMathTreeElement {
 	public void setParent(final MathOperatorNode parent) {
 		this.parent = parent;
 	}
+	
+	@Override
+	public int amountOfChildren() {
+		return 0;
+	}
 }

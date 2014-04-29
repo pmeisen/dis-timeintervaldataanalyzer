@@ -147,4 +147,9 @@ public class MathOperatorNode implements IMathTreeElement {
 		}
 		this.parent = parent;
 	}
+
+	@Override
+	public int amountOfChildren() {
+		return children.size();
+	}
 }

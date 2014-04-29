@@ -19,19 +19,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterSelectorSelectType(@NotNull QueryGrammarParser.SelectorSelectTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -39,19 +26,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorSelectType(@NotNull QueryGrammarParser.SelectorSelectTypeContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterCompDescValueTupel(@NotNull QueryGrammarParser.CompDescValueTupelContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompDescValueTupel(@NotNull QueryGrammarParser.CompDescValueTupelContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -84,19 +58,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -104,6 +65,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -136,13 +110,13 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
+	@Override public void enterExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
+	@Override public void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -162,13 +136,104 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx) { }
+	@Override public void enterCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx) { }
+	@Override public void exitCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompNamedMeasure(@NotNull QueryGrammarParser.CompNamedMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompNamedMeasure(@NotNull QueryGrammarParser.CompNamedMeasureContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompDescValueTupel(@NotNull QueryGrammarParser.CompDescValueTupelContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompDescValueTupel(@NotNull QueryGrammarParser.CompDescValueTupelContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorAlias(@NotNull QueryGrammarParser.SelectorAliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorAlias(@NotNull QueryGrammarParser.SelectorAliasContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -182,6 +247,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompAggrFunction(@NotNull QueryGrammarParser.CompAggrFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -227,19 +305,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterSelectorCloseInterval(@NotNull QueryGrammarParser.SelectorCloseIntervalContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -247,19 +312,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorCloseInterval(@NotNull QueryGrammarParser.SelectorCloseIntervalContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -292,26 +344,13 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx) { }
+	@Override public void enterCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompDescriptorFormulaAtom(@NotNull QueryGrammarParser.CompDescriptorFormulaAtomContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx) { }
+	@Override public void exitCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -325,19 +364,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

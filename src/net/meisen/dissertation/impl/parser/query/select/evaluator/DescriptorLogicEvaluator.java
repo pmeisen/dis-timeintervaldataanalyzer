@@ -110,7 +110,6 @@ public class DescriptorLogicEvaluator {
 		}
 
 		final Bitmap evalResult = evaluateOperator(node.get(), members);
-
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Evaluated logic '" + node.get() + "' for members '"
 					+ members + "' with result '" + evalResult + "'.");
@@ -197,9 +196,8 @@ public class DescriptorLogicEvaluator {
 			for (final Object d : descriptors) {
 				final Descriptor<?, ?, ?> desc = (Descriptor<?, ?, ?>) d;
 				if (cmp.matches(desc.getUniqueString())) {
-					final Slice<?> slice = index
-							.getMetaIndexDimensionSlice(cmp.getId(),
-									desc.getId());
+					final Slice<?> slice = index.getMetaIndexDimensionSlice(
+							cmp.getId(), desc.getId());
 
 					// add the slice if we have bitmap
 					if (slice != null) {
@@ -227,8 +225,8 @@ public class DescriptorLogicEvaluator {
 			} else {
 
 				// use the index to retrieve the slice
-				final Slice<?> slice = index
-						.getMetaIndexDimensionSlice(cmp.getId(), desc.getId());
+				final Slice<?> slice = index.getMetaIndexDimensionSlice(
+						cmp.getId(), desc.getId());
 
 				// check if we have a slice, otherwise we assume null
 				if (slice == null) {

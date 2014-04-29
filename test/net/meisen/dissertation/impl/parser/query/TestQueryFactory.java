@@ -17,6 +17,10 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
+import net.meisen.dissertation.impl.measures.Average;
+import net.meisen.dissertation.impl.measures.Count;
+import net.meisen.dissertation.impl.measures.Max;
+import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
@@ -270,9 +274,25 @@ public class TestQueryFactory extends LoaderBasedTest {
 	 */
 	@Test
 	public void testSingleSimpleMeasure() {
-		final SelectQuery query = q("select timeseries of count(PERSON) from testPersonModel");
-		assertEquals(1, query.getMeasures().size());
+		DescriptorMathTree measure;
 
+		final SelectQuery query = q("select timeseries of count(PERSON) AS PERSON from testPersonModel");
+		final List<DescriptorMathTree> measures = query.getMeasures();
+		assertEquals(1, measures.size());
+
+		// check the different measure
+		measure = measures.get(0);
+		assertEquals("PERSON", measure.getId());
+		assertTrue(measure.isSimple());
+
+		// check the node function
+		final MathOperatorNode node = (MathOperatorNode) measure.getRoot()
+				.getChild(0);
+		assertTrue(node.get().getFunction() instanceof Count);
+		assertNull(node.get().getOperator());
+
+		// check the person
+		assertEquals(mathDescLeaf, node.getChild(0).getClass());
 	}
 
 	/**
@@ -280,11 +300,37 @@ public class TestQueryFactory extends LoaderBasedTest {
 	 */
 	@Test
 	public void testMultipleSimpleMeasure() {
-		final SelectQuery query = q("select timeseries of average(PERSON), min(PERSON), max(LOCATION) from testPersonModel");
-		assertEquals(3, query.getMeasures().size());
+		DescriptorMathTree measure;
+		MathOperatorNode node;
 
+		final SelectQuery query = q("select timeseries of average(P) AS AVG, min(A) AS MIN000, max(L) AS \"MAX\" from testPersonModel");
+		final List<DescriptorMathTree> measures = query.getMeasures();
+		assertEquals(3, measures.size());
+
+		// check the different measure
+		measure = measures.get(0);
+		assertTrue(measure.isSimple());
+		assertEquals("AVG", measure.getId());
+		node = (MathOperatorNode) measure.getRoot().getChild(0);
+		assertTrue(node.get().getFunction() instanceof Average);
+
+		measure = measures.get(1);
+		assertTrue(measure.isSimple());
+		assertEquals("MIN000", measure.getId());
+		node = (MathOperatorNode) measure.getRoot().getChild(0);
+		assertTrue(node.get().getFunction() instanceof Min);
+
+		measure = measures.get(2);
+		assertTrue(measure.isSimple());
+		assertEquals("MAX", measure.getId());
+		node = (MathOperatorNode) measure.getRoot().getChild(0);
+		assertTrue(node.get().getFunction() instanceof Max);
 	}
 
+	/**
+	 * Tests the arithmetic used within facts (i.e. multiplication before
+	 * addition, ...).
+	 */
 	@Test
 	public void testArithmeticFactMeasure() {
 		SelectQuery query;
@@ -300,27 +346,33 @@ public class TestQueryFactory extends LoaderBasedTest {
 		measures = query.getMeasures();
 		assertEquals(1, measures.size());
 		measure = measures.get(0);
+		assertFalse(measure.isSimple());
 		order = measure.getEvaluationOrder();
 
 		// check the amount of commands
-		assertEquals(5, order.size());
+		assertEquals(order.toString(), 6, order.size());
 
 		// check the types of commands
-		assertEquals(order.toString(), order.get(0).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(1).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(2).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(3).getClass(),
-				MathOperatorNode.class);
-		assertEquals(order.toString(), order.get(4).getClass(),
-				MathOperatorNode.class);
+		assertEquals(order.toString(), mathDescLeaf, order.get(0).getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(1).getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(2).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(3)
+				.getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(4)
+				.getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(5)
+				.getClass());
 
 		// check the order of the operators
 		mo = ((MathOperatorNode) order.get(3)).get();
-		assertEquals(mo.getOperator(), ArithmeticOperator.MULTIPLY);
+		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
 		assertNull(mo.getFunction());
 		mo = ((MathOperatorNode) order.get(4)).get();
-		assertEquals(mo.getOperator(), ArithmeticOperator.ADD);
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
 		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(5)).get();
+		assertTrue(mo.getFunction() instanceof Max);
+		assertNull(mo.getOperator());
 
 		/*
 		 * check brackets usage
@@ -329,62 +381,149 @@ public class TestQueryFactory extends LoaderBasedTest {
 		measures = query.getMeasures();
 		assertEquals(1, measures.size());
 		measure = measures.get(0);
+		assertFalse(measure.isSimple());
 		order = measure.getEvaluationOrder();
 
+		// check the amount of commands
+		assertEquals(6, order.size());
+
 		// check the types of commands
-		assertEquals(order.toString(), order.get(0).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(1).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(2).getClass(),
-				MathOperatorNode.class);
-		assertEquals(order.toString(), order.get(3).getClass(), mathDescLeaf);
-		assertEquals(order.toString(), order.get(4).getClass(),
-				MathOperatorNode.class);
+		assertEquals(order.toString(), mathDescLeaf, order.get(0).getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(1).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(2)
+				.getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(3).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(4)
+				.getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(5)
+				.getClass());
 
 		// check the order of the operators
 		mo = ((MathOperatorNode) order.get(2)).get();
-		assertEquals(mo.getOperator(), ArithmeticOperator.ADD);
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
 		assertNull(mo.getFunction());
 		mo = ((MathOperatorNode) order.get(4)).get();
-		assertEquals(mo.getOperator(), ArithmeticOperator.MULTIPLY);
+		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
 		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(5)).get();
+		assertTrue(mo.getFunction() instanceof Max);
+		assertNull(mo.getOperator());
 
 		/*
-		 * 
+		 * check multiple values within
 		 */
-		query = q("select timeseries of max((A + B - E) * C - D) from testPersonModel");
+		query = q("select timeseries of max((A + B - E) * C - D * E + F) from testPersonModel");
 		measures = query.getMeasures();
 		assertEquals(1, measures.size());
 		measure = measures.get(0);
+		assertFalse(measure.isSimple());
 		order = measure.getEvaluationOrder();
-		System.out.println(measure);
 
-		query = q("select timeseries of max((A + B / E) * (C - D)) from testPersonModel");
-		measures = query.getMeasures();
-		assertEquals(1, measures.size());
-		measure = measures.get(0);
-		order = measure.getEvaluationOrder();
-		System.out.println(measure);
+		// check the amount of commands
+		assertEquals(14, order.size());
 
-		query = q("select timeseries of max(LOCATION + (PERSON - WHAT * (ANOTHER + ME) / (DIVISOR * FIVE) + LAST)) from testPersonModel");
-		measures = query.getMeasures();
-		assertEquals(1, measures.size());
-		measure = measures.get(0);
-		order = measure.getEvaluationOrder();
-		System.out.println(measure);
+		// check the types of commands
+		assertEquals(order.toString(), mathDescLeaf, order.get(0).getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(1).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(2)
+				.getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(3).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(4)
+				.getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(5).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(6)
+				.getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(7).getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(8).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(9)
+				.getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(10)
+				.getClass());
+		assertEquals(order.toString(), mathDescLeaf, order.get(11).getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(12)
+				.getClass());
+		assertEquals(order.toString(), MathOperatorNode.class, order.get(13)
+				.getClass());
 
+		// check the order of the operators
+		mo = ((MathOperatorNode) order.get(2)).get();
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertEquals(ArithmeticOperator.MINUS, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(6)).get();
+		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(9)).get();
+		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(10)).get();
+		assertEquals(ArithmeticOperator.MINUS, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(12)).get();
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(13)).get();
+		assertTrue(mo.getFunction() instanceof Max);
+		assertNull(mo.getOperator());
 	}
 
+	/**
+	 * Tests the parsing of a more complex measures-definition.
+	 */
 	@Test
 	public void testComplexMeasure() {
-		final SelectQuery query = q("select timeseries of max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON)) from testPersonModel");
-		final List<DescriptorMathTree> measures = query.getMeasures();
-		assertEquals(1, measures.size());
+		DescriptorMathTree measure;
+		List<IMathTreeElement> order;
+		MathOperator mo;
 
-		final DescriptorMathTree measure = measures.get(0);
-		final List<IMathTreeElement> order = measure.getEvaluationOrder();
+		final SelectQuery query = q("select timeseries of average(A + B * C), max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON)) from testPersonModel");
+		final List<DescriptorMathTree> measures = query.getMeasures();
+		assertEquals(2, measures.size());
+
+		/*
+		 * check average(A + B * C)
+		 */
+		measure = measures.get(0);
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+
+		// check the amount of commands
+		assertEquals(6, order.size());
+
+		/*
+		 * check max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON))
+		 */
+		measure = measures.get(1);
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
 
 		// check the amount of commands
 		assertEquals(12, order.size());
+
+		// check the order of the operators
+		mo = ((MathOperatorNode) order.get(2)).get();
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertEquals(ArithmeticOperator.MINUS, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(5)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Max);
+		mo = ((MathOperatorNode) order.get(7)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Average);
+		mo = ((MathOperatorNode) order.get(9)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Min);
+		mo = ((MathOperatorNode) order.get(10)).get();
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
+		assertNull(mo.getFunction());
+		mo = ((MathOperatorNode) order.get(11)).get();
+		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
+		assertNull(mo.getFunction());
 	}
 
 	/**

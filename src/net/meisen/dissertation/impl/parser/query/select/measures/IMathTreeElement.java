@@ -17,4 +17,6 @@ public interface IMathTreeElement {
 	 *            the parent to be
 	 */
 	public void setParent(final MathOperatorNode parent);
+
+	public int amountOfChildren();
 }

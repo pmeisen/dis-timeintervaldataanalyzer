@@ -18,7 +18,8 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
  * 
  */
 public class DescriptorLogicTree {
-	private RootNode root;
+	private final RootNode root;
+	
 	private LogicalOperatorNode currentNode;
 
 	/**

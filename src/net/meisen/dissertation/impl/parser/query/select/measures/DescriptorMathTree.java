@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.UUID;
 
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
@@ -18,15 +19,29 @@ import net.meisen.dissertation.model.measures.IAggregationFunction;
  * 
  */
 public class DescriptorMathTree {
-	private RootNode root;
+	private final String id;
+	private final RootNode root;
+
 	private MathOperatorNode currentNode;
 
 	/**
-	 * Constructor to create an empty logic-tree.
+	 * Constructor to create an empty math-tree.
 	 */
 	public DescriptorMathTree() {
+		this(null);
+	}
+
+	/**
+	 * Constructor to create an empty math-tree with the specified {@code id}.
+	 * 
+	 * @param id
+	 *            the identifier used for the math-tree, can be {@code null} (if
+	 *            so a random identifier will be created)
+	 */
+	public DescriptorMathTree(final String id) {
 		this.root = new RootNode();
 		this.currentNode = root;
+		this.id = id == null ? UUID.randomUUID().toString() : id;
 	}
 
 	/**
@@ -162,58 +177,31 @@ public class DescriptorMathTree {
 	}
 
 	/**
-	 * Optimizes the whole tree, so that logical expressions are combined if
-	 * possible.
+	 * Checks if the tree is simple, i.e. just a aggregation function for a
+	 * descriptor (e.g. {@code SUM(SMILES)}).
+	 * 
+	 * @return {@code true} if the tree represents a simple term, otherwise
+	 *         {@code false}
 	 */
-	public void optimize() {
+	public boolean isSimple() {
+		final IMathTreeElement c = root.getChild(0);
 
-		// merge equal logical expressions
-		mergeMathOperators(root);
+		if (c instanceof MathOperatorNode) {
+			final MathOperatorNode child = (MathOperatorNode) c;
+			final MathOperator op = child.get();
+			return (op.isFunction() && child.amountOfChildren() == 1 && child
+					.getChild(0) instanceof DescriptorLeaf);
+		} else {
+			return false;
+		}
 	}
 
 	/**
-	 * Merges the {@code current} node and it's parent if logically possible.
+	 * Gets the identifier of the math-tree.
 	 * 
-	 * @param current
-	 *            the node to be checked for merging
+	 * @return the identifier of the math-tree
 	 */
-	protected void mergeMathOperators(final MathOperatorNode current) {
-		//
-		// // get the parent
-		// final LogicalOperatorNode currentParent = current.getParent();
-		// final LogicalOperator currentParentOp = currentParent == null ? null
-		// : currentParent.get();
-		//
-		// // get the children
-		// final List<ILogicalTreeElement> currentChildren =
-		// current.getChildren();
-		//
-		// /*
-		// * Check if there is a parent and if so, check if the parent's
-		// * LogicalOperator is equal to the current's LogicalOperator. The
-		// * current node is not needed and all children can be attached to the
-		// * parent if so.
-		// */
-		// if (currentParentOp != null && currentParentOp.equals(current.get()))
-		// {
-		// for (int i = currentChildren.size(); i > 0; i--) {
-		// final ILogicalTreeElement currentChild = currentChildren
-		// .get(i - 1);
-		// currentParent.attachChildFirst(currentChild);
-		// currentChild.setParent(currentParent);
-		// }
-		// currentParent.removeChild(current);
-		// }
-		//
-		// // now go for all the children and check if those can be changed
-		// for (final ILogicalTreeElement currentChild : currentChildren) {
-		//
-		// // if the child is a LogicalOperatorNode it might be optimizable
-		// if (currentChild instanceof LogicalOperatorNode) {
-		// final LogicalOperatorNode childNode = (LogicalOperatorNode)
-		// currentChild;
-		// mergeLogicalOperators(childNode);
-		// }
-		// }
+	public String getId() {
+		return id;
 	}
 }

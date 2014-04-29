@@ -3,22 +3,27 @@ package net.meisen.dissertation.impl.parser.query;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescValueTupelContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorEqualContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMeasureContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionNameContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAliasContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
@@ -128,30 +133,55 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	private DescriptorMathTree mathExpr = null;
 
 	@Override
+	public void enterCompNamedMeasure(final CompNamedMeasureContext ctx) {
+		final String id = getAlias(ctx.selectorAlias());
+		mathExpr = new DescriptorMathTree(id);
+	}
+
+	@Override
+	public void exitCompNamedMeasure(final CompNamedMeasureContext ctx) {
+		q(SelectQuery.class).addMeasure(mathExpr);
+	}
+
+	@Override
 	public void enterCompMeasure(final CompMeasureContext ctx) {
 
-		// check if we have a new formula
-		if (ctx.getParent() instanceof ExprMeasureContext) {
-
-			// check if one is already running
-			if (mathExpr != null) {
-				System.out.println(mathExpr);
-			}
-
-			mathExpr = new DescriptorMathTree();
-		}
-		// otherwise is just a nested formula
-		else {
-			// nothing to do
+		// add the function to the tree
+		if (ctx.selectorSecondMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorSecondMathOperator());
+			mathExpr.attach(ao);
 		}
 	}
 
 	@Override
 	public void exitCompMeasure(final CompMeasureContext ctx) {
 
-		// check if we have a measure
-		if (ctx.getParent() instanceof ExprMeasureContext) {
-			q(SelectQuery.class).addMeasure(mathExpr);
+		// check if we had an operator and we have to move up
+		if (ctx.selectorSecondMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
+	public void enterCompMeasureAtom(final CompMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorFirstMathOperator());
+			mathExpr.attach(ao);
+		} else if (ctx.compAggrFunction() != null) {
+			final CompAggrFunctionContext aggFuncCtx = ctx.compAggrFunction();
+			mathExpr.attach(resolveAggregationFunction(aggFuncCtx
+					.selectorAggrFunctionName()));
+		}
+	}
+
+	@Override
+	public void exitCompMeasureAtom(final CompMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			mathExpr.moveUp();
+		} else if (ctx.compAggrFunction() != null) {
+			mathExpr.moveUp();
 		}
 	}
 
@@ -434,10 +464,30 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	/**
+	 * Gets the alias defined by the specified {@code SelectorAliasContext}.
+	 * 
+	 * @param ctx
+	 *            the context to retrieve the alias from
+	 * 
+	 * @return the alias defined by the {@code SelectorAliasContext}
+	 */
+	protected String getAlias(final SelectorAliasContext ctx) {
+		if (ctx == null) {
+			return UUID.randomUUID().toString();
+		} else if (ctx.SIMPLE_ID() != null) {
+			return ctx.SIMPLE_ID().getText();
+		} else if (ctx.ENHANCED_ID() != null) {
+			return ctx.ENHANCED_ID().getText();
+		} else {
+			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
+		}
+	}
+
+	/**
 	 * Resolves the name of the function to the concrete implementation of the
 	 * function.
 	 * 
-	 * @param functionName
+	 * @param ctx
 	 *            the name of the function
 	 * 
 	 * @return the instance of the {@code AggregationFunction}
@@ -448,18 +498,24 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 *             {@code ForwardedRuntimeException}
 	 */
 	protected IAggregationFunction resolveAggregationFunction(
-			final String functionName) throws QueryParsingException {
+			final ParserRuleContext ctx) throws QueryParsingException {
 		if (aggFuncHandler == null) {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1010, functionName);
+					1010, ctx == null ? null : ctx.getText());
 		}
 
-		final IAggregationFunction func = aggFuncHandler.resolve(functionName);
-		if (func == null) {
-			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1009, functionName);
+		if (ctx instanceof SelectorAggrFunctionNameContext) {
+			final String funcName = ctx.getText();
+			final IAggregationFunction func = aggFuncHandler.resolve(funcName);
+			if (func == null) {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1009, funcName);
+			} else {
+				return func;
+			}
 		} else {
-			return func;
+			throw new IllegalArgumentException("The context '" + ctx
+					+ "' does not contain any aggregation function.");
 		}
 	}
 
@@ -485,6 +541,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 	}
 
+	/**
+	 * Resolves the {@code ArithmeticOperator} based on the specified context.
+	 * 
+	 * @param ctx
+	 *            the context used to resolve the
+	 * 
+	 * @return the resolved {@code ArithmeticOperator}, can be {@code null} if
+	 *         it cannot be resolved
+	 */
 	protected ArithmeticOperator resolveArithmeticOperator(
 			final ParserRuleContext ctx) {
 		if (ctx.getToken(QueryGrammarParser.MATH_PLUS, 0) != null) {

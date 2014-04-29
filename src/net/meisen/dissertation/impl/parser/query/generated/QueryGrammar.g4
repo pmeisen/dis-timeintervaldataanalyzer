@@ -29,7 +29,7 @@ package net.meisen.dissertation.impl.parser.query.generated;
  * Define the different expressions/parts of the statement
  */
 exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)? EOF;
-exprMeasure  : compMeasure (SEPARATOR compMeasure)*;
+exprMeasure  : compNamedMeasure (SEPARATOR compNamedMeasure)*;
 exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
@@ -38,13 +38,14 @@ exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 /*
  * Define the different redudant definitions within the parts of the statement
  */
-compMeasure              : compMeasureAtom | compMeasureAtom selectorSecondMathOperator compMeasure;
+compNamedMeasure         : compMeasure (OP_ALIAS selectorAlias)?;
+compMeasure              : compMeasure selectorSecondMathOperator compMeasureAtom | compMeasureAtom;
 compMeasureAtom          : compAggrFunction | compMeasureAtom selectorFirstMathOperator compMeasureAtom | BRACKET_ROUND_OPENED compMeasure BRACKET_ROUND_CLOSED;
 compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorDescValue;
 compDescValueTupel       : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
 compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compAggrFunction         : selectorAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
-compDescriptorFormula    : compDescriptorFormulaAtom | compDescriptorFormulaAtom selectorSecondMathOperator compDescriptorFormula;
+compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
 compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 
 /*
@@ -54,6 +55,7 @@ compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom sele
  */
 selectorModelId           : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDescriptorId      : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
+selectorAlias             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorSelectType        : TYPE_TIMESERIES | TYPE_RECORDS;
 selectorDateInterval      : DATE SEPARATOR DATE;
 selectorIntInterval       : INT SEPARATOR INT;
@@ -91,6 +93,7 @@ TYPE_RECORDS   : R E C O R D S;
 OP_FROM     : F R O M;
 OP_OF       : O F;
 OP_IN       : I N;
+OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y;
 
