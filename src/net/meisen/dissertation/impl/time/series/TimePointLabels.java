@@ -2,25 +2,65 @@ package net.meisen.dissertation.impl.time.series;
 
 import net.meisen.general.genmisc.types.Strings;
 
+/**
+ * A list of {@code TimePoint} labels, a time-point is thereby addressed by a
+ * position.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TimePointLabels {
 	private final String[] labels;
 	private final Object[] labelValues;
 
+	/**
+	 * Standard constructor defining the amount of labels
+	 * 
+	 * @param size
+	 *            the amount of labels, i.e. granules
+	 */
 	public TimePointLabels(final int size) {
 		this.labels = new String[size];
 		this.labelValues = new Object[size];
 	}
 
+	/**
+	 * Sets the label for the specified {@code pos}.
+	 * 
+	 * @param pos
+	 *            the position to set the label for
+	 * @param label
+	 *            the formatted label to be set
+	 * @param labelValue
+	 *            the original unformatted label
+	 */
 	public void setLabel(final int pos, final String label,
 			final Object labelValue) {
 		this.labels[pos] = label;
 		this.labelValues[pos] = labelValue;
 	}
 
+	/**
+	 * Gets the label to be used for the specified {@code pos}. Instead of
+	 * {@link #getLabel(int)} this method returns the unformatted object.
+	 * 
+	 * @param pos
+	 *            the position to get the label for
+	 * 
+	 * @return the label of the specified {@code pos}
+	 */
 	public Object getLabelValue(final int pos) {
 		return this.labelValues[pos];
 	}
 
+	/**
+	 * Gets the label to be used for the specified {@code pos}.
+	 * 
+	 * @param pos
+	 *            the position to get the label for
+	 * 
+	 * @return the label of the specified {@code pos}
+	 */
 	public String getLabel(final int pos) {
 		return this.labels[pos];
 	}

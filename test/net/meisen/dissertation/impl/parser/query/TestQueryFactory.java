@@ -1143,7 +1143,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(2, tsRes.size());
+		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 
@@ -1176,7 +1176,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(2, tsRes.size());
+		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 		assertEquals("03.01.2014 00:00:00,000", tsRes.getLabel(2));
@@ -1218,7 +1218,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(3, tsRes.size());
+		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 
@@ -1256,7 +1256,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(3, tsRes.size());
+		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("06.01.2014 00:00:00,000", tsRes.getLabel(1));
 
@@ -1294,7 +1294,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(3, tsRes.size());
+		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 
@@ -1332,7 +1332,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(4, tsRes.size());
+		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("08.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("09.01.2014 00:00:00,000", tsRes.getLabel(1));
 		assertEquals("10.01.2014 00:00:00,000", tsRes.getLabel(2));
@@ -1380,7 +1380,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
 		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
-		assertEquals(4, tsRes.size());
+		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 		assertEquals("03.01.2014 00:00:00,000", tsRes.getLabel(2));
@@ -1419,38 +1419,6 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertEquals(ts.toString(), 1204.0, ts.getValue(2), 0.0);
 		assertEquals(ts.toString(), 1204.0, ts.getValue(3), 0.0);
 		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
-	}
-
-	@Test
-	public void testAllTimeSelection() {
-		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel";
-
-		// load the model
-		m(xml);
-
-		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
-
-		// check the result's filter
-		System.out.println(res.getTimeSeriesResult());
-	}
-
-	@Test
-	public void testTimeSelection() {
-		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014 16:19:00,03.03.2014 16:20:00] filter by PERSON='Philipp' AND LOCATION='Undefined'";
-
-		// load the model
-		m(xml);
-
-		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
-
-		// check the result's filter
-		System.out.println(res.getTimeSeriesResult());
 	}
 
 	/**

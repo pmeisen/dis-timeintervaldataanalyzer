@@ -342,12 +342,12 @@ public abstract class BasePersistor {
 	}
 
 	/**
-	 * Get all the registered {@code Persistables} with the {@code SelectGroup} each
-	 * is bound to.
+	 * Get all the registered {@code Persistables} with the {@code SelectGroup}
+	 * each is bound to.
 	 * 
 	 * @return all the registered {@code Persistables}
 	 * 
-	 * @see SelectGroup
+	 * @see Group
 	 * @see IPersistable
 	 */
 	protected Map<Group, IPersistable> getPersistables() {
@@ -558,12 +558,12 @@ public abstract class BasePersistor {
 	/**
 	 * Registers a {@code Persistable} to be persisted under the specified
 	 * {@code group} name. The method triggers the
-	 * {@link IPersistable#isRegistered(BasePersistor, SelectGroup)} for each
+	 * {@link IPersistable#isRegistered(BasePersistor, Group)} for each
 	 * registration.
 	 * 
 	 * @param group
-	 *            the name of the {@code SelectGroup} the {@code Persistable} is bound
-	 *            to
+	 *            the name of the {@code SelectGroup} the {@code Persistable} is
+	 *            bound to
 	 * @param persistable
 	 *            the {@code Persistable} to bound to the specified
 	 *            {@code group}

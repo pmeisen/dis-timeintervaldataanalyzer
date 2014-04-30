@@ -6,9 +6,6 @@ import java.util.Iterator;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
-import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
-import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
-import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -19,6 +16,12 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorMod
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 
+/**
+ * Evaluator used to evaluate timeseries.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TimeSeriesEvaluator {
 	private static final DescriptorMathTree defaultMeasure = new DescriptorMathTree(
 			"COUNT");
@@ -83,19 +86,42 @@ public class TimeSeriesEvaluator {
 	private final BaseIndexFactory indexFactory;
 	private final TimelineDefinition timeline;
 
+	/**
+	 * Standard constructor initializing the {@code TimeSeriesEvaluator} for the
+	 * specified {@code model}.
+	 * 
+	 * @param model
+	 *            the model the evaluator is used with
+	 */
 	public TimeSeriesEvaluator(final TidaModel model) {
 		this.index = model.getIndex();
 		this.indexFactory = model.getIndexFactory();
 		this.timeline = model.getIntervalModel().getTimelineDefinition();
 	}
 
-	public TimeSeriesResult evaluateInterval(final Interval interval,
+	/**
+	 * Evaluates the result for the specified {@code interval}.
+	 * 
+	 * @param interval
+	 *            the interval to evaluate the timeseries for
+	 * @param measures
+	 *            the measures to be evaluated
+	 * @param filterResult
+	 *            the records selected by filtering
+	 * @param groupResult
+	 *            the records selected by grouping
+	 * 
+	 * @return the created {@code TimeSeries}
+	 * 
+	 * @see TimeSeries
+	 */
+	public TimeSeriesResult evaluateInterval(final Interval<?> interval,
 			final Collection<DescriptorMathTree> measures,
 			final DescriptorLogicResult filterResult,
 			final GroupResult groupResult) {
 
 		// determine the interval
-		final SliceWithDescriptors<?>[] timeSlices = getTimeSlices(interval);
+		final SliceWithDescriptors<?>[] timeSlices = getIntervalIndexSlices(interval);
 
 		// create the result
 		final TimeSeriesResult result = createTimeSeriesResult(interval,
@@ -176,7 +202,16 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
-	protected SliceWithDescriptors<?>[] getTimeSlices(final Interval interval) {
+	/**
+	 * Gets the {@code Slices} available for the defined {@code interval}.
+	 * 
+	 * @param interval
+	 *            the {@code Slices} available
+	 * 
+	 * @return the {@code Slices} selected by the {@code interval}
+	 */
+	protected SliceWithDescriptors<?>[] getIntervalIndexSlices(
+			final Interval<?> interval) {
 		if (interval == null) {
 			return index.getIntervalIndexSlices();
 		} else {
@@ -186,8 +221,21 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
-	protected TimeSeriesResult createTimeSeriesResult(final Interval interval,
-			final int amountOfGranules) {
+	/**
+	 * Initializes the {@code TimeSeriesResult} without any {@code TimeSeries}
+	 * instances, but with initialized labeling.
+	 * 
+	 * @param interval
+	 *            the interval the {@code TimeSeries} should be based on
+	 * @param amountOfGranules
+	 *            the amount of granules defined for the {@code TimeSeries}
+	 * 
+	 * @return the created {@code TimeSeriesResult}
+	 * 
+	 * @see TimeSeriesResult
+	 */
+	protected TimeSeriesResult createTimeSeriesResult(
+			final Interval<?> interval, final int amountOfGranules) {
 
 		// determine the boundaries
 		final Object startPoint;
@@ -218,6 +266,21 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Combines the bitmaps of the {@code timeSlice}, the {@code filter} and the
+	 * specified {@code group}. The method returns {@code null} if the
+	 * {@code timeSlice} or it's bitmap is {@code null}.
+	 * 
+	 * @param timeSlice
+	 *            the {@code Slice}
+	 * @param filter
+	 *            the result of the filter
+	 * @param group
+	 *            the result of the group
+	 * 
+	 * @return the combined bitmap, is {@code null} if the {@code timeSlice} was
+	 *         {@code null}
+	 */
 	protected Bitmap combineBitmaps(final SliceWithDescriptors<?> timeSlice,
 			final IBitmapResult filter, final IBitmapResult group) {
 
