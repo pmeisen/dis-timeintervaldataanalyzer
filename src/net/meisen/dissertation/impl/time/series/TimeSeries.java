@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.time.series;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class TimeSeries {
@@ -9,6 +10,7 @@ public class TimeSeries {
 	public TimeSeries(final String id, final int size) {
 		this.id = id;
 		this.values = new double[size];
+		Arrays.fill(this.values, Double.NaN);
 	}
 
 	public String getId() {
@@ -41,5 +43,21 @@ public class TimeSeries {
 		}
 
 		return sb.toString();
+	}
+
+	public int size() {
+		return values.length;
+	}
+
+	public void applyDefault(final double defaultValue) {
+		if (Double.isNaN(defaultValue)) {
+			return;
+		}
+		
+		for (int i = 0; i < values.length; i++) {
+			if (Double.isNaN(values[i])) {
+				values[i] = defaultValue;
+			}
+		}
 	}
 }

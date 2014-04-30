@@ -184,7 +184,7 @@ public class DescriptorMathTree {
 	 *         {@code false}
 	 */
 	public boolean isSimple() {
-		final IMathTreeElement c = root.getChild(0);
+		final IMathTreeElement c = getFirst();
 
 		if (c instanceof MathOperatorNode) {
 			final MathOperatorNode child = (MathOperatorNode) c;
@@ -203,5 +203,18 @@ public class DescriptorMathTree {
 	 */
 	public String getId() {
 		return id;
+	}
+
+	/**
+	 * Gets the first none root node of the tree.
+	 * 
+	 * @return the first none root node of the tree
+	 */
+	public IMathTreeElement getFirst() {
+		if (root.amountOfChildren() == 0) {
+			return null;
+		} else {
+			return root.getChild(0);
+		}
 	}
 }

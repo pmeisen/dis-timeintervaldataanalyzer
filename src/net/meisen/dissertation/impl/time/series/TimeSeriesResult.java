@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.time.series;
 
+import java.util.Collection;
 import java.util.Locale;
 
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -37,10 +38,19 @@ public class TimeSeriesResult {
 	public void setValue(final int pos, final String timeSeriesId,
 			final double value) {
 		final TimeSeries series = getSeries(timeSeriesId);
+		if (series == null) {
+			// TODO throw exception
+		}
+
 		series.setValue(pos, value);
 	}
 
-	public TimeSeries getSeries(final String timeSeriesId) {
+	@SuppressWarnings("unchecked")
+	public Collection<TimeSeries> getSeries() {
+		return (Collection<TimeSeries>) timeSeries.getAll();
+	}
+
+	public TimeSeries createSeries(final String timeSeriesId) {
 
 		// get the indexed one
 		TimeSeries series = (TimeSeries) timeSeries.getObject(timeSeriesId);
@@ -49,9 +59,15 @@ public class TimeSeriesResult {
 		if (series == null) {
 			series = new TimeSeries(timeSeriesId, size);
 			timeSeries.addObject(series);
+		} else {
+			// TODO throw exception
 		}
 
 		return series;
+	}
+
+	public TimeSeries getSeries(final String timeSeriesId) {
+		return (TimeSeries) timeSeries.getObject(timeSeriesId);
 	}
 
 	@Override

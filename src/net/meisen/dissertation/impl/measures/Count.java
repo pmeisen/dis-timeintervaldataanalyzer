@@ -1,8 +1,8 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 
 import org.slf4j.Logger;
@@ -21,7 +21,11 @@ public class Count extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final Iterable<Descriptor<?, ?, ?>> descriptors) {
+			final FactDescriptorSet descriptors) {
+		if (bitmap == null || descriptors == null) {
+			return getDefaultValue();
+		}
+
 		return bitmap.determineCardinality();
 	}
 
@@ -32,11 +36,20 @@ public class Count extends BaseAggregationFunction {
 			LOG.warn("Using count aggregation with complex expression, to increase performance remove any complex expression within a count-aggregation.");
 		}
 
+		if (bitmap == null || facts == null || facts.length == 0) {
+			return getDefaultValue();
+		}
+
 		return bitmap.determineCardinality();
 	}
 
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double getDefaultValue() {
+		return 0.0;
 	}
 }

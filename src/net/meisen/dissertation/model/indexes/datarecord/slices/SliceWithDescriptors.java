@@ -16,7 +16,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
  *            the type of the identifier of the slice
  */
 public class SliceWithDescriptors<I> extends BaseSlice<I> {
-	private final FactDescriptorSet facts;
+	private final FactDescriptorModelSet facts;
 
 	/**
 	 * Default constructor to create a slice with descriptors.
@@ -29,7 +29,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	public SliceWithDescriptors(final I sliceId, final BaseIndexFactory factory) {
 		super(sliceId, factory);
 
-		facts = new FactDescriptorSet();
+		facts = new FactDescriptorModelSet();
 	}
 
 	/**
@@ -91,6 +91,30 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 */
 	public Iterable<Descriptor<?, ?, ?>> facts(final String descriptorModelId) {
 		return facts.facts(descriptorModelId);
+	}
+
+	/**
+	 * Gets all the {@code DescriptorModels} associated to the slice. For each
+	 * {@code DescriptorModel} the different associated {@code Descriptors} are
+	 * available.
+	 * 
+	 * @return the {@code DescriptorModels} associated to the slice
+	 */
+	public FactDescriptorModelSet getDescriptorModels() {
+		return facts;
+	}
+
+	/**
+	 * Gets the sorted set (sorted by value) of the descriptors.
+	 * 
+	 * @param descriptorModelId
+	 *            the identifier of the {@code DescriptorModel} to get the
+	 *            descriptors for
+	 * 
+	 * @return a sorted set of descriptors
+	 */
+	public FactDescriptorSet getDescriptors(final String descriptorModelId) {
+		return facts.getDescriptors(descriptorModelId);
 	}
 
 	/**

@@ -143,7 +143,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 				cmp = true;
 			}
 		}
-
+		
 		return cmp;
 	}
 

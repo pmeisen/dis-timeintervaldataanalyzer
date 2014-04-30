@@ -37,8 +37,6 @@ public class SelectEvaluator {
 						filterResult, groupResult);
 		queryResult.setTimeSeriesResult(timeSeriesResult);
 
-		// TODO check
-
 		return queryResult;
 	}
 }

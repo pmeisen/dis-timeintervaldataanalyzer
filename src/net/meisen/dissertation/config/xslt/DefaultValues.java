@@ -14,7 +14,6 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
-import net.meisen.dissertation.impl.measures.Average;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.measures.Max;
 import net.meisen.dissertation.impl.measures.Mean;
@@ -311,7 +310,6 @@ public class DefaultValues {
 	public static List<Class<? extends IAggregationFunction>> getAggregationFunctions() {
 		final List<Class<? extends IAggregationFunction>> functions = new ArrayList<Class<? extends IAggregationFunction>>();
 
-		functions.add(Average.class);
 		functions.add(Count.class);
 		functions.add(Max.class);
 		functions.add(Min.class);

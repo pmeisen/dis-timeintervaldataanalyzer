@@ -17,10 +17,13 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
-import net.meisen.dissertation.impl.measures.Average;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.measures.Max;
+import net.meisen.dissertation.impl.measures.Mean;
+import net.meisen.dissertation.impl.measures.Median;
 import net.meisen.dissertation.impl.measures.Min;
+import net.meisen.dissertation.impl.measures.Mode;
+import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
@@ -305,7 +308,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		DescriptorMathTree measure;
 		MathOperatorNode node;
 
-		final SelectQuery query = q("select timeseries of average(P) AS AVG, min(A) AS MIN000, max(L) AS \"MAX\" from testPersonModel");
+		final SelectQuery query = q("select timeseries of Mean(P) AS AVG, min(A) AS MIN000, max(L) AS \"MAX\" from testPersonModel");
 		final List<DescriptorMathTree> measures = query.getMeasures();
 		assertEquals(3, measures.size());
 
@@ -314,7 +317,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertTrue(measure.isSimple());
 		assertEquals("AVG", measure.getId());
 		node = (MathOperatorNode) measure.getRoot().getChild(0);
-		assertTrue(node.get().getFunction() instanceof Average);
+		assertTrue(node.get().getFunction() instanceof Mean);
 
 		measure = measures.get(1);
 		assertTrue(measure.isSimple());
@@ -480,12 +483,12 @@ public class TestQueryFactory extends LoaderBasedTest {
 		List<IMathTreeElement> order;
 		MathOperator mo;
 
-		final SelectQuery query = q("select timeseries of average(A + B * C), max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON)) from testPersonModel");
+		final SelectQuery query = q("select timeseries of mean(A + B * C), max(LOCATION + PERSON - WHAT) * (mean(PERSON) + min(PERSON)) from testPersonModel");
 		final List<DescriptorMathTree> measures = query.getMeasures();
 		assertEquals(2, measures.size());
 
 		/*
-		 * check average(A + B * C)
+		 * check mean(A + B * C)
 		 */
 		measure = measures.get(0);
 		assertFalse(measure.isSimple());
@@ -495,7 +498,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertEquals(6, order.size());
 
 		/*
-		 * check max(LOCATION + PERSON - WHAT) * (average(PERSON) + min(PERSON))
+		 * check max(LOCATION + PERSON - WHAT) * (Mean(PERSON) + min(PERSON))
 		 */
 		measure = measures.get(1);
 		assertFalse(measure.isSimple());
@@ -516,7 +519,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertTrue(mo.getFunction() instanceof Max);
 		mo = ((MathOperatorNode) order.get(7)).get();
 		assertNull(mo.getOperator());
-		assertTrue(mo.getFunction() instanceof Average);
+		assertTrue(mo.getFunction() instanceof Mean);
 		mo = ((MathOperatorNode) order.get(9)).get();
 		assertNull(mo.getOperator());
 		assertTrue(mo.getFunction() instanceof Min);
@@ -1157,14 +1160,14 @@ public class TestQueryFactory extends LoaderBasedTest {
 	}
 
 	/**
-	 * Tests the implementation of the {@link Average} aggregation-function.
+	 * Tests the implementation of the {@link Mean} aggregation-function.
 	 */
 	@Test
-	public void testAggregationAverage() {
+	public void testAggregationMean() {
 		TimeSeries ts;
 
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
-		final String query = "select timeseries of average(PAX) AS PAX, average(PAX + PAX) AS COMPLEX_AVERAGE from testNumberModel in [01.01.2014,02.01.2014]";
+		final String query = "select timeseries of mean(PAX) AS PAX, mean(PAX + PAX) AS COMPLEX_MEAN from testNumberModel in [01.01.2014,04.01.2014]";
 
 		// load the model
 		m(xml);
@@ -1176,17 +1179,246 @@ public class TestQueryFactory extends LoaderBasedTest {
 		assertEquals(2, tsRes.size());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
+		assertEquals("03.01.2014 00:00:00,000", tsRes.getLabel(2));
+		assertEquals("04.01.2014 00:00:00,000", tsRes.getLabel(3));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		ts.size();
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 996.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 1200.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 1200.0, ts.getValue(3), 0.0);
+		assertEquals(4, ts.size());
+
+		ts = tsRes.getSeries("COMPLEX_MEAN");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 2400.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 2400.0, ts.getValue(3), 0.0);
+		assertEquals(4, ts.size());
+	}
+
+	/**
+	 * Tests the implementation of the {@link Max} aggregation-function.
+	 */
+	@Test
+	public void testAggregationMax() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of max(PAX) AS PAX, max(PAX + AIRLINE) AS COMPLEX_MAX, max(PAX) + max(AIRLINE) AS COMBINED_MAX from testNumberModel in [01.01.2014,02.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(3, tsRes.size());
+		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1239.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_MAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1240.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMBINED_MAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1240.0, ts.getValue(1), 0.0);
+	}
+
+	/**
+	 * Tests the implementation of the {@link Min} aggregation-function.
+	 */
+	@Test
+	public void testAggregationMin() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of min(PAX) AS PAX, min(PAX + CREW) AS COMPLEX_MIN, min(PAX) + min(CREW) AS COMBINED_MIN from testNumberModel in [05.01.2014,06.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(3, tsRes.size());
+		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("06.01.2014 00:00:00,000", tsRes.getLabel(1));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 3.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_MIN");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 9.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMBINED_MIN");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 7.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+	}
+
+	/**
+	 * Tests the implementation of the {@link Sum} aggregation-function.
+	 */
+	@Test
+	public void testAggregationSum() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of sum(PAX) AS PAX, sum(PAX + CREW) AS COMPLEX_SUM, sum(PAX) + sum(CREW) AS COMBINED_SUM from testNumberModel in [01.01.2014,02.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(3, tsRes.size());
+		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
 
 		// check the results
 		ts = tsRes.getSeries("PAX");
 		assertNotNull(ts);
 		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
-		assertEquals(ts.toString(), 996.0, ts.getValue(1), 0.0);
-		
-		ts = tsRes.getSeries("COMPLEX_AVERAGE");
+		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_SUM");
 		assertNotNull(ts);
 		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
-		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMBINED_SUM");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
+	}
+
+	/**
+	 * Tests the implementation of {@link Median}.
+	 */
+	@Test
+	public void testAggregationMedian() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of median(PAX) AS PAX, median(CREW) AS CREW, median(PAX + CREW) AS COMPLEX_MEDIAN, median(PAX) + median(CREW) AS COMBINED_MEDIAN from testNumberModel in [08.01.2014,10.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(4, tsRes.size());
+		assertEquals("08.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("09.01.2014 00:00:00,000", tsRes.getLabel(1));
+		assertEquals("10.01.2014 00:00:00,000", tsRes.getLabel(2));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 550.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1000.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(2), 0.0);
+
+		ts = tsRes.getSeries("CREW");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 2.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 3.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(2), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_MEDIAN");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 552.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1003.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(2), 0.0);
+
+		ts = tsRes.getSeries("COMBINED_MEDIAN");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), 552.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 1003.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(2), 0.0);
+	}
+
+	/**
+	 * Tests the implementation of the {@code AggregatonFunction} {@link Mode}.
+	 */
+	@Test
+	public void testAggregationMode() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of mode(PAX) AS PAX, mode(CREW) AS CREW, mode(PAX + CREW) AS COMPLEX_MODE, mode(PAX) + mode(CREW) AS COMBINED_MODE from testNumberModel in [01.01.2014,05.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				loader);
+		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		assertEquals(4, tsRes.size());
+		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
+		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
+		assertEquals("03.01.2014 00:00:00,000", tsRes.getLabel(2));
+		assertEquals("04.01.2014 00:00:00,000", tsRes.getLabel(3));
+		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(4));
+
+		// check the results
+		ts = tsRes.getSeries("PAX");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 1200.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 1200.0, ts.getValue(3), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
+
+		ts = tsRes.getSeries("CREW");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 4.0, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 4.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 4.0, ts.getValue(3), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX_MODE");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 1204.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 1204.0, ts.getValue(3), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
+
+		ts = tsRes.getSeries("COMBINED_MODE");
+		assertNotNull(ts);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(1), 0.0);
+		assertEquals(ts.toString(), 1204.0, ts.getValue(2), 0.0);
+		assertEquals(ts.toString(), 1204.0, ts.getValue(3), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
 	}
 
 	@Test

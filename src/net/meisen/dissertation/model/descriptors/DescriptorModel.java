@@ -615,6 +615,7 @@ public class DescriptorModel<I extends Object> {
 
 		// make sure it was added
 		if (!added && isFailOnDuplicates()) {
+			System.out.println(descriptor);
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor.getUniqueString(), getId());
 		}
@@ -654,33 +655,33 @@ public class DescriptorModel<I extends Object> {
 	private Constructor<? extends Descriptor> findConstructor(
 			final Class<? extends Descriptor> clazz, final Class<?> valueType) {
 
-		Constructor<? extends Descriptor> constructor;
+		final List<Class<?>[]> ctors = new ArrayList<Class<?>[]>();
+		ctors.add(new Class[] { getIdClass(), valueType });
+		ctors.add(new Class[] { Object.class, valueType });
+		ctors.add(new Class[] { Object.class, Object.class });
 
-		try {
-			constructor = clazz.getConstructor(DescriptorModel.class,
-					Object.class, valueType);
-			return constructor;
-		} catch (final NoSuchMethodException e) {
-			constructor = null;
-
-			// check if a default constructor is supported
+		Constructor<? extends Descriptor> constructor = null;
+		for (Class<?>[] ctor : ctors) {
 			try {
 				constructor = clazz.getConstructor(DescriptorModel.class,
-						Object.class, Object.class);
-			} catch (final NoSuchMethodException innerE) {
+						ctor[0], ctor[1]);
+			} catch (final NoSuchMethodException e) {
 				constructor = null;
+				continue;
 			}
 
-			// if not throw the exception
-			if (constructor == null) {
-				exceptionRegistry.throwException(
-						DescriptorModelException.class, 1001, e,
-						clazz.getName(), idsFactory.getIdClass().getName(),
-						valueType.getName());
-				return null;
-			} else {
-				return constructor;
-			}
+			// we found one
+			break;
+		}
+
+		// if not throw the exception
+		if (constructor == null) {
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1001, clazz.getName(), idsFactory.getIdClass().getName(),
+					valueType.getName());
+			return null;
+		} else {
+			return constructor;
 		}
 	}
 

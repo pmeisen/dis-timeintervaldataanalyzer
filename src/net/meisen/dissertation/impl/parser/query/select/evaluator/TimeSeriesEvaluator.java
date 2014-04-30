@@ -6,12 +6,16 @@ import java.util.Iterator;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
+import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 
@@ -97,36 +101,72 @@ public class TimeSeriesEvaluator {
 		final TimeSeriesResult result = createTimeSeriesResult(interval,
 				timeSlices.length);
 
-		// create the iterables for empty results
-		final Iterable<GroupResultEntry> itGroup = groupResult == null
-				|| groupResult.size() == 0 ? noGroupIterable : groupResult;
-		final Iterable<DescriptorMathTree> itMeasures = measures == null
-				|| measures.size() == 0 ? noMeasureIterable : measures;
+		// create the iterables for the groups
+		int groupSize;
+		final Iterable<GroupResultEntry> itGroup;
+		if (groupResult == null || (groupSize = groupResult.size()) == 0) {
+			itGroup = noGroupIterable;
+			groupSize = 1;
+		} else {
+			itGroup = groupResult;
+		}
 
-		// iterate over each group
+		// create the iterables for the measures
+		int measureSize = measures.size();
+		final Iterable<DescriptorMathTree> itMeasures;
+		if (measures == null || (measureSize = measures.size()) == 0) {
+			itMeasures = noMeasureIterable;
+			measureSize = 1;
+		} else {
+			itMeasures = measures;
+		}
+
+		final int size = groupSize * measureSize;
+		final TimeSeries[] ts = new TimeSeries[size];
+		final DescriptorMathTree[] dmt = new DescriptorMathTree[size];
+
+		/*
+		 * Iterate over each group and measure and create the timeSeries for it.
+		 */
+		int counter = 0;
 		for (final GroupResultEntry groupResultEntry : itGroup) {
 			final String groupId = groupResultEntry == null ? null
 					: groupResultEntry.getGroup();
 
-			// iterate over the different slices
+			// calculate each measure
+			for (final DescriptorMathTree measure : itMeasures) {
+				final String timeSeriesId = groupId == null ? measure.getId()
+						: groupId + " (" + measure.getId() + ")";
+				final TimeSeries timeSeries = result.createSeries(timeSeriesId);
+
+				ts[counter] = timeSeries;
+				dmt[counter] = measure;
+				counter++;
+			}
+		}
+
+		/*
+		 * Iterate over the different slices and calculate each measure.
+		 */
+		for (final GroupResultEntry groupResultEntry : itGroup) {
 			int timeSlicePos = 0;
 			for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
 				final Bitmap resultBitmap = combineBitmaps(timeSlice,
 						filterResult, groupResultEntry);
+				final FactDescriptorModelSet descriptors = timeSlice == null ? null
+						: timeSlice.getDescriptorModels();
 
 				// create the evaluator
 				final MathExpressionEvaluator evaluator = new MathExpressionEvaluator(
-						index, timeSlice, resultBitmap);
+						index, resultBitmap, descriptors);
 
-				// calculate each measure
-				for (final DescriptorMathTree measure : itMeasures) {
-					final String timeSeriesId = groupId == null ? measure
-							.getId() : groupId + " (" + measure.getId() + ")";
-
-					final TimeSeries timeSeries = result
-							.getSeries(timeSeriesId);
-					final double value = evaluator.evaluateMeasure(measure);
+				// calculate the measure for each timeSeries
+				int i = 0;
+				for (final TimeSeries timeSeries : ts) {
+					final double value = evaluator.evaluateMeasure(dmt[i]);
 					timeSeries.setValue(timeSlicePos, value);
+
+					i++;
 				}
 
 				timeSlicePos++;

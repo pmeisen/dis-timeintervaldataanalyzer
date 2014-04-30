@@ -91,8 +91,6 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		final Performance performance = new Performance();
 		performance.start();
 
-		// TODO add performance for queries
-
 		final long[] result = performance.stop();
 		System.out.println(Longs.asList(result));
 	}

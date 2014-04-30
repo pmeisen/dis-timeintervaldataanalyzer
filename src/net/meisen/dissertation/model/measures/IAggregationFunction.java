@@ -1,8 +1,8 @@
 package net.meisen.dissertation.model.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 
 /**
  * Interface for an aggregation function. A concrete implementation has to be
@@ -21,9 +21,11 @@ public interface IAggregationFunction {
 	public String getName();
 
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final Iterable<Descriptor<?, ?, ?>> descriptors);
+			final FactDescriptorSet descriptors);
 
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final double[] facts);
+
+	public double getDefaultValue();
 
 }

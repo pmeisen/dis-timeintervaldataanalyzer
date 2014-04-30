@@ -1,36 +1,24 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.meisen.dissertation.model.descriptors.Descriptor;
-import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * An index used to keep the sorted facts of descriptors. That means that the
- * set can contain {@code Descriptor} instances of different
- * {@code DescriptorModels}. The implementation groups the different
- * {@code Descriptors} based on their {@code DescriptorModel}. Additionally, the
- * descriptors of each model are sorted according to their fact-values (i.e.
- * {@link Descriptor#getValue()}).
+ * A {@code SortedSet} of {@code Descriptors}. The sorting is done using the
+ * value of the {@code descriptor}, whereby all record variant
+ * {@code Descriptors} are smaller than invariant once - sorted by their
+ * identifier. The record invariant {@code Descriptors} are sorted by their
+ * invariant value.
  * 
  * @author pmeisen
  * 
- * @see Descriptor
- * @see DescriptorModel
- * 
  */
-public class FactDescriptorSet {
+public class FactDescriptorSet extends TreeSet<Descriptor<?, ?, ?>> {
+	private static final long serialVersionUID = 4576995616789676834L;
+
 	private final static Comparator<Descriptor<?, ?, ?>> valueComperator = new Comparator<Descriptor<?, ?, ?>>() {
 
 		/**
@@ -59,13 +47,9 @@ public class FactDescriptorSet {
 		public int compare(final Descriptor<?, ?, ?> desc1,
 				final Descriptor<?, ?, ?> desc2) {
 
-			// check nulls
-			if (desc1 == null && desc2 == null) {
-				return 0;
-			} else if (desc1 == null) {
-				return -1;
-			} else if (desc2 == null) {
-				return 1;
+			if (desc1 == null || desc2 == null) {
+				throw new NullPointerException(
+						"Null descriptors are not supported!");
 			}
 
 			// make sure both are invariant
@@ -86,92 +70,27 @@ public class FactDescriptorSet {
 				 * implementation, therefore just check the identifiers
 				 */
 				return Objects.compare(desc1.getId(), desc2.getId());
-			} else {
-				throw new IllegalStateException(
-						"One of the descriptors is variant considering the used record, and therefore cannot be sorted.");
+			}
+			// both are variant
+			else if (!invariantDesc1 && !invariantDesc2) {
+				return Objects.compare(desc1.getId(), desc2.getId());
+			}
+			// invariantDesc1 == true && invariantDesc2 == false
+			else if (invariantDesc1) {
+				return 1;
+			}
+			// invariantDesc2 == true && invariantDesc1 == false
+			else {
+				return -1;
 			}
 		}
 	};
 
-	private Map<String, SortedSet<Descriptor<?, ?, ?>>> facts;
-
 	/**
-	 * Creates an empty set.
+	 * Creates a new instance of a {@code DescriptorSet}.
 	 */
 	public FactDescriptorSet() {
-		facts = new HashMap<String, SortedSet<Descriptor<?, ?, ?>>>();
-	}
-
-	/**
-	 * Creates a {@code FactDescriptorSet} with the specified
-	 * {@code descriptors}.
-	 * 
-	 * @param descriptors
-	 *            the {@code descriptors} to be added
-	 */
-	public FactDescriptorSet(final Collection<Descriptor<?, ?, ?>> descriptors) {
-		this();
-
-		this.setDescriptors(descriptors);
-	}
-
-	/**
-	 * Adds {@code desc} to {@code this}. The method returns {@code true} if the
-	 * element wasn't in the set before, otherwise {@code false} is returned.
-	 * 
-	 * @param desc
-	 *            the {@code Descriptor} to be added
-	 * 
-	 * @return {@code true} if the element wasn't in the set before, otherwise
-	 *         {@code false}
-	 */
-	public boolean addDescriptor(final Descriptor<?, ?, ?> desc) {
-		if (desc == null) {
-			throw new NullPointerException("Cannot add a null descriptor.");
-		}
-
-		final String modelId = desc.getModelId();
-
-		// get the set if we don't have one create it
-		SortedSet<Descriptor<?, ?, ?>> set = facts.get(modelId);
-		if (set == null) {
-			set = new TreeSet<Descriptor<?, ?, ?>>(getValueComparator());
-			facts.put(modelId, set);
-		}
-
-		return set.add(desc);
-	}
-
-	/**
-	 * Tries to add all the {@code descriptors} to {@code this}.
-	 * 
-	 * @param descriptors
-	 *            the {@code Descriptors} to be added
-	 */
-	public void addDescriptors(final Collection<Descriptor<?, ?, ?>> descriptors) {
-		if (descriptors == null) {
-			return;
-		}
-
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
-		}
-	}
-
-	/**
-	 * Tries to add all the {@code descriptors} to {@code this}.
-	 * 
-	 * @param descriptors
-	 *            the {@code Descriptors} to be added
-	 */
-	public void addDescriptors(final Descriptor<?, ?, ?>... descriptors) {
-		if (descriptors == null) {
-			return;
-		}
-
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
-		}
+		super(valueComperator);
 	}
 
 	/**
@@ -179,8 +98,10 @@ public class FactDescriptorSet {
 	 * {@code Descriptor} instances. <br/>
 	 * <br/>
 	 * <b>Note:</b><br/>
-	 * The {@code Descriptor} instances have to be record invariant, i.e.
-	 * {@link Descriptor#isRecordInvariant()} must return {@code true}.
+	 * The {@code Descriptor} instances have sort the records by their values.
+	 * If the {@code Descriptor} is record variant, i.e.
+	 * {@link Descriptor#isRecordInvariant()} returns {@code false}, it is added
+	 * first.
 	 * 
 	 * @return the {@code Comparator} to be used
 	 * 
@@ -191,231 +112,11 @@ public class FactDescriptorSet {
 	}
 
 	/**
-	 * An iterator to iterate over the identifiers of the registered
-	 * {@code DescriptorModel} instances.
+	 * Checks if the set contains a {@code Descriptor} which is record variant.
 	 * 
-	 * @return the {@code Iterable} for the identifiers
-	 * 
-	 * @see Iterable
+	 * @return {@code true} if the set contains a record which is record variant
 	 */
-	public Iterable<String> models() {
-		final Set<String> keys = facts.keySet();
-
-		return new Iterable<String>() {
-
-			@Override
-			public Iterator<String> iterator() {
-				if (keys == null) {
-					return Collections.<String> emptyList().iterator();
-				} else {
-					return keys.iterator();
-				}
-			}
-		};
-	}
-
-	/**
-	 * Gets the {@code Set} of the identifiers of the registered
-	 * {@code DescriptorModel} instances.
-	 * 
-	 * @return the {@code Set} of the identifiers of the registered
-	 *         {@code DescriptorModel} instances
-	 * 
-	 * @see DescriptorModel
-	 * @see Set
-	 */
-	public Set<String> getModels() {
-		return facts.keySet();
-	}
-
-	/**
-	 * Creates a list of the identifiers of the registered
-	 * {@code DescriptorModel} instances.
-	 * 
-	 * @return the list of identifiers of the registered {@code DescriptorModel}
-	 *         instances
-	 */
-	public List<String> createModelList() {
-		final List<String> list = new ArrayList<String>();
-		list.addAll(facts.keySet());
-
-		return list;
-	}
-
-	/**
-	 * Iterate over the sorted {@code Descriptor} instances of the set.
-	 * 
-	 * @param model
-	 *            the {@code DescriptorModel} to get the descriptors of
-	 * 
-	 * @return an {@code Iterable} instance to iterate over the different
-	 *         descriptor instances
-	 * 
-	 * @see Iterable
-	 */
-	public Iterable<Descriptor<?, ?, ?>> facts(final DescriptorModel<?> model) {
-		return facts(model.getId());
-	}
-
-	/**
-	 * Iterate over the sorted {@code Descriptor} instances of the set.
-	 * 
-	 * @param descriptorModelId
-	 *            the identifier of the {@code DescriptorModel} to get the
-	 *            descriptors of
-	 * 
-	 * @return an {@code Iterable} instance to iterate over the different
-	 *         descriptor instances
-	 * 
-	 * @see Iterable
-	 */
-	public Iterable<Descriptor<?, ?, ?>> facts(final String descriptorModelId) {
-		final SortedSet<Descriptor<?, ?, ?>> descriptors = facts
-				.get(descriptorModelId);
-
-		return new Iterable<Descriptor<?, ?, ?>>() {
-
-			@Override
-			public Iterator<Descriptor<?, ?, ?>> iterator() {
-				if (descriptors == null) {
-					return Collections.<Descriptor<?, ?, ?>> emptyList()
-							.iterator();
-				} else {
-					return descriptors.iterator();
-				}
-			}
-		};
-	}
-
-	/**
-	 * Gets the {@code SortedSet} of the descriptors added for the specified
-	 * {@code DescriptorModel}.
-	 * 
-	 * @param model
-	 *            the {@code DescriptorModel} to get the set for
-	 * @return the {@code SortedSet} for the specified {@code model}
-	 * 
-	 * @see DescriptorModel
-	 * @see SortedSet
-	 */
-	public SortedSet<Descriptor<?, ?, ?>> getDescriptors(
-			final DescriptorModel<?> model) {
-		return facts.get(model.getId());
-	}
-
-	/**
-	 * Gets the {@code SortedSet} of the descriptors added for the specified
-	 * {@code descriptorModelId}.
-	 * 
-	 * @param descriptorModelId
-	 *            the identifier of the {@code DescriptorModel} to get the set
-	 *            for
-	 * @return the {@code SortedSet} for the specified {@code model}
-	 * 
-	 * @see DescriptorModel
-	 * @see SortedSet
-	 */
-	public SortedSet<Descriptor<?, ?, ?>> getDescriptors(
-			final String descriptorModelId) {
-		return facts.get(descriptorModelId);
-	}
-
-	/**
-	 * Creates a sorted list of the descriptors of the specified
-	 * {@code DescriptorModel}.
-	 * 
-	 * @param model
-	 *            the {@code DescriptorModel}
-	 * 
-	 * @return the created list
-	 * 
-	 * @see DescriptorModel
-	 */
-	public List<Descriptor<?, ?, ?>> createSortedDescriptorList(
-			final DescriptorModel<?> model) {
-		return createSortedDescriptorList(model.getId());
-	}
-
-	/**
-	 * Creates a sorted list of the descriptors of the specified
-	 * {@code DescriptorModel}.
-	 * 
-	 * @param descriptorModelId
-	 *            the identifier of the {@code DescriptorModel}
-	 * 
-	 * @return the created list
-	 * 
-	 * @see DescriptorModel
-	 */
-	public List<Descriptor<?, ?, ?>> createSortedDescriptorList(
-			final String descriptorModelId) {
-		final SortedSet<Descriptor<?, ?, ?>> descriptors = facts
-				.get(descriptorModelId);
-
-		final List<Descriptor<?, ?, ?>> sortedList = new ArrayList<Descriptor<?, ?, ?>>();
-		if (descriptors != null) {
-			sortedList.addAll(descriptors);
-		}
-
-		return sortedList;
-	}
-
-	/**
-	 * Gets the number of registered models.
-	 * 
-	 * @return the number of registered models
-	 */
-	public int numberOfModels() {
-		return facts.size();
-	}
-
-	/**
-	 * Gets the number of facts for a specific {@code DescriptorModel}.
-	 * 
-	 * @param model
-	 *            the {@code DescriptorModel} to get the number of facts for
-	 * 
-	 * @return the number of facts associated to the specified
-	 *         {@code descriptorModelId}.
-	 */
-	public int numberOfFacts(final DescriptorModel<?> model) {
-		return numberOfFacts(model.getId());
-	}
-
-	/**
-	 * Gets the number of facts for a specific {@code DescriptorModel}.
-	 * 
-	 * @param descriptorModelId
-	 *            the identifier of the model to get the number of facts for
-	 * 
-	 * @return the number of facts associated to the specified
-	 *         {@code descriptorModelId}.
-	 */
-	public int numberOfFacts(final String descriptorModelId) {
-		final SortedSet<Descriptor<?, ?, ?>> set = facts.get(descriptorModelId);
-		if (set == null) {
-			return 0;
-		}
-
-		return set.size();
-	}
-
-	/**
-	 * Sets the descriptors for the {@code Set}. All prior added descriptors are
-	 * removed.
-	 * 
-	 * @param descriptors
-	 *            the descriptors to be registered
-	 */
-	public void setDescriptors(final Collection<Descriptor<?, ?, ?>> descriptors) {
-		facts.clear();
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
-		}
-	}
-	
-	@Override
-	public String toString() {
-		return facts.toString();
+	public boolean containsVariantRecords() {
+		return size() > 0 && !first().isRecordInvariant();
 	}
 }

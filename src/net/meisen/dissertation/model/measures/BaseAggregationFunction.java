@@ -3,27 +3,30 @@ package net.meisen.dissertation.model.measures;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 
+/**
+ * Base implementation of an {@code AggregationFunction}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public abstract class BaseAggregationFunction implements IAggregationFunction {
-
-	@Override
-	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final Iterable<Descriptor<?, ?, ?>> descriptors) {
-		throw new UnsupportedOperationException("Currently not supported!");
-	}
-
-	@Override
-	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
-		throw new UnsupportedOperationException("Currently not supported!");
-	}
 
 	@Override
 	public String toString() {
 		return getName().toUpperCase();
 	}
 
+	/**
+	 * Helper method to calculate the sum of the specified {@code facts}.
+	 * 
+	 * @param facts
+	 *            the facts to calculate the sum for
+	 * 
+	 * @return the sum of the facts
+	 */
 	public double sum(final double[] facts) {
 
 		// make sure we have values
@@ -40,13 +43,30 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 		return sum;
 	}
 
+	/**
+	 * Helper method to calculate the sum of the specified {@code facts}.
+	 * 
+	 * @param index
+	 *            the {@code TidaIndex} to retrieve the meta-slices from
+	 * @param bitmap
+	 *            the defined bitmap of the filter and group
+	 * @param descriptors
+	 *            the descriptors of the fact
+	 * 
+	 * @return the sum of the facts
+	 */
 	public double sum(final TidaIndex index, final Bitmap bitmap,
-			final Iterable<Descriptor<?, ?, ?>> descriptors) {
+			final FactDescriptorSet descriptors) {
+		if (bitmap == null || descriptors == null) {
+			return getDefaultValue();
+		}
 
 		double sum = 0;
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-
-			if (desc.isRecordInvariant()) {
+		if (descriptors.containsVariantRecords()) {
+			// TODO support it
+			throw new UnsupportedOperationException("Currently not supported!");
+		} else {
+			for (final Descriptor<?, ?, ?> desc : descriptors) {
 
 				// get the slice
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
@@ -55,14 +75,14 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 				// get the bitmap
 				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
 				sum += bmp.determineCardinality() * desc.getFactValue(null);
-
-			} else {
-				// TODO add support
-				throw new UnsupportedOperationException(
-						"Currently not supported!");
 			}
-		}
 
-		return sum;
+			return sum;
+		}
+	}
+
+	@Override
+	public double getDefaultValue() {
+		return Double.NaN;
 	}
 }

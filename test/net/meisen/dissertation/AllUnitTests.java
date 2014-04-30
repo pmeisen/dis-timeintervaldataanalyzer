@@ -52,6 +52,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.indexes.datarecord.TestProcessedDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.slices.TestFactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.TestFactDescriptorSet;
 import net.meisen.dissertation.model.persistence.TestBasePersistor;
 import net.meisen.dissertation.model.persistence.TestGroup;
@@ -168,6 +169,7 @@ import org.junit.runners.Suite;
 
 		// Test the index for facts
 		TestFactDescriptorSet.class,
+		TestFactDescriptorModelSet.class,
 
 		// Test the tida-indexes
 		TestMetaIndexDimension.class,
