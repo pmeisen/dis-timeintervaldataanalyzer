@@ -4,6 +4,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * Used to calculate the average value of the facts and the amount of records.
@@ -33,8 +34,8 @@ public class Mean extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
-		int setRecords = facts.length;
+			final IFactsHolder facts) {
+		int setRecords = facts.amountOfFacts();
 
 		// if there aren't any values 0.0 is the result
 		if (facts == null || setRecords == 0) {

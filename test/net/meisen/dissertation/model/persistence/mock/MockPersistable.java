@@ -2,9 +2,9 @@ package net.meisen.dissertation.model.persistence.mock;
 
 import java.io.InputStream;
 
-import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.IPersistable;
 import net.meisen.dissertation.model.persistence.Identifier;
 
 /**

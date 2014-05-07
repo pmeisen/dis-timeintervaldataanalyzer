@@ -36,13 +36,17 @@ public abstract class Bitmap implements IBitmapContainer {
 		 */
 		OR;
 	}
-
+	
 	/**
 	 * Get the set identifiers for the bitmap.
 	 * 
 	 * @return the identifiers set
 	 */
 	public abstract int[] getIds();
+	
+	public abstract int getMaxId();
+	
+	public abstract int getMinId();
 
 	/**
 	 * Determines the cardinality of the bitmap.
@@ -147,7 +151,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @return the combined {@code Bitmap}
 	 */
 	public abstract Bitmap or(final Bitmap... bitmaps);
-
+	
 	/**
 	 * Calculates the cardinality of the bitmap created by combining
 	 * {@code this} and the specified {@code bitmaps}.

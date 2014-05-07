@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.PersistorException;
-import net.meisen.dissertation.model.IPersistable;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Streams;
@@ -216,7 +215,8 @@ public abstract class BasePersistor {
 			final Identifier id = metaData.getIdentifier();
 
 			if (getPersistable(id.getGroup()) != null) {
-
+				exceptionRegistry.throwException(PersistorException.class,
+						1008, metaData.getIdentifier());
 			} else {
 				final OutputStream os = _openForWrite(id);
 				final InputStream is = metaData.getStream();
@@ -265,6 +265,16 @@ public abstract class BasePersistor {
 
 			// the identifier is excluded
 			return;
+		}
+
+		// check if the group has any parents with factories
+		for (final Group group : identifier.getGroup()) {
+			final IPersistable persistable = getPersistable(group);
+			if (persistable instanceof IPersistableFactory) {
+				final IPersistableFactory factory = (IPersistableFactory) persistable;
+
+				factory.createInstance(this, identifier);
+			}
 		}
 
 		// call the persistable to handle the entry

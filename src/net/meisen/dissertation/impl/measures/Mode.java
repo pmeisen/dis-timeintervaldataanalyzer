@@ -1,13 +1,12 @@
 package net.meisen.dissertation.impl.measures;
 
-import java.util.Arrays;
-
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * Implementation of the {@code Mode} aggregation function.
@@ -55,14 +54,11 @@ public class Mode extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
+			final IFactsHolder facts) {
 
-		if (bitmap == null || facts == null || facts.length == 0) {
+		if (bitmap == null || facts == null || facts.amountOfFacts() == 0) {
 			return getDefaultValue();
 		}
-
-		// first we sort the array
-		Arrays.sort(facts);
 
 		// get some helpers to keep track of the last state
 		double lastFact = Double.NaN;
@@ -71,7 +67,7 @@ public class Mode extends BaseAggregationFunction {
 		// iterate over the values
 		int counter = 0;
 		double mode = Double.NaN;
-		for (final double fact : facts) {
+		for (final double fact : facts.sortedFacts()) {
 			if (lastFact == fact) {
 				counter++;
 			} else if (counter > maxAmount) {

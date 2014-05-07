@@ -1,10 +1,7 @@
-package net.meisen.dissertation.model;
+package net.meisen.dissertation.model.persistence;
 
 import java.io.InputStream;
 
-import net.meisen.dissertation.model.persistence.BasePersistor;
-import net.meisen.dissertation.model.persistence.Group;
-import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**

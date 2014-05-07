@@ -3,25 +3,19 @@ package net.meisen.dissertation.model.indexes.datarecord;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaIndexException;
-import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
-import net.meisen.dissertation.model.descriptors.Descriptor;
-import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.IPersistable;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
@@ -37,10 +31,9 @@ import org.slf4j.LoggerFactory;
  */
 public class TidaIndex implements IPersistable {
 	private final static String EXTENSION = ".config";
-	private final static int STATISTIC_THRESHOLD = 30;
-
 	private final static Logger LOG = LoggerFactory.getLogger(TidaIndex.class);
 
+	private final int lastValidId;
 	private final TidaModel model;
 
 	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
@@ -61,8 +54,17 @@ public class TidaIndex implements IPersistable {
 	 */
 	public TidaIndex(final TidaModel model) {
 		this.model = model;
-		this.dataId = 0;
 		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
+
+		// determine the last valid identifier
+		final Bitmap bmp = model.getIndexFactory().createBitmap();
+		lastValidId = Math.min(Integer.MAX_VALUE - 1, bmp.getMaxId());
+		dataId = Math.max(0, bmp.getMinId());
+		if (dataId != 0 && LOG.isWarnEnabled()) {
+			LOG.warn("THe minimal identifier is defined to be '"
+					+ dataId
+					+ "'. It is not suggested to use a different minimal value than '0'.");
+		}
 
 		// create the indexes
 		intervalIndex = new IntervalIndex(model);
@@ -105,6 +107,12 @@ public class TidaIndex implements IPersistable {
 	 */
 	public void index(final IDataRecord record) {
 
+		// make sure values still fit
+		if (dataId > lastValidId || dataId < 0) {
+			throw new ForwardedRuntimeException(TidaIndexException.class, 1001,
+					dataId, lastValidId);
+		}
+
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
 				record, model, dataId);
@@ -114,13 +122,6 @@ public class TidaIndex implements IPersistable {
 			idx.index(processedRecord);
 		}
 
-		//@formatter:off
-		/*
-		 * dataId cannot be:
-		 *  - negative or 
-		 *  - greater than Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits
-		 */
-		//@formatter:on
 		dataId++;
 	}
 
@@ -145,96 +146,6 @@ public class TidaIndex implements IPersistable {
 	@SuppressWarnings("unchecked")
 	protected <T extends IDataRecordIndex> T getIndex(final Class<T> clazz) {
 		return (T) indexes.get(clazz);
-	}
-
-	/**
-	 * Creates a string which prints a statistics for the {@code TidaIndex}.
-	 * 
-	 * @return a string which can be printed to show a statistic
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public String toStatistic() {
-		final String nl = System.getProperty("line.separator");
-
-		String stat = "";
-
-		// @formatter:off
-		stat += "TidaIndex statistic: " + nl;
-		stat += "- MetaIndex with " + metaIndex.getAmountOfDimensions() + " dimension(s):" + nl;
-		for (final MetaIndexDimension<?> dim : metaIndex.getDimensions()) {
-			final int amountOfSlices = dim.getAmountOfSlices();
-			stat += "  - " + dim.getModelId() + " (" + amountOfSlices + " slices)" + nl;
-			if (amountOfSlices == 0) {
-				continue;
-			}
-			
-			// sort the data ascending
-			final List<Slice> sortedSlices = new ArrayList<Slice>();
-			sortedSlices.addAll(Arrays.asList(dim.getSlices()));
-			Collections.sort(sortedSlices, Collections.reverseOrder());
-			final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
-			
-			// output the data use the threshold defined by STATISTIC_THRESHOLD
-			int i = 0;
-			for (final Slice<?> slice : sortedSlices) {
-				final Object sliceId = slice.getId();
-				final DescriptorModel model = dim.getModel();
-				final Descriptor value = model.getDescriptor(sliceId);
-				
-				stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
-				if (++i > STATISTIC_THRESHOLD) {
-					stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
-					break;
-				}
-			}
-		}
-		
-		final int amountOfSlices = intervalIndex.getAmountOfSlices();
-		stat += "- IntervalIndex for " + intervalIndex.getFormattedStart() + " (" + amountOfSlices + " slices)" + nl;
-		if (amountOfSlices != 0) {
-		
-			// sort the data ascending
-			final List<SliceWithDescriptors> sortedSlices = new ArrayList<SliceWithDescriptors>();
-			sortedSlices.addAll(Arrays.asList(intervalIndex.getSlices()));
-			Collections.sort(sortedSlices, new Comparator<SliceWithDescriptors>() {
-				
-				@Override
-				public int compare(final SliceWithDescriptors o1,
-						final SliceWithDescriptors o2) {
-					
-					if (o2 == null && o1 == null) {
-						return 0;
-					} else if (o2 == null || o1 == null) {
-						return o2==null ? -1 : 1;
-					} else {
-						return o2.compareTo(o1);
-		            }
-		        }
-			});
-			if (sortedSlices.get(0) != null) {
-				final int nrSize = String.valueOf(Math.max(amountOfSlices, sortedSlices.get(0).count())).length();
-				
-				// output the data use the threshold defined by STATISTIC_THRESHOLD
-				int i = 0;
-				for (final SliceWithDescriptors<?> slice : sortedSlices) {
-					if (slice == null) {
-						break;
-					}
-					
-					final Object sliceId = slice.getId();
-					final String value = intervalIndex.getFormattedId(sliceId);
-					
-					stat += "      + " + String.format("%1$-30s", value) + " (" + String.format("%" + nrSize + "d", slice.count()) + " records)" + nl;
-					if (++i > STATISTIC_THRESHOLD) {
-						stat += "      + " + String.format("%1$-30s", "...") + " [" + String.format("%" + nrSize + "d", amountOfSlices - i + 1) + " more slices]" + nl;
-						break;
-					}
-				}
-			}
-		}
-		// @formatter:on
-
-		return stat;
 	}
 
 	@Override
@@ -337,8 +248,8 @@ public class TidaIndex implements IPersistable {
 	public SliceWithDescriptors<?>[] getIntervalIndexSlices(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		return intervalIndex
-				.getSlicesByTimePoints(start, end, startInclusive, endInclusive);
+		return intervalIndex.getSlicesByTimePoints(start, end, startInclusive,
+				endInclusive);
 	}
 
 	/**
@@ -429,5 +340,14 @@ public class TidaIndex implements IPersistable {
 	 */
 	public String getTimePointLabel(final Object value) {
 		return intervalIndex.getFormattedValue(value);
+	}
+
+	/**
+	 * Gets the last record identifier.
+	 * 
+	 * @return the last used record identifier
+	 */
+	public int getLastRecordId() {
+		return dataId - 1;
 	}
 }

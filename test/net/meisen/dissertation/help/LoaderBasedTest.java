@@ -32,7 +32,8 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	protected TidaModelHandler loader;
 
 	/**
-	 * Helper method to load a specific model.
+	 * Helper method to load a specific model. The method loads the data of the
+	 * model.
 	 * 
 	 * @param xml
 	 *            the xml file to be loaded

@@ -56,7 +56,7 @@ public interface IAggregationFunction {
 	 * @return the aggregated value
 	 */
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts);
+			final IFactsHolder facts);
 
 	/**
 	 * Gets the default value normally used if no facts are available.

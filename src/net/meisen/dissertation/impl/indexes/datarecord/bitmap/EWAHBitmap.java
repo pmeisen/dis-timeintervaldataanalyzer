@@ -242,4 +242,14 @@ public class EWAHBitmap extends Bitmap {
 			return null;
 		}
 	}
+
+	@Override
+	public int getMaxId() {
+		return Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits;
+	}
+
+	@Override
+	public int getMinId() {
+		return 0;
+	}
 }

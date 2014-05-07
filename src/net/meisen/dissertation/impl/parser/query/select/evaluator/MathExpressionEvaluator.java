@@ -1,20 +1,18 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.map.hash.TIntDoubleHashMap;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.impl.measures.MapFactsHolder;
 import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -169,8 +167,9 @@ public class MathExpressionEvaluator {
 				if (facts == null || resultBitmap == null) {
 					return func.getDefaultValue();
 				} else if (childNode instanceof MathOperatorNode) {
-					final TIntDoubleHashMap facts = evaluateMathForNode((MathOperatorNode) childNode);
-					return func.aggregate(index, resultBitmap, facts.values());
+					final IFactsHolder facts = evaluateMathForNode((MathOperatorNode) childNode);
+
+					return func.aggregate(index, resultBitmap, facts);
 				} else if (childNode instanceof DescriptorLeaf) {
 					final DescriptorLeaf descLeaf = (DescriptorLeaf) childNode;
 					final String descModelId = descLeaf.get();
@@ -203,7 +202,7 @@ public class MathExpressionEvaluator {
 	 * @return the result of the evaluation, which can be seen as an array
 	 *         containing the values for each record
 	 */
-	protected TIntDoubleHashMap evaluateMathForNode(final IMathTreeElement node) {
+	protected IFactsHolder evaluateMathForNode(final IMathTreeElement node) {
 		if (node instanceof MathOperatorNode) {
 			return evaluateMathForNode((MathOperatorNode) node);
 		} else if (node instanceof DescriptorLeaf) {
@@ -230,7 +229,7 @@ public class MathExpressionEvaluator {
 	 *             if the amount of children is unequal to two or if the
 	 *             {@code MathOperatorNode} does not define a {@code operator}
 	 */
-	protected TIntDoubleHashMap evaluateMathForNode(final MathOperatorNode node)
+	protected IFactsHolder evaluateMathForNode(final MathOperatorNode node)
 			throws ForwardedRuntimeException {
 		final MathOperator op = node.get();
 
@@ -241,8 +240,8 @@ public class MathExpressionEvaluator {
 		}
 
 		// apply the arithmetic
-		final TIntDoubleHashMap res1 = evaluateMathForNode(node.getChild(0));
-		final TIntDoubleHashMap res2 = evaluateMathForNode(node.getChild(1));
+		final IFactsHolder res1 = evaluateMathForNode(node.getChild(0));
+		final IFactsHolder res2 = evaluateMathForNode(node.getChild(1));
 		final ArithmeticOperator operator = op.getOperator();
 
 		return calculate(operator, res1, res2);
@@ -258,34 +257,12 @@ public class MathExpressionEvaluator {
 	 * 
 	 * @return the unaggregated single values of each record of the descriptor
 	 */
-	protected TIntDoubleHashMap evaluateMathForNode(final DescriptorLeaf node) {
+	protected MapFactsHolder evaluateMathForNode(final DescriptorLeaf node) {
 		final String descModelId = node.get();
 
 		// create the result
-		final TIntDoubleHashMap res = new TIntDoubleHashMap(
-				Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1,
-				Double.NaN);
-
-		// set the values we know
-		for (final Descriptor<?, ?, ?> desc : facts.getDescriptors(descModelId)) {
-
-			if (desc.isRecordInvariant()) {
-				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
-						descModelId, desc.getId());
-
-				// get the bitmap
-				final Bitmap bmp = resultBitmap.and(metaSlice.getBitmap());
-
-				// get the values of the facts
-				for (final int id : bmp.getIds()) {
-					res.put(id, desc.getFactValue(null));
-				}
-			} else {
-				// TODO add support
-				throw new UnsupportedOperationException(
-						"Currently not supported!");
-			}
-		}
+		final MapFactsHolder res = new MapFactsHolder();
+		res.init(facts.getDescriptors(descModelId), index, resultBitmap);
 
 		return res;
 	}
@@ -307,17 +284,19 @@ public class MathExpressionEvaluator {
 	 * 
 	 * @return the result
 	 */
-	protected TIntDoubleHashMap calculate(final ArithmeticOperator operator,
-			final TIntDoubleHashMap res1, final TIntDoubleHashMap res2) {
-		assert res1.size() == res2.size();
+	protected IFactsHolder calculate(final ArithmeticOperator operator,
+			final IFactsHolder res1, final IFactsHolder res2) {
+		assert res1.amountOfFacts() == res2.amountOfFacts();
 
 		// create the result, res1 and res2 are both of the same size
-		final TIntDoubleHashMap res = new TIntDoubleHashMap(res1.size(),
-				Constants.DEFAULT_LOAD_FACTOR, -1, Double.NaN);
-		for (final int key : res1.keys()) {
-			final double value = calculate(operator, res1.get(key),
-					res2.get(key));
-			res.put(key, value);
+		final MapFactsHolder res = new MapFactsHolder();
+		res.init(index.getLastRecordId(), res1.amountOfFacts());
+
+		// set the values within the map
+		for (final int key : res1.recordIds()) {
+			final double value = calculate(operator, res1.getFactOfRecord(key),
+					res2.getFactOfRecord(key));
+			res.set(key, value);
 		}
 
 		return res;

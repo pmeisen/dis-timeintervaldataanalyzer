@@ -5,6 +5,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * Used to determine the minimum value of the facts and the amount of records.
@@ -35,15 +36,15 @@ public class Min extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
-		if (facts == null || facts.length == 0) {
+			final IFactsHolder facts) {
+		if (facts == null || facts.amountOfFacts() == 0) {
 			return getDefaultValue();
 		}
 
-		double min = facts[0];
-		for (int i = 1; i < facts.length; i++) {
-			if (facts[i] < min) {
-				min = facts[i];
+		double min = Double.MAX_VALUE;
+		for (double fact : facts.facts()) {
+			if (fact < min) {
+				min = fact;
 			}
 		}
 

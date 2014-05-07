@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluator;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;

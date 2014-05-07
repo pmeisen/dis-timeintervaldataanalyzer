@@ -27,7 +27,7 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 	 * 
 	 * @return the sum of the facts
 	 */
-	public double sum(final double[] facts) {
+	public double sum(final IFactsHolder facts) {
 
 		// make sure we have values
 		if (facts == null) {
@@ -36,7 +36,7 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 		// otherwise get the sum and calculate the average
 		double sum = 0.0;
-		for (final double fact : facts) {
+		for (final double fact : facts.facts()) {
 			sum += fact;
 		}
 

@@ -76,7 +76,7 @@ public class MetaIndex implements IDataRecordIndex {
 	/**
 	 * Gets the dimensions of the {@code MetaIndex} as collection.
 	 * 
-	 * @return the dimensions of the {@ode MetaIndex}
+	 * @return the dimensions of the {@code MetaIndex}
 	 */
 	@SuppressWarnings("unchecked")
 	protected Collection<MetaIndexDimension<?>> getDimensions() {

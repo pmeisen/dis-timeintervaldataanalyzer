@@ -1,7 +1,8 @@
-package net.meisen.dissertation.impl.parser.query.select.evaluator;
+package net.meisen.dissertation.impl.parser.query.select;
 
-import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 
 /**
@@ -17,7 +18,7 @@ public class SelectResult implements IQueryResult {
 
 	private DescriptorLogicResult filterResult;
 	private GroupResult groupResult;
-	private TimeSeriesResult timeSeriesResult;
+	private TimeSeriesCollection timeSeriesCollection;
 
 	/**
 	 * Standard constructor which is used to specify the {@code query} this
@@ -61,11 +62,11 @@ public class SelectResult implements IQueryResult {
 	/**
 	 * Sets the {@code TimeSeries} specified by the query.
 	 * 
-	 * @param timeSeriesResult
+	 * @param timeSeriesCollection
 	 *            the {@code TimeSeries} specified by the query
 	 */
-	public void setTimeSeriesResult(final TimeSeriesResult timeSeriesResult) {
-		this.timeSeriesResult = timeSeriesResult;
+	public void setTimeSeriesResult(final TimeSeriesCollection timeSeriesCollection) {
+		this.timeSeriesCollection = timeSeriesCollection;
 	}
 
 	/**
@@ -73,8 +74,8 @@ public class SelectResult implements IQueryResult {
 	 * 
 	 * @return the determined {@code TimeSeries}
 	 */
-	public TimeSeriesResult getTimeSeriesResult() {
-		return timeSeriesResult;
+	public TimeSeriesCollection getTimeSeriesResult() {
+		return timeSeriesCollection;
 	}
 
 	/**

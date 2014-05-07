@@ -4,6 +4,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * {@code AggregationFunction} to calculate the sum.
@@ -22,7 +23,7 @@ public class Sum extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
+			final IFactsHolder facts) {
 
 		if (facts == null) {
 			return getDefaultValue();

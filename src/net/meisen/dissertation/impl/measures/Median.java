@@ -1,13 +1,12 @@
 package net.meisen.dissertation.impl.measures;
 
-import java.util.Arrays;
-
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * {@code AggregationFunction} to calculate the {@code Median}.
@@ -90,25 +89,23 @@ public class Median extends BaseAggregationFunction {
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final double[] facts) {
-		if (facts == null || facts.length == 0) {
+			final IFactsHolder facts) {
+		if (facts == null || facts.amountOfFacts() == 0) {
 			return getDefaultValue();
 		}
 
-		// sort the array
-		Arrays.sort(facts);
-
 		// get the middle position
-		final int amount = facts.length;
+		final int amount = facts.amountOfFacts();
 		final boolean even = (amount & 1) == 0;
 		final int firstPos = (int) Math.floor(amount * 0.5) + (even ? -1 : 0);
 
 		// calculate the median
 		final double median;
+		final double[] sortedFacts = facts.sortedFacts();
 		if (even) {
-			median = 0.5 * (facts[firstPos] + facts[firstPos + 1]);
+			median = 0.5 * (sortedFacts[firstPos] + sortedFacts[firstPos + 1]);
 		} else {
-			median = facts[firstPos];
+			median = sortedFacts[firstPos];
 		}
 
 		return median;

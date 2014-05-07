@@ -1,6 +1,6 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import net.meisen.dissertation.model.IPersistable;
+import net.meisen.dissertation.model.persistence.IPersistable;
 
 /**
  * An {@code Index} is used to index {@code DataRecord} instances by a specified

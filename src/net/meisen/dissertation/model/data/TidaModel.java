@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
-import net.meisen.dissertation.model.IPersistable;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -14,6 +13,7 @@ import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
+import net.meisen.dissertation.model.persistence.IPersistable;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -192,11 +192,6 @@ public class TidaModel implements IPersistable {
 
 		// optimize the indexes after the loading
 		this.idx.optimize();
-
-		// print the statistic after data loading
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(idx.toStatistic());
-		}
 	}
 
 	/**
@@ -410,7 +405,7 @@ public class TidaModel implements IPersistable {
 
 		this.persistentGroup = group;
 
-		persistor.register(group.append("indexes"), this.idx);
+		persistor.register(group.append("index"), this.idx);
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import org.junit.Test;
  * 
  */
 public class TestDefaultValues {
-
+	
 	/**
 	 * Tests the implementation of
 	 * {@link DefaultValues#determineValueClass(String)}.

@@ -68,8 +68,5 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 				+ ", "
 				+ Math.round(model.getIndex().getAmountOfRecords()
 						/ (performanceRes[1] / 1000000000.0)) + "]");
-
-		// print the resulting values
-		System.out.println(model.getIndex().toStatistic());
 	}
 }

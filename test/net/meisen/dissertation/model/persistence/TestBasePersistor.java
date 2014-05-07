@@ -7,17 +7,19 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
-import net.meisen.dissertation.model.IPersistable;
+import net.meisen.dissertation.model.persistence.mock.MockFactory;
 import net.meisen.dissertation.model.persistence.mock.MockPersistable;
 import net.meisen.dissertation.model.persistence.mock.MockPersistor;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -200,5 +202,33 @@ public class TestBasePersistor extends ExceptionBasedTest {
 		fis.close();
 
 		assertTrue(tmpFile.delete());
+	}
+
+	/**
+	 * Tests the calling of a factory.
+	 */
+	@Test
+	public void testFactoryUsage() {
+
+		// register a factory
+		final Group factoryGroup = new Group("myGroup");
+		final IPersistableFactory factory = spy(new MockFactory());
+		persistor.register(factoryGroup, factory);
+
+		// register a simple persistable
+		final Group group = factoryGroup.append("1").append("value");
+		final IPersistable persistable = spy(new MockPersistable());
+		persistor.register(group, persistable);
+
+		// read the data using the persistor
+		final Identifier id = new Identifier("identifier.data", group);
+		final InputStream is = new ByteArrayInputStream(
+				"This is the data".getBytes());
+		persistor.read(id, is);
+		persistor.read(id, is);
+
+		// verify the different calls
+		verify(factory, times(2)).createInstance(persistor, id);
+		verify(persistable, times(2)).load(persistor, id, is);
 	}
 }

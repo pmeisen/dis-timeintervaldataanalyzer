@@ -4,6 +4,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IFactsHolder;
 
 /**
  * Simply mocked aggregation function for testing.
@@ -21,11 +22,11 @@ public class MockAggregationFunction extends BaseAggregationFunction {
 	@Override
 	public double aggregate(TidaIndex index, Bitmap bitmap,
 			FactDescriptorSet descriptors) {
-		return getDefaultValue();
+		return 0.0;
 	}
 
 	@Override
-	public double aggregate(TidaIndex index, Bitmap bitmap, double[] facts) {
-		return getDefaultValue();
+	public double aggregate(TidaIndex index, Bitmap bitmap, IFactsHolder facts) {
+		return 0.0;
 	}
 }

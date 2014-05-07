@@ -29,8 +29,8 @@ import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
+import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
-import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
@@ -43,7 +43,7 @@ import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElemen
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
-import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
+import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Dates;
 
@@ -1142,7 +1142,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1175,7 +1175,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1217,7 +1217,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1255,7 +1255,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("06.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1293,7 +1293,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1331,7 +1331,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("08.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("09.01.2014 00:00:00,000", tsRes.getLabel(1));
@@ -1379,7 +1379,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		// fire the query
 		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
 				loader);
-		final TimeSeriesResult tsRes = res.getTimeSeriesResult();
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
 		assertEquals("02.01.2014 00:00:00,000", tsRes.getLabel(1));

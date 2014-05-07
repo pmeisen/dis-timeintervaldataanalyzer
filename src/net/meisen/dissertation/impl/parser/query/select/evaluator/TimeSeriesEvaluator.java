@@ -7,7 +7,7 @@ import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
-import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
+import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -115,7 +115,7 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @see TimeSeries
 	 */
-	public TimeSeriesResult evaluateInterval(final Interval<?> interval,
+	public TimeSeriesCollection evaluateInterval(final Interval<?> interval,
 			final Collection<DescriptorMathTree> measures,
 			final DescriptorLogicResult filterResult,
 			final GroupResult groupResult) {
@@ -124,7 +124,7 @@ public class TimeSeriesEvaluator {
 		final SliceWithDescriptors<?>[] timeSlices = getIntervalIndexSlices(interval);
 
 		// create the result
-		final TimeSeriesResult result = createTimeSeriesResult(interval,
+		final TimeSeriesCollection result = createTimeSeriesResult(interval,
 				timeSlices.length);
 
 		// create the iterables for the groups
@@ -232,9 +232,9 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @return the created {@code TimeSeriesResult}
 	 * 
-	 * @see TimeSeriesResult
+	 * @see TimeSeriesCollection
 	 */
-	protected TimeSeriesResult createTimeSeriesResult(
+	protected TimeSeriesCollection createTimeSeriesResult(
 			final Interval<?> interval, final int amountOfGranules) {
 
 		// determine the boundaries
@@ -249,7 +249,7 @@ public class TimeSeriesEvaluator {
 		}
 
 		// create the result
-		final TimeSeriesResult result = new TimeSeriesResult(amountOfGranules,
+		final TimeSeriesCollection result = new TimeSeriesCollection(amountOfGranules,
 				indexFactory);
 		for (int i = 0; i < amountOfGranules; i++) {
 

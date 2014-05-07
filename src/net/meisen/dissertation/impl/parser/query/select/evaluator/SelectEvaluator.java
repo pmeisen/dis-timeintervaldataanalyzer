@@ -1,7 +1,8 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.time.series.TimeSeriesResult;
+import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.TidaModel;
 
 /**
@@ -52,10 +53,10 @@ public class SelectEvaluator {
 		// determine the slice
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
-		final TimeSeriesResult timeSeriesResult = timeSeriesEvaluator
+		final TimeSeriesCollection timeSeriesCollection = timeSeriesEvaluator
 				.evaluateInterval(query.getInterval(), query.getMeasures(),
 						filterResult, groupResult);
-		queryResult.setTimeSeriesResult(timeSeriesResult);
+		queryResult.setTimeSeriesResult(timeSeriesCollection);
 
 		return queryResult;
 	}

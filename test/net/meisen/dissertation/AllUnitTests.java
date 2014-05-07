@@ -27,6 +27,7 @@ import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.impl.indexes.datarecord.bitmap.TestEWAHBitmap;
+import net.meisen.dissertation.impl.measures.TestMapFactsHolder;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorValue;
@@ -175,6 +176,9 @@ import org.junit.runners.Suite;
 		TestMetaIndexDimension.class,
 		TestMetaIndex.class,
 		TestIntervalIndex.class,
+
+		// Test the fact-holder
+		TestMapFactsHolder.class,
 
 		// Test the query
 		TestDescriptorValue.class, TestDescriptorComperator.class,

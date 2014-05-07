@@ -8,13 +8,12 @@ import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 
 /**
- * A result of a query retrieving {@code TimeSeries} for a specified
- * {@code interval}.
+ * A collection of a {@code TimeSeries} for a specified {@code interval}.
  * 
  * @author pmeisen
  * 
  */
-public class TimeSeriesResult {
+public class TimeSeriesCollection {
 	private final TimePointLabels labels;
 	private final IIndexedCollection timeSeries;
 	private final int size;
@@ -29,7 +28,7 @@ public class TimeSeriesResult {
 	 * @param factory
 	 *            the factory used to create indexes
 	 */
-	public TimeSeriesResult(final int size, final BaseIndexFactory factory) {
+	public TimeSeriesCollection(final int size, final BaseIndexFactory factory) {
 		this.size = size;
 
 		this.labels = new TimePointLabels(size);
@@ -112,9 +111,9 @@ public class TimeSeriesResult {
 	}
 
 	/**
-	 * Gets all the {@code TimeSeries} of the result.
+	 * Gets all the {@code TimeSeries} of the collection.
 	 * 
-	 * @return all the {@code TimeSeries} of the result
+	 * @return all the {@code TimeSeries} of the collection
 	 */
 	@SuppressWarnings("unchecked")
 	public Collection<TimeSeries> getSeries() {

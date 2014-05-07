@@ -79,4 +79,14 @@ public class BitmapMock extends Bitmap {
 	public Bitmap copy() {
 		return this;
 	}
+
+	@Override
+	public int getMaxId() {
+		return 0;
+	}
+
+	@Override
+	public int getMinId() {
+		return 0;
+	}
 }
