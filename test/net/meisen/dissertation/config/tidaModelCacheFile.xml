@@ -8,7 +8,6 @@
   
   <config>
     <cache implementation="net.meisen.dissertation.impl.cache.FileCache" />
-    
   </config>
   
   <data />

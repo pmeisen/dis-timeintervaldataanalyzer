@@ -1,8 +1,8 @@
 package net.meisen.dissertation.config;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
@@ -16,6 +16,7 @@ import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.cache.FileCache;
 import net.meisen.dissertation.impl.cache.MemoryCache;
+import net.meisen.dissertation.impl.cache.TestFileCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
@@ -150,6 +151,12 @@ public class TestConfig {
 		}
 	}
 
+	/**
+	 * Tests the usage of a {@code MemoryCache} defined via the global
+	 * configuration.
+	 * 
+	 * @author pmeisen
+	 */
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheMemory.xml")
 	public static class TestConfigMemoryCache extends BaseTest {
 
@@ -163,6 +170,12 @@ public class TestConfig {
 		}
 	}
 
+	/**
+	 * Tests the usage of a {@code FileCache} defined via the global
+	 * configuration.
+	 * 
+	 * @author pmeisen
+	 */
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheFile.xml")
 	public static class TestConfigFileCache extends BaseTest {
 
@@ -172,13 +185,19 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(FileCache.class, cache.getClass());
+			assertEquals(TestFileCache.class, cache.getClass());
 
 			assertEquals(new File(System.getProperty("java.io.tmpdir")),
 					((FileCache) cache).getLocation());
 		}
 	}
 
+	/**
+	 * Tests the usage of a {@code MemoryCache} defined specifically for the
+	 * model.
+	 * 
+	 * @author pmeisen
+	 */
 	public static class TestModuleMemoryCache extends BaseTest {
 
 		@Override
@@ -193,6 +212,12 @@ public class TestConfig {
 		}
 	}
 
+	/**
+	 * Tests the usage of a {@code FileCache} defined specifically for the
+	 * model.
+	 * 
+	 * @author pmeisen
+	 */
 	public static class TestModuleFileCache extends BaseTest {
 
 		@Override
@@ -203,7 +228,7 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(FileCache.class, cache.getClass());
+			assertEquals(TestFileCache.class, cache.getClass());
 			assertEquals(new File("."), ((FileCache) cache).getLocation());
 		}
 	}

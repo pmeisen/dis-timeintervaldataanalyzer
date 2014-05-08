@@ -26,7 +26,7 @@
 
          The following cache implementations are available:
           + net.meisen.dissertation.impl.cache.MemoryCache
-          + net.meisen.dissertation.impl.cache.FileCache
+          + net.meisen.dissertation.impl.cache.TestFileCache
       -->
     <cache implementation="net.meisen.dissertation.impl.cache.MemoryCache" />
 
