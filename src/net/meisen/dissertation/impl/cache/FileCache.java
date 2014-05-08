@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.exceptions.FileCacheException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapUser;
