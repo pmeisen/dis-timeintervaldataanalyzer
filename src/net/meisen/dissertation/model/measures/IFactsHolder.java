@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.measures;
 
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 
 public interface IFactsHolder {

@@ -11,6 +11,7 @@
   <xsl:import href="dataretriever://includeXslts" />
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
+  <xsl:import href="cache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -22,6 +23,7 @@
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
   <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
+  <xsl:variable name="cacheId" select="mdef:getId('CACHE_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
@@ -60,6 +62,29 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
+      <!-- create the cache to be used -->     
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:cache/@implementation">
+          <xsl:variable name="cache" select="//mns:config/mns:cache/@implementation" />
+          <bean id="{$cacheId}" class="{$cache}">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:config/mns:cache/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:otherwise><ref bean="defaultCacheConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$cacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultCacheClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultCacheConfig" /></map>
+            </property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+      
       <!-- create the indexFactory to be used -->
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation">

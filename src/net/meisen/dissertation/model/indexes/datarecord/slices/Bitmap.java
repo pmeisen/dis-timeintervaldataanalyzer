@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.datarecord.bitmap;
+package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -36,16 +36,26 @@ public abstract class Bitmap implements IBitmapContainer {
 		 */
 		OR;
 	}
-	
+
 	/**
 	 * Get the set identifiers for the bitmap.
 	 * 
 	 * @return the identifiers set
 	 */
 	public abstract int[] getIds();
-	
+
+	/**
+	 * Get the maximal identifier which can be set within the bitmap.
+	 * 
+	 * @return the maximal identifier which can be set within the bitmap
+	 */
 	public abstract int getMaxId();
-	
+
+	/**
+	 * Gets the minimal identifier which can be set within the bitmap.
+	 * 
+	 * @return the minimal identifier which can be set within the bitmap
+	 */
 	public abstract int getMinId();
 
 	/**
@@ -66,7 +76,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @param recordIds
 	 *            the identifiers to be set
 	 */
-	public abstract void set(final int... recordIds);
+	protected abstract void set(final int... recordIds);
 
 	/**
 	 * Creates a deep-copy of the {@code Bitmap}.
@@ -96,7 +106,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @throws IOException
 	 *             if an exception using the input occurs
 	 */
-	public abstract void deserialize(final DataInputStream in)
+	protected abstract void deserialize(final DataInputStream in)
 			throws IOException;
 
 	/**
@@ -151,7 +161,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @return the combined {@code Bitmap}
 	 */
 	public abstract Bitmap or(final Bitmap... bitmaps);
-	
+
 	/**
 	 * Calculates the cardinality of the bitmap created by combining
 	 * {@code this} and the specified {@code bitmaps}.

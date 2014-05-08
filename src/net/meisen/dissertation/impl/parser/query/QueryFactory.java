@@ -20,6 +20,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -30,6 +32,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class QueryFactory implements IQueryFactory {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(QueryFactory.class);
 
 	/**
 	 * {@code exceptionRegistry} used to fire exceptions.
@@ -44,6 +48,10 @@ public class QueryFactory implements IQueryFactory {
 	@Autowired
 	@Qualifier(DefaultValues.AGGREGATIONFUNCTIONHANDLER_ID)
 	protected AggregationFunctionHandler aggFuncHandler;
+
+	@Autowired
+	@Qualifier(DefaultValues.HANDLER_ID)
+	private TidaModelHandler handler;
 
 	/**
 	 * Parses the query using the specified optimization setting.
@@ -118,12 +126,20 @@ public class QueryFactory implements IQueryFactory {
 	@Override
 	public IQuery parseQuery(final String queryString)
 			throws QueryParsingException {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Pasrsing the query '" + queryString + "'.");
+		}
+
 		return parseQuery(queryString, true);
 	}
 
 	@Override
-	public IQueryResult evaluateQuery(final IQuery query,
-			final TidaModelHandler handler) throws QueryEvaluationException {
+	public IQueryResult evaluateQuery(final IQuery query)
+			throws QueryEvaluationException {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Evaluating the query '" + query + "'.");
+		}
+
 		final String modelId = query.getModelId();
 
 		// get the model

@@ -1,8 +1,10 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.IBitmapContainer;
+import java.io.DataInputStream;
+import java.io.IOException;
+
+import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapUser;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -20,13 +22,14 @@ import net.meisen.dissertation.model.indexes.datarecord.bitmap.IBitmapContainer;
  *            the type of the identifier used to identify the slice
  */
 public abstract class BaseSlice<I extends Object> implements
-		Comparable<BaseSlice<I>>, IBitmapContainer {
-	private final I id;
+		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapUser {
+	private final SliceId<I> id;
+	private final IBitmapCache cache;
 
 	/**
 	 * The {@code Bitmap} of the slice
 	 */
-	protected final Bitmap bitmap;
+	private Bitmap bitmap;
 
 	/**
 	 * Creates a slice with no the specified {@code recId} added (i.e.
@@ -34,20 +37,13 @@ public abstract class BaseSlice<I extends Object> implements
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
-	 * @param factory
-	 *            factory used to create bitmap indexes
-	 * @param recordIds
-	 *            the identifiers of the records to be set
 	 */
-	public BaseSlice(final I sliceId, final BaseIndexFactory factory,
-			final int... recordIds) {
+	public BaseSlice(final SliceId<I> sliceId, final IBitmapCache cache) {
 		this.id = sliceId;
-		this.bitmap = factory.createBitmap();
+		this.cache = cache;
 
-		if (recordIds != null) {
-			this.bitmap.set(recordIds);
-		}
-
+		// register the instance as user
+		cache.registerBitmapUser(this);
 	}
 
 	/**
@@ -56,7 +52,30 @@ public abstract class BaseSlice<I extends Object> implements
 	 * @return the id of the slice
 	 */
 	public I getId() {
+		return id.getId();
+	}
+
+	public SliceId<I> getSliceId() {
 		return id;
+	}
+
+	protected void deserializeBitmap(final DataInputStream in)
+			throws IOException {
+
+		// load the bitmap from the serialized version
+		getBitmap().deserialize(in);
+
+		// inform the cache
+		updateBitmapCache();
+	}
+
+	protected void updateBitmapCache() {
+		cache.cacheBitmap(getSliceId(), getBitmap());
+	}
+
+	@Override
+	public BitmapId<?> getBitmapId() {
+		return getSliceId();
 	}
 
 	@Override
@@ -89,19 +108,38 @@ public abstract class BaseSlice<I extends Object> implements
 
 	@Override
 	public String toString() {
-		return id.toString() + " (" + bitmap + ")";
+		return id.toString() + " (" + getBitmap() + ")";
 	}
 
 	@Override
 	public Bitmap getBitmap() {
+		if (bitmap == null) {
+			bitmap = cache.getBitmap(id);
+		}
+
 		return bitmap;
+	}
+
+	@Override
+	public Bitmap getInstanceBitmap() {
+		return bitmap;
+	}
+
+	@Override
+	public void updateBitmap(final Bitmap bitmap) {
+		this.bitmap = bitmap;
+	}
+
+	@Override
+	public void releaseBitmap() {
+		bitmap = null;
 	}
 
 	/**
 	 * Optimize the slice considering space and/or performance.
 	 */
 	public void optimize() {
-		bitmap.optimize();
+		getBitmap().optimize();
 	}
 
 	/**
@@ -110,7 +148,7 @@ public abstract class BaseSlice<I extends Object> implements
 	 * @return the records' identifiers associated to the slice
 	 */
 	public int[] get() {
-		return bitmap.getIds();
+		return getBitmap().getIds();
 	}
 
 	/**
@@ -119,6 +157,6 @@ public abstract class BaseSlice<I extends Object> implements
 	 * @return the number of records associated to the slice
 	 */
 	public int count() {
-		return bitmap.determineCardinality();
+		return getBitmap().determineCardinality();
 	}
 }

@@ -2,7 +2,6 @@ package net.meisen.dissertation.model.parser.query;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
-import net.meisen.dissertation.model.handler.TidaModelHandler;
 
 /**
  * Factory to create {@code Query} instances for the specified string.
@@ -28,6 +27,6 @@ public interface IQueryFactory {
 	public IQuery parseQuery(final String queryString)
 			throws QueryParsingException;
 
-	public IQueryResult evaluateQuery(final IQuery query,
-			final TidaModelHandler handler) throws QueryEvaluationException;
+	public IQueryResult evaluateQuery(final IQuery query)
+			throws QueryEvaluationException;
 }

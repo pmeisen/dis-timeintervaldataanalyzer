@@ -11,7 +11,7 @@ import net.meisen.dissertation.model.indexes.IPrefixKeySeparatable;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

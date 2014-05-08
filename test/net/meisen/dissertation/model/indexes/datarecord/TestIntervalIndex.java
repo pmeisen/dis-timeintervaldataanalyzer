@@ -23,7 +23,6 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.NullDescriptor;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -186,23 +185,6 @@ public class TestIntervalIndex extends DbBasedTest {
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
 
-		// test combination
-		Bitmap bitmap;
-
-		// or combine
-		bitmap = idx.or(60, 65);
-		assertEquals(1, bitmap.determineCardinality());
-		bitmap = idx.or(100, 65);
-		assertEquals(0, bitmap.determineCardinality());
-
-		// and combine
-		bitmap = idx.and(60, 65);
-		assertEquals(0, bitmap.determineCardinality());
-		bitmap = idx.and(300, 300);
-		assertEquals(1, bitmap.determineCardinality());
-		bitmap = idx.and(100, 65);
-		assertEquals(0, bitmap.determineCardinality());
-
 		// test retrieval
 		SliceWithDescriptors<?>[] slices;
 
@@ -232,25 +214,6 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
-
-		// test the logical conjunctions
-		Bitmap combined;
-
-		// or combine
-		combined = idx.or(322, 340);
-		assertEquals(1, combined.determineCardinality());
-		combined = idx.or(323, 340);
-		assertEquals(0, combined.determineCardinality());
-		combined = idx.or(320, 100);
-		assertEquals(0, combined.determineCardinality());
-
-		// and combine
-		combined = idx.and(320, 340);
-		assertEquals(0, combined.determineCardinality());
-		combined = idx.and(323, 340);
-		assertEquals(0, combined.determineCardinality());
-		combined = idx.and(320, 100);
-		assertEquals(0, combined.determineCardinality());
 
 		// test the slices retrieval
 		SliceWithDescriptors<?>[] slices;

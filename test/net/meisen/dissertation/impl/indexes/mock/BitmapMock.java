@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 /**
  * A mock of a {@code Bitmap} used to test the definition of a bitmap type using
@@ -31,7 +31,7 @@ public class BitmapMock extends Bitmap {
 	}
 
 	@Override
-	public void set(final int... recordIds) {
+	protected void set(final int... recordIds) {
 		// nothing
 	}
 

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.meisen.dissertation.impl.cache.MemoryCache;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
@@ -138,6 +139,10 @@ public class DefaultValues {
 	 */
 	public static final String HANDLER_ID = "handlerId";
 	/**
+	 * Id of the {@code BitmapCache} to be used.
+	 */
+	public static final String CACHE_ID = "cacheId";
+	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;
@@ -158,6 +163,15 @@ public class DefaultValues {
 		} catch (final Exception e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Gets the default cache implementation to be used.
+	 * 
+	 * @return the default cache implementation to be used
+	 */
+	public static String getDefaultCache() {
+		return MemoryCache.class.getName();
 	}
 
 	/**

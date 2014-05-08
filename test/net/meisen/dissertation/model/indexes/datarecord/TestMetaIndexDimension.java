@@ -11,16 +11,11 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
-import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
-import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
-import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
-import net.meisen.dissertation.impl.idfactories.UuIdsFactory;
+import net.meisen.dissertation.impl.cache.MemoryCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
-import net.meisen.dissertation.impl.indexes.MapIndexedCollection;
-import net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection;
-import net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection;
 import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -52,39 +47,6 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	private TidaModelHandler loader;
 
 	/**
-	 * Tests the selected indexes for the {@code MetaIndexDimension} which is
-	 * used to index the different slices.
-	 */
-	@Test
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testIndexSelection() {
-		final IndexFactory idxFactory = new IndexFactory();
-		DescriptorModel<?> model;
-		MetaIndexDimension<?> idx;
-
-		// test for integers
-		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
-				new IntegerIdsFactory(), idxFactory);
-		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
-				idxFactory);
-		assertEquals(TroveIntIndexedCollection.class, idx.getIndexClass());
-
-		// test for longs
-		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
-				new LongIdsFactory(), idxFactory);
-		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
-				idxFactory);
-		assertEquals(TroveLongIndexedCollection.class, idx.getIndexClass());
-
-		// test for UUIDs
-		model = new DescriptorModel("ID", "MODEL", GeneralDescriptor.class,
-				new UuIdsFactory(), idxFactory);
-		idx = new MetaIndexDimension(new MetaStructureEntry("ID", 1), model,
-				idxFactory);
-		assertEquals(MapIndexedCollection.class, idx.getIndexClass());
-	}
-
-	/**
 	 * Tests the usage when loading a static model.
 	 */
 	@Test
@@ -101,7 +63,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idx = new MetaIndexDimension(
-				metaStructures.get(0), descModel, new IndexFactory());
+				metaStructures.get(0), descModel, model.getCache(),
+				model.getIndexFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -134,7 +97,6 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testUsingRandomIndexModel() {
-		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
 				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
 
@@ -160,11 +122,13 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// create the indexDimensions
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension fixedIdx = new MetaIndexDimension(
-				fixedStructure, fixedDescModel, idxFactory);
+				fixedStructure, fixedDescModel, model.getCache(),
+				model.getIndexFactory());
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension randomIdx = new MetaIndexDimension(
-				randomStructure, randomDescModel, idxFactory);
+				randomStructure, randomDescModel, model.getCache(),
+				model.getIndexFactory());
 
 		// add the data to the indexDimensions
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
@@ -220,7 +184,6 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 						.getModule(DefaultValues.EXCEPTIONREGISTRY_ID));
 
 		// get the model and the factory we use
-		final IndexFactory idxFactory = new IndexFactory();
 		final TidaModel model = loader
 				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
@@ -238,7 +201,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// get the save-index
 		@SuppressWarnings({ "rawtypes" })
 		final MetaIndexDimension saveIdx = new MetaIndexDimension(
-				metaStructure, descModel, idxFactory);
+				metaStructure, descModel, model.getCache(),
+				model.getIndexFactory());
 		assertEquals(0, saveIdx.getAmountOfSlices());
 
 		// add data
@@ -271,7 +235,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// get the load-index
 		@SuppressWarnings({ "rawtypes" })
 		final MetaIndexDimension loadIdx = new MetaIndexDimension(
-				metaStructure, descModel, idxFactory);
+				metaStructure, descModel, model.getCache(),
+				model.getIndexFactory());
 		assertEquals(0, loadIdx.getAmountOfSlices());
 
 		/*

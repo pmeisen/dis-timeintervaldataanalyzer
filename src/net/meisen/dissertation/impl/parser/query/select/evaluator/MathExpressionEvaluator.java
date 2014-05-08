@@ -9,7 +9,7 @@ import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElemen
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;

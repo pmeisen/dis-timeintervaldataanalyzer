@@ -3,7 +3,7 @@ package net.meisen.dissertation.impl.measures;
 import static org.junit.Assert.assertEquals;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 
 import org.junit.Test;

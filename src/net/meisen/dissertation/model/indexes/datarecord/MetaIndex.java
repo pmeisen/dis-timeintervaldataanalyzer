@@ -2,14 +2,19 @@ package net.meisen.dissertation.model.indexes.datarecord;
 
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.List;
 
+import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.model.data.DataStructure;
-import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
+import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A {@code MetaIndex} is used to index meta information associated to data. It
@@ -33,28 +38,79 @@ public class MetaIndex implements IDataRecordIndex {
 	 *            the {@code TidaModel} to create the {@code MetaIndex} for
 	 */
 	public MetaIndex(final TidaModel model) {
-		this(model.getMetaDataModel(), model.getDataStructure());
+		this.dimensionsIndex = createIndex(model);
 	}
 
 	/**
-	 * Constructor to create a {@code MetaIndex} using the specified
-	 * {@code MetaDataModel} and the specified {@code DataStructure}.
+	 * Creates the {@code MetaIndexDimensions} based on the specified
+	 * {@code structure}.
 	 * 
-	 * @param metaDataModel
-	 *            the {@code MetaDataModel} which contains the available
-	 *            meta-data
-	 * @param dataStructure
-	 *            the {@code DataStructure} which defines the meta information
-	 *            to be used by the index
+	 * @param model
+	 *            the {@code TidaModel} to create the index for
 	 * 
-	 * @see MetaDataModel
-	 * @see DataStructure
+	 * @return the created {@code MetaIndexDimensions} indexed by a
+	 *         {@code BaseIndexedCollection}
+	 * 
+	 * @see IIndexedCollection
+	 * @see MetaIndexDimension
 	 */
-	public MetaIndex(final MetaDataModel metaDataModel,
-			final DataStructure dataStructure) {
+	protected IIndexedCollection createIndex(final TidaModel model) {
+		final DataStructure structure = model.getDataStructure();
+		final IndexKeyDefinition key = new IndexKeyDefinition(
+				MetaIndexDimension.class, "getModelId");
+		final IIndexedCollection index = model.getIndexFactory().create(key);
+		if (structure == null) {
+			return index;
+		}
 
-		// create the dimensions using the MetaDataModel
-		this.dimensionsIndex = metaDataModel.createIndex(dataStructure);
+		// get all the MetaStructureEntries
+		final List<MetaStructureEntry> metaEntries = structure
+				.getEntriesByClass(MetaStructureEntry.class);
+
+		// create a MetaIndexDimension for each MetaStructureEntry
+		for (final MetaStructureEntry metaEntry : metaEntries) {
+			index.addObject(createIndexDimension(metaEntry, model));
+		}
+
+		return index;
+	}
+
+	/**
+	 * Creates a {@code MetaIndexDimension} for the specified {@code metaEntry}.
+	 * 
+	 * @param metaEntry
+	 *            the {@code MetaStructureEntry} which defines the
+	 *            {@code MetaIndexDimension} to be created, cannot be
+	 *            {@code null}
+	 * @param model
+	 *            the {@code TidaModel} to create the index for
+	 * 
+	 * @return the created {@code MetaIndexDimension}
+	 * 
+	 * @throws NullPointerException
+	 *             if {@code metaEntry} is {@code null}
+	 */
+	protected MetaIndexDimension<?> createIndexDimension(
+			final MetaStructureEntry metaEntry, final TidaModel model) {
+		if (metaEntry == null) {
+			throw new NullPointerException("The metaEntry cannot be null.");
+		}
+
+		// find the model for the entry
+		final String descModelId = metaEntry.getDescriptorModel();
+		final DescriptorModel<?> descModel = model.getMetaDataModel()
+				.getDescriptorModel(descModelId);
+		if (descModel == null) {
+			throw new ForwardedRuntimeException(MetaDataModelException.class,
+					1001, descModelId);
+		}
+
+		// create an IndexDimension for the MetaInformation
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
+				descModel, model.getCache(), model.getIndexFactory());
+
+		return idxDim;
 	}
 
 	@Override

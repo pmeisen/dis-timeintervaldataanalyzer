@@ -3,7 +3,7 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 import java.util.Collections;
 import java.util.List;
 
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.general.genmisc.types.Strings;
 
 /**

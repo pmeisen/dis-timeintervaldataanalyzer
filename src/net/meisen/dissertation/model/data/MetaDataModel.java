@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
-import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -14,7 +13,6 @@ import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
-import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -342,75 +340,6 @@ public class MetaDataModel {
 		}
 
 		return descriptorModels;
-	}
-
-	/**
-	 * Creates the {@code MetaIndexDimensions} based on the specified
-	 * {@code structure}.
-	 * 
-	 * @param structure
-	 *            the {@code DataStructure} to create the
-	 *            {@code MetaIndexDimensions} for
-	 * 
-	 * @return the created {@code MetaIndexDimensions} indexed by a
-	 *         {@code BaseIndexedCollection}
-	 * 
-	 * @see IIndexedCollection
-	 * @see MetaIndexDimension
-	 */
-	public IIndexedCollection createIndex(final DataStructure structure) {
-		final IndexKeyDefinition key = new IndexKeyDefinition(
-				MetaIndexDimension.class, "getModelId");
-		final IIndexedCollection index = getIndexFactory().create(key);
-		if (structure == null) {
-			return index;
-		}
-
-		// get all the MetaStructureEntries
-		final List<MetaStructureEntry> metaEntries = structure
-				.getEntriesByClass(MetaStructureEntry.class);
-
-		// create a MetaIndexDimension for each MetaStructureEntry
-		for (final MetaStructureEntry metaEntry : metaEntries) {
-			index.addObject(createIndexDimension(metaEntry));
-		}
-
-		return index;
-	}
-
-	/**
-	 * Creates a {@code MetaIndexDimension} for the specified {@code metaEntry}.
-	 * 
-	 * @param metaEntry
-	 *            the {@code MetaStructureEntry} which defines the
-	 *            {@code MetaIndexDimension} to be created, cannot be
-	 *            {@code null}
-	 * 
-	 * @return the created {@code MetaIndexDimension}
-	 * 
-	 * @throws NullPointerException
-	 *             if {@code metaEntry} is {@code null}
-	 */
-	public MetaIndexDimension<?> createIndexDimension(
-			final MetaStructureEntry metaEntry) {
-		if (metaEntry == null) {
-			throw new NullPointerException("The metaEntry cannot be null.");
-		}
-
-		// find the model for the entry
-		final String descModelId = metaEntry.getDescriptorModel();
-		final DescriptorModel<?> descModel = getDescriptorModel(descModelId);
-		if (descModel == null) {
-			exceptionRegistry.throwException(MetaDataModelException.class,
-					1001, descModelId);
-		}
-
-		// create an IndexDimension for the MetaInformation
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
-				descModel, getIndexFactory());
-
-		return idxDim;
 	}
 
 	/**

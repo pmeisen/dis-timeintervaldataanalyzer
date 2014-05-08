@@ -1,6 +1,9 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import java.io.DataInputStream;
+import java.io.IOException;
+
+import net.meisen.dissertation.model.cache.IBitmapCache;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -25,14 +28,9 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
-	 * @param factory
-	 *            factory used to create bitmap indexes
-	 * @param recordIds
-	 *            the identifiers of the records to be set
 	 */
-	public Slice(final I sliceId, final BaseIndexFactory factory,
-			final int... recordIds) {
-		super(sliceId, factory, recordIds);
+	public Slice(final SliceId<I> sliceId, final IBitmapCache cache) {
+		super(sliceId, cache);
 	}
 
 	/**
@@ -48,7 +46,15 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 			return;
 		}
 
-		bitmap.set(recordIds);
+		// modify the bitmap
+		getBitmap().set(recordIds);
+
+		// inform the cache
+		updateBitmapCache();
+	}
+
+	public void deserialize(final DataInputStream in) throws IOException {
+		super.deserializeBitmap(in);
 	}
 
 	/**
@@ -59,6 +65,6 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	 *            the identifiers of the record to be set
 	 */
 	public void set(final int recId) {
-		bitmap.set(recId);
+		getBitmap().set(recId);
 	}
 }

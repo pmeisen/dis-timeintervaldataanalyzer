@@ -8,7 +8,7 @@
     
   <!-- import the exceptions -->
   <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-exceptions.xml" />
-  
+    
   <!-- import additional needed loader -->
   <import resource="classpath:/net/meisen/dissertation/config/sbconfigurator-loader.xml" />
   

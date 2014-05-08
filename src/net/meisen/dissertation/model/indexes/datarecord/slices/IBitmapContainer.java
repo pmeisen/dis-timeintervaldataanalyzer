@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.datarecord.bitmap;
+package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 /**
  * A {@code BitmapContainer} is used to mark an instance to provide a bitmap,

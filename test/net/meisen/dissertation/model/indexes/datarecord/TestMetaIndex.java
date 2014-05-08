@@ -6,12 +6,16 @@ import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
+import org.hamcrest.Description;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.internal.matchers.TypeSafeMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -50,8 +54,6 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 
 		// check if we got all the dimensions
 		assertEquals(1, metaIndex.getAmountOfDimensions());
-
-		loader.unloadAll();
 	}
 
 	/**
@@ -80,7 +82,61 @@ public class TestMetaIndex extends ModuleAndDbBasedTest {
 
 		// check if we got all the dimensions
 		assertEquals(2, metaIndex.getAmountOfDimensions());
+	}
 
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} using {@code null} as
+	 * {@code MetaStructureEntry}, which should lead to an exception.
+	 */
+	@Test
+	public void testExceptionNullCreateDimension() {
+		thrown.expect(NullPointerException.class);
+		thrown.expectMessage("The metaEntry cannot be null.");
+
+		final TidaModel model = loader
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
+
+		// create the indexes
+		final MetaIndex metaIndex = new MetaIndex(model);
+		metaIndex.createIndexDimension(null, model);
+	}
+
+	/**
+	 * Tests the creation of a {@code MetaIndexDimension} referring to an
+	 * invalid {@code DescriptorModel}.
+	 */
+	@Test
+	public void testExceptionCreatingForInvalidModel() {
+		thrown.expect(ForwardedRuntimeException.class);
+		thrown.expect(new TypeSafeMatcher<ForwardedRuntimeException>() {
+			private final String expected = "Number: '1001'";
+
+			@Override
+			public void describeTo(final Description description) {
+				description.appendText(expected);
+			}
+
+			@Override
+			public boolean matchesSafely(final ForwardedRuntimeException item) {
+				return item.toString().contains(expected);
+			}
+		});
+
+		final TidaModel model = loader
+				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaRandomMetaIndex.xml");
+
+		// create the indexes
+		final MetaIndex metaIndex = new MetaIndex(model);
+		final MetaStructureEntry metaEntry = new MetaStructureEntry(
+				"ID_UNKNOWN", "myName");
+		metaIndex.createIndexDimension(metaEntry, model);
+	}
+
+	/**
+	 * CleanUp after test
+	 */
+	@After
+	public void unloadAll() {
 		loader.unloadAll();
 	}
 }

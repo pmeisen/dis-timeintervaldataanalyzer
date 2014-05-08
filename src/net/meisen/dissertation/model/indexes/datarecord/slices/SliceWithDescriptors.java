@@ -1,11 +1,13 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 
 /**
  * A slice of a dimension which has associated {@code Descriptors}.
@@ -23,11 +25,10 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * 
 	 * @param sliceId
 	 *            the identifier of the slice
-	 * @param factory
-	 *            the {@code IndexFactory} used to create indexes (i.e. bitmaps)
 	 */
-	public SliceWithDescriptors(final I sliceId, final BaseIndexFactory factory) {
-		super(sliceId, factory);
+	public SliceWithDescriptors(final SliceId<I> sliceId,
+			final IBitmapCache cache) {
+		super(sliceId, cache);
 
 		facts = new FactDescriptorModelSet();
 	}
@@ -44,8 +45,18 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *            {@code DataRecord}
 	 */
 	public void set(final int recId, final Descriptor<?, ?, ?>... descriptors) {
-		bitmap.set(recId);
+		getBitmap().set(recId);
 		facts.addDescriptors(descriptors);
+	}
+
+	public void deserialize(final DataInputStream in,
+			final List<Descriptor<?, ?, ?>> descriptors) throws IOException {
+
+		// set the descriptors of the slice
+		facts.addDescriptors(descriptors);
+
+		// update the bitmap
+		super.deserializeBitmap(in);
 	}
 
 	/**
@@ -61,8 +72,11 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 */
 	public void set(final int recId,
 			final Collection<Descriptor<?, ?, ?>> descriptors) {
-		bitmap.set(recId);
+		getBitmap().set(recId);
 		facts.addDescriptors(descriptors);
+
+		// inform the cache
+		updateBitmapCache();
 	}
 
 	/**

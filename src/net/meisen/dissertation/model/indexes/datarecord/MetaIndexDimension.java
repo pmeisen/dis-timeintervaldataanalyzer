@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.PersistorException;
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
@@ -17,6 +18,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
@@ -43,8 +45,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 
 	private final DescriptorModel<I> model;
 	private final MetaStructureEntry metaEntry;
-
-	private final BaseIndexFactory indexFactory;
+	private final IBitmapCache cache;
 	private final IIndexedCollection index;
 
 	private Group persistentGroup = null;
@@ -68,7 +69,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @see DescriptorModel
 	 */
 	public MetaIndexDimension(final MetaStructureEntry metaEntry,
-			final DescriptorModel<I> model, final BaseIndexFactory indexFactory) {
+			final DescriptorModel<I> model, final IBitmapCache cache,
+			final BaseIndexFactory indexFactory) {
 		if (model == null) {
 			throw new NullPointerException("The model cannot be null.");
 		} else if (metaEntry == null) {
@@ -86,7 +88,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		// set the values
 		this.metaEntry = metaEntry;
 		this.model = model;
-		this.indexFactory = indexFactory;
+		this.cache = cache;
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
@@ -134,12 +136,20 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		@SuppressWarnings("unchecked")
 		final Descriptor<?, ?, I> desc = (Descriptor<?, ?, I>) rec
 				.getDescriptor(metaEntry);
+		if (desc == null) {
+			throw new IllegalArgumentException(
+					"The processed record is not compatible to the datastructure of the index. A descriptor for '"
+							+ metaEntry
+							+ "' could not be found in '"
+							+ rec
+							+ "'.");
+		}
 		final I id = desc.getId();
 
 		// create or get the slices
 		final Slice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(new Slice<I>(id, indexFactory, rec.getId()));
+			index.addObject(createSlice(id, rec.getId()));
 		} else {
 			slice.set(rec.getId());
 		}
@@ -329,11 +339,11 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		}
 
 		// create the slice
-		final Slice<I> slice = new Slice<I>(id, indexFactory);
+		final Slice<I> slice = createSlice(id);
 
 		// load the slice from the InputStream
 		try {
-			slice.getBitmap().deserialize(new DataInputStream(inputStream));
+			slice.deserialize(new DataInputStream(inputStream));
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());
@@ -341,6 +351,15 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 
 		// add the slice
 		index.addObject(slice);
+	}
+
+	protected Slice<I> createSlice(final I id, final int... recordIds) {
+		final SliceId<I> sliceId = new SliceId<I>(id, MetaIndex.class,
+				model.getId());
+		final Slice<I> slice = new Slice<I>(sliceId, cache);
+		slice.set(recordIds);
+
+		return slice;
 	}
 
 	@Override

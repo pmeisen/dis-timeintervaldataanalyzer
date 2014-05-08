@@ -6,9 +6,11 @@
         xsi:schemaLocation="http://dev.meisen.net/server/config http://dev.meisen.net/xsd/server/serverConfig.xsd
                             http://dev.meisen.net/server/config/extension http://dev.meisen.net/xsd/server/serverConfigExtension.xsd">
 
-  <connector id="MAIN" port="7000" listener="HTTP">
+  <!-- add the lightweight HTTP protocol -->
+  <connector id="HTTP" port="7000" listener="HTTP">
   	<e:extension> 	
-      <servlet urlmatcher="/servlet/*">net.meisen.dissertation.server.TidaServerServlet</servlet>
+      <servlet urlmatcher="/loader/*">net.meisen.dissertation.server.LoaderServlet</servlet>
+      <servlet urlmatcher="/query/*">net.meisen.dissertation.server.QueryServlet</servlet>
       
       <servlet>
       	<script>
@@ -21,5 +23,9 @@
     </e:extension>
   </connector>
   
+  <!-- add the TSQL connector for queries -->
+  <connector id="TSQL" port="7001" listener="TSQL" />
+
+  <!-- disable the default connector -->
   <connector id="DEFAULT" port="${server.settings.defaultPort}" listener="${server.settings.defaultListener}" enable="false" />
 </server>

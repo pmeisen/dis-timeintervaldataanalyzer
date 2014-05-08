@@ -1,9 +1,9 @@
 package net.meisen.dissertation.impl.indexes;
 
-import net.meisen.dissertation.impl.indexes.datarecord.bitmap.EWAHBitmap;
+import net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap;
 import net.meisen.dissertation.model.indexes.IIndexFactoryConfig;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 /**
  * Configuration usable to define the indexes created by the

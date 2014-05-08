@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.indexes.datarecord.bitmap;
+package net.meisen.dissertation.impl.indexes.datarecord.slices;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 import com.googlecode.javaewah.EWAHCompressedBitmap;
 
@@ -59,7 +59,7 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public void set(final int... recordIds) {
+	protected void set(final int... recordIds) {
 		// sort the data and create the bitmap
 		Arrays.sort(recordIds);
 		bitmap = bitmap.or(EWAHCompressedBitmap.bitmapOf(recordIds));

@@ -1,11 +1,6 @@
 package net.meisen.dissertation.server;
 
-import java.io.File;
-import java.io.InputStream;
-
 import net.meisen.dissertation.config.TidaConfig;
-import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.server.Server;
 
@@ -20,29 +15,6 @@ public class TidaServer {
 	@Autowired
 	@Qualifier("server")
 	private Server server;
-
-	@Autowired
-	private TidaModelHandler loader;
-
-	public void unloadAll() {
-		loader.unloadAll();
-	}
-
-	public void unload(final String id) {
-		loader.unload(id);
-	}
-
-	public TidaModel load(final File file) {
-		return loader.loadViaXslt(file);
-	}
-
-	public TidaModel load(final String classPathResource) {
-		return loader.loadViaXslt(classPathResource);
-	}
-
-	public TidaModel load(final InputStream is) {
-		return loader.loadViaXslt(is);
-	}
 
 	public void startAsync() {
 		server.startAsync();

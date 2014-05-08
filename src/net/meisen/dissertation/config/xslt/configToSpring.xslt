@@ -10,6 +10,7 @@
 
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
+  <xsl:import href="cache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -22,6 +23,13 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
+      <!-- read the values configured -->
+      <xsl:variable name="cache">
+        <xsl:choose>
+          <xsl:when test="//cns:cache/@implementation"><xsl:value-of select="//cns:cache/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultCache()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
       <xsl:variable name="indexFactory">
         <xsl:choose>
           <xsl:when test="//cns:factories/cns:indexes/@implementation"><xsl:value-of select="//cns:config/cns:factories/cns:indexes/@implementation" /></xsl:when>
@@ -46,7 +54,21 @@
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultQueryFactory()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-                             
+
+      <!-- define the default cache class -->
+      <bean id="defaultCacheClass" class="java.lang.String"><constructor-arg value="{$cache}" /></bean>
+
+      <!-- read the default cache configuration -->
+      <bean id="defaultCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:cache/node()"><xsl:apply-imports /></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.cache.IBitmapCacheConfig" />
+      </bean>
+
       <!-- define the default factories' classes -->
       <bean id="defaultIndexFactoryClass" class="java.lang.String"><constructor-arg value="{$indexFactory}" /></bean>
       <bean id="defaultMapperFactoryClass" class="java.lang.String"><constructor-arg value="{$mapperFactory}" /></bean>

@@ -818,8 +818,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		assertNull(res.getFilterResult());
@@ -837,8 +836,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -863,8 +861,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -890,8 +887,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -917,8 +913,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -943,8 +938,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -969,8 +963,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -995,8 +988,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -1015,8 +1007,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -1038,8 +1029,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		assertNull(res.getGroupResult());
@@ -1057,8 +1047,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final GroupResult gRes = res.getGroupResult();
@@ -1082,8 +1071,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final GroupResult gRes = res.getGroupResult();
@@ -1115,8 +1103,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 
 		// check the result's filter
 		final GroupResult gRes = res.getGroupResult();
@@ -1140,8 +1127,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1173,8 +1159,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1215,8 +1200,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1253,8 +1237,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1291,8 +1274,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1329,8 +1311,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("08.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1377,8 +1358,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				loader);
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query));
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1436,7 +1416,7 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		factory.evaluateQuery(q(query), loader);
+		factory.evaluateQuery(q(query));
 	}
 
 	/**
@@ -1454,6 +1434,6 @@ public class TestQueryFactory extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		factory.evaluateQuery(q(query), loader);
+		factory.evaluateQuery(q(query));
 	}
 }

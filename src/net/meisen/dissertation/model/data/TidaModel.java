@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
+import net.meisen.dissertation.impl.cache.MemoryCache;
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -56,6 +58,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
+
+	@Autowired
+	@Qualifier(DefaultValues.CACHE_ID)
+	private IBitmapCache cache;
 
 	private final String id;
 	private final String name;
@@ -420,5 +426,9 @@ public class TidaModel implements IPersistable {
 	 */
 	public BaseIndexFactory getIndexFactory() {
 		return indexFactory;
+	}
+
+	public IBitmapCache getCache() {
+		return cache;
 	}
 }

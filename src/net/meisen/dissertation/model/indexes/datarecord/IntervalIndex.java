@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -18,7 +19,8 @@ import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
-import net.meisen.dissertation.model.indexes.datarecord.bitmap.Bitmap;
+import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
@@ -27,6 +29,9 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.genmisc.types.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@code IntervalIndex} is normally defined as an index for a mapper. The
@@ -37,13 +42,14 @@ import net.meisen.general.genmisc.types.Objects;
  * 
  */
 public class IntervalIndex implements IDataRecordIndex {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(IntervalIndex.class);
 	private final static String EXTENSION = ".slice";
 
 	private final MetaDataModel metaDataModel;
-
+	private final IBitmapCache cache;
 	private final IRangeQueryOptimized index;
 	private final BaseMapper<?> mapper;
-	private final BaseIndexFactory indexFactory;
 
 	private Group persistentGroup = null;
 
@@ -54,7 +60,8 @@ public class IntervalIndex implements IDataRecordIndex {
 	 *            the {@code TidaModel} to create the index for
 	 */
 	public IntervalIndex(final TidaModel model) {
-		this(model.getIntervalModel(), model.getMetaDataModel());
+		this(model.getIntervalModel(), model.getMetaDataModel(), model
+				.getCache(), model.getIndexFactory());
 	}
 
 	/**
@@ -67,11 +74,57 @@ public class IntervalIndex implements IDataRecordIndex {
 	 *            loading an index
 	 */
 	public IntervalIndex(final IntervalModel intervalModel,
-			final MetaDataModel metaDataModel) {
+			final MetaDataModel metaDataModel, final IBitmapCache cache,
+			final BaseIndexFactory indexFactory) {
+		this.cache = cache;
 		this.mapper = intervalModel.getTimelineMapper();
-		this.indexFactory = intervalModel.getIndexFactory();
-		this.index = intervalModel.createIndex();
 		this.metaDataModel = metaDataModel;
+
+		this.index = createIndex(intervalModel, indexFactory);
+	}
+
+	/**
+	 * Creates a {@code IndexedCollection} for the timeline.
+	 * 
+	 * @return the created {@code IndexedCollection}
+	 */
+	protected IRangeQueryOptimized createIndex(
+			final IntervalModel intervalModel,
+			final BaseIndexFactory indexFactory) {
+
+		// get the mapper
+		final BaseMapper<?> mapper = intervalModel.getTimelineMapper();
+
+		// do some logging
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Creating index for '"
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' using granularity '" + mapper.getGranularity()
+					+ "'...");
+		}
+
+		// create the index
+		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
+				SliceWithDescriptors.class, "getId");
+		indexKeyDef.overrideType(0, mapper.getTargetType());
+		final IRangeQueryOptimized index = indexFactory
+				.createRangeQueryOptimized(indexKeyDef);
+
+		// the maximum value of the index is defined by the mapper
+		index.setMaxValue(mapper.getNormEndAsLong());
+
+		// log the successful creation
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Created index for '"
+					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
+					+ mapper.format(mapper.demap(mapper.getEnd()))
+					+ "' with index '" + index.getClass().getName()
+					+ "' for identifiers of the intervalIndex of type '"
+					+ mapper.getTargetType().getName() + "'.");
+		}
+
+		return index;
 	}
 
 	/**
@@ -153,13 +206,17 @@ public class IntervalIndex implements IDataRecordIndex {
 		}
 
 		for (long i = rec.getStart(); i < rec.getEnd() + 1; i++) {
-			final SliceWithDescriptors<?> slice = (SliceWithDescriptors<?>) index
+			SliceWithDescriptors<?> slice = (SliceWithDescriptors<?>) index
 					.getObject(i);
+
+			// create a new slice
 			if (slice == null) {
-				index.addObject(createSlice(i, rec));
-			} else {
-				slice.set(rec.getId(), rec.getAllDescriptors());
+				slice = createSlice(i);
+				index.addObject(slice);
 			}
+
+			// set the values of the slice
+			slice.set(rec.getId(), rec.getAllDescriptors());
 		}
 	}
 
@@ -257,46 +314,14 @@ public class IntervalIndex implements IDataRecordIndex {
 	}
 
 	/**
-	 * And-combines the slices for the specified {@code start} (included) to
-	 * {@code end} (included).
-	 * 
-	 * @param start
-	 *            the start point (included)
-	 * @param end
-	 *            the end point (included)
-	 * 
-	 * @return the result of the combination of the specified slices (by and)
-	 */
-	public Bitmap and(final long start, final long end) {
-		return Bitmap.and(indexFactory,
-				index.getObjectsByStartAndEnd(start, end));
-	}
-
-	/**
-	 * Or-combines the slices for the specified {@code start} (included) to
-	 * {@code end} (included).
-	 * 
-	 * @param start
-	 *            the start point (included)
-	 * @param end
-	 *            the end point (included)
-	 * 
-	 * @return the result of the combination of the specified slices (by or)
-	 */
-	public Bitmap or(final long start, final long end) {
-		return Bitmap.or(indexFactory,
-				index.getObjectsByStartAndEnd(start, end));
-	}
-
-	/**
 	 * Method to create an empty slice with the specified id.
 	 * 
-	 * @param sliceId
+	 * @param id
 	 *            the identifier of the slice
 	 * 
 	 * @return the created {@code Slice}
 	 */
-	protected SliceWithDescriptors<?> createSlice(final Number sliceId) {
+	protected SliceWithDescriptors<?> createSlice(final Number id) {
 
 		// get the type of the slice
 		final Class<? extends Number> clazz = getType();
@@ -304,39 +329,22 @@ public class IntervalIndex implements IDataRecordIndex {
 		// create the slice
 		final SliceWithDescriptors<?> slice;
 		if (Byte.class.equals(clazz)) {
-			slice = new SliceWithDescriptors<Byte>(Numbers.castToByte(sliceId),
-					indexFactory);
+			final SliceId<Byte> sliceId = new SliceId<Byte>(
+					Numbers.castToByte(id), IntervalIndex.class);
+			slice = new SliceWithDescriptors<Byte>(sliceId, cache);
 		} else if (Short.class.equals(clazz)) {
-			slice = new SliceWithDescriptors<Short>(
-					Numbers.castToShort(sliceId), indexFactory);
+			final SliceId<Short> sliceId = new SliceId<Short>(
+					Numbers.castToShort(id), IntervalIndex.class);
+			slice = new SliceWithDescriptors<Short>(sliceId, cache);
 		} else if (Integer.class.equals(clazz)) {
-			slice = new SliceWithDescriptors<Integer>(
-					Numbers.castToInt(sliceId), indexFactory);
+			final SliceId<Integer> sliceId = new SliceId<Integer>(
+					Numbers.castToInt(id), IntervalIndex.class);
+			slice = new SliceWithDescriptors<Integer>(sliceId, cache);
 		} else {
-			slice = new SliceWithDescriptors<Long>(Numbers.castToLong(sliceId),
-					indexFactory);
+			final SliceId<Long> sliceId = new SliceId<Long>(
+					Numbers.castToLong(id), IntervalIndex.class);
+			slice = new SliceWithDescriptors<Long>(sliceId, cache);
 		}
-
-		return slice;
-	}
-
-	/**
-	 * Method to create a slice with the specified id and the specified set
-	 * {@code record}.
-	 * 
-	 * @param sliceId
-	 *            the identifier of the slice
-	 * @param record
-	 *            the record to be marked added
-	 * 
-	 * @return the created {@code Slice}
-	 */
-	protected SliceWithDescriptors<?> createSlice(final Number sliceId,
-			final ProcessedDataRecord record) {
-
-		// determine the slices types
-		final SliceWithDescriptors<?> slice = createSlice(sliceId);
-		slice.set(record.getId(), record.getAllDescriptors());
 
 		return slice;
 	}
@@ -463,11 +471,10 @@ public class IntervalIndex implements IDataRecordIndex {
 
 		// create the slice
 		final SliceWithDescriptors<?> slice = createSlice((Number) id);
-		slice.setDescriptors(descriptors);
 
 		// load the slice from the InputStream
 		try {
-			slice.getBitmap().deserialize(new DataInputStream(inputStream));
+			slice.deserialize(new DataInputStream(inputStream), descriptors);
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1004,
 					e, e.getMessage());

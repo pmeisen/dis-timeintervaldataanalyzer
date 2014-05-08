@@ -22,6 +22,14 @@
        id="myModel" name="My wonderful Model">
 
   <config>
+    <!-- Define the cache to be used.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.MemoryCache
+          + net.meisen.dissertation.impl.cache.FileCache
+      -->
+    <cache implementation="net.meisen.dissertation.impl.cache.MemoryCache" />
+
     <factories>
       <!-- Define the factory to be used to determine which IndexFactory
            to be used.

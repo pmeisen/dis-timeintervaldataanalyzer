@@ -3,6 +3,9 @@ package net.meisen.dissertation.config;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+
+import java.io.File;
+
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.config.xslt.mock.MockAggregationFunction;
 import net.meisen.dissertation.config.xslt.mock.MockIndexFactory;
@@ -11,10 +14,13 @@ import net.meisen.dissertation.config.xslt.mock.MockMinAggregationFunction;
 import net.meisen.dissertation.config.xslt.mock.MockQueryFactory;
 import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
+import net.meisen.dissertation.impl.cache.FileCache;
+import net.meisen.dissertation.impl.cache.MemoryCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
+import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -95,6 +101,10 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.MAPPERFACTORY_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MapperFactory);
+
+			o = modulesHolder.getModule(DefaultValues.CACHE_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(), o instanceof MemoryCache);
 		}
 	}
 
@@ -140,6 +150,64 @@ public class TestConfig {
 		}
 	}
 
+	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheMemory.xml")
+	public static class TestConfigMemoryCache extends BaseTest {
+
+		@Override
+		public void test() {
+			final IBitmapCache cache = modulesHolder
+					.getModule(DefaultValues.CACHE_ID);
+
+			assertNotNull(cache);
+			assertEquals(MemoryCache.class, cache.getClass());
+		}
+	}
+
+	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheFile.xml")
+	public static class TestConfigFileCache extends BaseTest {
+
+		@Override
+		public void test() {
+			final IBitmapCache cache = modulesHolder
+					.getModule(DefaultValues.CACHE_ID);
+
+			assertNotNull(cache);
+			assertEquals(FileCache.class, cache.getClass());
+
+			assertEquals(new File(System.getProperty("java.io.tmpdir")),
+					((FileCache) cache).getLocation());
+		}
+	}
+
+	public static class TestModuleMemoryCache extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheMemory.xml");
+
+			final IBitmapCache cache = modulesHolder
+					.getModule(DefaultValues.CACHE_ID);
+
+			assertNotNull(cache);
+			assertEquals(MemoryCache.class, cache.getClass());
+		}
+	}
+
+	public static class TestModuleFileCache extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheFile.xml");
+
+			final IBitmapCache cache = modulesHolder
+					.getModule(DefaultValues.CACHE_ID);
+
+			assertNotNull(cache);
+			assertEquals(FileCache.class, cache.getClass());
+			assertEquals(new File("."), ((FileCache) cache).getLocation());
+		}
+	}
+
 	/**
 	 * Suite which combines all the classes.
 	 * 
@@ -148,7 +216,9 @@ public class TestConfig {
 	 */
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses({ TestDefaultConfiguration.class,
-			TestConfigurationOfFactories.class })
+			TestConfigurationOfFactories.class, TestConfigMemoryCache.class,
+			TestConfigFileCache.class, TestModuleMemoryCache.class,
+			TestModuleFileCache.class })
 	public static class TestConfigSuite {
 		// just the suite with all the tests defined here
 	}

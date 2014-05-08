@@ -3,17 +3,12 @@ package net.meisen.dissertation.model.data;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.IntervalModelException;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
-import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
-import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -24,8 +19,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class IntervalModel {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(IntervalModel.class);
 
 	/**
 	 * A result of a mapping process, i.e. if an interval {@code [start, end]}
@@ -138,54 +131,6 @@ public class IntervalModel {
 		// set the factories
 		this.indexFactory = indexFactory;
 		this.mapperFactory = mapperFactory;
-	}
-
-	/**
-	 * Creates a {@code IndexedCollection} for the timeline.
-	 * 
-	 * @return the created {@code IndexedCollection}
-	 */
-	public IRangeQueryOptimized createIndex() {
-
-		// make sure needed stuff is known
-		if (timeline == null) {
-			exceptionRegistry
-					.throwException(IntervalModelException.class, 1001);
-		}
-
-		// get the mapper
-		final BaseMapper<?> mapper = getTimelineMapper();
-
-		// do some logging
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Creating index for '"
-					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
-					+ mapper.format(mapper.demap(mapper.getEnd()))
-					+ "' using granularity '" + mapper.getGranularity()
-					+ "'...");
-		}
-
-		// create the index
-		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
-				SliceWithDescriptors.class, "getId");
-		indexKeyDef.overrideType(0, mapper.getTargetType());
-		final IRangeQueryOptimized index = indexFactory
-				.createRangeQueryOptimized(indexKeyDef);
-
-		// the maximum value of the index is defined by the mapper
-		index.setMaxValue(mapper.getNormEndAsLong());
-
-		// log the successful creation
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Created index for '"
-					+ mapper.format(mapper.demap(mapper.getStart())) + " - "
-					+ mapper.format(mapper.demap(mapper.getEnd()))
-					+ "' with index '" + index.getClass().getName()
-					+ "' for identifiers of the intervalIndex of type '"
-					+ mapper.getTargetType().getName() + "'.");
-		}
-
-		return index;
 	}
 
 	/**

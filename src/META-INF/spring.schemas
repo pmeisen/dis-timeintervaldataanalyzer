@@ -6,3 +6,4 @@ http\://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd=net/meisen/dissert
 http\://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd=net/meisen/dissertation/impl/dataretriever/DbDataRetriever.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd=net/meisen/dissertation/impl/dataretriever/FixedStructureDataRetriever.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd=net/meisen/dissertation/impl/descriptors/advancedDescriptors.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaFileCache.xsd=net/meisen/dissertation/impl/cache/FileCache.xsd
