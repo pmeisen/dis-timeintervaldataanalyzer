@@ -15,7 +15,7 @@ public class FileCacheConfig implements IBitmapCacheConfig {
 
 	/**
 	 * Default constructor, configures the {@code FileCache} to use the default
-	 * location defined by {@link FileCache#getDefaultLocation()}.
+	 * location defined by {@link TestFileCache#getDefaultLocation()}.
 	 */
 	public FileCacheConfig() {
 		this((File) null);

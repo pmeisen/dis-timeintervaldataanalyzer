@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
+import com.google.common.base.Objects;
+
 import net.meisen.dissertation.model.indexes.datarecord.IDataRecordIndex;
 import net.meisen.general.genmisc.types.Strings;
 
@@ -33,6 +35,15 @@ public class BitmapId<I> {
 			return c + "." + id + " (" + type.getSimpleName() + ")";
 		} else {
 			return id + " (" + type.getSimpleName() + ")";
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		if (classifier == null || classifier.length == 0) {
+			return Objects.hashCode(id, type);
+		} else {
+			return Objects.hashCode(id, type, classifier);
 		}
 	}
 }

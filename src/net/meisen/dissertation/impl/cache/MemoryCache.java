@@ -11,6 +11,16 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The {@code MemoryCache} implementation is mainly used to create
+ * {@code Bitmap} instances, when a bitmap is retrieved using the
+ * {@link #getBitmap(BitmapId)} method. The cache expects that everything (i.e.
+ * all bitmaps} is kept in-memory by the index structures. Therefore updates are
+ * not recognized, nor any releases are published by this implementation.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MemoryCache implements IBitmapCache {
 
 	@Autowired

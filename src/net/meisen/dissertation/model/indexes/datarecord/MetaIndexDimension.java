@@ -60,6 +60,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @param model
 	 *            the {@code DescriptorModel} referred by the
 	 *            {@code MetaStructureEntry}
+	 * @param cache
+	 *            the cache used by the model to cache {@code Bitmap} instances
 	 * @param indexFactory
 	 *            the {@code IndexFactory} used to decide which index should be
 	 *            used for referring to the different {@code IndexBitmapSlice}
@@ -353,6 +355,17 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		index.addObject(slice);
 	}
 
+	/**
+	 * Creates a slice for the specified {@code id} and with the specified
+	 * {@code recordIds} set.
+	 * 
+	 * @param id
+	 *            the id of the slice to be created
+	 * @param recordIds
+	 *            the records to be marked as {@code true}
+	 *            
+	 * @return the create slice
+	 */
 	protected Slice<I> createSlice(final I id, final int... recordIds) {
 		final SliceId<I> sliceId = new SliceId<I>(id, MetaIndex.class,
 				model.getId());

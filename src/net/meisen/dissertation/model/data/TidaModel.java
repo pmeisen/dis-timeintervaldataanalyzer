@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
-import net.meisen.dissertation.impl.cache.MemoryCache;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -428,6 +427,13 @@ public class TidaModel implements IPersistable {
 		return indexFactory;
 	}
 
+	/**
+	 * Gets the {@code BitmapCache} used by the model.
+	 * 
+	 * @return the {@code BitmapCache} used by the model
+	 * 
+	 * @see IBitmapCache
+	 */
 	public IBitmapCache getCache() {
 		return cache;
 	}

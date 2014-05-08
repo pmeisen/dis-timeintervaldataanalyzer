@@ -72,6 +72,10 @@ public class IntervalIndex implements IDataRecordIndex {
 	 * @param metaDataModel
 	 *            the {@code MetaDataModel} is needed to lookup descriptors when
 	 *            loading an index
+	 * @param cache
+	 *            the cache used by the model to cache {@code Bitmap} instances
+	 * @param indexFactory
+	 *            the factory used to create indexes
 	 */
 	public IntervalIndex(final IntervalModel intervalModel,
 			final MetaDataModel metaDataModel, final IBitmapCache cache,
@@ -85,6 +89,12 @@ public class IntervalIndex implements IDataRecordIndex {
 
 	/**
 	 * Creates a {@code IndexedCollection} for the timeline.
+	 * 
+	 * @param intervalModel
+	 *            the {@code IntervalModel} defining what kind of index to be
+	 *            defined
+	 * @param indexFactory
+	 *            the factory used to create indexes
 	 * 
 	 * @return the created {@code IndexedCollection}
 	 */
