@@ -25,6 +25,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * Implementation of a {@code BitmapCache}, which uses the file-system to
+ * persist bitmaps and loads only a specific amount of bitmaps in memory.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class FileCache implements IBitmapCache {
 	private final static Logger LOG = LoggerFactory.getLogger(FileCache.class);
 
@@ -55,8 +62,10 @@ public class FileCache implements IBitmapCache {
 		 */
 		public IndexEntry(final byte[] bytes) {
 			if (bytes.length != IndexEntrySizeInBytes) {
-				// TODO e
-				throw new IllegalStateException();
+				throw new IllegalArgumentException(
+						"The amount of bytes to load the IndexEntry from is invalid ('"
+								+ bytes.length + "' != '"
+								+ IndexEntrySizeInBytes + "').");
 			}
 
 			// deserialize the values
@@ -344,8 +353,7 @@ public class FileCache implements IBitmapCache {
 	protected void _cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap) {
 
 		// check if it makes sense to cache the bitmap
-		
-		
+
 		// add the value
 		this.cache.put(bitmapId, bitmap);
 

@@ -27,6 +27,7 @@ import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
 import net.meisen.dissertation.impl.indexes.TestMapIndex;
 import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
+import net.meisen.dissertation.impl.indexes.datarecord.slices.TestBitmapId;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestEWAHBitmap;
 import net.meisen.dissertation.impl.measures.TestMapFactsHolder;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
@@ -161,6 +162,7 @@ import org.junit.runners.Suite;
 		TestXsltTidaModel.class,
 
 		// Test some bitmap implementations
+		TestBitmapId.class,
 		TestEWAHBitmap.class,
 
 		// Test the handler
