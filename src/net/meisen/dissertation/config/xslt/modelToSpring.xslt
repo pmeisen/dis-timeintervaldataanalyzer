@@ -66,10 +66,10 @@
       <xsl:choose>
         <xsl:when test="//mns:config/mns:cache/@implementation">
           <xsl:variable name="cache" select="//mns:config/mns:cache/@implementation" />
-          <bean id="{$cacheId}" class="{$cache}">
+          <bean id="{$cacheId}" class="{$cache}" destroy-method="release">
             <property name="config">
               <xsl:choose>
-                <xsl:when test="//mns:config/mns:config/mns:cache/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:when test="//mns:config/mns:cache/node()"><xsl:apply-imports /></xsl:when>
                 <xsl:otherwise><ref bean="defaultCacheConfig" /></xsl:otherwise>
               </xsl:choose>
             </property>

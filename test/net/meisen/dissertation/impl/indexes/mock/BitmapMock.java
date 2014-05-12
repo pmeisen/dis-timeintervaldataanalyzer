@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.indexes.mock;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -36,12 +36,12 @@ public class BitmapMock extends Bitmap {
 	}
 
 	@Override
-	public void serialize(final DataOutputStream out) throws IOException {
+	public void serialize(final DataOutput out) throws IOException {
 		// nothing
 	}
 
 	@Override
-	public void deserialize(final DataInputStream in) throws IOException {
+	public void deserialize(final DataInput in) throws IOException {
 		// nothing
 	}
 

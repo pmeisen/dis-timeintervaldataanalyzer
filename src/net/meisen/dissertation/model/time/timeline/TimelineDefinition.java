@@ -257,8 +257,8 @@ public class TimelineDefinition {
 						+ "' cannot be larger than the end '" + end + "'");
 			}
 		} else if (Long.class.equals(getType())) {
-			final long start = getStart();
-			final long end = getEnd();
+			final Long start = getStart();
+			final Long end = getEnd();
 
 			if (start > end) {
 				throw new IllegalArgumentException("The start '" + start

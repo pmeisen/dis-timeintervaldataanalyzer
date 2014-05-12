@@ -3,7 +3,7 @@ package net.meisen.dissertation.impl.cache;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
-import net.meisen.dissertation.model.cache.IBitmapUser;
+import net.meisen.dissertation.model.cache.IBitmapOwner;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
@@ -28,6 +28,11 @@ public class MemoryCache implements IBitmapCache {
 	private BaseIndexFactory factory;
 
 	@Override
+	public void initialize(final String modelId) {
+		// nothing to do
+	}
+
+	@Override
 	public Bitmap getBitmap(final BitmapId<?> bitmapId) {
 		return factory.createBitmap();
 	}
@@ -40,7 +45,7 @@ public class MemoryCache implements IBitmapCache {
 	}
 
 	@Override
-	public void registerBitmapUser(final IBitmapUser user) {
+	public void registerBitmapOwner(final IBitmapOwner user) {
 		/*
 		 * the memory is not interested in any users, because nothing will ever
 		 * be released
@@ -50,5 +55,10 @@ public class MemoryCache implements IBitmapCache {
 	@Override
 	public void setConfig(final IBitmapCacheConfig configuration) {
 		// ignore there is no configuration
+	}
+
+	@Override
+	public void release() {
+		// nothing to be released
 	}
 }

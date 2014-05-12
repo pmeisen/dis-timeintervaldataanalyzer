@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IBitmapUser;
+import net.meisen.dissertation.model.cache.IBitmapOwner;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -22,7 +22,7 @@ import net.meisen.dissertation.model.cache.IBitmapUser;
  *            the type of the identifier used to identify the slice
  */
 public abstract class BaseSlice<I extends Object> implements
-		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapUser {
+		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapOwner {
 	private final SliceId<I> id;
 	private final IBitmapCache cache;
 
@@ -43,7 +43,7 @@ public abstract class BaseSlice<I extends Object> implements
 		this.cache = cache;
 
 		// register the instance as user
-		cache.registerBitmapUser(this);
+		cache.registerBitmapOwner(this);
 	}
 
 	/**
@@ -118,16 +118,6 @@ public abstract class BaseSlice<I extends Object> implements
 		}
 
 		return bitmap;
-	}
-
-	@Override
-	public Bitmap getInstanceBitmap() {
-		return bitmap;
-	}
-
-	@Override
-	public void updateBitmap(final Bitmap bitmap) {
-		this.bitmap = bitmap;
 	}
 
 	@Override

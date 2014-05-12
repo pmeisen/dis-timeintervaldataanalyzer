@@ -16,7 +16,6 @@ import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.cache.FileCache;
 import net.meisen.dissertation.impl.cache.MemoryCache;
-import net.meisen.dissertation.impl.cache.TestFileCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
@@ -185,7 +184,7 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(TestFileCache.class, cache.getClass());
+			assertEquals(FileCache.class, cache.getClass());
 
 			assertEquals(new File(System.getProperty("java.io.tmpdir")),
 					((FileCache) cache).getLocation());
@@ -228,7 +227,7 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(TestFileCache.class, cache.getClass());
+			assertEquals(FileCache.class, cache.getClass());
 			assertEquals(new File("."), ((FileCache) cache).getLocation());
 		}
 	}

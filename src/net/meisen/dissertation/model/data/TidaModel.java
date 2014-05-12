@@ -151,6 +151,9 @@ public class TidaModel implements IPersistable {
 			exceptionRegistry.throwException(TidaModelException.class, 1000);
 		}
 
+		// initialize the cache
+		this.cache.initialize(getId());
+
 		// create the index
 		this.idx = new TidaIndex(this);
 	}

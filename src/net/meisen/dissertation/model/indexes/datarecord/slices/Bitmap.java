@@ -1,6 +1,8 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,8 +96,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @throws IOException
 	 *             if an exception using the output occurs
 	 */
-	public abstract void serialize(final DataOutputStream out)
-			throws IOException;
+	public abstract void serialize(final DataOutput out) throws IOException;
 
 	/**
 	 * Deserializes the bitmap from the specified {@code DataInputStream}.
@@ -106,8 +107,7 @@ public abstract class Bitmap implements IBitmapContainer {
 	 * @throws IOException
 	 *             if an exception using the input occurs
 	 */
-	protected abstract void deserialize(final DataInputStream in)
-			throws IOException;
+	protected abstract void deserialize(final DataInput in) throws IOException;
 
 	/**
 	 * Inverts the bitmap up to the specified {@code position}, i.e.
@@ -208,6 +208,22 @@ public abstract class Bitmap implements IBitmapContainer {
 	public static Bitmap or(final BaseIndexFactory factory,
 			final Object... bitmaps) {
 		return combine(bitmaps, LogicType.OR, factory);
+	}
+
+	public static Bitmap createBitmap(final BaseIndexFactory factory,
+			final int... ids) {
+		final Bitmap bitmap = factory.createBitmap();
+		bitmap.set(ids);
+
+		return bitmap;
+	}
+
+	public static Bitmap createFromInput(final BaseIndexFactory factory,
+			final DataInput in) throws IOException {
+		final Bitmap bitmap = factory.createBitmap();
+		bitmap.deserialize(in);
+
+		return bitmap;
 	}
 
 	/**

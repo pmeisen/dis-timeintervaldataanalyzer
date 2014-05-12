@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.indexes.datarecord.slices;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,12 +66,12 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public void serialize(final DataOutputStream out) throws IOException {
+	public void serialize(final DataOutput out) throws IOException {
 		bitmap.serialize(out);
 	}
 
 	@Override
-	public void deserialize(final DataInputStream in) throws IOException {
+	public void deserialize(final DataInput in) throws IOException {
 		bitmap.deserialize(in);
 	}
 
