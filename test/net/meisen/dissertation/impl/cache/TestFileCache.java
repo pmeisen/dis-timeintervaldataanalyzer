@@ -4,18 +4,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.io.File;
-import java.util.UUID;
+import java.util.Arrays;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.cache.FileCache.IndexEntry;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
-import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.general.genmisc.types.Files;
@@ -25,6 +25,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests the implementation of a {@code FileCache}.
@@ -53,6 +54,22 @@ public class TestFileCache extends ModuleBasedTest {
 
 		// make sure the location is deleted
 		assertTrue(Files.deleteDir(fc.getLocation()));
+	}
+
+	protected BitmapId createBitmapId(final int nr) {
+		return new BitmapId<Integer>(nr, IntervalIndex.class);
+	}
+
+	protected void cacheBitmap(final FileCache fc, final int amount,
+			final int dataOffset) {
+		for (int i = 0; i < amount; i++) {
+			final BitmapId<?> id = createBitmapId(i);
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i
+					+ dataOffset);
+
+			// cache the bitmap
+			fc.cacheBitmap(id, bmp);
+		}
 	}
 
 	/**
@@ -146,8 +163,8 @@ public class TestFileCache extends ModuleBasedTest {
 		fc.initialize(model.getId());
 
 		for (int i = 0; i < 100000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i,
-					MetaIndexDimension.class, "Classifier1");
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
@@ -161,6 +178,75 @@ public class TestFileCache extends ModuleBasedTest {
 			assertEquals(bmp, fc.getBitmap(id));
 			assertTrue(fc.isCached(id));
 		}
+	}
+
+	/**
+	 * The {@code FileCache} needs to create {@code lines} within the
+	 * index-file, which are used to map a {@code BitmapId} to a
+	 * {@code IndexEntry}. The {@code BitmapId} has to be transformed into a
+	 * byte-array to be stored. This should only be done once for each new
+	 * {@code BitmapId}. This tests checks, that the call is only done once for
+	 * each {@code BitmapId}.
+	 */
+	@Test
+	public void testUsageOfGenerateIndexLine() {
+		final FileCache spy = Mockito.spy(fc);
+		spy.initialize(model.getId());
+
+		// let's cache 100 bitmaps for testing purposes
+		cacheBitmap(spy, 100, 0);
+
+		// the generation of a line should have been called exactly 100 times
+		verify(spy, times(100)).generateIndexLine(Mockito.any(BitmapId.class),
+				Mockito.any(IndexEntry.class));
+
+		// modify the Bitmaps
+		cacheBitmap(spy, 200, 100);
+
+		/*
+		 * The modification shouldn't have triggered the generation again,
+		 * therefore in a total the generateIndexLine should only be called 200
+		 * times.
+		 */
+		verify(spy, times(200)).generateIndexLine(Mockito.any(BitmapId.class),
+				Mockito.any(IndexEntry.class));
+
+		// release the FileCache
+		spy.release();
+	}
+
+	@Test
+	public void testLoading() {
+		final FileCache spy = Mockito.spy(fc);
+
+		// create a cache with some data
+		spy.initialize(model.getId());
+		cacheBitmap(spy, 100, 20);
+		spy.release();
+
+		// now initialize again and check if the data is loaded
+		spy.initialize(model.getId());
+
+		// get the bitmap for 0, this cannot be empty now
+		for (int i = 0; i < 100; i++) {
+			final Bitmap bmp = spy.getBitmap(createBitmapId(i));
+			assertEquals(1, bmp.getIds().length);
+			assertTrue(Arrays.binarySearch(bmp.getIds(), i + 20) != -1);
+		}
+		verify(spy, times(100))._getFromCache(Mockito.any(BitmapId.class));
+		verify(spy, times(100))._getFromIndex(Mockito.any(BitmapId.class));
+		verify(spy, times(100)).readBitmap(Mockito.any(int.class));
+
+		// let's also get some values we don't have yet
+		final Bitmap emptyBitmap = model.getIndexFactory().createBitmap();
+		for (int i = 100; i < 200; i++) {
+			final Bitmap bmp = spy.getBitmap(createBitmapId(i));
+			assertEquals(0, bmp.getIds().length);
+			assertEquals(emptyBitmap, bmp);
+		}
+		verify(spy, times(200))._getFromCache(Mockito.any(BitmapId.class));
+		verify(spy, times(200))._getFromIndex(Mockito.any(BitmapId.class));
+		verify(spy, times(100)).readBitmap(Mockito.any(int.class));
 	}
 
 	/**

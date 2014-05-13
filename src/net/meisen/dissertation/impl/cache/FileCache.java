@@ -2,9 +2,13 @@ package net.meisen.dissertation.impl.cache;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,135 +40,18 @@ public class FileCache implements IBitmapCache {
 	private final static Logger LOG = LoggerFactory.getLogger(FileCache.class);
 
 	/**
-	 * A {@code IndexEntry} is an entry in the index-file (see
-	 * {@link FileCache#indexTableFileName}) of the cache. It defines the
-	 * 
-	 * @author pmeisen
-	 * 
-	 */
-	protected static class IndexEntry {
-
-		/**
-		 * The size of an {@code IndexEntry} as bytes.
-		 */
-		public static final int IndexEntrySizeInBytes = 12;
-
-		private final int size;
-		private final int bitmapFilePosition;
-
-		private int indexFileNumber;
-
-		/**
-		 * Constructor to create a {@code IndexEntry} from a byte-array.
-		 * 
-		 * @param bytes
-		 *            the array to read the {@code IndexEntry} from
-		 */
-		public IndexEntry(final byte[] bytes) {
-			if (bytes.length != IndexEntrySizeInBytes) {
-				throw new IllegalArgumentException(
-						"The amount of bytes to load the IndexEntry from is invalid ('"
-								+ bytes.length + "' != '"
-								+ IndexEntrySizeInBytes + "').");
-			}
-
-			// deserialize the values
-			final int size = Streams.byteToInt(Arrays.copyOfRange(bytes, 0, 4));
-			final int bfp = Streams.byteToInt(Arrays.copyOfRange(bytes, 4, 8));
-			final int ifp = Streams.byteToInt(Arrays.copyOfRange(bytes, 8, 12));
-
-			// set the values
-			this.size = size;
-			this.bitmapFilePosition = bfp;
-			this.indexFileNumber = ifp;
-		}
-
-		/**
-		 * Constructor to create a not persisted entry. The
-		 * {@code indexFileNumber} is set to {@code -1}.
-		 * 
-		 * @param size
-		 *            the size of the entry in the bitmap-file (see
-		 *            {@link FileCache#bitmapFileName}) in bytes
-		 * @param bitmapFilePosition
-		 *            the position (in bytes) of the entry within the
-		 *            bitmap-file (see {@link FileCache#bitmapFileName})
-		 */
-		public IndexEntry(final int size, final int bitmapFilePosition) {
-			this.size = size;
-			this.bitmapFilePosition = bitmapFilePosition;
-			this.indexFileNumber = -1;
-		}
-
-		/**
-		 * Gets the size of the entry in the bitmap-file (see
-		 * {@link FileCache#bitmapFileName}) in bytes.
-		 * 
-		 * @return the size of the entry in the bitmap-file (see
-		 *         {@link FileCache#bitmapFileName}) in bytes
-		 */
-		public int getSize() {
-			return size;
-		}
-
-		/**
-		 * Gets the position (in bytes) of the entry within the bitmap-file (see
-		 * {@link FileCache#bitmapFileName}).
-		 * 
-		 * @return the position (in bytes) of the entry within the bitmap-file
-		 *         (see {@link FileCache#bitmapFileName})
-		 */
-		public int getBitmapFilePosition() {
-			return bitmapFilePosition;
-		}
-
-		/**
-		 * Gets the number of the {@code IndexEntry}, i.e. the zero-based
-		 * position of the entry within the bitmap-file (see
-		 * {@link FileCache#bitmapFileName}).
-		 * 
-		 * @return the number of the {@code IndexEntry} (zero-based)
-		 */
-		public int getIndexFileNumber() {
-			return indexFileNumber;
-		}
-
-		/**
-		 * Sets the number of the {@code IndexEntry} for the entry.
-		 * 
-		 * @param indexFileNumber
-		 *            the number of the {@code IndexEntry} (zero-based)
-		 */
-		public void setIndexFileNumber(final int indexFileNumber) {
-			this.indexFileNumber = indexFileNumber;
-		}
-
-		/**
-		 * Gets the byte representation of the {@code IndexEntry}.
-		 * 
-		 * @return the byte representation of the {@code IndexEntry}
-		 */
-		public byte[] bytes() {
-			final byte[] bytesSize = Streams.intToByte(size);
-			final byte[] bytesBfp = Streams.intToByte(bitmapFilePosition);
-			final byte[] bytesIfp = Streams.intToByte(indexFileNumber);
-
-			return Streams.combineBytes(bytesSize, bytesBfp, bytesIfp);
-		}
-	}
-
-	/**
 	 * The name of the file used as index-table.
 	 */
-	protected final static String indexTableFileName = "bitmap.idx";
+	protected final static String idxTableFileName = "bitmap.idx";
 	/**
 	 * The name of the file used to store the bitmaps.
 	 */
 	protected final static String bitmapFileName = "bitmap.data";
 
-	private static final int IndexMaxBitmapSizeInBytes = 200;
-	private static final int IndexLineSizeInBytes = IndexMaxBitmapSizeInBytes
-			+ IndexEntry.IndexEntrySizeInBytes;
+	private static final int idxBitmapIdSizeInBytes = BitmapId
+			.getMaxBytesLength();
+	private static final int idxLineSizeInBytes = idxBitmapIdSizeInBytes
+			+ IndexEntry.idxEntrySizeInBytes;
 
 	private static final int cacheMaxSize = 100000;
 	private static final double cacheCleaningFactor = 0.2;
@@ -172,11 +59,11 @@ public class FileCache implements IBitmapCache {
 
 	private final Map<BitmapId<?>, IBitmapOwner> owners;
 	private final Map<BitmapId<?>, Bitmap> cache;
-	private final Map<BitmapId<?>, IndexEntry> index;
+	private final Map<BitmapId<?>, IndexEntry> idx;
 
 	private final ReentrantReadWriteLock ownersLock;
 	private final ReentrantReadWriteLock cacheLock;
-	private final ReentrantReadWriteLock indexLock;
+	private final ReentrantReadWriteLock idxLock;
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -190,21 +77,21 @@ public class FileCache implements IBitmapCache {
 	private File location;
 	private File modelLocation;
 
-	private File indexTableFile;
+	private File idxTableFile;
 	private File bitmapFile;
 
 	private RandomAccessFile bitmapReader;
 	private DataOutputStream bitmapWriter;
-	private RandomAccessFile indexTableWriter;
+	private RandomAccessFile idxTableWriter;
 
 	public FileCache() {
 		this.owners = new HashMap<BitmapId<?>, IBitmapOwner>();
-		this.index = new HashMap<BitmapId<?>, IndexEntry>();
+		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
 		this.cache = new HashMap<BitmapId<?>, Bitmap>();
 
 		this.ownersLock = new ReentrantReadWriteLock();
 		this.cacheLock = new ReentrantReadWriteLock();
-		this.indexLock = new ReentrantReadWriteLock();
+		this.idxLock = new ReentrantReadWriteLock();
 
 		this.location = getDefaultLocation();
 		this.init = false;
@@ -218,10 +105,14 @@ public class FileCache implements IBitmapCache {
 			return;
 		}
 
+		// define the needed files
 		this.modelLocation = new File(location, modelId);
+		this.idxTableFile = new File(modelLocation, idxTableFileName);
+		this.bitmapFile = new File(modelLocation, bitmapFileName);
+
+		// decide if data has to be loaded or an instance has to be created
 		if (modelLocation.exists()) {
-			// TODO implement
-			throw new UnsupportedOperationException("CURRENTLY NOT SUPPORTED.");
+			loadInstance();
 		} else {
 			createInstance();
 		}
@@ -248,33 +139,96 @@ public class FileCache implements IBitmapCache {
 		} else if (modelLocation.exists()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1004,
 					modelLocation);
-		}
-
-		// create the directories
-		if (!modelLocation.mkdirs()) {
+		} else if (!modelLocation.mkdirs()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1002,
 					modelLocation);
 		} else if (LOG.isDebugEnabled()) {
 			LOG.debug("Creating FileCache at '" + modelLocation + "'.");
 		}
 
-		// determine the needed files
-		final File indexTableFile = new File(modelLocation, indexTableFileName);
-		final File bitmapFile = new File(modelLocation, bitmapFileName);
-
-		// create the files
 		try {
-			indexTableFile.createNewFile();
+			// create the files
+			idxTableFile.createNewFile();
 			bitmapFile.createNewFile();
 
-			bitmapReader = new RandomAccessFile(bitmapFile, "r");
-			bitmapWriter = new DataOutputStream(new FileOutputStream(
-					bitmapFile, true));
-
-			indexTableWriter = new RandomAccessFile(indexTableFile, "rws");
+			// initialize the reader and writer
+			initializeReaderAndWriter();
 		} catch (final IOException e) {
 			exceptionRegistry.throwException(FileCacheException.class, 1006, e);
 		}
+	}
+
+	protected synchronized void loadInstance() {
+
+		// make sure we can load an instance
+		if (modelLocation == null) {
+			exceptionRegistry.throwException(FileCacheException.class, 1005);
+		} else if (!modelLocation.exists()) {
+			exceptionRegistry.throwException(FileCacheException.class, 1007,
+					modelLocation);
+		} else if (!idxTableFile.exists() || !bitmapFile.exists()) {
+			exceptionRegistry.throwException(FileCacheException.class, 1008,
+					idxTableFile, bitmapFile);
+		} else if (!idxTableFile.isFile() || !bitmapFile.isFile()) {
+			exceptionRegistry.throwException(FileCacheException.class, 1009,
+					idxTableFile, bitmapFile);
+		} else if (LOG.isDebugEnabled()) {
+			LOG.debug("Loading FileCache from '" + modelLocation + "'.");
+		}
+
+		try {
+
+			// create the reader and writer
+			initializeReaderAndWriter();
+
+			// read the index into memory
+			final FileInputStream f = new FileInputStream(idxTableFile);
+			final FileChannel ch = f.getChannel();
+			final ByteBuffer bb = ByteBuffer.allocate(idxLineSizeInBytes);
+
+			int nRead;
+			while ((nRead = ch.read(bb)) != -1) {
+				if (nRead == 0) {
+					continue;
+				}
+
+				// get the line and check the size
+				final byte[] line = bb.array();
+				if (line.length != idxLineSizeInBytes) {
+					// TODO e
+					throw new IllegalStateException();
+				}
+
+				// read the BitmapId and IndexEntry from the line
+				@SuppressWarnings("rawtypes")
+				final BitmapId bitmapId = new BitmapId(Arrays.copyOfRange(line,
+						0, idxBitmapIdSizeInBytes));
+				final IndexEntry entry = new IndexEntry(Arrays.copyOfRange(
+						line, idxBitmapIdSizeInBytes, idxLineSizeInBytes));
+
+				// just add the values to the index, nothing is cached
+				this.idx.put(bitmapId, entry);
+
+				// clear the buffer again
+				bb.clear();
+			}
+
+			f.close();
+		} catch (final IOException e) {
+			// TODO add e
+			throw new IllegalStateException();
+		}
+	}
+
+	protected void initializeReaderAndWriter() throws IOException {
+
+		// bitmap reader and writer
+		bitmapReader = new RandomAccessFile(bitmapFile, "r");
+		bitmapWriter = new DataOutputStream(new FileOutputStream(bitmapFile,
+				true));
+
+		// index writer (and reader)
+		idxTableWriter = new RandomAccessFile(idxTableFile, "rws");
 	}
 
 	protected IndexEntry writeBitmap(final Bitmap bitmap) {
@@ -316,12 +270,16 @@ public class FileCache implements IBitmapCache {
 
 	@Override
 	public Bitmap getBitmap(final BitmapId<?> bitmapId) {
+		if (!init) {
+			exceptionRegistry.throwException(FileCacheException.class, 1010);
+		}
+
 		boolean doCache = false;
 
 		Bitmap bitmap;
 		try {
 			this.cacheLock.readLock().lock();
-			this.indexLock.readLock().lock();
+			this.idxLock.readLock().lock();
 
 			bitmap = _getFromCache(bitmapId);
 			if (bitmap == null) {
@@ -335,7 +293,7 @@ public class FileCache implements IBitmapCache {
 				doCache = true;
 			}
 		} finally {
-			this.indexLock.readLock().unlock();
+			this.idxLock.readLock().unlock();
 			this.cacheLock.readLock().unlock();
 		}
 
@@ -396,30 +354,36 @@ public class FileCache implements IBitmapCache {
 		 * check if we already have a newer entry cached, this might have
 		 * happened because of asynchronous events
 		 */
-		final IndexEntry curEntry = this.index.get(bitmapId);
+		final IndexEntry curEntry = this.idx.get(bitmapId);
 		if (curEntry != null
 				&& curEntry.getBitmapFilePosition() >= entry
 						.getBitmapFilePosition()) {
 			return false;
 		} else {
+			final byte[] bytes;
+			final int idxFilePos;
 
-			// get the position of the entry within the file
+			// write the bitmap with the
 			if (curEntry == null) {
-				entry.setIndexFileNumber(this.index.size());
+				entry.setIndexFileNumber(this.idx.size());
+
+				// determine the position
+				idxFilePos = entry.getIndexFileNumber() * idxLineSizeInBytes;
+				bytes = generateIndexLine(bitmapId, entry);
 			} else {
 				entry.setIndexFileNumber(curEntry.getIndexFileNumber());
+
+				// determine the position
+				idxFilePos = entry.getIndexFileNumber() * idxLineSizeInBytes
+						+ idxBitmapIdSizeInBytes;
+				bytes = entry.bytes();
 			}
 
-			// determine the position
-			final byte[] bytes = generateIndexLine(bitmapId, entry);
-			final int indexFilePos = entry.getIndexFileNumber()
-					* IndexLineSizeInBytes;
-
 			// persist it to the file
-			synchronized (indexTableWriter) {
+			synchronized (idxTableWriter) {
 				try {
-					indexTableWriter.seek(indexFilePos);
-					indexTableWriter.write(bytes);
+					idxTableWriter.seek(idxFilePos);
+					idxTableWriter.write(bytes);
 				} catch (final IOException e) {
 					// TODO add e
 					throw new IllegalStateException();
@@ -427,7 +391,7 @@ public class FileCache implements IBitmapCache {
 			}
 
 			// index the value in memory
-			this.index.put(bitmapId, entry);
+			this.idx.put(bitmapId, entry);
 
 			return true;
 		}
@@ -438,14 +402,14 @@ public class FileCache implements IBitmapCache {
 		final byte[] bytesId = bitmapId.bytes();
 		final byte[] bytesEntry = entry.bytes();
 
-		if (bytesId.length > IndexMaxBitmapSizeInBytes) {
+		if (bytesId.length > idxBitmapIdSizeInBytes) {
 			// TODO e
 			throw new IllegalStateException();
-		} else if (bytesEntry.length != IndexEntry.IndexEntrySizeInBytes) {
+		} else if (bytesEntry.length != IndexEntry.idxEntrySizeInBytes) {
 			// TODO e
 			throw new IllegalStateException();
 		} else {
-			final byte[] filledBytesId = new byte[IndexMaxBitmapSizeInBytes];
+			final byte[] filledBytesId = new byte[idxBitmapIdSizeInBytes];
 			System.arraycopy(bytesId, 0, filledBytesId, 0, bytesId.length);
 
 			return Streams.combineBytes(filledBytesId, bytesEntry);
@@ -457,7 +421,7 @@ public class FileCache implements IBitmapCache {
 	}
 
 	protected Bitmap _getFromIndex(final BitmapId<?> bitmapId) {
-		final IndexEntry entry = index.get(bitmapId);
+		final IndexEntry entry = idx.get(bitmapId);
 
 		if (entry == null) {
 			return null;
@@ -468,23 +432,31 @@ public class FileCache implements IBitmapCache {
 
 	@Override
 	public void cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap) {
+		if (!init) {
+			exceptionRegistry.throwException(FileCacheException.class, 1010);
+		}
+
 		final IndexEntry entry = writeBitmap(bitmap);
 
 		this.cacheLock.writeLock().lock();
-		this.indexLock.writeLock().lock();
+		this.idxLock.writeLock().lock();
 
 		try {
 			if (_indexBitmap(bitmapId, entry)) {
 				_cacheBitmap(bitmapId, bitmap);
 			}
 		} finally {
-			this.indexLock.writeLock().unlock();
+			this.idxLock.writeLock().unlock();
 			this.cacheLock.writeLock().unlock();
 		}
 	}
 
 	@Override
 	public void registerBitmapOwner(final IBitmapOwner owner) {
+		if (!init) {
+			exceptionRegistry.throwException(FileCacheException.class, 1010);
+		}
+
 		this.ownersLock.writeLock().lock();
 
 		try {
@@ -552,19 +524,26 @@ public class FileCache implements IBitmapCache {
 			LOG.debug("Releasing FileCache at '" + getModelLocation() + "'.");
 		}
 
+		/*
+		 * set the initialization to be false, every call to the public methods
+		 * is not permitted now, initialization is blocked because this method
+		 * is synchronized
+		 */
+		this.init = false;
+
 		// make sure we are the only once using the reader and writer
 		synchronized (bitmapReader) {
 			synchronized (bitmapWriter) {
-				synchronized (indexTableWriter) {
+				synchronized (idxTableWriter) {
 
 					// release the indexTableWriter
-					if (indexTableWriter != null) {
+					if (idxTableWriter != null) {
 						try {
-							indexTableWriter.close();
+							idxTableWriter.close();
 						} catch (final IOException e) {
 							exceptionRegistry.throwException(
 									FileCacheException.class, 1003, e,
-									indexTableFile);
+									idxTableFile);
 						}
 					}
 
@@ -593,8 +572,18 @@ public class FileCache implements IBitmapCache {
 			}
 		}
 
-		// set the initialization to be false
-		this.init = false;
+		// empty the arrays
+		this.cacheLock.writeLock().lock();
+		this.ownersLock.writeLock().lock();
+		this.idxLock.writeLock().lock();
+
+		this.cache.clear();
+		this.idx.clear();
+		this.owners.clear();
+
+		this.idxLock.writeLock().unlock();
+		this.ownersLock.writeLock().unlock();
+		this.cacheLock.writeLock().unlock();
 	}
 
 	public boolean isCached(final BitmapId<?> id) {
@@ -607,8 +596,20 @@ public class FileCache implements IBitmapCache {
 		}
 	}
 
-	public void clearCache() {
+	public int getCacheSize() {
+		final int size;
 
+		this.cacheLock.readLock().lock();
+		try {
+			size = this.cache.size();
+		} finally {
+			this.cacheLock.readLock().unlock();
+		}
+
+		return size;
+	}
+
+	public void clearCache() {
 		this.cacheLock.writeLock().lock();
 		try {
 			this.cache.clear();

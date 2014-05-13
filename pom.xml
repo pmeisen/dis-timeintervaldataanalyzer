@@ -70,6 +70,14 @@
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
       <version>4.2</version>
+      
+      <!-- remove the treelayout it's only used in the GUI -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.abego.treelayout</groupId>
+          <artifactId>org.abego.treelayout.core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     
     <!-- logging -->
@@ -98,7 +106,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.8.4</version>
+      <version>1.9.5</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
