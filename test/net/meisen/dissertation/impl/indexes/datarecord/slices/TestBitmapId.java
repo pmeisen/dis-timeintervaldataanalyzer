@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
-import net.meisen.dissertation.model.indexes.datarecord.MetaIndexDimension;
+import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
 import org.junit.Test;
@@ -26,17 +26,16 @@ public class TestBitmapId extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testSerializationWithoutClassifier() {
-		final BitmapId<?> id = new BitmapId<Integer>(5,
-				MetaIndexDimension.class);
+		final BitmapId<?> id = new BitmapId<Integer>(5, MetaIndex.class);
 		assertEquals(Integer.class, id.getIdType());
 		assertEquals(5, id.getId());
-		assertEquals(MetaIndexDimension.class, id.getType());
+		assertEquals(MetaIndex.class, id.getType());
 		assertEquals("", id.getClassifier());
 
 		final BitmapId<?> deId = new BitmapId<Integer>(id.bytes());
 		assertEquals(Integer.class, deId.getIdType());
 		assertEquals(5, deId.getId());
-		assertEquals(MetaIndexDimension.class, deId.getType());
+		assertEquals(MetaIndex.class, deId.getType());
 		assertEquals("", deId.getClassifier());
 
 		assertEquals(id, deId);

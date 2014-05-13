@@ -215,8 +215,13 @@ public class TestFileCache extends ModuleBasedTest {
 		spy.release();
 	}
 
+	/**
+	 * Tests the loading of the internally used index from the hard-drive.
+	 * Furthermore the tests checks the amounts of call to
+	 * {@link FileCache#readBitmap(int)}.
+	 */
 	@Test
-	public void testLoading() {
+	public void testIndexLoading() {
 		final FileCache spy = Mockito.spy(fc);
 
 		// create a cache with some data
