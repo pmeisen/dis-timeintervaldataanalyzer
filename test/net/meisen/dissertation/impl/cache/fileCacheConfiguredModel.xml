@@ -6,11 +6,13 @@
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
                            http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileCache.xsd"
        
-       id="fileCacheModel">
+       id="fileCacheConfiguredModel">
   
   <config>
     <cache implementation="net.meisen.dissertation.impl.cache.FileCache">
-      <file:config folder="${java.io.tmpdir}/tmpFileCacheModelTest" />
+      <file:config folder="${java.io.tmpdir}/tmpFileCacheModelTest">
+        <file:strategy timeThresholdFactor="5.25" weightingTime="0.2" />
+      </file:config>
     </cache>
   </config>
   

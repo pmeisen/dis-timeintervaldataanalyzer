@@ -5,6 +5,7 @@ import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestDefaultValues;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
+import net.meisen.dissertation.impl.cache.TestCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileCache;
 import net.meisen.dissertation.impl.dataretriever.TestDbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.TestFixedStructureDataRetriever;
@@ -171,7 +172,8 @@ import org.junit.runners.Suite;
 		// Test the record pre-processing
 		TestProcessedDataRecord.class,
 
-		// Test the caches,
+		// Test the caches
+		TestCachingStrategy.class,
 		TestFileCache.class,
 
 		// Test the index for facts

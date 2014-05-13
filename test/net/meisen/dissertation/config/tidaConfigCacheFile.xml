@@ -7,6 +7,6 @@
                             http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileCache.xsd">
   
   <cache implementation="net.meisen.dissertation.impl.cache.FileCache">
-    <file:location folder="${java.io.tmpdir}" />
+    <file:config folder="${java.io.tmpdir}" />
   </cache>
 </config>

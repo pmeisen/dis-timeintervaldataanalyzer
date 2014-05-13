@@ -3,7 +3,6 @@ package net.meisen.dissertation.impl.cache;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -57,6 +57,8 @@ public class FileCache implements IBitmapCache {
 	private static final double cacheCleaningFactor = 0.2;
 	private static final int cacheCleaningSize = (int) (cacheMaxSize * cacheCleaningFactor);
 
+	private final CachingStrategy strategy;
+
 	private final Map<BitmapId<?>, IBitmapOwner> owners;
 	private final Map<BitmapId<?>, Bitmap> cache;
 	private final Map<BitmapId<?>, IndexEntry> idx;
@@ -85,6 +87,8 @@ public class FileCache implements IBitmapCache {
 	private RandomAccessFile idxTableWriter;
 
 	public FileCache() {
+		this.strategy = new CachingStrategy();
+
 		this.owners = new HashMap<BitmapId<?>, IBitmapOwner>();
 		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
 		this.cache = new HashMap<BitmapId<?>, Bitmap>();
@@ -299,7 +303,7 @@ public class FileCache implements IBitmapCache {
 
 		/*
 		 * Cache the retrieved bitmap if needed. The cacheBitmap method ensures
-		 * that an more accurate bitmap is not overridden.
+		 * that a more accurate bitmap is not replaced within the cache.
 		 */
 		if (doCache) {
 			cacheBitmap(bitmapId, bitmap);
@@ -315,16 +319,41 @@ public class FileCache implements IBitmapCache {
 		// add the value
 		this.cache.put(bitmapId, bitmap);
 
-		// check if the cache size is exceeded
-		if (this.cache.size() >= cacheMaxSize) {
+		// trigger a re-organization of the cache
+		_organizeCache();
+	}
 
-			// cacheCleaningSize;
+	protected void _organizeCache() {
 
-			final BitmapId<?> removedId = null;
+		// check if the cache size is exceeded and if organization is necessary
+		if (cache.size() < cacheMaxSize) {
+			return;
+		}
+
+		// determine which bitmaps to be released
+		final List<BitmapId<?>> removedIds = getStrategy()
+				.determineLessUsedList(cacheCleaningSize, true);
+
+		// log what is removed
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Organizing cache (size: " + cache.size()
+					+ ") by removing " + removedIds);
+		}
+
+		// remove the bitmaps from the cache and the owner
+		for (final BitmapId<?> removedId : removedIds) {
 			final IBitmapOwner owner = this.owners.get(removedId);
 
-			// release the bitmap
+			// remove the identifier from the cache
+			cache.remove(removedId);
+
+			// release the bitmap from the owner
 			owner.releaseBitmap();
+		}
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Finalized organizing of cache (new size: "
+					+ cache.size() + ")");
 		}
 	}
 
@@ -497,13 +526,23 @@ public class FileCache implements IBitmapCache {
 			exceptionRegistry.throwException(FileCacheException.class, 1000);
 		} else if (config == null) {
 			this.location = getDefaultLocation();
+			this.strategy.setDefaults();
 		} else if (config instanceof FileCacheConfig) {
-			final FileCacheConfig fcConfig = (FileCacheConfig) config;
-			this.location = fcConfig.getLocation();
+			final FileCacheConfig fcc = (FileCacheConfig) config;
+			this.location = fcc.getLocation();
+
+			// set the strategy values
+			this.strategy.setOldFactor(fcc.getOldFactor());
+			this.strategy.setTimeThresholdFactor(fcc.getTimeThresholdFactor());
+			this.strategy.setWeightingTime(fcc.getWeightingTime());
 		} else {
 			exceptionRegistry.throwException(FileCacheException.class, 1001,
 					config.getClass().getName());
 		}
+	}
+
+	protected CachingStrategy getStrategy() {
+		return strategy;
 	}
 
 	/**

@@ -3,9 +3,31 @@
 <xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/cache/file" 
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="http://dev.meisen.net/xsd/dissertation/cache/file" attributeFormDefault="unqualified" elementFormDefault="qualified">
-           
-  <xs:element name="location">
+
+  <xs:simpleType name="weightingFactor">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0.0"/>
+      <xs:maxInclusive value="1.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="thresholdFactor">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="config">
     <xs:complexType>
+      <xs:sequence>
+        <xs:element name="strategy" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:attribute name="timeThresholdFactor" type="thresholdFactor" use="optional" />
+            <xs:attribute name="weightingTime" type="weightingFactor" use="optional" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    
       <xs:attribute name="folder" type="xs:string" use="required" />
     </xs:complexType>
   </xs:element>

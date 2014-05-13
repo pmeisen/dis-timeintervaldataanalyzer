@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.io.File;
 import java.util.Arrays;
 
 import net.meisen.dissertation.config.TestConfig;
@@ -54,12 +55,54 @@ public class TestFileCache extends ModuleBasedTest {
 
 		// make sure the location is deleted
 		assertTrue(Files.deleteDir(fc.getLocation()));
+
+		// check if the default values are set
+		final CachingStrategy strategy = fc.getStrategy();
+		assertEquals(0.5, strategy.getWeightingTime(), 0.0);
+		assertEquals(50.0, strategy.getTimeThresholdFactor(), 0.0);
 	}
 
-	protected BitmapId createBitmapId(final int nr) {
+	/**
+	 * Loads a configured instance and checks the configuration
+	 */
+	@Test
+	public void testConfiguration() {
+		setModulesHolder("/net/meisen/dissertation/impl/cache/fileCacheConfiguredModel.xml");
+
+		// get the new FileCache
+		fc = modulesHolder.getModule(DefaultValues.CACHE_ID);
+		assertNotNull(fc);
+		assertEquals(new File(System.getProperty("java.io.tmpdir"),
+				"tmpFileCacheModelTest"), fc.getLocation());
+
+		final CachingStrategy strategy = fc.getStrategy();
+		assertEquals(0.2, strategy.getWeightingTime(), 0.0);
+		assertEquals(5.25, strategy.getTimeThresholdFactor(), 0.0);
+	}
+
+	/**
+	 * Creates a {@code BitmapId} with the specified identifier.
+	 * 
+	 * @param nr
+	 *            the identifier
+	 * 
+	 * @return the created {@code BitmapId}
+	 */
+	protected BitmapId<Integer> createBitmapId(final int nr) {
 		return new BitmapId<Integer>(nr, IntervalIndex.class);
 	}
 
+	/**
+	 * Helper method to cache some generated bitmaps to the {@code fc}.
+	 * 
+	 * @param fc
+	 *            the {@code FileCache} to add data to
+	 * @param amount
+	 *            the amount of data to be generated
+	 * @param dataOffset
+	 *            the offset between the id and the data to be set within the
+	 *            generated bitmap
+	 */
 	protected void cacheBitmap(final FileCache fc, final int amount,
 			final int dataOffset) {
 		for (int i = 0; i < amount; i++) {
@@ -142,6 +185,9 @@ public class TestFileCache extends ModuleBasedTest {
 		assertEquals(100, e.getIndexFileNumber());
 	}
 
+	/**
+	 * Tests the loading of none-cached bitmaps.
+	 */
 	@Test
 	public void testNoneCachedBitmapRetrieval() {
 		fc.initialize(model.getId());
@@ -158,8 +204,11 @@ public class TestFileCache extends ModuleBasedTest {
 		}
 	}
 
+	/**
+	 * Tests the persisting of bitmaps to the hard-drive.
+	 */
 	@Test
-	public void testPersistance() throws InterruptedException {
+	public void testPersistance() {
 		fc.initialize(model.getId());
 
 		for (int i = 0; i < 100000; i++) {

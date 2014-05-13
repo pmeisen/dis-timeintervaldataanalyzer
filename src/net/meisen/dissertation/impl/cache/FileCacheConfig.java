@@ -13,31 +13,17 @@ import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 public class FileCacheConfig implements IBitmapCacheConfig {
 	private File location;
 
-	/**
-	 * Default constructor, configures the {@code FileCache} to use the default
-	 * location defined by {@link TestFileCache#getDefaultLocation()}.
-	 */
+	private Integer oldFactor;
+	private Double timeThresholdFactor;
+	private Double weightingTime;
+
 	public FileCacheConfig() {
-		this((File) null);
+		setLocation(null);
+		setTimeThresholdFactor(null);
+		setWeightingTime(null);
 	}
 
-	/**
-	 * Configures the {@code FileCache} to use the specified location.
-	 * 
-	 * @param location
-	 *            the location to be used
-	 */
-	public FileCacheConfig(final String location) {
-		this(location == null ? null : new File(location));
-	}
-
-	/**
-	 * Configures the {@code FileCache} to use the specified location.
-	 * 
-	 * @param location
-	 *            the location to be used
-	 */
-	public FileCacheConfig(final File location) {
+	public void setLocation(final File location) {
 		this.location = location;
 	}
 
@@ -50,4 +36,27 @@ public class FileCacheConfig implements IBitmapCacheConfig {
 		return location;
 	}
 
+	public Integer getOldFactor() {
+		return oldFactor;
+	}
+
+	public void setOldFactor(Integer oldFactor) {
+		this.oldFactor = oldFactor;
+	}
+
+	public Double getTimeThresholdFactor() {
+		return timeThresholdFactor;
+	}
+
+	public void setTimeThresholdFactor(final Double timeThresholdFactor) {
+		this.timeThresholdFactor = timeThresholdFactor;
+	}
+
+	public Double getWeightingTime() {
+		return weightingTime;
+	}
+
+	public void setWeightingTime(final Double weightingTime) {
+		this.weightingTime = weightingTime;
+	}
 }
