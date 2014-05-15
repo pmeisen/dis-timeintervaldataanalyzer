@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.cache;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,16 +48,20 @@ public class FileCache implements IBitmapCache {
 	/**
 	 * The name of the file used to store the bitmaps.
 	 */
-	protected final static String bitmapFileName = "bitmap.data";
+	protected final static String bitmapFileName = "bitmap_{nr}.data";
 
 	private static final int idxBitmapIdSizeInBytes = BitmapId
 			.getMaxBytesLength();
 	private static final int idxLineSizeInBytes = idxBitmapIdSizeInBytes
 			+ IndexEntry.idxEntrySizeInBytes;
 
-	private static final int cacheMaxSize = 100000;
-	private static final double cacheCleaningFactor = 0.2;
-	private static final int cacheCleaningSize = (int) (cacheMaxSize * cacheCleaningFactor);
+	@Autowired
+	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+	private IExceptionRegistry exceptionRegistry;
+
+	@Autowired
+	@Qualifier(DefaultValues.INDEXFACTORY_ID)
+	private BaseIndexFactory factory;
 
 	private final CachingStrategy strategy;
 
@@ -66,25 +72,23 @@ public class FileCache implements IBitmapCache {
 	private final ReentrantReadWriteLock ownersLock;
 	private final ReentrantReadWriteLock cacheLock;
 	private final ReentrantReadWriteLock idxLock;
+	private final ReentrantReadWriteLock bitmapLock;
 
-	@Autowired
-	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
-	private IExceptionRegistry exceptionRegistry;
-
-	@Autowired
-	@Qualifier(DefaultValues.INDEXFACTORY_ID)
-	private BaseIndexFactory factory;
+	private final List<RandomAccessFile> bitmapReaders;
+	private final List<DataOutputStream> bitmapWriters;
+	private final List<File> bitmapFiles;
 
 	private boolean init;
 	private File location;
 	private File modelLocation;
+	private int cacheSize;
+	private int maxFileSizeInByte;
+	private double cacheCleaningFactor;
 
-	private File idxTableFile;
-	private File bitmapFile;
+	private int curFileNumber = -1;
 
-	private RandomAccessFile bitmapReader;
-	private DataOutputStream bitmapWriter;
 	private RandomAccessFile idxTableWriter;
+	private File idxTableFile;
 
 	public FileCache() {
 		this.strategy = new CachingStrategy();
@@ -96,8 +100,16 @@ public class FileCache implements IBitmapCache {
 		this.ownersLock = new ReentrantReadWriteLock();
 		this.cacheLock = new ReentrantReadWriteLock();
 		this.idxLock = new ReentrantReadWriteLock();
+		this.bitmapLock = new ReentrantReadWriteLock();
 
 		this.location = getDefaultLocation();
+		this.cacheSize = getDefaultCacheSize();
+		this.cacheCleaningFactor = getDefaultCacheCleaningFactor();
+
+		this.bitmapReaders = new ArrayList<RandomAccessFile>();
+		this.bitmapWriters = new ArrayList<DataOutputStream>();
+		this.bitmapFiles = new ArrayList<File>();
+
 		this.init = false;
 	}
 
@@ -112,7 +124,6 @@ public class FileCache implements IBitmapCache {
 		// define the needed files
 		this.modelLocation = new File(location, modelId);
 		this.idxTableFile = new File(modelLocation, idxTableFileName);
-		this.bitmapFile = new File(modelLocation, bitmapFileName);
 
 		// decide if data has to be loaded or an instance has to be created
 		if (modelLocation.exists()) {
@@ -135,7 +146,7 @@ public class FileCache implements IBitmapCache {
 	 *             {@code modelLocation} could not be created, or if an
 	 *             io-exception occurred during initialization
 	 */
-	protected synchronized void createInstance() throws FileCacheException {
+	protected void createInstance() throws FileCacheException {
 
 		// make sure we can create an instance
 		if (modelLocation == null) {
@@ -151,18 +162,20 @@ public class FileCache implements IBitmapCache {
 		}
 
 		try {
-			// create the files
+			// create the index file
 			idxTableFile.createNewFile();
-			bitmapFile.createNewFile();
 
-			// initialize the reader and writer
-			initializeReaderAndWriter();
+			// create the index writer
+			idxTableWriter = new RandomAccessFile(idxTableFile, "rws");
+
+			// create a first bitmap file
+			_createNewBitmapFile();
 		} catch (final IOException e) {
 			exceptionRegistry.throwException(FileCacheException.class, 1006, e);
 		}
 	}
 
-	protected synchronized void loadInstance() {
+	protected void loadInstance() {
 
 		// make sure we can load an instance
 		if (modelLocation == null) {
@@ -170,20 +183,20 @@ public class FileCache implements IBitmapCache {
 		} else if (!modelLocation.exists()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1007,
 					modelLocation);
-		} else if (!idxTableFile.exists() || !bitmapFile.exists()) {
+		} else if (!idxTableFile.exists()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1008,
-					idxTableFile, bitmapFile);
-		} else if (!idxTableFile.isFile() || !bitmapFile.isFile()) {
+					idxTableFile);
+		} else if (!idxTableFile.isFile()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1009,
-					idxTableFile, bitmapFile);
+					idxTableFile);
 		} else if (LOG.isDebugEnabled()) {
 			LOG.debug("Loading FileCache from '" + modelLocation + "'.");
 		}
 
 		try {
 
-			// create the reader and writer
-			initializeReaderAndWriter();
+			// create the index writer
+			idxTableWriter = new RandomAccessFile(idxTableFile, "rws");
 
 			// read the index into memory
 			final FileInputStream f = new FileInputStream(idxTableFile);
@@ -222,51 +235,193 @@ public class FileCache implements IBitmapCache {
 			// TODO add e
 			throw new IllegalStateException();
 		}
-	}
 
-	protected void initializeReaderAndWriter() throws IOException {
+		// validate the read files
+		for (final IndexEntry entry : this.idx.values()) {
+			final int fileNr = entry.getFileNumber();
+			final File file = getFile(fileNr);
 
-		// bitmap reader and writer
-		bitmapReader = new RandomAccessFile(bitmapFile, "r");
-		bitmapWriter = new DataOutputStream(new FileOutputStream(bitmapFile,
-				true));
+			if (bitmapFiles.contains(file)) {
+				continue;
+			} else {
 
-		// index writer (and reader)
-		idxTableWriter = new RandomAccessFile(idxTableFile, "rws");
-	}
-
-	protected IndexEntry writeBitmap(final Bitmap bitmap) {
-		final int priorSize, afterSize;
-
-		try {
-			synchronized (bitmapWriter) {
-				priorSize = bitmapWriter.size();
-
-				bitmap.serialize(bitmapWriter);
-				bitmapWriter.flush();
-
-				afterSize = bitmapWriter.size();
+				// add the bitmapFile
+				try {
+					_addBitmapFile(file, fileNr);
+				} catch (final IOException e) {
+					// TODO add e
+					throw new IllegalStateException();
+				}
 			}
-		} catch (final IOException e) {
+		}
+
+		// set the number of the file
+		curFileNumber = bitmapFiles.size() - 1;
+	}
+
+	protected void _addBitmapFile(final File bitmapFile,
+			final int expectedNumber) throws IOException {
+
+		if (!bitmapFile.exists() || !bitmapFile.isFile()) {
 			// TODO add e
 			throw new IllegalStateException();
 		}
 
-		// calculate some values
-		return new IndexEntry(afterSize - priorSize, priorSize);
-	}
+		// bitmap reader and writer
+		final RandomAccessFile reader = new RandomAccessFile(bitmapFile, "r");
+		final DataOutputStream writer = new DataOutputStream(
+				new FileOutputStream(bitmapFile, true));
 
-	protected Bitmap readBitmap(final int pos) {
-		final Bitmap bitmap;
+		// add everything
+		if (expectedNumber < bitmapFiles.size()) {
+			if (bitmapFiles.set(expectedNumber, bitmapFile) != null
+					|| bitmapReaders.set(expectedNumber, reader) != null
+					|| bitmapWriters.set(expectedNumber, writer) != null) {
 
-		synchronized (bitmapReader) {
-			try {
-				bitmapReader.seek(pos);
-				bitmap = Bitmap.createFromInput(factory, bitmapReader);
-			} catch (final IOException e) {
-				// TODO e
+				// close the reader and writer cause they will not be used
+				Streams.closeIO(reader);
+				Streams.closeIO(writer);
+
+				// TODO add e
 				throw new IllegalStateException();
 			}
+		} else {
+
+			// add some empty placeholders
+			if (expectedNumber > bitmapFiles.size()) {
+				for (int i = bitmapFiles.size(); i < expectedNumber; i++) {
+					bitmapFiles.add(null);
+					bitmapReaders.add(null);
+					bitmapWriters.add(null);
+				}
+			}
+
+			// add the bitmapFile and it's reader and writer
+			bitmapFiles.add(bitmapFile);
+			bitmapReaders.add(reader);
+			bitmapWriters.add(writer);
+		}
+	}
+
+	protected void _createNewBitmapFile() throws IOException {
+
+		// the current file has to be increased by one
+		curFileNumber++;
+
+		// create the file
+		final File file = getFile(curFileNumber);
+		file.createNewFile();
+
+		// bitmap reader and writer
+		_addBitmapFile(file, curFileNumber);
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Created new BitmapFile with fileNumber '"
+					+ curFileNumber + "' at '" + file + "'.");
+		}
+	}
+
+	protected File getFile(final int nr) {
+		final String fileName = bitmapFileName.replace("{nr}", "" + nr);
+		return new File(getModelLocation(), fileName);
+	}
+
+	protected IndexEntry writeBitmap(final Bitmap bitmap) {
+
+		// get the byte representation
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final DataOutputStream w = new DataOutputStream(baos);
+		try {
+			bitmap.serialize(w);
+			w.flush();
+		} catch (final IOException e) {
+			// TODO add e
+			throw new IllegalStateException();
+		} finally {
+			Streams.closeIO(w);
+			Streams.closeIO(baos);
+		}
+		final byte[] result = baos.toByteArray();
+		final int resSize = result.length;
+
+		// check if the result can fit into a file
+		if (resSize > getMaxFileSizeInByte()) {
+			// TODO add e
+			throw new IllegalStateException();
+		}
+
+		int priorSize;
+		int fileNr;
+		boolean written;
+
+		// write the byte-array to the writer
+		bitmapLock.readLock().lock();
+		try {
+			final DataOutputStream writer = bitmapWriters.get(curFileNumber);
+
+			synchronized (writer) {
+				priorSize = writer.size();
+				fileNr = curFileNumber;
+
+				if (priorSize + resSize > getMaxFileSizeInByte()) {
+					written = false;
+				} else {
+					writer.write(result);
+					writer.flush();
+
+					written = true;
+				}
+			}
+		} catch (final IOException e) {
+			// TODO add e
+			throw new IllegalStateException();
+		} finally {
+			bitmapLock.readLock().unlock();
+		}
+
+		if (written) {
+
+			// create the entry the bitmap is stored at
+			return new IndexEntry(resSize, priorSize, fileNr);
+		} else {
+
+			// create a new file
+			bitmapLock.writeLock().lock();
+			try {
+				
+				// check if no other thread created a new file
+				if (fileNr == curFileNumber) {
+					_createNewBitmapFile();
+				}
+			} catch (final IOException e) {
+				// TODO add e
+				throw new IllegalStateException();
+			} finally {
+				bitmapLock.writeLock().unlock();
+			}
+
+			// try again to write the file
+			return writeBitmap(bitmap);
+		}
+	}
+
+	protected Bitmap readBitmap(final IndexEntry e) {
+		final Bitmap bitmap;
+
+		bitmapLock.readLock().lock();
+		try {
+			final RandomAccessFile reader = bitmapReaders
+					.get(e.getFileNumber());
+
+			synchronized (reader) {
+				reader.seek(e.getBitmapFilePosition());
+				bitmap = Bitmap.createFromInput(factory, reader);
+			}
+		} catch (final IOException ex) {
+			// TODO e
+			throw new IllegalStateException(ex);
+		} finally {
+			bitmapLock.readLock().unlock();
 		}
 
 		return bitmap;
@@ -279,15 +434,17 @@ public class FileCache implements IBitmapCache {
 		}
 
 		boolean doCache = false;
-
 		Bitmap bitmap;
 		try {
 			this.cacheLock.readLock().lock();
 			this.idxLock.readLock().lock();
 
+			// check the cache
 			bitmap = _getFromCache(bitmapId);
+
+			// if we couldn't find it get it from the hard-drive
 			if (bitmap == null) {
-				bitmap = _getFromIndex(bitmapId);
+				bitmap = _getFromIndex(idx.get(bitmapId));
 				doCache = true;
 			}
 
@@ -302,33 +459,54 @@ public class FileCache implements IBitmapCache {
 		}
 
 		/*
-		 * Cache the retrieved bitmap if needed. The cacheBitmap method ensures
-		 * that a more accurate bitmap is not replaced within the cache.
+		 * Cache the retrieved bitmap if needed. The cache might contain a newer
+		 * version by now (the release of the read and the acquiring of the
+		 * write gave other threads the chance to modify the cache). Therefore
+		 * we have to check again.
 		 */
 		if (doCache) {
-			cacheBitmap(bitmapId, bitmap);
+			this.cacheLock.writeLock().lock();
+			try {
+
+				// the cache might have been updated
+				if (!cache.containsKey(bitmapId)) {
+					_cacheBitmap(bitmapId, bitmap);
+				}
+			} finally {
+				this.cacheLock.writeLock().unlock();
+			}
+
 		}
+
+		// mark the bitmap as used
+		getStrategy().usedBitmap(bitmapId);
 
 		return bitmap;
 	}
 
 	protected void _cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap) {
 
-		// check if it makes sense to cache the bitmap
-
 		// add the value
-		this.cache.put(bitmapId, bitmap);
+		if (cache.put(bitmapId, bitmap) == null) {
 
-		// trigger a re-organization of the cache
-		_organizeCache();
+			/*
+			 * check if the cache size is exceeded and if needed, trigger a
+			 * re-organization of the cache
+			 */
+			if (cache.size() > cacheSize) {
+				_organizeCache();
+			}
+
+			// register the bitmap because it wasn't registered yet
+			getStrategy().registerBitmap(bitmapId);
+		}
 	}
 
 	protected void _organizeCache() {
 
-		// check if the cache size is exceeded and if organization is necessary
-		if (cache.size() < cacheMaxSize) {
-			return;
-		}
+		// determine the cleaning size, i.e. how many elements to be removed
+		final int cacheCleaningSize = Math.min(cacheSize,
+				Math.max(1, (int) (cacheSize * getCacheCleaningFactor())));
 
 		// determine which bitmaps to be released
 		final List<BitmapId<?>> removedIds = getStrategy()
@@ -337,7 +515,7 @@ public class FileCache implements IBitmapCache {
 		// log what is removed
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Organizing cache (size: " + cache.size()
-					+ ") by removing " + removedIds);
+					+ ") by removing '" + removedIds.size() + "'");
 		}
 
 		// remove the bitmaps from the cache and the owner
@@ -348,7 +526,9 @@ public class FileCache implements IBitmapCache {
 			cache.remove(removedId);
 
 			// release the bitmap from the owner
-			owner.releaseBitmap();
+			if (owner != null) {
+				owner.releaseBitmap();
+			}
 		}
 
 		if (LOG.isTraceEnabled()) {
@@ -358,13 +538,41 @@ public class FileCache implements IBitmapCache {
 	}
 
 	/**
+	 * Checks if the {@code expectedNewEntry} is newer than the {@code curEntry}
+	 * . The method returns {@code true} if {@code expectedNewEntry} is newer,
+	 * otherwise {@code false} is returned.
+	 * 
+	 * @param curEntry
+	 *            the entry to compare with
+	 * @param expectedNewEntry
+	 *            the entry to be expected newer
+	 * 
+	 * @return {@code true} if {@code expectedNewEntry} is newer, otherwise
+	 *         {@code false}
+	 */
+	protected boolean isNewerEntry(final IndexEntry curEntry,
+			final IndexEntry expectedNewEntry) {
+
+		if (curEntry == null) {
+			return true;
+		} else if (curEntry.getFileNumber() < expectedNewEntry.getFileNumber()) {
+			return true;
+		} else if (curEntry.getFileNumber() > expectedNewEntry.getFileNumber()) {
+			return false;
+		} else {
+			return curEntry.getBitmapFilePosition() < expectedNewEntry
+					.getBitmapFilePosition();
+		}
+	}
+
+	/**
 	 * Indexes the specified {@code entry} for the specified {@code bitmapId}.
 	 * 
 	 * @param bitmapId
 	 * @param entry
 	 * 
-	 * @return {@code true} if the bitmap refreshed (i.e. was new) the internal
-	 *         cache, otherwise {@code false}
+	 * @return {@code true} if the bitmap refreshed (i.e. was newer than the
+	 *         internally cached one), otherwise {@code false}
 	 * 
 	 * @throws FileCacheException
 	 *             if the {@code entry} is already indexed (i.e.
@@ -384,9 +592,7 @@ public class FileCache implements IBitmapCache {
 		 * happened because of asynchronous events
 		 */
 		final IndexEntry curEntry = this.idx.get(bitmapId);
-		if (curEntry != null
-				&& curEntry.getBitmapFilePosition() >= entry
-						.getBitmapFilePosition()) {
+		if (!isNewerEntry(curEntry, entry)) {
 			return false;
 		} else {
 			final byte[] bytes;
@@ -449,13 +655,11 @@ public class FileCache implements IBitmapCache {
 		return cache.get(bitmapId);
 	}
 
-	protected Bitmap _getFromIndex(final BitmapId<?> bitmapId) {
-		final IndexEntry entry = idx.get(bitmapId);
-
+	protected Bitmap _getFromIndex(final IndexEntry entry) {
 		if (entry == null) {
 			return null;
 		} else {
-			return readBitmap(entry.getBitmapFilePosition());
+			return readBitmap(entry);
 		}
 	}
 
@@ -469,7 +673,6 @@ public class FileCache implements IBitmapCache {
 
 		this.cacheLock.writeLock().lock();
 		this.idxLock.writeLock().lock();
-
 		try {
 			if (_indexBitmap(bitmapId, entry)) {
 				_cacheBitmap(bitmapId, bitmap);
@@ -526,15 +729,25 @@ public class FileCache implements IBitmapCache {
 			exceptionRegistry.throwException(FileCacheException.class, 1000);
 		} else if (config == null) {
 			this.location = getDefaultLocation();
-			this.strategy.setDefaults();
+			this.cacheSize = getDefaultCacheSize();
+			this.maxFileSizeInByte = getDefaultMaxFileSizeInByte();
 		} else if (config instanceof FileCacheConfig) {
 			final FileCacheConfig fcc = (FileCacheConfig) config;
-			this.location = fcc.getLocation();
 
-			// set the strategy values
-			this.strategy.setOldFactor(fcc.getOldFactor());
-			this.strategy.setTimeThresholdFactor(fcc.getTimeThresholdFactor());
-			this.strategy.setWeightingTime(fcc.getWeightingTime());
+			final File cLoc = fcc.getLocation();
+			this.location = cLoc == null ? getDefaultLocation() : fcc
+					.getLocation();
+
+			final Integer cSize = fcc.getCacheSize();
+			this.cacheSize = cSize == null ? getDefaultCacheSize() : cSize;
+
+			final Double cFactor = fcc.getCacheCleaningFactor();
+			this.cacheCleaningFactor = cFactor == null ? getDefaultCacheCleaningFactor()
+					: cFactor;
+
+			final Integer cMaxFileSizeInByte = fcc.getMaxFileSizeInByte();
+			this.maxFileSizeInByte = cMaxFileSizeInByte == null ? getDefaultMaxFileSizeInByte()
+					: cMaxFileSizeInByte;
 		} else {
 			exceptionRegistry.throwException(FileCacheException.class, 1001,
 					config.getClass().getName());
@@ -555,6 +768,23 @@ public class FileCache implements IBitmapCache {
 		return new File(".");
 	}
 
+	/**
+	 * Gets the default max size of the cache.
+	 * 
+	 * @return the default max size of the cache
+	 */
+	protected int getDefaultCacheSize() {
+		return 100000;
+	}
+
+	protected double getDefaultCacheCleaningFactor() {
+		return 0.2;
+	}
+
+	protected int getDefaultMaxFileSizeInByte() {
+		return Integer.MAX_VALUE;
+	}
+
 	@Override
 	public synchronized void release() {
 		if (!this.init) {
@@ -570,45 +800,59 @@ public class FileCache implements IBitmapCache {
 		 */
 		this.init = false;
 
-		// make sure we are the only once using the reader and writer
-		synchronized (bitmapReader) {
-			synchronized (bitmapWriter) {
-				synchronized (idxTableWriter) {
+		// release the index writer
+		synchronized (idxTableWriter) {
 
-					// release the indexTableWriter
-					if (idxTableWriter != null) {
-						try {
-							idxTableWriter.close();
-						} catch (final IOException e) {
-							exceptionRegistry.throwException(
-									FileCacheException.class, 1003, e,
-									idxTableFile);
-						}
-					}
-
-					// release the reader
-					if (bitmapReader != null) {
-						try {
-							bitmapReader.close();
-						} catch (final IOException e) {
-							exceptionRegistry.throwException(
-									FileCacheException.class, 1003, e,
-									bitmapFile);
-						}
-					}
-
-					// release the writer
-					if (bitmapWriter != null) {
-						try {
-							bitmapWriter.close();
-						} catch (final IOException e) {
-							exceptionRegistry.throwException(
-									FileCacheException.class, 1003, e,
-									bitmapFile);
-						}
-					}
+			// release the indexTableWriter
+			if (idxTableWriter != null) {
+				try {
+					idxTableWriter.close();
+				} catch (final IOException e) {
+					exceptionRegistry.throwException(FileCacheException.class,
+							1003, e, idxTableFile);
 				}
 			}
+		}
+
+		// make sure we are the only once using the reader and writer
+		bitmapLock.writeLock().lock();
+		try {
+
+			// release the reader
+			int fileCounter = 0;
+			for (final RandomAccessFile raf : bitmapReaders) {
+				try {
+					raf.close();
+				} catch (final IOException e) {
+					exceptionRegistry.throwException(FileCacheException.class,
+							1003, e, bitmapFiles.get(fileCounter));
+				}
+
+				fileCounter++;
+			}
+
+			// release the writer
+			fileCounter = 0;
+			for (final DataOutputStream dos : bitmapWriters) {
+				try {
+					dos.close();
+				} catch (final IOException e) {
+					exceptionRegistry.throwException(FileCacheException.class,
+							1003, e, bitmapFiles.get(fileCounter));
+				}
+
+				fileCounter++;
+			}
+
+			// reset the files
+			bitmapReaders.clear();
+			bitmapWriters.clear();
+			bitmapFiles.clear();
+
+			// reset the number
+			curFileNumber = -1;
+		} finally {
+			bitmapLock.writeLock().unlock();
 		}
 
 		// empty the arrays
@@ -626,7 +870,6 @@ public class FileCache implements IBitmapCache {
 	}
 
 	public boolean isCached(final BitmapId<?> id) {
-
 		this.cacheLock.writeLock().lock();
 		try {
 			return this.cache.containsKey(id);
@@ -648,6 +891,10 @@ public class FileCache implements IBitmapCache {
 		return size;
 	}
 
+	public int getMaxCacheSize() {
+		return cacheSize;
+	}
+
 	public void clearCache() {
 		this.cacheLock.writeLock().lock();
 		try {
@@ -655,5 +902,17 @@ public class FileCache implements IBitmapCache {
 		} finally {
 			this.cacheLock.writeLock().unlock();
 		}
+	}
+
+	public double getCacheCleaningFactor() {
+		return cacheCleaningFactor;
+	}
+
+	public int getMaxFileSizeInByte() {
+		return maxFileSizeInByte;
+	}
+
+	public int getNumberOfBitmapFiles() {
+		return curFileNumber + 1;
 	}
 }

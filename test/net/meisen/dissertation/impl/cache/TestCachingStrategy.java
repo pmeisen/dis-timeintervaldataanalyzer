@@ -1,13 +1,13 @@
 package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import net.meisen.dissertation.impl.cache.CachingStrategy.UsageStatistic;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
@@ -22,135 +22,12 @@ import org.junit.Test;
 public class TestCachingStrategy {
 
 	/**
-	 * Tests the usage of the {@code CachingStrategy} in a multi-threaded
-	 * environment.
-	 * 
-	 * @throws InterruptedException
-	 *             if a thread is interrupted
-	 */
-	@Test
-	public void testMultithreadingCount() throws InterruptedException {
-		final int amountOfThreads = 1000;
-		final int amountOfBitmaps = 10000;
-
-		final CachingStrategy strategy = new CachingStrategy();
-
-		// create some threads
-		final Thread[] threads = new Thread[amountOfThreads];
-		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i] = new Thread() {
-
-				@Override
-				public void run() {
-					for (int i = 0; i < amountOfBitmaps; i++) {
-						strategy.usedBitmap(new BitmapId<Integer>(i,
-								IntervalIndex.class));
-
-						assertTrue(strategy.getMaxCount() <= amountOfBitmaps);
-					}
-				};
-			};
-		}
-
-		// start all the threads
-		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i].start();
-		}
-
-		// make sure all threads are over
-		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i].join();
-		}
-
-		// check the result
-		final Map<BitmapId<?>, Integer> counts = strategy.getCounts();
-		for (final int count : counts.values()) {
-			assertEquals(amountOfThreads, count);
-		}
-
-		assertEquals(amountOfThreads, strategy.getMaxCount());
-	}
-
-	/**
-	 * Tests the maxCount value in a single threaded environment.
-	 */
-	@Test
-	public void testMaxCount() {
-		final int amountOfRuns = 10000;
-
-		final CachingStrategy strategy = new CachingStrategy();
-
-		for (int i = 0; i < amountOfRuns; i++) {
-			strategy.usedBitmap(new BitmapId<Integer>(0, IntervalIndex.class));
-
-			assertTrue(strategy.getMaxCount() == i + 1);
-		}
-	}
-
-	/**
-	 * Tests the reading of maxCount in a multi-threaded environment.
-	 * 
-	 * @throws InterruptedException
-	 *             if a thread is interrupted
-	 */
-	@Test
-	public void testMultithreadedMaxCount() throws InterruptedException {
-		final int amountOfThreads = 1000;
-		final int amountOfRuns = 10000;
-
-		final CachingStrategy strategy = new CachingStrategy();
-
-		// create some threads
-		final Thread[] threads = new Thread[amountOfThreads];
-		for (int i = 0; i < amountOfThreads; i++) {
-			final int nr = i;
-
-			threads[i] = new Thread() {
-
-				@Override
-				public void run() {
-					if (nr == 0) {
-						for (int i = 0; i < amountOfRuns; i++) {
-							strategy.usedBitmap(new BitmapId<Integer>(0,
-									IntervalIndex.class));
-
-							assertEquals(i + 1, strategy.getMaxCount());
-						}
-					} else {
-						strategy.usedBitmap(new BitmapId<Integer>(nr,
-								IntervalIndex.class));
-
-						while (strategy.getMaxCount() != amountOfRuns) {
-							assertNotNull(strategy.getCounts());
-							assertTrue(strategy.getLastUsage() > 0);
-
-							try {
-								Thread.sleep(50);
-							} catch (final InterruptedException e) {
-								fail(e.getMessage());
-							}
-						}
-					}
-				};
-			};
-		}
-
-		// start all the threads
-		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i].start();
-		}
-
-		// make sure all threads are over
-		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i].join();
-		}
-	}
-
-	/**
 	 * Helper method to create a {@code CachingStrategy}.
 	 * 
-	 * @param amount
-	 *            the amount of entries to add to the {@code CachingStrategy}
+	 * @param amountOfBitmaps
+	 *            the amount of bitmaps to be added
+	 * @param amountUsed
+	 *            the amount of usages of the first bitmap
 	 * @param initValue
 	 *            the timestamp to be used for initialization
 	 * @param currentTime
@@ -160,8 +37,8 @@ public class TestCachingStrategy {
 	 * 
 	 * @return a {@code CachingStrategy} with the specified settings
 	 */
-	protected CachingStrategy createStrategy(final int amount,
-			final long initValue, final long currentTime,
+	protected CachingStrategy createStrategy(final int amountOfBitmaps,
+			final int amountUsed, final long initValue, final long currentTime,
 			final long lastValueAdded) {
 		final CachingStrategy strategy = new CachingStrategy(new Clock() {
 
@@ -194,54 +71,172 @@ public class TestCachingStrategy {
 					return -1l;
 				}
 			}
-
-			@Override
-			public long getAmountOfASecond() {
-				return 1l;
-			}
 		});
 
 		// add a bitmap so that we have the strategy initialized
-		for (int i = 0; i < amount; i++) {
-			strategy.usedBitmap(new BitmapId<Integer>(0, IntervalIndex.class));
+		for (int id = 0; id < amountOfBitmaps; id++) {
+			strategy.usedBitmap(new BitmapId<Integer>(id, IntervalIndex.class));
+
+			if (id == 0) {
+				for (int i = 0; i < amountUsed; i++) {
+					strategy.usedBitmap(new BitmapId<Integer>(id,
+							IntervalIndex.class));
+				}
+			}
 		}
 
 		return strategy;
 	}
 
 	/**
-	 * Tests the weighting implementation of the {@code CachingStrategy}.
+	 * Tests the usage of the {@code CachingStrategy} in a multi-threaded
+	 * environment.
+	 * 
+	 * @throws InterruptedException
+	 *             if a thread is interrupted
 	 */
 	@Test
-	public void testWeighting() {
+	public void testMultithreadingCount() throws InterruptedException {
+		final int amountOfThreads = 100;
+		final int amountOfBitmaps = 10000;
+
+		final CachingStrategy strategy = new CachingStrategy();
+
+		// create some threads
+		final Thread[] threads = new Thread[amountOfThreads];
+		for (int i = 0; i < amountOfThreads; i++) {
+			threads[i] = new Thread() {
+
+				@Override
+				public void run() {
+					for (int i = 0; i < amountOfBitmaps; i++) {
+						strategy.usedBitmap(new BitmapId<Integer>(i,
+								IntervalIndex.class));
+					}
+				};
+			};
+		}
+
+		// start all the threads
+		for (int i = 0; i < amountOfThreads; i++) {
+			threads[i].start();
+		}
+
+		// make sure all threads are over
+		for (int i = 0; i < amountOfThreads; i++) {
+			threads[i].join();
+		}
+
+		// check the result
+		final Map<BitmapId<?>, Integer> counts = strategy.getCounts();
+		for (final int count : counts.values()) {
+			assertEquals(amountOfThreads, count);
+		}
+	}
+
+	/**
+	 * Determine the retrieval of the less-used elements.
+	 */
+	@Test
+	public void testDetermineLessUsed() {
+		List<Integer> expected;
+		List<BitmapId<?>> l;
 		CachingStrategy strategy;
 
 		/*
-		 * The strategy wasn't updated for a long time (0l), and the element was
-		 * the one which updated the strategy (0l).
+		 * test an empty strategy
 		 */
-		strategy = createStrategy(1, 0l, 86400l, 0l);
-		assertEquals(100, strategy._weight(100, 0l));
+		strategy = new CachingStrategy();
+		l = strategy.determineLessUsedList(100, true);
+		assertEquals(0, l.size());
+		l = strategy.determineLessUsedList(20, false);
+		assertEquals(0, l.size());
 
 		/*
-		 * The strategy was recently updated (86400l), but the element to be
-		 * weighted is old (0l)
+		 * Test a retrieval of less elements than available without update
 		 */
-		strategy = createStrategy(1, 0l, 86400l, 86400l);
-		assertEquals(CachingStrategy.removeWeight, strategy._weight(100, 0l));
+		strategy = createStrategy(1000, 1, 0, 0, 0);
+		l = strategy.determineLessUsedList(100, false);
+		assertEquals(100, l.size());
+		assertEquals(1000, strategy.size());
+
+		// create the list of expected ids
+		expected = new ArrayList<Integer>();
+		for (int i = 0; i < 100; i++) {
+			expected.add(i);
+		}
+
+		// remove the once found
+		for (final BitmapId<?> id : l) {
+			assertTrue(expected.remove(id.getId()));
+		}
+
+		// everything has to be removed
+		assertEquals(0, expected.size());
 
 		/*
-		 * The strategy was shortly updated (80000l), but no element can be old
-		 * based on the definition.
+		 * Test a retrieval of less elements than available with update
 		 */
-		strategy = createStrategy(1, 0l, 86400l, 80000l);
-		assertEquals(100, strategy._weight(100, 0l));
+		l = strategy.determineLessUsedList(100, true);
+		assertEquals(100, l.size());
+		assertEquals(900, strategy.size());
+
+		// create the list of expected ids
+		expected = new ArrayList<Integer>();
+		for (int i = 0; i < 100; i++) {
+			expected.add(i);
+		}
+
+		// remove the once found
+		for (final BitmapId<?> id : l) {
+			assertTrue("Not found: " + id.getId(), expected.remove(id.getId()));
+		}
+
+		// everything has to be removed
+		assertEquals(0, expected.size());
 
 		/*
-		 * High update ratio (1l), element is therefore assumed to be really
-		 * old.
+		 * Test a retrieval of more elements than available without update
 		 */
-		strategy = createStrategy(1, 0l, 86400l, 86399l);
-		assertEquals(Integer.MIN_VALUE, strategy._weight(100, 0l));
+		strategy = createStrategy(5, 1, 0, 0, 0);
+		l = strategy.determineLessUsedList(100, false);
+		assertEquals(5, l.size());
+		assertEquals(5, strategy.size());
+
+		/*
+		 * Test a retrieval of more elements than available with update
+		 */
+		l = strategy.determineLessUsedList(100, true);
+		assertEquals(5, l.size());
+		assertEquals(0, strategy.size());
+
+		/*
+		 * Test a retrieval in correct order without update
+		 */
+		strategy = new CachingStrategy();
+		strategy.usedBitmap(new BitmapId<Integer>(0, IntervalIndex.class));
+		strategy.usedBitmap(new BitmapId<Integer>(1, IntervalIndex.class));
+		strategy.usedBitmap(new BitmapId<Integer>(2, IntervalIndex.class));
+		strategy.usedBitmap(new BitmapId<Integer>(3, IntervalIndex.class));
+		strategy.usedBitmap(new BitmapId<Integer>(4, IntervalIndex.class));
+		strategy.usedBitmap(new BitmapId<Integer>(0, IntervalIndex.class));
+
+		l = strategy.determineLessUsedList(3, false);
+		assertEquals(3, l.size());
+		assertEquals(1, l.get(0).getId());
+		assertEquals(2, l.get(1).getId());
+		assertEquals(3, l.get(2).getId());
+
+		l = strategy.determineLessUsedList(3, true);
+		assertEquals(3, l.size());
+		assertEquals(2, strategy.size());
+		assertEquals(1, l.get(0).getId());
+		assertEquals(2, l.get(1).getId());
+		assertEquals(3, l.get(2).getId());
+		l = strategy.determineLessUsedList(3, true);
+		assertEquals(2, l.size());
+		assertEquals(0, strategy.size());
+		assertEquals(4, l.get(0).getId());
+		assertEquals(0, l.get(1).getId());
 	}
 }

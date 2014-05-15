@@ -11,14 +11,19 @@
         <property name="location" value="{$folder}" />
       </xsl:if>
 
-      <xsl:if test="file:strategy[@timeThresholdFactor]">
-        <xsl:variable name="timeThresholdFactor" select="file:strategy/@timeThresholdFactor" />
-        <property name="timeThresholdFactor" value="{$timeThresholdFactor}" />
+      <xsl:if test="@size">
+        <xsl:variable name="size" select="@size" />
+        <property name="cacheSize" value="{$size}" />
       </xsl:if>
       
-      <xsl:if test="file:strategy[@weightingTime]">
-        <xsl:variable name="weightingTime" select="file:strategy/@weightingTime" />
-        <property name="weightingTime" value="{$weightingTime}" />
+      <xsl:if test="@maxFileSize">
+        <xsl:variable name="maxFileSize" select="@maxFileSize" />
+        <property name="maxFileSize" value="{$maxFileSize}" />
+      </xsl:if>
+      
+      <xsl:if test="@cleaningFactor">
+        <xsl:variable name="cleaningFactor" select="@cleaningFactor" />
+        <property name="cacheCleaningFactor" value="{$cleaningFactor}" />
       </xsl:if>
     </bean>
   </xsl:template>

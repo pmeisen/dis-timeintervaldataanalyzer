@@ -16,10 +16,11 @@ public class IndexEntry {
 	/**
 	 * The size of an {@code IndexEntry} as bytes.
 	 */
-	public static final int idxEntrySizeInBytes = 12;
+	public static final int idxEntrySizeInBytes = 16;
 
 	private final int size;
 	private final int bitmapFilePosition;
+	private final int fileNumber;
 
 	private int indexFileNumber;
 
@@ -40,11 +41,13 @@ public class IndexEntry {
 		// deserialize the values
 		final int size = Streams.byteToInt(Arrays.copyOfRange(bytes, 0, 4));
 		final int bfp = Streams.byteToInt(Arrays.copyOfRange(bytes, 4, 8));
-		final int ifp = Streams.byteToInt(Arrays.copyOfRange(bytes, 8, 12));
+		final int fn = Streams.byteToInt(Arrays.copyOfRange(bytes, 8, 12));
+		final int ifp = Streams.byteToInt(Arrays.copyOfRange(bytes, 12, 16));
 
 		// set the values
 		this.size = size;
 		this.bitmapFilePosition = bfp;
+		this.fileNumber = fn;
 		this.indexFileNumber = ifp;
 	}
 
@@ -58,10 +61,14 @@ public class IndexEntry {
 	 * @param bitmapFilePosition
 	 *            the position (in bytes) of the entry within the bitmap-file
 	 *            (see {@link FileCache#bitmapFileName})
+	 * @param fileNumber
+	 *            the number of the file the entry belongs to
 	 */
-	public IndexEntry(final int size, final int bitmapFilePosition) {
+	public IndexEntry(final int size, final int bitmapFilePosition,
+			final int fileNumber) {
 		this.size = size;
 		this.bitmapFilePosition = bitmapFilePosition;
+		this.fileNumber = fileNumber;
 		this.indexFileNumber = -1;
 	}
 
@@ -99,6 +106,15 @@ public class IndexEntry {
 	}
 
 	/**
+	 * Gets the number of the file the entry belongs to.
+	 * 
+	 * @return the number of the file the entry belongs to
+	 */
+	public int getFileNumber() {
+		return fileNumber;
+	}
+
+	/**
 	 * Sets the number of the {@code IndexEntry} for the entry.
 	 * 
 	 * @param indexFileNumber
@@ -114,15 +130,17 @@ public class IndexEntry {
 	 * @return the byte representation of the {@code IndexEntry}
 	 */
 	public byte[] bytes() {
-		final byte[] bytesSize = Streams.intToByte(size);
-		final byte[] bytesBfp = Streams.intToByte(bitmapFilePosition);
-		final byte[] bytesIfp = Streams.intToByte(indexFileNumber);
+		final byte[] bytesSize = Streams.intToByte(getSize());
+		final byte[] bytesBfp = Streams.intToByte(getBitmapFilePosition());
+		final byte[] bytesFn = Streams.intToByte(getFileNumber());
+		final byte[] bytesIfp = Streams.intToByte(getIndexFileNumber());
 
-		return Streams.combineBytes(bytesSize, bytesBfp, bytesIfp);
+		return Streams.combineBytes(bytesSize, bytesBfp, bytesFn, bytesIfp);
 	}
 
 	@Override
 	public String toString() {
-		return bitmapFilePosition + ", " + size + ", " + indexFileNumber;
+		return bitmapFilePosition + ", " + size + ", " + indexFileNumber + ", "
+				+ fileNumber;
 	}
 }

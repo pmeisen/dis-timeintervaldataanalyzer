@@ -17,8 +17,4 @@ public class Clock {
 	public long getCurrentTime() {
 		return System.currentTimeMillis();
 	}
-
-	public long getAmountOfASecond() {
-		return 1000l;
-	}
 }
