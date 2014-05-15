@@ -190,7 +190,7 @@ public class TestFileCache extends ModuleBasedTest {
 	public void testPersistance() {
 		fc.initialize(model.getId());
 
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < 50000; i++) {
 			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
 					"Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
@@ -467,10 +467,13 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testUsageScenario() throws InterruptedException {
+		final int amountOfBitmaps = 30000;
+		final int amountOfRuns = 30000;
+
 		final FileCacheConfig config = new FileCacheConfig();
 		config.setLocation(fc.getLocation());
-		config.setMaxFileSize("10M");
-		config.setCacheSize(80000);
+		config.setMaxFileSize(30 * amountOfBitmaps + "b");
+		config.setCacheSize((int) (amountOfBitmaps * 0.7));
 		fc.setConfig(config);
 
 		// initialize the model
@@ -481,21 +484,21 @@ public class TestFileCache extends ModuleBasedTest {
 
 			@Override
 			public void run() {
-				_createBitmaps(100000, 0);
+				_createBitmaps(amountOfBitmaps, 0);
 			}
 		};
 		final Thread tIdPlus1Bitmap = new Thread() {
 
 			@Override
 			public void run() {
-				_createBitmaps(100000, 1);
+				_createBitmaps(amountOfBitmaps, 1);
 			}
 		};
 		final Thread tIdPlus2Bitmap = new Thread() {
 
 			@Override
 			public void run() {
-				_createBitmaps(100000, 2);
+				_createBitmaps(amountOfBitmaps, 2);
 			}
 		};
 
@@ -514,14 +517,16 @@ public class TestFileCache extends ModuleBasedTest {
 
 			@Override
 			public void run() {
-				_getRndBitmaps(new Random(), 500000);
+				_getRndBitmaps(new Random(), amountOfRuns,
+						(int) (amountOfBitmaps * 0.5));
 			}
 		};
 		final Thread tGetBitmap2 = new Thread() {
 
 			@Override
 			public void run() {
-				_getRndBitmaps(new Random(), 500000);
+				_getRndBitmaps(new Random(), amountOfRuns,
+						(int) (amountOfBitmaps * 0.5));
 			}
 		};
 
@@ -547,10 +552,13 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	protected void _createBitmaps(final int amount, final int offset) {
 		for (int i = 0; i < amount; i++) {
+
+			// get the bitmap and check the cardinality
 			final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
 			assertTrue(bitmap.determineCardinality() == 0
 					|| bitmap.determineCardinality() == 1);
 
+			// cache a newly created bitmap
 			fc.cacheBitmap(createBitmapId(i),
 					Bitmap.createBitmap(model.getIndexFactory(), i + offset));
 		}
@@ -563,10 +571,13 @@ public class TestFileCache extends ModuleBasedTest {
 	 *            the randomizer
 	 * @param runs
 	 *            the amounts of runs to check
+	 * @param maxNumber
+	 *            the max-id (exclusive) of a bitmap to be retrieved
 	 */
-	protected void _getRndBitmaps(final Random rnd, final int runs) {
+	protected void _getRndBitmaps(final Random rnd, final int runs,
+			final int maxNumber) {
 		for (int i = 0; i < runs; i++) {
-			final int nr = rnd.nextInt(50000);
+			final int nr = rnd.nextInt(maxNumber);
 			final Bitmap bitmap = fc.getBitmap(createBitmapId(nr));
 			final int[] ids = bitmap.getIds();
 
