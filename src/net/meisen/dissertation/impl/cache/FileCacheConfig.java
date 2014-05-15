@@ -47,22 +47,51 @@ public class FileCacheConfig implements IBitmapCacheConfig {
 		return location;
 	}
 
+	/**
+	 * Gets the maximal amount of bitmaps to be cached.
+	 * 
+	 * @return the maximal amount of bitmaps to be cached
+	 */
 	public Integer getCacheSize() {
 		return cacheSize;
 	}
 
+	/**
+	 * Specifies the maximal amount of bitmaps to be cached.
+	 * 
+	 * @param cacheSize
+	 *            the maximal amount of bitmaps to be cached
+	 */
 	public void setCacheSize(final Integer cacheSize) {
 		this.cacheSize = cacheSize;
 	}
 
+	/**
+	 * Gets the factor of cleaning, i.e. the amount of bitmaps to be released
+	 * when the cache is full.
+	 * 
+	 * @return the factor of cleaning
+	 */
 	public Double getCacheCleaningFactor() {
 		return cacheCleaningFactor;
 	}
 
+	/**
+	 * Sets the factor of cleaning, i.e. the amount of bitmaps to be released
+	 * when the cache is full.
+	 * 
+	 * @param cacheCleaningFactor
+	 *            the factor of cleaning
+	 */
 	public void setCacheCleaningFactor(final Double cacheCleaningFactor) {
 		this.cacheCleaningFactor = cacheCleaningFactor;
 	}
 
+	/**
+	 * Gets the maximal file-size in bytes used for a persisted bitmap-file.
+	 * 
+	 * @return the maximal file-size in bytes
+	 */
 	public Integer getMaxFileSizeInByte() {
 		if (maxFileSize == null) {
 			return null;
@@ -101,10 +130,25 @@ public class FileCacheConfig implements IBitmapCacheConfig {
 		}
 	}
 
+	/**
+	 * Gets the maximal file-size used for a persisted bitmap-file. The value
+	 * can be specified by 1g (i.e. 1 gigabyte), m (for megabyte), k (for
+	 * kilobyte) or b (for bytes).
+	 * 
+	 * @return the maximal file-size
+	 */
 	public String getMaxFileSize() {
 		return maxFileSize;
 	}
 
+	/**
+	 * Sets the maximal file-size used for a persisted bitmap-file. The value
+	 * can be specified by 1g (i.e. 1 gigabyte), m (for megabyte), k (for
+	 * kilobyte) or b (for bytes).
+	 * 
+	 * @param maxFileSize
+	 *            the maximal file-size
+	 */
 	public void setMaxFileSize(final String maxFileSize) {
 		this.maxFileSize = maxFileSize;
 	}

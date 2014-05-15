@@ -60,6 +60,13 @@ public class CachingStrategy {
 		list = new LinkedList<BitmapId<?>>();
 	}
 
+	/**
+	 * Registers a bitmap to be part of the {@code CachingStrategy}. The bitmap
+	 * is not assumed to be used, i.e. all counters are set to {@code 0}.
+	 * 
+	 * @param bitmapId
+	 *            the bitmap to be registered
+	 */
 	public void registerBitmap(final BitmapId<?> bitmapId) {
 		counterLock.writeLock().lock();
 		try {

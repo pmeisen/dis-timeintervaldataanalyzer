@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -475,10 +476,12 @@ public class TestFileCache extends ModuleBasedTest {
 			@Override
 			public void run() {
 				for (int i = 0; i < 100000; i++) {
-					fc.getBitmap(createBitmapId(i));
+					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+					assertTrue(bitmap.determineCardinality() == 0
+							|| bitmap.determineCardinality() == 1);
+
 					fc.cacheBitmap(createBitmapId(i),
 							Bitmap.createBitmap(model.getIndexFactory(), i));
-					fc.getBitmap(createBitmapId(i));
 				}
 			}
 		};
@@ -487,10 +490,12 @@ public class TestFileCache extends ModuleBasedTest {
 			@Override
 			public void run() {
 				for (int i = 0; i < 100000; i++) {
-					fc.getBitmap(createBitmapId(i));
+					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+					assertTrue(bitmap.determineCardinality() == 0
+							|| bitmap.determineCardinality() == 1);
+
 					fc.cacheBitmap(createBitmapId(i),
 							Bitmap.createBitmap(model.getIndexFactory(), i + 1));
-					fc.getBitmap(createBitmapId(i));
 				}
 			}
 		};
@@ -499,10 +504,12 @@ public class TestFileCache extends ModuleBasedTest {
 			@Override
 			public void run() {
 				for (int i = 0; i < 100000; i++) {
-					fc.getBitmap(createBitmapId(i));
+					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+					assertTrue(bitmap.determineCardinality() == 0
+							|| bitmap.determineCardinality() == 1);
+
 					fc.cacheBitmap(createBitmapId(i),
 							Bitmap.createBitmap(model.getIndexFactory(), i + 2));
-					fc.getBitmap(createBitmapId(i));
 				}
 			}
 		};
@@ -519,10 +526,13 @@ public class TestFileCache extends ModuleBasedTest {
 
 		// now get the bitmaps
 		final Thread tGetBitmap1 = new Thread() {
+			final Random rnd = new Random();
+
 			@Override
 			public void run() {
-				for (int i = 0; i < 80000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+				for (int i = 0; i < 100000; i++) {
+					final Bitmap bitmap = fc.getBitmap(createBitmapId(rnd
+							.nextInt(100000)));
 					final int[] ids = bitmap.getIds();
 
 					assertEquals(1, ids.length);
@@ -532,11 +542,13 @@ public class TestFileCache extends ModuleBasedTest {
 			}
 		};
 		final Thread tGetBitmap2 = new Thread() {
+			final Random rnd = new Random();
 
 			@Override
 			public void run() {
-				for (int i = 20000; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+				for (int i = 0; i < 100000; i++) {
+					final Bitmap bitmap = fc.getBitmap(createBitmapId(rnd
+							.nextInt(100000)));
 					final int[] ids = bitmap.getIds();
 
 					assertEquals(1, ids.length);
