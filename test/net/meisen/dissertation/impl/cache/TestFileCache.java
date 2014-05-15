@@ -459,6 +459,12 @@ public class TestFileCache extends ModuleBasedTest {
 		}
 	}
 
+	/**
+	 * Tests some sample usage scenario.
+	 * 
+	 * @throws InterruptedException
+	 *             if a thread gets interrupted
+	 */
 	@Test
 	public void testUsageScenario() throws InterruptedException {
 		final FileCacheConfig config = new FileCacheConfig();
@@ -475,42 +481,21 @@ public class TestFileCache extends ModuleBasedTest {
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
-					assertTrue(bitmap.determineCardinality() == 0
-							|| bitmap.determineCardinality() == 1);
-
-					fc.cacheBitmap(createBitmapId(i),
-							Bitmap.createBitmap(model.getIndexFactory(), i));
-				}
+				_createBitmaps(100000, 0);
 			}
 		};
 		final Thread tIdPlus1Bitmap = new Thread() {
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
-					assertTrue(bitmap.determineCardinality() == 0
-							|| bitmap.determineCardinality() == 1);
-
-					fc.cacheBitmap(createBitmapId(i),
-							Bitmap.createBitmap(model.getIndexFactory(), i + 1));
-				}
+				_createBitmaps(100000, 1);
 			}
 		};
 		final Thread tIdPlus2Bitmap = new Thread() {
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
-					assertTrue(bitmap.determineCardinality() == 0
-							|| bitmap.determineCardinality() == 1);
-
-					fc.cacheBitmap(createBitmapId(i),
-							Bitmap.createBitmap(model.getIndexFactory(), i + 2));
-				}
+				_createBitmaps(100000, 2);
 			}
 		};
 
@@ -526,35 +511,17 @@ public class TestFileCache extends ModuleBasedTest {
 
 		// now get the bitmaps
 		final Thread tGetBitmap1 = new Thread() {
-			final Random rnd = new Random();
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(rnd
-							.nextInt(100000)));
-					final int[] ids = bitmap.getIds();
-
-					assertEquals(1, ids.length);
-					assertTrue(bitmap.toString(), ids[0] == i
-							|| ids[0] == i + 1 || ids[0] == i + 2);
-				}
+				_getRndBitmaps(new Random(), 500000);
 			}
 		};
 		final Thread tGetBitmap2 = new Thread() {
-			final Random rnd = new Random();
 
 			@Override
 			public void run() {
-				for (int i = 0; i < 100000; i++) {
-					final Bitmap bitmap = fc.getBitmap(createBitmapId(rnd
-							.nextInt(100000)));
-					final int[] ids = bitmap.getIds();
-
-					assertEquals(1, ids.length);
-					assertTrue(bitmap.toString(), ids[0] == i
-							|| ids[0] == i + 1 || ids[0] == i + 2);
-				}
+				_getRndBitmaps(new Random(), 500000);
 			}
 		};
 
@@ -565,6 +532,48 @@ public class TestFileCache extends ModuleBasedTest {
 		// join with this one
 		tGetBitmap1.join();
 		tGetBitmap2.join();
+	}
+
+	/**
+	 * Helper method for {@link #testUsageScenario()}. The method creates
+	 * {@code amount} bitmaps, whereby the id is defined by the number of it's
+	 * creation. The created bitmap will have the bit sets defined by
+	 * {@code id + offset}.
+	 * 
+	 * @param amount
+	 *            the amount of bitmaps to be created
+	 * @param offset
+	 *            the offset of the set bit to the bitmap's id
+	 */
+	protected void _createBitmaps(final int amount, final int offset) {
+		for (int i = 0; i < amount; i++) {
+			final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+			assertTrue(bitmap.determineCardinality() == 0
+					|| bitmap.determineCardinality() == 1);
+
+			fc.cacheBitmap(createBitmapId(i),
+					Bitmap.createBitmap(model.getIndexFactory(), i + offset));
+		}
+	}
+
+	/**
+	 * Picks random bitmaps and checks the values.
+	 * 
+	 * @param rnd
+	 *            the randomizer
+	 * @param runs
+	 *            the amounts of runs to check
+	 */
+	protected void _getRndBitmaps(final Random rnd, final int runs) {
+		for (int i = 0; i < runs; i++) {
+			final int nr = rnd.nextInt(50000);
+			final Bitmap bitmap = fc.getBitmap(createBitmapId(nr));
+			final int[] ids = bitmap.getIds();
+
+			assertEquals(1, ids.length);
+			assertTrue(bitmap.toString(), ids[0] == nr || ids[0] == nr + 1
+					|| ids[0] == nr + 2);
+		}
 	}
 
 	/**
