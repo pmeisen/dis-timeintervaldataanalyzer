@@ -8,10 +8,10 @@ import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
+import net.meisen.general.genmisc.types.Streams;
+import net.meisen.general.genmisc.types.Strings;
 
 import org.junit.Test;
-
-import com.google.common.base.Strings;
 
 /**
  * Tests the implementation of a {@code BitmapId}.
@@ -95,8 +95,10 @@ public class TestBitmapId extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testMaximumSize() {
-		final String fullId = Strings.repeat("A", Byte.MAX_VALUE - 1);
-		final String fullClassifier = Strings.repeat("A", Byte.MAX_VALUE);
+		final String fullId = Strings.repeat('A', Byte.MAX_VALUE - 1
+				- Streams.SIZEOF_INT);
+		final String fullClassifier = Strings.repeat('A', Byte.MAX_VALUE - 1
+				- Streams.SIZEOF_INT);
 
 		final BitmapId<?> id = new BitmapId<String>(fullId,
 				IntervalIndex.class, fullClassifier);
@@ -113,13 +115,13 @@ public class TestBitmapId extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testExceptionWhenSizeOfIdIsExceeded() {
-		final String full = Strings.repeat("A", Byte.MAX_VALUE);
+		final String full = Strings.repeat('A',
+				Byte.MAX_VALUE - Streams.objectOverhead(String.class) + 1);
 
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("identifier '" + full + "' is too long");
 
-		final BitmapId<?> id = new BitmapId<String>(full, IntervalIndex.class,
-				full);
+		final BitmapId<?> id = new BitmapId<String>(full, IntervalIndex.class);
 		id.bytes();
 	}
 
@@ -128,12 +130,26 @@ public class TestBitmapId extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testExceptionWhenSizeOfClassifierIsExceeded() {
-		final String full = Strings.repeat("A", Byte.MAX_VALUE + 1);
+		final String full = Strings.repeat('A',
+				Byte.MAX_VALUE - Streams.objectOverhead(String.class) + 1);
 
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("classifier '" + full + "' is too long");
 
 		final BitmapId<?> id = new BitmapId<String>("A", IntervalIndex.class,
+				full);
+		id.bytes();
+	}
+
+	/**
+	 * Tests the usage of id and classifier with maximal size.
+	 */
+	@Test
+	public void testMaxSizes() {
+		final String full = Strings.repeat('A',
+				Byte.MAX_VALUE - Streams.objectOverhead(String.class));
+
+		final BitmapId<?> id = new BitmapId<String>(full, IntervalIndex.class,
 				full);
 		id.bytes();
 	}
