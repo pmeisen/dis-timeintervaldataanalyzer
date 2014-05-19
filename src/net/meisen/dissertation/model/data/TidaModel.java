@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.data;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ import net.meisen.dissertation.model.persistence.IPersistable;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +66,7 @@ public class TidaModel implements IPersistable {
 
 	private final String id;
 	private final String name;
+	private final File location;
 
 	private TidaIndex idx;
 
@@ -106,8 +109,26 @@ public class TidaModel implements IPersistable {
 	 *            name will be equal to the {@code id}
 	 */
 	public TidaModel(final String id, final String name) {
+		this(id, name, null);
+	}
+
+	/**
+	 * /** Creates a {@code TimeIntervalDataAnalyzerModel} with the specified
+	 * {@code id} and the specified {@code name}, the instance must be wired
+	 * prior to it's usage to ensure that an {@code IndexFactory} is available.
+	 * 
+	 * @param id
+	 *            the identifier used for the {@code MetaDataModel}
+	 * @param name
+	 *            the name of the {@code MetaDataModel}, if {@code null} the
+	 *            name will be equal to the {@code id}
+	 * @param location
+	 *            the working directory of the model
+	 */
+	public TidaModel(final String id, final String name, final File location) {
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
+		this.location = location == null ? new File(".", this.id) : location;
 
 		// set the default value
 		setMetaDataHandling(null);
@@ -151,11 +172,62 @@ public class TidaModel implements IPersistable {
 			exceptionRegistry.throwException(TidaModelException.class, 1000);
 		}
 
+		// make sure the location exists
+		final File loc = getLocation();
+		if (!loc.exists() && !getLocation().mkdirs()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1002,
+					loc);
+		} else if (loc.exists() && !loc.isDirectory()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1003,
+					loc);
+		}
+
 		// initialize the cache
-		this.cache.initialize(getId());
+		this.cache.initialize(getId(), getLocation());
 
 		// create the index
 		this.idx = new TidaIndex(this);
+
+		// log the init
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Initialized model '" + getId() + "' at '" + getLocation()
+					+ "'.");
+		}
+	}
+
+	/**
+	 * Release the model and all the resources bound to it.
+	 * 
+	 * @param deleteLocation
+	 *            {@code true} if all folders should be deleted, which were
+	 *            created by the model, otherwise {@code false}
+	 */
+	public void release(final boolean deleteLocation) {
+		if (!isInitialized()) {
+			return;
+		}
+
+		// log the release
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Releasing model '" + getId() + "' at '" + getLocation()
+					+ "'.");
+		}
+
+		// release the cache
+		this.cache.release();
+
+		// delete created files if necessary
+		if (!Files.deleteDir(getLocation())) {
+			exceptionRegistry.throwException(TidaModelException.class, 1004,
+					getLocation());
+		}
+	}
+
+	/**
+	 * Releases all the resources
+	 */
+	public void release() {
+		release(false);
 	}
 
 	/**
@@ -439,5 +511,14 @@ public class TidaModel implements IPersistable {
 	 */
 	public IBitmapCache getCache() {
 		return cache;
+	}
+
+	/**
+	 * The location to store the model's data.
+	 * 
+	 * @return the model's location
+	 */
+	public File getLocation() {
+		return location;
 	}
 }

@@ -166,6 +166,15 @@ public class DefaultValues {
 	}
 
 	/**
+	 * Gets the default location to be used if no other is defined.
+	 * 
+	 * @return the default location
+	 */
+	public static String getDefaultLocation() {
+		return ".";
+	}
+
+	/**
 	 * Gets the default cache implementation to be used.
 	 * 
 	 * @return the default cache implementation to be used

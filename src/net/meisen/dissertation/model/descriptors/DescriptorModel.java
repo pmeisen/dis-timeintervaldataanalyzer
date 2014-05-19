@@ -615,7 +615,6 @@ public class DescriptorModel<I extends Object> {
 
 		// make sure it was added
 		if (!added && isFailOnDuplicates()) {
-			System.out.println(descriptor);
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor.getUniqueString(), getId());
 		}

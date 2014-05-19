@@ -20,10 +20,12 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.hamcrest.Description;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.internal.matchers.TypeSafeMatcher;
@@ -308,5 +310,15 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 
 		assertFalse("Unable to find '" + desc + "' in '" + groups
 				+ "' at position '" + position + "'.", false);
+	}
+
+	/**
+	 * CleanUp after each test.
+	 */
+	@After
+	public void cleanup() {
+
+		// cleanup
+		model.release(true);
 	}
 }

@@ -21,6 +21,7 @@ import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -105,6 +106,13 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.CACHE_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MemoryCache);
+
+			// check folder configuration
+			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(), o instanceof TidaModel);
+			final TidaModel model = (TidaModel) o;
+			assertEquals(new File(".", model.getId()), model.getLocation());
 		}
 	}
 
@@ -115,7 +123,7 @@ public class TestConfig {
 	 * 
 	 */
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigSimpleLoadingTest.xml")
-	public static class TestConfigurationOfFactories extends BaseTest {
+	public static class TestCustomizedConfiguration extends BaseTest {
 
 		@Override
 		public void test() {
@@ -147,6 +155,36 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.MAPPERFACTORY_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MockMapperFactory);
+
+			// check folder configuration
+			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(), o instanceof TidaModel);
+			final TidaModel model = (TidaModel) o;
+			assertEquals(new File("./testWorkingDirectory", model.getId()),
+					model.getLocation());
+		}
+	}
+
+	/**
+	 * Tests the changing of the location for the model.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigSimpleLoadingTest.xml")
+	public static class TestModelSpecificLocation extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/tidaModelLocation.xml");
+
+			final Object o = modulesHolder
+					.getModule(DefaultValues.TIDAMODEL_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(), o instanceof TidaModel);
+			final TidaModel model = (TidaModel) o;
+			assertEquals(new File("helloWorld"), model.getLocation());
 		}
 	}
 
@@ -228,7 +266,8 @@ public class TestConfig {
 
 			assertNotNull(cache);
 			assertEquals(FileCache.class, cache.getClass());
-			assertEquals(new File("."), ((FileCache) cache).getLocation());
+
+			assertEquals(null, ((FileCache) cache).getLocation());
 		}
 	}
 
@@ -240,9 +279,9 @@ public class TestConfig {
 	 */
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses({ TestDefaultConfiguration.class,
-			TestConfigurationOfFactories.class, TestConfigMemoryCache.class,
-			TestConfigFileCache.class, TestModuleMemoryCache.class,
-			TestModuleFileCache.class })
+			TestCustomizedConfiguration.class, TestModelSpecificLocation.class,
+			TestConfigMemoryCache.class, TestConfigFileCache.class,
+			TestModuleMemoryCache.class, TestModuleFileCache.class })
 	public static class TestConfigSuite {
 		// just the suite with all the tests defined here
 	}

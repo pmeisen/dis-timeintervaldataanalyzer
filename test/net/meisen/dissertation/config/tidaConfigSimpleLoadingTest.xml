@@ -4,6 +4,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
   
+  <location folder="./testWorkingDirectory" />
+  
   <factories>
     <indexes implementation="net.meisen.dissertation.config.xslt.mock.MockIndexFactory" />
     <mappers implementation="net.meisen.dissertation.config.xslt.mock.MockMapperFactory" />

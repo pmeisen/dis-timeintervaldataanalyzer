@@ -62,12 +62,12 @@ public class TestIntervalIndex extends DbBasedTest {
 						+ modelPath);
 	}
 
-	private IntervalIndex loadAndIndex(final String dbName,
+	private TidaModel loadModelAndData(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
 		model.loadData();
 
-		return model.getIndex().getIntervalIndex();
+		return model;
 	}
 
 	private int count(final SliceWithDescriptors<?>[] slices) {
@@ -89,8 +89,9 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testIntervalIndexFromDb() throws IOException {
-		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final TidaModel model = loadModelAndData("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip", "tidaRandomDbIntervalIndex.xml");
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 
 		// 12 Month in 10 years, random linear data
 		assertEquals(120, idx.getAmountOfSlices());
@@ -100,6 +101,9 @@ public class TestIntervalIndex extends DbBasedTest {
 			assertTrue(slice.count() > 0);
 			assertEquals(slice.numberOfModels(), 0);
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -110,9 +114,10 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesBoundaries() throws IOException {
-		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final TidaModel model = loadModelAndData("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
@@ -137,6 +142,9 @@ public class TestIntervalIndex extends DbBasedTest {
 				fail("Invalid value with i = " + i);
 			}
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -147,9 +155,10 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testIndexWithNullValuesOther() throws IOException {
-		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final TidaModel model = loadModelAndData("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
@@ -168,6 +177,9 @@ public class TestIntervalIndex extends DbBasedTest {
 				assertNull("at " + i, slice);
 			}
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -178,9 +190,10 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinations() throws IOException {
-		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final TidaModel model = loadModelAndData("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingOther.xml");
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
@@ -198,6 +211,9 @@ public class TestIntervalIndex extends DbBasedTest {
 		assertNull(slices[5]);
 		slices = idx.getSlices(100, 65);
 		assertEquals(0, slices.length);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -208,9 +224,10 @@ public class TestIntervalIndex extends DbBasedTest {
 	 */
 	@Test
 	public void testGetAndCombinationsWithNulls() throws IOException {
-		final IntervalIndex idx = loadAndIndex("tidaTestDateIntervals",
+		final TidaModel model = loadModelAndData("tidaTestDateIntervals",
 				"tidaTestDateIntervals.zip",
 				"tidaDbWithNullIntervalIndexUsingBoundaries.xml");
+		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 
 		// test the type (the amount of values)
 		assertEquals(Short.class, idx.getType());
@@ -231,6 +248,9 @@ public class TestIntervalIndex extends DbBasedTest {
 						((SliceWithDescriptors<?>) slices[i]).getId());
 			}
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -262,6 +282,7 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		// remove all the models loaded so far
 		loader.unloadAll();
+		model.release(true);
 
 		// load the model
 		final TidaModel loadedModel = loader.load(new FileLocation(tmpFile));
@@ -283,6 +304,9 @@ public class TestIntervalIndex extends DbBasedTest {
 			assertEquals(slice.getBitmap(),
 					loadedIdx.getSliceById((Short) slice.getId()).getBitmap());
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -305,6 +329,9 @@ public class TestIntervalIndex extends DbBasedTest {
 		for (int i = 0; i < 50; i++) {
 			assertEquals(Numbers.castToByte(i + 1), res[i].getId());
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -336,6 +363,9 @@ public class TestIntervalIndex extends DbBasedTest {
 				assertNull("Not null: " + i, res[i]);
 			}
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -358,6 +388,9 @@ public class TestIntervalIndex extends DbBasedTest {
 		for (int i = 0; i < 48; i++) {
 			assertEquals(Numbers.castToByte(i + 2), res[i].getId());
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -389,6 +422,9 @@ public class TestIntervalIndex extends DbBasedTest {
 		for (int i = 0; i < 29; i++) {
 			assertEquals(Numbers.castToByte(i + 22), resRight[i].getId());
 		}
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -408,6 +444,9 @@ public class TestIntervalIndex extends DbBasedTest {
 				1050, true, true);
 
 		assertEquals(0, res.length);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -427,6 +466,9 @@ public class TestIntervalIndex extends DbBasedTest {
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1050,
 				1050, false, true);
 		assertEquals(0, res.length);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -443,6 +485,9 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		assertIntervalsWithDescriptors(model, idx);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -468,6 +513,7 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		// remove all the models loaded so far
 		loader.unloadAll();
+		model.release(true);
 
 		// load the model
 		final TidaModel loadedModel = loader.load(new FileLocation(tmpFile));
@@ -476,6 +522,7 @@ public class TestIntervalIndex extends DbBasedTest {
 
 		// make sure everything is cleaned
 		assertTrue(tmpFile.delete());
+		model.release(true);
 
 		// validate the saved and loaded model
 		assertIntervalsWithDescriptors(loadedModel, loadedIdx);

@@ -38,7 +38,13 @@
         <xsl:when test="@name"><xsl:value-of select="@name" /></xsl:when>
         <xsl:otherwise><xsl:value-of select="$modelId" /></xsl:otherwise>
       </xsl:choose>
-    </xsl:variable> 
+    </xsl:variable>
+    <xsl:variable name="modelLocation">
+      <xsl:choose>
+        <xsl:when test="@folder"><xsl:value-of select="@folder" /></xsl:when>
+        <xsl:otherwise></xsl:otherwise>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:variable name="metahandling">
       <xsl:choose>
         <xsl:when test="mns:data/@metahandling"><xsl:value-of select="mns:data/@metahandling"/></xsl:when>
@@ -397,6 +403,19 @@
       <bean id="{$tidaModelId}" class="net.meisen.dissertation.model.data.TidaModel">
         <constructor-arg type="java.lang.String" value="{$modelId}" />
         <constructor-arg type="java.lang.String" value="{$modelName}" />
+        <constructor-arg type="java.io.File">
+          <bean class="java.io.File">
+            <xsl:choose>
+              <xsl:when test="normalize-space($modelLocation) = ''">
+                <constructor-arg type="java.lang.String" ref="defaultLocation" />
+                <constructor-arg type="java.lang.String" value="{$modelId}" />             
+              </xsl:when>
+              <xsl:otherwise>
+                <constructor-arg type="java.lang.String" value="{$modelLocation}" />
+              </xsl:otherwise>
+            </xsl:choose>
+          </bean>
+        </constructor-arg>
         
         <property name="metaDataHandlingByString" value="{$metahandling}" />
         <property name="intervalDataHandlingByString" value="{$intervalhandling}" />

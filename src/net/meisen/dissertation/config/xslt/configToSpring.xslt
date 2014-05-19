@@ -24,6 +24,12 @@
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
       <!-- read the values configured -->
+      <xsl:variable name="folder">
+        <xsl:choose>
+          <xsl:when test="//cns:location/@folder"><xsl:value-of select="//cns:location/@folder" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultLocation()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
       <xsl:variable name="cache">
         <xsl:choose>
           <xsl:when test="//cns:cache/@implementation"><xsl:value-of select="//cns:cache/@implementation" /></xsl:when>
@@ -54,6 +60,9 @@
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultQueryFactory()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
+
+      <!-- define the default location -->
+      <bean id="defaultLocation" class="java.lang.String"><constructor-arg value="{$folder}" /></bean>
 
       <!-- define the default cache class -->
       <bean id="defaultCacheClass" class="java.lang.String"><constructor-arg value="{$cache}" /></bean>

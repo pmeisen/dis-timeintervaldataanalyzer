@@ -196,6 +196,10 @@ public class TidaModelHandler {
 	public synchronized void unloadAll() {
 		for (final IModuleHolder moduleHolder : moduleHolders.values()) {
 			moduleHolder.release();
+
+			final TidaModel model = moduleHolder
+					.getModule(DefaultValues.TIDAMODEL_ID);
+			model.release();
 		}
 
 		if (LOG.isInfoEnabled()) {
@@ -221,6 +225,11 @@ public class TidaModelHandler {
 			moduleHolders.remove(id);
 			configurations.remove(id);
 			moduleHolder.release();
+
+			// release the model
+			final TidaModel model = moduleHolder
+					.getModule(DefaultValues.TIDAMODEL_ID);
+			model.release();
 
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Unloaded ModuleHolder '" + id + "'.");

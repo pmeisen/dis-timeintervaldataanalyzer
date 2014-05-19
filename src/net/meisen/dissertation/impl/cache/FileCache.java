@@ -102,7 +102,7 @@ public class FileCache implements IBitmapCache {
 		this.idxLock = new ReentrantReadWriteLock();
 		this.bitmapLock = new ReentrantReadWriteLock();
 
-		this.location = getDefaultLocation();
+		this.location = null;
 		this.cacheSize = getDefaultCacheSize();
 		this.cacheCleaningFactor = getDefaultCacheCleaningFactor();
 
@@ -114,19 +114,30 @@ public class FileCache implements IBitmapCache {
 	}
 
 	@Override
-	public synchronized void initialize(final String modelId) {
+	public synchronized void initialize(final String modelId,
+			final File modelLocation) {
 
 		// if already initialized we are done
 		if (this.init) {
 			return;
 		}
 
-		// define the needed files
-		this.modelLocation = new File(location, modelId);
-		this.idxTableFile = new File(modelLocation, idxTableFileName);
+		// determine the location of the model
+		if (this.location != null) {
+			this.modelLocation = new File(location, modelId);
+		} else if (modelLocation != null) {
+			this.modelLocation = modelLocation;
+			this.location = modelLocation.getParentFile();
+		} else {
+			this.location = getDefaultLocation();
+			this.modelLocation = new File(getDefaultLocation(), modelId);
+		}
+
+		// create the index file
+		this.idxTableFile = new File(this.modelLocation, idxTableFileName);
 
 		// decide if data has to be loaded or an instance has to be created
-		if (modelLocation.exists()) {
+		if (this.idxTableFile.exists()) {
 			loadInstance();
 		} else {
 			createInstance();
@@ -151,10 +162,10 @@ public class FileCache implements IBitmapCache {
 		// make sure we can create an instance
 		if (modelLocation == null) {
 			exceptionRegistry.throwException(FileCacheException.class, 1005);
-		} else if (modelLocation.exists()) {
+		} else if (idxTableFile.exists()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1004,
 					modelLocation);
-		} else if (!modelLocation.mkdirs()) {
+		} else if (!modelLocation.exists() && !modelLocation.mkdirs()) {
 			exceptionRegistry.throwException(FileCacheException.class, 1002,
 					modelLocation);
 		} else if (LOG.isDebugEnabled()) {
@@ -171,7 +182,8 @@ public class FileCache implements IBitmapCache {
 			// create a first bitmap file
 			_createNewBitmapFile();
 		} catch (final IOException e) {
-			exceptionRegistry.throwException(FileCacheException.class, 1006, e);
+			exceptionRegistry.throwException(FileCacheException.class, 1006, e,
+					idxTableFile);
 		}
 	}
 
@@ -388,7 +400,7 @@ public class FileCache implements IBitmapCache {
 			// create a new file
 			bitmapLock.writeLock().lock();
 			try {
-				
+
 				// check if no other thread created a new file
 				if (fileNr == curFileNumber) {
 					_createNewBitmapFile();
@@ -728,15 +740,14 @@ public class FileCache implements IBitmapCache {
 		if (init) {
 			exceptionRegistry.throwException(FileCacheException.class, 1000);
 		} else if (config == null) {
-			this.location = getDefaultLocation();
+			this.location = null;
 			this.cacheSize = getDefaultCacheSize();
 			this.maxFileSizeInByte = getDefaultMaxFileSizeInByte();
 		} else if (config instanceof FileCacheConfig) {
 			final FileCacheConfig fcc = (FileCacheConfig) config;
 
 			final File cLoc = fcc.getLocation();
-			this.location = cLoc == null ? getDefaultLocation() : fcc
-					.getLocation();
+			this.location = cLoc == null ? null : fcc.getLocation();
 
 			final Integer cSize = fcc.getCacheSize();
 			this.cacheSize = cSize == null ? getDefaultCacheSize() : cSize;

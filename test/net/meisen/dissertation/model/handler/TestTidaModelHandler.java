@@ -19,6 +19,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -106,14 +107,22 @@ public class TestTidaModelHandler extends DbBasedTest {
 	 * used multiple times.
 	 */
 	@Test
-	public void testExceptionUsingIdTWhenViaXsltwice() {
-		thrown.expect(TidaModelHandlerException.class);
-		thrown.expectMessage("model with the identifier 'myModel' is already defined");
-
-		loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
+	public void testExceptionUsingIdTwice() {
+		final TidaModel model = loader
+				.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertTrue("Reached this point", true);
 
-		loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
+		boolean exception = false;
+		try {
+			loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
+		} catch (final TidaModelHandlerException e) {
+			assertTrue(e.getMessage().contains(
+					"model with the identifier 'myModel' is already defined"));
+			exception = true;
+		}
+		assertTrue(exception);
+		
+		model.release(true);
 	}
 
 	/**
@@ -148,6 +157,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 				.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(model);
 		assertEquals("myModel", model.getId());
+		
+		model.release(true);
 	}
 
 	/**
@@ -184,12 +195,15 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// now load the file
 		loader.unload(modelPioneerData1.getId());
+		modelPioneerData1.release(true);
+
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
 		assertEquals(modelPioneerData1.getNextDataId(),
 				modelPioneerData2.getNextDataId());
 		assertEquals(modelPioneerData1.getOfflineMode(),
 				modelPioneerData2.getOfflineMode());
+		modelPioneerData2.release(true);
 
 		// delete the file
 		assertTrue(tmpFile.delete());
@@ -230,8 +244,11 @@ public class TestTidaModelHandler extends DbBasedTest {
 		// make sure the database is offline
 		db.shutDownDb();
 
-		// now load the file
+		// unload and cleanup
 		loader.unload(modelPioneerData1.getId());
+		modelPioneerData1.release(true);
+
+		// now load the file
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
 		assertEquals(modelPioneerData1.getNextDataId(),
@@ -241,6 +258,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// delete the file
 		assertTrue(tmpFile.delete());
+		modelPioneerData2.release(true);
 	}
 
 	/**
