@@ -210,16 +210,18 @@ public class TidaModel implements IPersistable {
 		// log the release
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Releasing model '" + getId() + "' at '" + getLocation()
-					+ "'.");
+					+ "' (deleteLocation: " + deleteLocation + ").");
 		}
 
 		// release the cache
 		this.cache.release();
 
 		// delete created files if necessary
-		if (!Files.deleteDir(getLocation())) {
-			exceptionRegistry.throwException(TidaModelException.class, 1004,
-					getLocation());
+		if (deleteLocation) {
+			if (!Files.deleteDir(getLocation())) {
+				exceptionRegistry.throwException(TidaModelException.class,
+						1004, getLocation());
+			}
 		}
 	}
 

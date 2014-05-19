@@ -17,7 +17,7 @@
 
        offlinemode="false"
 
-       id="modelWithExternalSources">
+       id="fullModelDataFromExternal">
 
   <config>
     <factories>

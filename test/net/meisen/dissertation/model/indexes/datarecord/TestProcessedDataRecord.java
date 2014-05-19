@@ -65,6 +65,7 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 
 		// cleanup
 		it.close();
+		model.release(true);
 	}
 
 	/**
@@ -72,9 +73,6 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 	 */
 	@Test
 	public void testDescriptorFailure() {
-		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage("descriptor for the value 'Holger' could not be found.");
-
 		final TidaModel model = m(
 				"/net/meisen/dissertation/model/indexes/datarecord/processedDataFailDescriptor.xml",
 				false);
@@ -88,7 +86,18 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 		assertTrue(it.hasNext());
 
 		// create the processed record for each record of the model
-		new ProcessedDataRecord(it.next(), model, 1);
+		boolean exception = false;
+		try {
+			new ProcessedDataRecord(it.next(), model, 1);
+		} catch (final DescriptorModelException e) {
+			assertTrue(e.getMessage().contains(
+					"descriptor for the value 'Holger' could not be found."));
+			exception = true;
+		}
+		assertTrue(exception);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -113,6 +122,9 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 				model, 1);
 		assertTrue(record.getDescriptor((MetaStructureEntry) model
 				.getDataStructure().getEntries().get(0)) instanceof NullDescriptor);
+
+		// cleanUp
+		model.release(true);
 	}
 
 	/**
@@ -215,6 +227,7 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 
 		// cleanup
 		it.close();
+		model.release(true);
 	}
 
 	/**
@@ -317,5 +330,6 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 
 		// cleanup
 		it.close();
+		model.release(true);
 	}
 }

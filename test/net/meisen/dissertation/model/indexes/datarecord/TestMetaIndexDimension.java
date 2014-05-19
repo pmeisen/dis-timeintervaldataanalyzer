@@ -86,7 +86,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 			assertEquals(exp[i], idx.getSliceByValue(vals[i]).count());
 		}
 
+		// cleanUp
 		loader.unloadAll();
+		model.release(true);
 	}
 
 	/**
@@ -161,7 +163,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		assertTrue("Created " + randomIdx.getAmountOfSlices(),
 				randomIdx.getAmountOfSlices() <= 100000);
 
+		// cleanUp
 		loader.unloadAll();
+		model.release(true);
 	}
 
 	/**
@@ -250,8 +254,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 					.getBitmap());
 		}
 
+		// cleanUp
 		loader.unloadAll();
-
+		model.release(true);
 		assertTrue(tmpFile.delete());
 	}
 }

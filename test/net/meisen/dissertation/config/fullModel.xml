@@ -19,7 +19,7 @@
        
        offlinemode="false"
        
-       id="myModel" name="My wonderful Model">
+       id="fullModel" name="My wonderful Model">
 
   <config>
     <!-- Define the cache to be used.

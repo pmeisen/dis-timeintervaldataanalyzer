@@ -19,7 +19,6 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
-import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -117,7 +116,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 			loader.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		} catch (final TidaModelHandlerException e) {
 			assertTrue(e.getMessage().contains(
-					"model with the identifier 'myModel' is already defined"));
+					"model with the identifier 'fullModel' is already defined"));
 			exception = true;
 		}
 		assertTrue(exception);
@@ -156,7 +155,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		final TidaModel model = loader
 				.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(model);
-		assertEquals("myModel", model.getId());
+		assertEquals("fullModel", model.getId());
 		
 		model.release(true);
 	}

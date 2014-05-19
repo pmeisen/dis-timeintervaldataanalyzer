@@ -5,7 +5,7 @@
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
-       id="tidaStaticIndexModel" name="StaticIndexModel">
+       id="processedDataFailDescriptor">
 
   <meta>
     <descriptors>

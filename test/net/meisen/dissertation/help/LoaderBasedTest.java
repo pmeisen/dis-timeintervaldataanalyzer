@@ -1,5 +1,8 @@
 package net.meisen.dissertation.help;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -30,6 +33,8 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	@Autowired
 	@Qualifier(DefaultValues.HANDLER_ID)
 	protected TidaModelHandler loader;
+	
+	private List<TidaModel> models = new ArrayList<TidaModel>();
 
 	/**
 	 * Helper method to load a specific model. The method loads the data of the
@@ -63,6 +68,8 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 			model.loadData();
 		}
 
+		models.add(model);
+		
 		return model;
 	}
 
@@ -72,5 +79,13 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	@After
 	public void unload() {
 		loader.unloadAll();
+		
+		// release all models
+		for (final TidaModel model : models) {
+			model.release(true);
+		}
+		
+		// clear the models
+		models.clear();
 	}
 }
