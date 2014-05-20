@@ -408,23 +408,74 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	 * Tests the implementation of
 	 * {@link DescriptorModel#addDescriptor(Object, Object)}.
 	 */
-	public void testCreateDescriptorWithId() {
+	@Test
+	public void testAddingDescriptorWithId() {
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory());
+				new IntegerIdsFactory(), new IndexFactory());
+		configuration.wireInstance(model);
 		model.setSupportsNullDescriptor(true);
+		model.setFailOnDuplicates(false);
 
 		// the model should only have the NullDescriptor so far
 		assertEquals(model.getAllDescriptors().size(), 1);
-		
-		// add the NullDescriptor
-		assertEquals(
-				model.getNullDescriptor(),
-				model.addDescriptor(model.getNullDescriptorId(),
-						model.getNullDescriptor()));
-		
-		// add a new descriptor
-		Descriptor<?, ?, ?> desc = model.addDescriptor(5, UUID.randomUUID());
-		
+
+		// add the NullDescriptor and make sure the result is equal
+		assertEquals(model.getNullDescriptor(),
+				model.addDescriptor(model.getNullDescriptorId(), null));
+
+		// add a new descriptor and check if the adding returns the same object
+		model.setFailOnDuplicates(true);
+		Descriptor<UUID, ?, Integer> desc;
+		desc = model.addDescriptor(5, UUID.randomUUID());
+		assertTrue(desc == model.addDescriptor(desc.getId(), desc.getValue()));
+	}
+
+	/**
+	 * Checks the exception to be thrown if another {@code NullDescriptor} is
+	 * added with another id using
+	 * {@link DescriptorModel#addDescriptor(Object, Object)}.
+	 */
+	@Test
+	public void testExceptionAddingNullDescriptorWithDifferentId() {
+		thrown.expect(DescriptorModelException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("cannot be added to the model"));
+
+		// create the model
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory(), new IndexFactory());
+		configuration.wireInstance(model);
+		model.setFailOnDuplicates(false);
+		model.setSupportsNullDescriptor(true);
+
+		// create the null descriptor
+		model.getNullDescriptor();
+		model.addDescriptor(model.getNullDescriptorId() + 1, null);
+	}
+
+	/**
+	 * Checks the exception to be thrown if another {@code Descriptor} with the
+	 * same id but another value is added using
+	 * {@link DescriptorModel#addDescriptor(Object, Object)}.
+	 */
+	@Test
+	public void testExceptionAddingDescriptorWithDifferentId() {
+		thrown.expect(DescriptorModelException.class);
+		thrown.expectMessage(JUnitMatchers
+				.containsString("cannot be added to the model"));
+
+		// create the model
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory(), new IndexFactory());
+		configuration.wireInstance(model);
+		model.setFailOnDuplicates(false);
+		model.setSupportsNullDescriptor(true);
+
+		// create the null descriptor
+		model.addDescriptor(1, UUID.randomUUID());
+		model.addDescriptor(1, UUID.randomUUID());
 	}
 }

@@ -17,8 +17,6 @@ import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -34,9 +32,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 @SuppressWarnings("rawtypes")
 public class DescriptorModel<I extends Object> {
-	private final static Logger LOG = LoggerFactory
-			.getLogger(DescriptorModel.class);
-
 	private final String id;
 	private final String name;
 	private final Class<? extends Descriptor> descriptorClass;
@@ -175,7 +170,8 @@ public class DescriptorModel<I extends Object> {
 
 	/**
 	 * Adds the descriptor with the specified {@code id} and {@code value} to
-	 * {@code this}.
+	 * {@code this}. If a descriptor with the same values is already added the
+	 * descriptor of {@code this} is returned, otherwise one is created.
 	 * 
 	 * @param id
 	 *            the identifier of the descriptor to be added
@@ -186,17 +182,23 @@ public class DescriptorModel<I extends Object> {
 	 *         the model
 	 */
 	public <D> Descriptor<D, ?, I> addDescriptor(final I id, final D value) {
+
 		Descriptor descriptor;
-
 		if (value == null) {
-
 			if (nullDescriptor == null) {
-				nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
+				nullDescriptor = new NullDescriptor<I>(this, id);
+			} else if (!Objects.equals(nullDescriptor.getId(), id)) {
+				exceptionRegistry.throwException(
+						DescriptorModelException.class, 1008, id, null,
+						nullDescriptor);
 			}
 
 			descriptor = getNullDescriptor();
 		} else if ((descriptor = getDescriptor(id)) == null) {
 			descriptor = createDescriptor(id, value);
+		} else if (!Objects.equals(descriptor.getValue(), value)) {
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1008, id, value, descriptor);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -295,7 +297,7 @@ public class DescriptorModel<I extends Object> {
 				descriptorClass, valueType);
 
 		// create the instance and assign the id and a value
-		final Descriptor<D, ?, I> descriptor;
+		Descriptor<D, ?, I> descriptor;
 		try {
 			@SuppressWarnings("unchecked")
 			final Descriptor<D, ?, I> d = constructor.newInstance(this, id,
@@ -309,10 +311,14 @@ public class DescriptorModel<I extends Object> {
 
 		// add the descriptor and return it
 		if (!addDescriptor(descriptor)) {
-			final Descriptor<?, ?, I> idxDescriptor = getDescriptor(id);
+
+			@SuppressWarnings("unchecked")
+			final Descriptor<D, ?, I> idxDescriptor = (Descriptor<D, ?, I>) getDescriptor(id);
 
 			// make sure the indexed and the descriptor are not equal
-			if (!Objects.equals(idxDescriptor, descriptor)) {
+			if (Objects.equals(idxDescriptor, descriptor)) {
+				descriptor = idxDescriptor;
+			} else {
 				exceptionRegistry.throwException(
 						DescriptorModelException.class, 1007, descriptor,
 						idxDescriptor);
