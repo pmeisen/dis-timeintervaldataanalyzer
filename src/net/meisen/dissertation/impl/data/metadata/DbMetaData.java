@@ -4,16 +4,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.data.OfflineMode;
-import net.meisen.dissertation.model.data.metadata.IMetaData;
 import net.meisen.dissertation.model.data.metadata.IOfflineModeAwareMetaData;
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
-import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A {@code DbMetaData} is used to retrieve meta-data from a
+ * {@code BaseDataRetriever}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DbMetaData implements IOfflineModeAwareMetaData {
 	private final static Logger LOG = LoggerFactory.getLogger(DbMetaData.class);
 
@@ -23,6 +28,18 @@ public class DbMetaData implements IOfflineModeAwareMetaData {
 
 	private OfflineMode offlineMode;
 
+	/**
+	 * Constructor to specify the {@code descriptorModelId}, the
+	 * {@code retriever}, and the {@code query}.
+	 * 
+	 * @param descriptorModelId
+	 *            the identifier of the {@code DescriptorModel} the values
+	 *            belong to
+	 * @param retriever
+	 *            the {@code BaseDataRetriever} to retrieve the data from
+	 * @param query
+	 *            the query to be fired
+	 */
 	public DbMetaData(final String descriptorModelId,
 			final BaseDataRetriever retriever, final IQueryConfiguration query) {
 		this.descriptorModelId = descriptorModelId;
@@ -32,7 +49,7 @@ public class DbMetaData implements IOfflineModeAwareMetaData {
 
 		setOfflineMode(null);
 	}
-	
+
 	/**
 	 * Gets the {@code OfflineMode} defined for the {@code DescriptorModel}.
 	 * 

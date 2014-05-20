@@ -193,8 +193,13 @@ public class TidaModel implements IPersistable {
 					loc);
 		}
 
-		// add the define metadata and release it
-		this.metaDataModel.addMetaData(metaDataCollection);
+		// load the metaData
+		if (locExists) {
+			
+		} else {
+			this.metaDataModel.addMetaData(metaDataCollection);
+		}
+		this.metaDataCollection.clear();
 		this.metaDataCollection = null;
 
 		// initialize the caches

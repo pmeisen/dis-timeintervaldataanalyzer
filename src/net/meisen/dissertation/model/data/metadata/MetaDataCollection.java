@@ -56,7 +56,7 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 	 *            the {@code MetaData} to be collected
 	 */
 	public void setMetaData(final Collection<IMetaData> metaData) {
-		this.metaData.clear();
+		clear();
 		addMetaData(metaData);
 	}
 
@@ -86,5 +86,12 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 	@Override
 	public Iterator<IMetaData> iterator() {
 		return metaData.values().iterator();
+	}
+
+	/**
+	 * Removes all the values from the collection.
+	 */
+	public void clear() {
+		metaData.clear();
 	}
 }
