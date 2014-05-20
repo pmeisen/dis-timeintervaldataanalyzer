@@ -61,7 +61,7 @@ public class IntervalIndex implements IDataRecordIndex {
 	 */
 	public IntervalIndex(final TidaModel model) {
 		this(model.getIntervalModel(), model.getMetaDataModel(), model
-				.getCache(), model.getIndexFactory());
+				.getBitmapCache(), model.getIndexFactory());
 	}
 
 	/**

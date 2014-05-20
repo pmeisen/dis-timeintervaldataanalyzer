@@ -104,7 +104,7 @@ public class TestFileCache extends ModuleBasedTest {
 		thrown.expectMessage("configuration cannot be changed");
 
 		// initialize and change the configuration
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 		fc.setConfig(null);
 	}
 
@@ -130,7 +130,18 @@ public class TestFileCache extends ModuleBasedTest {
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
-		fc.initialize("?", null);
+		final TidaModel model = new TidaModel() {
+			@Override
+			public String getId() {
+				return "?";
+			}
+
+			@Override
+			public File getLocation() {
+				return null;
+			};
+		};
+		fc.initialize(model);
 	}
 
 	/**
@@ -145,7 +156,19 @@ public class TestFileCache extends ModuleBasedTest {
 		final FileCacheConfig config = new FileCacheConfig();
 		config.setLocation(null);
 		fc.setConfig(config);
-		fc.initialize("modelId", new File("?"));
+
+		final TidaModel model = new TidaModel() {
+			@Override
+			public String getId() {
+				return "modelId";
+			}
+
+			@Override
+			public File getLocation() {
+				return new File("?");
+			};
+		};
+		fc.initialize(model);
 	}
 
 	/**
@@ -153,7 +176,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testCreationOfModelLocation() {
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		// make sure the location is created
 		assertNotNull(fc.getModelLocation());
@@ -185,7 +208,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testNoneCachedBitmapRetrieval() {
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		final Bitmap emptyBitmap = model.getIndexFactory().createBitmap();
 
@@ -204,7 +227,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testPersistance() {
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		for (int i = 0; i < 50000; i++) {
 			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
@@ -235,7 +258,7 @@ public class TestFileCache extends ModuleBasedTest {
 	@Test
 	public void testUsageOfGenerateIndexLine() {
 		final FileCache spy = Mockito.spy(fc);
-		spy.initialize(model.getId(), model.getLocation());
+		spy.initialize(model);
 
 		// let's cache 100 bitmaps for testing purposes
 		cacheBitmap(spy, 100, 0);
@@ -279,7 +302,7 @@ public class TestFileCache extends ModuleBasedTest {
 		assertEquals(0.8, fc.getCacheCleaningFactor(), 0.0);
 		assertEquals(1024 * 1024, fc.getMaxFileSizeInByte());
 
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 		for (int i = 0; i < 100000; i++) {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), 1,
 					1000, 2000, Integer.MAX_VALUE - 2000);
@@ -305,7 +328,7 @@ public class TestFileCache extends ModuleBasedTest {
 		spy.setConfig(config);
 
 		// create a cache with some data
-		spy.initialize(model.getId(), model.getLocation());
+		spy.initialize(model);
 		cacheBitmap(spy, 100, 20);
 		verify(spy, times(100)).cacheBitmap(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
@@ -319,7 +342,7 @@ public class TestFileCache extends ModuleBasedTest {
 		spy.release();
 
 		// now initialize again and check if the data is loaded
-		spy.initialize(model.getId(), model.getLocation());
+		spy.initialize(model);
 		assertEquals(nrOfFiles, spy.getNumberOfBitmapFiles());
 		assertEquals(0, fc.getCacheSize());
 
@@ -374,7 +397,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testMultipleThreadSafety() throws InterruptedException {
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		final Thread tCacheSize = new Thread() {
 
@@ -443,7 +466,7 @@ public class TestFileCache extends ModuleBasedTest {
 		fc.setConfig(fcc);
 
 		// initialize the model
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		// add 100 values to the cache
 		for (int i = 0; i < 100; i++) {
@@ -493,7 +516,7 @@ public class TestFileCache extends ModuleBasedTest {
 		fc.setConfig(config);
 
 		// initialize the model
-		fc.initialize(model.getId(), model.getLocation());
+		fc.initialize(model);
 
 		// create some bitmaps
 		final Thread tIdBitmap = new Thread() {
@@ -611,6 +634,7 @@ public class TestFileCache extends ModuleBasedTest {
 
 		// release the instance
 		fc.release();
+		model.release(true);
 
 		// delete all the created files
 		if (fc.getModelLocation() != null && fc.getModelLocation().exists()) {

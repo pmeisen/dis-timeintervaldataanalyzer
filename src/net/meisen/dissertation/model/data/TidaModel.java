@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -62,7 +63,11 @@ public class TidaModel implements IPersistable {
 
 	@Autowired
 	@Qualifier(DefaultValues.CACHE_ID)
-	private IBitmapCache cache;
+	private IBitmapCache bitmapCache;
+
+	@Autowired
+	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
+	private MetaDataCollection metaDataCollection;
 
 	private final String id;
 	private final String name;
@@ -172,27 +177,33 @@ public class TidaModel implements IPersistable {
 	 */
 	public void initialize() {
 
+		// do not allow to initialize the cache twice
 		if (isInitialized()) {
 			exceptionRegistry.throwException(TidaModelException.class, 1000);
 		}
 
 		// make sure the location exists
 		final File loc = getLocation();
-		if (!loc.exists() && !getLocation().mkdirs()) {
+		final boolean locExists = loc.exists();
+		if (!locExists && !loc.mkdirs()) {
 			exceptionRegistry.throwException(TidaModelException.class, 1002,
 					loc);
-		} else if (loc.exists() && !loc.isDirectory()) {
+		} else if (locExists && !loc.isDirectory()) {
 			exceptionRegistry.throwException(TidaModelException.class, 1003,
 					loc);
 		}
 
-		// initialize the cache
-		this.cache.initialize(getId(), getLocation());
+		// add the define metadata and release it
+		this.metaDataModel.addMetaData(metaDataCollection);
+		this.metaDataCollection = null;
+
+		// initialize the caches
+		this.bitmapCache.initialize(this);
 
 		// create the index
 		this.idx = new TidaIndex(this);
 
-		// log the init
+		// log the initialization
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Initialized model '" + getId() + "' at '" + getLocation()
 					+ "'.");
@@ -217,7 +228,7 @@ public class TidaModel implements IPersistable {
 		}
 
 		// release the cache
-		this.cache.release();
+		this.bitmapCache.release();
 
 		// delete created files if necessary
 		if (deleteLocation && getLocation().exists()) {
@@ -522,8 +533,8 @@ public class TidaModel implements IPersistable {
 	 * 
 	 * @see IBitmapCache
 	 */
-	public IBitmapCache getCache() {
-		return cache;
+	public IBitmapCache getBitmapCache() {
+		return bitmapCache;
 	}
 
 	/**

@@ -28,7 +28,9 @@ public interface IIndexedCollection {
 	public boolean containsObject(final Object object);
 
 	/**
-	 * Adds the specified object to the collection.
+	 * Adds the specified object to the collection. If the object is already
+	 * indexed, it will not be added again or override the old object, instead
+	 * {@code false} will be returned.
 	 * 
 	 * @param object
 	 *            the object to be added

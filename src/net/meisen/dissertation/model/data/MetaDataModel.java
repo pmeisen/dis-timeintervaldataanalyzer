@@ -3,9 +3,14 @@ package net.meisen.dissertation.model.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
+import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
+import net.meisen.dissertation.model.data.metadata.IMetaData;
+import net.meisen.dissertation.model.data.metadata.IOfflineModeAwareMetaData;
+import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -64,6 +69,52 @@ public class MetaDataModel {
 		// set the factories
 		this.indexFactory = baseIndexFactory;
 		setOfflineMode(null);
+	}
+
+	/**
+	 * Adds the meta-data defined by {@code MetaDataCollection} to the
+	 * {@code MetaDataModel}.
+	 * 
+	 * @param metaData
+	 *            the meta-data to be added
+	 * 
+	 * @see MetaDataCollection
+	 */
+	@SuppressWarnings("unchecked")
+	public void addMetaData(final MetaDataCollection metaData) {
+
+		// iterate over the metadata and add it
+		for (final IMetaData md : metaData) {
+			final String modelId = md.getDescriptorModelId();
+			
+			@SuppressWarnings("rawtypes")
+			final DescriptorModel model = getDescriptorModel(modelId);
+
+			// set the OfflineMode to be used if it's offlineModeAware
+			if (md instanceof IOfflineModeAwareMetaData) {
+				((IOfflineModeAwareMetaData) md)
+						.setOfflineMode(getOfflineMode());
+			}
+
+			// check if the metaData provides identifier
+			if (md instanceof IIdentifiedMetaData) {
+				final IIdentifiedMetaData idMetaData = (IIdentifiedMetaData) md;
+
+				for (final Entry<Object, Object> entry : idMetaData
+						.getIdentifiedValues().entrySet()) {
+					final Object key = entry.getKey();
+					final Object value = entry.getValue();
+
+					model.addDescriptor(model.castId(key), value);
+				}
+			} else {
+
+				// create a descriptor for each value
+				for (final Object value : md.getValues()) {
+					model.createDescriptor(value);
+				}
+			}
+		}
 	}
 
 	/**

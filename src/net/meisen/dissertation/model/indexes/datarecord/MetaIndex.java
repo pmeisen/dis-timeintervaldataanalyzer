@@ -108,7 +108,7 @@ public class MetaIndex implements IDataRecordIndex {
 		// create an IndexDimension for the MetaInformation
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idxDim = new MetaIndexDimension(metaEntry,
-				descModel, model.getCache(), model.getIndexFactory());
+				descModel, model.getBitmapCache(), model.getIndexFactory());
 
 		return idxDim;
 	}

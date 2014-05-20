@@ -10,10 +10,6 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
-import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
-import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfig;
-import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetrieverConfigEntry;
-import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
@@ -129,7 +125,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	 * .
 	 */
 	@Test
-	public void testCreateDescriptor() {
+	public void testCreateDescriptorWithoutId() {
 
 		// create a model using an integerIdsFactory
 		final DescriptorModel<Integer> model1 = new DescriptorModel<Integer>(
@@ -205,38 +201,6 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 			assertEquals(new Long(i), desc.getId());
 			assertEquals(new Long(100 - i), desc.getValue());
 		}
-	}
-
-	/**
-	 * Tests the implementation of
-	 * {@code DescriptorModel#createDescriptors(BaseDataRetriever, IQueryConfiguration)}
-	 * .
-	 */
-	@Test
-	public void testCreateDescriptorFromDataRetriever() {
-
-		// create some descriptors using a dataRetriever
-		final FixedStructureDataRetrieverConfig config = new FixedStructureDataRetrieverConfig(
-				new FixedStructureDataRetrieverConfigEntry("RND", String.class));
-		final FixedStructureDataRetriever retriever = new FixedStructureDataRetriever(
-				config);
-		final FixedStructureQueryConfig query = new FixedStructureQueryConfig(
-				99);
-		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
-				"ModelId", "ModelName", GeneralDescriptor.class,
-				new IntegerIdsFactory(), new IndexFactory());
-		model.createDescriptors(retriever, query);
-		for (int i = 1; i < 100; i++) {
-			final Descriptor<?, ?, ?> descriptor = model.getDescriptor(i);
-			assertNotNull(descriptor);
-			assertEquals(descriptor.getId(), i);
-			assertTrue(Integer.class.equals(descriptor.getId().getClass()));
-			assertTrue(descriptor.getValue() instanceof String);
-
-			// no exception
-			UUID.fromString((String) descriptor.getValue());
-		}
-		retriever.release();
 	}
 
 	/**
@@ -438,5 +402,29 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 				new IntegerIdsFactory());
 		configuration.wireInstance(model);
 		model.createDescriptor(null);
+	}
+
+	/**
+	 * Tests the implementation of
+	 * {@link DescriptorModel#addDescriptor(Object, Object)}.
+	 */
+	public void testCreateDescriptorWithId() {
+		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
+				"ModelId", "ModelName", GeneralDescriptor.class,
+				new IntegerIdsFactory());
+		model.setSupportsNullDescriptor(true);
+
+		// the model should only have the NullDescriptor so far
+		assertEquals(model.getAllDescriptors().size(), 1);
+		
+		// add the NullDescriptor
+		assertEquals(
+				model.getNullDescriptor(),
+				model.addDescriptor(model.getNullDescriptorId(),
+						model.getNullDescriptor()));
+		
+		// add a new descriptor
+		Descriptor<?, ?, ?> desc = model.addDescriptor(5, UUID.randomUUID());
+		
 	}
 }

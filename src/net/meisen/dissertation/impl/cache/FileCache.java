@@ -20,6 +20,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapOwner;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
@@ -114,13 +115,16 @@ public class FileCache implements IBitmapCache {
 	}
 
 	@Override
-	public synchronized void initialize(final String modelId,
-			final File modelLocation) {
+	public synchronized void initialize(final TidaModel model) {
 
 		// if already initialized we are done
 		if (this.init) {
 			return;
 		}
+
+		// read the values needed
+		final String modelId = model.getId();
+		final File modelLocation = model.getLocation();
 
 		// determine the location of the model
 		if (this.location != null) {
@@ -155,7 +159,9 @@ public class FileCache implements IBitmapCache {
 	 *             if the {@code modelLocation} is {@code null}, if the
 	 *             {@code modelLocation} already exists, if the
 	 *             {@code modelLocation} could not be created, or if an
-	 *             io-exception occurred during initialization
+	 *             {@code IOException} occurred during initialization
+	 * 
+	 * @see IOException
 	 */
 	protected void createInstance() throws FileCacheException {
 

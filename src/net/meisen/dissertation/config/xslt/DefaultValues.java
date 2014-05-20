@@ -61,6 +61,11 @@ public class DefaultValues {
 	public static final String METADATAMODEL_ID = "metaDataModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
+	 * define meta-data.
+	 */
+	public static final String METADATACOLLECTION_ID = "metaDataCollection";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code IntervalModel}.
 	 * 
 	 * @see IntervalModel

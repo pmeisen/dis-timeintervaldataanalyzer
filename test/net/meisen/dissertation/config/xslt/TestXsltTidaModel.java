@@ -45,6 +45,7 @@ import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
@@ -117,7 +118,19 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 	private MetaDataModel getMetaDataModel(final String xml) {
 		setModulesHolder(xml);
-		return modulesHolder.getModule(DefaultValues.METADATAMODEL_ID);
+
+		// get the metaData
+		final MetaDataCollection collection = modulesHolder
+				.getModule(DefaultValues.METADATACOLLECTION_ID);
+
+		// get the metaDataModel
+		final MetaDataModel metaDataModel = modulesHolder
+				.getModule(DefaultValues.METADATAMODEL_ID);
+
+		// add the metaData
+		metaDataModel.addMetaData(collection);
+
+		return metaDataModel;
 	}
 
 	private DataModel getDataModel(final String xml) {

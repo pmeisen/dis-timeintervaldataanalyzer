@@ -16,6 +16,7 @@
   <xsl:output method="xml" indent="yes" />
   
   <xsl:variable name="metaDataModelId" select="mdef:getId('METADATAMODEL_ID')" />
+  <xsl:variable name="metaDataCollectionId" select="mdef:getId('METADATACOLLECTION_ID')" />
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
   <xsl:variable name="intervalModelId" select="mdef:getId('INTERVALMODEL_ID')" />
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
@@ -228,44 +229,45 @@
         <xsl:apply-templates />
       </xsl:for-each>
       
-      <!-- add the descriptors defined in XML to their descriptorModels -->
-      <xsl:for-each select="mns:meta/mns:entries/mns:entry[not(@dataretriever)]">
-        <xsl:variable name="descriptorValue">
-          <xsl:choose>
-            <xsl:when test="@value"><xsl:value-of select="@value" /></xsl:when>
-            <xsl:otherwise></xsl:otherwise>
-          </xsl:choose>
-        </xsl:variable> 
-        <xsl:variable name="descriptorModel" select="@descriptor" />
+      <!-- create the metaDataCollection -->
+      <bean id="{$metaDataCollectionId}" class="net.meisen.dissertation.model.data.metadata.MetaDataCollection">
+        <property name="metaData">
+          <list value-type="net.meisen.dissertation.model.data.metadata.IMetaData">
 
-        <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
-          <property name="targetMethod" value="createDescriptor" />
-          <property name="targetObject" ref="descriptormodel-{$descriptorModel}" />
-          <property name="type" value="init" />
-          <property name="arguments" value="{$descriptorValue}" />
-        </bean>
-      </xsl:for-each>
+            <xsl:for-each select="mns:meta/mns:entries/mns:entry[not(@dataretriever)]">
+              <xsl:variable name="descriptorValue">
+                <xsl:choose>
+                  <xsl:when test="@value"><xsl:value-of select="@value" /></xsl:when>
+                  <xsl:otherwise></xsl:otherwise>
+                </xsl:choose>
+              </xsl:variable> 
+              <xsl:variable name="descriptorModel" select="@descriptor" />
+              
+              <bean class="net.meisen.dissertation.impl.data.metadata.DirectlyDefinedMetaData">
+                <constructor-arg type="java.lang.String" value="{$descriptorModel}" />
+                <constructor-arg><array value-type="java.lang.Object"><value><xsl:value-of select="$descriptorValue" /></value></array></constructor-arg>
+              </bean>
+            </xsl:for-each>
+                  
+            <xsl:for-each select="mns:meta/mns:entries/mns:entry[@dataretriever]">
+              <xsl:variable name="descriptorModel" select="@descriptor" />
+              <xsl:variable name="dataretriever" select="@dataretriever" />
 
-      <!-- add the descriptors from dataRetrievers to their descriptorModels -->
-      <xsl:for-each select="mns:meta/mns:entries/mns:entry[@dataretriever]">
-        <xsl:variable name="descriptorModel" select="@descriptor" />
-        <xsl:variable name="dataretriever" select="@dataretriever" />
+              <bean class="net.meisen.dissertation.impl.data.metadata.DbMetaData">
+                <constructor-arg type="java.lang.String" value="{$descriptorModel}" />
+                <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever" ref="dataretriever-{$dataretriever}" />
+                <constructor-arg type="net.meisen.dissertation.model.dataretriever.IQueryConfiguration">
+                  <xsl:choose>
+                    <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
+                    <xsl:otherwise><null /></xsl:otherwise>
+                  </xsl:choose>
+                </constructor-arg>
+              </bean>
+            </xsl:for-each>
 
-        <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
-          <property name="targetMethod" value="createDescriptors" />
-          <property name="targetObject" ref="descriptormodel-{$descriptorModel}" />
-          <property name="type" value="init" />
-          <property name="arguments">
-            <list>
-              <ref bean="dataretriever-{$dataretriever}" />
-              <xsl:choose>
-                <xsl:when test="node()"><xsl:apply-imports /></xsl:when>
-                <xsl:otherwise><null /></xsl:otherwise>
-              </xsl:choose>
-            </list>
-          </property>
-        </bean>
-      </xsl:for-each>
+          </list>
+        </property>
+      </bean>
       
       <!-- create the MetaDataModel -->
       <bean id="{$metaDataModelId}" class="net.meisen.dissertation.model.data.MetaDataModel">

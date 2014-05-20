@@ -8,9 +8,6 @@ import java.util.List;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.model.data.OfflineMode;
-import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
-import net.meisen.dissertation.model.dataretriever.DataCollection;
-import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IMultipleKeySupport;
@@ -18,6 +15,7 @@ import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,6 +174,37 @@ public class DescriptorModel<I extends Object> {
 	}
 
 	/**
+	 * Adds the descriptor with the specified {@code id} and {@code value} to
+	 * {@code this}.
+	 * 
+	 * @param id
+	 *            the identifier of the descriptor to be added
+	 * @param value
+	 *            the value of the descriptor
+	 * 
+	 * @return the added descriptor or the an equal descriptor already added to
+	 *         the model
+	 */
+	public <D> Descriptor<D, ?, I> addDescriptor(final I id, final D value) {
+		Descriptor descriptor;
+
+		if (value == null) {
+
+			if (nullDescriptor == null) {
+				nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
+			}
+
+			descriptor = getNullDescriptor();
+		} else if ((descriptor = getDescriptor(id)) == null) {
+			descriptor = createDescriptor(id, value);
+		}
+
+		@SuppressWarnings("unchecked")
+		final Descriptor<D, ?, I> typedDescriptor = (Descriptor<D, ?, I>) descriptor;
+		return typedDescriptor;
+	}
+
+	/**
 	 * Creates a {@code Descriptor} for each passed {@code value}.
 	 * 
 	 * @param values
@@ -197,61 +226,6 @@ public class DescriptorModel<I extends Object> {
 
 			return descriptors;
 		}
-	}
-
-	/**
-	 * Create {@code Descriptor} instances from the passed {@code retriever}
-	 * using the specified {@code query}.
-	 * 
-	 * @param retriever
-	 *            the retrieve to be used to retrieve the data
-	 * @param query
-	 *            the query used to retrieve the data
-	 * 
-	 * @return the the {@code Collection} of created {@code Descriptors}
-	 */
-	public Collection<Descriptor> createDescriptors(
-			final BaseDataRetriever retriever, final IQueryConfiguration query) {
-
-		// get the loader to retrieve the data
-		DataCollection<?> loader = null;
-		Collection<Object> loadedData = null;
-
-		// check if we are in offline mode
-		if (OfflineMode.TRUE.equals(getOfflineMode())) {
-			// nothing to be loaded just ignore the call and return nothing
-		} else {
-
-			try {
-				loader = retriever.retrieve(query);
-
-				// retrieve the data
-				loadedData = loader.transform();
-			} catch (final RuntimeException e) {
-				if (OfflineMode.FALSE.equals(getOfflineMode())) {
-					throw e;
-				} else {
-					if (LOG.isTraceEnabled()) {
-						LOG.trace("Could not load the descriptors (OfflineMode: "
-								+ getOfflineMode()
-								+ ") of the DescriptorModel '" + getId() + "'.");
-					}
-				}
-			} finally {
-				if (loader != null) {
-					try {
-						loader.release();
-					} catch (final RuntimeException e) {
-						// ignore
-					}
-				}
-			}
-		}
-
-		// create descriptors based on the loadedData
-		final Collection<Descriptor> data = createDescriptors(loadedData);
-
-		return data;
 	}
 
 	/**
@@ -278,36 +252,75 @@ public class DescriptorModel<I extends Object> {
 	 * @see Descriptor
 	 * @see NullDescriptor
 	 */
+	@SuppressWarnings("unchecked")
 	public <D> Descriptor<D, ?, I> createDescriptor(final D value) {
+		Descriptor<D, ?, I> descriptor;
 
 		if (value == null) {
+			descriptor = (Descriptor<D, ?, I>) getNullDescriptor();
+		} else if ((descriptor = (Descriptor<D, ?, I>) getDescriptorByValue(value)) == null) {
+			descriptor = createDescriptor(idsFactory.getId(), value);
+		} else if (isFailOnDuplicates()) {
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1002, value, getId());
+		}
+
+		return descriptor;
+	}
+
+	/**
+	 * Creates a new {@code Descriptor} instance with the specified {@code id}
+	 * and the specified {@code value}. If a descriptor with the specified
+	 * {@code id}
+	 * 
+	 * @param id
+	 *            the identifier of the descriptor to be created
+	 * @param value
+	 *            the value of the descriptor to be created
+	 * 
+	 * @return the created descriptor or if a descriptor with the specified id
+	 *         already exists, the equal descriptor (i.e. same id and same
+	 *         value)
+	 * 
+	 * @throws DescriptorModelException
+	 *             if the descriptor cannot be created or if a different
+	 *             descriptor (with the id or value) already exists
+	 */
+	protected <D> Descriptor<D, ?, I> createDescriptor(final I id, final D value)
+			throws DescriptorModelException {
+		final Class<?> valueType = value.getClass();
+
+		// get the constructor
+		final Constructor<? extends Descriptor> constructor = findConstructor(
+				descriptorClass, valueType);
+
+		// create the instance and assign the id and a value
+		final Descriptor<D, ?, I> descriptor;
+		try {
 			@SuppressWarnings("unchecked")
-			final Descriptor<D, ?, I> descriptor = (Descriptor<D, ?, I>) getNullDescriptor();
-			return descriptor;
-		} else {
-			final Class<?> valueType = value.getClass();
+			final Descriptor<D, ?, I> d = constructor.newInstance(this, id,
+					value);
+			descriptor = d;
+		} catch (final Exception e) {
+			exceptionRegistry.throwException(DescriptorModelException.class,
+					1000, e, descriptorClass.getName());
+			return null;
+		}
 
-			// get the constructor
-			final Constructor<? extends Descriptor> constructor = findConstructor(
-					descriptorClass, valueType);
+		// add the descriptor and return it
+		if (!addDescriptor(descriptor)) {
+			final Descriptor<?, ?, I> idxDescriptor = getDescriptor(id);
 
-			// create the instance and assign an id and a value
-			final Descriptor descriptor;
-			try {
-				descriptor = constructor.newInstance(this, idsFactory.getId(),
-						value);
-			} catch (final Exception e) {
+			// make sure the indexed and the descriptor are not equal
+			if (!Objects.equals(idxDescriptor, descriptor)) {
 				exceptionRegistry.throwException(
-						DescriptorModelException.class, 1000, e,
-						descriptorClass.getName());
+						DescriptorModelException.class, 1007, descriptor,
+						idxDescriptor);
 				return null;
 			}
-			addDescriptor(descriptor);
-
-			@SuppressWarnings("unchecked")
-			final Descriptor<D, ?, I> typedDescriptor = (Descriptor<D, ?, I>) descriptor;
-			return typedDescriptor;
 		}
+
+		return descriptor;
 	}
 
 	/**
@@ -587,14 +600,20 @@ public class DescriptorModel<I extends Object> {
 	 * 
 	 * @param descriptors
 	 *            the descriptors to be added
+	 * 
+	 * @return {@code true} if all descriptors were added, otherwise
+	 *         {@code false}
 	 */
-	protected void addDescriptors(final Collection<Descriptor> descriptors) {
+	protected boolean addDescriptors(final Collection<Descriptor> descriptors) {
 
+		boolean added = true;
 		if (descriptors != null) {
 			for (final Descriptor descriptor : descriptors) {
-				addDescriptor(descriptor);
+				added = addDescriptor(descriptor) && added;
 			}
 		}
+
+		return added;
 	}
 
 	/**
@@ -602,8 +621,16 @@ public class DescriptorModel<I extends Object> {
 	 * 
 	 * @param descriptor
 	 *            the descriptor to be added
+	 * 
+	 * @return {@code true} if the {@code Descriptor} was added, otherwise
+	 *         {@code false}
+	 * 
+	 * @throws DescriptorModelException
+	 *             if duplicates aren't allowed and a {@code Descriptor} was
+	 *             already indexed
 	 */
-	protected void addDescriptor(final Descriptor descriptor) {
+	protected boolean addDescriptor(final Descriptor descriptor)
+			throws DescriptorModelException {
 		boolean added = false;
 
 		try {
@@ -618,6 +645,8 @@ public class DescriptorModel<I extends Object> {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor.getUniqueString(), getId());
 		}
+
+		return added;
 	}
 
 	/**
@@ -719,5 +748,19 @@ public class DescriptorModel<I extends Object> {
 	 */
 	public void setOfflineModeByString(final String mode) {
 		setOfflineMode(OfflineMode.find(mode));
+	}
+
+	/**
+	 * Casts the specified {@code id} to the type of the identifier of the
+	 * model's descriptors.
+	 * 
+	 * @param id
+	 *            the id to be casted
+	 * 
+	 * @return the casted id
+	 */
+	@SuppressWarnings("unchecked")
+	public I castId(final Object id) {
+		return (I) id;
 	}
 }

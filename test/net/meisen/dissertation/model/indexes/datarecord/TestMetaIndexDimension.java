@@ -60,7 +60,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension idx = new MetaIndexDimension(
-				metaStructures.get(0), descModel, model.getCache(),
+				metaStructures.get(0), descModel, model.getBitmapCache(),
 				model.getIndexFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
@@ -121,12 +121,12 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// create the indexDimensions
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension fixedIdx = new MetaIndexDimension(
-				fixedStructure, fixedDescModel, model.getCache(),
+				fixedStructure, fixedDescModel, model.getBitmapCache(),
 				model.getIndexFactory());
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension randomIdx = new MetaIndexDimension(
-				randomStructure, randomDescModel, model.getCache(),
+				randomStructure, randomDescModel, model.getBitmapCache(),
 				model.getIndexFactory());
 
 		// add the data to the indexDimensions
@@ -202,7 +202,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// get the save-index
 		@SuppressWarnings({ "rawtypes" })
 		final MetaIndexDimension saveIdx = new MetaIndexDimension(
-				metaStructure, descModel, model.getCache(),
+				metaStructure, descModel, model.getBitmapCache(),
 				model.getIndexFactory());
 		assertEquals(0, saveIdx.getAmountOfSlices());
 
@@ -236,7 +236,7 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// get the load-index
 		@SuppressWarnings({ "rawtypes" })
 		final MetaIndexDimension loadIdx = new MetaIndexDimension(
-				metaStructure, descModel, model.getCache(),
+				metaStructure, descModel, model.getBitmapCache(),
 				model.getIndexFactory());
 		assertEquals(0, loadIdx.getAmountOfSlices());
 

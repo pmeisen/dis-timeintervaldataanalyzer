@@ -1,11 +1,10 @@
 package net.meisen.dissertation.impl.cache;
 
-import java.io.File;
-
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapOwner;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
@@ -30,7 +29,7 @@ public class MemoryCache implements IBitmapCache {
 	private BaseIndexFactory factory;
 
 	@Override
-	public void initialize(final String modelId, final File modelLocation) {
+	public void initialize(final TidaModel model) {
 		// nothing to do
 	}
 
