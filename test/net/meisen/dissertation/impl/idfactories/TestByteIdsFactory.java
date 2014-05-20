@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.idfactories;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -87,5 +88,28 @@ public class TestByteIdsFactory extends ExceptionBasedTest {
 				.containsString("amount of available identifiers is reached"));
 
 		factory.getId();
+	}
+
+	/**
+	 * Tests the implementation of {@link ByteIdsFactory#setIdAsUsed(Byte)}.
+	 */
+	@Test
+	public void testSetUsedId() {
+		factory.initialize(ByteIdsFactory.FIRST_ID);
+		assertEquals(new Byte((byte) (ByteIdsFactory.FIRST_ID + 1)),
+				factory.getId());
+
+		// check the usage of the next byte
+		factory.setIdAsUsed((byte) 5);
+		assertEquals(new Byte((byte) 6), factory.getId());
+		factory.setIdAsUsed((byte) 5);
+		assertEquals(new Byte((byte) 7), factory.getId());
+		factory.setIdAsUsed((byte) 7);
+		assertEquals(new Byte((byte) 8), factory.getId());
+		factory.setIdAsUsed((byte) 100);
+		assertEquals(new Byte((byte) 101), factory.getId());
+
+		// also the max should be setable
+		factory.setIdAsUsed(Byte.MAX_VALUE);
 	}
 }

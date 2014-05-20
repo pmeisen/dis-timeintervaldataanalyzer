@@ -23,4 +23,9 @@ public class UuIdsFactory implements IIdsFactory<UUID> {
 	public UUID getId() {
 		return UUID.randomUUID();
 	}
+
+	@Override
+	public void setIdAsUsed(final UUID id) {
+		// nothing to do we don't expect anyone to guess a UUID
+	}
 }

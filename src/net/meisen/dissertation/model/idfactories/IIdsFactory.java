@@ -1,6 +1,5 @@
 package net.meisen.dissertation.model.idfactories;
 
-
 /**
  * An {@code IdFactory} is used to create unique identifiers. The factory has to
  * ensure that every call to {@link #getId()} returns a new not prior returned
@@ -31,4 +30,13 @@ public interface IIdsFactory<I extends Object> {
 	 * @return a new identifier which wasn't returned before
 	 */
 	public I getId();
+
+	/**
+	 * Sets the specified id as used, so that the factory won't return this
+	 * identifier again.
+	 * 
+	 * @param id
+	 *            the identifier to mark as used
+	 */
+	public void setIdAsUsed(final I id);
 }

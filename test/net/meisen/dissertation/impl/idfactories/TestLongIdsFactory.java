@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.idfactories;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -85,5 +86,29 @@ public class TestLongIdsFactory extends ExceptionBasedTest {
 				.containsString("amount of available identifiers is reached"));
 
 		factory.getId();
+	}
+
+	/**
+	 * Tests the implementation of {@link LongIdsFactory#setIdAsUsed(Long)}.
+	 */
+	@Test
+	public void testSetUsedId() {
+		factory.initialize(LongIdsFactory.FIRST_ID);
+		assertEquals(new Long(LongIdsFactory.FIRST_ID + 1), factory.getId());
+
+		// check the usage of the next short
+		factory.setIdAsUsed(5l);
+		assertEquals(new Long(6l), factory.getId());
+		factory.setIdAsUsed(5l);
+		assertEquals(new Long(7l), factory.getId());
+		factory.setIdAsUsed(7l);
+		assertEquals(new Long(8l), factory.getId());
+		factory.setIdAsUsed(100l);
+		assertEquals(new Long(101l), factory.getId());
+		factory.setIdAsUsed(Long.MAX_VALUE - 1);
+		assertEquals(new Long(Long.MAX_VALUE), factory.getId());
+
+		// also the max should be setable
+		factory.setIdAsUsed(Long.MAX_VALUE);
 	}
 }

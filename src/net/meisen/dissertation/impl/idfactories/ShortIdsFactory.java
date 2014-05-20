@@ -58,4 +58,13 @@ public class ShortIdsFactory implements IOrderedIdsFactory<Short> {
 		nextId++;
 		return id;
 	}
+
+	@Override
+	public void setIdAsUsed(final Short id) {
+		if (id < nextId) {
+			return;
+		} else {
+			nextId = (short) (id + 1);
+		}
+	}
 }

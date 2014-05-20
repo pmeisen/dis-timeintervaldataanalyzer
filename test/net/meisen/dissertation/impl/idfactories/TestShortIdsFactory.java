@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.idfactories;
 
+import static org.junit.Assert.assertEquals;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.IdsFactoryException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
@@ -57,5 +58,30 @@ public class TestShortIdsFactory extends ExceptionBasedTest {
 				.containsString("amount of available identifiers is reached"));
 
 		factory.getId();
+	}
+
+	/**
+	 * Tests the implementation of {@link ShortIdsFactory#setIdAsUsed(Short)}.
+	 */
+	@Test
+	public void testSetUsedId() {
+		factory.initialize(ShortIdsFactory.FIRST_ID);
+		assertEquals(new Short((short) (ShortIdsFactory.FIRST_ID + 1)),
+				factory.getId());
+
+		// check the usage of the next short
+		factory.setIdAsUsed((short) 5);
+		assertEquals(new Short((short) 6), factory.getId());
+		factory.setIdAsUsed((short) 5);
+		assertEquals(new Short((short) 7), factory.getId());
+		factory.setIdAsUsed((short) 7);
+		assertEquals(new Short((short) 8), factory.getId());
+		factory.setIdAsUsed((short) 100);
+		assertEquals(new Short((short) 101), factory.getId());
+		factory.setIdAsUsed((short) (Short.MAX_VALUE - 1));
+		assertEquals(new Short(Short.MAX_VALUE), factory.getId());
+		
+		// also the max should be setable		
+		factory.setIdAsUsed((short) (Short.MAX_VALUE));
 	}
 }

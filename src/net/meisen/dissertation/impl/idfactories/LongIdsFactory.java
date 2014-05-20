@@ -59,4 +59,12 @@ public class LongIdsFactory implements IOrderedIdsFactory<Long> {
 		return id;
 	}
 
+	@Override
+	public void setIdAsUsed(final Long id) {
+		if (id < nextId) {
+			return;
+		} else {
+			nextId = id + 1l;
+		}
+	}
 }

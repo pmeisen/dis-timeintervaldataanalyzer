@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class ByteIdsFactory implements IOrderedIdsFactory<Byte> {
-	
+
 	/**
-	 * The first generally available identifier 
+	 * The first generally available identifier
 	 */
 	protected static final byte FIRST_ID = 1;
 
@@ -57,5 +57,14 @@ public class ByteIdsFactory implements IOrderedIdsFactory<Byte> {
 
 		nextId++;
 		return id;
+	}
+
+	@Override
+	public void setIdAsUsed(final Byte id) {
+		if (id < nextId) {
+			return;
+		} else {
+			nextId = (byte) (id + 1);
+		}
 	}
 }

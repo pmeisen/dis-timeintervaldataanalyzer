@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class IntegerIdsFactory implements IOrderedIdsFactory<Integer> {
-	
+
 	/**
-	 * The first generally available identifier 
+	 * The first generally available identifier
 	 */
 	protected static final int FIRST_ID = 1;
 
@@ -57,5 +57,14 @@ public class IntegerIdsFactory implements IOrderedIdsFactory<Integer> {
 
 		nextId = nextId + 1;
 		return id;
+	}
+
+	@Override
+	public void setIdAsUsed(final Integer id) {
+		if (id < nextId) {
+			return;
+		} else {
+			nextId = id + 1;
+		}
 	}
 }

@@ -650,6 +650,10 @@ public class DescriptorModel<I extends Object> {
 		if (!added && isFailOnDuplicates()) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor.getUniqueString(), getId());
+		} else if (added) {
+			@SuppressWarnings("unchecked")
+			final I id = (I) descriptor.getId();
+			idsFactory.setIdAsUsed(id);
 		}
 
 		return added;
