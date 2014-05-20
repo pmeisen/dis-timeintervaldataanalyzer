@@ -68,6 +68,8 @@ public class TidaModel implements IPersistable {
 	private final String name;
 	private final File location;
 
+	private boolean initialized;
+
 	private TidaIndex idx;
 
 	private MetaDataHandling metaDataHandling;
@@ -130,6 +132,8 @@ public class TidaModel implements IPersistable {
 		this.name = name == null ? id : name;
 		this.location = location == null ? new File(".", this.id) : location;
 
+		this.initialized = false;
+
 		// set the default value
 		setMetaDataHandling(null);
 		setIntervalDataHandling(null);
@@ -160,7 +164,7 @@ public class TidaModel implements IPersistable {
 	 * @return {@code true} if it is initialized, otherwise {@code false}.
 	 */
 	public boolean isInitialized() {
-		return this.idx != null;
+		return initialized;
 	}
 
 	/**
@@ -193,6 +197,8 @@ public class TidaModel implements IPersistable {
 			LOG.info("Initialized model '" + getId() + "' at '" + getLocation()
 					+ "'.");
 		}
+
+		this.initialized = true;
 	}
 
 	/**
@@ -203,26 +209,31 @@ public class TidaModel implements IPersistable {
 	 *            created by the model, otherwise {@code false}
 	 */
 	public void release(final boolean deleteLocation) {
-		if (!isInitialized()) {
-			return;
-		}
 
 		// log the release
-		if (LOG.isInfoEnabled()) {
+		if (isInitialized() && LOG.isInfoEnabled()) {
 			LOG.info("Releasing model '" + getId() + "' at '" + getLocation()
-					+ "' (deleteLocation: " + deleteLocation + ").");
+					+ ".");
 		}
 
 		// release the cache
 		this.cache.release();
 
 		// delete created files if necessary
-		if (deleteLocation) {
+		if (deleteLocation && getLocation().exists()) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Deleting the files of the model '" + getId()
+						+ "' at '" + getLocation() + ".");
+			}
+
 			if (!Files.deleteDir(getLocation())) {
 				exceptionRegistry.throwException(TidaModelException.class,
 						1004, getLocation());
 			}
 		}
+
+		// the model isn't initialized anymore
+		initialized = false;
 	}
 
 	/**

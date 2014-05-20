@@ -120,7 +120,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 			exception = true;
 		}
 		assertTrue(exception);
-		
+
 		model.release(true);
 	}
 
@@ -156,7 +156,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 				.loadViaXslt("/net/meisen/dissertation/config/fullModel.xml");
 		assertNotNull(model);
 		assertEquals("fullModel", model.getId());
-		
+
 		model.release(true);
 	}
 
@@ -192,16 +192,18 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertTrue(tmpFile.exists());
 		assertTrue(tmpFile.length() > 0);
 
+		// keep some information of the model
+		final int nextId = modelPioneerData1.getNextDataId();
+		final OfflineMode offlineMode = modelPioneerData1.getOfflineMode();
+
 		// now load the file
 		loader.unload(modelPioneerData1.getId());
 		modelPioneerData1.release(true);
 
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
-		assertEquals(modelPioneerData1.getNextDataId(),
-				modelPioneerData2.getNextDataId());
-		assertEquals(modelPioneerData1.getOfflineMode(),
-				modelPioneerData2.getOfflineMode());
+		assertEquals(nextId, modelPioneerData2.getNextDataId());
+		assertEquals(offlineMode, modelPioneerData2.getOfflineMode());
 		modelPioneerData2.release(true);
 
 		// delete the file
@@ -243,6 +245,10 @@ public class TestTidaModelHandler extends DbBasedTest {
 		// make sure the database is offline
 		db.shutDownDb();
 
+		// keep some information of the model
+		final int nextId = modelPioneerData1.getNextDataId();
+		final OfflineMode offlineMode = modelPioneerData1.getOfflineMode();
+
 		// unload and cleanup
 		loader.unload(modelPioneerData1.getId());
 		modelPioneerData1.release(true);
@@ -250,10 +256,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 		// now load the file
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
-		assertEquals(modelPioneerData1.getNextDataId(),
-				modelPioneerData2.getNextDataId());
-		assertEquals(modelPioneerData1.getOfflineMode(),
-				modelPioneerData2.getOfflineMode());
+		assertEquals(nextId, modelPioneerData2.getNextDataId());
+		assertEquals(offlineMode, modelPioneerData2.getOfflineMode());
 
 		// delete the file
 		assertTrue(tmpFile.delete());

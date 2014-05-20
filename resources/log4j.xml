@@ -36,7 +36,7 @@
     <level value="WARN"/>
   </logger>
   <logger name="net.meisen.dissertation">
-    <level value="INFO"/>
+    <level value="TRACE"/>
   </logger>
 
    <!-- ======================= --> 
