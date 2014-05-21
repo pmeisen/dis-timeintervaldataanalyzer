@@ -22,13 +22,23 @@
        id="fullModel" name="My wonderful Model">
 
   <config>
-    <!-- Define the cache to be used.
+    <caches>
+      <!-- Define the cache to be used.
 
-         The following cache implementations are available:
-          + net.meisen.dissertation.impl.cache.MemoryBitmapCache
-          + net.meisen.dissertation.impl.cache.TestFileBitmapCache
-      -->
-    <cache implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+           The following cache implementations are available:
+            + net.meisen.dissertation.impl.cache.MemoryMetaDataCache
+            + net.meisen.dissertation.impl.cache.FileMetaDataCache
+        -->
+      <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+      
+      <!-- Define the cache to be used.
+
+           The following cache implementations are available:
+            + net.meisen.dissertation.impl.cache.MemoryBitmapCache
+            + net.meisen.dissertation.impl.cache.FileBitmapCache
+        -->
+      <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+    </caches>
 
     <factories>
       <!-- Define the factory to be used to determine which IndexFactory

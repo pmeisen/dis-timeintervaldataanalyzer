@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
+import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
@@ -146,7 +147,11 @@ public class DefaultValues {
 	/**
 	 * Id of the {@code BitmapCache} to be used.
 	 */
-	public static final String CACHE_ID = "cacheId";
+	public static final String BITMAPCACHE_ID = "bitmapCacheId";
+	/**
+	 * Id of the {@code BitmapCache} to be used.
+	 */
+	public static final String METADATACACHE_ID = "metaDataCacheId";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -180,12 +185,21 @@ public class DefaultValues {
 	}
 
 	/**
-	 * Gets the default cache implementation to be used.
+	 * Gets the default {@code BitmapCache} implementation to be used.
 	 * 
 	 * @return the default cache implementation to be used
 	 */
-	public static String getDefaultCache() {
+	public static String getDefaultBitmapCache() {
 		return MemoryBitmapCache.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code MetaDataCache} implementation to be used.
+	 * 
+	 * @return the default cache implementation to be used
+	 */
+	public static String getDefaultMetaDataCache() {
+		return MemoryMetaDataCache.class.getName();
 	}
 
 	/**

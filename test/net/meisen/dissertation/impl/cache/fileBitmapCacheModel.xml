@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
-       xmlns:file="http://dev.meisen.net/xsd/dissertation/cache/file"
+       xmlns:file="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd"
+                           http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd"
        
        id="fileBitmapCacheModel">
   
   <config>
-    <cache implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
-      <file:config folder="${java.io.tmpdir}/tmpFileBitmapCacheModelTest" />
-    </cache>
+    <caches>
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+        <file:config folder="${java.io.tmpdir}/tmpFileBitmapCacheModelTest" />
+      </bitmap>
+    </caches>
   </config>
   
   <data />

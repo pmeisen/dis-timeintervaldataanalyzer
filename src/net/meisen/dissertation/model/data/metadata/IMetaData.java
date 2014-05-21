@@ -31,4 +31,11 @@ public interface IMetaData {
 	 * @return the values of the descriptors defined by {@code this}
 	 */
 	public Collection<Object> getValues();
+
+	/**
+	 * Gets the amount of values.
+	 * 
+	 * @return the amount of values
+	 */
+	public int size();
 }

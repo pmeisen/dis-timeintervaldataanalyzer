@@ -109,4 +109,48 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 	public void clear() {
 		metaData.clear();
 	}
+
+	/**
+	 * Get the amount of {@code DescriptorModel} associations.
+	 * 
+	 * @return the amount of {@code DescriptorModel} associations
+	 */
+	public int size() {
+		return metaData.size();
+	}
+
+	/**
+	 * Get the amount of {@code MetaData} instances associated to the specified
+	 * {@code DescriptorModel}.
+	 * 
+	 * @param descriptorModelId
+	 *            the identifier of the {@code DescriptorModel} to get the
+	 *            amount of {@code MetaData} instances from
+	 * 
+	 * @return the amount of {@code MetaData} instances associated to the
+	 *         specified {@code DescriptorModel}
+	 */
+	public int size(final String descriptorModelId) {
+		final Collection<IMetaData> metaData = get(descriptorModelId);
+
+		return metaData == null ? 0 : metaData.size();
+	}
+
+	public Collection<IMetaData> get(final String descriptorModelId) {
+		return this.metaData.getAll(descriptorModelId);
+	}
+
+	public int sizeOfValues(final String descriptorModelId) {
+		final Collection<IMetaData> metaData = get(descriptorModelId);
+		if (metaData == null) {
+			return 0;
+		}
+
+		int count = 0;
+		for (final IMetaData md : metaData) {
+			count += md == null ? 0 : md.size();
+		}
+
+		return count;
+	}
 }

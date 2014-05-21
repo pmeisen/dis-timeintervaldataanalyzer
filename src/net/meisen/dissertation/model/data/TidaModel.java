@@ -7,6 +7,7 @@ import java.util.UUID;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -62,12 +63,12 @@ public class TidaModel implements IPersistable {
 	private DataStructure dataStructure;
 
 	@Autowired
-	@Qualifier(DefaultValues.CACHE_ID)
+	@Qualifier(DefaultValues.BITMAPCACHE_ID)
 	private IBitmapCache bitmapCache;
 
 	@Autowired
-	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
-	private MetaDataCollection metaDataCollection;
+	@Qualifier(DefaultValues.METADATACACHE_ID)
+	private IMetaDataCache metaDataCache;
 
 	private final String id;
 	private final String name;
@@ -193,17 +194,20 @@ public class TidaModel implements IPersistable {
 					loc);
 		}
 
-		// load the metaData
-		if (locExists) {
-
-		} else {
-			this.metaDataModel.addMetaData(metaDataCollection);
-		}
-		this.metaDataCollection.clear();
-		this.metaDataCollection = null;
-
 		// initialize the caches
+		this.metaDataCache.initialize(this);
 		this.bitmapCache.initialize(this);
+
+		/*
+		 * Get the cached metaData and use it. Afterwards the data is stored in
+		 * the MetaDataModel and not needed anymore, therefore release the
+		 * cache.
+		 */
+		final MetaDataCollection metaData = this.metaDataCache
+				.createMetaDataCollection();
+		this.metaDataModel.addMetaData(metaData);
+		this.metaDataCache.release();
+		this.metaDataCache = null;
 
 		// create the index
 		this.idx = new TidaIndex(this);

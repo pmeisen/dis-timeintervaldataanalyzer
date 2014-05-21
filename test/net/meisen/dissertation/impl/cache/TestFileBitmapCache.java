@@ -52,7 +52,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// create the instance of the cache
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
-		fc = modulesHolder.getModule(DefaultValues.CACHE_ID);
+		fc = modulesHolder.getModule(DefaultValues.BITMAPCACHE_ID);
 		assertNotNull(fc);
 
 		// make sure the location is deleted
@@ -291,7 +291,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// create the instance of the cache
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
-		fc = modulesHolder.getModule(DefaultValues.CACHE_ID);
+		fc = modulesHolder.getModule(DefaultValues.BITMAPCACHE_ID);
 		assertNotNull(fc);
 
 		// make sure the location is deleted

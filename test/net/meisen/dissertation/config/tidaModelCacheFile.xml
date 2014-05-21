@@ -1,13 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:mdfile="http://dev.meisen.net/xsd/dissertation/caches/metadata/file"
+       xmlns:bmpfile="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+       
+       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+       
+                           http://dev.meisen.net/xsd/dissertation/caches/metadata/file http://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
+                           
+                           http://dev.meisen.net/xsd/dissertation/model/fxd http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd"
        
        id="tidaModelCacheFile">
   
   <config>
-    <cache implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
+    <caches>
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache">
+        <mdfile:config folder="${java.io.tmpdir}/model-metadata" />
+      </metadata>
+    
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+        <bmpfile:config folder="${java.io.tmpdir}/model-bitmap" />
+      </bitmap>
+    </caches>
+
+    <!-- add another import -->
+    <dataretrievers>
+      <dataretriever id="db_butFixed" implementation="net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever" />
+      <dataretriever id="myOwnId" implementation="net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever">
+        <fxd:record>
+          <fxd:field name="DOUBLE" type="java.lang.Double" />
+        </fxd:record>
+      </dataretriever>
+    </dataretrievers>
   </config>
   
   <data />

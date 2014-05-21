@@ -15,7 +15,7 @@ public class BitmapCacheXsltResolver extends XsltImportResolver {
 
 	@Override
 	public String getProtocol() {
-		return "cache";
+		return "bitmapcache";
 	}
 
 	@Override

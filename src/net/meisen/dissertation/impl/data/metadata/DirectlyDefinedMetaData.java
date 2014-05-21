@@ -137,4 +137,9 @@ public class DirectlyDefinedMetaData implements IMetaData {
 	public String toString() {
 		return getDescriptorModelId() + ": " + getValues();
 	}
+
+	@Override
+	public int size() {
+		return values.size();
+	}
 }

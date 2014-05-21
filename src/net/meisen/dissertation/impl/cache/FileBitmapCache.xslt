@@ -2,7 +2,7 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                               xmlns="http://www.springframework.org/schema/beans"
-                              xmlns:file="http://dev.meisen.net/xsd/dissertation/cache/file">
+                              xmlns:file="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file">
 
   <xsl:template match="file:config">
     <bean class="net.meisen.dissertation.impl.cache.FileBitmapCacheConfig">

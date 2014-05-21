@@ -115,4 +115,9 @@ public class DbMetaData implements IOfflineModeAwareMetaData {
 	public String toString() {
 		return getDescriptorModelId() + ": " + retriever + " - " + query;
 	}
+
+	@Override
+	public int size() {
+		return getValues().size();
+	}
 }

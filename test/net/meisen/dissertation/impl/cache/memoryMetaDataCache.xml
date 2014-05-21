@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="memoryMetaDataCache">
+    
+  <meta>
+    <descriptors>
+      <integer id="PAX" />
+      <integer id="CREW"  null="true" />
+      <string id="AIRLINE" null="true" />
+    </descriptors>
+
+    <entries>          
+      <entry descriptor="AIRLINE" value="LH" />
+      <entry descriptor="AIRLINE" value="AB" />
+    </entries>
+  </meta>
+    
+  <data />
+</model>

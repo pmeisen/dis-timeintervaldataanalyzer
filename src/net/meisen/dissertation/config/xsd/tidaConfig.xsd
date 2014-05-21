@@ -15,13 +15,30 @@
           </xs:complexType>
         </xs:element>
 
-        <xs:element name="cache" minOccurs="0">
+        <xs:element name="caches" minOccurs="0">
           <xs:complexType>
+          
             <xs:sequence>
-              <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="unbounded" />
+              <xs:element name="metadata" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+
+              <xs:element name="bitmap" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
-                        
-            <xs:attribute name="implementation" type="types:javaClass" use="required" />
           </xs:complexType>
         </xs:element>
 

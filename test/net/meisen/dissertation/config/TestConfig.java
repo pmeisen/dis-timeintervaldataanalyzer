@@ -15,12 +15,15 @@ import net.meisen.dissertation.config.xslt.mock.MockQueryFactory;
 import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.cache.FileBitmapCache;
+import net.meisen.dissertation.impl.cache.FileMetaDataCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
+import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -103,9 +106,13 @@ public class TestConfig {
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MapperFactory);
 
-			o = modulesHolder.getModule(DefaultValues.CACHE_ID);
+			o = modulesHolder.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MemoryBitmapCache);
+
+			o = modulesHolder.getModule(DefaultValues.METADATACACHE_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(), o instanceof MemoryMetaDataCache);
 
 			// check folder configuration
 			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
@@ -189,8 +196,8 @@ public class TestConfig {
 	}
 
 	/**
-	 * Tests the usage of a {@code MemoryCache} defined via the global
-	 * configuration.
+	 * Tests the usage of a {@code MemoryBitmapCache} and
+	 * {@code MemoryMetaDataCache} defined via the global configuration.
 	 * 
 	 * @author pmeisen
 	 */
@@ -199,11 +206,15 @@ public class TestConfig {
 
 		@Override
 		public void test() {
-			final IBitmapCache cache = modulesHolder
-					.getModule(DefaultValues.CACHE_ID);
+			final IBitmapCache bmpCache = modulesHolder
+					.getModule(DefaultValues.BITMAPCACHE_ID);
+			assertNotNull(bmpCache);
+			assertEquals(MemoryBitmapCache.class, bmpCache.getClass());
 
-			assertNotNull(cache);
-			assertEquals(MemoryBitmapCache.class, cache.getClass());
+			final IMetaDataCache mdCache = modulesHolder
+					.getModule(DefaultValues.METADATACACHE_ID);
+			assertNotNull(mdCache);
+			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
 		}
 	}
 
@@ -214,24 +225,30 @@ public class TestConfig {
 	 * @author pmeisen
 	 */
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheFile.xml")
-	public static class TestConfigFileBitmapCache extends BaseTest {
+	public static class TestConfigFileCache extends BaseTest {
 
 		@Override
 		public void test() {
-			final IBitmapCache cache = modulesHolder
-					.getModule(DefaultValues.CACHE_ID);
-
-			assertNotNull(cache);
-			assertEquals(FileBitmapCache.class, cache.getClass());
-
+			final IBitmapCache bmpCache = modulesHolder
+					.getModule(DefaultValues.BITMAPCACHE_ID);
+			assertNotNull(bmpCache);
+			assertEquals(FileBitmapCache.class, bmpCache.getClass());
 			assertEquals(new File(System.getProperty("java.io.tmpdir")),
-					((FileBitmapCache) cache).getLocation());
+					((FileBitmapCache) bmpCache).getLocation());
+
+			final IMetaDataCache mdCache = modulesHolder
+					.getModule(DefaultValues.METADATACACHE_ID);
+			assertNotNull(mdCache);
+			assertEquals(FileMetaDataCache.class, mdCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"config-metadata"),
+					((FileMetaDataCache) mdCache).getLocation());
 		}
 	}
 
 	/**
-	 * Tests the usage of a {@code MemoryCache} defined specifically for the
-	 * model.
+	 * Tests the usage of a {@code MemoryBitmapCache} and
+	 * {@code MemoryMetaDataCache} defined specifically for the model.
 	 * 
 	 * @author pmeisen
 	 */
@@ -241,11 +258,15 @@ public class TestConfig {
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheMemory.xml");
 
-			final IBitmapCache cache = modulesHolder
-					.getModule(DefaultValues.CACHE_ID);
+			final IBitmapCache bmpCache = modulesHolder
+					.getModule(DefaultValues.BITMAPCACHE_ID);
+			assertNotNull(bmpCache);
+			assertEquals(MemoryBitmapCache.class, bmpCache.getClass());
 
-			assertNotNull(cache);
-			assertEquals(MemoryBitmapCache.class, cache.getClass());
+			final IMetaDataCache mdCache = modulesHolder
+					.getModule(DefaultValues.METADATACACHE_ID);
+			assertNotNull(mdCache);
+			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
 		}
 	}
 
@@ -255,19 +276,26 @@ public class TestConfig {
 	 * 
 	 * @author pmeisen
 	 */
-	public static class TestModuleFileBitmapCache extends BaseTest {
+	public static class TestModuleFileCache extends BaseTest {
 
 		@Override
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheFile.xml");
 
-			final IBitmapCache cache = modulesHolder
-					.getModule(DefaultValues.CACHE_ID);
+			final IBitmapCache bmpCache = modulesHolder
+					.getModule(DefaultValues.BITMAPCACHE_ID);
+			assertNotNull(bmpCache);
+			assertEquals(FileBitmapCache.class, bmpCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"model-bitmap"), ((FileBitmapCache) bmpCache).getLocation());
 
-			assertNotNull(cache);
-			assertEquals(FileBitmapCache.class, cache.getClass());
-
-			assertEquals(null, ((FileBitmapCache) cache).getLocation());
+			final IMetaDataCache mdCache = modulesHolder
+					.getModule(DefaultValues.METADATACACHE_ID);
+			assertNotNull(mdCache);
+			assertEquals(FileMetaDataCache.class, mdCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"model-metadata"),
+					((FileMetaDataCache) mdCache).getLocation());
 		}
 	}
 
@@ -280,8 +308,8 @@ public class TestConfig {
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses({ TestDefaultConfiguration.class,
 			TestCustomizedConfiguration.class, TestModelSpecificLocation.class,
-			TestConfigMemoryCache.class, TestConfigFileBitmapCache.class,
-			TestModuleMemoryCache.class, TestModuleFileBitmapCache.class })
+			TestConfigMemoryCache.class, TestConfigFileCache.class,
+			TestModuleMemoryCache.class, TestModuleFileCache.class })
 	public static class TestConfigSuite {
 		// just the suite with all the tests defined here
 	}

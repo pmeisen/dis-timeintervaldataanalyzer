@@ -10,7 +10,8 @@
 
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="cache://includeXslts" />
+  <xsl:import href="bitmapcache://includeXslts" />
+  <xsl:import href="metadatacache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -30,10 +31,16 @@
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultLocation()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-      <xsl:variable name="cache">
+      <xsl:variable name="metaDataCache">
         <xsl:choose>
-          <xsl:when test="//cns:cache/@implementation"><xsl:value-of select="//cns:cache/@implementation" /></xsl:when>
-          <xsl:otherwise><xsl:value-of select="cdef:getDefaultCache()" /></xsl:otherwise>
+          <xsl:when test="//cns:caches/cns:metadata/@implementation"><xsl:value-of select="//cns:caches/cns:metadata/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultMetaDataCache()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="bitmapCache">
+        <xsl:choose>
+          <xsl:when test="//cns:caches/cns:bitmap/@implementation"><xsl:value-of select="//cns:caches/cns:bitmap/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultBitmapCache()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
       <xsl:variable name="indexFactory">
@@ -64,14 +71,34 @@
       <!-- define the default location -->
       <bean id="defaultLocation" class="java.lang.String"><constructor-arg value="{$folder}" /></bean>
 
-      <!-- define the default cache class -->
-      <bean id="defaultCacheClass" class="java.lang.String"><constructor-arg value="{$cache}" /></bean>
+      <!-- define the default caches class -->
+      <bean id="defaultMetaDataCacheClass" class="java.lang.String"><constructor-arg value="{$metaDataCache}" /></bean>
+      <bean id="defaultBitmapCacheClass" class="java.lang.String"><constructor-arg value="{$bitmapCache}" /></bean>
 
-      <!-- read the default cache configuration -->
-      <bean id="defaultCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+      <!-- read the default metaDataCache configuration -->
+      <bean id="defaultMetaDataCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
         <property name="bean">
           <xsl:choose>
-            <xsl:when test="//cns:cache/node()"><xsl:apply-imports /></xsl:when>
+            <xsl:when test="//cns:caches/cns:metadata/node()">
+              <xsl:for-each select='//cns:caches/cns:metadata/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.cache.IMetaDataCacheConfig" />
+      </bean>
+
+      <!-- read the default bitmapCache configuration -->
+      <bean id="defaultBitmapCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:caches/cns:bitmap/node()">
+              <xsl:for-each select='//cns:caches/cns:bitmap/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
@@ -87,7 +114,11 @@
       <bean id="defaultIndexFactoryConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
         <property name="bean">
           <xsl:choose>
-            <xsl:when test="//cns:config/cns:factories/cns:indexes/node()"><xsl:apply-imports /></xsl:when>
+            <xsl:when test="//cns:config/cns:factories/cns:indexes/node()">
+              <xsl:for-each select='//cns:config/cns:factories/cns:indexes/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
@@ -98,7 +129,11 @@
       <bean id="defaultMapperFactoryConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
         <property name="bean">
           <xsl:choose>
-            <xsl:when test="//cns:config/cns:factories/cns:mappers/node()"><xsl:apply-imports /></xsl:when>
+            <xsl:when test="//cns:config/cns:factories/cns:mappers/node()">
+              <xsl:for-each select='//cns:config/cns:factories/cns:mappers/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>

@@ -11,7 +11,8 @@
   <xsl:import href="dataretriever://includeXslts" />
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="cache://includeXslts" />
+  <xsl:import href="bitmapcache://includeXslts" />
+  <xsl:import href="metadatacache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -24,7 +25,8 @@
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
   <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
-  <xsl:variable name="cacheId" select="mdef:getId('CACHE_ID')" />
+  <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
+  <xsl:variable name="metaDataCacheId" select="mdef:getId('METADATACACHE_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
@@ -69,24 +71,55 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
-      <!-- create the cache to be used -->     
+      <!-- create the metaDataCache to be used -->     
       <xsl:choose>
-        <xsl:when test="//mns:config/mns:cache/@implementation">
-          <xsl:variable name="cache" select="//mns:config/mns:cache/@implementation" />
-          <bean id="{$cacheId}" class="{$cache}" destroy-method="release">
+        <xsl:when test="//mns:config/mns:caches/mns:metadata/@implementation">
+          <xsl:variable name="metaDataCache" select="//mns:config/mns:caches/mns:metadata/@implementation" />
+          <bean id="{$metaDataCacheId}" class="{$metaDataCache}" destroy-method="release">
             <property name="config">
               <xsl:choose>
-                <xsl:when test="//mns:config/mns:cache/node()"><xsl:apply-imports /></xsl:when>
-                <xsl:otherwise><ref bean="defaultCacheConfig" /></xsl:otherwise>
+                <xsl:when test="//mns:config/mns:caches/mns:metadata/node()">
+                  <xsl:for-each select='//mns:config/mns:caches/mns:metadata/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><ref bean="defaultMetaDataCacheConfig" /></xsl:otherwise>
               </xsl:choose>
             </property>
           </bean>
         </xsl:when>
         <xsl:otherwise>
-          <bean id="{$cacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
-            <property name="beanClass" ref="defaultCacheClass" />
+          <bean id="{$metaDataCacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultMetaDataCacheClass" />
             <property name="properties">
-              <map><entry key="config" value-ref="defaultCacheConfig" /></map>
+              <map><entry key="config" value-ref="defaultMetaDataCacheConfig" /></map>
+            </property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+
+      <!-- create the bitmapCache to be used -->     
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:caches/mns:bitmap/@implementation">
+          <xsl:variable name="bitmapCache" select="//mns:config/mns:caches/mns:bitmap/@implementation" />
+          <bean id="{$bitmapCacheId}" class="{$bitmapCache}" destroy-method="release">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:caches/mns:bitmap/node()">
+                  <xsl:for-each select='//mns:config/mns:caches/mns:bitmap/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><ref bean="defaultBitmapCacheConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$bitmapCacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultBitmapCacheClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultBitmapCacheConfig" /></map>
             </property>
           </bean>
         </xsl:otherwise>
@@ -99,7 +132,11 @@
           <bean id="{$indexFactoryId}" class="{$indexFactory}">
             <property name="config">
               <xsl:choose>
-                <xsl:when test="//mns:config/mns:factories/mns:indexes/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:when test="//mns:config/mns:factories/mns:indexes/node()">
+                  <xsl:for-each select='//mns:config/mns:factories/mns:indexes/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
                 <xsl:otherwise><ref bean="defaultIndexFactoryConfig" /></xsl:otherwise>
               </xsl:choose>
             </property>
@@ -122,7 +159,11 @@
           <bean id="{$mapperFactoryId}" class="{$mapperFactory}">
             <property name="config">
               <xsl:choose>
-                <xsl:when test="//mns:config/mns:factories/mns:mappers/node()"><xsl:apply-imports /></xsl:when>
+                <xsl:when test="//mns:config/mns:factories/mns:mappers/node()">
+                  <xsl:for-each select='//mns:config/mns:factories/mns:mappers/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
                 <xsl:otherwise><ref bean="defaultMapperFactoryConfig" /></xsl:otherwise>
               </xsl:choose>
             </property>

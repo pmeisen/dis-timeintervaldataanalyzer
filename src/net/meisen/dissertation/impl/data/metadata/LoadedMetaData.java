@@ -55,4 +55,9 @@ public class LoadedMetaData implements IIdentifiedMetaData {
 	public String toString() {
 		return getDescriptorModelId() + ": " + values;
 	}
+
+	@Override
+	public int size() {
+		return values.size();
+	}
 }

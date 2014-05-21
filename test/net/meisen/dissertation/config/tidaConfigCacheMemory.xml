@@ -4,5 +4,8 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
   
-  <cache implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+  <caches>
+    <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+    <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+  </caches>
 </config>
