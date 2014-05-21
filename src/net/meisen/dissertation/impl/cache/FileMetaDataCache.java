@@ -28,10 +28,14 @@ public class FileMetaDataCache implements IMetaDataCache {
 
 	private boolean init = false;
 
+	private File location;
+	private File modelLocation;
+
 	@Override
 	public void cacheMetaDataModel(final MetaDataModel model) {
 		if (!init) {
-
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1003);
 		}
 
 		final MetaDataCollection metaDataCollection = new MetaDataCollection();
@@ -57,9 +61,9 @@ public class FileMetaDataCache implements IMetaDataCache {
 
 	@Override
 	public MetaDataCollection createMetaDataCollection() {
-
-		if (this.metaDataCollection == null) {
-
+		if (!init) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1003);
 		}
 
 		return metaDataCollection;
@@ -76,20 +80,77 @@ public class FileMetaDataCache implements IMetaDataCache {
 	@Override
 	public void setConfig(final IMetaDataCacheConfig config) {
 		if (init) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1000);
+		} else if (config == null) {
+			this.location = null;
+		} else if (config instanceof FileMetaDataCacheConfig) {
+			final FileMetaDataCacheConfig fcc = (FileMetaDataCacheConfig) config;
 
+			final File cLoc = fcc.getLocation();
+			this.location = cLoc == null ? null : fcc.getLocation();
+		} else {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1001, config.getClass().getName());
 		}
 	}
 
 	@Override
 	public void initialize(final TidaModel model) {
-		if (metaDataCollection == null) {
 
+		// if already initialized we are done
+		if (this.init) {
+			return;
+		}
+
+		// read the values needed
+		final String modelId = model.getId();
+		final File modelLocation = model.getLocation();
+
+		// determine the location of the model
+		if (metaDataCollection == null) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1002);
+		} else if (this.location != null) {
+			this.modelLocation = new File(location, modelId);
+		} else if (modelLocation != null) {
+			this.modelLocation = modelLocation;
+			this.location = modelLocation.getParentFile();
+		} else {
+			this.location = getDefaultLocation();
+			this.modelLocation = new File(getDefaultLocation(), modelId);
 		}
 
 		init = true;
 	}
 
+	/**
+	 * Gets the default-location used by the {@code FileMetaDataCache} if no
+	 * other is specified.
+	 * 
+	 * @return the default-location used by the {@code FileMetaDataCache}
+	 */
+	protected File getDefaultLocation() {
+		return new File(".");
+	}
+
+	/**
+	 * Gets the root-location of the caches. The {@code FileMetaDataCache}
+	 * generates a sub-folder within this {@code location}.
+	 * 
+	 * @return the root-location of the caches
+	 */
 	public File getLocation() {
-		return null;
+		return this.location;
+	}
+
+	/**
+	 * Gets the location where the data of the cache is stored. This location is
+	 * a sub-folder within the location specified by {@link #getLocation()}.
+	 * 
+	 * @return the location the cache stores data
+	 */
+	public File getModelLocation() {
+		return this.modelLocation;
 	}
 }
