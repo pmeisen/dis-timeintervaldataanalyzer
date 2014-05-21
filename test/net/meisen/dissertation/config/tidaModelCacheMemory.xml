@@ -7,7 +7,7 @@
        id="tidaModelCacheMemory">
   
   <config>
-    <cache implementation="net.meisen.dissertation.impl.cache.MemoryCache" />
+    <cache implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
   </config>
   
   <data />

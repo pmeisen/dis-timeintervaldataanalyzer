@@ -6,19 +6,19 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**
- * Tests the implementation of a {@code FileCacheConfig}
+ * Tests the implementation of a {@code FileBitmapCacheConfig}
  * 
  * @author pmeisen
  * 
  */
-public class TestFileCacheConfig {
+public class TestFileBitmapCacheConfig {
 
 	/**
 	 * Tests the calculation of the configured max file-size.
 	 */
 	@Test
 	public void testMaxFileSize() {
-		final FileCacheConfig c = new FileCacheConfig();
+		final FileBitmapCacheConfig c = new FileBitmapCacheConfig();
 
 		// check default value
 		assertNull(c.getMaxFileSizeInByte());

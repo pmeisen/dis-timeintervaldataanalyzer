@@ -14,8 +14,8 @@ import net.meisen.dissertation.config.xslt.mock.MockMinAggregationFunction;
 import net.meisen.dissertation.config.xslt.mock.MockQueryFactory;
 import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.cache.FileCache;
-import net.meisen.dissertation.impl.cache.MemoryCache;
+import net.meisen.dissertation.impl.cache.FileBitmapCache;
+import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
@@ -105,7 +105,7 @@ public class TestConfig {
 
 			o = modulesHolder.getModule(DefaultValues.CACHE_ID);
 			assertNotNull(o);
-			assertTrue(o.getClass().getName(), o instanceof MemoryCache);
+			assertTrue(o.getClass().getName(), o instanceof MemoryBitmapCache);
 
 			// check folder configuration
 			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
@@ -203,18 +203,18 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(MemoryCache.class, cache.getClass());
+			assertEquals(MemoryBitmapCache.class, cache.getClass());
 		}
 	}
 
 	/**
-	 * Tests the usage of a {@code FileCache} defined via the global
+	 * Tests the usage of a {@code FileBitmapCache} defined via the global
 	 * configuration.
 	 * 
 	 * @author pmeisen
 	 */
 	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/tidaConfigCacheFile.xml")
-	public static class TestConfigFileCache extends BaseTest {
+	public static class TestConfigFileBitmapCache extends BaseTest {
 
 		@Override
 		public void test() {
@@ -222,10 +222,10 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(FileCache.class, cache.getClass());
+			assertEquals(FileBitmapCache.class, cache.getClass());
 
 			assertEquals(new File(System.getProperty("java.io.tmpdir")),
-					((FileCache) cache).getLocation());
+					((FileBitmapCache) cache).getLocation());
 		}
 	}
 
@@ -245,17 +245,17 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(MemoryCache.class, cache.getClass());
+			assertEquals(MemoryBitmapCache.class, cache.getClass());
 		}
 	}
 
 	/**
-	 * Tests the usage of a {@code FileCache} defined specifically for the
+	 * Tests the usage of a {@code FileBitmapCache} defined specifically for the
 	 * model.
 	 * 
 	 * @author pmeisen
 	 */
-	public static class TestModuleFileCache extends BaseTest {
+	public static class TestModuleFileBitmapCache extends BaseTest {
 
 		@Override
 		public void test() {
@@ -265,9 +265,9 @@ public class TestConfig {
 					.getModule(DefaultValues.CACHE_ID);
 
 			assertNotNull(cache);
-			assertEquals(FileCache.class, cache.getClass());
+			assertEquals(FileBitmapCache.class, cache.getClass());
 
-			assertEquals(null, ((FileCache) cache).getLocation());
+			assertEquals(null, ((FileBitmapCache) cache).getLocation());
 		}
 	}
 
@@ -280,8 +280,8 @@ public class TestConfig {
 	@RunWith(Suite.class)
 	@Suite.SuiteClasses({ TestDefaultConfiguration.class,
 			TestCustomizedConfiguration.class, TestModelSpecificLocation.class,
-			TestConfigMemoryCache.class, TestConfigFileCache.class,
-			TestModuleMemoryCache.class, TestModuleFileCache.class })
+			TestConfigMemoryCache.class, TestConfigFileBitmapCache.class,
+			TestModuleMemoryCache.class, TestModuleFileBitmapCache.class })
 	public static class TestConfigSuite {
 		// just the suite with all the tests defined here
 	}

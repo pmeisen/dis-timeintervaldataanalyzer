@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.meisen.dissertation.impl.cache.MemoryCache;
+import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
@@ -185,7 +185,7 @@ public class DefaultValues {
 	 * @return the default cache implementation to be used
 	 */
 	public static String getDefaultCache() {
-		return MemoryCache.class.getName();
+		return MemoryBitmapCache.class.getName();
 	}
 
 	/**

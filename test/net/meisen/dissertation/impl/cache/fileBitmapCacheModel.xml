@@ -4,13 +4,13 @@
        xmlns:file="http://dev.meisen.net/xsd/dissertation/cache/file"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileCache.xsd"
+                           http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd"
        
-       id="fileCacheModel">
+       id="fileBitmapCacheModel">
   
   <config>
-    <cache implementation="net.meisen.dissertation.impl.cache.FileCache">
-      <file:config folder="${java.io.tmpdir}/tmpFileCacheModelTest" maxFileSize="1M" cleaningFactor="0.8" size="1000" />
+    <cache implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+      <file:config folder="${java.io.tmpdir}/tmpFileBitmapCacheModelTest" />
     </cache>
   </config>
   

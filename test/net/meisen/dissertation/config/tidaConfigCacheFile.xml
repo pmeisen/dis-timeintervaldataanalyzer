@@ -4,9 +4,9 @@
         xmlns:file="http://dev.meisen.net/xsd/dissertation/cache/file"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd
-                            http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileCache.xsd">
+                            http://dev.meisen.net/xsd/dissertation/cache/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd">
   
-  <cache implementation="net.meisen.dissertation.impl.cache.FileCache">
+  <cache implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
     <file:config folder="${java.io.tmpdir}" />
   </cache>
 </config>

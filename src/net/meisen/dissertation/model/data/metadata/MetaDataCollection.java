@@ -60,6 +60,21 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 		addMetaData(metaData);
 	}
 
+	/**
+	 * Adds the {@code MetaData} of the passed {@code collection} to
+	 * {@code this}.
+	 * 
+	 * @param collection
+	 *            the {@code MetaDataCollection} to add the {@code MetaData}
+	 *            from
+	 */
+	public void add(final MetaDataCollection collection) {
+		if (collection == null || collection.metaData == null) {
+			return;
+		}
+		addMetaData(collection.metaData.values());
+	}
+
 	@Override
 	public String toString() {
 

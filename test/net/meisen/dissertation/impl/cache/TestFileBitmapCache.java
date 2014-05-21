@@ -31,24 +31,24 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 /**
- * Tests the implementation of a {@code FileCache}.
+ * Tests the implementation of a {@code FileBitmapCache}.
  * 
  * @author pmeisen
  * 
  */
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-public class TestFileCache extends ModuleBasedTest {
+public class TestFileBitmapCache extends ModuleBasedTest {
 
 	private TidaModel model;
-	private FileCache fc;
+	private FileBitmapCache fc;
 
 	/**
-	 * Create a test instance of a {@code FileCache}.
+	 * Create a test instance of a {@code FileBitmapCache}.
 	 */
 	@Before
 	public void create() {
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileCacheModel.xml");
+		setModulesHolder("/net/meisen/dissertation/impl/cache/fileBitmapCacheModel.xml");
 
 		// create the instance of the cache
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
@@ -75,14 +75,14 @@ public class TestFileCache extends ModuleBasedTest {
 	 * Helper method to cache some generated bitmaps to the {@code fc}.
 	 * 
 	 * @param fc
-	 *            the {@code FileCache} to add data to
+	 *            the {@code FileBitmapCache} to add data to
 	 * @param amount
 	 *            the amount of data to be generated
 	 * @param dataOffset
 	 *            the offset between the id and the data to be set within the
 	 *            generated bitmap
 	 */
-	protected void cacheBitmap(final FileCache fc, final int amount,
+	protected void cacheBitmap(final FileBitmapCache fc, final int amount,
 			final int dataOffset) {
 		for (int i = 0; i < amount; i++) {
 			final BitmapId<?> id = createBitmapId(i);
@@ -100,7 +100,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testConfigurationChangeException() {
-		thrown.expect(FileCacheException.class);
+		thrown.expect(FileBitmapCacheException.class);
 		thrown.expectMessage("configuration cannot be changed");
 
 		// initialize and change the configuration
@@ -113,7 +113,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidConfigurationException() {
-		thrown.expect(FileCacheException.class);
+		thrown.expect(FileBitmapCacheException.class);
 		thrown.expectMessage("cache does not support a configuration of type");
 
 		// initialize and change the configuration
@@ -126,7 +126,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidModelIdException() {
-		thrown.expect(FileCacheException.class);
+		thrown.expect(FileBitmapCacheException.class);
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
@@ -149,11 +149,11 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidLocationException() {
-		thrown.expect(FileCacheException.class);
+		thrown.expect(FileBitmapCacheException.class);
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
-		final FileCacheConfig config = new FileCacheConfig();
+		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
 		config.setLocation(null);
 		fc.setConfig(config);
 
@@ -248,7 +248,7 @@ public class TestFileCache extends ModuleBasedTest {
 	}
 
 	/**
-	 * The {@code FileCache} needs to create {@code lines} within the
+	 * The {@code FileBitmapCache} needs to create {@code lines} within the
 	 * index-file, which are used to map a {@code BitmapId} to a
 	 * {@code IndexEntry}. The {@code BitmapId} has to be transformed into a
 	 * byte-array to be stored. This should only be done once for each new
@@ -257,7 +257,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testUsageOfGenerateIndexLine() {
-		final FileCache spy = Mockito.spy(fc);
+		final FileBitmapCache spy = Mockito.spy(fc);
 		spy.initialize(model);
 
 		// let's cache 100 bitmaps for testing purposes
@@ -278,7 +278,7 @@ public class TestFileCache extends ModuleBasedTest {
 		verify(spy, times(200)).generateIndexLine(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
 
-		// release the FileCache
+		// release the FileBitmapCache
 		spy.release();
 	}
 
@@ -287,7 +287,7 @@ public class TestFileCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testMaxFileSize() {
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileCacheModelMaxFileSize.xml");
+		setModulesHolder("/net/meisen/dissertation/impl/cache/fileBitmapCacheModelMaxFileSize.xml");
 
 		// create the instance of the cache
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
@@ -315,12 +315,12 @@ public class TestFileCache extends ModuleBasedTest {
 	/**
 	 * Tests the loading of the internally used index from the hard-drive.
 	 * Furthermore the tests checks the amounts of call to
-	 * {@link FileCache#readBitmap(IndexEntry)}.
+	 * {@link FileBitmapCache#readBitmap(IndexEntry)}.
 	 */
 	@Test
 	public void testIndexLoading() {
-		final FileCache spy = Mockito.spy(fc);
-		final FileCacheConfig config = new FileCacheConfig();
+		final FileBitmapCache spy = Mockito.spy(fc);
+		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
 		config.setLocation(spy.getLocation());
 		config.setMaxFileSize("1K");
 		config.setCacheSize(100);
@@ -390,7 +390,7 @@ public class TestFileCache extends ModuleBasedTest {
 	}
 
 	/**
-	 * Tests the multi-threading of a {@code FileCache}.
+	 * Tests the multi-threading of a {@code FileBitmapCache}.
 	 * 
 	 * @throws InterruptedException
 	 *             if a thread is interrupted
@@ -459,7 +459,7 @@ public class TestFileCache extends ModuleBasedTest {
 	public void testCleaning() {
 
 		// create a new configuration
-		final FileCacheConfig fcc = new FileCacheConfig();
+		final FileBitmapCacheConfig fcc = new FileBitmapCacheConfig();
 		fcc.setCacheCleaningFactor(0.5);
 		fcc.setCacheSize(10);
 		fcc.setLocation(fc.getLocation());
@@ -509,7 +509,7 @@ public class TestFileCache extends ModuleBasedTest {
 		final int amountOfBitmaps = 30000;
 		final int amountOfRuns = 30000;
 
-		final FileCacheConfig config = new FileCacheConfig();
+		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
 		config.setLocation(fc.getLocation());
 		config.setMaxFileSize(30 * amountOfBitmaps + "b");
 		config.setCacheSize((int) (amountOfBitmaps * 0.7));
