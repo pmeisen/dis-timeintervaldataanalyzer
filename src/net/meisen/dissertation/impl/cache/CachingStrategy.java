@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
 /**
- * Defines a {@code CachingStrategy} for the {@code FileCache}. The strategy
+ * Defines a {@code CachingStrategy} for the {@code FileBitmapCache}. The strategy
  * defines which elements to be cached and which once to be removed if the cache
  * is exceeded.
  * 

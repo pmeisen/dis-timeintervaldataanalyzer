@@ -7,21 +7,22 @@ import java.util.regex.Pattern;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 
 /**
- * Configuration of the {@code FileCache}.
+ * Configuration of the {@code FileBitmapCache}.
  * 
  * @author pmeisen
  * 
  */
-public class FileCacheConfig implements IBitmapCacheConfig {
+public class FileBitmapCacheConfig implements IBitmapCacheConfig {
 	private File location;
 	private Integer cacheSize;
 	private Double cacheCleaningFactor;
 	private String maxFileSize;
 
 	/**
-	 * Creates a {@code FileCacheConfig} used to configure a {@code FileCache}.
+	 * Creates a {@code FileBitmapCacheConfig} used to configure a
+	 * {@code FileBitmapCache}.
 	 */
-	public FileCacheConfig() {
+	public FileBitmapCacheConfig() {
 		setLocation(null);
 		setCacheSize(null);
 		setCacheCleaningFactor(null);

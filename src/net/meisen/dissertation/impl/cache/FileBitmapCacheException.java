@@ -3,14 +3,14 @@ package net.meisen.dissertation.impl.cache;
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 
 /**
- * General exceptions thrown within a {@code FileCache}.
+ * General exceptions thrown within a {@code FileBitmapCache}.
  * 
  * @author pmeisen
  * 
  * @see BaseDataRetriever
  * 
  */
-public class FileCacheException extends RuntimeException {
+public class FileBitmapCacheException extends RuntimeException {
 	private static final long serialVersionUID = 851688924231263967L;
 
 	/**
@@ -20,7 +20,7 @@ public class FileCacheException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public FileCacheException(final String message) {
+	public FileBitmapCacheException(final String message) {
 		super(message);
 	}
 
@@ -33,7 +33,7 @@ public class FileCacheException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public FileCacheException(final String message, final Throwable t) {
+	public FileBitmapCacheException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

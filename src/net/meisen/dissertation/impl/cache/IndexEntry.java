@@ -6,7 +6,7 @@ import net.meisen.general.genmisc.types.Streams;
 
 /**
  * An {@code IndexEntry} is an entry in the index-file (see
- * {@link FileCache#idxTableFileName}) of the cache. It defines the
+ * {@link FileBitmapCache#idxTableFileName}) of the cache. It defines the
  * 
  * @author pmeisen
  * 
@@ -57,10 +57,10 @@ public class IndexEntry {
 	 * 
 	 * @param size
 	 *            the size of the entry in the bitmap-file (see
-	 *            {@link FileCache#bitmapFileName}) in bytes
+	 *            {@link FileBitmapCache#bitmapFileName}) in bytes
 	 * @param bitmapFilePosition
 	 *            the position (in bytes) of the entry within the bitmap-file
-	 *            (see {@link FileCache#bitmapFileName})
+	 *            (see {@link FileBitmapCache#bitmapFileName})
 	 * @param fileNumber
 	 *            the number of the file the entry belongs to
 	 */
@@ -74,10 +74,10 @@ public class IndexEntry {
 
 	/**
 	 * Gets the size of the entry in the bitmap-file (see
-	 * {@link FileCache#bitmapFileName}) in bytes.
+	 * {@link FileBitmapCache#bitmapFileName}) in bytes.
 	 * 
 	 * @return the size of the entry in the bitmap-file (see
-	 *         {@link FileCache#bitmapFileName}) in bytes
+	 *         {@link FileBitmapCache#bitmapFileName}) in bytes
 	 */
 	public int getSize() {
 		return size;
@@ -85,10 +85,10 @@ public class IndexEntry {
 
 	/**
 	 * Gets the position (in bytes) of the entry within the bitmap-file (see
-	 * {@link FileCache#bitmapFileName}).
+	 * {@link FileBitmapCache#bitmapFileName}).
 	 * 
 	 * @return the position (in bytes) of the entry within the bitmap-file (see
-	 *         {@link FileCache#bitmapFileName})
+	 *         {@link FileBitmapCache#bitmapFileName})
 	 */
 	public int getBitmapFilePosition() {
 		return bitmapFilePosition;
@@ -96,7 +96,7 @@ public class IndexEntry {
 
 	/**
 	 * Gets the number of the {@code IndexEntry}, i.e. the zero-based position
-	 * of the entry within the bitmap-file (see {@link FileCache#bitmapFileName}
+	 * of the entry within the bitmap-file (see {@link FileBitmapCache#bitmapFileName}
 	 * ).
 	 * 
 	 * @return the number of the {@code IndexEntry} (zero-based)
