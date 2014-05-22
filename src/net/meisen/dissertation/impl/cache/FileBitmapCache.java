@@ -631,12 +631,12 @@ public class FileBitmapCache implements IBitmapCache {
 
 		// remove the bitmaps from the cache and the owner
 		for (final BitmapId<?> removedId : removedIds) {
-			final IBitmapOwner owner = this.owners.get(removedId);
 
 			// remove the identifier from the cache
 			cache.remove(removedId);
 
 			// release the bitmap from the owner
+			final IBitmapOwner owner = this.owners.get(removedId);
 			if (owner != null) {
 				owner.releaseBitmap();
 			}
