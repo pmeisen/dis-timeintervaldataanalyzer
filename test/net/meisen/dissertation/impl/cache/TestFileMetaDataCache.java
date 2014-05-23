@@ -160,7 +160,7 @@ public class TestFileMetaDataCache extends ModuleBasedTest {
 	 * @param corrupt
 	 *            {@code true} if the file should be corrupted, otherwise
 	 *            {@code false} which creates an empty file
-	 *            
+	 * 
 	 * @throws IOException
 	 *             if the file cannot be created
 	 */

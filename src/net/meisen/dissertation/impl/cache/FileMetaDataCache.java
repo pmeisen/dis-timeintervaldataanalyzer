@@ -27,6 +27,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * A {@code FileMetaDataCache} is used to cache meta-data accross several
+ * restarts.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class FileMetaDataCache implements IMetaDataCache {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(FileMetaDataCache.class);
@@ -35,6 +42,9 @@ public class FileMetaDataCache implements IMetaDataCache {
 	 * The name of the file used to store the meta-data
 	 */
 	protected final static String metaDataFileName = "meta.data";
+	/**
+	 * The extension appended to a file-name if it's a backup
+	 */
 	protected final static String backupFileExtension = ".bak";
 
 	@Autowired
@@ -94,7 +104,22 @@ public class FileMetaDataCache implements IMetaDataCache {
 		}
 	}
 
-	protected MetaDataCollection read(final File metaDataFile) {
+	/**
+	 * Reads the {@code MetaDataCollection} from the specified
+	 * {@code metaDataFile}.
+	 * 
+	 * @param metaDataFile
+	 *            the file to read the data from
+	 * 
+	 * @return the read {@code MetaDataCollection}
+	 * 
+	 * @throws FileMetaDataCacheException
+	 *             if the {@code metaDataFile} does not exist or isn't a file,
+	 *             if the {@code metaDataFile} cannot be read, or if the
+	 *             {@code metaDataFile} contains corrupted data
+	 */
+	protected MetaDataCollection read(final File metaDataFile)
+			throws FileMetaDataCacheException {
 		final MetaDataCollection collection = new MetaDataCollection();
 
 		// make sure we have a file
@@ -164,8 +189,25 @@ public class FileMetaDataCache implements IMetaDataCache {
 		return collection;
 	}
 
+	/**
+	 * Writes the {@code collection} to the specified {@code metaDataFile}.
+	 * 
+	 * @param metaDataFile
+	 *            the file to write to
+	 * @param collection
+	 *            the {@code MetaDataCollection} to be written
+	 * 
+	 * @throws FileMetaDataCacheException
+	 *             if the defined {@code metaDataFile} location exists and isn't
+	 *             a directory, if an existing backup cannot be deleted, if a
+	 *             backup cannot be created, if the {@code metaDataFile} cannot
+	 *             be created, or if the data cannot be written
+	 * 
+	 * @see MetaDataCollection
+	 */
 	protected void write(final File metaDataFile,
-			final MetaDataCollection collection) {
+			final MetaDataCollection collection)
+			throws FileMetaDataCacheException {
 		final File backup;
 
 		if (metaDataFile.exists()) {
@@ -275,6 +317,14 @@ public class FileMetaDataCache implements IMetaDataCache {
 		}
 	}
 
+	/**
+	 * Gets the name of the backup-file for the {@code metaDataFile}.
+	 * 
+	 * @param metaDataFile
+	 *            the file to get the backup-file for
+	 * 
+	 * @return the backup-file
+	 */
 	protected File getBackUpFile(final File metaDataFile) {
 		final File parent = metaDataFile.getParentFile();
 		if (parent == null) {
