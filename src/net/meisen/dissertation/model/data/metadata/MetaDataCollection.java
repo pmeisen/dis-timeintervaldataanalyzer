@@ -130,10 +130,32 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 		return metaData == null ? 0 : metaData.size();
 	}
 
+	/**
+	 * Gets all the defined meta-data for the specified
+	 * {@code descriptorModelId}.
+	 * 
+	 * @param descriptorModelId
+	 *            the identifier of the {@code DescriptorModel} to get the
+	 *            meta-data for
+	 * 
+	 * @return a collection of all the meta-data defined for the specified
+	 *         {@code descriptorModelId}
+	 */
 	public Collection<IMetaData> get(final String descriptorModelId) {
 		return this.metaData.getAll(descriptorModelId);
 	}
 
+	/**
+	 * Determines the amount of values available for a specified
+	 * {@code descriptorModelId}.
+	 * 
+	 * @param descriptorModelId
+	 *            the identifier of the {@code DescriptorModel} to determine the
+	 *            size for
+	 * 
+	 * @return the amount of values available for a specified
+	 *         {@code descriptorModelId}
+	 */
 	public int sizeOfValues(final String descriptorModelId) {
 		final Collection<IMetaData> metaData = get(descriptorModelId);
 		if (metaData == null) {
