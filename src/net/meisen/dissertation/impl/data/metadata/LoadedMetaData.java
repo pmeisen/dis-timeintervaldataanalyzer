@@ -8,11 +8,26 @@ import java.util.Map.Entry;
 import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
 import net.meisen.general.genmisc.types.Objects;
 
+/**
+ * {@code IdentifiedMetaData} which was loaded from a persisted state.
+ * 
+ * @author pmeisen
+ * 
+ * @see IIdentifiedMetaData
+ * 
+ */
 public class LoadedMetaData implements IIdentifiedMetaData {
 
 	private final Map<Object, Object> values;
 	private final String descriptorModelId;
 
+	/**
+	 * Default constructor which specifies the {@code descriptorModelId} the
+	 * meta-data is defined for.
+	 * 
+	 * @param descriptorModelId
+	 *            the {@code descriptorModelId} the meta-data is defined for
+	 */
 	public LoadedMetaData(final String descriptorModelId) {
 		this.values = new HashMap<Object, Object>();
 		this.descriptorModelId = descriptorModelId;
@@ -28,6 +43,12 @@ public class LoadedMetaData implements IIdentifiedMetaData {
 		return values;
 	}
 
+	/**
+	 * Adds the specified key-value pairs to {@code this}.
+	 * 
+	 * @param values
+	 *            the key-value pairs to be added
+	 */
 	public void addValues(final Map<Object, Object> values) {
 		if (values == null) {
 			return;
@@ -38,10 +59,26 @@ public class LoadedMetaData implements IIdentifiedMetaData {
 		}
 	}
 
+	/**
+	 * Adds a key-value pair to {@code this}.
+	 * 
+	 * @param key
+	 *            the key of the value to be added
+	 * @param value
+	 *            the value to be added
+	 */
 	public void addValue(final Object key, final Object value) {
 		this.values.put(key, value);
 	}
 
+	/**
+	 * Sets the specified key-value pairs of {@code this}. In contrast to
+	 * adding, setting removes all other already pairs prior to adding the
+	 * specified {@code values}.
+	 * 
+	 * @param values
+	 *            the key-value pairs to be set
+	 */
 	public void setValues(final Map<Object, Object> values) {
 		this.values.clear();
 		addValues(values);
