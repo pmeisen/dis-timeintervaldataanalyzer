@@ -201,11 +201,13 @@ public class TidaModel implements IPersistable {
 		/*
 		 * Get the cached metaData and use it. Afterwards the data is stored in
 		 * the MetaDataModel and not needed anymore, therefore release the
-		 * cache.
+		 * cache. Before releasing the cache is used to persist the currently
+		 * loaded metaData.
 		 */
 		final MetaDataCollection metaData = this.metaDataCache
 				.createMetaDataCollection();
 		this.metaDataModel.addMetaData(metaData);
+		this.metaDataCache.cacheMetaDataModel(this.metaDataModel);
 		this.metaDataCache.release();
 		this.metaDataCache = null;
 

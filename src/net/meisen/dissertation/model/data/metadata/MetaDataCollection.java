@@ -77,25 +77,19 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 
 	@Override
 	public String toString() {
+		return metaData.toString();
+	}
 
-		final Iterator<String> i = metaData.keySet().iterator();
-		if (!i.hasNext()) {
-			return "{}";
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof MetaDataCollection) {
+			final MetaDataCollection col = (MetaDataCollection) obj;
+			return metaData.equals(col.metaData);
+		} else {
+			return false;
 		}
-
-		final StringBuilder sb = new StringBuilder();
-		sb.append('{');
-		for (;;) {
-			final String key = i.next();
-			final Collection<IMetaData> value = metaData.getAll(key);
-			sb.append(value.toString());
-
-			if (!i.hasNext()) {
-				return sb.append('}').toString();
-			}
-			sb.append(", ");
-		}
-
 	}
 
 	@Override

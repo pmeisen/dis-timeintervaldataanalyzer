@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.model.data.metadata.IMetaData;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * {@code DirectlyDefinedMetaData} is used to define {@code MetaData} directly,
@@ -141,5 +142,18 @@ public class DirectlyDefinedMetaData implements IMetaData {
 	@Override
 	public int size() {
 		return values.size();
+	}
+	
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof DirectlyDefinedMetaData) {
+			final DirectlyDefinedMetaData ddmd = (DirectlyDefinedMetaData) obj;
+			return Objects.equals(ddmd.descriptorModelId, descriptorModelId)
+					&& Objects.equals(ddmd.values, values);
+		} else {
+			return false;
+		}
 	}
 }

@@ -6,22 +6,25 @@
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
-       id="memoryMetaDataCache">
-  
+       folder="${java.io.tmpdir}/testMetaDataCache"
+       id="fileMetaDataCache">
+    
   <config>
     <caches>
-      <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
     </caches>
   </config>
-  
+    
   <meta>
     <descriptors>
       <integer id="PAX" />
-      <integer id="CREW"  null="true" />
+      <integer id="CREW" null="true" />
       <string id="AIRLINE" null="true" />
     </descriptors>
 
-    <entries>          
+    <entries>
+      <entry descriptor="CREW" value="5" />
+              
       <entry descriptor="AIRLINE" value="LH" />
       <entry descriptor="AIRLINE" value="AB" />
     </entries>

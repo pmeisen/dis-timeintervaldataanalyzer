@@ -182,10 +182,9 @@ public class DescriptorModel<I extends Object> {
 	 *         the model
 	 */
 	public <D> Descriptor<D, ?, I> addDescriptor(final I id, final D value) {
-
 		Descriptor descriptor;
 		if (value == null) {
-			if (nullDescriptor == null) {
+			if (!createdNullDescriptor()) {
 				nullDescriptor = new NullDescriptor<I>(this, id);
 			} else if (!Objects.equals(nullDescriptor.getId(), id)) {
 				exceptionRegistry.throwException(
@@ -330,14 +329,27 @@ public class DescriptorModel<I extends Object> {
 	}
 
 	/**
-	 * Gets the amount of descriptors in this {@code DescriptorModel}. If all
-	 * descriptors are needed anyways it makes more sense to get those using
-	 * {@code #getDescriptors()} and count the retrieved {@code Collection}.
+	 * Gets the amount of descriptors (without a possible {@code NullDescriptor}
+	 * ) in this {@code DescriptorModel}. If descriptors are needed anyways it
+	 * makes more sense to get those using {@code #getDescriptors()} and count
+	 * the retrieved {@code Collection}.
 	 * 
 	 * @return the amount of descriptors
 	 */
 	public int size() {
 		return getDescriptorIndex().size();
+	}
+
+	/**
+	 * Gets the amount of descriptors (with a possible {@code NullDescriptor} )
+	 * in this {@code DescriptorModel}. If descriptors are needed anyways it
+	 * makes more sense to get those using {@code #getAllDescriptors()} and
+	 * count the retrieved {@code Collection}.
+	 * 
+	 * @return the amount of descriptors
+	 */
+	public int sizeAll() {
+		return getAllDescriptors().size();
 	}
 
 	/**
@@ -419,7 +431,7 @@ public class DescriptorModel<I extends Object> {
 		}
 
 		// make sure we have a nullDescriptor
-		if (nullDescriptor == null) {
+		if (!createdNullDescriptor()) {
 			nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
 		}
 
@@ -444,6 +456,20 @@ public class DescriptorModel<I extends Object> {
 	 */
 	public I getNullDescriptorId() {
 		return getNullDescriptor().getId();
+	}
+
+	/**
+	 * Checks if the {@code NullDescriptor} was already created. This method
+	 * does not check if a {@code NullDescriptor} is supported, it just checks
+	 * if it was created already.
+	 * 
+	 * @return {@code true} if the {@code NullDescriptor} for this
+	 *         {@code DescriptorModel} was created, otherwise {@code false}
+	 * 
+	 * @see #supportsNullDescriptor()
+	 */
+	protected boolean createdNullDescriptor() {
+		return nullDescriptor != null;
 	}
 
 	/**
@@ -496,7 +522,8 @@ public class DescriptorModel<I extends Object> {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1005);
 			return null;
-		} else if (supportsNullDescriptor() && id.equals(getNullDescriptorId())) {
+		} else if (supportsNullDescriptor() && createdNullDescriptor()
+				&& id.equals(getNullDescriptorId())) {
 			return getNullDescriptor();
 		} else {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
@@ -772,5 +799,10 @@ public class DescriptorModel<I extends Object> {
 	@SuppressWarnings("unchecked")
 	public I castId(final Object id) {
 		return (I) id;
+	}
+
+	@Override
+	public String toString() {
+		return descriptors.toString();
 	}
 }

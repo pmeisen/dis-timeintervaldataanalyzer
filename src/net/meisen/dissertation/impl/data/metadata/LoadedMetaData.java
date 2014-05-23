@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
+import net.meisen.general.genmisc.types.Objects;
 
 public class LoadedMetaData implements IIdentifiedMetaData {
 
@@ -59,5 +60,18 @@ public class LoadedMetaData implements IIdentifiedMetaData {
 	@Override
 	public int size() {
 		return values.size();
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof LoadedMetaData) {
+			final LoadedMetaData lmd = (LoadedMetaData) obj;
+			return Objects.equals(lmd.descriptorModelId, descriptorModelId)
+					&& Objects.equals(lmd.values, values);
+		} else {
+			return false;
+		}
 	}
 }

@@ -7,7 +7,6 @@ import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
-import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -30,12 +29,11 @@ public class TestMemoryMetaDataCache extends ModuleBasedTest {
 
 	/**
 	 * Tests the implementation of
-	 * {@link MemoryMetaDataCache#createMetaDataCollection()} and
-	 * {@link MemoryMetaDataCache#createCollectionForModel(MetaDataModel)}.
+	 * {@link MemoryMetaDataCache#createMetaDataCollection()} and the usage
+	 * within a {@code TidaModel}.
 	 */
 	@Test
 	public void testUsage() {
-		MetaDataCollection collection;
 		setModulesHolder("/net/meisen/dissertation/impl/cache/memoryMetaDataCache.xml");
 
 		// get the model and make sure it's not initialized
@@ -49,7 +47,7 @@ public class TestMemoryMetaDataCache extends ModuleBasedTest {
 		cache.initialize(model);
 
 		// create the collection (should be the defined one)
-		collection = cache.createMetaDataCollection();
+		final MetaDataCollection collection = cache.createMetaDataCollection();
 		assertEquals(1, collection.size());
 		assertEquals(2, collection.size("AIRLINE"));
 
@@ -58,18 +56,6 @@ public class TestMemoryMetaDataCache extends ModuleBasedTest {
 
 		// the cache should not be initialized anymore
 		assertFalse(((MemoryMetaDataCache) cache).isInitialized());
-
-		// check the creation of the collection
-		final MemoryMetaDataCache newCache = new MemoryMetaDataCache();
-		collection = newCache
-				.createCollectionForModel(model.getMetaDataModel());
-		assertEquals(3, collection.size());
-		assertEquals(1, collection.size("AIRLINE"));
-		assertEquals(3, collection.sizeOfValues("AIRLINE"));
-		assertEquals(1, collection.size("PAX"));
-		assertEquals(0, collection.sizeOfValues("PAX"));
-		assertEquals(1, collection.size("CREW"));
-		assertEquals(1, collection.sizeOfValues("CREW"));
 	}
 
 	/**

@@ -8,6 +8,7 @@ import net.meisen.dissertation.model.data.metadata.IOfflineModeAwareMetaData;
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
+import net.meisen.general.genmisc.types.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,5 +120,19 @@ public class DbMetaData implements IOfflineModeAwareMetaData {
 	@Override
 	public int size() {
 		return getValues().size();
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof DbMetaData) {
+			final DbMetaData dbmd = (DbMetaData) obj;
+			return Objects.equals(dbmd.descriptorModelId, descriptorModelId)
+					&& Objects.equals(dbmd.retriever, retriever)
+					&& Objects.equals(dbmd.query, query);
+		} else {
+			return false;
+		}
 	}
 }

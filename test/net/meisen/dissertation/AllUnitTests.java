@@ -8,7 +8,9 @@ import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.cache.TestCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCacheConfig;
+import net.meisen.dissertation.impl.cache.TestFileMetaDataCache;
 import net.meisen.dissertation.impl.cache.TestMemoryMetaDataCache;
+import net.meisen.dissertation.impl.cache.TestUtilMetaDataCache;
 import net.meisen.dissertation.impl.dataretriever.TestDbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.TestFixedStructureDataRetriever;
 import net.meisen.dissertation.impl.datasets.TestDataRetrieverDataSet;
@@ -175,7 +177,9 @@ import org.junit.runners.Suite;
 		TestProcessedDataRecord.class,
 
 		// Test the caches
+		TestUtilMetaDataCache.class,
 		TestMemoryMetaDataCache.class,
+		TestFileMetaDataCache.class,
 		TestFileBitmapCacheConfig.class,
 		TestCachingStrategy.class,
 		TestFileBitmapCache.class,

@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.cache;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -312,8 +313,8 @@ public class FileBitmapCache implements IBitmapCache {
 		final DataOutputStream writer;
 		try {
 			reader = new RandomAccessFile(bitmapFile, "r");
-			writer = new DataOutputStream(
-					new FileOutputStream(bitmapFile, true));
+			writer = new DataOutputStream(new BufferedOutputStream(
+					new FileOutputStream(bitmapFile, true)));
 		} catch (final IOException e) {
 			exceptionRegistry.throwException(FileBitmapCacheException.class,
 					1012, e, bitmapFile);
