@@ -4,30 +4,30 @@ import java.util.Comparator;
 import java.util.TreeSet;
 
 import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * A {@code SortedSet} of {@code Descriptors}. The sorting is done using the
- * value of the {@code descriptor}, whereby all record variant
- * {@code Descriptors} are smaller than invariant once - sorted by their
- * identifier. The record invariant {@code Descriptors} are sorted by their
- * invariant value.
+ * A {@code SortedSet} of {@code FactDescriptors}. The sorting is done using the
+ * value of the {@code fact}, whereby all record variant {@code FactDescriptors}
+ * are smaller than invariant once - sorted by their identifier. The record
+ * invariant {@code FactDescriptor} are sorted by their invariant value.
  * 
  * @author pmeisen
  * 
  */
-public class FactDescriptorSet extends TreeSet<Descriptor<?, ?, ?>> {
+public class FactDescriptorSet extends TreeSet<FactDescriptor<?>> {
 	private static final long serialVersionUID = 4576995616789676834L;
 
-	private final static Comparator<Descriptor<?, ?, ?>> valueComperator = new Comparator<Descriptor<?, ?, ?>>() {
+	private final static Comparator<FactDescriptor<?>> valueComperator = new Comparator<FactDescriptor<?>>() {
 
 		/**
 		 * Compares the two {@code Descriptor} instances. If one of the
 		 * descriptors isn't record invariant an exception is thrown.
 		 * 
-		 * @param desc1
+		 * @param factDesc1
 		 *            the first {@code Descriptor} to compare
-		 * @param desc2
+		 * @param factDesc2
 		 *            the second {@code Descriptor} to compare
 		 * 
 		 * @return {@code 0} if both {@code Descriptor} instances are equal
@@ -44,24 +44,24 @@ public class FactDescriptorSet extends TreeSet<Descriptor<?, ?, ?>> {
 		 * @see Descriptor
 		 */
 		@Override
-		public int compare(final Descriptor<?, ?, ?> desc1,
-				final Descriptor<?, ?, ?> desc2) {
+		public int compare(final FactDescriptor<?> factDesc1,
+				final FactDescriptor<?> factDesc2) {
 
-			if (desc1 == null || desc2 == null) {
+			if (factDesc1 == null || factDesc2 == null) {
 				throw new NullPointerException(
 						"Null descriptors are not supported!");
 			}
 
 			// make sure both are invariant
-			final boolean invariantDesc1 = desc1.isRecordInvariant();
-			final boolean invariantDesc2 = desc2.isRecordInvariant();
+			final boolean invariantDesc1 = factDesc1.isRecordInvariant();
+			final boolean invariantDesc2 = factDesc2.isRecordInvariant();
 			if (invariantDesc1 && invariantDesc2) {
-				final double factDesc1 = desc1.getFactValue(null);
-				final double factDesc2 = desc2.getFactValue(null);
+				final double fact1 = factDesc1.getFact();
+				final double fact2 = factDesc2.getFact();
 
-				if (factDesc1 < factDesc2) {
+				if (fact1 < fact2) {
 					return -1;
-				} else if (factDesc1 > factDesc2) {
+				} else if (fact1 > fact2) {
 					return 1;
 				}
 
@@ -69,11 +69,11 @@ public class FactDescriptorSet extends TreeSet<Descriptor<?, ?, ?>> {
 				 * the models are equal within one set, which is ensured by the
 				 * implementation, therefore just check the identifiers
 				 */
-				return Objects.compare(desc1.getId(), desc2.getId());
+				return Objects.compare(factDesc1.getId(), factDesc2.getId());
 			}
 			// both are variant
 			else if (!invariantDesc1 && !invariantDesc2) {
-				return Objects.compare(desc1.getId(), desc2.getId());
+				return Objects.compare(factDesc1.getId(), factDesc2.getId());
 			}
 			// invariantDesc1 == true && invariantDesc2 == false
 			else if (invariantDesc1) {
@@ -107,7 +107,7 @@ public class FactDescriptorSet extends TreeSet<Descriptor<?, ?, ?>> {
 	 * 
 	 * @see Comparator
 	 */
-	protected Comparator<Descriptor<?, ?, ?>> getValueComparator() {
+	protected Comparator<FactDescriptor<?>> getValueComparator() {
 		return valueComperator;
 	}
 

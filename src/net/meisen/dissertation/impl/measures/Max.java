@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -30,8 +30,8 @@ public class Max extends BaseAggregationFunction {
 		}
 
 		// get the last descriptor and get it's value
-		final Descriptor<?, ?, ?> last = descriptors.last();
-		return last.getFactValue(null);
+		final FactDescriptor<?> last = descriptors.last();
+		return last.getFact();
 	}
 
 	@Override

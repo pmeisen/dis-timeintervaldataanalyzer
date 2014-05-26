@@ -8,6 +8,7 @@ import java.util.List;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 
 /**
  * A slice of a dimension which has associated {@code Descriptors}.
@@ -50,10 +51,10 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	}
 
 	public void deserialize(final DataInputStream in,
-			final List<Descriptor<?, ?, ?>> descriptors) throws IOException {
+			final List<FactDescriptor<?>> factDescriptors) throws IOException {
 
 		// set the descriptors of the slice
-		facts.addDescriptors(descriptors);
+		facts.add(factDescriptors);
 
 		// update the bitmap
 		super.deserializeBitmap(in);
@@ -103,7 +104,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * 
 	 * @see Iterable
 	 */
-	public Iterable<Descriptor<?, ?, ?>> facts(final String descriptorModelId) {
+	public Iterable<FactDescriptor<?>> facts(final String descriptorModelId) {
 		return facts.facts(descriptorModelId);
 	}
 
@@ -178,8 +179,8 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	}
 
 	/**
-	 * Creates a sorted list of the descriptors of the specified
-	 * {@code DescriptorModel}.
+	 * Creates a sorted list of the {@code FactDescriptor} instances of the
+	 * specified {@code DescriptorModel}.
 	 * 
 	 * @param descriptorModelId
 	 *            the identifier of the {@code DescriptorModel}
@@ -188,7 +189,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * 
 	 * @see DescriptorModel
 	 */
-	public List<Descriptor<?, ?, ?>> createSortedDescriptorList(
+	public List<FactDescriptor<?>> createSortedDescriptorList(
 			String descriptorModelId) {
 		return facts.createSortedDescriptorList(descriptorModelId);
 	}

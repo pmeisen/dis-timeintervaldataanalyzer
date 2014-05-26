@@ -17,6 +17,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
@@ -418,7 +419,12 @@ public class IntervalIndex implements IDataRecordIndex {
 				for (final String modelId : slice.models()) {
 					persistor.writeString(out, modelId);
 					persistor.writeInt(out, slice.numberOfFacts(modelId));
-					for (final Descriptor<?, ?, ?> desc : slice.facts(modelId)) {
+
+					for (final FactDescriptor<?> factDesc : slice
+							.facts(modelId)) {
+						final Descriptor<?, ?, ?> desc = metaDataModel
+								.getDescriptor(factDesc.getModelId(),
+										factDesc.getId());
 						persistor.writeObject(out, desc.getValue());
 					}
 				}
@@ -457,8 +463,7 @@ public class IntervalIndex implements IDataRecordIndex {
 		}
 
 		// get the descriptors associated
-		final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
-
+		final List<FactDescriptor<?>> descriptors = new ArrayList<FactDescriptor<?>>();
 		try {
 			final int nrOfModels = persistor.readInt(inputStream);
 			for (int i = 0; i < nrOfModels; i++) {
@@ -471,7 +476,7 @@ public class IntervalIndex implements IDataRecordIndex {
 							.getDescriptorByValue(modelId, descValue,
 									MetaDataHandling.CREATEDESCRIPTOR);
 
-					descriptors.add(desc);
+					descriptors.add(desc.getFactDescriptor());
 				}
 			}
 		} catch (final Exception e) {

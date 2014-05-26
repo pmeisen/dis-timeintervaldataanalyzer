@@ -20,6 +20,8 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	private final I id;
 	private final DescriptorModel<I> model;
 
+	private FactDescriptor<I> factDescriptor = null;
+
 	/**
 	 * Constructor which creates a {@code Descriptor} based on the specified
 	 * {@code model} and with the specified {@code id}.
@@ -109,6 +111,27 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	public abstract boolean isRecordInvariant();
 
 	/**
+	 * Gets the {@code FactDescriptor} for {@code this}.
+	 * 
+	 * @return the {@code FactDescriptor} for {@code this}
+	 */
+	public FactDescriptor<I> getFactDescriptor() {
+
+		// create a new FactDescriptor if we don't have one
+		if (factDescriptor == null) {
+			if (isRecordInvariant()) {
+				factDescriptor = new FactDescriptor<I>(getModelId(), getId(),
+						getFactValue(null));
+			} else {
+				factDescriptor = new FactDescriptor<I>(getModelId(), getId());
+			}
+		}
+
+		// return the FactDescriptor
+		return factDescriptor;
+	}
+
+	/**
 	 * Gets a unique string representation for the descriptor. This
 	 * representation is necessary for queries, when filtering for the
 	 * descriptor.
@@ -143,7 +166,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 				cmp = true;
 			}
 		}
-		
+
 		return cmp;
 	}
 

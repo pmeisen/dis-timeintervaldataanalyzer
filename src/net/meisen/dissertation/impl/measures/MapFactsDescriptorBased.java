@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -39,7 +39,7 @@ public class MapFactsDescriptorBased extends MapFactsArrayBased {
 		// add all the values of the descriptors
 		final double[] facts = returnSortedFacts ? new double[index
 				.getAmountOfRecords()] : null;
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
+		for (final FactDescriptor<?> desc : descriptors) {
 
 			if (desc.isRecordInvariant()) {
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
@@ -48,7 +48,7 @@ public class MapFactsDescriptorBased extends MapFactsArrayBased {
 				// get the bitmap
 				final Bitmap bmp = bitmap == null ? metaSlice.getBitmap()
 						: bitmap.and(metaSlice.getBitmap());
-				final double val = desc.getFactValue(null);
+				final double val = desc.getFact();
 
 				// add the values to the identifiers
 				final int[] ids = bmp.getIds();

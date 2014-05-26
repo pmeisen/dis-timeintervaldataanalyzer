@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
-import net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap;
-
 import org.junit.Test;
 
 /**

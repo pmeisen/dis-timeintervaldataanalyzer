@@ -1,6 +1,7 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import net.meisen.dissertation.impl.idfactories.ShortIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,28 +62,25 @@ public class TestFactDescriptorModelSet {
 
 		// add the descriptors to the set
 		for (int i = 0; i < 10; i++) {
-			set.addDescriptor(desc1000);
-			set.addDescriptor(desc1000);
-			set.addDescriptor(desc2000);
-			set.addDescriptor(desc2000);
-			set.addDescriptor(desc1500);
-			set.addDescriptor(desc1500);
-			set.addDescriptor(desc1000);
-			set.addDescriptor(desc1000);
-			set.addDescriptor(desc1500);
-			set.addDescriptor(desc1500);
+			final boolean first = i == 0;
+
+			assertEquals(first, set.addDescriptor(desc1000));
+			assertEquals(first, set.addDescriptor(desc2000));
+			assertEquals(first, set.addDescriptor(desc1500));
+			assertFalse(set.addDescriptor(desc1000));
+			assertFalse(set.addDescriptor(desc1500));
 		}
 
 		// check the final result, it should be sorted by the value
-		final List<Descriptor<?, ?, ?>> list = set
+		final List<FactDescriptor<?>> list = set
 				.createSortedDescriptorList(model1);
 		assertEquals(3, list.size());
-		assertTrue(desc1000 == list.get(0));
-		assertTrue(desc1500 == list.get(1));
-		assertTrue(desc2000 == list.get(2));
-		assertEquals(1000.0, desc1000.getFactValue(null), 0.0);
-		assertEquals(1500.0, desc1500.getFactValue(null), 0.0);
-		assertEquals(2000.0, desc2000.getFactValue(null), 0.0);
+		assertTrue(desc1000.getFactDescriptor() == list.get(0));
+		assertTrue(desc1500.getFactDescriptor() == list.get(1));
+		assertTrue(desc2000.getFactDescriptor() == list.get(2));
+		assertEquals(1000.0, desc1000.getFactDescriptor().getFact(), 0.0);
+		assertEquals(1500.0, desc1500.getFactDescriptor().getFact(), 0.0);
+		assertEquals(2000.0, desc2000.getFactDescriptor().getFact(), 0.0);
 	}
 
 	/**
@@ -99,25 +98,26 @@ public class TestFactDescriptorModelSet {
 
 		// add the descriptors to the set
 		for (int i = 0; i < 10; i++) {
-			set.addDescriptor(desc3);
-			set.addDescriptor(desc3);
-			set.addDescriptor(desc1);
-			set.addDescriptor(desc1);
-			set.addDescriptor(desc1);
-			set.addDescriptor(desc2);
-			set.addDescriptor(desc2);
+			final boolean first = i == 0;
+
+			assertEquals(first, set.addDescriptor(desc3));
+			assertEquals(first, set.addDescriptors(desc1, desc3));
+			assertFalse(set.addDescriptor(desc3));
+			assertFalse(set.addDescriptor(desc1));
+			assertFalse(set.addDescriptors(desc1, desc3));
+			assertEquals(first, set.addDescriptor(desc2));
 		}
 
 		// check the final result, it should be sorted by id
-		final List<Descriptor<?, ?, ?>> list = set
+		final List<FactDescriptor<?>> list = set
 				.createSortedDescriptorList(model3);
 		assertEquals(3, list.size());
-		assertTrue(desc1 == list.get(0));
-		assertTrue(desc2 == list.get(1));
-		assertTrue(desc3 == list.get(2));
-		assertEquals(1.0, desc1.getFactValue(null), 0.0);
-		assertEquals(1.0, desc2.getFactValue(null), 0.0);
-		assertEquals(1.0, desc3.getFactValue(null), 0.0);
+		assertTrue(desc1.getFactDescriptor() == list.get(0));
+		assertTrue(desc2.getFactDescriptor() == list.get(1));
+		assertTrue(desc3.getFactDescriptor() == list.get(2));
+		assertEquals(1.0, desc1.getFactDescriptor().getFact(), 0.0);
+		assertEquals(1.0, desc2.getFactDescriptor().getFact(), 0.0);
+		assertEquals(1.0, desc3.getFactDescriptor().getFact(), 0.0);
 	}
 
 	/**
@@ -137,20 +137,20 @@ public class TestFactDescriptorModelSet {
 			final Descriptor<Integer, ?, Short> model3Desc = model3
 					.createDescriptor(i);
 
-			set.addDescriptor(model1Desc);
-			set.addDescriptor(model2Desc);
-			set.addDescriptor(model3Desc);
-			set.addDescriptor(model1Desc);
-			set.addDescriptor(model2Desc);
-			set.addDescriptor(model3Desc);
+			assertTrue(set.addDescriptor(model1Desc));
+			assertTrue(set.addDescriptor(model2Desc));
+			assertTrue(set.addDescriptor(model3Desc));
+			assertFalse(set.addDescriptor(model1Desc));
+			assertFalse(set.addDescriptor(model2Desc));
+			assertFalse(set.addDescriptor(model3Desc));
 		}
 
-		SortedSet<Descriptor<?, ?, ?>> descriptors;
+		SortedSet<FactDescriptor<?>> descriptors;
 		descriptors = set.getDescriptors(model1);
 		assertEquals(nrOfDescPerModel, descriptors.size());
 		int intNr = 0;
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			assertEquals(intNr, desc.getFactValue(null), 0.0);
+		for (final FactDescriptor<?> desc : descriptors) {
+			assertEquals(intNr, desc.getFact(), 0.0);
 			assertEquals(nrOfDescPerModel - intNr, desc.getId());
 			intNr++;
 		}
@@ -158,8 +158,8 @@ public class TestFactDescriptorModelSet {
 		descriptors = set.getDescriptors(model2);
 		assertEquals(nrOfDescPerModel, descriptors.size());
 		short shortNr = 0;
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			assertEquals(shortNr, desc.getFactValue(null), 0.0);
+		for (final FactDescriptor<?> desc : descriptors) {
+			assertEquals(shortNr, desc.getFact(), 0.0);
 			assertEquals((short) (nrOfDescPerModel - shortNr), desc.getId());
 			shortNr++;
 		}
@@ -167,8 +167,8 @@ public class TestFactDescriptorModelSet {
 		descriptors = set.getDescriptors(model3);
 		assertEquals(nrOfDescPerModel, descriptors.size());
 		short idNr = 1;
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			assertEquals(1.0, desc.getFactValue(null), 0.0);
+		for (final FactDescriptor<?> desc : descriptors) {
+			assertEquals(1.0, desc.getFact(), 0.0);
 			assertEquals(idNr, desc.getId());
 			idNr++;
 		}

@@ -9,8 +9,8 @@ import java.util.Iterator;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
-import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.slices.mock.VariantDescriptor;
 
 import org.junit.Before;
@@ -49,17 +49,20 @@ public class TestFactDescriptorSet {
 	public void testJustVariantOrder() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		set.add(modelVariant.createDescriptor("VAL3000"));
-		set.add(modelVariant.createDescriptor("VAL2000"));
-		set.add(modelVariant.createDescriptor("VAL1000"));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL3000")
+				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL2000")
+				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL1000")
+				.getFactDescriptor()));
 
 		assertEquals(set.size(), 3);
 		assertTrue(set.containsVariantRecords());
 
-		Iterator<Descriptor<?, ?, ?>> it = set.iterator();
-		assertEquals("VAL3000", it.next().getValue());
-		assertEquals("VAL2000", it.next().getValue());
-		assertEquals("VAL1000", it.next().getValue());
+		Iterator<FactDescriptor<?>> it = set.iterator();
+		assertEquals(1, it.next().getId());
+		assertEquals(2, it.next().getId());
+		assertEquals(3, it.next().getId());
 
 		it = set.iterator();
 		assertEquals(1, it.next().getId());
@@ -74,19 +77,17 @@ public class TestFactDescriptorSet {
 	public void testJustInvariantOrder() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		set.add(modelInvariant.createDescriptor(500));
-		set.add(modelInvariant.createDescriptor(100));
-		set.add(modelInvariant.createDescriptor(200));
+		assertTrue(set.add(modelInvariant.createDescriptor(500)
+				.getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(100)
+				.getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(200)
+				.getFactDescriptor()));
 
 		assertEquals(set.size(), 3);
 		assertFalse(set.containsVariantRecords());
 
-		Iterator<Descriptor<?, ?, ?>> it = set.iterator();
-		assertEquals(100, it.next().getValue());
-		assertEquals(200, it.next().getValue());
-		assertEquals(500, it.next().getValue());
-
-		it = set.iterator();
+		final Iterator<FactDescriptor<?>> it = set.iterator();
 		assertEquals(2, it.next().getId());
 		assertEquals(3, it.next().getId());
 		assertEquals(1, it.next().getId());
@@ -99,25 +100,23 @@ public class TestFactDescriptorSet {
 	public void testMixed() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		set.add(modelInvariant.createDescriptor(500));
-		set.add(modelVariant.createDescriptor("VAL3000"));
-		set.add(modelVariant.createDescriptor("VAL1000"));
-		set.add(modelInvariant.createDescriptor(100));
-		set.add(modelVariant.createDescriptor("VAL2000"));
-		set.add(modelInvariant.createDescriptor(200));
+		assertTrue(set.add(modelInvariant.createDescriptor(500)
+				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL3000")
+				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL1000")
+				.getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(100)
+				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL2000")
+				.getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(200)
+				.getFactDescriptor()));
 
 		assertEquals(set.size(), 6);
 		assertTrue(set.containsVariantRecords());
 
-		Iterator<Descriptor<?, ?, ?>> it = set.iterator();
-		assertEquals("VAL3000", it.next().getValue());
-		assertEquals("VAL1000", it.next().getValue());
-		assertEquals("VAL2000", it.next().getValue());
-		assertEquals(100, it.next().getValue());
-		assertEquals(200, it.next().getValue());
-		assertEquals(500, it.next().getValue());
-
-		it = set.iterator();
+		final Iterator<FactDescriptor<?>> it = set.iterator();
 		assertEquals(2, it.next().getId());
 		assertEquals(3, it.next().getId());
 		assertEquals(5, it.next().getId());

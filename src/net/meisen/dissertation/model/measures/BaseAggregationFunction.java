@@ -1,6 +1,6 @@
 package net.meisen.dissertation.model.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -66,7 +66,7 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 			// TODO support it
 			throw new UnsupportedOperationException("Currently not supported!");
 		} else {
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
+			for (final FactDescriptor<?> desc : descriptors) {
 
 				// get the slice
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
@@ -74,7 +74,7 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 				// get the bitmap
 				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
-				sum += bmp.determineCardinality() * desc.getFactValue(null);
+				sum += bmp.determineCardinality() * desc.getFact();
 			}
 
 			return sum;

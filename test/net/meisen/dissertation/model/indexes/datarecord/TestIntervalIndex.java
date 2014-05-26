@@ -21,6 +21,7 @@ import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.descriptors.NullDescriptor;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
@@ -528,21 +529,20 @@ public class TestIntervalIndex extends DbBasedTest {
 		assertIntervalsWithDescriptors(loadedModel, loadedIdx);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void assertIntervalsWithDescriptors(final TidaModel model,
 			final IntervalIndex idx) {
 
 		// generate equal descriptors for comparison
-		@SuppressWarnings("unchecked")
 		final DescriptorModel<Integer> descModel = (DescriptorModel<Integer>) model
 				.getMetaDataModel().getDescriptorModel("NAME");
-		final NullDescriptor<Integer> nul = new NullDescriptor<Integer>(
-				descModel, 1);
-		final GeneralDescriptor<Integer> philipp = new GeneralDescriptor<Integer>(
-				descModel, 2, "Philipp");
-		final GeneralDescriptor<Integer> edison = new GeneralDescriptor<Integer>(
-				descModel, 3, "Edison");
-		final GeneralDescriptor<Integer> debbie = new GeneralDescriptor<Integer>(
-				descModel, 4, "Debbie");
+		final NullDescriptor<Integer> nul = descModel.getNullDescriptor();
+		final GeneralDescriptor<Integer> philipp = (GeneralDescriptor<Integer>) descModel
+				.getDescriptorByValue("Philipp");
+		final GeneralDescriptor<Integer> edison = (GeneralDescriptor<Integer>) descModel
+				.getDescriptorByValue("Edison");
+		final GeneralDescriptor<Integer> debbie = (GeneralDescriptor<Integer>) descModel
+				.getDescriptorByValue("Debbie");
 
 		// get all slices
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1000,
@@ -557,7 +557,7 @@ public class TestIntervalIndex extends DbBasedTest {
 			assertTrue(models.contains("NAME"));
 			assertEquals(1, models.size());
 
-			final List<Descriptor<?, ?, ?>> set = slice
+			final List<FactDescriptor<?>> set = slice
 					.createSortedDescriptorList("NAME");
 			final Set<Descriptor<?, ?, ?>> notExpected = new HashSet<Descriptor<?, ?, ?>>();
 			notExpected.add(nul);
@@ -569,32 +569,32 @@ public class TestIntervalIndex extends DbBasedTest {
 			if (i >= 0 && i <= 15) {
 				notExpected.remove(nul);
 				assertTrue(nul + " contained at " + i + " (" + set + ")",
-						set.contains(nul));
+						set.contains(nul.getFactDescriptor()));
 			}
 
 			// Philipp is set for 1006-1025
 			if (i >= 6 && i <= 25) {
 				notExpected.remove(philipp);
 				assertTrue(philipp + " contained at " + i + " (" + set + ")",
-						set.contains(philipp));
+						set.contains(philipp.getFactDescriptor()));
 			}
 
 			// Edison is set for 1016-1040
 			if (i >= 16 && i <= 40) {
 				notExpected.remove(edison);
 				assertTrue(edison + " contained at " + i + " (" + set + ")",
-						set.contains(edison));
+						set.contains(edison.getFactDescriptor()));
 			}
 
 			// Debbie is set for 1016-1040
 			if (i >= 31) {
 				notExpected.remove(debbie);
 				assertTrue(debbie + " contained at " + i + " (" + set + ")",
-						set.contains(debbie));
+						set.contains(debbie.getFactDescriptor()));
 			}
 
 			// make sure the notExpected aren't there
-			for (final Descriptor<?, ?, ?> desc : set) {
+			for (final FactDescriptor<?> desc : set) {
 				assertFalse("found " + desc + " (" + set + ")",
 						notExpected.contains(desc));
 			}

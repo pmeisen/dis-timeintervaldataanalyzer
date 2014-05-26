@@ -21,6 +21,8 @@ import com.googlecode.javaewah.EWAHCompressedBitmap;
  * 
  */
 public class EWAHBitmap extends Bitmap {
+	private final static int MAX_SIZE = Integer.MAX_VALUE
+			- EWAHCompressedBitmap.wordinbits;
 	private EWAHCompressedBitmap bitmap;
 
 	/**
@@ -76,58 +78,37 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public EWAHBitmap invert(final int pos) {
-
-		// check if we even have a position
-		if (pos < 0) {
-			return new EWAHBitmap();
-		}
-
-		// let's get the current positions
-		final int[] current = bitmap.toArray();
-		final int currentSize = current.length;
-
-		// determine the amount of set positions
-		final int posPos = Arrays.binarySearch(current, pos) + 1;
-
-		// calculate the size of the new array
-		final int invertSize = pos + 1 + (currentSize - posPos)
-				+ (posPos < 1 ? 1 : -1) * posPos;
-
-		// create the result and a meaningful synonym in the context
-		final int[] invert = new int[invertSize];
-		final int lastPos = currentSize;
-		final int finalPos = Math.max(currentSize, pos + 1);
-
-		// iterate over all the positions and invert those
-		int fromPos = 0, invertPos = 0;
-		for (int i = 0; i < finalPos; i++) {
-			final int foundPos = Arrays.binarySearch(current, fromPos, lastPos,
-					i);
-
-			if (foundPos > -1) {
-				fromPos = foundPos + 1;
-
-				// add it if we are at a position not to be inverted
-				if (i > pos) {
-					invert[invertPos] = i;
-					invertPos++;
-				}
-			} else {
-				fromPos = -1 * (foundPos + 1);
-
-				// add the inverted value
-				invert[invertPos] = i;
-				invertPos++;
-			}
-		}
-
-		return new EWAHBitmap(EWAHCompressedBitmap.bitmapOf(invert));
+	public EWAHBitmap invert(final int position) {
+		return new EWAHBitmap(EWAHCompressedBitmap.xor(
+				createAllSetBitmap(position), bitmap));
 	}
 
 	@Override
 	public int invertCardinality(final int position) {
 		return invert(position).determineCardinality();
+	}
+
+	/**
+	 * Create a bitmap with all values set up to the specified {@code position}.
+	 * 
+	 * @param position
+	 *            the position (zero-based) to define the set values
+	 * 
+	 * @return the created bitmap
+	 */
+	protected EWAHCompressedBitmap createAllSetBitmap(final int position) {
+
+		final EWAHCompressedBitmap bitmap;
+		if (position < getMaxId()) {
+			bitmap = EWAHCompressedBitmap.bitmapOf(position + 1);
+			bitmap.not();
+		} else {
+			bitmap = EWAHCompressedBitmap.bitmapOf(position);
+			bitmap.not();
+			bitmap.set(position);
+		}
+
+		return bitmap;
 	}
 
 	@Override
@@ -245,7 +226,7 @@ public class EWAHBitmap extends Bitmap {
 
 	@Override
 	public int getMaxId() {
-		return Integer.MAX_VALUE - EWAHCompressedBitmap.wordinbits;
+		return MAX_SIZE;
 	}
 
 	@Override

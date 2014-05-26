@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -29,9 +29,9 @@ public class Min extends BaseAggregationFunction {
 			throw new UnsupportedOperationException("Currently not supported!");
 		}
 
-		// get the last descriptor and get it's value
-		final Descriptor<?, ?, ?> first = descriptors.first();
-		return first.getFactValue(null);
+		// get the first descriptor and get it's value
+		final FactDescriptor<?> first = descriptors.first();
+		return first.getFact();
 	}
 
 	@Override

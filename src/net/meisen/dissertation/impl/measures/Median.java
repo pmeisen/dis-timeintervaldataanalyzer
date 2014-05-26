@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -38,7 +38,7 @@ public class Median extends BaseAggregationFunction {
 			// get the median
 			int processedRecords = 0;
 			double median = Double.NaN;
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
+			for (final FactDescriptor<?> desc : descriptors) {
 
 				// get the slice and the combined bitmap
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
@@ -53,7 +53,7 @@ public class Median extends BaseAggregationFunction {
 					continue;
 				}
 
-				final double curValue = desc.getFactValue(null);
+				final double curValue = desc.getFact();
 				if (processedRecords > firstPos) {
 
 					// the current value is the median

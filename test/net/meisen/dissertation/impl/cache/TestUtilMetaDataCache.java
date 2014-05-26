@@ -1,11 +1,13 @@
 package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.After;
 import org.junit.Test;
 
 import net.meisen.dissertation.config.TestConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -31,7 +33,13 @@ public class TestUtilMetaDataCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testCreateCollectionForModel() {
+		setModulesHolder("/net/meisen/dissertation/impl/cache/memoryMetaDataCache.xml");
 
+		// get the model and make sure it's not initialized
+		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+		assertFalse(model.isInitialized());
+		model.initialize();
+		
 		// check the creation of the collection
 		final MetaDataCollection collection = UtilMetaDataCache
 				.createCollectionForModel(model.getMetaDataModel());

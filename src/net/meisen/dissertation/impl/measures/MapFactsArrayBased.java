@@ -1,9 +1,9 @@
 package net.meisen.dissertation.impl.measures;
 
-import java.util.Arrays;
-
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+
+import java.util.Arrays;
 
 public class MapFactsArrayBased {
 	private final int maxRecordId;

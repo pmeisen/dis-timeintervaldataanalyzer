@@ -11,6 +11,7 @@ import java.util.Set;
 
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 
 /**
  * An index used to keep the sorted facts of descriptors. That means that the
@@ -61,11 +62,26 @@ public class FactDescriptorModelSet {
 	 *         {@code false}
 	 */
 	public boolean addDescriptor(final Descriptor<?, ?, ?> desc) {
-		if (desc == null) {
-			throw new NullPointerException("Cannot add a null descriptor.");
+		return add(desc.getFactDescriptor());
+	}
+
+	/**
+	 * Adds {@code factDesc} to {@code this}. The method returns {@code true} if
+	 * the element wasn't in the set before, otherwise {@code false} is
+	 * returned.
+	 * 
+	 * @param factDesc
+	 *            the {@code FactDescriptor} to be added
+	 * 
+	 * @return {@code true} if the element wasn't in the set before, otherwise
+	 *         {@code false}
+	 */
+	public boolean add(final FactDescriptor<?> factDesc) {
+		if (factDesc == null) {
+			throw new NullPointerException("Cannot add a null FactDescriptor.");
 		}
 
-		final String modelId = desc.getModelId();
+		final String modelId = factDesc.getModelId();
 
 		// get the set if we don't have one create it
 		FactDescriptorSet set = facts.get(modelId);
@@ -74,7 +90,7 @@ public class FactDescriptorModelSet {
 			facts.put(modelId, set);
 		}
 
-		return set.add(desc);
+		return set.add(factDesc);
 	}
 
 	/**
@@ -82,15 +98,22 @@ public class FactDescriptorModelSet {
 	 * 
 	 * @param descriptors
 	 *            the {@code Descriptors} to be added
+	 * 
+	 * @return {@code true} if the set was modified because of the adding,
+	 *         otherwise {@code false}
 	 */
-	public void addDescriptors(final Collection<Descriptor<?, ?, ?>> descriptors) {
+	public boolean addDescriptors(
+			final Collection<Descriptor<?, ?, ?>> descriptors) {
 		if (descriptors == null) {
-			return;
+			return false;
 		}
 
+		boolean modified = false;
 		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
+			modified = addDescriptor(desc) || modified;
 		}
+
+		return modified;
 	}
 
 	/**
@@ -98,15 +121,65 @@ public class FactDescriptorModelSet {
 	 * 
 	 * @param descriptors
 	 *            the {@code Descriptors} to be added
+	 * 
+	 * @return {@code true} if the set was modified because of the adding,
+	 *         otherwise {@code false}
 	 */
-	public void addDescriptors(final Descriptor<?, ?, ?>... descriptors) {
+	public boolean addDescriptors(final Descriptor<?, ?, ?>... descriptors) {
 		if (descriptors == null) {
-			return;
+			return false;
 		}
 
+		boolean modified = false;
 		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
+			modified = addDescriptor(desc) || modified;
 		}
+
+		return modified;
+	}
+
+	/**
+	 * Tries to add all the {@code factDescriptors} to {@code this}.
+	 * 
+	 * @param factDescriptors
+	 *            the {@code FactDescriptors} to be added
+	 * 
+	 * @return {@code true} if the set was modified because of the adding,
+	 *         otherwise {@code false}
+	 */
+	public boolean add(final Collection<FactDescriptor<?>> factDescriptors) {
+		if (factDescriptors == null) {
+			return false;
+		}
+
+		boolean modified = false;
+		for (final FactDescriptor<?> factDesc : factDescriptors) {
+			modified = add(factDesc) || modified;
+		}
+
+		return modified;
+	}
+
+	/**
+	 * Tries to add all the {@code factDescriptors} to {@code this}.
+	 * 
+	 * @param factDescriptors
+	 *            the {@code FactDescriptors} to be added
+	 * 
+	 * @return {@code true} if the set was modified because of the adding,
+	 *         otherwise {@code false}
+	 */
+	public boolean add(final FactDescriptor<?>... factDescriptors) {
+		if (factDescriptors == null) {
+			return false;
+		}
+
+		boolean modified = false;
+		for (final FactDescriptor<?> factDesc : factDescriptors) {
+			modified = add(factDesc) || modified;
+		}
+
+		return modified;
 	}
 
 	/**
@@ -162,41 +235,41 @@ public class FactDescriptorModelSet {
 	}
 
 	/**
-	 * Iterate over the sorted {@code Descriptor} instances of the set.
+	 * Iterate over the sorted {@code FactDescriptor} instances of the set.
 	 * 
 	 * @param model
 	 *            the {@code DescriptorModel} to get the descriptors of
 	 * 
 	 * @return an {@code Iterable} instance to iterate over the different
-	 *         descriptor instances
+	 *         {@code FactDescriptor} instances
 	 * 
 	 * @see Iterable
 	 */
-	public Iterable<Descriptor<?, ?, ?>> facts(final DescriptorModel<?> model) {
+	public Iterable<FactDescriptor<?>> facts(final DescriptorModel<?> model) {
 		return facts(model.getId());
 	}
 
 	/**
-	 * Iterate over the sorted {@code Descriptor} instances of the set.
+	 * Iterate over the sorted {@code FactDescriptor} instances of the set.
 	 * 
 	 * @param descriptorModelId
 	 *            the identifier of the {@code DescriptorModel} to get the
 	 *            descriptors of
 	 * 
 	 * @return an {@code Iterable} instance to iterate over the different
-	 *         descriptor instances
+	 *         {@code FactDescriptor} instances
 	 * 
 	 * @see Iterable
 	 */
-	public Iterable<Descriptor<?, ?, ?>> facts(final String descriptorModelId) {
+	public Iterable<FactDescriptor<?>> facts(final String descriptorModelId) {
 		final FactDescriptorSet descriptors = getDescriptors(descriptorModelId);
 
-		return new Iterable<Descriptor<?, ?, ?>>() {
+		return new Iterable<FactDescriptor<?>>() {
 
 			@Override
-			public Iterator<Descriptor<?, ?, ?>> iterator() {
+			public Iterator<FactDescriptor<?>> iterator() {
 				if (descriptors == null) {
-					return Collections.<Descriptor<?, ?, ?>> emptyList()
+					return Collections.<FactDescriptor<?>> emptyList()
 							.iterator();
 				} else {
 					return descriptors.iterator();
@@ -237,8 +310,8 @@ public class FactDescriptorModelSet {
 	}
 
 	/**
-	 * Creates a sorted list of the descriptors of the specified
-	 * {@code DescriptorModel}.
+	 * Creates a sorted list of the {@code FactDescriptor} instances of the
+	 * specified {@code DescriptorModel}.
 	 * 
 	 * @param model
 	 *            the {@code DescriptorModel}
@@ -247,14 +320,14 @@ public class FactDescriptorModelSet {
 	 * 
 	 * @see DescriptorModel
 	 */
-	public List<Descriptor<?, ?, ?>> createSortedDescriptorList(
+	public List<FactDescriptor<?>> createSortedDescriptorList(
 			final DescriptorModel<?> model) {
 		return createSortedDescriptorList(model.getId());
 	}
 
 	/**
-	 * Creates a sorted list of the descriptors of the specified
-	 * {@code DescriptorModel}.
+	 * Creates a sorted list of the {@code FactDescriptor} instances of the
+	 * specified {@code DescriptorModel}.
 	 * 
 	 * @param descriptorModelId
 	 *            the identifier of the {@code DescriptorModel}
@@ -263,11 +336,11 @@ public class FactDescriptorModelSet {
 	 * 
 	 * @see DescriptorModel
 	 */
-	public List<Descriptor<?, ?, ?>> createSortedDescriptorList(
+	public List<FactDescriptor<?>> createSortedDescriptorList(
 			final String descriptorModelId) {
 		final FactDescriptorSet descriptors = getDescriptors(descriptorModelId);
 
-		final List<Descriptor<?, ?, ?>> sortedList = new ArrayList<Descriptor<?, ?, ?>>();
+		final List<FactDescriptor<?>> sortedList = new ArrayList<FactDescriptor<?>>();
 		if (descriptors != null) {
 			sortedList.addAll(descriptors);
 		}

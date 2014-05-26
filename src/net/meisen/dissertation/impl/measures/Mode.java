@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
-import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
@@ -31,7 +31,7 @@ public class Mode extends BaseAggregationFunction {
 		} else {
 			int maxAmount = -1;
 			double mode = Double.NaN;
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
+			for (final FactDescriptor<?> desc : descriptors) {
 
 				// get the slice and the combined bitmap
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
@@ -42,7 +42,7 @@ public class Mode extends BaseAggregationFunction {
 				final int amount = bmp.determineCardinality();
 				if (amount > maxAmount) {
 					maxAmount = amount;
-					mode = desc.getFactValue(null);
+					mode = desc.getFact();
 				} else if (amount == maxAmount) {
 					mode = Double.NaN;
 				}
