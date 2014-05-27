@@ -21,21 +21,27 @@ public class FixedStructureDataRetriever extends BaseDataRetriever {
 	/**
 	 * Constructs a {@code FixedStructureDataRetriever} using the specified
 	 * default configuration.
+	 * 
+	 * @param id
+	 *            an identifier for the retriever
 	 */
-	public FixedStructureDataRetriever() {
-		this(null);
+	public FixedStructureDataRetriever(final String id) {
+		this(id, null);
 	}
 
 	/**
 	 * Constructor used to create a new instance of a
 	 * {@code FixedStructureDataRetriever}.
 	 * 
+	 * @param id
+	 *            an identifier for the retriever
 	 * @param config
 	 *            the configuration to be used for the
 	 *            {@code FixedStructureDataRetriever}
 	 */
-	public FixedStructureDataRetriever(final IDataRetrieverConfig config) {
-		super(config);
+	public FixedStructureDataRetriever(final String id,
+			final IDataRetrieverConfig config) {
+		super(id, config);
 	}
 
 	@Override

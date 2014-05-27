@@ -11,6 +11,7 @@
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
   <xsl:import href="bitmapcache://includeXslts" />
+  <xsl:import href="factdescriptormodelsetcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
@@ -41,6 +42,12 @@
         <xsl:choose>
           <xsl:when test="//cns:caches/cns:bitmap/@implementation"><xsl:value-of select="//cns:caches/cns:bitmap/@implementation" /></xsl:when>
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultBitmapCache()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="factSetsCache">
+        <xsl:choose>
+          <xsl:when test="//cns:caches/cns:factsets/@implementation"><xsl:value-of select="//cns:caches/cns:factsets/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultFactSetsCache()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
       <xsl:variable name="indexFactory">
@@ -74,6 +81,7 @@
       <!-- define the default caches class -->
       <bean id="defaultMetaDataCacheClass" class="java.lang.String"><constructor-arg value="{$metaDataCache}" /></bean>
       <bean id="defaultBitmapCacheClass" class="java.lang.String"><constructor-arg value="{$bitmapCache}" /></bean>
+      <bean id="defaultFactSetsCacheClass" class="java.lang.String"><constructor-arg value="{$factSetsCache}" /></bean>
 
       <!-- read the default metaDataCache configuration -->
       <bean id="defaultMetaDataCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
@@ -103,6 +111,21 @@
           </xsl:choose>
         </property>
         <property name="class" value="net.meisen.dissertation.model.cache.IBitmapCacheConfig" />
+      </bean>
+      
+      <!-- read the default factSetsCache configuration -->
+      <bean id="defaultFactSetsCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:caches/cns:factsets/node()">
+              <xsl:for-each select='//cns:caches/cns:factsets/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.cache.IFactDescriptorModelSetCacheConfig" />
       </bean>
 
       <!-- define the default factories' classes -->

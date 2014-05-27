@@ -4,7 +4,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IBitmapOwner;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
+import net.meisen.dissertation.model.cache.IBitmapIdOwner;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -22,7 +23,7 @@ import net.meisen.dissertation.model.cache.IBitmapOwner;
  *            the type of the identifier used to identify the slice
  */
 public abstract class BaseSlice<I extends Object> implements
-		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapOwner {
+		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapIdOwner {
 	private final SliceId<I> id;
 	private final IBitmapCache cache;
 
@@ -37,13 +38,15 @@ public abstract class BaseSlice<I extends Object> implements
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
+	 * @param cache
+	 *            the cache used for the {@code Bitmap} instances
 	 */
 	public BaseSlice(final SliceId<I> sliceId, final IBitmapCache cache) {
 		this.id = sliceId;
 		this.cache = cache;
 
 		// register the instance as user
-		cache.registerBitmapOwner(this);
+		cache.registerOwner(this);
 	}
 
 	/**
@@ -59,6 +62,16 @@ public abstract class BaseSlice<I extends Object> implements
 		return id;
 	}
 
+	/**
+	 * Deserializes the {@code Bitmap} of the {@code BaseSlice} from the
+	 * specified {@code in}.
+	 * 
+	 * @param in
+	 *            the {@code InputStream} to read the information from
+	 * 
+	 * @throws IOException
+	 *             if the data cannot be read
+	 */
 	protected void deserializeBitmap(final DataInputStream in)
 			throws IOException {
 
@@ -121,8 +134,10 @@ public abstract class BaseSlice<I extends Object> implements
 	}
 
 	@Override
-	public void releaseBitmap() {
-		bitmap = null;
+	public void release(final IBitmapIdCacheable instance) {
+		if (instance != null && instance.getClass().equals(Bitmap.class)) {
+			bitmap = null;
+		}
 	}
 
 	/**

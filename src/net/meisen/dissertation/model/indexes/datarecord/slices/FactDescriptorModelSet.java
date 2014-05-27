@@ -7,11 +7,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * An index used to keep the sorted facts of descriptors. That means that the
@@ -27,7 +30,8 @@ import net.meisen.dissertation.model.descriptors.FactDescriptor;
  * @see DescriptorModel
  * 
  */
-public class FactDescriptorModelSet {
+public class FactDescriptorModelSet implements IBitmapIdCacheable,
+		Iterable<FactDescriptor<?>> {
 	private Map<String, FactDescriptorSet> facts;
 
 	/**
@@ -90,7 +94,22 @@ public class FactDescriptorModelSet {
 			facts.put(modelId, set);
 		}
 
-		return set.add(factDesc);
+		final FactDescriptor<?> cur = set.ceiling(factDesc);
+		if (cur == null) {
+			return set.add(factDesc);
+		} else {
+
+			// the objects are equal but modified
+			if (!Objects.equals(cur.isRecordInvariant(),
+					factDesc.isRecordInvariant())
+					|| !Objects.equals(cur.getFact(), factDesc.getFact())) {
+
+				set.remove(cur);
+				return set.add(factDesc);
+			} else {
+				return false;
+			}
+		}
 	}
 
 	/**
@@ -397,13 +416,84 @@ public class FactDescriptorModelSet {
 	 */
 	public void setDescriptors(final Collection<Descriptor<?, ?, ?>> descriptors) {
 		facts.clear();
-		for (final Descriptor<?, ?, ?> desc : descriptors) {
-			addDescriptor(desc);
-		}
+		addDescriptors(descriptors);
+	}
+
+	/**
+	 * Sets the descriptors for the {@code Set}. All prior added descriptors are
+	 * removed.
+	 * 
+	 * @param descriptors
+	 *            the descriptors to be registered
+	 */
+	public void set(final Collection<FactDescriptor<?>> descriptors) {
+		facts.clear();
+		add(descriptors);
 	}
 
 	@Override
 	public String toString() {
 		return facts.toString();
+	}
+
+	@Override
+	public Iterator<FactDescriptor<?>> iterator() {
+		return new Iterator<FactDescriptor<?>>() {
+			private Iterator<Entry<String, FactDescriptorSet>> it = facts
+					.entrySet().iterator();
+			private Iterator<FactDescriptor<?>> innerIt = null;
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext() || (innerIt != null && innerIt.hasNext());
+			}
+
+			@Override
+			public FactDescriptor<?> next() {
+
+				// get the next inner iterator
+				if (innerIt == null || !innerIt.hasNext()) {
+					innerIt = it.next().getValue().iterator();
+				}
+
+				return innerIt.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"The iterator is read only.");
+			}
+		};
+	}
+
+	/**
+	 * Returns an iterator to iterate over the {@code FactDescriptor} instances
+	 * of the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel} to get the
+	 *            {@code FactDescriptor} instances for
+	 * 
+	 * @return an iterator, never {@code null}
+	 */
+	public Iterable<FactDescriptor<?>> iterator(final String modelId) {
+		final FactDescriptorSet set = facts.get(modelId);
+		if (set == null) {
+			return Collections.<FactDescriptor<?>> emptyList();
+		} else {
+			return set;
+		}
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof FactDescriptorModelSet) {
+			return facts.equals(((FactDescriptorModelSet) obj).facts);
+		} else {
+			return false;
+		}
 	}
 }

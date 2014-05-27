@@ -57,7 +57,7 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	 *            the xml file to be loaded
 	 * @param loadData
 	 *            {@code true} if all data should be loaded (see
-	 *            {@link TidaModel#loadData()}, otherwise {@code false}
+	 *            {@link TidaModel#bulkLoadDataFromDataModel()}, otherwise {@code false}
 	 * 
 	 * @return the loaded model
 	 */
@@ -65,7 +65,7 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 		final TidaModel model = loader.loadViaXslt(xml);
 
 		if (loadData) {
-			model.loadData();
+			model.bulkLoadDataFromDataModel();
 		}
 
 		models.add(model);

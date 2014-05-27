@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 
 /**
@@ -18,7 +19,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
  * @see BaseIndexFactory
  * 
  */
-public abstract class Bitmap implements IBitmapContainer {
+public abstract class Bitmap implements IBitmapContainer, IBitmapIdCacheable {
 
 	/**
 	 * The logical types to combine a bitmap with another.
@@ -208,6 +209,18 @@ public abstract class Bitmap implements IBitmapContainer {
 		return combine(bitmaps, LogicType.OR, factory);
 	}
 
+	/**
+	 * Creates a new instance of a {@code Bitmap} with the specified {@code ids}
+	 * set.
+	 * 
+	 * @param factory
+	 *            the {@code BaseIndexFactory} to create the {@code Bitmap}
+	 *            instance
+	 * @param ids
+	 *            the identifiers to be set
+	 * 
+	 * @return the created {@code Bitmap}
+	 */
 	public static Bitmap createBitmap(final BaseIndexFactory factory,
 			final int... ids) {
 		final Bitmap bitmap = factory.createBitmap();
@@ -216,6 +229,20 @@ public abstract class Bitmap implements IBitmapContainer {
 		return bitmap;
 	}
 
+	/**
+	 * Creates a instance of a {@code Bitmap} based on the persisted version
+	 * read from {@code in}.
+	 * 
+	 * @param factory
+	 *            the {@code BaseIndexFactory} to create the {@code Bitmap}
+	 *            instance
+	 * @param in
+	 *            the {@code DataInput} to read the persisted version from
+	 * @return the read {@code Bitmap} instance
+	 * 
+	 * @throws IOException
+	 *             if an error occurred during reading
+	 */
 	public static Bitmap createFromInput(final BaseIndexFactory factory,
 			final DataInput in) throws IOException {
 		final Bitmap bitmap = factory.createBitmap();

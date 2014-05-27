@@ -8,3 +8,4 @@ http\://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd=net/meis
 http\://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd=net/meisen/dissertation/impl/descriptors/advancedDescriptors.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd=net/meisen/dissertation/impl/cache/FileBitmapCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd=net/meisen/dissertation/impl/cache/FileMetaDataCache.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/FileFactDescriptorModelSetCache.xsd

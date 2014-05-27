@@ -42,7 +42,7 @@ public class TestDescriptorLogicEvaluator extends ModuleBasedTest {
 		final TidaModel model = modulesHolder
 				.getModule(DefaultValues.TIDAMODEL_ID);
 		model.initialize();
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		// create an evaluator
 		final DescriptorLogicEvaluator evaluator = new DescriptorLogicEvaluator(

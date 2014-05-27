@@ -2,11 +2,14 @@ package net.meisen.dissertation.model.data;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -67,6 +70,10 @@ public class TidaModel implements IPersistable {
 	private IBitmapCache bitmapCache;
 
 	@Autowired
+	@Qualifier(DefaultValues.FACTSETSCACHE_ID)
+	private IFactDescriptorModelSetCache factsCache;
+
+	@Autowired
 	@Qualifier(DefaultValues.METADATACACHE_ID)
 	private IMetaDataCache metaDataCache;
 
@@ -83,6 +90,8 @@ public class TidaModel implements IPersistable {
 	private OfflineMode offlineMode;
 
 	private Group persistentGroup = null;
+
+	private ReentrantReadWriteLock loadLock = new ReentrantReadWriteLock();
 
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
@@ -196,7 +205,8 @@ public class TidaModel implements IPersistable {
 
 		// initialize the caches
 		this.metaDataCache.initialize(this);
-		this.bitmapCache.initialize(this);
+		getBitmapCache().initialize(this);
+		getFactsCache().initialize(this);
 
 		/*
 		 * Get the cached metaData and use it. Afterwards the data is stored in
@@ -239,7 +249,8 @@ public class TidaModel implements IPersistable {
 		}
 
 		// release the cache
-		this.bitmapCache.release();
+		getBitmapCache().release();
+		getFactsCache().release();
 
 		// delete created files if necessary
 		if (deleteLocation && getLocation().exists()) {
@@ -266,47 +277,118 @@ public class TidaModel implements IPersistable {
 	}
 
 	/**
-	 * Loads all the data specified by the {@code DataModel}.
+	 * Loads the specified record into the database.
+	 * 
+	 * @param record
+	 *            the {@code DataRecord} to be loaded
 	 */
-	public void loadData() {
+	public void loadRecord(final IDataRecord record) {
 
+		// make sure the model is initialized
 		if (!isInitialized()) {
 			exceptionRegistry.throwException(TidaModelException.class, 1001,
 					"loadData");
-		} else if (LOG.isDebugEnabled()) {
-			LOG.debug("Start adding of records from dataModel...");
 		}
 
-		// check the data and add it to the initialize index
-		final IClosableIterator<IDataRecord> it = dataModel.iterator();
-		int i = 0;
-
+		loadLock.writeLock().lock();
 		try {
-			while (it.hasNext()) {
-				this.idx.index(it.next());
-
-				if (++i % 10000 == 0 && LOG.isDebugEnabled()) {
-					LOG.debug("... added " + i + " records from dataModel...");
-				}
-			}
-		} catch (final RuntimeException e) {
-
-			/*
-			 * if the OfflineMode isn't enabled or if it's set to auto throw the
-			 * exception, otherwise we just log it
-			 */
-			throw e;
+			_loadRecord(record);
 		} finally {
-			it.close();
+			loadLock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Loads the specified record into the database without checking any
+	 * preconditions.
+	 * 
+	 * @param record
+	 *            the {@code DataRecord} to be loaded
+	 */
+	protected void _loadRecord(final IDataRecord record) {
+		this.idx.index(record);
+	}
+
+	/**
+	 * Loads the specified data in a bulk-load, i.e. the data is not persisted
+	 * until all data is read.
+	 * 
+	 * @param it
+	 *            the {@code iterator} for the data to be loaded
+	 * 
+	 * @return the amount of data loaded
+	 */
+	public int bulkLoadData(final Iterator<IDataRecord> it) {
+
+		// make sure the model is initialized
+		if (!isInitialized()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1001,
+					"loadData");
+		}
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Start adding of records...");
+		}
+
+		// inform the cache about bulk-loads
+		loadLock.writeLock().lock();
+		int amountOfData = 0;
+		try {
+			getBitmapCache().setPersistency(false);
+			getFactsCache().setPersistency(false);
+
+			try {
+				while (it.hasNext()) {
+					_loadRecord(it.next());
+
+					if (++amountOfData % 10000 == 0 && LOG.isDebugEnabled()) {
+						LOG.debug("... added " + amountOfData + " records...");
+					}
+				}
+			} catch (final RuntimeException e) {
+				throw e;
+			}
+		} finally {
+
+			// enable the persistency again, everything is loaded
+			getBitmapCache().setPersistency(true);
+			getFactsCache().setPersistency(true);
+
+			loadLock.writeLock().unlock();
 		}
 
 		// log the finalization
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Finished adding of " + i + " records from dataModel.");
+			LOG.debug("Finished adding of " + amountOfData + " records.");
 		}
 
 		// optimize the indexes after the loading
 		this.idx.optimize();
+
+		// return the amount of data written
+		return amountOfData;
+	}
+
+	/**
+	 * Loads all the data specified by the {@code DataModel}.
+	 */
+	public void bulkLoadDataFromDataModel() {
+
+		// make sure the model is initialized
+		if (!isInitialized()) {
+			exceptionRegistry.throwException(TidaModelException.class, 1001,
+					"loadData");
+		}
+
+		// check the data and add it to the initialize index
+		final IClosableIterator<IDataRecord> it = dataModel.iterator();
+		try {
+			bulkLoadData(it);
+		} catch (final RuntimeException e) {
+			throw e;
+		} finally {
+			it.close();
+		}
 	}
 
 	/**
@@ -546,6 +628,17 @@ public class TidaModel implements IPersistable {
 	 */
 	public IBitmapCache getBitmapCache() {
 		return bitmapCache;
+	}
+
+	/**
+	 * Gets the {@code FactDescriptorModelSetCache} used by the model.
+	 * 
+	 * @return the {@code FactDescriptorModelSetCache} used by the model
+	 * 
+	 * @see IFactDescriptorModelSetCache
+	 */
+	public IFactDescriptorModelSetCache getFactsCache() {
+		return factsCache;
 	}
 
 	/**

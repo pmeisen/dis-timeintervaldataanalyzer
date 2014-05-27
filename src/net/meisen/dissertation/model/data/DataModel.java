@@ -3,6 +3,7 @@ package net.meisen.dissertation.model.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datasets.IDataSet;
@@ -19,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  */
 public class DataModel implements IDataSet {
+
+	@Autowired(required = false)
+	private List<BaseDataRetriever> retrievers = new ArrayList<BaseDataRetriever>();
 
 	@Autowired(required = false)
 	private List<IDataSet> dataSets = new ArrayList<IDataSet>();
@@ -193,5 +197,38 @@ public class DataModel implements IDataSet {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Gets the {@code BaseDataRetriever} with the specified {@code id}.
+	 * 
+	 * @param id
+	 *            the identifier of the {@code BaseDataRetriever} to retrieve
+	 * 
+	 * @return the {@code BaseDataRetriever} with the specified {@code id},
+	 *         {@code null} if no such {@code BaseDataRetriever} can be found
+	 */
+	public BaseDataRetriever getDataRetriever(final String id) {
+		if (id == null || sizeOfRetrievers() == 0) {
+			return null;
+		} else {
+			for (final BaseDataRetriever retriever : retrievers) {
+				if (id.equals(retriever.getId())) {
+					return retriever;
+				}
+			}
+
+			// not found
+			return null;
+		}
+	}
+
+	/**
+	 * Gets the amount of defined {@code BaseDataRetriever} instances.
+	 * 
+	 * @return the amount of defined {@code BaseDataRetriever} instances
+	 */
+	public int sizeOfRetrievers() {
+		return retrievers == null ? 0 : retrievers.size();
 	}
 }

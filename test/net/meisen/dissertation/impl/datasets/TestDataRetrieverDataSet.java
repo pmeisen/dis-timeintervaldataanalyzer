@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
@@ -53,7 +54,8 @@ public class TestDataRetrieverDataSet {
 	 */
 	@Test
 	public void testUsageWithDataRetriever() {
-		final FixedStructureDataRetriever fsDataRetriever = new FixedStructureDataRetriever();
+		final FixedStructureDataRetriever fsDataRetriever = new FixedStructureDataRetriever(
+				UUID.randomUUID().toString());
 		final DataRetrieverDataSet retriever = new DataRetrieverDataSet(
 				fsDataRetriever, new FixedStructureQueryConfig(100));
 

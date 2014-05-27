@@ -51,7 +51,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		setModulesHolder("/net/meisen/dissertation/impl/parser/query/select/evaluator/testPersonModel.xml");
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
 		model.initialize();
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 	}
 
 	/**

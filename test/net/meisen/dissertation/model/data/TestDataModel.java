@@ -66,6 +66,9 @@ public class TestDataModel {
 		final DataModel model = moduleHolder.getModule("dataModelId");
 		assertNotNull(model);
 
+		// check the retrievers
+		assertEquals(0, model.sizeOfRetrievers());
+
 		// test some names
 		assertFalse(model.hasNamedValue(null));
 		assertFalse(model.hasNamedValue(""));
@@ -110,6 +113,9 @@ public class TestDataModel {
 		final IModuleHolder moduleHolder = getModelHolder("/net/meisen/dissertation/model/data/testDbDataModel.xml");
 		final DataModel model = moduleHolder.getModule("dataModelId");
 		assertNotNull(model);
+		
+		// check the retrievers
+		assertEquals(0, model.sizeOfRetrievers());
 
 		// test some names
 		assertFalse(model.hasNamedValue(null));
@@ -164,6 +170,9 @@ public class TestDataModel {
 		final IModuleHolder moduleHolder = getModelHolder("/net/meisen/dissertation/model/data/testMixedDataModel.xml");
 		final DataModel model = moduleHolder.getModule("dataModelId");
 		assertNotNull(model);
+		
+		// check the retrievers
+		assertEquals(0, model.sizeOfRetrievers());
 
 		// test some names
 		assertFalse(model.hasNamedValue(null));

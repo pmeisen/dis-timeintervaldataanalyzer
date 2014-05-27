@@ -6,7 +6,8 @@ import net.meisen.general.genmisc.types.Streams;
 
 /**
  * An {@code IndexEntry} is an entry in the index-file (see
- * {@link FileBitmapCache#idxTableFileName}) of the cache. It defines the
+ * {@link BaseFileBitmapIdCache#getIndexFileName()}) of the cache. It defines
+ * the
  * 
  * @author pmeisen
  * 
@@ -19,7 +20,7 @@ public class IndexEntry {
 	public static final int idxEntrySizeInBytes = 16;
 
 	private final int size;
-	private final int bitmapFilePosition;
+	private final int filePosition;
 	private final int fileNumber;
 
 	private int indexFileNumber;
@@ -46,7 +47,7 @@ public class IndexEntry {
 
 		// set the values
 		this.size = size;
-		this.bitmapFilePosition = bfp;
+		this.filePosition = bfp;
 		this.fileNumber = fn;
 		this.indexFileNumber = ifp;
 	}
@@ -56,48 +57,47 @@ public class IndexEntry {
 	 * is set to {@code -1}.
 	 * 
 	 * @param size
-	 *            the size of the entry in the bitmap-file (see
-	 *            {@link FileBitmapCache#bitmapFileName}) in bytes
-	 * @param bitmapFilePosition
+	 *            the size of the entry in the data-file (see
+	 *            {@link BaseFileBitmapIdCache#getIndexFileName()}) in bytes
+	 * @param filePosition
 	 *            the position (in bytes) of the entry within the bitmap-file
-	 *            (see {@link FileBitmapCache#bitmapFileName})
+	 *            (see {@link BaseFileBitmapIdCache#getIndexFileName()})
 	 * @param fileNumber
 	 *            the number of the file the entry belongs to
 	 */
-	public IndexEntry(final int size, final int bitmapFilePosition,
+	public IndexEntry(final int size, final int filePosition,
 			final int fileNumber) {
 		this.size = size;
-		this.bitmapFilePosition = bitmapFilePosition;
+		this.filePosition = filePosition;
 		this.fileNumber = fileNumber;
 		this.indexFileNumber = -1;
 	}
 
 	/**
-	 * Gets the size of the entry in the bitmap-file (see
-	 * {@link FileBitmapCache#bitmapFileName}) in bytes.
+	 * Gets the size of the entry in the data-file (see
+	 * {@link BaseFileBitmapIdCache#getIndexFileName()}) in bytes.
 	 * 
-	 * @return the size of the entry in the bitmap-file (see
-	 *         {@link FileBitmapCache#bitmapFileName}) in bytes
+	 * @return the size of the entry in the data-file (see
+	 *         {@link BaseFileBitmapIdCache#getIndexFileName()}) in bytes
 	 */
 	public int getSize() {
 		return size;
 	}
 
 	/**
-	 * Gets the position (in bytes) of the entry within the bitmap-file (see
-	 * {@link FileBitmapCache#bitmapFileName}).
+	 * Gets the position (in bytes) of the entry within the data-file (see
+	 * {@link BaseFileBitmapIdCache#getFileNamePattern()}).
 	 * 
-	 * @return the position (in bytes) of the entry within the bitmap-file (see
-	 *         {@link FileBitmapCache#bitmapFileName})
+	 * @return the position (in bytes) of the entry within the data-file
 	 */
-	public int getBitmapFilePosition() {
-		return bitmapFilePosition;
+	public int getFilePosition() {
+		return filePosition;
 	}
 
 	/**
 	 * Gets the number of the {@code IndexEntry}, i.e. the zero-based position
-	 * of the entry within the bitmap-file (see {@link FileBitmapCache#bitmapFileName}
-	 * ).
+	 * of the entry within the data-file (see
+	 * {@link BaseFileBitmapIdCache#getIndexFileName()}).
 	 * 
 	 * @return the number of the {@code IndexEntry} (zero-based)
 	 */
@@ -131,7 +131,7 @@ public class IndexEntry {
 	 */
 	public byte[] bytes() {
 		final byte[] bytesSize = Streams.intToByte(getSize());
-		final byte[] bytesBfp = Streams.intToByte(getBitmapFilePosition());
+		final byte[] bytesBfp = Streams.intToByte(getFilePosition());
 		final byte[] bytesFn = Streams.intToByte(getFileNumber());
 		final byte[] bytesIfp = Streams.intToByte(getIndexFileNumber());
 
@@ -140,7 +140,7 @@ public class IndexEntry {
 
 	@Override
 	public String toString() {
-		return bitmapFilePosition + ", " + size + ", " + indexFileNumber + ", "
+		return filePosition + ", " + size + ", " + indexFileNumber + ", "
 				+ fileNumber;
 	}
 }

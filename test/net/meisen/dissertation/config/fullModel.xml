@@ -38,6 +38,14 @@
             + net.meisen.dissertation.impl.cache.FileBitmapCache
         -->
       <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+      
+      <!-- Define the cache to be used.
+
+           The following cache implementations are available:
+            + net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache
+            + net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache
+        -->
+      <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
     </caches>
 
     <factories>

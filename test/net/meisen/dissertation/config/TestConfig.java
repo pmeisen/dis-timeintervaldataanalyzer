@@ -15,14 +15,17 @@ import net.meisen.dissertation.config.xslt.mock.MockQueryFactory;
 import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.cache.FileBitmapCache;
+import net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.FileMetaDataCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
+import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
@@ -113,6 +116,11 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.METADATACACHE_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MemoryMetaDataCache);
+
+			o = modulesHolder.getModule(DefaultValues.FACTSETSCACHE_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(),
+					o instanceof MemoryFactDescriptorModelSetCache);
 
 			// check folder configuration
 			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
@@ -215,6 +223,12 @@ public class TestConfig {
 					.getModule(DefaultValues.METADATACACHE_ID);
 			assertNotNull(mdCache);
 			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
+
+			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+					.getModule(DefaultValues.FACTSETSCACHE_ID);
+			assertNotNull(fdmsCache);
+			assertEquals(MemoryFactDescriptorModelSetCache.class,
+					fdmsCache.getClass());
 		}
 	}
 
@@ -243,6 +257,18 @@ public class TestConfig {
 			assertEquals(new File(System.getProperty("java.io.tmpdir"),
 					"config-metadata"),
 					((FileMetaDataCache) mdCache).getLocation());
+
+			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+					.getModule(DefaultValues.FACTSETSCACHE_ID);
+			assertNotNull(fdmsCache);
+			assertEquals(FileFactDescriptorModelSetCache.class,
+					fdmsCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"config-facts"),
+					((FileFactDescriptorModelSetCache) fdmsCache).getLocation());
+			assertEquals(1000 * 1024 * 1024,
+					((FileFactDescriptorModelSetCache) fdmsCache)
+							.getMaxFileSizeInByte());
 		}
 	}
 
@@ -267,6 +293,12 @@ public class TestConfig {
 					.getModule(DefaultValues.METADATACACHE_ID);
 			assertNotNull(mdCache);
 			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
+
+			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+					.getModule(DefaultValues.FACTSETSCACHE_ID);
+			assertNotNull(fdmsCache);
+			assertEquals(MemoryFactDescriptorModelSetCache.class,
+					fdmsCache.getClass());
 		}
 	}
 
@@ -296,6 +328,18 @@ public class TestConfig {
 			assertEquals(new File(System.getProperty("java.io.tmpdir"),
 					"model-metadata"),
 					((FileMetaDataCache) mdCache).getLocation());
+
+			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+					.getModule(DefaultValues.FACTSETSCACHE_ID);
+			assertNotNull(fdmsCache);
+			assertEquals(FileFactDescriptorModelSetCache.class,
+					fdmsCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"model-facts"),
+					((FileFactDescriptorModelSetCache) fdmsCache).getLocation());
+			assertEquals(10000,
+					((FileFactDescriptorModelSetCache) fdmsCache)
+							.getMaxCacheSize());
 		}
 	}
 

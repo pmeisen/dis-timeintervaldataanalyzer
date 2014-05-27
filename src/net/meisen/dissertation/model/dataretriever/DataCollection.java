@@ -17,7 +17,7 @@ import java.util.List;
  * 
  * @author pmeisen
  * 
- * @param <D>
+ * @param <D> the type of the names of the collection
  */
 public abstract class DataCollection<D> implements Iterable<DataRecord<D>> {
 

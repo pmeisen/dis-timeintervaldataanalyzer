@@ -8,6 +8,7 @@
   <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
     <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
       <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
+        <constructor-arg type="java.lang.String" value="testId1" />
         <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
           <bean class="net.meisen.dissertation.impl.dataretriever.DbConnectionConfig">    
             <property name="type" value="jdbc"/>
@@ -32,6 +33,7 @@
   <bean class="net.meisen.dissertation.impl.datasets.DataRetrieverDataSet">
     <constructor-arg type="net.meisen.dissertation.model.dataretriever.BaseDataRetriever">
       <bean class="net.meisen.dissertation.impl.dataretriever.DbDataRetriever" destroy-method="release">
+        <constructor-arg type="java.lang.String" value="testId2" />
         <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
           <bean class="net.meisen.dissertation.impl.dataretriever.DbConnectionConfig">    
             <property name="type" value="jdbc"/>

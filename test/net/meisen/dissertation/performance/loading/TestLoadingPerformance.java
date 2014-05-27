@@ -50,7 +50,7 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 				+ performance.printSecs(performanceRes));
 
 		performance.start();
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 		performanceRes = performance.stop();
 		System.out.println("Loading Data: ("
 				+ model.getIndex().getAmountOfRecords() + " records) "

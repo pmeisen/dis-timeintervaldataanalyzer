@@ -1,22 +1,21 @@
 package net.meisen.dissertation.model.cache;
 
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 
 /**
- * A cache used to hold a specific part of bitmaps in memory and all bitmaps at
- * a location specified by the concrete implementation (e.g. memory,
- * file-system).
+ * Interface which describes the requirements of a cache used to handle
+ * {@code FactDescriptorModelSet} instances.
  * 
  * @author pmeisen
  * 
  */
-public interface IBitmapCache {
+public interface IFactDescriptorModelSetCache {
 
 	/**
-	 * Initializes the {@code BitmapCache} for the specified {@code model}.
+	 * Initializes the {@code FactDescriptorModelSetCache} for the specified
+	 * {@code model}.
 	 * 
 	 * @param model
 	 *            the {@code TidaModel} to initialize the cache for
@@ -32,7 +31,7 @@ public interface IBitmapCache {
 	 *            the configuration to be used for the concrete {@code Cache}
 	 *            implementation
 	 */
-	public void setConfig(final IBitmapCacheConfig configuration);
+	public void setConfig(final IFactDescriptorModelSetCacheConfig configuration);
 
 	/**
 	 * Registers a {@code BitmapOwner} within the cache. The {@code BitmapOwner}
@@ -45,31 +44,33 @@ public interface IBitmapCache {
 	public void registerOwner(final IBitmapIdOwner owner);
 
 	/**
-	 * Caches the specified {@code bitmap} for the specified {@code bitmapId}.
+	 * Caches the specified {@code set} for the specified {@code bitmapId}.
 	 * 
 	 * @param bitmapId
 	 *            the {@code BitmapId} of the {@code bitmap} to be cached
-	 * @param bitmap
-	 *            the {@code Bitmap} to be cached
+	 * @param set
+	 *            the {@code FactDescriptorModelSet} to be cached
 	 * 
 	 * @see BitmapId
-	 * @see Bitmap
+	 * @see FactDescriptorModelSet
 	 */
-	public void cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap);
+	public void cacheFactDescriptorModelSet(final BitmapId<?> bitmapId,
+			final FactDescriptorModelSet set);
 
 	/**
-	 * Gets the {@code Bitmap} with the specified {@code bitmapId} from the
-	 * cache. This method never returns {@code null} instead a new
-	 * {@code Bitmap} should be created using
-	 * {@link BaseIndexFactory#createBitmap()} if no {@code Bitmap} is available
-	 * with the specified {@code BitmapId}.
+	 * Gets the {@code FactDescriptorModelSet} with the specified
+	 * {@code bitmapId} from the cache. This method never returns {@code null}
+	 * instead a new {@code FactDescriptorModelSet} should be created if no
+	 * {@code FactDescriptorModelSet} is available with the specified
+	 * {@code BitmapId}.
 	 * 
 	 * @param bitmapId
 	 *            the {@code BitmapId} of the {@code Bitmap} to be retrieved
 	 * 
-	 * @return the {@code Bitmap} for the specified {@code BitmapId}
+	 * @return the {@code FactDescriptorModelSet} for the specified
+	 *         {@code BitmapId}
 	 */
-	public Bitmap getBitmap(final BitmapId<?> bitmapId);
+	public FactDescriptorModelSet getSet(final BitmapId<?> bitmapId);
 
 	/**
 	 * Releases all of the resources used by the cache.

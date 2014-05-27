@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DataRetrieverException;
@@ -101,8 +102,8 @@ public class TestDbDataRetriever {
 		public static DbDataRetriever create(
 				final IConfiguration configuration, final String dbName) {
 			// get the DatabaseRetriever to be tested
-			final DbDataRetriever dbRetriever = new DbDataRetriever(
-					Util.getConnectionConfig(dbName));
+			final DbDataRetriever dbRetriever = new DbDataRetriever(UUID
+					.randomUUID().toString(), Util.getConnectionConfig(dbName));
 			configuration.wireInstance(dbRetriever);
 
 			return dbRetriever;

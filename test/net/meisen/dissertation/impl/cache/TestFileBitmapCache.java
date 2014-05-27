@@ -100,7 +100,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testConfigurationChangeException() {
-		thrown.expect(FileBitmapCacheException.class);
+		thrown.expect(BaseFileBitmapIdCacheException.class);
 		thrown.expectMessage("configuration cannot be changed");
 
 		// initialize and change the configuration
@@ -113,7 +113,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidConfigurationException() {
-		thrown.expect(FileBitmapCacheException.class);
+		thrown.expect(BaseFileBitmapIdCacheException.class);
 		thrown.expectMessage("cache does not support a configuration of type");
 
 		// initialize and change the configuration
@@ -126,7 +126,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidModelIdException() {
-		thrown.expect(FileBitmapCacheException.class);
+		thrown.expect(BaseFileBitmapIdCacheException.class);
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
@@ -149,7 +149,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidLocationException() {
-		thrown.expect(FileBitmapCacheException.class);
+		thrown.expect(BaseFileBitmapIdCacheException.class);
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
@@ -198,7 +198,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// deserialize it
 		assertEquals(1000, e.getSize());
-		assertEquals(25000, e.getBitmapFilePosition());
+		assertEquals(25000, e.getFilePosition());
 		assertEquals(100, e.getIndexFileNumber());
 		assertEquals((byte) 5, e.getFileNumber());
 	}
@@ -309,13 +309,13 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			fc.cacheBitmap(createBitmapId(0), bmp);
 		}
 
-		assertEquals(8, fc.getNumberOfBitmapFiles());
+		assertEquals(8, fc.getNumberOfFiles());
 	}
 
 	/**
 	 * Tests the loading of the internally used index from the hard-drive.
 	 * Furthermore the tests checks the amounts of call to
-	 * {@link FileBitmapCache#readBitmap(IndexEntry)}.
+	 * {@link FileBitmapCache#read(IndexEntry)}.
 	 */
 	@Test
 	public void testIndexLoading() {
@@ -332,18 +332,18 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		cacheBitmap(spy, 100, 20);
 		verify(spy, times(100)).cacheBitmap(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
-		verify(spy, times(100))._indexBitmap(Mockito.any(BitmapId.class),
+		verify(spy, times(100))._index(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
-		verify(spy, times(100))._cacheBitmap(Mockito.any(BitmapId.class),
+		verify(spy, times(100))._cache(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
 
 		// get the amount of created files
-		final int nrOfFiles = spy.getNumberOfBitmapFiles();
+		final int nrOfFiles = spy.getNumberOfFiles();
 		spy.release();
 
 		// now initialize again and check if the data is loaded
 		spy.initialize(model);
-		assertEquals(nrOfFiles, spy.getNumberOfBitmapFiles());
+		assertEquals(nrOfFiles, spy.getNumberOfFiles());
 		assertEquals(0, fc.getCacheSize());
 
 		// get the bitmap for 0, this cannot be empty now
@@ -354,7 +354,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		}
 
 		// no new files were created and the cache is filled
-		assertEquals(nrOfFiles, spy.getNumberOfBitmapFiles());
+		assertEquals(nrOfFiles, spy.getNumberOfFiles());
 		assertEquals(100, spy.getCacheSize());
 
 		// there was no need for reorganization
@@ -362,14 +362,14 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// the cache had to read every bitmap from disk
 		verify(spy, times(100))._getFromCache(Mockito.any(BitmapId.class));
-		verify(spy, times(100)).readBitmap(Mockito.any(IndexEntry.class));
+		verify(spy, times(100)).read(Mockito.any(IndexEntry.class));
 
 		// every Bitmap had to be added to the cache, but not updated
 		verify(spy, times(100)).cacheBitmap(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
-		verify(spy, times(100))._indexBitmap(Mockito.any(BitmapId.class),
+		verify(spy, times(100))._index(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
-		verify(spy, times(200))._cacheBitmap(Mockito.any(BitmapId.class),
+		verify(spy, times(200))._cache(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
 
 		// let's also get some values we don't have yet
@@ -380,7 +380,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			assertEquals(emptyBitmap, bmp);
 		}
 		verify(spy, times(200))._getFromCache(Mockito.any(BitmapId.class));
-		verify(spy, times(100)).readBitmap(Mockito.any(IndexEntry.class));
+		verify(spy, times(100)).read(Mockito.any(IndexEntry.class));
 		verify(spy, times(1))._organizeCache();
 		assertEquals(100, spy.getCacheSize());
 

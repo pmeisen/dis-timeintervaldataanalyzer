@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataCollection;
@@ -66,7 +67,7 @@ public class TestFixedStructureDataRetriever {
 				final IConfiguration c,
 				final FixedStructureDataRetrieverConfig config) {
 			final FixedStructureDataRetriever rnd = new FixedStructureDataRetriever(
-					config);
+					UUID.randomUUID().toString(), config);
 			c.wireInstance(rnd);
 
 			return rnd;

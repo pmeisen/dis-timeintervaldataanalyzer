@@ -2,10 +2,13 @@ package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
+import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
@@ -19,7 +22,9 @@ import net.meisen.dissertation.model.descriptors.FactDescriptor;
  *            the type of the identifier of the slice
  */
 public class SliceWithDescriptors<I> extends BaseSlice<I> {
-	private final FactDescriptorModelSet facts;
+	private IFactDescriptorModelSetCache factsCache;
+
+	private FactDescriptorModelSet facts = null;
 
 	/**
 	 * Default constructor to create a slice with descriptors.
@@ -28,10 +33,11 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *            the identifier of the slice
 	 */
 	public SliceWithDescriptors(final SliceId<I> sliceId,
-			final IBitmapCache cache) {
-		super(sliceId, cache);
+			final IBitmapCache bitmapCache,
+			final IFactDescriptorModelSetCache factsCache) {
+		super(sliceId, bitmapCache);
 
-		facts = new FactDescriptorModelSet();
+		this.factsCache = factsCache;
 	}
 
 	/**
@@ -46,18 +52,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *            {@code DataRecord}
 	 */
 	public void set(final int recId, final Descriptor<?, ?, ?>... descriptors) {
-		getBitmap().set(recId);
-		facts.addDescriptors(descriptors);
-	}
-
-	public void deserialize(final DataInputStream in,
-			final List<FactDescriptor<?>> factDescriptors) throws IOException {
-
-		// set the descriptors of the slice
-		facts.add(factDescriptors);
-
-		// update the bitmap
-		super.deserializeBitmap(in);
+		set(recId, descriptors == null ? null : Arrays.asList(descriptors));
 	}
 
 	/**
@@ -73,11 +68,33 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 */
 	public void set(final int recId,
 			final Collection<Descriptor<?, ?, ?>> descriptors) {
-		getBitmap().set(recId);
-		facts.addDescriptors(descriptors);
+		if (descriptors == null) {
+			return;
+		}
 
-		// inform the cache
+		// modify the meta-data
+		if (getFactsSet().addDescriptors(descriptors)) {
+			updateFactsCache();
+		}
+
+		// modify the bitmap
+		getBitmap().set(recId);
 		updateBitmapCache();
+	}
+
+	public void deserialize(final DataInputStream in,
+			final List<FactDescriptor<?>> factDescriptors) throws IOException {
+
+		// set the descriptors of the slice
+		getFactsSet().set(factDescriptors);
+		updateFactsCache();
+
+		// update the bitmap
+		super.deserializeBitmap(in);
+	}
+
+	protected void updateFactsCache() {
+		factsCache.cacheFactDescriptorModelSet(getSliceId(), getFactsSet());
 	}
 
 	/**
@@ -89,7 +106,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * @see Iterable
 	 */
 	public Iterable<String> models() {
-		return facts.models();
+		return getFactsSet().models();
 	}
 
 	/**
@@ -105,18 +122,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * @see Iterable
 	 */
 	public Iterable<FactDescriptor<?>> facts(final String descriptorModelId) {
-		return facts.facts(descriptorModelId);
-	}
-
-	/**
-	 * Gets all the {@code DescriptorModels} associated to the slice. For each
-	 * {@code DescriptorModel} the different associated {@code Descriptors} are
-	 * available.
-	 * 
-	 * @return the {@code DescriptorModels} associated to the slice
-	 */
-	public FactDescriptorModelSet getDescriptorModels() {
-		return facts;
+		return getFactsSet().facts(descriptorModelId);
 	}
 
 	/**
@@ -129,7 +135,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * @return a sorted set of descriptors
 	 */
 	public FactDescriptorSet getDescriptors(final String descriptorModelId) {
-		return facts.getDescriptors(descriptorModelId);
+		return getFactsSet().getDescriptors(descriptorModelId);
 	}
 
 	/**
@@ -140,7 +146,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *         slice
 	 */
 	public int numberOfModels() {
-		return facts.numberOfModels();
+		return getFactsSet().numberOfModels();
 	}
 
 	/**
@@ -153,7 +159,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *         {@code descriptorModelId}.
 	 */
 	public int numberOfFacts(final String descriptorModelId) {
-		return facts.numberOfFacts(descriptorModelId);
+		return getFactsSet().numberOfFacts(descriptorModelId);
 	}
 
 	/**
@@ -164,7 +170,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *            the descriptors to be used for the {@code Slice}
 	 */
 	public void setDescriptors(final Collection<Descriptor<?, ?, ?>> descriptors) {
-		facts.setDescriptors(descriptors);
+		getFactsSet().setDescriptors(descriptors);
 	}
 
 	/**
@@ -175,7 +181,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 *         instances
 	 */
 	public List<String> createModelList() {
-		return facts.createModelList();
+		return getFactsSet().createModelList();
 	}
 
 	/**
@@ -191,11 +197,36 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 */
 	public List<FactDescriptor<?>> createSortedDescriptorList(
 			String descriptorModelId) {
-		return facts.createSortedDescriptorList(descriptorModelId);
+		return getFactsSet().createSortedDescriptorList(descriptorModelId);
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + " (" + facts + ")";
+		return super.toString() + " (" + getFactsSet() + ")";
+	}
+
+	@Override
+	public void release(final IBitmapIdCacheable instance) {
+		if (instance != null
+				&& instance.getClass().equals(FactDescriptorModelSet.class)) {
+			facts = null;
+		} else {
+			super.release(instance);
+		}
+	}
+
+	/**
+	 * Gets all the {@code DescriptorModels} associated to the slice. For each
+	 * {@code DescriptorModel} the different associated {@code Descriptors} are
+	 * available.
+	 * 
+	 * @return the {@code DescriptorModels} associated to the slice
+	 */
+	public FactDescriptorModelSet getFactsSet() {
+		if (facts == null) {
+			facts = factsCache.getSet(getSliceId());
+		}
+
+		return facts;
 	}
 }

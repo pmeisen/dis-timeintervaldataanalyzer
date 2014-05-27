@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 /**
  * Base Implementation of a {@code Iterator} used to iterate over the results
- * retrieved from a database. THe base implementation is just used to finalize
+ * retrieved from a database. The base implementation is just used to finalize
  * the implementation of the {@link #remove()} method, which is not supported by
  * a {@code DataIterator} but declared for a {@code Iterator}.
  * 

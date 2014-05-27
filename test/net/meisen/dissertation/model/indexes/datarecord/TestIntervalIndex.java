@@ -66,7 +66,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	private TidaModel loadModelAndData(final String dbName,
 			final String dbPath, final String modelPath) throws IOException {
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		return model;
 	}
@@ -269,7 +269,7 @@ public class TestIntervalIndex extends DbBasedTest {
 		// create an instance
 		final TidaModel model = loadModel(dbName, dbPath, modelPath);
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 		assertEquals(676, count(idx.getSlices()));
 
 		// create a temporary file and save it
@@ -320,7 +320,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testInclusionAllSlicesAvailable() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
@@ -346,7 +346,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testInclusionSlicesPartiallyAvailable() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
@@ -379,7 +379,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testExclusionAllSlicesAvailable() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1001,
@@ -405,7 +405,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testPartialAllSlicesAvailable() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] resLeft = idx.getSlicesByTimePoints(
@@ -438,7 +438,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testInclusionInvalidInterval() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1051,
@@ -461,7 +461,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testExclusionInvalidInterval() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervals.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		final SliceWithDescriptors<?>[] res = idx.getSlicesByTimePoints(1050,
@@ -482,7 +482,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testDescriptorAssociation() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervalsWithDescriptors.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		final IntervalIndex idx = model.getIndex().getIntervalIndex();
 		assertIntervalsWithDescriptors(model, idx);
@@ -501,7 +501,7 @@ public class TestIntervalIndex extends DbBasedTest {
 	public void testSaveAndLoadWithDescriptorAssociation() throws IOException {
 		final TidaModel model = loadModel(null, null,
 				"tidaDbUsingLongIntervalsWithDescriptors.xml");
-		model.loadData();
+		model.bulkLoadDataFromDataModel();
 
 		// create a temporary file and save it
 		final String prefixFile = UUID.randomUUID().toString();

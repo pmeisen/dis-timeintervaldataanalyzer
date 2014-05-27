@@ -23,17 +23,23 @@ public abstract class BaseDataRetriever {
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	protected IExceptionRegistry exceptionRegistry;
 
+	private final String id;
+
 	/**
 	 * Constructor with the {@code DataRetrieverConfiguration}, the
 	 * {@code config} must be of a valid type.
 	 * 
+	 * @param id
+	 *            an identifier for the retriever
 	 * @param config
 	 *            the {@code DataRetrieverConfiguration} used for the
 	 *            {@code DataRetriever}
 	 * 
 	 * @see #supportedConfiguration()
 	 */
-	public BaseDataRetriever(final IDataRetrieverConfig config) {
+	public BaseDataRetriever(final String id, final IDataRetrieverConfig config) {
+		this.id = id;
+
 		final Class<? extends IDataRetrieverConfig> configClazz = supportedConfiguration();
 		if (config == null && needConfiguration()) {
 			exceptionRegistry.throwException(DataRetrieverException.class,
@@ -119,5 +125,14 @@ public abstract class BaseDataRetriever {
 	 */
 	public void release() {
 		// do nothing
+	}
+
+	/**
+	 * Gets the identifier of the {@code BaseDataRetriever}.
+	 * 
+	 * @return the identifier of {@code this}
+	 */
+	public String getId() {
+		return id;
 	}
 }

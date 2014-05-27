@@ -28,6 +28,8 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	 * 
 	 * @param sliceId
 	 *            the identifier the slice stands for
+	 * @param cache
+	 *            the {@code BitmapCache} to be used
 	 */
 	public Slice(final SliceId<I> sliceId, final IBitmapCache cache) {
 		super(sliceId, cache);
@@ -53,6 +55,15 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 		updateBitmapCache();
 	}
 
+	/**
+	 * Deserializes the bitmap retrieved from the specified {@code in}.
+	 * 
+	 * @param in
+	 *            the {@code InputStream} to read the information from
+	 * 
+	 * @throws IOException
+	 *             if the data cannot be read
+	 */
 	public void deserialize(final DataInputStream in) throws IOException {
 		super.deserializeBitmap(in);
 	}

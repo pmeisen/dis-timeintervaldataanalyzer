@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
+import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
@@ -147,11 +148,15 @@ public class DefaultValues {
 	/**
 	 * Id of the {@code BitmapCache} to be used.
 	 */
-	public static final String BITMAPCACHE_ID = "bitmapCacheId";
+	public static final String METADATACACHE_ID = "metaDataCacheId";
 	/**
 	 * Id of the {@code BitmapCache} to be used.
 	 */
-	public static final String METADATACACHE_ID = "metaDataCacheId";
+	public static final String BITMAPCACHE_ID = "bitmapCacheId";
+	/**
+	 * Id of the {@code FactDescriptorModelSetCache} to be used.
+	 */
+	public static final String FACTSETSCACHE_ID = "factSetsCacheId";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -191,6 +196,16 @@ public class DefaultValues {
 	 */
 	public static String getDefaultBitmapCache() {
 		return MemoryBitmapCache.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code FactDescriptorModelSetCache} implementation to be
+	 * used.
+	 * 
+	 * @return the default cache implementation to be used
+	 */
+	public static String getDefaultFactSetsCache() {
+		return MemoryFactDescriptorModelSetCache.class.getName();
 	}
 
 	/**

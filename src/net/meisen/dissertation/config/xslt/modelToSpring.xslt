@@ -12,6 +12,7 @@
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
   <xsl:import href="bitmapcache://includeXslts" />
+  <xsl:import href="factdescriptormodelsetcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
@@ -25,8 +26,9 @@
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
   <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
-  <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
   <xsl:variable name="metaDataCacheId" select="mdef:getId('METADATACACHE_ID')" />
+  <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
+  <xsl:variable name="factSetsCacheId" select="mdef:getId('FACTSETSCACHE_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
   <xsl:template match="/mns:model">
@@ -125,6 +127,33 @@
         </xsl:otherwise>
       </xsl:choose>
       
+      <!-- create the factSetsCache to be used -->     
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:caches/mns:factsets/@implementation">
+          <xsl:variable name="factSetsCache" select="//mns:config/mns:caches/mns:factsets/@implementation" />
+          <bean id="{$factSetsCacheId}" class="{$factSetsCache}" destroy-method="release">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:caches/mns:factsets/node()">
+                  <xsl:for-each select='//mns:config/mns:caches/mns:factsets/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><ref bean="defaultFactSetsCacheConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$factSetsCacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultFactSetsCacheClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultFactSetsCacheConfig" /></map>
+            </property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+      
       <!-- create the indexFactory to be used -->
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation">
@@ -203,6 +232,7 @@
         </xsl:variable>
             
         <bean id="dataretriever-{$id}" class="{$implementation}" destroy-method="release">
+          <constructor-arg type="java.lang.String" value="{$id}" />
           <constructor-arg type="net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig">
             <xsl:choose>
               <xsl:when test="node()"><xsl:apply-imports /></xsl:when>

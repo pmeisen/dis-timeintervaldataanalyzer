@@ -77,9 +77,5 @@
     <key name="KEY" />
   </structure>
   
-  <data metahandling="fail" intervalhandling="failOnNull">
-    <dataset dataretriever="db_tida">
-      <db:query>SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA WHERE ROWNUM() &lt;= 10000</db:query>
-    </dataset>
-  </data>
+  <data metahandling="fail" intervalhandling="failOnNull" />
 </model>

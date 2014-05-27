@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -48,7 +49,8 @@ public class IntervalIndex implements IDataRecordIndex {
 	private final static String EXTENSION = ".slice";
 
 	private final MetaDataModel metaDataModel;
-	private final IBitmapCache cache;
+	private final IBitmapCache bitmapCache;
+	private final IFactDescriptorModelSetCache factsCache;
 	private final IRangeQueryOptimized index;
 	private final BaseMapper<?> mapper;
 
@@ -62,7 +64,8 @@ public class IntervalIndex implements IDataRecordIndex {
 	 */
 	public IntervalIndex(final TidaModel model) {
 		this(model.getIntervalModel(), model.getMetaDataModel(), model
-				.getBitmapCache(), model.getIndexFactory());
+				.getBitmapCache(), model.getFactsCache(), model
+				.getIndexFactory());
 	}
 
 	/**
@@ -73,15 +76,20 @@ public class IntervalIndex implements IDataRecordIndex {
 	 * @param metaDataModel
 	 *            the {@code MetaDataModel} is needed to lookup descriptors when
 	 *            loading an index
-	 * @param cache
+	 * @param bitmapCache
 	 *            the cache used by the model to cache {@code Bitmap} instances
+	 * @param factsCache
+	 *            the cache used by the model to cache
+	 *            {@code FactDescriptorModelSet} instances
 	 * @param indexFactory
 	 *            the factory used to create indexes
 	 */
 	public IntervalIndex(final IntervalModel intervalModel,
-			final MetaDataModel metaDataModel, final IBitmapCache cache,
+			final MetaDataModel metaDataModel, final IBitmapCache bitmapCache,
+			final IFactDescriptorModelSetCache factsCache,
 			final BaseIndexFactory indexFactory) {
-		this.cache = cache;
+		this.bitmapCache = bitmapCache;
+		this.factsCache = factsCache;
 		this.mapper = intervalModel.getTimelineMapper();
 		this.metaDataModel = metaDataModel;
 
@@ -342,19 +350,23 @@ public class IntervalIndex implements IDataRecordIndex {
 		if (Byte.class.equals(clazz)) {
 			final SliceId<Byte> sliceId = new SliceId<Byte>(
 					Numbers.castToByte(id), IntervalIndex.class);
-			slice = new SliceWithDescriptors<Byte>(sliceId, cache);
+			slice = new SliceWithDescriptors<Byte>(sliceId, bitmapCache,
+					factsCache);
 		} else if (Short.class.equals(clazz)) {
 			final SliceId<Short> sliceId = new SliceId<Short>(
 					Numbers.castToShort(id), IntervalIndex.class);
-			slice = new SliceWithDescriptors<Short>(sliceId, cache);
+			slice = new SliceWithDescriptors<Short>(sliceId, bitmapCache,
+					factsCache);
 		} else if (Integer.class.equals(clazz)) {
 			final SliceId<Integer> sliceId = new SliceId<Integer>(
 					Numbers.castToInt(id), IntervalIndex.class);
-			slice = new SliceWithDescriptors<Integer>(sliceId, cache);
+			slice = new SliceWithDescriptors<Integer>(sliceId, bitmapCache,
+					factsCache);
 		} else {
 			final SliceId<Long> sliceId = new SliceId<Long>(
 					Numbers.castToLong(id), IntervalIndex.class);
-			slice = new SliceWithDescriptors<Long>(sliceId, cache);
+			slice = new SliceWithDescriptors<Long>(sliceId, bitmapCache,
+					factsCache);
 		}
 
 		return slice;

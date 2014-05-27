@@ -180,7 +180,7 @@ public class TimeSeriesEvaluator {
 				final Bitmap resultBitmap = combineBitmaps(timeSlice,
 						filterResult, groupResultEntry);
 				final FactDescriptorModelSet descriptors = timeSlice == null ? null
-						: timeSlice.getDescriptorModels();
+						: timeSlice.getFactsSet();
 
 				// create the evaluator
 				final MathExpressionEvaluator evaluator = new MathExpressionEvaluator(
@@ -249,8 +249,8 @@ public class TimeSeriesEvaluator {
 		}
 
 		// create the result
-		final TimeSeriesCollection result = new TimeSeriesCollection(amountOfGranules,
-				indexFactory);
+		final TimeSeriesCollection result = new TimeSeriesCollection(
+				amountOfGranules, indexFactory);
 		for (int i = 0; i < amountOfGranules; i++) {
 
 			// create a label for the timeSlice

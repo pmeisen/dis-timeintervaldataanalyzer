@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbConnectionConfig;
@@ -164,7 +165,8 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 		config.setPassword("");
 		config.setType("jdbc");
 		config.setUrl("jdbc:hsqldb:hsql://localhost:6666/tidaTestData");
-		final DbDataRetriever retriever = new DbDataRetriever(config);
+		final DbDataRetriever retriever = new DbDataRetriever(UUID.randomUUID()
+				.toString(), config);
 		final DbQueryConfig query = new DbQueryConfig();
 		query.setLanguage("sql");
 		query.setQuery("SELECT FIXED, RANDOM, COUNTER FROM TB_TESTDATA");
@@ -193,7 +195,7 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 				dbDataSet);
 		assertEquals(1, it.count());
 		it.close();
-		
+
 		// release the retriever
 		retriever.release();
 	}

@@ -2,8 +2,12 @@ package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
 
@@ -172,6 +176,43 @@ public class TestFactDescriptorModelSet {
 			assertEquals(idNr, desc.getId());
 			idNr++;
 		}
+	}
 
+	/**
+	 * Test the iteration over an empty {@code FactDescriptorModelSet}.
+	 */
+	@Test
+	public void testEmptyIteration() {
+		final FactDescriptorModelSet set = new FactDescriptorModelSet();
+
+		// just iterate if there is any we are wrong
+		for (final FactDescriptor<?> fd : set) {
+			assertNotNull(fd);
+			fail("Iterated over empty set: " + set);
+		}
+
+		assertFalse(set.iterator().hasNext());
+	}
+
+	/**
+	 * Test the iteration over a {@code FactDescriptorModelSet}.
+	 */
+	@Test
+	public void testIteration() {
+		final Collection<FactDescriptor<?>> expected = new HashSet<FactDescriptor<?>>();
+		final FactDescriptorModelSet set = new FactDescriptorModelSet();
+
+		// add some sample values
+		expected.add(new FactDescriptor<Integer>("Value", 500, 500.0));
+		expected.add(new FactDescriptor<Integer>("Value", 600, 600.0));
+		set.add(expected);
+
+		int counter = 0;
+		for (final FactDescriptor<?> fd : set) {
+			assertTrue(expected.remove(fd));
+			counter++;
+		}
+		assertEquals(0, expected.size());
+		assertEquals(2, counter);
 	}
 }

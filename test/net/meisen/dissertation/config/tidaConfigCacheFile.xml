@@ -3,12 +3,14 @@
 <config xmlns="http://dev.meisen.net/xsd/dissertation/config"
         xmlns:mdfile="http://dev.meisen.net/xsd/dissertation/caches/metadata/file"
         xmlns:bmpfile="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+        xmlns:factfile="http://dev.meisen.net/xsd/dissertation/caches/facts/file"
         
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         
         xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd
                             http://dev.meisen.net/xsd/dissertation/caches/metadata/file http://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd
-                            http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd">
+                            http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
+                            http://dev.meisen.net/xsd/dissertation/caches/facts/file http://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd">
   
   <caches>
     <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache">
@@ -18,5 +20,9 @@
     <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
       <bmpfile:config folder="${java.io.tmpdir}" />
     </bitmap>
+    
+    <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache">
+      <factfile:config folder="${java.io.tmpdir}/config-facts" maxFileSize="1000m" />
+    </factsets>
   </caches>
 </config>

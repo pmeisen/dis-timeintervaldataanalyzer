@@ -1,17 +1,13 @@
 package net.meisen.dissertation.impl.cache;
 
-import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
-
 /**
- * General exceptions thrown within a {@code FileBitmapCache}.
+ * Exception thrown when a problem with the {@code FileMetaDataCache} occurres.
  * 
  * @author pmeisen
  * 
- * @see BaseDataRetriever
- * 
  */
-public class FileBitmapCacheException extends RuntimeException {
-	private static final long serialVersionUID = 851688924231263967L;
+public class BaseFileBitmapIdCacheException extends RuntimeException {
+	private static final long serialVersionUID = 5418038661045869700L;
 
 	/**
 	 * Creates an exception which should been thrown whenever there is no other
@@ -20,7 +16,7 @@ public class FileBitmapCacheException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public FileBitmapCacheException(final String message) {
+	public BaseFileBitmapIdCacheException(final String message) {
 		super(message);
 	}
 
@@ -33,7 +29,7 @@ public class FileBitmapCacheException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public FileBitmapCacheException(final String message, final Throwable t) {
+	public BaseFileBitmapIdCacheException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

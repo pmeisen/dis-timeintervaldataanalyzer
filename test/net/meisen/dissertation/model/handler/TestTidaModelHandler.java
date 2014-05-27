@@ -182,7 +182,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertEquals(OfflineMode.find(null), modelPioneerData1.getOfflineMode());
 
 		// load the first module from the database
-		modelPioneerData1.loadData();
+		modelPioneerData1.bulkLoadDataFromDataModel();
 
 		// save the data
 		final File tmpFile = File.createTempFile("pioneer", ".zip");
@@ -232,7 +232,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertEquals(OfflineMode.find(null), modelPioneerData1.getOfflineMode());
 
 		// load the first module from the database
-		modelPioneerData1.loadData();
+		modelPioneerData1.bulkLoadDataFromDataModel();
 
 		// save the data
 		final File tmpFile = File.createTempFile("pioneer", ".zip");

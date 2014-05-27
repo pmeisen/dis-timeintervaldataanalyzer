@@ -29,14 +29,16 @@ public class DbDataRetriever extends BaseDataRetriever {
 	 * Constructor with the {@code DataRetrieverConfiguration}, the
 	 * {@code config} must be of a valid type.
 	 * 
+	 * @param id
+	 *            an identifier for the retriever
 	 * @param config
 	 *            the {@code DataRetrieverConfiguration} used for the
 	 *            {@code DataRetriever}
 	 * 
 	 * @see #supportedConfiguration()
 	 */
-	public DbDataRetriever(final IDataRetrieverConfig config) {
-		super(config);
+	public DbDataRetriever(final String id, final IDataRetrieverConfig config) {
+		super(id, config);
 
 		final DbConnectionConfig c = getConfig();
 

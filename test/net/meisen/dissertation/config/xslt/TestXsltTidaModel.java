@@ -474,6 +474,11 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		final DataModel model = getDataModel("/net/meisen/dissertation/config/xslt/dbDataSets.xml");
 		final IClosableIterator<IDataRecord> it = model.iterator();
 
+		// get the retrievers
+		assertEquals(1, model.sizeOfRetrievers());
+		assertNotNull(model.getDataRetriever("db_test"));
+		assertNull(model.getDataRetriever("another_id"));
+		
 		// get the expected
 		final Set<Integer> expected = new HashSet<Integer>();
 		for (int i = 1; i <= 10000; i = i == 9 ? 9991 : i + 1) {
