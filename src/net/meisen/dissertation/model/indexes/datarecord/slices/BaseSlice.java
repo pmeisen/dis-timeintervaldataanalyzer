@@ -58,6 +58,11 @@ public abstract class BaseSlice<I extends Object> implements
 		return id.getId();
 	}
 
+	/**
+	 * Gets the identifier of the slice.
+	 * 
+	 * @return the identifier of the slice
+	 */
 	public SliceId<I> getSliceId() {
 		return id;
 	}
@@ -82,6 +87,9 @@ public abstract class BaseSlice<I extends Object> implements
 		updateBitmapCache();
 	}
 
+	/**
+	 * Updates the cache by caching the current bitmap of the slice.
+	 */
 	protected void updateBitmapCache() {
 		cache.cacheBitmap(getSliceId(), getBitmap());
 	}

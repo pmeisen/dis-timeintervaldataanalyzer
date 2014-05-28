@@ -31,6 +31,13 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * 
 	 * @param sliceId
 	 *            the identifier of the slice
+	 * @param bitmapCache
+	 *            the {@code BitmapCache} used
+	 * @param factsCache
+	 *            the {@code FactDescriptorModelSetCache} used
+	 * 
+	 * @see IBitmapCache
+	 * @see IFactDescriptorModelSetCache
 	 */
 	public SliceWithDescriptors(final SliceId<I> sliceId,
 			final IBitmapCache bitmapCache,
@@ -82,6 +89,18 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 		updateBitmapCache();
 	}
 
+	/**
+	 * Deserializes the bitmap from the specified {@code in} and associates the
+	 * {@code factDescriptors}.
+	 * 
+	 * @param in
+	 *            the {@code DataInputStream} to read the data from
+	 * @param factDescriptors
+	 *            the associated {@code factDescriptors}
+	 * 
+	 * @throws IOException
+	 *             of the data cannot be read
+	 */
 	public void deserialize(final DataInputStream in,
 			final List<FactDescriptor<?>> factDescriptors) throws IOException {
 
@@ -93,6 +112,10 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 		super.deserializeBitmap(in);
 	}
 
+	/**
+	 * Updates the cache of the {@code FactDescriptorModelSet} with the
+	 * currently set once.
+	 */
 	protected void updateFactsCache() {
 		factsCache.cacheFactDescriptorModelSet(getSliceId(), getFactsSet());
 	}
