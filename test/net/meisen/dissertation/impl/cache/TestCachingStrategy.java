@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.meisen.dissertation.help.ThreadForTesting;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
@@ -103,12 +104,12 @@ public class TestCachingStrategy {
 		final CachingStrategy strategy = new CachingStrategy();
 
 		// create some threads
-		final Thread[] threads = new Thread[amountOfThreads];
+		final ThreadForTesting[] threads = new ThreadForTesting[amountOfThreads];
 		for (int i = 0; i < amountOfThreads; i++) {
-			threads[i] = new Thread() {
+			threads[i] = new ThreadForTesting() {
 
 				@Override
-				public void run() {
+				public void _run() {
 					for (int i = 0; i < amountOfBitmaps; i++) {
 						strategy.usedBitmap(new BitmapId<Integer>(i,
 								IntervalIndex.class));
@@ -125,6 +126,10 @@ public class TestCachingStrategy {
 		// make sure all threads are over
 		for (int i = 0; i < amountOfThreads; i++) {
 			threads[i].join();
+		}
+
+		for (int i = 0; i < amountOfThreads; i++) {
+			threads[i].validate();
 		}
 
 		// check the result

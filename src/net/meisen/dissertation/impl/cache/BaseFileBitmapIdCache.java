@@ -14,9 +14,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -83,6 +86,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	private final List<DataOutputStream> fileWriters;
 	private final List<File> files;
 
+	private final Set<BitmapId<?>> notPersisted;
+
 	private boolean init;
 	private boolean persistency;
 	private File location;
@@ -105,6 +110,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		this.owners = new HashMap<BitmapId<?>, IBitmapIdOwner>();
 		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
 		this.cache = new HashMap<BitmapId<?>, T>();
+
+		this.notPersisted = new HashSet<BitmapId<?>>();
 
 		this.ownersLock = new ReentrantReadWriteLock();
 		this.cacheLock = new ReentrantReadWriteLock();
@@ -641,7 +648,19 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 
 				// the cache might have been updated
 				if (!cache.containsKey(bitmapId)) {
-					_cache(bitmapId, cacheable);
+					if (_cache(bitmapId, cacheable)) {
+
+						if (isPersistencyEnabled()) {
+							_organizeCache();
+						} else {
+							this.idxLock.writeLock().lock();
+							try {
+								_organizeCache();
+							} finally {
+								this.idxLock.writeLock().unlock();
+							}
+						}
+					}
 				}
 			} finally {
 				this.cacheLock.writeLock().unlock();
@@ -677,9 +696,13 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	 * @param cacheable
 	 *            the {@code Cacheable} to be cached
 	 * 
+	 * @return {@code true} if the cache has to be organized, otherwise
+	 *         {@code false}
+	 * 
 	 * @see IBitmapIdCacheable
 	 */
-	protected void _cache(final BitmapId<?> bitmapId, final T cacheable) {
+	protected boolean _cache(final BitmapId<?> bitmapId, final T cacheable) {
+		boolean needReorganization = false;
 
 		// add the value
 		if (cache.put(bitmapId, cacheable) == null) {
@@ -689,12 +712,14 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			 * re-organization of the cache
 			 */
 			if (cache.size() > cacheSize) {
-				_organizeCache();
+				needReorganization = true;
 			}
 
 			// register the bitmap because it wasn't registered yet
 			getStrategy().registerBitmap(bitmapId);
 		}
+
+		return needReorganization;
 	}
 
 	/**
@@ -714,6 +739,11 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Organizing cache (size: " + cache.size()
 					+ ") by removing '" + removedIds.size() + "'");
+		}
+
+		// persist the once that will be removed
+		if (!isPersistencyEnabled()) {
+			_bulkWrite(removedIds);
 		}
 
 		// remove the bitmaps from the cache and the owner
@@ -921,7 +951,9 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			this.idxLock.writeLock().lock();
 			try {
 				if (_index(bitmapId, entry)) {
-					_cache(bitmapId, cacheable);
+					if (_cache(bitmapId, cacheable)) {
+						_organizeCache();
+					}
 				}
 			} finally {
 				this.idxLock.writeLock().unlock();
@@ -930,7 +962,19 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		} else {
 			this.cacheLock.writeLock().lock();
 			try {
-				_cache(bitmapId, cacheable);
+				notPersisted.add(bitmapId);
+
+				// update the cache
+				if (_cache(bitmapId, cacheable)) {
+
+					// if needed reorganize it
+					this.idxLock.writeLock().lock();
+					try {
+						_organizeCache();
+					} finally {
+						this.idxLock.writeLock().unlock();
+					}
+				}
 			} finally {
 				this.cacheLock.writeLock().unlock();
 			}
@@ -1203,6 +1247,18 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	public void clearCache() {
 		this.cacheLock.writeLock().lock();
 		try {
+
+			// the data might not be persisted yet, so we have to do it know
+			if (!isPersistencyEnabled()) {
+				this.idxLock.writeLock().lock();
+				try {
+					_bulkWrite(this.cache.keySet());
+				} finally {
+					this.idxLock.writeLock().unlock();
+				}
+			}
+
+			// clear the cache
 			this.cache.clear();
 		} finally {
 			this.cacheLock.writeLock().unlock();
@@ -1244,16 +1300,17 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	 * 
 	 * @param enable
 	 *            {@code true} to enable persistency, otherwise {@code false}
+	 * 
+	 * @return the old value of the persistency setting
 	 */
-	public synchronized void setPersistency(final boolean enable) {
+	public synchronized boolean setPersistency(final boolean enable) {
 
 		/*
-		 * Make sure that there is no other thread working with the files
+		 * Make sure that there is no other thread working with the cache
 		 * currently.
 		 */
 		this.cacheLock.writeLock().lock();
 		this.idxLock.writeLock().lock();
-		this.fileLock.writeLock().lock();
 		try {
 			final boolean oldPersistency = this.persistency;
 			this.persistency = enable;
@@ -1263,17 +1320,64 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 				// nothing
 			}
 			// persistency was enabled
-			else if (this.persistency) {
-
+			else if (oldPersistency) {
+				notPersisted.clear();
 			}
-			// persistency was disabled
+			// persistency was disabled, write the not persisted once
 			else {
-				
+				_bulkWrite(null);
 			}
+
+			return oldPersistency;
 		} finally {
-			this.fileLock.writeLock().unlock();
 			this.idxLock.writeLock().unlock();
 			this.cacheLock.writeLock().unlock();
+		}
+	}
+
+	/**
+	 * Persists the {@code notPersisted} data in a bulk-mode, whereby the data
+	 * written can be filtered by the specified {@code filterIds}.
+	 * 
+	 * @param filterIds
+	 *            the {@code BitmapIds} to filter the {@code notPersisted} by,
+	 *            i.e. the method will persist the intersection between the
+	 *            {@code notPersisted} and the {@code filterIds}, can be
+	 *            {@code null} if all {@code notPersisted} should be persisted
+	 */
+	protected void _bulkWrite(final Collection<BitmapId<?>> filterIds) {
+
+		// define the BitmapIds which really should be written
+		final Set<BitmapId<?>> toBeWritten = new HashSet<BitmapId<?>>(
+				notPersisted);
+		if (filterIds != null) {
+			toBeWritten.retainAll(filterIds);
+		}
+
+		// log the writing
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Persisting " + toBeWritten.size()
+					+ " cacheables during bulk write.");
+		}
+
+		// write the once to be written
+		for (final BitmapId<?> id : toBeWritten) {
+
+			// get the instance to be persisted
+			final T cacheable = _getFromCache(id);
+
+			// persist it
+			final IndexEntry entry = write(cacheable);
+			_index(id, entry);
+
+			// remove the one from the once that are not persisted
+			notPersisted.remove(id);
+		}
+
+		// log the success
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Finished bulk write of " + toBeWritten.size()
+					+ " cacheables.");
 		}
 	}
 

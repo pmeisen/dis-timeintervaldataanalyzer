@@ -95,15 +95,13 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		}
 
 		final FactDescriptor<?> cur = set.ceiling(factDesc);
-		if (cur == null) {
+		if (cur == null || !cur.equals(factDesc)) {
 			return set.add(factDesc);
 		} else {
-
 			// the objects are equal but modified
 			if (!Objects.equals(cur.isRecordInvariant(),
 					factDesc.isRecordInvariant())
 					|| !Objects.equals(cur.getFact(), factDesc.getFact())) {
-
 				set.remove(cur);
 				return set.add(factDesc);
 			} else {

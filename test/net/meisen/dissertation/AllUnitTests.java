@@ -8,6 +8,7 @@ import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.cache.TestCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCacheConfig;
+import net.meisen.dissertation.impl.cache.TestFileCaches;
 import net.meisen.dissertation.impl.cache.TestFileFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.TestFileMetaDataCache;
 import net.meisen.dissertation.impl.cache.TestMemoryMetaDataCache;
@@ -185,6 +186,7 @@ import org.junit.runners.Suite;
 		TestCachingStrategy.class,
 		TestFileBitmapCache.class,
 		TestFileFactDescriptorModelSetCache.class,
+		TestFileCaches.class,
 
 		// Test the index for facts
 		TestFactDescriptorSet.class,

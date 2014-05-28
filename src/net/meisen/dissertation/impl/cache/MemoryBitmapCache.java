@@ -64,7 +64,7 @@ public class MemoryBitmapCache implements IBitmapCache {
 	}
 
 	@Override
-	public void setPersistency(final boolean enable) {
-		// just ignore
+	public boolean setPersistency(final boolean enable) {
+		return false;
 	}
 }

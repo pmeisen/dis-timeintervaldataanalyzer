@@ -53,7 +53,7 @@ public class MemoryFactDescriptorModelSetCache implements
 	}
 	
 	@Override
-	public void setPersistency(final boolean enable) {
-		// just ignore
+	public boolean setPersistency(final boolean enable) {
+		return false;
 	}
 }

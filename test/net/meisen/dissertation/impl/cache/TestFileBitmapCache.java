@@ -15,6 +15,7 @@ import java.util.Random;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
+import net.meisen.dissertation.help.ThreadForTesting;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
@@ -245,6 +246,141 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			assertEquals(bmp, fc.getBitmap(id));
 			assertTrue(fc.isCached(id));
 		}
+
+		fc.clearCache();
+		
+		// check to read all the bitmaps
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// get the bitmap from the cache
+			assertFalse(fc.isCached(id));
+			assertEquals(bmp, fc.getBitmap(id));
+			assertTrue(fc.isCached(id));
+		}
+	}
+
+	/**
+	 * Tests the bulk-write.
+	 */
+	@Test
+	public void testBulkPersistance() {
+		fc.initialize(model);
+
+		// disable the persistancy
+		fc.setPersistency(false);
+
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// cache the bitmap
+			fc.cacheBitmap(id, bmp);
+
+			// retrieve the bitmap and check the cache status
+			assertEquals(bmp, fc.getBitmap(id));
+			assertTrue(fc.isCached(id));
+		}
+
+		// everything should be in cache
+		assertEquals(50000, fc.getCacheSize());
+
+		// enable it again
+		fc.setPersistency(true);
+
+		// clear all the cached data
+		fc.clearCache();
+
+		// check to read all the bitmaps
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// get the bitmap from the cache
+			assertFalse(fc.isCached(id));
+			assertEquals(bmp, fc.getBitmap(id));
+			assertTrue(fc.isCached(id));
+		}
+	}
+
+	/**
+	 * Tests the bulk-write with using the
+	 * {@link FileBitmapCache#_organizeCache()}.
+	 */
+	@Test
+	public void testBulkPersistanceWithReorganization() {
+		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		config.setLocation(fc.getLocation());
+		config.setCacheSize(10000);
+		config.setCacheCleaningFactor(1.0);
+		fc.setConfig(config);
+		fc.initialize(model);
+
+		// disable the persistancy
+		fc.setPersistency(false);
+
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// cache the bitmap
+			fc.cacheBitmap(id, bmp);
+
+			// retrieve the bitmap and check the cache status
+			assertEquals(bmp, fc.getBitmap(id));
+			assertTrue(fc.isCached(id));
+		}
+
+		// enable it again
+		fc.setPersistency(true);
+
+		// clear all the cached data
+		fc.clearCache();
+
+		// check to read all the bitmaps
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// get the bitmap from the cache
+			assertFalse(fc.isCached(id));
+			assertEquals(bmp, fc.getBitmap(id));
+		}
+	}
+
+	/**
+	 * Tests the bulk-write with using the {@link FileBitmapCache#clearCache()}.
+	 */
+	@Test
+	public void testBulkPersistanceWithClearCache() {
+		fc.initialize(model);
+
+		fc.setPersistency(false);
+
+		for (int i = 0; i < 50000; i++) {
+			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
+					"Classifier1");
+			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
+
+			// cache the bitmap
+			fc.cacheBitmap(id, bmp);
+
+			// clear the cache
+			fc.clearCache();
+
+			// retrieve the bitmap and check the cache status
+			assertFalse(fc.isCached(id));
+			assertEquals(bmp, fc.getBitmap(id));
+			assertTrue(fc.isCached(id));
+		}
+
+		fc.setPersistency(true);
 	}
 
 	/**
@@ -399,10 +535,10 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	public void testMultipleThreadSafety() throws InterruptedException {
 		fc.initialize(model);
 
-		final Thread tCacheSize = new Thread() {
+		final ThreadForTesting tCacheSize = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				while (fc.getCacheSize() == 0) {
 					try {
 						Thread.sleep(50);
@@ -428,10 +564,10 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			}
 		};
 
-		final Thread tCache = new Thread() {
+		final ThreadForTesting tCache = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				for (int i = 0; i < 100000; i++) {
 					fc.cacheBitmap(createBitmapId(0), model.getIndexFactory()
 							.createBitmap());
@@ -448,8 +584,85 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		tCacheSize.join();
 		tCache.join();
 
+		// validate the threads
+		tCacheSize.validate();
+		tCache.validate();
+
 		// after everything there should be one left
 		assertEquals(2, fc.getCacheSize());
+	}
+
+	/**
+	 * Tests the multi-threading using bulk-write.
+	 * 
+	 * @throws InterruptedException
+	 *             if the threads cannot be found
+	 */
+	@Test
+	public void testMultiThreadWithBulkWrite() throws InterruptedException {
+		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		config.setLocation(fc.getLocation());
+		config.setCacheSize(10000);
+		config.setCacheCleaningFactor(0.3);
+		fc.setConfig(config);
+		fc.initialize(model);
+
+		final Bitmap empty = model.getIndexFactory().createBitmap();
+
+		final int amount = 50000;
+
+		final ThreadForTesting tGet = new ThreadForTesting() {
+			private Random r = new Random();
+
+			@Override
+			public void _run() {
+				for (int i = 0; i < 4 * amount; i++) {
+					int nr = r.nextInt(amount);
+					final BitmapId<?> id = new BitmapId<Integer>(nr,
+							MetaIndex.class, "Classifier1");
+					final Bitmap res = fc.getBitmap(id);
+					final Bitmap bmp = Bitmap.createBitmap(
+							model.getIndexFactory(), nr);
+
+					/*
+					 * we must get the empty one or the one created by the other
+					 * thread
+					 */
+					assertTrue(res.toString(),
+							empty.equals(res) || bmp.equals(res));
+				}
+			}
+		};
+
+		final ThreadForTesting tBulkLoad = new ThreadForTesting() {
+
+			@Override
+			public void _run() {
+				fc.setPersistency(false);
+				for (int i = 0; i < amount; i++) {
+					final BitmapId<?> id = new BitmapId<Integer>(i,
+							MetaIndex.class, "Classifier1");
+					final Bitmap bmp = Bitmap.createBitmap(
+							model.getIndexFactory(), i);
+
+					// cache the bitmap
+					fc.cacheBitmap(id, bmp);
+				}
+				fc.setPersistency(true);
+			}
+		};
+
+		// start the threads
+		tGet.start();
+		tBulkLoad.start();
+
+		// join with this one
+		tGet.join();
+		tBulkLoad.join();
+
+		// validate the threads
+		tGet.validate();
+		tBulkLoad.validate();
 	}
 
 	/**
@@ -519,24 +732,24 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		fc.initialize(model);
 
 		// create some bitmaps
-		final Thread tIdBitmap = new Thread() {
+		final ThreadForTesting tIdBitmap = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				_createBitmaps(amountOfBitmaps, 0);
 			}
 		};
-		final Thread tIdPlus1Bitmap = new Thread() {
+		final ThreadForTesting tIdPlus1Bitmap = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				_createBitmaps(amountOfBitmaps, 1);
 			}
 		};
-		final Thread tIdPlus2Bitmap = new Thread() {
+		final ThreadForTesting tIdPlus2Bitmap = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				_createBitmaps(amountOfBitmaps, 2);
 			}
 		};
@@ -551,19 +764,24 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		tIdPlus1Bitmap.join();
 		tIdPlus2Bitmap.join();
 
+		// validate the threads
+		tIdBitmap.validate();
+		tIdPlus1Bitmap.validate();
+		tIdPlus2Bitmap.validate();
+
 		// now get the bitmaps
-		final Thread tGetBitmap1 = new Thread() {
+		final ThreadForTesting tGetBitmap1 = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				_getRndBitmaps(new Random(), amountOfRuns,
 						(int) (amountOfBitmaps * 0.5));
 			}
 		};
-		final Thread tGetBitmap2 = new Thread() {
+		final ThreadForTesting tGetBitmap2 = new ThreadForTesting() {
 
 			@Override
-			public void run() {
+			public void _run() {
 				_getRndBitmaps(new Random(), amountOfRuns,
 						(int) (amountOfBitmaps * 0.5));
 			}
@@ -576,6 +794,10 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		// join with this one
 		tGetBitmap1.join();
 		tGetBitmap2.join();
+
+		// validate the threads
+		tGetBitmap1.validate();
+		tGetBitmap2.validate();
 	}
 
 	/**

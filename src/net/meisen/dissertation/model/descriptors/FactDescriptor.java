@@ -2,12 +2,27 @@ package net.meisen.dissertation.model.descriptors;
 
 import net.meisen.general.genmisc.types.Objects;
 
+/**
+ * A {@code FactDescriptor} is a to facts compressed {@code Descriptor}.
+ * 
+ * @author pmeisen
+ * 
+ * @param <I>
+ */
 public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 	private final String descModelId;
 	private final I descId;
 	private final boolean recordInvariant;
 	private final double fact;
 
+	/**
+	 * Generates a {@code recordVariant} fact-descriptor.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the model of the {@code Descriptor}
+	 * @param descId
+	 *            the identifier of the {@code Descriptor}
+	 */
 	public FactDescriptor(final String descModelId, final I descId) {
 		this.descModelId = descModelId;
 		this.descId = descId;
@@ -15,6 +30,16 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 		this.recordInvariant = false;
 	}
 
+	/**
+	 * Generates a {@code recordInvariant} fact-descriptor.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the model of the {@code Descriptor}
+	 * @param descId
+	 *            the identifier of the {@code Descriptor}
+	 * @param fact
+	 *            the invariant fact
+	 */
 	public FactDescriptor(final String descModelId, final I descId,
 			final double fact) {
 		this.descModelId = descModelId;
@@ -23,18 +48,41 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 		this.recordInvariant = true;
 	}
 
+	/**
+	 * Gets the identifier of the model.
+	 * 
+	 * @return the identifier of the model
+	 */
 	public String getModelId() {
 		return descModelId;
 	}
 
+	/**
+	 * Gets the identifier of the {@code Descriptor}.
+	 * 
+	 * @return the identifier of the {@code Descriptor}
+	 */
 	public I getId() {
 		return descId;
 	}
 
+	/**
+	 * {@code true} if the fact is record invariant, otherwise {@code true}.
+	 * 
+	 * @return {@code true} if the fact is record invariant, otherwise
+	 *         {@code true}
+	 */
 	public boolean isRecordInvariant() {
 		return recordInvariant;
 	}
 
+	/**
+	 * Gets the fact, might be an invalid value, i.e. if the {@code Descriptor}
+	 * is {@code recordVariant}.
+	 * 
+	 * @return the fact, might be an invalid value, i.e. if the
+	 *         {@code Descriptor} is {@code recordVariant}
+	 */
 	public double getFact() {
 		return fact;
 	}

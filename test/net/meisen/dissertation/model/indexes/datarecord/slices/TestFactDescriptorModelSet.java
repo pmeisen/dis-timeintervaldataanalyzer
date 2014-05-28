@@ -68,6 +68,8 @@ public class TestFactDescriptorModelSet {
 		for (int i = 0; i < 10; i++) {
 			final boolean first = i == 0;
 
+			System.out.println(i);
+			
 			assertEquals(first, set.addDescriptor(desc1000));
 			assertEquals(first, set.addDescriptor(desc2000));
 			assertEquals(first, set.addDescriptor(desc1500));

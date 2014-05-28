@@ -85,6 +85,8 @@ public interface IFactDescriptorModelSetCache {
 	 * 
 	 * @param enable
 	 *            {@code true} to enable persistency, otherwise {@code false}
+	 *            
+	 * @return the old value of the persistency setting
 	 */
-	public void setPersistency(final boolean enable);
+	public boolean setPersistency(final boolean enable);
 }

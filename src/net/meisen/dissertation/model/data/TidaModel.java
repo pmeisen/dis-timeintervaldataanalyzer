@@ -333,9 +333,11 @@ public class TidaModel implements IPersistable {
 		// inform the cache about bulk-loads
 		loadLock.writeLock().lock();
 		int amountOfData = 0;
+		boolean oldPersistencyBitmap = true;
+		boolean oldPersistencyFacts = true;
 		try {
-			getBitmapCache().setPersistency(false);
-			getFactsCache().setPersistency(false);
+			oldPersistencyBitmap = getBitmapCache().setPersistency(false);
+			oldPersistencyFacts = getFactsCache().setPersistency(false);
 
 			try {
 				while (it.hasNext()) {
@@ -351,8 +353,8 @@ public class TidaModel implements IPersistable {
 		} finally {
 
 			// enable the persistency again, everything is loaded
-			getBitmapCache().setPersistency(true);
-			getFactsCache().setPersistency(true);
+			getBitmapCache().setPersistency(oldPersistencyBitmap);
+			getFactsCache().setPersistency(oldPersistencyFacts);
 
 			loadLock.writeLock().unlock();
 		}

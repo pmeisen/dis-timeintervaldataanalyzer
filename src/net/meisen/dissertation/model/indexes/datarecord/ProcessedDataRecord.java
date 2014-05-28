@@ -152,8 +152,8 @@ public class ProcessedDataRecord {
 
 	@Override
 	public String toString() {
-		return "[" + start + ", " + end + "] : " + processedMeta + " : "
-				+ " (record: " + raw + ")";
+		return id + " : [" + start + ", " + end + "] : " + processedMeta
+				+ " : " + " (record: " + raw + ")";
 	}
 
 	/**
