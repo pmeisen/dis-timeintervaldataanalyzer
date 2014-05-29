@@ -33,7 +33,7 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	@Autowired
 	@Qualifier(DefaultValues.HANDLER_ID)
 	protected TidaModelHandler loader;
-	
+
 	private List<TidaModel> models = new ArrayList<TidaModel>();
 
 	/**
@@ -57,7 +57,8 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	 *            the xml file to be loaded
 	 * @param loadData
 	 *            {@code true} if all data should be loaded (see
-	 *            {@link TidaModel#bulkLoadDataFromDataModel()}, otherwise {@code false}
+	 *            {@link TidaModel#bulkLoadDataFromDataModel()}, otherwise
+	 *            {@code false}
 	 * 
 	 * @return the loaded model
 	 */
@@ -69,8 +70,12 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 		}
 
 		models.add(model);
-		
+
 		return model;
+	}
+
+	protected TidaModel getTidaModel(final String modelId) {
+		return loader.getTidaModel(modelId);
 	}
 
 	/**
@@ -79,12 +84,12 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	@After
 	public void unload() {
 		loader.unloadAll();
-		
+
 		// release all models
 		for (final TidaModel model : models) {
 			model.release(true);
 		}
-		
+
 		// clear the models
 		models.clear();
 	}
