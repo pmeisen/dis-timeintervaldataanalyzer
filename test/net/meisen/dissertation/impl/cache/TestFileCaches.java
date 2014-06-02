@@ -2,7 +2,9 @@ package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +17,17 @@ import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.DbQueryConfig;
 import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.impl.datasets.DataRetrieverDataSetRecord;
+import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.MultipleDataSetIterator;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.general.genmisc.types.Files;
 
@@ -161,8 +171,11 @@ public class TestFileCaches {
 					"fileAllCacheReloadingTest")));
 		}
 
+		/**
+		 * Tests the reloading of a model using caches.
+		 */
 		@Test
-		public void lala() {
+		public void test() {
 
 			// get the model
 			final TidaModel loadedModel = m("/net/meisen/dissertation/impl/cache/fileAllCacheReloadingTest.xml");
@@ -184,32 +197,128 @@ public class TestFileCaches {
 					"/net/meisen/dissertation/impl/cache/fileAllCacheReloadingTest.xml",
 					false);
 
-			// check the
+			// check the general model and index values
 			assertEquals(amount, reloadedModel.getAmountOfRecords());
 			assertEquals(nextDataId, reloadedModel.getNextDataId());
 			assertEquals(lastRecordId, reloadedModel.getIndex()
 					.getLastRecordId());
 
-			// check the timeSlices
-			int timeId = 0;
+			// check the timeSlices, i.e. intervalIndex
+			int sliceNr = 0;
 			for (final SliceWithDescriptors<?> slice : reloadedModel.getIndex()
 					.getIntervalIndexSlices()) {
+				if (sliceNr >= 50000 && sliceNr <= 59999) {
+					assertNull("" + sliceNr, slice);
+				} else {
+					final int timeId = (Integer) slice.getId();
+					assertEquals(sliceNr, timeId);
 
-				for (int recId = 0; recId < 5; recId++) {
-					final int[] ids = slice.getBitmap().getIds();
-					final int pos = Arrays.binarySearch(ids, recId);
+					for (int recNr = 0; recNr < 5; recNr++) {
 
-					// recId 0 -> 1 - 10000, recId 1 -> 10001 -> 20000, ...
-					if ((recId * 10000) + 1 > timeId
-							&& (recId + 1) * 10000 < timeId) {
-						assertTrue(pos > -1);
+						// recId 0 -> 1 - 10000, recId 1 -> 10001 -> 20000, ...
+						final int start = (recNr * 10000);
+						final int end = ((recNr + 1) * 10000 - 1);
+
+						if (slice == null) {
+							fail(timeId + " " + recNr + " slice is null.");
+						}
+
+						final int[] ids = slice.getBitmap().getIds();
+						final int pos = Arrays.binarySearch(ids, recNr);
+
+						if (timeId >= start && timeId <= end) {
+							assertTrue(timeId + " " + recNr + " " + pos,
+									pos > -1);
+						} else {
+							assertFalse(timeId + " " + recNr + " " + pos,
+									pos > -1);
+						}
+					}
+
+					// check the meta-values
+					final FactDescriptorSet personSet = slice
+							.getDescriptors("PERSON");
+					final FactDescriptorSet taskSet = slice
+							.getDescriptors("TASK");
+					assertEquals(1, personSet.size());
+					assertEquals(1, taskSet.size());
+
+					final FactDescriptor<?> personFactDesc = personSet.first();
+					final FactDescriptor<?> taskFactDesc = taskSet.first();
+					final Descriptor<?, ?, ?> personDesc = reloadedModel
+							.getMetaDataModel().getDescriptor("PERSON",
+									personFactDesc.getId());
+					final Descriptor<?, ?, ?> taskDesc = reloadedModel
+							.getMetaDataModel().getDescriptor("TASK",
+									taskFactDesc.getId());
+
+					// check the values
+					if (sliceNr < 10000) {
+						assertEquals("Philipp", personDesc.getValue());
+						assertEquals("working", taskDesc.getValue());
+					} else if (sliceNr < 20000) {
+						assertEquals("Debbie", personDesc.getValue());
+						assertEquals("mothering", taskDesc.getValue());
+					} else if (sliceNr < 30000) {
+						assertEquals("Uschi", personDesc.getValue());
+						assertEquals("playing computer games",
+								taskDesc.getValue());
+					} else if (sliceNr < 40000) {
+						assertEquals("Hajo", personDesc.getValue());
+						assertEquals("sleeping", taskDesc.getValue());
+					} else if (sliceNr < 50000) {
+						assertEquals("Edison", personDesc.getValue());
+						assertEquals("playing", taskDesc.getValue());
 					} else {
-						assertFalse(pos > -1);
+						fail("Unexpected sliceNr '" + sliceNr + "'");
 					}
 				}
 
-				timeId++;
+				sliceNr++;
 			}
+
+			// check the metaIndex
+			final BaseIndexFactory f = reloadedModel.getIndexFactory();
+			final MetaDataModel metaModel = reloadedModel.getMetaDataModel();
+			final TidaIndex index = reloadedModel.getIndex();
+			assertEquals(2, metaModel.getDescriptorModels().size());
+			assertEquals(6, metaModel.getDescriptorModel("PERSON").sizeAll());
+			assertEquals(6, metaModel.getDescriptorModel("PERSON").sizeAll());
+
+			Descriptor<?, ?, ?> d;
+			Slice<?> s;
+
+			d = metaModel.getDescriptorByValue("PERSON", null);
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertNull(s);
+
+			d = metaModel.getDescriptorByValue("PERSON", "Philipp");
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertEquals(Bitmap.createBitmap(f, 0, 5, 10, 15, 20),
+					s.getBitmap());
+
+			d = metaModel.getDescriptorByValue("PERSON", "Debbie");
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertEquals(Bitmap.createBitmap(f, 1, 6, 11, 16, 21),
+					s.getBitmap());
+
+			d = metaModel.getDescriptorByValue("PERSON", "Uschi");
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertEquals(Bitmap.createBitmap(f, 2, 7, 12, 17, 22),
+					s.getBitmap());
+
+			d = metaModel.getDescriptorByValue("PERSON", "Hajo");
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertEquals(Bitmap.createBitmap(f, 3, 8, 13, 18, 23),
+					s.getBitmap());
+
+			d = metaModel.getDescriptorByValue("PERSON", "Edison");
+			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
+			assertEquals(Bitmap.createBitmap(f, 4, 9, 14, 19, 24),
+					s.getBitmap());
+
+			// all together the model presents 60000 slices
+			assertEquals(60000, sliceNr);
 		}
 	}
 

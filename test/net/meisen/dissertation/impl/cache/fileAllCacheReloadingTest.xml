@@ -34,7 +34,7 @@
   </config>
  
   <time>
-    <timeline start="1" end="50000" granularity="SECOND" />
+    <timeline start="1" end="60000" granularity="SECOND" />
   </time>
 
   <meta>

@@ -201,7 +201,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			exceptionRegistry.throwException(getExceptionClass(1002), 1002,
 					modelLocation);
 		} else if (LOG.isDebugEnabled()) {
-			LOG.debug("Creating cache-file at '" + modelLocation + "'.");
+			LOG.debug("Creating cache-file at '" + modelLocation + "' ("
+					+ getClass().getSimpleName() + ").");
 		}
 
 		try {
@@ -237,7 +238,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			exceptionRegistry.throwException(getExceptionClass(1009), 1009,
 					idxTableFile);
 		} else if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading cache from '" + modelLocation + "'.");
+			LOG.debug("Loading cache from '" + modelLocation + "' ("
+					+ getClass().getSimpleName() + ").");
 		}
 
 		try {
@@ -395,7 +397,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Created new cache-file with fileNumber '"
-					+ curFileNumber + "' at '" + file + "'.");
+					+ curFileNumber + "' at '" + file + "' ("
+					+ getClass().getSimpleName() + ").");
 		}
 	}
 
@@ -738,7 +741,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		// log what is removed
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Organizing cache (size: " + cache.size()
-					+ ") by removing '" + removedIds.size() + "'");
+					+ ") by removing '" + removedIds.size() + "' ("
+					+ getClass().getSimpleName() + ").");
 		}
 
 		// persist the once that will be removed
@@ -761,7 +765,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Finalized organizing of cache (new size: "
-					+ cache.size() + ")");
+					+ cache.size() + ", " + getClass().getSimpleName() + ").");
 		}
 	}
 
@@ -1002,7 +1006,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			if (owners.put(owner.getBitmapId(), owner) != null) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn("The owner of '" + owner.getBitmapId()
-							+ "' was changed.");
+							+ "' was changed (" + getClass().getSimpleName()
+							+ ").");
 				}
 			}
 		} finally {
@@ -1118,7 +1123,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			return;
 		} else if (LOG.isDebugEnabled()) {
 			LOG.debug("Releasing '" + getClass().getSimpleName() + "' at '"
-					+ getModelLocation() + "'.");
+					+ getModelLocation() + "' (" + getClass().getSimpleName()
+					+ ").");
 		}
 
 		/*
@@ -1218,11 +1224,11 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	 * @return {@code true} if the bitmap is cached, otherwise {@code false}
 	 */
 	public boolean isCached(final BitmapId<?> id) {
-		this.cacheLock.writeLock().lock();
+		this.cacheLock.readLock().lock();
 		try {
 			return this.cache.containsKey(id);
 		} finally {
-			this.cacheLock.writeLock().unlock();
+			this.cacheLock.readLock().unlock();
 		}
 	}
 
@@ -1370,10 +1376,12 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		if (LOG.isDebugEnabled()) {
 			if (filterIds == null) {
 				LOG.debug("Persisting " + toBeWritten.size()
-						+ " cacheables during bulk write.");
+						+ " cacheables during bulk write ("
+						+ getClass().getSimpleName() + ").");
 			} else {
 				LOG.debug("Persisting " + toBeWritten.size()
-						+ " cacheables during bulk write.");
+						+ " cacheables during bulk writ ("
+						+ getClass().getSimpleName() + ")e.");
 			}
 		}
 
@@ -1394,7 +1402,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		// log the success
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Finished bulk write of " + toBeWritten.size()
-					+ " cacheables.");
+					+ " cacheables (" + getClass().getSimpleName() + ").");
 		}
 	}
 
@@ -1405,5 +1413,41 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	 */
 	public boolean isPersistencyEnabled() {
 		return persistency;
+	}
+
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
+	public Collection<BitmapId<?>> getBitmapIdentifiers() {
+		final List<BitmapId<?>> keys;
+
+		idxLock.readLock().lock();
+		try {
+			keys = new ArrayList<BitmapId<?>>(idx.size());
+			keys.addAll(idx.keySet());
+		} finally {
+			idxLock.readLock().unlock();
+		}
+		return keys;
+	}
+
+	/**
+	 * Checks if the cache contains a bitmap with the specified {@code bitmapId}
+	 * .
+	 * 
+	 * @param bitmapId
+	 *            the identifier to be checked
+	 * 
+	 * @return {@code true} if an instance is contained, otherwise {@code false}
+	 */
+	public boolean contains(final BitmapId<?> bitmapId) {
+		idxLock.readLock().lock();
+		try {
+			return idx.containsKey(bitmapId);
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 }

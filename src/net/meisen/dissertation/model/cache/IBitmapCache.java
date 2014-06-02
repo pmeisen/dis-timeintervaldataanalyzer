@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.cache;
 
+import java.util.Collection;
+
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -58,6 +60,24 @@ public interface IBitmapCache {
 	public void cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap);
 
 	/**
+	 * Checks if the cache contains a bitmap with the specified {@code bitmapId}
+	 * .
+	 * 
+	 * @param bitmapId
+	 *            the identifier to be checked
+	 * 
+	 * @return {@code true} if an instance is contained, otherwise {@code false}
+	 */
+	public boolean contains(final BitmapId<?> bitmapId);
+
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
+	public Collection<BitmapId<?>> getBitmapIdentifiers();
+
+	/**
 	 * Gets the {@code Bitmap} with the specified {@code bitmapId} from the
 	 * cache. This method never returns {@code null} instead a new
 	 * {@code Bitmap} should be created using
@@ -84,7 +104,7 @@ public interface IBitmapCache {
 	 * 
 	 * @param enable
 	 *            {@code true} to enable persistency, otherwise {@code false}
-	 *            
+	 * 
 	 * @return the old value of the persistency setting
 	 */
 	public boolean setPersistency(final boolean enable);

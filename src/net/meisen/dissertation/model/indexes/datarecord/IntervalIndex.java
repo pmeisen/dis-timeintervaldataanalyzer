@@ -22,6 +22,7 @@ import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
@@ -141,6 +142,13 @@ public class IntervalIndex implements IDataRecordIndex {
 					+ "' with index '" + index.getClass().getName()
 					+ "' for identifiers of the intervalIndex of type '"
 					+ mapper.getTargetType().getName() + "'.");
+		}
+
+		// read the data from the cache which is available
+		for (final BitmapId<?> bitmapId : bitmapCache.getBitmapIdentifiers()) {
+			if (IntervalIndex.class.equals(bitmapId.getType())) {
+				index.addObject(createSlice((Number) bitmapId.getId()));
+			}
 		}
 
 		return index;

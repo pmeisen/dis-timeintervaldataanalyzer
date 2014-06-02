@@ -1,5 +1,8 @@
 package net.meisen.dissertation.impl.cache;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
@@ -66,5 +69,15 @@ public class MemoryBitmapCache implements IBitmapCache {
 	@Override
 	public boolean setPersistency(final boolean enable) {
 		return false;
+	}
+
+	@Override
+	public boolean contains(BitmapId<?> bitmapId) {
+		return false;
+	}
+
+	@Override
+	public Collection<BitmapId<?>> getBitmapIdentifiers() {
+		return Collections.emptyList();
 	}
 }

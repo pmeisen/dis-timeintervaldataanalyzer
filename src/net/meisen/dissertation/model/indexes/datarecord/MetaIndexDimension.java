@@ -17,6 +17,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
 import net.meisen.dissertation.model.persistence.BasePersistor;
@@ -97,6 +98,16 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 				Slice.class, "getId");
 		indexKeyDef.overrideType(0, model.getIdClass());
 		this.index = indexFactory.create(indexKeyDef);
+
+		// add the cached values
+		for (final BitmapId<?> bitmapId : cache.getBitmapIdentifiers()) {
+			if (MetaIndex.class.equals(bitmapId.getType())
+					&& model.getId().equals(bitmapId.getClassifier())) {
+				@SuppressWarnings("unchecked")
+				final I id = (I) bitmapId.getId();
+				index.addObject(createSlice(id));
+			}
+		}
 
 		// log the successful creation
 		if (LOG.isTraceEnabled()) {
