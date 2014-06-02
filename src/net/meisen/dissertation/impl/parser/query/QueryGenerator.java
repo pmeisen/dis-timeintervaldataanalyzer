@@ -20,16 +20,23 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprInsertContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAliasContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorSelectTypeContext;
+import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.select.DateIntervalValue;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
@@ -49,6 +56,9 @@ import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Strings;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 /**
  * A generator to generate a {@code Query} from a {@code QueryGrammarParser}.
@@ -64,6 +74,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	private IQuery query;
 	private boolean finalized = false;
+	private DescriptorMathTree mathExpr = null;
 
 	/**
 	 * Generates a {@code QueryGenerator} which will trigger optimization after
@@ -97,6 +108,69 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		this.optimize = optimize;
 	}
 
+	@Override
+	public void enterExprInsert(final ExprInsertContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new InsertQuery();
+	}
+
+	@Override
+	public void exitExprInsert(final ExprInsertContext ctx) {
+		finalized = true;
+	}
+
+	@Override
+	public void exitExprStructure(final ExprStructureContext ctx) {
+		final InsertQuery q = q(InsertQuery.class);
+
+		// determine the specified interval-types
+		final SelectorIntervalDefContext intervalDefCtx = ctx
+				.selectorIntervalDef();
+		final IntervalType[] types = resolveIntervalType(intervalDefCtx);
+		q.setStartIntervalType(types[0]);
+		q.setEndIntervalType(types[1]);
+
+		final List<String> ids = new ArrayList<String>();
+		for (final SelectorDescriptorIdContext descIdCtx : ctx
+				.selectorDescriptorId()) {
+			ids.add(getDescriptorModelId(descIdCtx));
+		}
+
+		q.setDescriptorModels(ids);
+
+		System.out.println(q);
+	}
+
+	@Override
+	public void exitExprValues(final ExprValuesContext ctx) {
+		final InsertQuery q = q(InsertQuery.class);
+
+		ctx.selectorDescValue();
+
+		// determine the values
+		final SelectorDateIntervalWithNullContext dateCtx = ctx
+				.selectorDateIntervalWithNull();
+		final SelectorIntIntervalWithNullContext intCtx = ctx
+				.selectorIntIntervalWithNull();
+		final Interval<?> interval = resolveInterval(ctx.getText(), dateCtx,
+				intCtx, q.getStartIntervalType(), q.getEndIntervalType());
+
+		final List<String> data = new ArrayList<String>(q.sizeOfDescriptors());
+		for (final SelectorDescValueContext descValueCtx : ctx
+				.selectorDescValue()) {
+			data.add(getDescValue(descValueCtx));
+		}
+
+		// add the record
+		q.addData(interval, data);
+
+		System.out.println(interval + ": " + data);
+	}
+
 	/**
 	 * Create the {@code query} and mark the process to be in-progress, i.e.
 	 * {@link #isFinalized()} returns {@code false}.
@@ -111,16 +185,6 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		this.query = new SelectQuery();
 	}
 
-	/**
-	 * Checks if the generation is finalized, i.e. {@code true} is returned.
-	 * 
-	 * @return the generation is finalized (i.e. {@code true}), if not finalized
-	 *         {@code false} is returned
-	 */
-	public boolean isFinalized() {
-		return this.finalized;
-	}
-
 	@Override
 	public void exitExprSelect(final ExprSelectContext ctx) {
 		if (isOptimize()) {
@@ -130,7 +194,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		finalized = true;
 	}
 
-	private DescriptorMathTree mathExpr = null;
+	/**
+	 * Checks if the generation is finalized, i.e. {@code true} is returned.
+	 * 
+	 * @return the generation is finalized (i.e. {@code true}), if not finalized
+	 *         {@code false} is returned
+	 */
+	public boolean isFinalized() {
+		return this.finalized;
+	}
 
 	@Override
 	public void enterCompNamedMeasure(final CompNamedMeasureContext ctx) {
@@ -281,25 +353,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		// determine the values
 		final SelectorDateIntervalContext dateCtx = ctx.selectorDateInterval();
 		final SelectorIntIntervalContext intCtx = ctx.selectorIntInterval();
-
-		// create the interval
-		final Interval<?> interval;
-		if (dateCtx != null) {
-			final Date date1 = Dates.isDate(dateCtx.DATE(0).getText(),
-					Dates.GENERAL_TIMEZONE);
-			final Date date2 = Dates.isDate(dateCtx.DATE(1).getText(),
-					Dates.GENERAL_TIMEZONE);
-			interval = new Interval<Date>(new DateIntervalValue(date1),
-					openType, new DateIntervalValue(date2), closeType);
-		} else if (intCtx != null) {
-			final long val1 = Long.parseLong(intCtx.INT(0).getText());
-			final long val2 = Long.parseLong(intCtx.INT(1).getText());
-			interval = new Interval<Long>(new LongIntervalValue(val1),
-					openType, new LongIntervalValue(val2), closeType);
-		} else {
-			throw new ForwardedRuntimeException(QueryParsingException.class,
-					1004, ctx.getText());
-		}
+		final Interval<?> interval = resolveInterval(ctx.getText(), dateCtx,
+				intCtx, openType, closeType);
 
 		q(SelectQuery.class).setInterval(interval);
 	}
@@ -312,7 +367,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitSelectorModelId(final SelectorModelIdContext ctx) {
-		q(SelectQuery.class).setModelId(getModelId(ctx));
+		q(IQuery.class).setModelId(getModelId(ctx));
 	}
 
 	@Override
@@ -596,6 +651,44 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	/**
+	 * Resolves the type of an interval for a {@code SelectorIntervalDefContext}
+	 * .
+	 * 
+	 * @param ctx
+	 *            the context to resolve the type from
+	 * @return the resolved type
+	 * 
+	 * @see SelectorIntervalDefContext
+	 */
+	protected IntervalType[] resolveIntervalType(
+			final SelectorIntervalDefContext ctx) {
+
+		final IntervalType[] types = new IntervalType[2];
+
+		// determine the start
+		if (ctx.POS_START_INCL() != null) {
+			types[0] = IntervalType.INCLUDE;
+		} else if (ctx.POS_START_EXCL() != null) {
+			types[0] = IntervalType.EXCLUDE;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1011, ctx.getText());
+		}
+
+		// determine the end
+		if (ctx.POS_END_INCL() != null) {
+			types[1] = IntervalType.INCLUDE;
+		} else if (ctx.POS_END_EXCL() != null) {
+			types[1] = IntervalType.EXCLUDE;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1011, ctx.getText());
+		}
+
+		return types;
+	}
+
+	/**
 	 * Determines the {@code ResultType} from the context.
 	 * 
 	 * @param ctx
@@ -619,5 +712,114 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());
 		}
+	}
+
+	/**
+	 * Resolves the {@code Interval} from the specified
+	 * {@code ParserRuleContext}. Currently only the
+	 * {@code SelectorDateIntervalContext}, the
+	 * {@code SelectorDateIntervalWithNullContext}, the
+	 * {@code SelectorIntIntervalContext}, and the
+	 * {@code SelectorIntIntervalWithNullContext} is supported.
+	 * 
+	 * @param ctxText
+	 *            the text of the global context, used for error messages
+	 * @param dateCtx
+	 *            the date context
+	 * @param intCtx
+	 *            the int context
+	 * @param openType
+	 *            the type of the interval's start
+	 * @param closeType
+	 *            the type of the interval's end
+	 * 
+	 * @return the resolved interval
+	 * 
+	 * @see SelectorDateIntervalContext
+	 * @see SelectorDateIntervalWithNullContext
+	 * @see SelectorIntIntervalContext
+	 * @see SelectorIntIntervalWithNullContext
+	 */
+	protected Interval<?> resolveInterval(final String ctxText,
+			final ParserRuleContext dateCtx, final ParserRuleContext intCtx,
+			final IntervalType openType, final IntervalType closeType) {
+
+		// create the interval
+		final Interval<?> interval;
+		if (dateCtx != null) {
+			final Date dates[] = new Date[2];
+
+			// parse depending on the type
+			if (dateCtx instanceof SelectorDateIntervalContext) {
+				final SelectorDateIntervalContext c = (SelectorDateIntervalContext) dateCtx;
+
+				dates[0] = Dates.isDate(c.DATE(0).getText(),
+						Dates.GENERAL_TIMEZONE);
+				dates[1] = Dates.isDate(c.DATE(1).getText(),
+						Dates.GENERAL_TIMEZONE);
+			} else if (dateCtx instanceof SelectorDateIntervalWithNullContext) {
+				final SelectorDateIntervalWithNullContext c = (SelectorDateIntervalWithNullContext) dateCtx;
+
+				int i = 0;
+				for (ParseTree o : c.children) {
+					if (o instanceof TerminalNode) {
+						final Token symbol = ((TerminalNode) o).getSymbol();
+
+						if (QueryGrammarParser.NULL_VALUE == symbol.getType()) {
+							dates[i] = null;
+							i++;
+						} else if (QueryGrammarParser.DATE == symbol.getType()) {
+							dates[i] = Dates.isDate(symbol.getText(),
+									Dates.GENERAL_TIMEZONE);
+							i++;
+						}
+					}
+				}
+			} else {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1004, ctxText);
+			}
+
+			interval = new Interval<Date>(new DateIntervalValue(dates[0]),
+					openType, new DateIntervalValue(dates[1]), closeType);
+		} else if (intCtx != null) {
+			final Long vals[] = new Long[2];
+
+			// parse depending on the type
+			if (intCtx instanceof SelectorIntIntervalContext) {
+				final SelectorIntIntervalContext c = (SelectorIntIntervalContext) intCtx;
+
+				vals[0] = Long.parseLong(c.INT(0).getText());
+				vals[1] = Long.parseLong(c.INT(1).getText());
+			} else if (intCtx instanceof SelectorIntIntervalWithNullContext) {
+				final SelectorIntIntervalWithNullContext c = (SelectorIntIntervalWithNullContext) intCtx;
+
+				int i = 0;
+				for (ParseTree o : c.children) {
+					if (o instanceof TerminalNode) {
+						final Token symbol = ((TerminalNode) o).getSymbol();
+
+						if (QueryGrammarParser.NULL_VALUE == symbol.getType()) {
+							vals[i] = null;
+							i++;
+						} else if (QueryGrammarParser.INT == symbol.getType()) {
+							vals[i] = Long.parseLong(symbol.getText());
+							i++;
+						}
+					}
+				}
+			} else {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1004, ctxText);
+			}
+
+			interval = new Interval<Long>(new LongIntervalValue(vals[0]),
+					openType, new LongIntervalValue(vals[1]), closeType);
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1004, ctxText);
+		}
+
+		return interval;
 	}
 }

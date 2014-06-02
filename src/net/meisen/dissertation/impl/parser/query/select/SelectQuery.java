@@ -108,12 +108,7 @@ public class SelectQuery implements IQuery {
 		return modelId;
 	}
 
-	/**
-	 * Sets the {@code modelId} for the query.
-	 * 
-	 * @param modelId
-	 *            the {@code modelId} of the query
-	 */
+	@Override
 	public void setModelId(final String modelId) {
 		this.modelId = modelId;
 	}

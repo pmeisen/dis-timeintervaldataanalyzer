@@ -104,7 +104,7 @@ public class QueryFactory implements IQueryFactory {
 			});
 
 			// trigger the generator by a walker (post-parsing)
-			walker.walk(generator, parser.exprSelect());
+			walker.walk(generator, parser.root());
 
 			// return the created query
 			return generator.getQuery();

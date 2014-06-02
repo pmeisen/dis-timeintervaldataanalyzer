@@ -123,7 +123,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @see DescriptorLogicTree
  * 
  */
-public class TestQueryFactory extends LoaderBasedTest {
+public class TestSelectQueries extends LoaderBasedTest {
 	private final static Class<?> mathDescLeaf = net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf.class;
 
 	@Autowired

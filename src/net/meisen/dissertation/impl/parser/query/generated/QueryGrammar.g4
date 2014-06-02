@@ -25,10 +25,19 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
+root   : (exprInsert | exprSelect) EOF;
+
 /*
- * Define the different expressions/parts of the statement
+ * Define the different expressions/parts of the insert statement
  */
-exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)? EOF;
+exprInsert    : STMT_INSERT OP_INTO selectorModelId exprStructure OP_VALUES exprValues (SEPARATOR exprValues)*;
+exprStructure : BRACKET_ROUND_OPENED selectorIntervalDef SEPARATOR selectorDescriptorId (SEPARATOR selectorDescriptorId)* BRACKET_ROUND_CLOSED;
+exprValues    : BRACKET_ROUND_OPENED (selectorDateIntervalWithNull | selectorIntIntervalWithNull) SEPARATOR selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
+
+/*
+ * Define the different expressions/parts of the select statement
+ */
+exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
 exprMeasure  : compNamedMeasure (SEPARATOR compNamedMeasure)*;
 exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
@@ -53,19 +62,21 @@ compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom sele
  * a selector is understood - in our case - as an atom, which cannot be a token,
  * because it's semantic is context based
  */
-selectorModelId           : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
-selectorDescriptorId      : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
-selectorAlias             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
-selectorSelectType        : TYPE_TIMESERIES | TYPE_RECORDS;
-selectorDateInterval      : DATE SEPARATOR DATE;
-selectorIntInterval       : INT SEPARATOR INT;
-selectorOpenInterval      : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
-selectorCloseInterval     : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
-selectorDescValue         : (DESC_VALUE | NULL_VALUE);
-selectorAggrFunctionName  : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
-
-selectorFirstMathOperator : MATH_MULTIPLY | MATH_DIVISION;
-selectorSecondMathOperator: MATH_PLUS | MATH_MINUS;
+selectorModelId             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
+selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
+selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
+selectorSelectType          : TYPE_TIMESERIES | TYPE_RECORDS;
+selectorDateInterval        : DATE SEPARATOR DATE;
+selectorIntInterval         : INT SEPARATOR INT;
+selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
+selectorIntIntervalWithNull : (INT | NULL_VALUE) SEPARATOR (INT | NULL_VALUE);
+selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
+selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
+selectorDescValue           : (DESC_VALUE | NULL_VALUE);
+selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
+selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
+selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
+selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) SEPARATOR (POS_END_INCL | POS_END_EXCL);
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -82,8 +93,15 @@ DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MAS
 // NULL used to identify a null descriptor-value
 NULL_VALUE: N U L L;
 
+// reserverd words to specify the positions of start and end
+POS_START_INCL : BRACKET_SQUARE_OPENED S T A R T BRACKET_SQUARE_CLOSED;
+POS_END_INCL   : BRACKET_SQUARE_OPENED E N D BRACKET_SQUARE_CLOSED;
+POS_START_EXCL : BRACKET_SQUARE_OPENED S T A R T '-' BRACKET_SQUARE_CLOSED;
+POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
+
 // reserved word to define a SELECT statement
 STMT_SELECT   : S E L E C T;
+STMT_INSERT   : I N S E R T;
 
 // reserved words to define the types of data to select
 TYPE_TIMESERIES: T I M E S E R I E S;
@@ -93,6 +111,8 @@ TYPE_RECORDS   : R E C O R D S;
 OP_FROM     : F R O M;
 OP_OF       : O F;
 OP_IN       : I N;
+OP_INTO     : I N T O;
+OP_VALUES   : V A L U E S;
 OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y;
