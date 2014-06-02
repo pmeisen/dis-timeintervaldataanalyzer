@@ -166,16 +166,37 @@ public abstract class BaseIdentifierCache implements IIdentifierCache {
 		this.bitmap = bitmap;
 	}
 
+	/**
+	 * Checks if the cache is initialized.
+	 * 
+	 * @return {@code true} if the cache is initialized, otherwise {@code false}
+	 */
 	public boolean isInitialized() {
 		return init;
 	}
 
+	/**
+	 * Method to set the cache to be initialized.
+	 */
 	protected void markAsInitialized() {
 		this.init = true;
 	}
 
+	/**
+	 * Caches the specified {@code newBitmap} representing the valid
+	 * identifiers.
+	 * 
+	 * @param newBitmap
+	 *            the {@code Bitmap} to be cached
+	 */
 	protected abstract void cacheBitmap(final Bitmap newBitmap);
 
+	/**
+	 * Caches the specified {@code lastUsedIdentifier}.
+	 * 
+	 * @param lastUsedIdentifier
+	 *            the identifier to be cached
+	 */
 	protected abstract void cacheIdentifier(final int lastUsedIdentifier);
 
 	/**
@@ -240,16 +261,20 @@ public abstract class BaseIdentifierCache implements IIdentifierCache {
 	 */
 	@Override
 	public void release() {
-		init = false;
+		if (!isInitialized()) {
+			return;
+		} else {
+			init = false;
 
-		// persists everything a last time
-		if (!isPersistencyEnabled()) {
-			cacheIdentifier(lastUsedIdentifier);
-			cacheBitmap(bitmap);
+			// persists everything a last time
+			if (!isPersistencyEnabled()) {
+				cacheIdentifier(lastUsedIdentifier);
+				cacheBitmap(bitmap);
+			}
+
+			lastUsedIdentifier = -1;
+			bitmap = null;
 		}
-
-		lastUsedIdentifier = -1;
-		bitmap = null;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.IPersistable;
@@ -681,5 +682,14 @@ public class TidaModel implements IPersistable {
 	 */
 	public File getLocation() {
 		return location;
+	}
+
+	/**
+	 * Gets a bitmap identifying the valid records.
+	 * 
+	 * @return a bitmap identifying the valid records
+	 */
+	public Bitmap getValidRecords() {
+		return getIdentifierCache().getValidIdentifiers();
 	}
 }

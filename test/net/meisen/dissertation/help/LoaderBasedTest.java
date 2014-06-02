@@ -74,6 +74,14 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 		return model;
 	}
 
+	/**
+	 * Gets the model for the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to be retrieved
+	 *            
+	 * @return the {@code TidaModel} or {@code null} if not found
+	 */
 	protected TidaModel getTidaModel(final String modelId) {
 		return loader.getTidaModel(modelId);
 	}

@@ -3,13 +3,16 @@ package net.meisen.dissertation.impl.cache;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Arrays;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -35,6 +38,7 @@ public class TestFileIdentifierCache extends ModuleBasedTest {
 	 */
 	@Before
 	public void loadCache() {
+		assertTrue(Files.deleteDir(new File(".", "fileIdentifierCacheModel")));
 
 		// load the model and get the cache
 		setModulesHolder("/net/meisen/dissertation/impl/cache/fileIdentifierCacheModel.xml");

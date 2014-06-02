@@ -59,15 +59,21 @@ public class FileIdentifierCache extends BaseIdentifierCache {
 	}
 
 	public void release() {
-		
-		// now reset the initialization
-		super.release();
-		
-		try {
-			identifierFileWriter.close();
-		} catch (final IOException e) {
-			exceptionRegistry.throwException(
-					FileIdentifierCacheException.class, 1004, identifierFile);
+
+		if (!isInitialized()) {
+			return;
+		} else {
+
+			// now reset the initialization
+			super.release();
+
+			try {
+				identifierFileWriter.close();
+			} catch (final IOException e) {
+				exceptionRegistry.throwException(
+						FileIdentifierCacheException.class, 1004,
+						identifierFile);
+			}
 		}
 	}
 

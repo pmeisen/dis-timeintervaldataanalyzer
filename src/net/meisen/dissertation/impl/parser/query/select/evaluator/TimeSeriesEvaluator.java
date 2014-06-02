@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.select.Interval;
+import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
@@ -106,19 +107,23 @@ public class TimeSeriesEvaluator {
 	 *            the interval to evaluate the timeseries for
 	 * @param measures
 	 *            the measures to be evaluated
-	 * @param filterResult
-	 *            the records selected by filtering
-	 * @param groupResult
-	 *            the records selected by grouping
+	 * @param queryResult
+	 *            the result of the parsing and interpretation of the select
+	 *            statement
 	 * 
 	 * @return the created {@code TimeSeries}
 	 * 
 	 * @see TimeSeries
+	 * @see SelectResult
 	 */
 	public TimeSeriesCollection evaluateInterval(final Interval<?> interval,
 			final Collection<DescriptorMathTree> measures,
-			final DescriptorLogicResult filterResult,
-			final GroupResult groupResult) {
+			final SelectResult queryResult) {
+
+		final Bitmap validRecords = queryResult.getValidRecords();
+		final DescriptorLogicResult filterResult = queryResult
+				.getFilterResult();
+		final GroupResult groupResult = queryResult.getGroupResult();
 
 		// determine the interval
 		final SliceWithDescriptors<?>[] timeSlices = getIntervalIndexSlices(interval);
@@ -171,6 +176,10 @@ public class TimeSeriesEvaluator {
 			}
 		}
 
+		// combine the filter with the valid records
+		final Bitmap filteredValidRecords = combineBitmaps(validRecords,
+				filterResult);
+
 		/*
 		 * Iterate over the different slices and calculate each measure.
 		 */
@@ -178,7 +187,7 @@ public class TimeSeriesEvaluator {
 			int timeSlicePos = 0;
 			for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
 				final Bitmap resultBitmap = combineBitmaps(timeSlice,
-						filterResult, groupResultEntry);
+						filteredValidRecords, groupResultEntry);
 				final FactDescriptorModelSet descriptors = timeSlice == null ? null
 						: timeSlice.getFactsSet();
 
@@ -267,14 +276,37 @@ public class TimeSeriesEvaluator {
 	}
 
 	/**
+	 * Combines the valid records (see {@link TidaModel#getValidRecords()} with
+	 * the result of the filter.
+	 * 
+	 * @param validRecords
+	 *            the valid records
+	 * @param filter
+	 *            the filter
+	 * 
+	 * @return the result of the combination of both
+	 */
+	protected Bitmap combineBitmaps(final Bitmap validRecords,
+			final IBitmapResult filter) {
+		if (filter == null) {
+			return validRecords;
+		} else if (validRecords == null) {
+			return filter.getBitmap();
+		} else {
+			return validRecords.and(filter.getBitmap());
+		}
+	}
+
+	/**
 	 * Combines the bitmaps of the {@code timeSlice}, the {@code filter} and the
 	 * specified {@code group}. The method returns {@code null} if the
 	 * {@code timeSlice} or it's bitmap is {@code null}.
 	 * 
 	 * @param timeSlice
 	 *            the {@code Slice}
-	 * @param filter
-	 *            the result of the filter
+	 * @param filteredValidRecords
+	 *            the result of the combination of valid records and the filter
+	 *            (see {@link #combineBitmaps(Bitmap, IBitmapResult)}.
 	 * @param group
 	 *            the result of the group
 	 * 
@@ -282,12 +314,12 @@ public class TimeSeriesEvaluator {
 	 *         {@code null}
 	 */
 	protected Bitmap combineBitmaps(final SliceWithDescriptors<?> timeSlice,
-			final IBitmapResult filter, final IBitmapResult group) {
+			final Bitmap filteredValidRecords, final IBitmapResult group) {
 
 		// check if we have no or only a timeSlice
 		if (timeSlice == null) {
 			return null;
-		} else if (filter == null && group == null) {
+		} else if (filteredValidRecords == null && group == null) {
 			return timeSlice.getBitmap();
 		}
 
@@ -298,13 +330,13 @@ public class TimeSeriesEvaluator {
 		}
 
 		// apply the filter and group to the Bitmap
-		if (filter != null && group != null) {
-			resultBitmap = resultBitmap.and(filter.getBitmap(),
+		if (filteredValidRecords != null && group != null) {
+			resultBitmap = resultBitmap.and(filteredValidRecords,
 					group.getBitmap());
 		} else if (group != null) {
 			resultBitmap = resultBitmap.and(group.getBitmap());
-		} else if (filter != null) {
-			resultBitmap = resultBitmap.and(filter.getBitmap());
+		} else if (filteredValidRecords != null) {
+			resultBitmap = resultBitmap.and(filteredValidRecords);
 		}
 
 		// return the result

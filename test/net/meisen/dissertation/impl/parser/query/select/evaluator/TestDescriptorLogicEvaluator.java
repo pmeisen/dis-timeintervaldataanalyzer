@@ -12,7 +12,6 @@ import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.RootNode;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 

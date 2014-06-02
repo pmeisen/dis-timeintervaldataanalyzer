@@ -3,6 +3,7 @@ package net.meisen.dissertation.impl.parser.query.select;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 
 /**
@@ -16,6 +17,7 @@ import net.meisen.dissertation.model.parser.query.IQueryResult;
 public class SelectResult implements IQueryResult {
 	private final SelectQuery query;
 
+	private Bitmap validRecords;
 	private DescriptorLogicResult filterResult;
 	private GroupResult groupResult;
 	private TimeSeriesCollection timeSeriesCollection;
@@ -65,7 +67,8 @@ public class SelectResult implements IQueryResult {
 	 * @param timeSeriesCollection
 	 *            the {@code TimeSeries} specified by the query
 	 */
-	public void setTimeSeriesResult(final TimeSeriesCollection timeSeriesCollection) {
+	public void setTimeSeriesResult(
+			final TimeSeriesCollection timeSeriesCollection) {
 		this.timeSeriesCollection = timeSeriesCollection;
 	}
 
@@ -95,5 +98,24 @@ public class SelectResult implements IQueryResult {
 	 */
 	public void setGroupResult(final GroupResult groupResult) {
 		this.groupResult = groupResult;
+	}
+
+	/**
+	 * Gets the valid records.
+	 * 
+	 * @return the valid records
+	 */
+	public Bitmap getValidRecords() {
+		return validRecords;
+	}
+
+	/**
+	 * Sets the valid records.
+	 * 
+	 * @param validRecords
+	 *            the valid records
+	 */
+	public void setValidRecords(final Bitmap validRecords) {
+		this.validRecords = validRecords;
 	}
 }

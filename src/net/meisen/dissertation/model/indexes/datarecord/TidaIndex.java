@@ -44,6 +44,16 @@ public class TidaIndex implements IPersistable {
 	private int dataId;
 	private Group persistentGroup = null;
 
+	/**
+	 * Creates an index for the passed {@code model}. The first record will be
+	 * identifier with the first valid identifier available by the underlying
+	 * bitmap implementation (see {@link Bitmap#getMinId()}.
+	 * 
+	 * @param model
+	 *            the {@code TidaModel} to be added
+	 * 
+	 * @see TidaModel
+	 */
 	public TidaIndex(final TidaModel model) {
 		this(model, -1);
 	}
@@ -53,6 +63,11 @@ public class TidaIndex implements IPersistable {
 	 * 
 	 * @param model
 	 *            the {@code TidaModel} to be added
+	 * @param lastUsedId
+	 *            the last used identifier, i.e. the index will index new
+	 *            records with an identifier larger than the last used one. Pass
+	 *            {@code -1} to initialize the index with the first valid
+	 *            identifier.
 	 * 
 	 * @see TidaModel
 	 */

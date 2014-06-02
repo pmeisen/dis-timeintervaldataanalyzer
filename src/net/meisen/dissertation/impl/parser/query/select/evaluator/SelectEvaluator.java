@@ -4,6 +4,7 @@ import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 /**
  * An evaluator used to evaluate select queries.
@@ -50,12 +51,16 @@ public class SelectEvaluator {
 				.evaluateGroupExpression(query.getGroup());
 		queryResult.setGroupResult(groupResult);
 
+		// set the valid records
+		final Bitmap validRecords = model.getValidRecords();
+		queryResult.setValidRecords(validRecords);
+
 		// determine the slice
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
 		final TimeSeriesCollection timeSeriesCollection = timeSeriesEvaluator
 				.evaluateInterval(query.getInterval(), query.getMeasures(),
-						filterResult, groupResult);
+						queryResult);
 		queryResult.setTimeSeriesResult(timeSeriesCollection);
 
 		return queryResult;
