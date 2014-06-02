@@ -77,5 +77,8 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	 */
 	public void set(final int recId) {
 		getBitmap().set(recId);
+
+		// inform the cache
+		updateBitmapCache();
 	}
 }

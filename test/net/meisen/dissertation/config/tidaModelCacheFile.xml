@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:idfile="http://dev.meisen.net/xsd/dissertation/caches/identifier/file"
        xmlns:mdfile="http://dev.meisen.net/xsd/dissertation/caches/metadata/file"
        xmlns:bmpfile="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
        xmlns:factfile="http://dev.meisen.net/xsd/dissertation/caches/facts/file"
@@ -11,6 +12,7 @@
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
        
+                           http://dev.meisen.net/xsd/dissertation/caches/identifier/file http://dev.meisen.net/xsd/dissertation/tidaFileIdentifierCache.xsd
                            http://dev.meisen.net/xsd/dissertation/caches/metadata/file http://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd
                            http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
                            http://dev.meisen.net/xsd/dissertation/caches/facts/file http://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd
@@ -21,6 +23,10 @@
   
   <config>
     <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache">
+        <idfile:config folder="${java.io.tmpdir}/model-identifier" />
+      </identifier>
+    
       <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache">
         <mdfile:config folder="${java.io.tmpdir}/model-metadata" />
       </metadata>

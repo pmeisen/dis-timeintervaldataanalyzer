@@ -1128,6 +1128,18 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		 */
 		this.init = false;
 
+		// write the not persisted data
+		if (!isPersistencyEnabled()) {
+			this.cacheLock.writeLock().lock();
+			this.idxLock.writeLock().lock();
+			try {
+				_bulkWrite(this.cache.keySet());
+			} finally {
+				this.idxLock.writeLock().unlock();
+				this.cacheLock.writeLock().unlock();
+			}
+		}
+
 		// release the index writer
 		synchronized (idxTableWriter) {
 
@@ -1356,8 +1368,13 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 
 		// log the writing
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Persisting " + toBeWritten.size()
-					+ " cacheables during bulk write.");
+			if (filterIds == null) {
+				LOG.debug("Persisting " + toBeWritten.size()
+						+ " cacheables during bulk write.");
+			} else {
+				LOG.debug("Persisting " + toBeWritten.size()
+						+ " cacheables during bulk write.");
+			}
 		}
 
 		// write the once to be written

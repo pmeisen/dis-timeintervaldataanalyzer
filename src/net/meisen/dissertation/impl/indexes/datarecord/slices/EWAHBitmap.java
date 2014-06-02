@@ -24,6 +24,7 @@ public class EWAHBitmap extends Bitmap {
 	private final static int MAX_SIZE = Integer.MAX_VALUE
 			- EWAHCompressedBitmap.wordinbits;
 	private EWAHCompressedBitmap bitmap;
+	private int cardinality = -1;
 
 	/**
 	 * Default constructor used to create an empty bitmap, i.e. everything is
@@ -85,7 +86,11 @@ public class EWAHBitmap extends Bitmap {
 
 	@Override
 	public int invertCardinality(final int position) {
-		return invert(position).determineCardinality();
+		if (cardinality == -1) {
+			cardinality = invert(position).determineCardinality();
+		}
+
+		return cardinality;
 	}
 
 	/**
@@ -130,6 +135,18 @@ public class EWAHBitmap extends Bitmap {
 			return EWAHCompressedBitmap.andCardinality(array);
 		} else {
 			return 0;
+		}
+	}
+
+	@Override
+	public Bitmap xor(final Bitmap... bitmaps) {
+		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
+		if (array.length > 1) {
+			return new EWAHBitmap(EWAHCompressedBitmap.xor(array));
+		} else if (array.length > 0) {
+			return copy();
+		} else {
+			return new EWAHBitmap();
 		}
 	}
 

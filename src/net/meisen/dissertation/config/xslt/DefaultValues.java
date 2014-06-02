@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
+import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
@@ -146,7 +147,11 @@ public class DefaultValues {
 	 */
 	public static final String HANDLER_ID = "handlerId";
 	/**
-	 * Id of the {@code BitmapCache} to be used.
+	 * Id of the {@code IdentifierCache} to be used.
+	 */
+	public static final String IDENTIFIERCACHE_ID = "identifierCacheId";
+	/**
+	 * Id of the {@code MetaDataCache} to be used.
 	 */
 	public static final String METADATACACHE_ID = "metaDataCacheId";
 	/**
@@ -206,6 +211,15 @@ public class DefaultValues {
 	 */
 	public static String getDefaultFactSetsCache() {
 		return MemoryFactDescriptorModelSetCache.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code IdentifierCache} implementation to be used.
+	 * 
+	 * @return the default cache implementation to be used
+	 */
+	public static String getDefaultIdentifierCache() {
+		return MemoryIdentifierCache.class.getName();
 	}
 
 	/**

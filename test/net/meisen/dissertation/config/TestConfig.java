@@ -16,9 +16,11 @@ import net.meisen.dissertation.config.xslt.mock.MockTimeGranularityFactory;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.cache.FileBitmapCache;
 import net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache;
+import net.meisen.dissertation.impl.cache.FileIdentifierCache;
 import net.meisen.dissertation.impl.cache.FileMetaDataCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
+import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
@@ -26,6 +28,7 @@ import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
@@ -108,6 +111,11 @@ public class TestConfig {
 			o = modulesHolder.getModule(DefaultValues.MAPPERFACTORY_ID);
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof MapperFactory);
+
+			o = modulesHolder.getModule(DefaultValues.IDENTIFIERCACHE_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(),
+					o instanceof MemoryIdentifierCache);
 
 			o = modulesHolder.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(o);
@@ -214,6 +222,11 @@ public class TestConfig {
 
 		@Override
 		public void test() {
+			final IIdentifierCache idCache = modulesHolder
+					.getModule(DefaultValues.IDENTIFIERCACHE_ID);
+			assertNotNull(idCache);
+			assertEquals(MemoryIdentifierCache.class, idCache.getClass());
+
 			final IBitmapCache bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
@@ -243,6 +256,14 @@ public class TestConfig {
 
 		@Override
 		public void test() {
+			final IIdentifierCache idCache = modulesHolder
+					.getModule(DefaultValues.IDENTIFIERCACHE_ID);
+			assertNotNull(idCache);
+			assertEquals(FileIdentifierCache.class, idCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"config-identifier"),
+					((FileIdentifierCache) idCache).getLocation());
+
 			final IBitmapCache bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
@@ -284,6 +305,11 @@ public class TestConfig {
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheMemory.xml");
 
+			final IIdentifierCache idCache = modulesHolder
+					.getModule(DefaultValues.IDENTIFIERCACHE_ID);
+			assertNotNull(idCache);
+			assertEquals(MemoryIdentifierCache.class, idCache.getClass());
+
 			final IBitmapCache bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
@@ -313,6 +339,14 @@ public class TestConfig {
 		@Override
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/tidaModelCacheFile.xml");
+
+			final IIdentifierCache idCache = modulesHolder
+					.getModule(DefaultValues.IDENTIFIERCACHE_ID);
+			assertNotNull(idCache);
+			assertEquals(FileIdentifierCache.class, idCache.getClass());
+			assertEquals(new File(System.getProperty("java.io.tmpdir"),
+					"model-identifier"),
+					((FileIdentifierCache) idCache).getLocation());
 
 			final IBitmapCache bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);

@@ -44,6 +44,10 @@ public class TidaIndex implements IPersistable {
 	private int dataId;
 	private Group persistentGroup = null;
 
+	public TidaIndex(final TidaModel model) {
+		this(model, -1);
+	}
+
 	/**
 	 * Creates an index for the passed {@code model}.
 	 * 
@@ -52,18 +56,23 @@ public class TidaIndex implements IPersistable {
 	 * 
 	 * @see TidaModel
 	 */
-	public TidaIndex(final TidaModel model) {
+	public TidaIndex(final TidaModel model, final int lastUsedId) {
 		this.model = model;
 		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
 
 		// determine the last valid identifier
 		final Bitmap bmp = model.getIndexFactory().createBitmap();
-		lastValidId = Math.min(Integer.MAX_VALUE - 1, bmp.getMaxId());
-		dataId = Math.max(0, bmp.getMinId());
-		if (dataId != 0 && LOG.isWarnEnabled()) {
-			LOG.warn("THe minimal identifier is defined to be '"
-					+ dataId
-					+ "'. It is not suggested to use a different minimal value than '0'.");
+		this.lastValidId = Math.min(Integer.MAX_VALUE - 1, bmp.getMaxId());
+
+		if (lastUsedId < 0) {
+			this.dataId = Math.max(0, bmp.getMinId());
+			if (this.dataId != 0 && LOG.isWarnEnabled()) {
+				LOG.warn("The minimal identifier is defined to be '"
+						+ this.dataId
+						+ "'. It is not suggested to use a different minimal value than '0'.");
+			}
+		} else {
+			this.dataId = lastUsedId + 1;
 		}
 
 		// create the indexes
@@ -267,15 +276,6 @@ public class TidaIndex implements IPersistable {
 	 * @return the id of the next record added
 	 */
 	public int getNextDataId() {
-		return dataId;
-	}
-
-	/**
-	 * Gets the amount of stored records.
-	 * 
-	 * @return the amount of stored records
-	 */
-	public int getAmountOfRecords() {
 		return dataId;
 	}
 

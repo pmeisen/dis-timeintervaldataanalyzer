@@ -43,8 +43,9 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		// remove all of them
 		Logger.getRootLogger().removeAllAppenders();
 		Logger.getRootLogger().addAppender(new NullAppender());
-		
-		final File modelLocation = new File(".", "tidaDbMinuteLoadingPerformance");
+
+		final File modelLocation = new File(".",
+				"tidaDbMinuteLoadingPerformance");
 		assertTrue(Files.deleteDir(modelLocation));
 	}
 
@@ -138,20 +139,6 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		results.put("testLoadingPerformance400000 - Average", (long) (sum / 4l));
 	}
 
-	@Test
-	public void testLoadingPerformance500000() throws IOException {
-		results.put("testLoadingPerformance500000", runLoading(500000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(500000);
-		sum += runLoading(500000);
-		sum += runLoading(500000);
-		sum += runLoading(500000);
-
-		results.put("testLoadingPerformance500000 - Average", (long) (sum / 4l));
-	}
-
 	protected long runLoading(final int amount) throws IOException {
 		System.setProperty("tidaModelMinute.dataAmount", "" + amount);
 
@@ -177,7 +164,7 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		}
 
 		// get the currentAmount
-		final int curAmount = model.getIndex().getAmountOfRecords();
+		final int curAmount = model.getAmountOfRecords();
 
 		// get the database connection
 		final DbDataRetriever retriever = (DbDataRetriever) model
@@ -199,8 +186,7 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		it.close();
 
 		// print some statistics
-		final int addedAmount = model.getIndex().getAmountOfRecords()
-				- curAmount;
+		final int addedAmount = model.getAmountOfRecords() - curAmount;
 		System.out.println("Loading Data: (" + addedAmount + " records) "
 				+ performance.printSecs(performanceRes));
 

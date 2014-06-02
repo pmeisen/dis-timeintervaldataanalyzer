@@ -38,7 +38,7 @@ public class MapFactsDescriptorBased extends MapFactsArrayBased {
 
 		// add all the values of the descriptors
 		final double[] facts = returnSortedFacts ? new double[index
-				.getAmountOfRecords()] : null;
+				.getNextDataId()] : null;
 		for (final FactDescriptor<?> desc : descriptors) {
 
 			if (desc.isRecordInvariant()) {

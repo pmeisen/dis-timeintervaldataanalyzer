@@ -13,6 +13,7 @@
   <xsl:import href="bitmapcache://includeXslts" />
   <xsl:import href="factdescriptormodelsetcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
+  <xsl:import href="identifiercache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -30,6 +31,12 @@
         <xsl:choose>
           <xsl:when test="//cns:location/@folder"><xsl:value-of select="//cns:location/@folder" /></xsl:when>
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultLocation()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
+      <xsl:variable name="identifierCache">
+        <xsl:choose>
+          <xsl:when test="//cns:caches/cns:identifier/@implementation"><xsl:value-of select="//cns:caches/cns:identifier/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultIdentifierCache()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
       <xsl:variable name="metaDataCache">
@@ -79,9 +86,25 @@
       <bean id="defaultLocation" class="java.lang.String"><constructor-arg value="{$folder}" /></bean>
 
       <!-- define the default caches class -->
+      <bean id="defaultIdentifierCacheClass" class="java.lang.String"><constructor-arg value="{$identifierCache}" /></bean>
       <bean id="defaultMetaDataCacheClass" class="java.lang.String"><constructor-arg value="{$metaDataCache}" /></bean>
       <bean id="defaultBitmapCacheClass" class="java.lang.String"><constructor-arg value="{$bitmapCache}" /></bean>
       <bean id="defaultFactSetsCacheClass" class="java.lang.String"><constructor-arg value="{$factSetsCache}" /></bean>
+
+      <!-- read the default identifierCache configuration -->
+      <bean id="defaultIdentifierCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:caches/cns:identifier/node()">
+              <xsl:for-each select='//cns:caches/cns:identifier/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.cache.IIdentifierCacheConfig" />
+      </bean>
 
       <!-- read the default metaDataCache configuration -->
       <bean id="defaultMetaDataCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">

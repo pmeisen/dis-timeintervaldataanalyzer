@@ -14,6 +14,7 @@
   <xsl:import href="bitmapcache://includeXslts" />
   <xsl:import href="factdescriptormodelsetcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
+  <xsl:import href="identifiercache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -26,6 +27,7 @@
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
   <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
+  <xsl:variable name="identifierCacheId" select="mdef:getId('IDENTIFIERCACHE_ID')" />
   <xsl:variable name="metaDataCacheId" select="mdef:getId('METADATACACHE_ID')" />
   <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
   <xsl:variable name="factSetsCacheId" select="mdef:getId('FACTSETSCACHE_ID')" />
@@ -72,6 +74,33 @@
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+       <!-- create the identifierCache to be used -->     
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:caches/mns:identifier/@implementation">
+          <xsl:variable name="identifierCache" select="//mns:config/mns:caches/mns:identifier/@implementation" />
+          <bean id="{$identifierCacheId}" class="{$identifierCache}" destroy-method="release">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:caches/mns:identifier/node()">
+                  <xsl:for-each select='//mns:config/mns:caches/mns:identifier/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><ref bean="defaultIdentifierCacheConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>
+          <bean id="{$identifierCacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultIdentifierCacheClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultIdentifierCacheConfig" /></map>
+            </property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- create the metaDataCache to be used -->     
       <xsl:choose>

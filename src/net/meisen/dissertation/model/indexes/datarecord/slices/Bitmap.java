@@ -162,6 +162,16 @@ public abstract class Bitmap implements IBitmapContainer, IBitmapIdCacheable {
 	public abstract Bitmap or(final Bitmap... bitmaps);
 
 	/**
+	 * Creates a new bitmap by combining {@code this} and the specified
+	 * {@code bitmaps}.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to be combined with {@code this} using {@code XOR}
+	 * @return the combined {@code Bitmap}
+	 */
+	public abstract Bitmap xor(final Bitmap... bitmaps);
+
+	/**
 	 * Calculates the cardinality of the bitmap created by combining
 	 * {@code this} and the specified {@code bitmaps}.
 	 * 

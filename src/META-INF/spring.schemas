@@ -7,5 +7,6 @@ http\://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd=net/meisen/dis
 http\://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd=net/meisen/dissertation/impl/dataretriever/FixedStructureDataRetriever.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd=net/meisen/dissertation/impl/descriptors/advancedDescriptors.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd=net/meisen/dissertation/impl/cache/FileBitmapCache.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaFileIdentifierCache.xsd=net/meisen/dissertation/impl/cache/FileIdentifierCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd=net/meisen/dissertation/impl/cache/FileMetaDataCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/FileFactDescriptorModelSetCache.xsd

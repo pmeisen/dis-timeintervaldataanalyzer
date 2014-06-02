@@ -4,14 +4,11 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
-       id="tidaModelCacheMemory">
+       id="memoryIdentifierCacheModel">
   
   <config>
     <caches>
       <identifier implementation="net.meisen.dissertation.impl.cache.MemoryIdentifierCache" />
-      <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
-      <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
-      <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
     </caches>
   </config>
   

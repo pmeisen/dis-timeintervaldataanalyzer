@@ -10,6 +10,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -64,6 +65,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
 	private DataStructure dataStructure;
+
+	@Autowired
+	@Qualifier(DefaultValues.IDENTIFIERCACHE_ID)
+	private IIdentifierCache idCache;
 
 	@Autowired
 	@Qualifier(DefaultValues.BITMAPCACHE_ID)
@@ -205,6 +210,7 @@ public class TidaModel implements IPersistable {
 
 		// initialize the caches
 		this.metaDataCache.initialize(this);
+		getIdentifierCache().initialize(this);
 		getBitmapCache().initialize(this);
 		getFactsCache().initialize(this);
 
@@ -222,7 +228,8 @@ public class TidaModel implements IPersistable {
 		this.metaDataCache = null;
 
 		// create the index
-		this.idx = new TidaIndex(this);
+		this.idx = new TidaIndex(this, getIdentifierCache()
+				.getLastUsedIdentifier());
 
 		// log the initialization
 		if (LOG.isInfoEnabled()) {
@@ -251,6 +258,7 @@ public class TidaModel implements IPersistable {
 		// release the cache
 		getBitmapCache().release();
 		getFactsCache().release();
+		getIdentifierCache().release();
 
 		// delete created files if necessary
 		if (deleteLocation && getLocation().exists()) {
@@ -306,7 +314,18 @@ public class TidaModel implements IPersistable {
 	 *            the {@code DataRecord} to be loaded
 	 */
 	protected void _loadRecord(final IDataRecord record) {
+
+		// get the identifier which will be used for the next record
+		final int id = this.idx.getNextDataId();
+
+		// persist the identifier as used
+		getIdentifierCache().markIdentifierAsUsed(id);
+
+		// now index the record
 		this.idx.index(record);
+
+		// set the bitmap for the specified identifier
+		getIdentifierCache().markIdentifierAsValid(id);
 	}
 
 	/**
@@ -579,7 +598,8 @@ public class TidaModel implements IPersistable {
 	 * @return the amount of stored records
 	 */
 	public int getAmountOfRecords() {
-		return idx.getAmountOfRecords();
+		return getIdentifierCache().getValidIdentifiers()
+				.determineCardinality();
 	}
 
 	@Override
@@ -619,6 +639,17 @@ public class TidaModel implements IPersistable {
 	 */
 	public BaseIndexFactory getIndexFactory() {
 		return indexFactory;
+	}
+
+	/**
+	 * Gets the {@code IdentifierCache} used by the model.
+	 * 
+	 * @return the {@code IdentifierCache} used by the model
+	 * 
+	 * @see IIdentifierCache
+	 */
+	public IIdentifierCache getIdentifierCache() {
+		return idCache;
 	}
 
 	/**

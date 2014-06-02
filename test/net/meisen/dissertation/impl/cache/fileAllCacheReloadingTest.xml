@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- OfflineMode (i.e. what should happen if a dataretriever is not available)
+     is optional and can be one of the following values (case-insensitive):
+      + true, y, yes
+      + false, n, no
+      + auto
+  -->
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:bmpfile="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+       xmlns:factfile="http://dev.meisen.net/xsd/dissertation/caches/facts/file"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model              http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/facts/file  http://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd"
+
+       offlinemode="false"
+       
+       id="fileAllCacheReloadingTest">
+ 
+  <config>
+
+    <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+        <bmpfile:config maxFileSize="10000m" size="5000" cleaningFactor="1.0" />
+      </bitmap>
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache">
+        <factfile:config maxFileSize="1000m" size="10000" cleaningFactor="0.5" />
+      </factsets>
+    </caches>
+  </config>
+ 
+  <time>
+    <timeline start="1" end="50000" granularity="SECOND" />
+  </time>
+
+  <meta>
+    <!-- As identifier-factory the following implementations are available:
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
+          
+         The null-attribute (true or false) defines if null values are allowed within 
+         the model.
+         The failonduplicates-attributes (true or false) specifies if duplicates are 
+         just ignored or if an exception is thrown.
+      -->
+    <descriptors>
+      <string id="PERSON" failonduplicates="true" null="true" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="TASK" failonduplicates="true" null="true" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="PERSON" value="Philipp" />
+      <entry descriptor="PERSON" value="Debbie" />
+      <entry descriptor="PERSON" value="Edison" />
+      <entry descriptor="PERSON" value="Uschi" />
+      <entry descriptor="PERSON" value="Hajo" />
+      
+      <entry descriptor="TASK" value="playing computer games" />
+      <entry descriptor="TASK" value="sleeping" />
+      <entry descriptor="TASK" value="working" />
+      <entry descriptor="TASK" value="playing" />
+      <entry descriptor="TASK" value="mothering" />
+    </entries>
+  </meta>
+    
+  <structure>
+    <meta position="3"  descriptor="PERSON" />
+    <meta position="4"  descriptor="TASK" />
+    
+    <interval position="1"  type="start" />
+    <interval position="2"  type="end" />
+  </structure>
+  
+  <data metahandling="fail" intervalhandling="failOnNull">
+    <dataset>
+      <entry class="int" value="1" />
+      <entry class="int" value="10000" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="working" />
+    </dataset>
+    
+    <dataset>
+      <entry class="int" value="10001" />
+      <entry class="int" value="20000" />
+      <entry class="java.lang.String" value="Debbie" />
+      <entry class="java.lang.String" value="mothering" />
+    </dataset>
+    
+    <dataset>
+      <entry class="int" value="20001" />
+      <entry class="int" value="30000" />
+      <entry class="java.lang.String" value="Uschi" />
+      <entry class="java.lang.String" value="playing computer games" />
+    </dataset>
+    
+    <dataset>
+      <entry class="int" value="30001" />
+      <entry class="int" value="40000" />
+      <entry class="java.lang.String" value="Hajo" />
+      <entry class="java.lang.String" value="sleeping" />
+    </dataset>
+    
+    <dataset>
+      <entry class="int" value="40001" />
+      <entry class="int" value="50000" />
+      <entry class="java.lang.String" value="Edison" />
+      <entry class="java.lang.String" value="playing" />
+    </dataset>
+  </data>
+</model>

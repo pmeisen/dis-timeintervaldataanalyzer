@@ -59,6 +59,11 @@ public class BitmapMock extends Bitmap {
 	public Bitmap or(final Bitmap... bitmaps) {
 		return null;
 	}
+	
+	@Override
+	public Bitmap xor(final Bitmap... bitmaps) {
+		return null;
+	}
 
 	@Override
 	public int orCardinality(final Bitmap... bitmaps) {
