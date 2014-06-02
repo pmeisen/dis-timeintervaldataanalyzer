@@ -772,7 +772,6 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	protected void printTransformation(final String xml)
 			throws TransformationFailedException {
 		transformer.transformFromClasspath(xml, outputStream);
-		System.out.println(getOutput());
 	}
 
 	/**

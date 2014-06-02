@@ -163,7 +163,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		// generate a group for three descriptors
 		group = new GroupExpression("LOCATION", "SCREAMS", "PERSON");
 		res = evaluator.generateGroups(group);
-		System.out.println(res);
+
 		assertEquals(36, res.size());
 		for (final Group g : res) {
 			assertEquals(3, g.size());

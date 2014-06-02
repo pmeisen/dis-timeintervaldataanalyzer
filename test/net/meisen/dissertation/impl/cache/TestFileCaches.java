@@ -174,8 +174,6 @@ public class TestFileCaches {
 					"/net/meisen/dissertation/impl/cache/fileAllCacheReloadingTest.xml",
 					false);
 
-			System.out.println(reloadedModel.getAmountOfRecords());
-			System.out.println(reloadedModel.getNextDataId());
 			assertEquals(amount, reloadedModel.getAmountOfRecords());
 			assertEquals(nextDataId, reloadedModel.getNextDataId());
 		}
