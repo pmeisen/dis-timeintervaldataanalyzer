@@ -227,10 +227,11 @@ public abstract class BasePersistor {
 				} catch (final IOException e) {
 					exceptionRegistry.throwException(PersistorException.class,
 							1007, metaData.getIdentifier());
-				}
+				} finally {
 
-				// close the handler again
-				close(id);
+					// close the handler again
+					close(id);
+				}
 			}
 		}
 	}

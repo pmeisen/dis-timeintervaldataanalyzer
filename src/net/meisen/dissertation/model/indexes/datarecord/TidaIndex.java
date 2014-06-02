@@ -188,8 +188,9 @@ public class TidaIndex implements IPersistable {
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(PersistorException.class, 1003,
 					e, e.getMessage());
+		} finally {
+			persistor.close(identifier);
 		}
-		persistor.close(identifier);
 	}
 
 	@Override

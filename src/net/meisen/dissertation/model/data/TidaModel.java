@@ -1,12 +1,17 @@
 package net.meisen.dissertation.model.data;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
@@ -27,6 +32,7 @@ import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Files;
+import net.meisen.general.genmisc.types.Numbers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +47,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class TidaModel implements IPersistable {
+	private final static String EXTENSION = ".model";
 	private final static Logger LOG = LoggerFactory.getLogger(TidaModel.class);
 
 	@Autowired
@@ -604,19 +611,6 @@ public class TidaModel implements IPersistable {
 	}
 
 	@Override
-	public void save(final BasePersistor persistor)
-			throws ForwardedRuntimeException {
-		// nothing to save
-	}
-
-	@Override
-	public void load(final BasePersistor persistor,
-			final Identifier identifier, final InputStream inputStream)
-			throws ForwardedRuntimeException {
-		// nothing to load
-	}
-
-	@Override
 	public void isRegistered(final BasePersistor persistor, final Group group) {
 		if (!isInitialized()) {
 			exceptionRegistry.throwException(TidaModelException.class, 1001,
@@ -626,6 +620,43 @@ public class TidaModel implements IPersistable {
 		this.persistentGroup = group;
 
 		persistor.register(group.append("index"), this.idx);
+	}
+
+	@Override
+	public void save(final BasePersistor persistor)
+			throws ForwardedRuntimeException {
+		final IIdentifierCache cache = getIdentifierCache();
+		final Identifier identifier = new Identifier(id + EXTENSION,
+				persistentGroup);
+
+		final OutputStream out = persistor.openForWrite(identifier);
+
+		try {
+			persistor.writeInt(out, cache.getLastUsedIdentifier());
+			cache.getValidIdentifiers().serialize(new DataOutputStream(out));
+		} catch (final IOException e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1003,
+					e, e.getMessage());
+		} finally {
+			persistor.close(identifier);
+		}
+	}
+
+	@Override
+	public void load(final BasePersistor persistor,
+			final Identifier identifier, final InputStream inputStream)
+			throws ForwardedRuntimeException {
+		final IIdentifierCache cache = getIdentifierCache();
+
+		// get the InputStream
+		try {
+			cache.markIdentifierAsUsed(persistor.readInt(inputStream));
+			cache.markIdentifierAsValid(Bitmap.createFromInput(indexFactory,
+					new DataInputStream(inputStream)));
+		} catch (final Exception e) {
+			throw new ForwardedRuntimeException(PersistorException.class, 1004,
+					e, e.getMessage());
+		}
 	}
 
 	@Override

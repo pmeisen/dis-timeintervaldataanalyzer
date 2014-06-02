@@ -24,6 +24,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.descriptors.NullDescriptor;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
@@ -281,12 +282,25 @@ public class TestIntervalIndex extends DbBasedTest {
 		loader.save(model.getId(), new FileLocation(tmpFile));
 		assertTrue(tmpFile.length() > 0);
 
+		// keep the bitmap of the loaded stuff
+		final Bitmap validRecs = model.getValidRecords();
+		final int lastUsedId = model.getIdentifierCache()
+				.getLastUsedIdentifier();
+		final int lastRecordId = model.getIndex().getLastRecordId();
+		assertEquals(lastUsedId, lastRecordId);
+
 		// remove all the models loaded so far
 		loader.unloadAll();
 		model.release(true);
 
-		// load the model
+		// load the model and check all the index specific values of the model
 		final TidaModel loadedModel = loader.load(new FileLocation(tmpFile));
+		assertEquals(validRecs, loadedModel.getValidRecords());
+		assertEquals(lastUsedId, loadedModel.getIdentifierCache()
+				.getLastUsedIdentifier());
+		assertEquals(lastRecordId, loadedModel.getIndex().getLastRecordId());
+
+		// get the index
 		final IntervalIndex loadedIdx = loadedModel.getIndex()
 				.getIntervalIndex();
 

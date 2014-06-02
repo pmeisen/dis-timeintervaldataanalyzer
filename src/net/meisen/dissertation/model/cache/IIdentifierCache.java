@@ -61,6 +61,14 @@ public interface IIdentifierCache {
 	public void markIdentifierAsValid(final int... validIdentifier);
 
 	/**
+	 * Marks the specified as valid.
+	 * 
+	 * @param bitmap
+	 *            the identifiers to be marked as valid
+	 */
+	public void markIdentifierAsValid(final Bitmap bitmap);
+
+	/**
 	 * Marks the identifiers as invalid, i.e. not to be used.
 	 * 
 	 * @param invalidIdentifier

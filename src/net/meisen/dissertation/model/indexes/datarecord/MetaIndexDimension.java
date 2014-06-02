@@ -309,9 +309,9 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 			} catch (final IOException e) {
 				throw new ForwardedRuntimeException(PersistorException.class,
 						1003, e, e.getMessage());
+			} finally {
+				persistor.close(id);
 			}
-
-			persistor.close(id);
 		}
 	}
 
@@ -363,7 +363,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 *            the id of the slice to be created
 	 * @param recordIds
 	 *            the records to be marked as {@code true}
-	 *            
+	 * 
 	 * @return the create slice
 	 */
 	protected Slice<I> createSlice(final I id, final int... recordIds) {

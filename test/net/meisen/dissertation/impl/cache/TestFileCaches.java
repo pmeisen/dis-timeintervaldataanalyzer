@@ -1,10 +1,12 @@
 package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import net.meisen.dissertation.help.LoaderAndDbBasedTest;
 import net.meisen.dissertation.impl.dataretriever.DbDataCollection;
@@ -16,6 +18,7 @@ import net.meisen.dissertation.impl.datasets.DataRetrieverDataSetRecord;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.MultipleDataSetIterator;
+import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.general.genmisc.types.Files;
 
 import org.junit.AfterClass;
@@ -138,6 +141,12 @@ public class TestFileCaches {
 		}
 	}
 
+	/**
+	 * Tests the reloading of data from the file-system using the file-caches.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestReloading extends LoaderAndDbBasedTest {
 
 		/**
@@ -165,6 +174,7 @@ public class TestFileCaches {
 			// get some values from the model
 			final int amount = loadedModel.getAmountOfRecords();
 			final int nextDataId = loadedModel.getNextDataId();
+			final int lastRecordId = loadedModel.getIndex().getLastRecordId();
 
 			// unload everything
 			loader.unloadAll();
@@ -174,8 +184,32 @@ public class TestFileCaches {
 					"/net/meisen/dissertation/impl/cache/fileAllCacheReloadingTest.xml",
 					false);
 
+			// check the
 			assertEquals(amount, reloadedModel.getAmountOfRecords());
 			assertEquals(nextDataId, reloadedModel.getNextDataId());
+			assertEquals(lastRecordId, reloadedModel.getIndex()
+					.getLastRecordId());
+
+			// check the timeSlices
+			int timeId = 0;
+			for (final SliceWithDescriptors<?> slice : reloadedModel.getIndex()
+					.getIntervalIndexSlices()) {
+
+				for (int recId = 0; recId < 5; recId++) {
+					final int[] ids = slice.getBitmap().getIds();
+					final int pos = Arrays.binarySearch(ids, recId);
+
+					// recId 0 -> 1 - 10000, recId 1 -> 10001 -> 20000, ...
+					if ((recId * 10000) + 1 > timeId
+							&& (recId + 1) * 10000 < timeId) {
+						assertTrue(pos > -1);
+					} else {
+						assertFalse(pos > -1);
+					}
+				}
+
+				timeId++;
+			}
 		}
 	}
 

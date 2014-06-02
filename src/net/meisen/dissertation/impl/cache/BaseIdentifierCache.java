@@ -123,6 +123,23 @@ public abstract class BaseIdentifierCache implements IIdentifierCache {
 	}
 
 	@Override
+	public void markIdentifierAsValid(final Bitmap bitmap) {
+		if (bitmap == null) {
+			return;
+		}
+
+		// create a new Bitmap with all specified identifiers
+		final Bitmap newBitmap = getValidIdentifiers().or(bitmap);
+
+		// update the persisted bitmap
+		if (isPersistencyEnabled()) {
+			cacheBitmap(newBitmap);
+		}
+
+		this.bitmap = newBitmap;
+	}
+
+	@Override
 	public void markIdentifierAsInvalid(final int... invalidIdentifier) {
 		if (!isInitialized()) {
 			exceptionRegistry.throwException(getExceptionClass(1000), 1000);
