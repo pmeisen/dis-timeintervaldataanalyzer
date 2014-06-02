@@ -31,7 +31,7 @@ public class EWAHBitmap extends Bitmap {
 	 * set to {@code false}.
 	 */
 	public EWAHBitmap() {
-		this.bitmap = EWAHCompressedBitmap.bitmapOf();
+		this(EWAHCompressedBitmap.bitmapOf());
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class EWAHBitmap extends Bitmap {
 	}
 
 	@Override
-	public Bitmap xor(final Bitmap... bitmaps) {
+	public EWAHBitmap xor(final Bitmap... bitmaps) {
 		final EWAHCompressedBitmap[] array = createArray(true, bitmaps);
 		if (array.length > 1) {
 			return new EWAHBitmap(EWAHCompressedBitmap.xor(array));

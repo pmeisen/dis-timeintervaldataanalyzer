@@ -38,6 +38,7 @@ import net.meisen.dissertation.impl.indexes.TestMultipleIndexedCollection;
 import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestBitmapId;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestEWAHBitmap;
+import net.meisen.dissertation.impl.indexes.datarecord.slices.TestRoaringBitmap;
 import net.meisen.dissertation.impl.measures.TestMapFactsHolder;
 import net.meisen.dissertation.impl.parser.query.TestQueryFactory;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator;
@@ -173,6 +174,7 @@ import org.junit.runners.Suite;
 		// Test some bitmap implementations
 		TestBitmapId.class,
 		TestEWAHBitmap.class,
+		TestRoaringBitmap.class,
 
 		// Test the handler
 		TestTidaModelHandler.class,
@@ -184,7 +186,7 @@ import org.junit.runners.Suite;
 		TestUtilMetaDataCache.class,
 		TestMemoryMetaDataCache.class,
 		TestFileMetaDataCache.class,
-		TestMemoryIdentifierCache.class, 
+		TestMemoryIdentifierCache.class,
 		TestFileIdentifierCache.class,
 		TestFileBitmapCacheConfig.class,
 		TestCachingStrategy.class,
