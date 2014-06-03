@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="processedDataIntervalMappingWithBoundaries">
+  
+  <time>
+    <timeline start="100" duration="400" granularity="DAY" />
+  </time>
+  
+  <structure>
+    <interval position="1" type="start" />
+    <interval position="2" type="end" inclusive="false" />
+  </structure>
+           
+  <data intervalhandling="boundaries">
+  	<!-- an interval within the timeline -->
+    <dataset>
+      <entry class="short" value="110" />
+      <entry class="short" value="200" />
+    </dataset>
+    <!-- an interval which exceeds the timeline -->
+    <dataset>
+      <entry class="long" value="1000" />
+      <entry class="short" value="1010" />
+    </dataset>
+    <!-- an interval which undercuts the timeline -->
+    <dataset>
+      <entry class="long" value="10" />
+      <entry class="short" value="20" />
+    </dataset>
+    <!-- invalid interval -->
+    <dataset>
+      <entry class="long" value="120" />
+      <entry class="short" value="110" />
+    </dataset>
+    <!-- invalid undercutting interval -->
+    <dataset>
+      <entry class="long" value="20" />
+      <entry class="short" value="10" />
+    </dataset>
+    <!-- invalid exceeding interval -->
+    <dataset>
+      <entry class="long" value="520" />
+      <entry class="short" value="510" />
+    </dataset>
+    <!-- start null -->
+    <dataset>
+      <entry class="java.lang.Long" />
+      <entry class="short" value="110" />
+    </dataset>
+    <!-- end null -->
+    <dataset>
+      <entry class="short" value="110" />
+      <entry class="java.lang.Long" />
+    </dataset>
+    <!-- both null -->
+    <dataset>
+      <entry class="java.lang.Long" />
+      <entry class="java.lang.Short" />
+    </dataset>
+    <!-- end exceeds timeline and start null -->
+    <dataset>
+      <entry class="java.lang.Long" />
+      <entry class="int" value="1000" />
+    </dataset>
+    <!-- start exceeds timeline and end null -->
+    <dataset>
+      <entry class="int" value="1000" />
+      <entry class="java.lang.Long" />
+    </dataset>
+    <!-- end undercuts timeline and start null -->
+    <dataset>
+      <entry class="java.lang.Long" />
+      <entry class="int" value="10" />
+    </dataset>
+    <!-- start undercuts timeline and end null -->
+    <dataset>
+      <entry class="int" value="10" />
+      <entry class="java.lang.Long" />
+    </dataset>
+  </data>
+</model>

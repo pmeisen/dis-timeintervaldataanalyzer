@@ -232,6 +232,105 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 
 	/**
 	 * Tests the mapping of interval values using the
+	 * {@link IntervalDataHandling#USEOTHER} strategy and an excluded end.
+	 */
+	@Test
+	public void testIntervalMappingUsingUseOtherAndExcludes() {
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithUseOtherAndExcludes.xml",
+				false);
+
+		final IClosableIterator<IDataRecord> it = model.getDataModel()
+				.iterator();
+
+		// check different results
+		ProcessedDataRecord record;
+
+		// an interval [110, 200) within the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(10, record.getStart());
+		assertEquals(99, record.getEnd());
+
+		// an interval [1000, 1010) exceeding the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [10, 20) undercutting the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [120, 110) generally invalid
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [20, 10) generally invalid, but undercutting
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [520, 510) generally invalid, but exceeding
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [null, 110) having a null start value
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(9, record.getStart());
+		assertEquals(9, record.getEnd());
+
+		// an interval [110, null) having a null end value
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(10, record.getStart());
+		assertEquals(10, record.getEnd());
+
+		// an interval [null, null) having both values null
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [null, 1000) with null as start and exceeded end
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [1000, null) with null as end and exceeded start
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [null, 10) with null as start and undercutting end
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [10, null) with null as end and undercutting start
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// cleanup
+		it.close();
+		model.release(true);
+	}
+
+	/**
+	 * Tests the mapping of interval values using the
 	 * {@link IntervalDataHandling#BOUNDARIESWHENNULL} strategy.
 	 */
 	@Test
@@ -323,6 +422,110 @@ public class TestProcessedDataRecord extends LoaderBasedTest {
 		assertEquals(-1, record.getEnd());
 
 		// an interval [10, null] with null as end and undercutting start
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(0, record.getStart());
+		assertEquals(400, record.getEnd());
+
+		// cleanup
+		it.close();
+		model.release(true);
+	}
+
+	/**
+	 * Tests the mapping of interval values using the
+	 * {@link IntervalDataHandling#BOUNDARIESWHENNULL} strategy and an excluded
+	 * end.
+	 */
+	@Test
+	public void testIntervalMappingUsingBoundariesAndExcludes() {
+		final TidaModel model = m(
+				"/net/meisen/dissertation/model/indexes/datarecord/processedDataIntervalMappingWithBoundariesAndExcludes.xml",
+				false);
+
+		// check the pre-requirements
+		assertEquals(IntervalDataHandling.BOUNDARIESWHENNULL,
+				model.getIntervalDataHandling());
+
+		final IClosableIterator<IDataRecord> it = model.getDataModel()
+				.iterator();
+
+		// check different results
+		ProcessedDataRecord record;
+
+		// an interval [110, 200) within the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(10, record.getStart());
+		assertEquals(99, record.getEnd());
+
+		// an interval [1000, 1010) exceeding the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [10, 20) undercutting the timeline [100, 500]
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [120, 110) generally invalid
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [20, 10) generally invalid, but undercutting
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [520, 510) generally invalid, but exceeding
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [null, 110) having a null start value
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(0, record.getStart());
+		assertEquals(9, record.getEnd());
+
+		// an interval [110, null) having a null end value
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(10, record.getStart());
+		assertEquals(400, record.getEnd());
+
+		// an interval [null, null) having both values null
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(0, record.getStart());
+		assertEquals(400, record.getEnd());
+
+		// an interval [null, 1000) with null as start and exceeded end
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(0, record.getStart());
+		assertEquals(400, record.getEnd());
+
+		// an interval [1000, null) with null as end and exceeded start
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [null, 10) with null as start and undercutting end
+		assertTrue(it.hasNext());
+		record = new ProcessedDataRecord(it.next(), model, 1);
+		assertEquals(-1, record.getStart());
+		assertEquals(-1, record.getEnd());
+
+		// an interval [10, null) with null as end and undercutting start
 		assertTrue(it.hasNext());
 		record = new ProcessedDataRecord(it.next(), model, 1);
 		assertEquals(0, record.getStart());

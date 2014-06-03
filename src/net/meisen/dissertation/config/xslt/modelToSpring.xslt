@@ -411,20 +411,23 @@
                     <xsl:when test="local-name() = 'meta'">
                       <bean class="net.meisen.dissertation.model.datastructure.MetaStructureEntry">
                         <constructor-arg type="java.lang.String"><value><xsl:value-of select="@descriptor" /></value></constructor-arg>
-                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                        <xsl:call-template name="beanStructureEntryConstructorArgs" />
                       </bean>
                     </xsl:when>
                     
                     <xsl:when test="local-name() = 'key'">
                       <bean class="net.meisen.dissertation.model.datastructure.KeyStructureEntry">
-                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                        <xsl:call-template name="beanStructureEntryConstructorArgs" />
                       </bean>
                     </xsl:when>
                     
                     <xsl:when test="local-name() = 'interval'">
                       <bean class="net.meisen.dissertation.model.datastructure.IntervalStructureEntry">
                         <constructor-arg type="java.lang.String"><value><xsl:value-of select="@type" /></value></constructor-arg>
-                        <xsl:call-template name="beanStructureEntryConsutructorArgs" />
+                        <xsl:if test="@inclusive">
+                          <constructor-arg type="boolean"><value><xsl:value-of select="@inclusive" /></value></constructor-arg>
+                        </xsl:if>
+                        <xsl:call-template name="beanStructureEntryConstructorArgs" />
                       </bean>
                     </xsl:when>
                     
@@ -579,7 +582,7 @@
   <!--
     Template to create the common constructor values of a StructureEntry
     -->
-  <xsl:template name="beanStructureEntryConsutructorArgs">
+  <xsl:template name="beanStructureEntryConstructorArgs">
     <xsl:if test="not(@name) and not(@position)">
       <xsl:message terminate="yes">A structure must have at least a name or a position.</xsl:message>
     </xsl:if>

@@ -238,7 +238,39 @@ public class IntervalModel {
 	 *             {@link IntervalDataHandling#FAILONNULL}
 	 */
 	public MappingResult mapToTimeline(final Object start, final Object end,
-			final IntervalDataHandling handling) throws IntervalModelException {
+			final IntervalDataHandling handling) {
+		return mapToTimeline(start, end, handling, true, true);
+	}
+
+	/**
+	 * Depending on {@code startInclusive} and {@code endInclusive} the method
+	 * maps the {@code [start, end]} interval, {@code (start, end)} interval,
+	 * {@code (start, end]} interval, or {@code [start, end)} interval to the
+	 * values defined by the timeline.
+	 * 
+	 * @param start
+	 *            the start value to be mapped
+	 * @param end
+	 *            the end value to be mapped
+	 * @param handling
+	 *            the {@code IntervalDataHandling} used to map the values
+	 * @param startInclusive
+	 *            {@code true} to define the start value to be inclusive,
+	 *            otherwise it is exclusive
+	 * @param endInclusive
+	 *            {@code true} to define the start value to be inclusive,
+	 *            otherwise it is exclusive
+	 * 
+	 * @return the result of the mapping
+	 * 
+	 * @throws IntervalModelException
+	 *             if a {@code null} value is specified for {@code start} and/or
+	 *             {@code end} and the defined {@code handling} is
+	 *             {@link IntervalDataHandling#FAILONNULL}
+	 */
+	public MappingResult mapToTimeline(final Object start, final Object end,
+			final IntervalDataHandling handling, final boolean startInclusive,
+			final boolean endInclusive) throws IntervalModelException {
 		final BaseMapper<?> mapper = getTimelineMapper();
 
 		// check for nulls
@@ -256,13 +288,15 @@ public class IntervalModel {
 				return null;
 			} else if (IntervalDataHandling.USEOTHER.equals(handling)) {
 				if (startIsNull && !endIsNull) {
-					normStart = mapper.mapToLong(end);
+					normStart = endInclusive ? mapper.mapToLong(end) : mapper
+							.shiftToLong(end, 1, true);
 					normEnd = normStart;
 				} else if (startIsNull && endIsNull) {
 					normStart = -1;
 					normEnd = -1;
 				} else if (!startIsNull && endIsNull) {
-					normStart = mapper.mapToLong(start);
+					normStart = startInclusive ? mapper.mapToLong(start)
+							: mapper.shiftToLong(start, 1, false);
 					normEnd = normStart;
 				} else {
 					throw new IllegalStateException(
@@ -273,12 +307,14 @@ public class IntervalModel {
 				if (startIsNull) {
 					normStart = mapper.getNormStartAsLong();
 				} else {
-					normStart = mapper.mapToLong(start);
+					normStart = startInclusive ? mapper.mapToLong(start)
+							: mapper.shiftToLong(start, 1, false);
 				}
 				if (endIsNull) {
 					normEnd = mapper.getNormEndAsLong();
 				} else {
-					normEnd = mapper.mapToLong(end);
+					normEnd = endInclusive ? mapper.mapToLong(end) : mapper
+							.shiftToLong(end, 1, true);
 				}
 			} else {
 				throw new UnsupportedOperationException(
@@ -286,8 +322,10 @@ public class IntervalModel {
 								+ "' is not supported.");
 			}
 		} else {
-			normStart = mapper.mapToLong(start);
-			normEnd = mapper.mapToLong(end);
+			normStart = startInclusive ? mapper.mapToLong(start) : mapper
+					.shiftToLong(start, 1, false);
+			normEnd = endInclusive ? mapper.mapToLong(end) : mapper
+					.shiftToLong(end, 1, true);
 		}
 
 		// if one value is invalid both are

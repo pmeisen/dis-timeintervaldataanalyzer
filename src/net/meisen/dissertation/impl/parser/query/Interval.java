@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.parser.query.select;
+package net.meisen.dissertation.impl.parser.query;
 
 /**
  * Specifies an interval, i.e. something like {@code [1, 5]},

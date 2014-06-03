@@ -25,8 +25,6 @@ import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.measures.Mode;
 import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
-import net.meisen.dissertation.impl.parser.query.select.Interval;
-import net.meisen.dissertation.impl.parser.query.select.IntervalType;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;

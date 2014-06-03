@@ -16,10 +16,11 @@
     <descriptors>
       <string null="true" id="NAME" />
       <string null="true" id="PRIORITY"  />
+      <integer null="true" id="POSITION" />
     </descriptors>
 
     <entries />
   </meta>
   
-  <data metahandling="create" intervalhandling="fail" />
+  <data metahandling="create" intervalhandling="other" />
 </model>

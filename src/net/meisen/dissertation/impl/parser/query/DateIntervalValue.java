@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.parser.query.select;
+package net.meisen.dissertation.impl.parser.query;
 
 import java.util.Date;
 

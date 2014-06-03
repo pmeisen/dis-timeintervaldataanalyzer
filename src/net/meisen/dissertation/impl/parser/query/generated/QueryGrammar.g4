@@ -31,8 +31,8 @@ root   : (exprInsert | exprSelect) EOF;
  * Define the different expressions/parts of the insert statement
  */
 exprInsert    : STMT_INSERT OP_INTO selectorModelId exprStructure OP_VALUES exprValues (SEPARATOR exprValues)*;
-exprStructure : BRACKET_ROUND_OPENED selectorIntervalDef SEPARATOR selectorDescriptorId (SEPARATOR selectorDescriptorId)* BRACKET_ROUND_CLOSED;
-exprValues    : BRACKET_ROUND_OPENED (selectorDateIntervalWithNull | selectorIntIntervalWithNull) SEPARATOR selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
+exprStructure : BRACKET_ROUND_OPENED compStructureElement (SEPARATOR compStructureElement)* BRACKET_ROUND_CLOSED;
+exprValues    : BRACKET_ROUND_OPENED compValueElement (SEPARATOR compValueElement)* BRACKET_ROUND_CLOSED;
 
 /*
  * Define the different expressions/parts of the select statement
@@ -56,6 +56,8 @@ compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR co
 compAggrFunction         : selectorAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
 compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
+compStructureElement     : selectorIntervalDef | selectorDescriptorId;
+compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | selectorDescValue;
 
 /*
  * Define special selectors which make up a semantic based on specific tokens, 
@@ -70,13 +72,15 @@ selectorDateInterval        : DATE SEPARATOR DATE;
 selectorIntInterval         : INT SEPARATOR INT;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
 selectorIntIntervalWithNull : (INT | NULL_VALUE) SEPARATOR (INT | NULL_VALUE);
+selectorDateValueOrNull     : (DATE | NULL_VALUE);
+selectorIntValueOrNull      : (INT | NULL_VALUE);
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 selectorDescValue           : (DESC_VALUE | NULL_VALUE);
 selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
-selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) SEPARATOR (POS_END_INCL | POS_END_EXCL);
+selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL | POS_END_EXCL);
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -94,8 +98,8 @@ DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MAS
 NULL_VALUE: N U L L;
 
 // reserverd words to specify the positions of start and end
-POS_START_INCL : BRACKET_SQUARE_OPENED S T A R T BRACKET_SQUARE_CLOSED;
-POS_END_INCL   : BRACKET_SQUARE_OPENED E N D BRACKET_SQUARE_CLOSED;
+POS_START_INCL : BRACKET_SQUARE_OPENED S T A R T '+'? BRACKET_SQUARE_CLOSED;
+POS_END_INCL   : BRACKET_SQUARE_OPENED E N D '+'? BRACKET_SQUARE_CLOSED;
 POS_START_EXCL : BRACKET_SQUARE_OPENED S T A R T '-' BRACKET_SQUARE_CLOSED;
 POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 

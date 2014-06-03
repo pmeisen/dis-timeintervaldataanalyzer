@@ -350,10 +350,10 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 				.getEntriesByClass(IntervalStructureEntry.class)) {
 			if ("intervalend".equals(e.getName())) {
 				assertEquals(-1, e.getPosition());
-				assertEquals(IntervalType.END, e.getType());
+				assertEquals(IntervalType.END, e.getIntervalType());
 			} else if (e.getPosition() == 1) {
 				assertNull(e.getName());
-				assertEquals(IntervalType.START, e.getType());
+				assertEquals(IntervalType.START, e.getIntervalType());
 			} else {
 				fail("Entry with invalid name '" + e.getName()
 						+ "' with position '" + e.getPosition() + "' found");

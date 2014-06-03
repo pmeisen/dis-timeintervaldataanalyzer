@@ -22,6 +22,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorSelectType(@NotNull QueryGrammarParser.SelectorSelectTypeContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compStructureElement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompStructureElement(@NotNull QueryGrammarParser.CompStructureElementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compStructureElement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompStructureElement(@NotNull QueryGrammarParser.CompStructureElementContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#root}.
 	 * @param ctx the parse tree
 	 */
@@ -110,6 +121,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorSecondMathOperator(@NotNull QueryGrammarParser.SelectorSecondMathOperatorContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorIntValueOrNull}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorIntValueOrNull(@NotNull QueryGrammarParser.SelectorIntValueOrNullContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorIntValueOrNull}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorIntValueOrNull(@NotNull QueryGrammarParser.SelectorIntValueOrNullContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorIntInterval}.
 	 * @param ctx the parse tree
 	 */
@@ -187,6 +209,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateValueOrNull}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorDateValueOrNull(@NotNull QueryGrammarParser.SelectorDateValueOrNullContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorDateValueOrNull}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorDateValueOrNull(@NotNull QueryGrammarParser.SelectorDateValueOrNullContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprComp}.
 	 * @param ctx the parse tree
 	 */
@@ -229,6 +262,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprInsert(@NotNull QueryGrammarParser.ExprInsertContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compValueElement}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompValueElement(@NotNull QueryGrammarParser.CompValueElementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compValueElement}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompValueElement(@NotNull QueryGrammarParser.CompValueElementContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorAlias}.

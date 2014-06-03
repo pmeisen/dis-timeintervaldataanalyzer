@@ -51,12 +51,28 @@ public class ProcessedDataRecord {
 	 */
 	public ProcessedDataRecord(final IDataRecord raw, final TidaModel model,
 			final int id) {
+		this(model.getDataStructure(), raw, model, id);
+	}
+
+	/**
+	 * Constructor to create a {@code ProcessedDataRecord} based on the
+	 * {@code TidaModel} and the {@code DataRecord}.
+	 * 
+	 * @param dataStructure
+	 *            overrides the {@code DataStructure} of the specified
+	 *            {@code model}
+	 * @param raw
+	 *            the {@code DataRecord} to be processed
+	 * @param model
+	 *            the {@code Model} which defines how to process the record
+	 * @param id
+	 *            the identifier of the record
+	 */
+	public ProcessedDataRecord(final DataStructure dataStructure,
+			final IDataRecord raw, final TidaModel model, final int id) {
 		this.id = id;
 		this.raw = raw;
 		this.processedMeta = new HashMap<MetaStructureEntry, Descriptor<?, ?, ?>>();
-
-		// iterate over the different entries and add the values
-		final DataStructure dataStructure = model.getDataStructure();
 
 		// handle the IntervalStructureEntries
 		final List<IntervalStructureEntry> intervalEntries = dataStructure
@@ -207,12 +223,14 @@ public class ProcessedDataRecord {
 		} else {
 
 			// map the values
+			final boolean startInclusive = startEntry.isInclusive();
+			final boolean endInclusive = endEntry.isInclusive();
 			final Object start = getValue(raw, startEntry);
 			final Object end = getValue(raw, endEntry);
 			final IntervalDataHandling handling = model
 					.getIntervalDataHandling();
 			final MappingResult res = intervalModel.mapToTimeline(start, end,
-					handling);
+					handling, startInclusive, endInclusive);
 
 			// add the results
 			this.start = res.getStart();

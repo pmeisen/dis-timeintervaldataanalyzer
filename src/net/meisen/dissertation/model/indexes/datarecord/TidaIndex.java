@@ -8,6 +8,7 @@ import java.util.Map;
 
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaIndexException;
+import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -130,6 +131,19 @@ public class TidaIndex implements IPersistable {
 	 *            the record to be indexed
 	 */
 	public void index(final IDataRecord record) {
+		index(model.getDataStructure(), record);
+	}
+
+	/**
+	 * Indexes the passed {@code record}.
+	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
+	 * @param record
+	 *            the record to be indexed
+	 */
+	public void index(final DataStructure dataStructure,
+			final IDataRecord record) {
 
 		// make sure values still fit
 		if (dataId > lastValidId || dataId < 0) {
@@ -139,7 +153,7 @@ public class TidaIndex implements IPersistable {
 
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
-				record, model, dataId);
+				dataStructure, record, model, dataId);
 
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {

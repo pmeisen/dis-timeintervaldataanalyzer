@@ -298,6 +298,19 @@ public class TidaModel implements IPersistable {
 	 *            the {@code DataRecord} to be loaded
 	 */
 	public void loadRecord(final IDataRecord record) {
+		loadRecord(getDataStructure(), record);
+	}
+
+	/**
+	 * Loads the specified record into the database.
+	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
+	 * @param record
+	 *            the {@code DataRecord} to be loaded
+	 */
+	public void loadRecord(final DataStructure dataStructure,
+			final IDataRecord record) {
 
 		// make sure the model is initialized
 		if (!isInitialized()) {
@@ -307,7 +320,7 @@ public class TidaModel implements IPersistable {
 
 		loadLock.writeLock().lock();
 		try {
-			_loadRecord(record);
+			_loadRecord(dataStructure, record);
 		} finally {
 			loadLock.writeLock().unlock();
 		}
@@ -317,10 +330,13 @@ public class TidaModel implements IPersistable {
 	 * Loads the specified record into the database without checking any
 	 * preconditions.
 	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
 	 * @param record
 	 *            the {@code DataRecord} to be loaded
 	 */
-	protected void _loadRecord(final IDataRecord record) {
+	protected void _loadRecord(final DataStructure dataStructure,
+			final IDataRecord record) {
 
 		// get the identifier which will be used for the next record
 		final int id = this.idx.getNextDataId();
@@ -329,7 +345,7 @@ public class TidaModel implements IPersistable {
 		getIdentifierCache().markIdentifierAsUsed(id);
 
 		// now index the record
-		this.idx.index(record);
+		this.idx.index(dataStructure, record);
 
 		// set the bitmap for the specified identifier
 		getIdentifierCache().markIdentifierAsValid(id);
@@ -345,6 +361,22 @@ public class TidaModel implements IPersistable {
 	 * @return the amount of data loaded
 	 */
 	public int bulkLoadData(final Iterator<IDataRecord> it) {
+		return bulkLoadData(getDataStructure(), it);
+	}
+
+	/**
+	 * Loads the specified data in a bulk-load, i.e. the data is not persisted
+	 * until all data is read.
+	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
+	 * @param it
+	 *            the {@code iterator} for the data to be loaded
+	 * 
+	 * @return the amount of data loaded
+	 */
+	public int bulkLoadData(final DataStructure dataStructure,
+			final Iterator<IDataRecord> it) {
 
 		// make sure the model is initialized
 		if (!isInitialized()) {
@@ -367,7 +399,7 @@ public class TidaModel implements IPersistable {
 
 			try {
 				while (it.hasNext()) {
-					_loadRecord(it.next());
+					_loadRecord(dataStructure, it.next());
 
 					if (++amountOfData % 10000 == 0 && LOG.isDebugEnabled()) {
 						LOG.debug("... added " + amountOfData + " records...");
@@ -375,6 +407,10 @@ public class TidaModel implements IPersistable {
 				}
 			} catch (final RuntimeException e) {
 				throw e;
+			} finally {
+				if (it instanceof IClosableIterator) {
+					((IClosableIterator<?>) it).close();
+				}
 			}
 		} finally {
 

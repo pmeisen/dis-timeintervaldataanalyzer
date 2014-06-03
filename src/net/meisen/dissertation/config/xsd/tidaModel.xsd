@@ -184,6 +184,7 @@
                   <xs:complexContent>
                     <xs:extension base="structurelement">
                       <xs:attribute name="type" type="types:identifier" use="required" />
+                      <xs:attribute name="inclusive" type="xs:boolean" use="optional" />
                     </xs:extension>
                   </xs:complexContent>
                 </xs:complexType>
