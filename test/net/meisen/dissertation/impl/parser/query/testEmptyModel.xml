@@ -14,9 +14,9 @@
   
   <meta>
     <descriptors>
-      <string null="true" id="NAME" />
-      <string null="true" id="PRIORITY"  />
-      <integer null="true" id="POSITION" />
+      <string  null="true" failonduplicates="false" id="NAME" />
+      <string  null="true" failonduplicates="false" id="PRIORITY"  />
+      <integer null="true" failonduplicates="false" id="POSITION" />
     </descriptors>
 
     <entries />

@@ -1,10 +1,7 @@
 package net.meisen.dissertation.impl.datasets;
 
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.UUID;
-
-import net.meisen.general.genmisc.types.Dates;
 
 /**
  * This class defines an entry of a {@code SingleStaticDataSet}. A entry is
@@ -81,15 +78,24 @@ public class SingleStaticDataSetEntry {
 		this.name = name == null ? UUID.randomUUID().toString() : name;
 
 		if (value instanceof Date) {
-			/*
-			 * If it's a date map the date to UTC and assume it to be in the
-			 * system timezone.
-			 */
-			this.value = Dates.mapToTimezone((Date) value, TimeZone
-					.getDefault().getID(), Dates.GENERAL_TIMEZONE);
+			this.value = mapToTimezone((Date) value);
 		} else {
 			this.value = value;
 		}
+	}
+
+	/**
+	 * Method used to map the raw {code Date}-value to a valid {@code Date}
+	 * value within the correct time-zone. The default implementation uses an
+	 * identity mapping.
+	 * 
+	 * @param value
+	 *            the value to be mapped
+	 * 
+	 * @return the mapped value
+	 */
+	protected Date mapToTimezone(final Date value) {
+		return value;
 	}
 
 	/**

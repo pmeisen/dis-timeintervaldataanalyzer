@@ -1,6 +1,7 @@
 package net.meisen.dissertation.model.descriptors;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +18,8 @@ import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -32,11 +35,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 @SuppressWarnings("rawtypes")
 public class DescriptorModel<I extends Object> {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(DescriptorModel.class);
+
 	private final String id;
 	private final String name;
 	private final Class<? extends Descriptor> descriptorClass;
 	private final IIdsFactory<I> idsFactory;
 
+	private Class<?> descriptorValueClass = null;
 	private NullDescriptor<I> nullDescriptor = null;
 	private boolean failOnDuplicates = true;
 	private boolean supportsNullDescriptor = false;
@@ -551,9 +558,13 @@ public class DescriptorModel<I extends Object> {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1004, getId());
 			return null;
-		} else {
+		} else if (getValueType().isAssignableFrom(value.getClass())) {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);
+		} else if (value instanceof String) {
+			return getDescriptorByString((String) value);
+		} else {
+			return null;
 		}
 	}
 
@@ -706,6 +717,7 @@ public class DescriptorModel<I extends Object> {
 			desIdDef.overrideType(0, getIdClass());
 			final IndexKeyDefinition valueDef = new IndexKeyDefinition(
 					Descriptor.class, "getValue");
+			valueDef.overrideType(0, getValueType());
 			final IndexKeyDefinition stringDef = new IndexKeyDefinition(
 					Descriptor.class, "getUniqueString");
 
@@ -715,6 +727,33 @@ public class DescriptorModel<I extends Object> {
 		}
 
 		return descriptors;
+	}
+
+	/**
+	 * Gets the type of the value of the {@code Descriptor} managed by
+	 * {@code this}.
+	 * 
+	 * @return the type of the value of the {@code Descriptor} managed by
+	 *         {@code this}
+	 */
+	public Class<?> getValueType() {
+
+		// determine the class if not known
+		if (descriptorValueClass == null) {
+			try {
+				descriptorValueClass = (Class<?>) ((ParameterizedType) descriptorClass
+						.getGenericSuperclass()).getActualTypeArguments()[0];
+			} catch (final Exception e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Cannot determine the value-type of descriptor-class '"
+							+ descriptorClass.getName() + "'.");
+				}
+
+				descriptorValueClass = Object.class;
+			}
+		}
+
+		return descriptorValueClass;
 	}
 
 	private Constructor<? extends Descriptor> findConstructor(

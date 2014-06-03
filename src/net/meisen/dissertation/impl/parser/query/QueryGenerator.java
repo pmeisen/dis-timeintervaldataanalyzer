@@ -415,7 +415,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		final SelectorIntIntervalContext intCtx = ctx.selectorIntInterval();
 		final Interval<?> interval = resolveInterval(ctx.getText(), dateCtx,
 				intCtx, openType, closeType);
-
+		
 		q(SelectQuery.class).setInterval(interval);
 	}
 

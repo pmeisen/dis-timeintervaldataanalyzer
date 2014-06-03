@@ -131,7 +131,7 @@ public class IndexKeyDefinition {
 		if (pos < 0 || pos >= this.size) {
 			throw new IllegalArgumentException("Cannot override the position '"
 					+ pos + "' please use a position between [0, " + size
-					+ "].");
+					+ ").");
 		}
 
 		if (type == null) {

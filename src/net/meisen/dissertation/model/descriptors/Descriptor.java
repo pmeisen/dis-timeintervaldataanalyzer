@@ -142,7 +142,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 
 	@Override
 	public abstract T clone();
-
+	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + ": " + getUniqueString();

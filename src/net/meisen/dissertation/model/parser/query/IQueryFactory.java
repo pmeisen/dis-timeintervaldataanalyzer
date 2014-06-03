@@ -24,9 +24,20 @@ public interface IQueryFactory {
 	 * 
 	 * @see IQuery
 	 */
-	public IQuery parseQuery(final String queryString)
+	public <T extends IQuery> T parseQuery(final String queryString)
 			throws QueryParsingException;
 
-	public IQueryResult evaluateQuery(final IQuery query)
+	/**
+	 * Evaluates the query and retrieves the {@code IQueryResult}.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * 
+	 * @return the result of the query
+	 * 
+	 * @throws QueryEvaluationException
+	 *             of the evaluation fails
+	 */
+	public <T extends IQueryResult> T evaluateQuery(final IQuery query)
 			throws QueryEvaluationException;
 }

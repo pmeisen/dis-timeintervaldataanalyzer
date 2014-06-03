@@ -155,7 +155,7 @@ public class MultipleIndexedCollection extends BaseIndexedCollection implements
 									.toString()) + "'");
 		}
 	}
-
+	
 	@Override
 	public Object getObject(final Object... values) {
 

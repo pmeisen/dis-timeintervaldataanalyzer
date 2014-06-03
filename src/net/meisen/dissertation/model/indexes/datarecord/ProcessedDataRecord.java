@@ -229,6 +229,7 @@ public class ProcessedDataRecord {
 			final Object end = getValue(raw, endEntry);
 			final IntervalDataHandling handling = model
 					.getIntervalDataHandling();
+						
 			final MappingResult res = intervalModel.mapToTimeline(start, end,
 					handling, startInclusive, endInclusive);
 

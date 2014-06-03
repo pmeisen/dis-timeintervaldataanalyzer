@@ -123,18 +123,20 @@ public class QueryFactory implements IQueryFactory {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IQuery parseQuery(final String queryString)
+	public <T extends IQuery> T parseQuery(final String queryString)
 			throws QueryParsingException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Pasrsing the query '" + queryString + "'.");
 		}
 
-		return parseQuery(queryString, true);
+		return (T) parseQuery(queryString, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IQueryResult evaluateQuery(final IQuery query)
+	public <T extends IQueryResult> T evaluateQuery(final IQuery query)
 			throws QueryEvaluationException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Evaluating the query '" + query + "'.");
@@ -150,7 +152,7 @@ public class QueryFactory implements IQueryFactory {
 		}
 
 		try {
-			return query.evaluate(model);
+			return (T) query.evaluate(model);
 		} catch (final Exception e) {
 			if (e instanceof ForwardedRuntimeException) {
 				exceptionRegistry

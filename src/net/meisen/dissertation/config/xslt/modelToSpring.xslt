@@ -454,7 +454,7 @@
             <array value-type="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
               <xsl:for-each select="mns:entry">
               
-                <bean class="net.meisen.dissertation.impl.datasets.SingleStaticDataSetEntry">
+                <bean class="net.meisen.dissertation.impl.datasets.ConfiguredSingleStaticDataSetEntry">
                   <constructor-arg type="int">
                     <value><xsl:choose><xsl:when test="@position"><xsl:value-of select="@position" /></xsl:when><xsl:otherwise>-1</xsl:otherwise></xsl:choose></value>
                   </constructor-arg>

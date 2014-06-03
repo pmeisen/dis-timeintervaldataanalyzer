@@ -48,6 +48,11 @@ public class InsertQuery implements IQuery {
 		this.descIds = Collections.emptyList();
 	}
 
+	/**
+	 * Generates an iterator useful to iterate over the data of {@code this}.
+	 * 
+	 * @return an iterator to iterate over the data of {@code this}
+	 */
 	public Iterator<IDataRecord> it() {
 		return new Iterator<IDataRecord>() {
 			private int pos = 0;
@@ -129,7 +134,7 @@ public class InsertQuery implements IQuery {
 
 	@Override
 	public IQueryResult evaluate(final TidaModel model) {
-		return null;
+		return new InsertResult(model.bulkLoadData(getDataStructure(), it()));
 	}
 
 	/**

@@ -405,6 +405,7 @@ public class IntervalIndex implements IDataRecordIndex {
 				.shiftToLong(start, 1, false);
 		final long lEnd = endInclusive ? mapper.mapToLong(end) : mapper
 				.shiftToLong(end, 1, true);
+
 		return getSlices(lStart, lEnd);
 	}
 
