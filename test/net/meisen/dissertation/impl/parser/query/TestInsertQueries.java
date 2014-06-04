@@ -181,6 +181,9 @@ public class TestInsertQueries extends LoaderBasedTest {
 		assertEquals("CONTRACT", mse.get(3).getDescriptorModel());
 	}
 
+	/**
+	 * Tests the insertion of one value.
+	 */
 	@Test
 	public void testInsertionOfOne() {
 
@@ -202,6 +205,12 @@ public class TestInsertQueries extends LoaderBasedTest {
 		assertEquals(1, model.getNextDataId());
 	}
 
+	/**
+	 * Tests the insertion of multiple values.
+	 * 
+	 * @throws ParseException
+	 *             if a date cannot be parsed
+	 */
 	@Test
 	public void testInsertionOfMultiple() throws ParseException {
 

@@ -50,7 +50,8 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 	}
 
 	/**
-	 * Load some data from an hsql database.
+	 * Load 200k of data from an hsql database. The data is loaded in 20x 10k
+	 * steps.
 	 * 
 	 * @throws IOException
 	 *             if the database cannot be opened
@@ -60,15 +61,23 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		results.put("testLoadingPerformance10000", runLoading(10000));
 
 		// add four times the same data
+		final int amount = 19;
 		long sum = 0;
-		sum += runLoading(10000);
-		sum += runLoading(10000);
-		sum += runLoading(10000);
-		sum += runLoading(10000);
+		for (int i = 0; i < amount; i++) {
+			sum += runLoading(10000);
+		}
 
-		results.put("testLoadingPerformance10000 - Average", (long) (sum / 4l));
+		results.put("testLoadingPerformance10000 - Average",
+				(long) (sum / amount));
 	}
 
+	/**
+	 * Load 200k of data from an hsql database. The data is loaded in 4x 50k
+	 * steps.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
 	@Test
 	public void testLoadingPerformance50000() throws IOException {
 		results.put("testLoadingPerformance50000", runLoading(50000));
@@ -78,11 +87,17 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		sum += runLoading(50000);
 		sum += runLoading(50000);
 		sum += runLoading(50000);
-		sum += runLoading(50000);
 
-		results.put("testLoadingPerformance50000 - Average", (long) (sum / 4l));
+		results.put("testLoadingPerformance50000 - Average", (long) (sum / 3l));
 	}
 
+	/**
+	 * Load 200k of data from an hsql database. The data is loaded in 2x 100k
+	 * steps.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
 	@Test
 	public void testLoadingPerformance100000() throws IOException {
 		results.put("testLoadingPerformance100000", runLoading(100000));
@@ -90,55 +105,33 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		// add four times the same data
 		long sum = 0;
 		sum += runLoading(100000);
-		sum += runLoading(100000);
-		sum += runLoading(100000);
-		sum += runLoading(100000);
 
-		results.put("testLoadingPerformance100000 - Average", (long) (sum / 4l));
+		results.put("testLoadingPerformance100000 - Average", (long) (sum / 1l));
 	}
 
+	/**
+	 * Load 200k of data from an hsql database. The data is loaded in 1x 200k
+	 * steps.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
 	@Test
 	public void testLoadingPerformance200000() throws IOException {
 		results.put("testLoadingPerformance200000", runLoading(200000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(200000);
-		sum += runLoading(200000);
-		sum += runLoading(200000);
-		sum += runLoading(200000);
-
-		results.put("testLoadingPerformance200000 - Average", (long) (sum / 4l));
 	}
 
-	@Test
-	public void testLoadingPerformance300000() throws IOException {
-		results.put("testLoadingPerformance300000", runLoading(300000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(300000);
-		sum += runLoading(300000);
-		sum += runLoading(300000);
-		sum += runLoading(300000);
-
-		results.put("testLoadingPerformance300000 - Average", (long) (sum / 4l));
-	}
-
-	@Test
-	public void testLoadingPerformance400000() throws IOException {
-		results.put("testLoadingPerformance400000", runLoading(400000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(400000);
-		sum += runLoading(400000);
-		sum += runLoading(400000);
-		sum += runLoading(400000);
-
-		results.put("testLoadingPerformance400000 - Average", (long) (sum / 4l));
-	}
-
+	/**
+	 * Helper method used to load the specified amount of data.
+	 * 
+	 * @param amount
+	 *            the amount of data to be loaded
+	 * 
+	 * @return the amount of data loaded
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
 	protected long runLoading(final int amount) throws IOException {
 		System.setProperty("tidaModelMinute.dataAmount", "" + amount);
 

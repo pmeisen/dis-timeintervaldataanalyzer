@@ -393,9 +393,11 @@ public class TidaModel implements IPersistable {
 		int amountOfData = 0;
 		boolean oldPersistencyBitmap = true;
 		boolean oldPersistencyFacts = true;
+		boolean oldPersistencyId = true;
 		try {
 			oldPersistencyBitmap = getBitmapCache().setPersistency(false);
 			oldPersistencyFacts = getFactsCache().setPersistency(false);
+			oldPersistencyId = getIdentifierCache().setPersistency(false);
 
 			try {
 				while (it.hasNext()) {
@@ -417,6 +419,7 @@ public class TidaModel implements IPersistable {
 			// enable the persistency again, everything is loaded
 			getBitmapCache().setPersistency(oldPersistencyBitmap);
 			getFactsCache().setPersistency(oldPersistencyFacts);
+			getIdentifierCache().setPersistency(oldPersistencyId);
 
 			loadLock.writeLock().unlock();
 		}

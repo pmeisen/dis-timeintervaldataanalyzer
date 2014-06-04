@@ -9,8 +9,17 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 import org.junit.Test;
 
+/**
+ * Performance tests considering the usage of large {@code DescriptorModels}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestLargeDescriptor {
 
+	/**
+	 * Tests the performance when using a huge amount of descriptors.
+	 */
 	@Test
 	public void testLargeDescriptor() {
 		final long max = Integer.MAX_VALUE;
@@ -20,9 +29,10 @@ public class TestLargeDescriptor {
 
 		for (long i = 0; i < max; i++) {
 			model.createDescriptor(UUID.randomUUID());
-			
+
 			if ((i + 1) % 1000000l == 0l) {
-				System.out.println("Created " + (i + 1) + " of " + max + "' descriptors...");
+				System.out.println("Created " + (i + 1) + " of " + max
+						+ "' descriptors...");
 			}
 		}
 	}

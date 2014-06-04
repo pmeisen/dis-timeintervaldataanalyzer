@@ -20,6 +20,7 @@
   <config>
 
     <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
       <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
       <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
       <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
