@@ -575,9 +575,9 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	protected abstract T createFromInput(final DataInput in) throws IOException;
 
 	/**
-	 * Creates an empty, new instance of the {@ode Cacheable}.
+	 * Creates an empty, new instance of the {@code Cacheable}.
 	 * 
-	 * @return an empty, new instance of the {@ode Cacheable}
+	 * @return an empty, new instance of the {@code Cacheable}
 	 */
 	protected abstract T createNewInstance();
 

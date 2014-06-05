@@ -2,19 +2,17 @@ package net.meisen.dissertation.server;
 
 import java.io.UnsupportedEncodingException;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.general.server.http.listener.api.IServlet;
+import net.meisen.general.server.settings.pojos.Extension;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.impl.parser.query.QueryFactory;
-import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.dissertation.model.parser.query.IQuery;
-import net.meisen.general.server.http.listener.api.IServlet;
-import net.meisen.general.server.settings.pojos.Extension;
 
 public class QueryServlet implements IServlet {
 

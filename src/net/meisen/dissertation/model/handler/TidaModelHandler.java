@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -39,8 +41,11 @@ import org.w3c.dom.Node;
  * 
  */
 public class TidaModelHandler {
+	private final static String MODEL_FILENAME = "model.xml";
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TidaModelHandler.class);
+
+	private String defaultLocation;
 
 	/**
 	 * Class to keep track of changes on an xml document.
@@ -168,8 +173,9 @@ public class TidaModelHandler {
 		final IModuleHolder moduleHolder = configuration.loadDelayed(
 				"tidaXsltModelLoader", bais);
 
-		// close the stream silently
+		// close the streams silently
 		Streams.closeIO(bais);
+		Streams.closeIO(is);
 
 		final TidaModel model = moduleHolder
 				.getModule(DefaultValues.TIDAMODEL_ID);
@@ -286,7 +292,6 @@ public class TidaModelHandler {
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
 	public synchronized TidaModel loadViaXslt(final InputStream is) {
-
 		final TidaModel model = getModuleHolder(is).getModule(
 				DefaultValues.TIDAMODEL_ID);
 
@@ -298,7 +303,55 @@ public class TidaModelHandler {
 		// initialize the model
 		model.initialize();
 
+		// define the file to store the model at
+		final String modelId = model.getId();
+		final File modelDir = new File(getDefaultLocation(), model.getId());
+		final File modelFile = new File(modelDir, MODEL_FILENAME);
+		if (modelFile.exists()) {
+			if (modelFile.isDirectory()) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1006, modelFile);
+			} else if (!modelFile.delete()) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1007, modelFile);
+			}
+		} else {
+			modelDir.mkdirs();
+		}
+
+		// copy the file to the specified location
+		final byte[] config = configurations.get(modelId);
+		try {
+			Streams.copyStreamToFile(new ByteArrayInputStream(config),
+					modelFile);
+		} catch (final IOException e) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1008, e, modelFile);
+		}
+
 		return model;
+	}
+
+	/**
+	 * Loads a previously loaded model from the default location, i.e. the
+	 * location where all the models are stored.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to be loaded
+	 * 
+	 * @return the loaded {@code TidaModel}
+	 */
+	public synchronized TidaModel loadFromDefaultLocation(final String modelId) {
+		final File modelDir = new File(getDefaultLocation(), modelId);
+		final File modelFile = new File(modelDir, MODEL_FILENAME);
+
+		// check if the file does not exist or if it's a directory
+		if (!modelFile.exists() || modelFile.isDirectory()) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1009, modelId, modelFile);
+		}
+
+		return loadViaXslt(modelFile);
 	}
 
 	/**
@@ -324,15 +377,21 @@ public class TidaModelHandler {
 		persistor.load(location, config);
 
 		// manipulate the configuration so that it can be used for loading
-		final ManipulatedXml xml = manipulateXmlForLoading(config.getStream());
+		final ManipulatedXml xml = manipulateXmlForLoading(config.getStream(),
+				"offlinemode", "auto");
 
 		// load the xml
 		final ByteArrayInputStream configIs = new ByteArrayInputStream(
 				xml.getXml());
 		final TidaModel model = loadViaXslt(configIs);
-
-		// reset the changes made for loading
-		model.setOfflineModeByString(xml.getOldValue("offlinemode"));
+		if (!"auto".equalsIgnoreCase(xml.getOldValue("offlinemode"))) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("The 'offlibemode' of the model was changed during the loading from the location '"
+						+ location
+						+ "' (old: '"
+						+ xml.getOldValue("offlinemode") + "', new: 'auto')");
+			}
+		}
 
 		// close the created and used stream
 		Streams.closeIO(configIs);
@@ -388,13 +447,37 @@ public class TidaModelHandler {
 	 * 
 	 * @param xml
 	 *            the xml to be manipulated
+	 * @param key
+	 *            the attribute to be manipulated
+	 * @param value
+	 *            the new value of the attribute
 	 * 
 	 * @return the manipulated xml
 	 */
-	protected ManipulatedXml manipulateXmlForLoading(final byte[] xml) {
+	protected ManipulatedXml manipulateXmlForLoading(final byte[] xml,
+			final String key, final String value) {
+		final Properties p = new Properties();
+		p.setProperty("offlinemode", "auto");
+
+		return manipulateXmlForLoading(xml, p);
+	}
+
+	/**
+	 * Manipulates the specified {@code xml} to be used for loading.
+	 * 
+	 * @param xml
+	 *            the xml to be manipulated
+	 * @param properties
+	 *            the attributes to be manipulated
+	 * 
+	 * @return the manipulated xml
+	 */
+	protected ManipulatedXml manipulateXmlForLoading(final byte[] xml,
+			final Properties properties) {
 		final InputStream bais = new ByteArrayInputStream(xml);
 
-		final ManipulatedXml manipulatedXml = manipulateXmlForLoading(bais);
+		final ManipulatedXml manipulatedXml = manipulateXmlForLoading(bais,
+				properties);
 		Streams.closeIO(bais);
 
 		return manipulatedXml;
@@ -405,10 +488,33 @@ public class TidaModelHandler {
 	 * 
 	 * @param xml
 	 *            the xml to be manipulated
+	 * @param key
+	 *            the attribute to be manipulated
+	 * @param value
+	 *            the new value of the attribute
 	 * 
 	 * @return the manipulated xml
 	 */
-	protected ManipulatedXml manipulateXmlForLoading(final InputStream xml) {
+	protected ManipulatedXml manipulateXmlForLoading(final InputStream xml,
+			final String key, final String value) {
+		final Properties p = new Properties();
+		p.setProperty("offlinemode", "auto");
+
+		return manipulateXmlForLoading(xml, p);
+	}
+
+	/**
+	 * Manipulates the specified {@code xml} to be used for loading.
+	 * 
+	 * @param xml
+	 *            the xml to be manipulated
+	 * @param properties
+	 *            the attributes to be manipulated
+	 * 
+	 * @return the manipulated xml
+	 */
+	protected ManipulatedXml manipulateXmlForLoading(final InputStream xml,
+			final Properties properties) {
 		final Document doc = Xml.createDocument(xml, true);
 
 		// check if the document could be read
@@ -425,19 +531,42 @@ public class TidaModelHandler {
 		final NamedNodeMap nodeAttributes = root.getAttributes();
 
 		// manipulate the offlinemode attribute
-		Node attribute = nodeAttributes.getNamedItem("offlinemode");
-		if (attribute == null) {
-			attribute = doc.createAttribute("offlinemode");
-		} else {
-			manipulatedXml.addValue("offlinemode", attribute.getTextContent());
-		}
-		attribute.setTextContent("auto");
+		for (final Entry<Object, Object> e : properties.entrySet()) {
+			final String key = (String) e.getKey();
 
-		// make sure it is added
-		nodeAttributes.setNamedItem(attribute);
+			Node attribute = nodeAttributes.getNamedItem(key);
+			if (attribute == null) {
+				attribute = doc.createAttribute(key);
+			} else {
+				manipulatedXml.addValue(key, attribute.getTextContent());
+			}
+			attribute.setTextContent((String) e.getValue());
+
+			// make sure it is added
+			nodeAttributes.setNamedItem(attribute);
+		}
 
 		manipulatedXml.setManipulatedXml(Xml.createByteArray(doc));
 
 		return manipulatedXml;
+	}
+
+	/**
+	 * Gets the default location under which the models are stored.
+	 * 
+	 * @return the default location under which the models are stored
+	 */
+	public String getDefaultLocation() {
+		return defaultLocation;
+	}
+
+	/**
+	 * Specifies the default location under which the models are stored.
+	 * 
+	 * @param defaultLocation
+	 *            the default location under which the models are stored
+	 */
+	public void setDefaultLocation(final String defaultLocation) {
+		this.defaultLocation = defaultLocation;
 	}
 }

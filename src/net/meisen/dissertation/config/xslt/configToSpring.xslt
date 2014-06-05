@@ -219,7 +219,9 @@
       <bean id="{$queryFactoryId}" class="{$queryFactory}" />
     
       <!-- define loaders used to load tidaModels -->
-      <bean id="{$handlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler" />
+      <bean id="{$handlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler">
+        <property name="defaultLocation" ref="defaultLocation" /> 
+      </bean>
   
       <!-- define the tidaServer -->
       <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />

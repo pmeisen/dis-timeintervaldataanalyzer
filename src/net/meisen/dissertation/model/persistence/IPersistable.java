@@ -57,7 +57,7 @@ public interface IPersistable {
 	 *            the {@code Persistor} at which the {@code Persistable} was
 	 *            registered at
 	 * @param group
-	 *            the group the {@ode Persistor} was registered under
+	 *            the group the {@code Persistor} was registered under
 	 */
 	public void isRegistered(final BasePersistor persistor, final Group group);
 

@@ -25,7 +25,22 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect) EOF;
+root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive) EOF;
+
+/*
+ * Define the different expressions/parts of the alive statement
+ */
+exprAlive     : STMT_ALIVE;
+
+/*
+ * Define the different expressions/parts of the load statement
+ */
+exprLoad      : STMT_LOAD (selectorModelId | (OP_FROM selectorFilePath));
+
+/*
+ * Define the different expressions/parts of the unload statement
+ */
+exprUnload      : STMT_UNLOAD selectorModelId;
 
 /*
  * Define the different expressions/parts of the insert statement
@@ -76,7 +91,8 @@ selectorDateValueOrNull     : (DATE | NULL_VALUE);
 selectorIntValueOrNull      : (INT | NULL_VALUE);
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
-selectorDescValue           : (DESC_VALUE | NULL_VALUE);
+selectorDescValue           : (VALUE | NULL_VALUE);
+selectorFilePath            : VALUE;
 selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
@@ -93,7 +109,7 @@ selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL 
 MARKED_ID : SYM_IDMARKER (SIMPLE_ID | ENHANCED_ID) SYM_IDMARKER;
 
 // '...' everything marked by single quotes should be handled as value of a descriptor
-DESC_VALUE: SYM_DESC_VALUE ((SYM_QUOTE (SYM_DESC_VALUE | SYM_QUOTE | SYM_ALL_MASK))|~('\''|'\\'))*? SYM_DESC_VALUE;
+VALUE: SYM_VALUE ((SYM_QUOTE (SYM_VALUE | SYM_QUOTE | SYM_ALL_MASK))|~('\''|'\\'))*? SYM_VALUE;
 // NULL used to identify a null descriptor-value
 NULL_VALUE: N U L L;
 
@@ -106,6 +122,9 @@ POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 // reserved word to define a SELECT statement
 STMT_SELECT   : S E L E C T;
 STMT_INSERT   : I N S E R T;
+STMT_LOAD     : L O A D;
+STMT_UNLOAD   : U N L O A D;
+STMT_ALIVE    : A L I V E;
 
 // reserved words to define the types of data to select
 TYPE_TIMESERIES: T I M E S E R I E S;
@@ -179,7 +198,7 @@ WHITESPACE: [ \t\r\n]+ -> skip;
  * Define some special tokens used for wildchars, and special markups.
  */
 fragment SYM_ALL_MASK      : '*';
-fragment SYM_DESC_VALUE    : '\'';
+fragment SYM_VALUE    : '\'';
 fragment SYM_QUOTE         : '\\';
 fragment SYM_IDMARKER      : '"';
 

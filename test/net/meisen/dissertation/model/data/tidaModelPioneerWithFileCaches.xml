@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       
+       id="tidaModelPioneerWithFileCaches">
+
+  <config>
+  
+    <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
+    </caches>
+  
+    <dataretrievers>
+      <dataretriever id="db_pioneer">
+        <db:connection type="jdbc" url="jdbc:hsqldb:hsql://localhost:6666/tidaPioneerData" driver="org.hsqldb.jdbcDriver" username="SA" password="" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <time>
+    <timeline start="0" duration="10000" />
+  </time>
+
+  <meta>
+    <descriptors>
+      <string id="SYMBOL" name="symbol" failonduplicates="false" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="SYMBOL" dataretriever="db_pioneer">
+        <db:query language="sql">SELECT symbol FROM TB_INTERVALS</db:query>
+      </entry>
+    </entries>
+  </meta>
+
+  <structure>
+    <meta position="3" descriptor="SYMBOL" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+           
+  <data metahandling="fail" intervalhandling="fail">
+    <dataset dataretriever="db_pioneer">
+      <db:query>SELECT start_time, end_time, symbol FROM TB_INTERVALS</db:query>
+    </dataset>
+  </data>
+</model>

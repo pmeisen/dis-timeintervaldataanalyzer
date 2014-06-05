@@ -195,7 +195,7 @@ public class TestInsertQueries extends LoaderBasedTest {
 
 		// evaluate the query
 		final InsertQuery query = q("INSERT INTO testEmptyModel ([END], NAME, [START+], PRIORITY, POSITION) VALUES (20.01.2000, 'Philipp', NULL, 'High', '19')");
-		final InsertResult res = factory.evaluateQuery(query);
+		final InsertResult res = factory.evaluateQuery(query, null);
 
 		// check the result
 		assertEquals(1, res.getAmount());
@@ -232,7 +232,7 @@ public class TestInsertQueries extends LoaderBasedTest {
 
 		// evaluate the query
 		final InsertQuery query = q(q);
-		final InsertResult res = factory.evaluateQuery(query);
+		final InsertResult res = factory.evaluateQuery(query, null);
 
 		// check the result
 		assertEquals(6, res.getAmount());

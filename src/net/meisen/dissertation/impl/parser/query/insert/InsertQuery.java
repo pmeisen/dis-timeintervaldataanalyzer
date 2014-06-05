@@ -14,8 +14,10 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.datastructure.StructureEntry;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
+import net.meisen.dissertation.model.parser.query.IResourceResolver;
 
 /**
  * A query used to insert values into a {@code TidaModel}.
@@ -133,7 +135,8 @@ public class InsertQuery implements IQuery {
 	}
 
 	@Override
-	public IQueryResult evaluate(final TidaModel model) {
+	public IQueryResult evaluate(final TidaModelHandler handler,
+			final TidaModel model, final IResourceResolver resolver) {
 		return new InsertResult(model.bulkLoadData(getDataStructure(), it()));
 	}
 
@@ -294,5 +297,10 @@ public class InsertQuery implements IQuery {
 	 */
 	public List<String> getDescriptorValues(final int recordPos) {
 		return data.get(recordPos);
+	}
+
+	@Override
+	public boolean expectsModel() {
+		return true;
 	}
 }

@@ -10,7 +10,10 @@ import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.dissertation.model.parser.query.IResourceResolver;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A {@code SelectQuery} is a {@code Query} used to retrieve data from the
@@ -99,7 +102,9 @@ public class SelectQuery implements IQuery {
 	}
 
 	@Override
-	public SelectResult evaluate(final TidaModel model) {
+	public SelectResult evaluate(final TidaModelHandler handler,
+			final TidaModel model, final IResourceResolver resolver)
+			throws ForwardedRuntimeException {
 		final SelectEvaluator evaluator = new SelectEvaluator(model);
 		return evaluator.evaluate(this);
 	}
@@ -140,5 +145,10 @@ public class SelectQuery implements IQuery {
 	 */
 	public void addMeasure(final DescriptorMathTree mathTree) {
 		measures.add(mathTree);
+	}
+
+	@Override
+	public boolean expectsModel() {
+		return true;
 	}
 }

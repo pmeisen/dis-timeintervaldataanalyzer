@@ -8,7 +8,7 @@
 
   <!-- add the lightweight HTTP protocol -->
   <connector id="HTTP" port="7000" listener="HTTP">
-  	<e:extension> 	
+  	<e:extension>
       <servlet urlmatcher="/loader/*">net.meisen.dissertation.server.LoaderServlet</servlet>
       <servlet urlmatcher="/query/*">net.meisen.dissertation.server.QueryServlet</servlet>
       
@@ -24,7 +24,13 @@
   </connector>
   
   <!-- add the TSQL connector for queries -->
-  <connector id="TSQL" port="7001" listener="TSQL" />
+  <connector id="TSQL" port="7001" listener="TSQL">
+    <e:extension>
+      
+      <!-- Specify the timeout of a client-server connection in seconds, 0 disables the timeout -->
+      <client timeout="1800000" />
+    </e:extension>
+  </connector>
 
   <!-- disable the default connector -->
   <connector id="DEFAULT" port="${server.settings.defaultPort}" listener="${server.settings.defaultListener}" enable="false" />

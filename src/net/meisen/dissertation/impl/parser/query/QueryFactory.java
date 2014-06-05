@@ -11,6 +11,7 @@ import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
+import net.meisen.dissertation.model.parser.query.IResourceResolver;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -128,7 +129,7 @@ public class QueryFactory implements IQueryFactory {
 	public <T extends IQuery> T parseQuery(final String queryString)
 			throws QueryParsingException {
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Pasrsing the query '" + queryString + "'.");
+			LOG.trace("Parsing the query '" + queryString + "'.");
 		}
 
 		return (T) parseQuery(queryString, true);
@@ -136,23 +137,28 @@ public class QueryFactory implements IQueryFactory {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends IQueryResult> T evaluateQuery(final IQuery query)
-			throws QueryEvaluationException {
+	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
+			final IResourceResolver resolver) throws QueryEvaluationException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Evaluating the query '" + query + "'.");
 		}
 
-		final String modelId = query.getModelId();
-
 		// get the model
-		final TidaModel model = handler.getTidaModel(modelId);
-		if (model == null) {
-			exceptionRegistry.throwRuntimeException(
-					QueryEvaluationException.class, 1001, modelId);
+		final TidaModel model;
+		if (query.expectsModel()) {
+			final String modelId = query.getModelId();
+			model = handler.getTidaModel(modelId);
+
+			if (model == null) {
+				exceptionRegistry.throwRuntimeException(
+						QueryEvaluationException.class, 1001, modelId);
+			}
+		} else {
+			model = null;
 		}
 
 		try {
-			return (T) query.evaluate(model);
+			return (T) query.evaluate(handler, model, resolver);
 		} catch (final Exception e) {
 			if (e instanceof ForwardedRuntimeException) {
 				exceptionRegistry

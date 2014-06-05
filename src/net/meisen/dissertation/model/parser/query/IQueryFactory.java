@@ -28,16 +28,25 @@ public interface IQueryFactory {
 			throws QueryParsingException;
 
 	/**
-	 * Evaluates the query and retrieves the {@code IQueryResult}.
+	 * Evaluates the query and retrieves the {@code QueryResult}. The evaluation
+	 * of the {@code Query} might need additional resources, which can be
+	 * specified by a {@code ResourceResolver}. A {@code ResourceResolver} is an
+	 * optional argument, i.e. it might be {@code null}. If a
+	 * {@code ResourceResolver} is needed but not specified a
+	 * {@code QueryEvaluationException} should be thrown.
 	 * 
 	 * @param query
 	 *            the query to be evaluated
+	 * @param resolver
+	 *            it might be necessary for the evaluation of the {@code Query}
+	 *            to retrieve additional resources, those can be retrieved from
+	 *            the resolver (might be {@code null})
 	 * 
 	 * @return the result of the query
 	 * 
 	 * @throws QueryEvaluationException
 	 *             of the evaluation fails
 	 */
-	public <T extends IQueryResult> T evaluateQuery(final IQuery query)
-			throws QueryEvaluationException;
+	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
+			final IResourceResolver resolver) throws QueryEvaluationException;
 }

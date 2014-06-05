@@ -14,6 +14,7 @@ import net.meisen.dissertation.exceptions.TidaModelHandlerException;
 import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.impl.persistence.FileLocation;
+import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
@@ -132,9 +133,10 @@ public class TestTidaModelHandler extends DbBasedTest {
 	 */
 	@Test
 	public void testXmlManipulation() throws IOException {
-		final ManipulatedXml xml = loader.manipulateXmlForLoading(Streams
-				.copyStreamToByteArray(getClass().getResourceAsStream(
-						"/net/meisen/dissertation/config/fullModel.xml")));
+		final ManipulatedXml xml = loader.manipulateXmlForLoading(
+				Streams.copyStreamToByteArray(getClass().getResourceAsStream(
+						"/net/meisen/dissertation/config/fullModel.xml")),
+				"offlinemode", "auto");
 
 		// get the modified xml as string
 		final String result = Streams.readFromStream(new ByteArrayInputStream(
@@ -194,7 +196,6 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// keep some information of the model
 		final int nextId = modelPioneerData1.getNextDataId();
-		final OfflineMode offlineMode = modelPioneerData1.getOfflineMode();
 
 		// now load the file
 		loader.unload(modelPioneerData1.getId());
@@ -203,7 +204,6 @@ public class TestTidaModelHandler extends DbBasedTest {
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
 		assertEquals(nextId, modelPioneerData2.getNextDataId());
-		assertEquals(offlineMode, modelPioneerData2.getOfflineMode());
 		modelPioneerData2.release(true);
 
 		// delete the file
@@ -247,7 +247,6 @@ public class TestTidaModelHandler extends DbBasedTest {
 
 		// keep some information of the model
 		final int nextId = modelPioneerData1.getNextDataId();
-		final OfflineMode offlineMode = modelPioneerData1.getOfflineMode();
 
 		// unload and cleanup
 		loader.unload(modelPioneerData1.getId());
@@ -257,11 +256,53 @@ public class TestTidaModelHandler extends DbBasedTest {
 		final TidaModel modelPioneerData2 = loader.load(new FileLocation(
 				tmpFile));
 		assertEquals(nextId, modelPioneerData2.getNextDataId());
-		assertEquals(offlineMode, modelPioneerData2.getOfflineMode());
 
 		// delete the file
 		assertTrue(tmpFile.delete());
 		modelPioneerData2.release(true);
+	}
+
+	/**
+	 * Loads a model from the default location of the system.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be started
+	 */
+	@Test
+	public void testLoadFromDefaultLocation() throws IOException {
+
+		// start the needed Database
+		final Db db = getDb("tidaPioneerData",
+				"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
+
+		// load a model so that it is created at the default location
+		TidaModel model = null;
+
+		try {
+			// load the model
+			model = loader
+					.loadViaXslt("/net/meisen/dissertation/model/data/tidaModelPioneerWithFileCaches.xml");
+			model.bulkLoadDataFromDataModel();
+
+			final int size = model.getAmountOfRecords();
+
+			// unload everything
+			loader.unloadAll();
+			db.shutDownDb();
+
+			// now reload it
+			model = loader
+					.loadFromDefaultLocation("tidaModelPioneerWithFileCaches");
+
+			final MetaDataModel metaModel = model.getMetaDataModel();
+			assertEquals(1, metaModel.getDescriptorModels().size());
+			assertNotNull(metaModel.getDescriptorModel("SYMBOL"));
+			assertEquals(size, model.getAmountOfRecords());
+		} finally {
+			if (model != null) {
+				model.release(true);
+			}
+		}
 	}
 
 	/**

@@ -283,10 +283,10 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	}
 
 	/**
-	 * Gets the class of the {@ode Index} using to index the different
+	 * Gets the class of the {@code Index} using to index the different
 	 * slices of the {@code MetaIndexDimension}.
 	 * 
-	 * @return the class of the {@ode Index}
+	 * @return the class of the {@code Index}
 	 */
 	protected Class<? extends IIndexedCollection> getIndexClass() {
 		return index.getClass();

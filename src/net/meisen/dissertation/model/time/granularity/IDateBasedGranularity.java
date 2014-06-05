@@ -68,7 +68,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * Gets the format of the date which represents the
 	 * {@code DateBasedGranularity}.
 	 * 
-	 * @return the {@code DateFormat} which represents the {@ode
+	 * @return the {@code DateFormat} which represents the {@code
 	 *         DateBasedGranularity}
 	 */
 	public DateFormat getFormat();
