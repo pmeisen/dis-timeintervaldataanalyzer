@@ -164,6 +164,10 @@ public class QueryFactory implements IQueryFactory {
 				exceptionRegistry
 						.throwRuntimeException((ForwardedRuntimeException) e);
 			} else {
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Unknown error occurred during evaluation.", e);
+				}
+
 				exceptionRegistry.throwRuntimeException(
 						QueryEvaluationException.class, 1000, e, query);
 			}

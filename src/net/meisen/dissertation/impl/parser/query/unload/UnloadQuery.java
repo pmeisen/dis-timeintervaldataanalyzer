@@ -7,6 +7,12 @@ import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
+/**
+ * Query to unload a specific {@code TidaModel}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class UnloadQuery implements IQuery {
 	private String modelId;
 
@@ -32,7 +38,7 @@ public class UnloadQuery implements IQuery {
 
 		// unload the model
 		handler.unload(modelId);
-		
+
 		return new UnloadResult();
 	}
 }

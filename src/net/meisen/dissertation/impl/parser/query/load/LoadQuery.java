@@ -37,8 +37,9 @@ public class LoadQuery implements IQuery {
 	public IQueryResult evaluate(final TidaModelHandler handler,
 			final TidaModel model, final IResourceResolver resolver) {
 
+		final String modelId;
 		if (getPath() == null) {
-			final String modelId = getModelId();
+			modelId = getModelId();
 
 			// check if the model is already loaded
 			if (handler.getTidaModel(modelId) != null) {
@@ -59,11 +60,17 @@ public class LoadQuery implements IQuery {
 					1014, getPath());
 		} else {
 			final InputStream is = resolver.resolve(getPath());
-			handler.loadViaXslt(is);
+			final TidaModel loadedModel = handler.loadViaXslt(is);
 			Streams.closeIO(is);
+
+			modelId = loadedModel.getId();
 		}
 
-		return new LoadResult();
+		// create the result, the loading is finished
+		final LoadResult result = new LoadResult();
+		result.setModelId(modelId);
+
+		return result;
 	}
 
 	/**

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.LoaderBasedTest;
-import net.meisen.dissertation.impl.parser.query.load.LoadResult;
 import net.meisen.dissertation.impl.parser.query.unload.UnloadQuery;
 import net.meisen.dissertation.impl.parser.query.unload.UnloadResult;
 

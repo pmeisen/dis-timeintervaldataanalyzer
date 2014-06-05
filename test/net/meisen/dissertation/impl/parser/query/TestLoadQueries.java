@@ -64,6 +64,7 @@ public class TestLoadQueries extends LoaderBasedTest implements
 		final LoadResult res = factory.evaluateQuery(query, null);
 		assertNotNull(loader.getTidaModel("testPersonModel"));
 		assertNotNull(res);
+		assertEquals("testPersonModel", res.getModelId());
 	}
 
 	/**
@@ -81,6 +82,7 @@ public class TestLoadQueries extends LoaderBasedTest implements
 		final LoadResult res = factory.evaluateQuery(query, this);
 		assertNotNull(loader.getTidaModel("testPersonModel"));
 		assertNotNull(res);
+		assertEquals("testPersonModel", res.getModelId());
 	}
 
 	/**

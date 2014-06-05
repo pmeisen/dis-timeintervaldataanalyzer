@@ -1,14 +1,21 @@
 package net.meisen.dissertation.server;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Date;
 
-import net.meisen.general.genmisc.types.Streams;
+import net.meisen.dissertation.help.Performance;
+import net.meisen.dissertation.server.protocol.Communication;
+import net.meisen.dissertation.server.protocol.Communication.IResponseHandler;
+import net.meisen.dissertation.server.protocol.Communication.ResponseType;
+import net.meisen.dissertation.server.protocol.Communication.RetrievedValue;
+import net.meisen.general.genmisc.types.Files;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,9 +23,10 @@ import org.junit.Test;
 
 public class TestTidaServer {
 	private TidaServer server;
+	private Socket socket;
 
 	@Before
-	public void startServer() throws InterruptedException {
+	public void startServer() throws InterruptedException, IOException {
 		server = TidaServer.create();
 		server.startAsync();
 
@@ -26,51 +34,59 @@ public class TestTidaServer {
 		while (!server.isRunning()) {
 			Thread.sleep(50);
 		}
+
+		// directly create a socket
+		socket = new Socket();
+		socket.connect(new InetSocketAddress("localhost", 7001), 1000);
 	}
 
 	@Test
-	public void testConnection() throws IOException, InterruptedException {
-		Socket socket = new Socket();
-		socket.connect(new InetSocketAddress("localhost", 7001), 1000);
-//		socket.setSoTimeout(1000);
+	public void testCommunication() throws IOException {
+		final Communication c = new Communication(socket);
 
-		byte[] msgAsBytes;
-		
-		// create a input- and outputStream
-		final DataInputStream is = new DataInputStream(
-				new BufferedInputStream(socket.getInputStream()));
-		final DataOutputStream os = new DataOutputStream(
-				new BufferedOutputStream(socket.getOutputStream()));
+		final IResponseHandler handler = new IResponseHandler() {
 
-		msgAsBytes = "SELECT".getBytes("UTF8");
-		os.writeInt(msgAsBytes.length);
-		os.write(msgAsBytes);
-		os.flush();
-		
-		msgAsBytes = new byte[is.readInt()];
-		is.read(msgAsBytes);
-		System.out.println("echo: " + new String(msgAsBytes, "UTF8"));
-				
-		msgAsBytes = "SELECT".getBytes("UTF8");
-		os.writeInt(msgAsBytes.length);
-		os.write(msgAsBytes);
-		os.flush();
-		
-		msgAsBytes = new byte[is.readInt()];
-		is.read(msgAsBytes);
-		System.out.println("echo: " + new String(msgAsBytes, "UTF8"));
-		
-		Streams.closeIO(os);
-		Streams.closeIO(is);
-		
+			@Override
+			public InputStream getResourceStream(final String resource) {
+				return getClass().getResourceAsStream(resource);
+			}
+
+			@Override
+			public void handleResult(final byte[] result) {
+				try {
+					System.out.println(new String(result, "UTF8"));
+				} catch (final UnsupportedEncodingException e) {
+					// ignore
+				}
+			}
+		};
+
+		// load a model
+		c.write("LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'");
+		c.handleResponse(handler);
+
+		Performance p = new Performance();
+
+		for (int i = 0; i < 10; i++) {
+			p.start();
+			c.write("select timeseries of count(PERSON) AS PERSON from testPersonModel");
+			c.handleResponse(handler);
+			System.out.println(p.printSecs(p.stop()));
+		}
+
+		c.write("unload testPersonModel");
+		c.handleResponse(handler);
+
 		// close the socket
-		socket.close();
-		
-		System.out.println("DONE");
+		c.close();
 	}
 
 	@After
-	public void shutdownServer() {
+	public void shutdownServer() throws IOException {
+		socket.close();
 		server.shutdown();
+
+		// make sure the used model is cleaned
+		assertTrue(Files.deleteDir(new File(".", "testPersonModel")));
 	}
 }
