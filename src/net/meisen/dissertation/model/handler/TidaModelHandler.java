@@ -579,7 +579,17 @@ public class TidaModelHandler {
 		this.defaultLocation = defaultLocation;
 	}
 
-	public void enableAutoload(final String modelId) {
+	/**
+	 * Enables the automatically loading for the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the modelId to be automatically loaded
+	 * @throws TidaModelHandlerException
+	 *             if the {@code TidaModel} with the specified {@code modelId}
+	 *             is not known, i.e. was never loaded before
+	 */
+	public void enableAutoload(final String modelId)
+			throws TidaModelHandlerException {
 
 		// check if the directory exists
 		final File modelDir = getModelDir(modelId);
@@ -599,10 +609,19 @@ public class TidaModelHandler {
 		setAutoload(modelId, true);
 	}
 
+	/**
+	 * Disables the automatically loading for the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the modelId to be automatically loaded
+	 */
 	public void disableAutoload(final String modelId) {
 		setAutoload(modelId, false);
 	}
 
+	/**
+	 * Loads all the models defined for automatically loading.
+	 */
 	public void autoloadModules() {
 		autoloadLock.readLock().lock();
 		final Collection<String> modelIds;
@@ -622,6 +641,15 @@ public class TidaModelHandler {
 		}
 	}
 
+	/**
+	 * Sets the automatically loading, i.e. {@code true} to enable and
+	 * {@code false} to disable, for the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to be set
+	 * @param autoload
+	 *            {@code true} to enable auto-loading, otherwise {@code false}
+	 */
 	protected void setAutoload(final String modelId, final boolean autoload) {
 		autoloadLock.writeLock().lock();
 
@@ -672,6 +700,13 @@ public class TidaModelHandler {
 		}
 	}
 
+	/**
+	 * Reads the file of models to be automatically loaded and returns the
+	 * defined identifiers of the models to be automatically loaded.
+	 * 
+	 * @return set of identifiers of {@code TidaModel} instances to be
+	 *         automatically loaded
+	 */
 	protected Set<String> _readAutoloads() {
 		final Set<String> autoloads = new HashSet<String>();
 		final File autoloadFile = getAutoloadFile();
@@ -704,10 +739,29 @@ public class TidaModelHandler {
 		return autoloads;
 	}
 
+	/**
+	 * Gets the file containing all the models' identifier to be automatically
+	 * loaded.
+	 * 
+	 * @return the file containing all the models' identifier to be
+	 *         automatically loaded
+	 * 
+	 * @see #_readAutoloads()
+	 */
 	protected File getAutoloadFile() {
 		return new File(getDefaultLocation(), AUTOLOAD_FILENAME);
 	}
 
+	/**
+	 * Gets the default directory used to store data about a specific
+	 * {@code TidaModel}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to get the directory for
+	 * 
+	 * @return default directory used to store data for the {@code TidaModel}
+	 *         with the specified {@code modelId}
+	 */
 	protected File getModelDir(final String modelId) {
 		return new File(getDefaultLocation(), modelId);
 	}
