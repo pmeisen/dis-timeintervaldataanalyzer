@@ -5,14 +5,29 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.jdbc.protocol.Protocol;
+import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
-import net.meisen.dissertation.server.Protocol.WrappedException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
+/**
+ * A {@code ResourceResolver} used to resolve resources from the connected
+ * client.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class ClientResourceResolver implements IResourceResolver {
 
-	private final Protocol protocol; 
+	private final Protocol protocol;
 
+	/**
+	 * Constructor which specifies the {@code Protocol} used to retrieve the
+	 * resource.
+	 * 
+	 * @param protocol
+	 *            the used protocol
+	 */
 	public ClientResourceResolver(final Protocol protocol) {
 		this.protocol = protocol;
 	}
@@ -30,13 +45,11 @@ public class ClientResourceResolver implements IResourceResolver {
 			// return the resource
 			return new ByteArrayInputStream(resourceAsBytes);
 		} catch (final IOException e) {
-			// TODO fix number 10000
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					10000, e, resource);
+					1015, e, resource);
 		} catch (final WrappedException e) {
-			// TODO fix number 10001
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					10001, e.getMessage());
+					1016, resource, e.getMessage());
 		}
 	}
 }

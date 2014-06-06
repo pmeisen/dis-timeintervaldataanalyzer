@@ -1,16 +1,14 @@
 package net.meisen.dissertation.server;
 
-import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
 
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.dissertation.jdbc.protocol.Protocol;
+import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
-import net.meisen.dissertation.model.parser.query.IResourceResolver;
-import net.meisen.dissertation.server.Protocol.WrappedException;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.server.listener.utility.WorkerThread;
 

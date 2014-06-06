@@ -17,6 +17,13 @@
       <version>TRUNK-SNAPSHOT</version>
     </dependency>
     
+    <!-- add the driver for the common protocol -->
+    <dependency>
+      <groupId>net.meisen.dissertation</groupId>
+      <artifactId>net-meisen-dissertation-dis-timeintervaldataanalyzer-jdbc</artifactId>
+      <version>TRUNK-SNAPSHOT</version>
+    </dependency>
+    
     <!-- ConnectionManager -->
     <dependency>
       <groupId>com.jolbox</groupId>

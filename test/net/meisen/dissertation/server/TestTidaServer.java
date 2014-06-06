@@ -1,32 +1,37 @@
 package net.meisen.dissertation.server;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Date;
 
-import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.help.Performance;
-import net.meisen.dissertation.server.Protocol.IResponseHandler;
-import net.meisen.dissertation.server.Protocol.ResponseType;
-import net.meisen.dissertation.server.Protocol.RetrievedValue;
-import net.meisen.general.genmisc.types.Files;
+import net.meisen.dissertation.jdbc.protocol.Protocol;
+import net.meisen.dissertation.jdbc.protocol.Protocol.IResponseHandler;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Tests the implementation of the {@code TidaServer} and it's listeners and
+ * handlers.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestTidaServer {
 	private TidaServer server;
 	private Socket socket;
 
+	/**
+	 * Start a server for testing purposes
+	 * 
+	 * @throws Exception
+	 *             if the server could not be started
+	 */
 	@Before
-	public void startServer() throws InterruptedException, IOException {
+	public void startServer() throws Exception {
 		server = TidaServer.create();
 		server.startAsync();
 
@@ -93,10 +98,6 @@ public class TestTidaServer {
 	@After
 	public void shutdownServer() throws IOException {
 		socket.close();
-		server.shutdown();
-
-		// make sure the used model is cleaned
-		assertTrue(Files
-				.deleteDir(new File(DefaultValues.getDefaultLocation())));
+		server.shutdown(true);
 	}
 }

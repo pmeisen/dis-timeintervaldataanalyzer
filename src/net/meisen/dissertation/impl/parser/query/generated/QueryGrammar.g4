@@ -207,7 +207,7 @@ WHITESPACE: [ \t\r\n]+ -> skip;
  * Define some special tokens used for wildchars, and special markups.
  */
 fragment SYM_ALL_MASK      : '*';
-fragment SYM_VALUE    : '\'';
+fragment SYM_VALUE         : '\'';
 fragment SYM_QUOTE         : '\\';
 fragment SYM_IDMARKER      : '"';
 
