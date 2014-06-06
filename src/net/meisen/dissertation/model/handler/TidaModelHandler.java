@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
  * 
  */
 public class TidaModelHandler {
-	private final static String AUTOLOAD_FILENAME = "autoload.data";
+	private final static String AUTOLOAD_FILENAME = "handler.data";
 	private final static String MODEL_FILENAME = "model.xml";
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TidaModelHandler.class);
@@ -694,6 +694,8 @@ public class TidaModelHandler {
 				exceptionRegistry.throwRuntimeException(
 						TidaModelHandlerException.class, 1014, e, autoloadFile);
 				return;
+			} finally {
+				Streams.closeIO(out);
 			}
 		} finally {
 			autoloadLock.writeLock().unlock();
@@ -719,20 +721,26 @@ public class TidaModelHandler {
 		} else {
 			final IByteBufferReader reader = Streams
 					.createByteBufferReader(autoloadFile);
+			
+			try {
+				
+				// read all the objects
+				while (reader.hasRemaining()) {
+					final String modelId = (String) Streams
+							.readNextObject(reader);
+					final File modelDir = getModelDir(modelId);
 
-			// read all the objects
-			while (reader.hasRemaining()) {
-				final String modelId = (String) Streams.readNextObject(reader);
-				final File modelDir = getModelDir(modelId);
-
-				// validate the directory
-				if (!modelDir.exists() || !modelDir.isDirectory()) {
-					exceptionRegistry.throwRuntimeException(
-							TidaModelHandlerException.class, 1011, modelId,
-							modelDir);
-				} else {
-					autoloads.add(modelId);
+					// validate the directory
+					if (!modelDir.exists() || !modelDir.isDirectory()) {
+						exceptionRegistry.throwRuntimeException(
+								TidaModelHandlerException.class, 1011, modelId,
+								modelDir);
+					} else {
+						autoloads.add(modelId);
+					}
 				}
+			} finally {
+				Streams.closeIO(reader);
 			}
 		}
 

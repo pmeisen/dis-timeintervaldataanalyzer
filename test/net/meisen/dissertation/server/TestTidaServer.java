@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Date;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.Performance;
 import net.meisen.dissertation.server.Protocol.IResponseHandler;
 import net.meisen.dissertation.server.Protocol.ResponseType;
@@ -49,7 +50,7 @@ public class TestTidaServer {
 			public InputStream getResourceStream(final String resource) {
 				return getClass().getResourceAsStream(resource);
 			}
- 
+
 			@Override
 			public void handleResult(final byte[] result) {
 				try {
@@ -82,6 +83,7 @@ public class TestTidaServer {
 		server.shutdown();
 
 		// make sure the used model is cleaned
-		assertTrue(Files.deleteDir(new File(".", "testPersonModel")));
+		assertTrue(Files
+				.deleteDir(new File(DefaultValues.getDefaultLocation())));
 	}
 }

@@ -1,13 +1,19 @@
 package net.meisen.dissertation.help;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
 import java.io.InputStream;
 
+import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import net.meisen.general.sbconfigurator.helper.SpringHelper;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.runner.RunWith;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +83,17 @@ public class ModuleBasedTest extends ExceptionBasedTest {
 		if (modulesHolder != null) {
 			modulesHolder.release();
 			modulesHolder = null;
+		}
+	}
+
+	/**
+	 * After the complete tests remove the system's directory.
+	 */
+	@AfterClass
+	public static void removeDefaultLocation() {
+		final String location = DefaultValues.getDefaultLocation();
+		if (!location.isEmpty() && !".".equals(location)) {
+			assertTrue(Files.deleteDir(new File(location)));
 		}
 	}
 }

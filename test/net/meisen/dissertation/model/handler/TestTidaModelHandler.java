@@ -22,6 +22,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -307,6 +308,9 @@ public class TestTidaModelHandler extends DbBasedTest {
 		}
 	}
 
+	/**
+	 * Tests the auto-loading of specific models.
+	 */
 	@Test
 	public void testAutoloadEnabling() {
 		loader.loadViaXslt("/net/meisen/dissertation/impl/parser/query/testNumberModel.xml");
@@ -323,6 +327,15 @@ public class TestTidaModelHandler extends DbBasedTest {
 		// now load everything
 		loader.autoloadModules();
 		assertNotNull(loader.getTidaModel("testNumberModel"));
+
+		// unload everything loaded
+		loader.unloadAll();
+		assertNull(loader.getTidaModel("testNumberModel"));
+		loader.disableAutoload("testNumberModel");
+
+		// now load it again
+		loader.autoloadModules();
+		assertNull(loader.getTidaModel("testNumberModel"));
 	}
 
 	/**
@@ -358,5 +371,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@After
 	public void cleanUp() {
 		loader.unloadAll();
+
+		// delete the folder after every run, because the auto-loading is used
+		assertTrue(Files.deleteDir(new File(loader.getDefaultLocation())));
 	}
 }
