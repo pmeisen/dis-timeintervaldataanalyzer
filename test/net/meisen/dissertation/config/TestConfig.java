@@ -135,7 +135,9 @@ public class TestConfig {
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(), o instanceof TidaModel);
 			final TidaModel model = (TidaModel) o;
-			assertEquals(new File(".", model.getId()), model.getLocation());
+			assertEquals(
+					new File(DefaultValues.getDefaultLocation(), model.getId()),
+					model.getLocation());
 		}
 	}
 

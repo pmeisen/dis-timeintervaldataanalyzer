@@ -85,7 +85,7 @@ public class TestDescriptorLogicEvaluator extends ModuleBasedTest {
 		res = evaluator.evaluateDescriptorLeaf(leaf);
 		assertEquals(1, res.determineCardinality());
 		assertEquals(0, Arrays.binarySearch(res.getIds(), 5));
-		
+
 		// cleanup
 		model.release(true);
 	}

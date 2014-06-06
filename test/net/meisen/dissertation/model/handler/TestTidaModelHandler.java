@@ -22,7 +22,6 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
-import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -311,7 +310,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@Test
 	public void testAutoloadEnabling() {
 		loader.loadViaXslt("/net/meisen/dissertation/impl/parser/query/testNumberModel.xml");
-		loader.enableAutoload("testNumberModel"); 
+		loader.enableAutoload("testNumberModel");
 
 		// get the once to be loaded automatically
 		final Set<String> autoloads = loader._readAutoloads();
@@ -359,6 +358,5 @@ public class TestTidaModelHandler extends DbBasedTest {
 	@After
 	public void cleanUp() {
 		loader.unloadAll();
-		assertTrue(Files.deleteDir(new File(loader.getDefaultLocation())));
 	}
 }
