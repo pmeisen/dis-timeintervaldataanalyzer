@@ -4,13 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
@@ -20,6 +25,7 @@ import net.meisen.dissertation.model.persistence.ILocation;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.resources.IByteBufferReader;
 import net.meisen.general.genmisc.resources.Xml;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
@@ -41,11 +47,14 @@ import org.w3c.dom.Node;
  * 
  */
 public class TidaModelHandler {
+	private final static String AUTOLOAD_FILENAME = "autoload.data";
 	private final static String MODEL_FILENAME = "model.xml";
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TidaModelHandler.class);
 
 	private String defaultLocation;
+
+	private ReentrantReadWriteLock autoloadLock = new ReentrantReadWriteLock();
 
 	/**
 	 * Class to keep track of changes on an xml document.
@@ -122,7 +131,7 @@ public class TidaModelHandler {
 
 	/**
 	 * Gets the {@code TidaModel} loaded by the {@code ModuleHolder} with the
-	 * specified id. If no {@code ModuleHolder} with the specified id is known,
+	 * specified id. If no {@code ModuleHolder} with the specified id is loaded,
 	 * {@code null} is returned.
 	 * 
 	 * @param id
@@ -201,11 +210,11 @@ public class TidaModelHandler {
 	 */
 	public synchronized void unloadAll() {
 		for (final IModuleHolder moduleHolder : moduleHolders.values()) {
-			moduleHolder.release();
-
 			final TidaModel model = moduleHolder
 					.getModule(DefaultValues.TIDAMODEL_ID);
 			model.release();
+
+			moduleHolder.release();
 		}
 
 		if (LOG.isInfoEnabled()) {
@@ -305,7 +314,7 @@ public class TidaModelHandler {
 
 		// define the file to store the model at
 		final String modelId = model.getId();
-		final File modelDir = new File(getDefaultLocation(), model.getId());
+		final File modelDir = getModelDir(model.getId());
 		final File modelFile = new File(modelDir, MODEL_FILENAME);
 		if (modelFile.exists()) {
 			if (modelFile.isDirectory()) {
@@ -568,5 +577,138 @@ public class TidaModelHandler {
 	 */
 	public void setDefaultLocation(final String defaultLocation) {
 		this.defaultLocation = defaultLocation;
+	}
+
+	public void enableAutoload(final String modelId) {
+
+		// check if the directory exists
+		final File modelDir = getModelDir(modelId);
+		if (!modelDir.exists()) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1011, modelId, modelDir);
+		}
+
+		// check if the file exists
+		final File modelFile = new File(modelDir, MODEL_FILENAME);
+		if (!modelFile.exists()) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1011, modelId, modelFile);
+		}
+
+		// the model is qualified to be autoloaded
+		setAutoload(modelId, true);
+	}
+
+	public void disableAutoload(final String modelId) {
+		setAutoload(modelId, false);
+	}
+
+	public void autoloadModules() {
+		autoloadLock.readLock().lock();
+		final Collection<String> modelIds;
+		try {
+			modelIds = _readAutoloads();
+		} finally {
+			autoloadLock.readLock().unlock();
+		}
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Autoloading the modules: " + modelIds);
+		}
+
+		// load each model
+		for (final String modelId : modelIds) {
+			this.loadFromDefaultLocation(modelId);
+		}
+	}
+
+	protected void setAutoload(final String modelId, final boolean autoload) {
+		autoloadLock.writeLock().lock();
+
+		try {
+			final Set<String> modelIds = _readAutoloads();
+			if (modelIds.contains(modelId) == autoload) {
+				// autoload == true == contains => nothing to do
+				// autoload == false == contains => nothing to do
+				return;
+			}
+
+			// modify the set according to the autoload argument
+			if (autoload) {
+				modelIds.add(modelId);
+			} else {
+				modelIds.remove(modelId);
+			}
+
+			// remove the file if it exists
+			final File autoloadFile = getAutoloadFile();
+			if (autoloadFile.exists() && !autoloadFile.delete()) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1012, autoloadFile);
+				return;
+			}
+
+			// create the file and get access
+			final FileOutputStream out;
+			try {
+				autoloadFile.createNewFile();
+				out = new FileOutputStream(autoloadFile);
+			} catch (final IOException e) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1013, e, autoloadFile);
+				return;
+			}
+
+			// write everything to the file
+			try {
+				out.write(Streams.writeAllObjects(modelIds.toArray()));
+			} catch (final IOException e) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1014, e, autoloadFile);
+				return;
+			}
+		} finally {
+			autoloadLock.writeLock().unlock();
+		}
+	}
+
+	protected Set<String> _readAutoloads() {
+		final Set<String> autoloads = new HashSet<String>();
+		final File autoloadFile = getAutoloadFile();
+
+		if (!autoloadFile.exists()) {
+			// do nothing
+		} else if (autoloadFile.isDirectory()) {
+			exceptionRegistry.throwRuntimeException(
+					TidaModelHandlerException.class, 1010, autoloadFile);
+		} else {
+			final IByteBufferReader reader = Streams
+					.createByteBufferReader(autoloadFile);
+
+			// read all the objects
+			while (reader.hasRemaining()) {
+				final String modelId = (String) Streams.readNextObject(reader);
+				final File modelDir = getModelDir(modelId);
+
+				// validate the directory
+				if (!modelDir.exists() || !modelDir.isDirectory()) {
+					exceptionRegistry.throwRuntimeException(
+							TidaModelHandlerException.class, 1011, modelId,
+							modelDir);
+				} else {
+					autoloads.add(modelId);
+				}
+			}
+		}
+
+		return autoloads;
+	}
+
+	protected File getAutoloadFile() {
+		return new File(getDefaultLocation(), AUTOLOAD_FILENAME);
+	}
+
+	protected File getModelDir(final String modelId) {
+		return new File(getDefaultLocation(), modelId);
 	}
 }

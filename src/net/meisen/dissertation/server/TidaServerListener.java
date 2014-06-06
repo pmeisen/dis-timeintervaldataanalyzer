@@ -32,7 +32,7 @@ public class TidaServerListener extends BaseListener {
 
 		final Extension client = c.getExtension("client");
 		if (client != null) {
-			final int timeoutInS = client.getProperty("timeout");
+			final int timeoutInS = client.<Integer> getProperty("timeout");
 			timeoutInMs = Math.max(0, timeoutInS * 1000);
 		} else {
 			timeoutInMs = DEFAULT_TIMEOUTINMS;

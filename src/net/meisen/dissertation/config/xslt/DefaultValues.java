@@ -191,7 +191,7 @@ public class DefaultValues {
 	 * @return the default location
 	 */
 	public static String getDefaultLocation() {
-		return ".";
+		return "_data";
 	}
 
 	/**

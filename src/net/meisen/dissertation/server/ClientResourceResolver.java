@@ -6,16 +6,15 @@ import java.io.InputStream;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
-import net.meisen.dissertation.server.protocol.Communication;
-import net.meisen.dissertation.server.protocol.Communication.WrappedException;
+import net.meisen.dissertation.server.Protocol.WrappedException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class ClientResourceResolver implements IResourceResolver {
 
-	private final Communication communication;
+	private final Protocol protocol; 
 
-	public ClientResourceResolver(final Communication communication) {
-		this.communication = communication;
+	public ClientResourceResolver(final Protocol protocol) {
+		this.protocol = protocol;
 	}
 
 	@Override
@@ -23,10 +22,10 @@ public class ClientResourceResolver implements IResourceResolver {
 		try {
 
 			// tell the client that we need a resource
-			this.communication.writeResourceDemand(resource);
+			this.protocol.writeResourceDemand(resource);
 
 			// wait for the resource
-			final byte[] resourceAsBytes = this.communication.readResource();
+			final byte[] resourceAsBytes = this.protocol.readResource();
 
 			// return the resource
 			return new ByteArrayInputStream(resourceAsBytes);

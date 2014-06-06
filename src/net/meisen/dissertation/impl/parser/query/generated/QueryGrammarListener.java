@@ -143,6 +143,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorDateInterval(@NotNull QueryGrammarParser.SelectorDateIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoadProperty}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprLoadProperty(@NotNull QueryGrammarParser.ExprLoadPropertyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprLoadProperty}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprLoadProperty(@NotNull QueryGrammarParser.ExprLoadPropertyContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorSecondMathOperator}.
 	 * @param ctx the parse tree
 	 */
@@ -185,6 +196,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorBoolean}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorBoolean(@NotNull QueryGrammarParser.SelectorBooleanContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorBoolean}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorBoolean(@NotNull QueryGrammarParser.SelectorBooleanContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorEqual}.
@@ -460,6 +482,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoadSetProperty}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprLoadSetProperty(@NotNull QueryGrammarParser.ExprLoadSetPropertyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprLoadSetProperty}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprLoadSetProperty(@NotNull QueryGrammarParser.ExprLoadSetPropertyContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compMeasure}.

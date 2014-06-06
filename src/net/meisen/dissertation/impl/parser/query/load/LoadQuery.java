@@ -1,6 +1,9 @@
 package net.meisen.dissertation.impl.parser.query.load;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
@@ -22,6 +25,8 @@ public class LoadQuery implements IQuery {
 
 	private String modelId;
 	private String path;
+
+	private Map<String, Object> properties = new HashMap<String, Object>();
 
 	@Override
 	public String getModelId() {
@@ -66,6 +71,22 @@ public class LoadQuery implements IQuery {
 			modelId = loadedModel.getId();
 		}
 
+		// check if the model should be registered for autoload
+		final Boolean autoload = getProperty("autoload", null);
+		
+		// do not change the setting
+		if (autoload == null) {
+			// do nothing
+		} 
+		// autoload should be enabled
+		else if (autoload) {
+
+		} 
+		// autoload should be disabled
+		else {
+			
+		}
+
 		// create the result, the loading is finished
 		final LoadResult result = new LoadResult();
 		result.setModelId(modelId);
@@ -101,5 +122,38 @@ public class LoadQuery implements IQuery {
 	public String toString() {
 		return "load " + getModelId()
 				+ (getPath() == null ? "" : " from " + getPath());
+	}
+
+	/**
+	 * Sets the specified {@code properties} of {@code this}.
+	 * 
+	 * @param properties
+	 *            the properties to be set
+	 */
+	public void setProperties(final Map<String, Object> properties) {
+		for (final Entry<String, Object> e : properties.entrySet()) {
+			this.properties.put(e.getKey().toUpperCase(), e.getValue());
+		}
+	}
+
+	/**
+	 * Reads the value of the specified {@code property}.
+	 * 
+	 * @param property
+	 *            the property to retrieve the value for
+	 * @param defaultValue
+	 *            the default value to be used if the property is not set
+	 * 
+	 * @return the determined value
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getProperty(final String property, final T defaultValue) {
+		final Object value = properties.get(property.toUpperCase());
+
+		if (value == null) {
+			return defaultValue;
+		} else {
+			return (T) value;
+		}
 	}
 }

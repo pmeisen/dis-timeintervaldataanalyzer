@@ -2,12 +2,14 @@ package net.meisen.dissertation.model.handler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
@@ -20,6 +22,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler.ManipulatedXml;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -305,11 +308,57 @@ public class TestTidaModelHandler extends DbBasedTest {
 		}
 	}
 
+	@Test
+	public void testAutoloadEnabling() {
+		loader.loadViaXslt("/net/meisen/dissertation/impl/parser/query/testNumberModel.xml");
+		loader.enableAutoload("testNumberModel"); 
+
+		// get the once to be loaded automatically
+		final Set<String> autoloads = loader._readAutoloads();
+		assertTrue(autoloads.contains("testNumberModel"));
+
+		// unload everything loaded
+		loader.unloadAll();
+		assertNull(loader.getTidaModel("testNumberModel"));
+
+		// now load everything
+		loader.autoloadModules();
+		assertNotNull(loader.getTidaModel("testNumberModel"));
+	}
+
+	/**
+	 * Tests the exception to be thrown when the file of the autoload is a
+	 * directory.
+	 */
+	@Test
+	public void testExceptionInvalidFileAutoload() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("Error while reading the automatically loaded modules");
+
+		assertTrue(loader.getAutoloadFile().mkdirs());
+		loader._readAutoloads();
+	}
+
+	/**
+	 * Tests the exception to be thrown if an invalid model should be
+	 * auto-loaded.
+	 */
+	@Test
+	public void testExceptionInvalidEnablingOfAutoload() {
+		thrown.expect(TidaModelHandlerException.class);
+		thrown.expectMessage("model 'notExistent' should be loaded automatically, but the directory '"
+				+ new File(loader.getDefaultLocation(), "notExistent")
+				+ "' does not exist");
+
+		loader.enableAutoload("notExistent");
+	}
+
 	/**
 	 * Unloads all the loaded {@code TidaModel} instances.
 	 */
 	@After
 	public void cleanUp() {
 		loader.unloadAll();
+		assertTrue(Files.deleteDir(new File(loader.getDefaultLocation())));
 	}
 }

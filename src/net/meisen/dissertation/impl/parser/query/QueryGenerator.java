@@ -2,7 +2,9 @@ package net.meisen.dissertation.impl.parser.query;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.QueryParsingException;
@@ -27,6 +29,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprInsertContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadSetPropertyContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
@@ -168,6 +171,16 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 
 		this.query = new InsertQuery();
+	}
+
+	@Override
+	public void exitExprLoadSetProperty(final ExprLoadSetPropertyContext ctx) {
+		final Map<String, Object> properties = new HashMap<String, Object>();
+		resolveProperty(properties, ctx.exprLoadProperty(),
+				ctx.selectorBoolean()); 
+
+		final LoadQuery q = q(LoadQuery.class);
+		q.setProperties(properties);
 	}
 
 	@Override
@@ -1031,4 +1044,49 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		return interval;
 	}
 
+	/**
+	 * This method is used to resolve a property value.
+	 * 
+	 * @param properties
+	 *            the map to set the determined property value in
+	 * @param propertyCtx
+	 *            the context to read the property name from
+	 * @param valueCtx
+	 *            the context to read the value from
+	 * 
+	 * @throws QueryParsingException
+	 *             if the value cannot be resolved, more detailed the
+	 *             {@code QueryParsingException} is wrapped within a
+	 *             {@code ForwardedRuntimeException}
+	 * 
+	 */
+	protected void resolveProperty(final Map<String, Object> properties,
+			final ParserRuleContext propertyCtx,
+			final ParserRuleContext valueCtx) throws QueryParsingException {
+
+		final String key = propertyCtx.getText();
+
+		// determine the token we have
+		TerminalNode token;
+		if ((token = valueCtx.getToken(QueryGrammarParser.LOGICAL_TRUE, 0)) != null) {
+			properties.put(key, true);
+		} else if ((token = valueCtx.getToken(QueryGrammarParser.LOGICAL_FALSE,
+				0)) != null) {
+			properties.put(key, false);
+		} else if ((token = valueCtx.getToken(QueryGrammarParser.NULL_VALUE, 0)) != null) {
+			properties.put(key, null);
+		} else if ((token = valueCtx.getToken(QueryGrammarParser.INT, 0)) != null) {
+			final Long l = Long.parseLong(token.getText());
+			properties.put(key, l);
+		} else if ((token = valueCtx.getToken(QueryGrammarParser.DATE, 0)) != null) {
+			final Date date = Dates.isDate(token.getText(),
+					Dates.GENERAL_TIMEZONE);
+			properties.put(key, date);
+		} else if ((token = valueCtx.getToken(QueryGrammarParser.VALUE, 0)) != null) {
+			properties.put(key, getValue(token));
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1019, valueCtx.getText());
+		}
+	}
 }

@@ -41,11 +41,19 @@ public class TestLoadQueries extends LoaderBasedTest implements
 		query = factory.parseQuery("LOAD myModel");
 		assertNull(query.getPath());
 		assertEquals("myModel", query.getModelId());
+		assertNull(query.getProperty("autoload", null));
 
 		// parse the load query with a path
 		query = factory.parseQuery("load FROM 'C:\\\\'");
 		assertNull(query.getModelId());
 		assertEquals("C:\\", query.getPath());
+		assertNull(query.getProperty("autoload", null));
+
+		// parse the load query with properties
+		query = factory.parseQuery("load FROM 'C:\\\\' SET autoload=true");
+		assertNull(query.getModelId());
+		assertEquals("C:\\", query.getPath()); 
+		assertEquals(true, query.getProperty("autoload", null));
 	}
 
 	/**

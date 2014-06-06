@@ -1,4 +1,4 @@
-package net.meisen.dissertation.server.protocol;
+package net.meisen.dissertation.server;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 
-public class Communication implements Closeable {
+public class Protocol implements Closeable {
 
 	public static class WrappedException extends RuntimeException {
 		public WrappedException(final String msg) {
@@ -122,11 +122,11 @@ public class Communication implements Closeable {
 	 * @throws IOException
 	 *             if the streams cannot be retrieved
 	 */
-	public Communication(final Socket socket) throws IOException {
+	public Protocol(final Socket socket) throws IOException {
 		this(socket.getInputStream(), socket.getOutputStream());
 	}
 
-	public Communication(final InputStream is, final OutputStream os) {
+	public Protocol(final InputStream is, final OutputStream os) {
 		this.is = new DataInputStream(new BufferedInputStream(is));
 		this.os = new DataOutputStream(new BufferedOutputStream(os));
 	}

@@ -11,10 +11,9 @@ import java.net.Socket;
 import java.util.Date;
 
 import net.meisen.dissertation.help.Performance;
-import net.meisen.dissertation.server.protocol.Communication;
-import net.meisen.dissertation.server.protocol.Communication.IResponseHandler;
-import net.meisen.dissertation.server.protocol.Communication.ResponseType;
-import net.meisen.dissertation.server.protocol.Communication.RetrievedValue;
+import net.meisen.dissertation.server.Protocol.IResponseHandler;
+import net.meisen.dissertation.server.Protocol.ResponseType;
+import net.meisen.dissertation.server.Protocol.RetrievedValue;
 import net.meisen.general.genmisc.types.Files;
 
 import org.junit.After;
@@ -41,8 +40,8 @@ public class TestTidaServer {
 	}
 
 	@Test
-	public void testCommunication() throws IOException {
-		final Communication c = new Communication(socket);
+	public void testProtocol() throws IOException {
+		final Protocol p = new Protocol(socket);
 
 		final IResponseHandler handler = new IResponseHandler() {
 
@@ -50,7 +49,7 @@ public class TestTidaServer {
 			public InputStream getResourceStream(final String resource) {
 				return getClass().getResourceAsStream(resource);
 			}
-
+ 
 			@Override
 			public void handleResult(final byte[] result) {
 				try {
@@ -62,23 +61,19 @@ public class TestTidaServer {
 		};
 
 		// load a model
-		c.write("LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'");
-		c.handleResponse(handler);
-
-		Performance p = new Performance();
+		p.write("LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'");
+		p.handleResponse(handler);
 
 		for (int i = 0; i < 10; i++) {
-			p.start();
-			c.write("select timeseries of count(PERSON) AS PERSON from testPersonModel");
-			c.handleResponse(handler);
-			System.out.println(p.printSecs(p.stop()));
+			p.write("select timeseries of count(PERSON) AS PERSON from testPersonModel");
+			p.handleResponse(handler);
 		}
 
-		c.write("unload testPersonModel");
-		c.handleResponse(handler);
+		p.write("unload testPersonModel");
+		p.handleResponse(handler);
 
 		// close the socket
-		c.close();
+		p.close();
 	}
 
 	@After

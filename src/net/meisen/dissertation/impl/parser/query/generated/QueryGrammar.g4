@@ -35,7 +35,9 @@ exprAlive     : STMT_ALIVE;
 /*
  * Define the different expressions/parts of the load statement
  */
-exprLoad      : STMT_LOAD (selectorModelId | (OP_FROM selectorFilePath));
+exprLoad            : STMT_LOAD (selectorModelId | (OP_FROM selectorFilePath)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
+exprLoadSetProperty : exprLoadProperty CMP_EQUAL selectorBoolean;
+exprLoadProperty    : PROP_AUTOLOAD;
 
 /*
  * Define the different expressions/parts of the unload statement
@@ -97,6 +99,7 @@ selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGG
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
 selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL | POS_END_EXCL);
+selectorBoolean             : LOGICAL_TRUE | LOGICAL_FALSE;
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -119,12 +122,15 @@ POS_END_INCL   : BRACKET_SQUARE_OPENED E N D '+'? BRACKET_SQUARE_CLOSED;
 POS_START_EXCL : BRACKET_SQUARE_OPENED S T A R T '-' BRACKET_SQUARE_CLOSED;
 POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 
-// reserved word to define a SELECT statement
+// reserved words to define a SELECT statement
 STMT_SELECT   : S E L E C T;
 STMT_INSERT   : I N S E R T;
 STMT_LOAD     : L O A D;
 STMT_UNLOAD   : U N L O A D;
 STMT_ALIVE    : A L I V E;
+
+// reserved words for properties
+PROP_AUTOLOAD : A U T O L O A D;
 
 // reserved words to define the types of data to select
 TYPE_TIMESERIES: T I M E S E R I E S;
@@ -135,6 +141,7 @@ OP_FROM     : F R O M;
 OP_OF       : O F;
 OP_IN       : I N;
 OP_INTO     : I N T O;
+OP_SET      : S E T;
 OP_VALUES   : V A L U E S;
 OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
@@ -145,6 +152,8 @@ LOGICAL_OR      : O R | '||';
 LOGICAL_AND     : A N D | '&&';
 LOGICAL_NOT     : N O T | '!';
 LOGICAL_IGNORE  : I G N O R E;
+LOGICAL_TRUE    : T R U E;
+LOGICAL_FALSE   : F A L S E;
 
 // reserved words used for calculations
 MATH_MULTIPLY   : '*';

@@ -10,8 +10,7 @@ import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
-import net.meisen.dissertation.server.protocol.Communication;
-import net.meisen.dissertation.server.protocol.Communication.WrappedException;
+import net.meisen.dissertation.server.Protocol.WrappedException;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.server.listener.utility.WorkerThread;
 
@@ -45,14 +44,14 @@ public class RequestHandlerThread extends WorkerThread {
 	}
 
 	public void handleRequests() throws IOException {
-		final Communication c = new Communication(getSocket());
+		final Protocol p = new Protocol(getSocket());
 
 		try {
 			while (true) {
 				final String msg;
 				try {
 					// get the real message that was send
-					msg = c.readString();
+					msg = p.readString();
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Retrieved query '" + msg + "'.");
 					}
@@ -66,7 +65,7 @@ public class RequestHandlerThread extends WorkerThread {
 					if (LOG.isErrorEnabled()) {
 						LOG.error("Client send exception '" + e.getMessage()
 								+ "'", e);
-					}
+					} 
 
 					/*
 					 * Read the next one, the client will close the connection
@@ -78,13 +77,13 @@ public class RequestHandlerThread extends WorkerThread {
 				try {
 					final IQuery query = queryFactory.parseQuery(msg);
 					final IQueryResult result = queryFactory.evaluateQuery(
-							query, new ClientResourceResolver(c));
+							query, new ClientResourceResolver(p));
 
 					// write the result
-					c.writeResult(result.toString().getBytes());
-					c.writeEndOfResult();
+					p.writeResult(result.toString().getBytes());
+					p.writeEndOfResult();
 				} catch (final Exception e) {
-					c.writeException(e);
+					p.writeException(e);
 				}
 			}
 		} catch (final EOFException e) {
@@ -92,7 +91,7 @@ public class RequestHandlerThread extends WorkerThread {
 		} finally {
 
 			// make sure the DataInputStream is closed now
-			Streams.closeIO(c);
+			Streams.closeIO(p);
 		}
 	}
 

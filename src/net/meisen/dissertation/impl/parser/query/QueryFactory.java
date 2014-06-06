@@ -152,7 +152,7 @@ public class QueryFactory implements IQueryFactory {
 			if (model == null) {
 				exceptionRegistry.throwRuntimeException(
 						QueryEvaluationException.class, 1001, modelId);
-			}
+			} 
 		} else {
 			model = null;
 		}
