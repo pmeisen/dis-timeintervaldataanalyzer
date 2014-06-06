@@ -40,10 +40,17 @@ public class TestTidaServer {
 		socket.connect(new InetSocketAddress("localhost", 7001), 1000);
 	}
 
+	/**
+	 * Tests the implemented {@code Protocol}.
+	 * 
+	 * @throws IOException
+	 *             if the socket cannot be handled
+	 */
 	@Test
 	public void testProtocol() throws IOException {
 		final Protocol p = new Protocol(socket);
 
+		// create a handler for testing
 		final IResponseHandler handler = new IResponseHandler() {
 
 			@Override
@@ -77,6 +84,12 @@ public class TestTidaServer {
 		p.close();
 	}
 
+	/**
+	 * Shutdowns the server.
+	 * 
+	 * @throws IOException
+	 *             if the shutdown cannot be achieved
+	 */
 	@After
 	public void shutdownServer() throws IOException {
 		socket.close();
