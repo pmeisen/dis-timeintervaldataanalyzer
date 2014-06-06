@@ -1,5 +1,8 @@
 package net.meisen.dissertation.help;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +10,7 @@ import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -79,7 +83,7 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	 * 
 	 * @param modelId
 	 *            the identifier of the model to be retrieved
-	 *            
+	 * 
 	 * @return the {@code TidaModel} or {@code null} if not found
 	 */
 	protected TidaModel getTidaModel(final String modelId) {
@@ -100,5 +104,8 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 
 		// clear the models
 		models.clear();
+
+		// delete the directory of the system
+		assertTrue(Files.deleteDir(new File(loader.getDefaultLocation())));
 	}
 }
