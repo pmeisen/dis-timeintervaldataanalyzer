@@ -1,10 +1,14 @@
 package net.meisen.dissertation.server;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 
 import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.Protocol.IResponseHandler;
@@ -87,6 +91,36 @@ public class TestTidaServer {
 
 		// close the socket
 		p.close();
+	}
+
+	/**
+	 * Tests that an open {@code Socket} is closed, after the server is shut
+	 * down.
+	 * 
+	 * @throws IOException
+	 *             if an unexpected exception while writing or reading is thrown
+	 */
+	@Test
+	public void testCloseSocketAfterShutdown() throws IOException {
+		final Protocol p = new Protocol(socket);
+
+		// send a message everything should just work fine
+		p.write("ALIVE");
+		p.read();
+
+		// shut the server down
+		server.shutdown();
+
+		// the socket should be closed
+		Exception exception = null;
+		try {
+			p.write("ALIVE");
+			p.read();
+		} catch (final SocketException e) {
+			exception = e;
+		}
+		assertNotNull(exception);
+		assertTrue(exception.getMessage().contains("caused connection abort"));
 	}
 
 	/**

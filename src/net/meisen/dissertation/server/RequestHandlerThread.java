@@ -3,6 +3,7 @@ package net.meisen.dissertation.server;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
@@ -20,6 +21,7 @@ public class RequestHandlerThread extends WorkerThread {
 			.getLogger(RequestHandlerThread.class);
 
 	private QueryFactory queryFactory;
+	private Exception lastException = null;
 
 	public RequestHandlerThread(final Socket input,
 			final QueryFactory queryFactory) {
@@ -32,10 +34,13 @@ public class RequestHandlerThread extends WorkerThread {
 	public void run() {
 		try {
 			handleRequests();
+		} catch (final SocketException e) {
+			// ignore any kind of socket exception, it is closed
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Exception thrown while handling a request.", e);
+			}
 		} catch (final Exception e) {
-			// TODO log
-			System.out.println("TODO ERROR: " + e.getMessage());
-			e.printStackTrace();
+			lastException = e;
 		} finally {
 			close();
 		}
@@ -63,7 +68,7 @@ public class RequestHandlerThread extends WorkerThread {
 					if (LOG.isErrorEnabled()) {
 						LOG.error("Client send exception '" + e.getMessage()
 								+ "'", e);
-					} 
+					}
 
 					/*
 					 * Read the next one, the client will close the connection
@@ -93,12 +98,20 @@ public class RequestHandlerThread extends WorkerThread {
 		}
 	}
 
+	public Exception getLastException() {
+		return lastException;
+	}
+
 	@Override
 	public void close() {
+		if (getSocket().isClosed()) {
+			return;
+		}
+
+		// log the closing and do it
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Closing socket used for request handling...");
 		}
-
 		super.close();
 	}
 }
