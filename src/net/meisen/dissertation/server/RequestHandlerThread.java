@@ -16,6 +16,12 @@ import net.meisen.general.server.listener.utility.WorkerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A thread used to handle requests to the server.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class RequestHandlerThread extends WorkerThread {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(RequestHandlerThread.class);
@@ -23,6 +29,14 @@ public class RequestHandlerThread extends WorkerThread {
 	private QueryFactory queryFactory;
 	private Exception lastException = null;
 
+	/**
+	 * A thread to handle requests on server side.
+	 * 
+	 * @param input
+	 *            the {@code Socket} to retrieve the requests on
+	 * @param queryFactory
+	 *            the factory used to interprete a request
+	 */
 	public RequestHandlerThread(final Socket input,
 			final QueryFactory queryFactory) {
 		super(input);
@@ -46,6 +60,12 @@ public class RequestHandlerThread extends WorkerThread {
 		}
 	}
 
+	/**
+	 * Handles a request by reading a string using the current {@code Protocol}.
+	 * 
+	 * @throws IOException
+	 *             if the requests handling fails
+	 */
 	public void handleRequests() throws IOException {
 		final Protocol p = new Protocol(getSocket());
 
@@ -98,6 +118,11 @@ public class RequestHandlerThread extends WorkerThread {
 		}
 	}
 
+	/**
+	 * Get the last exception thrown.
+	 * 
+	 * @return the last exception thrown, {@code null} if none was thrown
+	 */
 	public Exception getLastException() {
 		return lastException;
 	}

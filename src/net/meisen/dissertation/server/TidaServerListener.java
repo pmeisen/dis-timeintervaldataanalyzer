@@ -4,6 +4,7 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.TidaServerListenerException;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.general.server.api.impl.BaseListener;
 import net.meisen.general.server.settings.pojos.Connector;
@@ -12,6 +13,12 @@ import net.meisen.general.server.settings.pojos.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * Listener used to handle queries.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TidaServerListener extends BaseListener {
 	private final int DEFAULT_TIMEOUTINMS = 30 * 60 * 1000;
 
@@ -44,9 +51,8 @@ public class TidaServerListener extends BaseListener {
 		try {
 			socket.setSoTimeout(timeoutInMs);
 		} catch (final SocketException e) {
-			// getExceptionRegistry()
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			getExceptionRegistry().throwException(
+					TidaServerListenerException.class, 1000, timeoutInMs);
 		}
 
 		return new RequestHandlerThread(socket, queryFactory);
