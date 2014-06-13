@@ -33,6 +33,7 @@ public class SelectQuery implements IQuery {
 	private String modelId;
 	private ResultType type;
 	private Interval<?> interval;
+	private boolean transposed;
 
 	/**
 	 * Default constructor initializing the query.
@@ -41,6 +42,8 @@ public class SelectQuery implements IQuery {
 		filter = new DescriptorLogicTree();
 		group = new GroupExpression();
 		measures = new ArrayList<DescriptorMathTree>();
+
+		transposed = false;
 	}
 
 	/**
@@ -150,5 +153,26 @@ public class SelectQuery implements IQuery {
 	@Override
 	public boolean expectsModel() {
 		return true;
+	}
+
+	/**
+	 * Specifies if the result of the selection should be transposed.
+	 * 
+	 * @param transposed
+	 *            {@code true} if it should be transposed, otherwise
+	 *            {@code false}
+	 */
+	public void setTransposed(final boolean transposed) {
+		this.transposed = transposed;
+	}
+
+	/**
+	 * Checks if the result should be transposed.
+	 * 
+	 * @return {@code true} if the result should be transposed, otherwise
+	 *         {@code false}
+	 */
+	public boolean isTransposed() {
+		return transposed;
 	}
 }

@@ -12,6 +12,7 @@ import java.net.SocketException;
 
 import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.Protocol.IResponseHandler;
+import net.meisen.dissertation.jdbc.protocol.Protocol.RetrievedValue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,12 +69,29 @@ public class TestTidaServer {
 			}
 
 			@Override
-			public void handleResult(final byte[] result) {
+			public void setHeader(final Class<?>[] header) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void setHeaderNames(final String[] header) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public boolean handleResult(final RetrievedValue value) {
 				try {
-					System.out.println(new String(result, "UTF8"));
+					System.out.println(new String(value.bytes, "UTF8"));
 				} catch (final UnsupportedEncodingException e) {
 					// ignore
 				}
+
+				return true;
+			}
+
+			@Override
+			public void signalEORReached() {
+				// TODO Auto-generated method stub
 			}
 		};
 
@@ -121,6 +139,9 @@ public class TestTidaServer {
 		}
 		assertNotNull(exception);
 		assertTrue(exception.getMessage().contains("caused connection abort"));
+		
+		// close the socket
+		p.close();
 	}
 
 	/**

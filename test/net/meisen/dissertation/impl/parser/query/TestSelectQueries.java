@@ -149,6 +149,20 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertFalse(query.isTransposed());
+		assertNull(query.getInterval());
+	}
+
+	/**
+	 * Tests the usage of a transposed timeseries.
+	 */
+	@Test
+	public void testTransposition() {
+		final SelectQuery query = q("SELECT TRANSPOSE(TIMESERIES) FROM MODELID");
+
+		assertEquals("MODELID", query.getModelId());
+		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertTrue(query.isTransposed());
 		assertNull(query.getInterval());
 	}
 
@@ -161,6 +175,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
 	}
 
@@ -282,7 +297,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("select timeseries of count(PERSON) AS PERSON from testPersonModel");
 		final List<DescriptorMathTree> measures = query.getMeasures();
 		assertEquals(1, measures.size());
- 
+
 		// check the different measure
 		measure = measures.get(0);
 		assertEquals("PERSON", measure.getId());

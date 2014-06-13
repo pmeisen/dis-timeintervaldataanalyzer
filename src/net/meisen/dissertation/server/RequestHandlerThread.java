@@ -10,6 +10,8 @@ import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
+import net.meisen.dissertation.model.parser.query.IQueryResultInteger;
+import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.server.listener.utility.WorkerThread;
 
@@ -74,7 +76,7 @@ public class RequestHandlerThread extends WorkerThread {
 				final String msg;
 				try {
 					// get the real message that was send
-					msg = p.readString();
+					msg = p.readMessage();
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("Retrieved query '" + msg + "'.");
 					}
@@ -101,6 +103,19 @@ public class RequestHandlerThread extends WorkerThread {
 					final IQuery query = queryFactory.parseQuery(msg);
 					final IQueryResult result = queryFactory.evaluateQuery(
 							query, new ClientResourceResolver(p));
+
+					if (result instanceof IQueryResultInteger) {
+						final IQueryResultInteger resultInt = (IQueryResultInteger) result;					
+//						p.writeInt(resultInt.getResult());
+					} else if (result instanceof IQueryResultSet) {
+						final IQueryResultSet resultSet = (IQueryResultSet) result;
+						p.writeHeader(resultSet.getTypes());
+						p.writeHeaderNames(resultSet.getNames());
+						
+						// TODO iterate over the data and write it
+					} else {
+
+					}
 
 					// write the result
 					p.writeResult(result.toString().getBytes());

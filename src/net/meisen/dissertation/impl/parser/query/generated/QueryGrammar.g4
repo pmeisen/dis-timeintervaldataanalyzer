@@ -84,7 +84,7 @@ compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | se
 selectorModelId             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
-selectorSelectType          : TYPE_TIMESERIES | TYPE_RECORDS;
+selectorSelectType          : TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED | TYPE_RECORDS;
 selectorDateInterval        : DATE SEPARATOR DATE;
 selectorIntInterval         : INT SEPARATOR INT;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
@@ -133,8 +133,8 @@ STMT_ALIVE    : A L I V E;
 PROP_AUTOLOAD : A U T O L O A D;
 
 // reserved words to define the types of data to select
-TYPE_TIMESERIES: T I M E S E R I E S;
-TYPE_RECORDS   : R E C O R D S;
+TYPE_TIMESERIES          : T I M E S E R I E S;
+TYPE_RECORDS             : R E C O R D S;
 
 // reserved words to define special positions in the statement
 OP_FROM     : F R O M;
@@ -146,6 +146,7 @@ OP_VALUES   : V A L U E S;
 OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y;
+OP_TRANSPOSE: T R A N S P O S E;
 
 // reserved words used for logic expressions 
 LOGICAL_OR      : O R | '||';

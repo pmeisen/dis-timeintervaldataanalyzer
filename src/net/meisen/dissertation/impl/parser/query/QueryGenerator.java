@@ -177,7 +177,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	public void exitExprLoadSetProperty(final ExprLoadSetPropertyContext ctx) {
 		final Map<String, Object> properties = new HashMap<String, Object>();
 		resolveProperty(properties, ctx.exprLoadProperty(),
-				ctx.selectorBoolean()); 
+				ctx.selectorBoolean());
 
 		final LoadQuery q = q(LoadQuery.class);
 		q.setProperties(properties);
@@ -493,7 +493,9 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitSelectorSelectType(final SelectorSelectTypeContext ctx) {
 		final ResultType type = resolveResultType(ctx);
+		final boolean transposed = resolveTransposition(ctx);
 		q(SelectQuery.class).setResultType(type);
+		q(SelectQuery.class).setTransposed(transposed);
 	}
 
 	@Override
@@ -881,6 +883,24 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());
+		}
+	}
+
+	/**
+	 * Checks if the result should be transposed.
+	 * 
+	 * @param ctx
+	 *            the {@code SelectorSelectTypeContext} to determine if the
+	 *            result should be transposed
+	 *            
+	 * @return {@code true} if the result should be transposed, otherwise
+	 *         {@code false}
+	 */
+	protected boolean resolveTransposition(final SelectorSelectTypeContext ctx) {
+		if (ctx.getToken(QueryGrammarParser.OP_TRANSPOSE, 0) != null) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
