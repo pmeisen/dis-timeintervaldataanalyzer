@@ -334,8 +334,10 @@ public class TidaModel implements IPersistable {
 	 *            the {@code DataStructure} to be used for the data
 	 * @param record
 	 *            the {@code DataRecord} to be loaded
+	 *            
+	 * @return the identifier of the record written
 	 */
-	protected void _loadRecord(final DataStructure dataStructure,
+	protected int _loadRecord(final DataStructure dataStructure,
 			final IDataRecord record) {
 
 		// get the identifier which will be used for the next record
@@ -349,6 +351,8 @@ public class TidaModel implements IPersistable {
 
 		// set the bitmap for the specified identifier
 		getIdentifierCache().markIdentifierAsValid(id);
+
+		return id;
 	}
 
 	/**
