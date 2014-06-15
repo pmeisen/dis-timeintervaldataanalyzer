@@ -10,7 +10,7 @@ import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
-import net.meisen.dissertation.model.parser.query.IQueryResultInteger;
+import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.server.listener.utility.WorkerThread;
@@ -104,9 +104,9 @@ public class RequestHandlerThread extends WorkerThread {
 					final IQueryResult result = queryFactory.evaluateQuery(
 							query, new ClientResourceResolver(p));
 
-					if (result instanceof IQueryResultInteger) {
-						final IQueryResultInteger resultInt = (IQueryResultInteger) result;					
-//						p.writeInt(resultInt.getResult());
+					if (result instanceof IQueryResultSingleInteger) {
+						final IQueryResultSingleInteger resultInt = (IQueryResultSingleInteger) result;					
+						p.writeInt(resultInt.getResult());
 					} else if (result instanceof IQueryResultSet) {
 						final IQueryResultSet resultSet = (IQueryResultSet) result;
 						p.writeHeader(resultSet.getTypes());
