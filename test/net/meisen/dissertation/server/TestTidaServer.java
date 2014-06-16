@@ -10,9 +10,9 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
+import net.meisen.dissertation.jdbc.protocol.IResponseHandler;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
-import net.meisen.dissertation.jdbc.protocol.Protocol.IResponseHandler;
-import net.meisen.dissertation.jdbc.protocol.Protocol.RetrievedValue;
+import net.meisen.dissertation.jdbc.protocol.RetrievedValue;
 
 import org.junit.After;
 import org.junit.Before;

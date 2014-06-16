@@ -7,7 +7,7 @@ import java.net.SocketException;
 
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
-import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
+import net.meisen.dissertation.jdbc.protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IQueryResultArrayOfIntegers;
