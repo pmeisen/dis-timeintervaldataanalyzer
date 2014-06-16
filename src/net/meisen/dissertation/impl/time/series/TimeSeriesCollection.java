@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.time.series;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Locale;
 
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -13,7 +14,7 @@ import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
  * @author pmeisen
  * 
  */
-public class TimeSeriesCollection {
+public class TimeSeriesCollection implements Iterable<TimeSeries> {
 	private final TimePointLabels labels;
 	private final IIndexedCollection timeSeries;
 	private final int size;
@@ -25,13 +26,15 @@ public class TimeSeriesCollection {
 	 * 
 	 * @param size
 	 *            the size of the {@code TimeSeries} to be handled
+	 * @param type
+	 *            the type of the raw-values of the labels
 	 * @param factory
 	 *            the factory used to create indexes
 	 */
-	public TimeSeriesCollection(final int size, final BaseIndexFactory factory) {
+	public TimeSeriesCollection(final int size, final Class<?> type,
+			final BaseIndexFactory factory) {
 		this.size = size;
-
-		this.labels = new TimePointLabels(size);
+		this.labels = new TimePointLabels(size, type);
 
 		final IndexKeyDefinition keyDef = new IndexKeyDefinition(
 				TimeSeries.class, "getId");
@@ -200,5 +203,47 @@ public class TimeSeriesCollection {
 	 */
 	public int amountOfSeries() {
 		return timeSeries.size();
+	}
+
+	/**
+	 * Gets the labels of the collection.
+	 * 
+	 * @return the labels of the collection
+	 */
+	public String[] getLabels() {
+		return labels == null ? null : labels.getLabels();
+	}
+
+	/**
+	 * Gets the amount of labels specified.
+	 * 
+	 * @return the amount of labels specified
+	 */
+	public int sizeOfLabels() {
+		return labels.size();
+	}
+
+	/**
+	 * Gets the amount of time-series.
+	 * 
+	 * @return the amount of time-series
+	 */
+	public int size() {
+		return timeSeries.size();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Iterator<TimeSeries> iterator() {
+		return (Iterator<TimeSeries>) timeSeries.getAll().iterator();
+	}
+
+	/**
+	 * Gets the type of the raw-values of the labels.
+	 * 
+	 * @return the type of the raw-values of the labels
+	 */
+	public Class<?> getLabelValueType() {
+		return labels.getType();
 	}
 }

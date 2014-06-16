@@ -1469,4 +1469,78 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// fire the query
 		factory.evaluateQuery(q(query), null);
 	}
+
+	/**
+	 * Tests the iteration over the time-series.
+	 */
+	@Test
+	public void testLabelsAndIteration() {
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select timeseries of mode(PAX) AS PAX, mode(CREW) AS CREW, mode(PAX + CREW) AS COMPLEX_MODE, mode(PAX) + mode(CREW) AS COMBINED_MODE from testNumberModel in [01.01.2014,05.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				null);
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
+
+		// check the labels
+		final String[] labels = res.getNames();
+		assertEquals(tsRes.sizeOfLabels() + 1, labels.length);
+		assertEquals("ID", labels[0]);
+		assertEquals("01.01.2014 00:00:00,000", labels[1]);
+		assertEquals("02.01.2014 00:00:00,000", labels[2]);
+		assertEquals("03.01.2014 00:00:00,000", labels[3]);
+		assertEquals("04.01.2014 00:00:00,000", labels[4]);
+		assertEquals("05.01.2014 00:00:00,000", labels[5]);
+
+		int counter = 0;
+		for (final Object[] o : res) {
+			ts = tsRes.getSeries((String) o[0]);
+
+			assertNotNull(ts);
+			assertEquals(ts.getId(), o[0]);
+			assertEquals(ts.getValue(0), o[1]);
+			assertEquals(ts.getValue(1), o[2]);
+			assertEquals(ts.getValue(2), o[3]);
+			assertEquals(ts.getValue(3), o[4]);
+			assertEquals(ts.getValue(4), o[5]);
+
+			counter++;
+		}
+		assertEquals(tsRes.size(), counter);
+	}
+
+	/**
+	 * Checks the iteration of the transposed time-series.
+	 */
+	@Test
+	public void testLabelsAndTransposedIteration() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testNumberModel.xml";
+		final String query = "select TRANSPOSE(timeseries) of mode(PAX) AS PAX, mode(CREW) AS CREW, mode(PAX + CREW) AS COMPLEX_MODE, mode(PAX) + mode(CREW) AS COMBINED_MODE from testNumberModel in [01.01.2014,05.01.2014]";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				null);
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
+		int counter = 0;
+		for (final Object[] o : res) {
+			assertNotNull(o);
+			counter++;
+
+			// make sure the whole thing ends sometimes
+			if (counter > tsRes.sizeOfLabels() * tsRes.size() + 1) {
+				break;
+			}
+		}
+
+		assertEquals(counter, tsRes.sizeOfLabels() * tsRes.size());
+	}
 }

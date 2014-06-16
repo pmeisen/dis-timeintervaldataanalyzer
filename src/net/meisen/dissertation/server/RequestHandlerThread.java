@@ -6,13 +6,14 @@ import java.net.Socket;
 import java.net.SocketException;
 
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
+import net.meisen.dissertation.jdbc.protocol.QueryStatus;
 import net.meisen.dissertation.jdbc.protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
-import net.meisen.dissertation.model.parser.query.IQueryResultArrayOfIntegers;
-import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
+import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.server.listener.utility.WorkerThread;
 
@@ -101,28 +102,49 @@ public class RequestHandlerThread extends WorkerThread {
 				}
 
 				try {
+
+					// parse the query and send the type
 					final IQuery query = queryFactory.parseQuery(msg);
-					final IQueryResult result = queryFactory.evaluateQuery(
-							query, new ClientResourceResolver(p));
+					p.writeQueryType(query.getQueryType());
 
-					if (result instanceof IQueryResultSingleInteger) {
-						final IQueryResultSingleInteger resultInt = (IQueryResultSingleInteger) result;
-						p.writeInt(resultInt.getResult());
-					} else if (result instanceof IQueryResultArrayOfIntegers) {
+					// check the status
+					final QueryStatus status = p.readQueryStatus();
+					if (!QueryStatus.CANCEL.equals(status)) {
+						final boolean enableIdCollection = QueryStatus.PROCESSANDGETIDS
+								.equals(status);
+						query.enableIdCollection(enableIdCollection);
 
-						// TODO write all the integers
-					} else if (result instanceof IQueryResultSet) {
-						final IQueryResultSet resultSet = (IQueryResultSet) result;
-						p.writeHeader(resultSet.getTypes());
-						p.writeHeaderNames(resultSet.getNames());
+						final IQueryResult result = queryFactory.evaluateQuery(
+								query, new ClientResourceResolver(p));
 
-						// TODO iterate over the data and write it
-					} else {
+						if (result instanceof IQueryResultSingleInteger) {
+							final IQueryResultSingleInteger res = (IQueryResultSingleInteger) result;
+							p.writeInt(res.getResult());
+						} else if (result instanceof IQueryResultSet) {
+							final IQueryResultSet res = (IQueryResultSet) result;
 
+							// write the header
+							final DataType[] header = p.writeHeader(res
+									.getTypes());
+							p.writeHeaderNames(res.getNames());
+
+							// write the records
+							for (final Object[] values : res) {
+								p.writeResult(header, values);
+							}
+						}
+
+						// write the collected identifiers if it was activated
+						if (enableIdCollection) {
+							final int[] collectedIds = result.getCollectedIds();
+							if (collectedIds == null) {
+								p.writeInts(collectedIds);
+							} else {
+								p.writeInts(new int[0]);
+							}
+						}
 					}
 
-					// write the result
-					p.writeResult(result.toString().getBytes());
 					p.writeEndOfResult();
 				} catch (final Exception e) {
 					p.writeException(e);

@@ -8,6 +8,7 @@ import java.util.List;
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.IntervalType;
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -40,12 +41,16 @@ public class InsertQuery implements IQuery {
 
 	private List<String> descIds;
 
+	private boolean enableIdCollection;
+
 	/**
 	 * Default constructor.
 	 */
 	public InsertQuery() {
 		this.data = new ArrayList<List<String>>();
 		this.intervals = new ArrayList<Interval<?>>();
+
+		this.enableIdCollection = false;
 
 		this.descIds = Collections.emptyList();
 	}
@@ -302,5 +307,15 @@ public class InsertQuery implements IQuery {
 	@Override
 	public boolean expectsModel() {
 		return true;
+	}
+
+	@Override
+	public QueryType getQueryType() {
+		return QueryType.MANIPULATION;
+	}
+
+	@Override
+	public void enableIdCollection(final boolean enableIdCollection) {
+		this.enableIdCollection = enableIdCollection;
 	}
 }

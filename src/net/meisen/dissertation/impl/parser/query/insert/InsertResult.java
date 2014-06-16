@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.insert;
 
-import net.meisen.dissertation.model.parser.query.IQueryResult;
+import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 
 /**
  * The result of an insert statement.
@@ -8,7 +8,7 @@ import net.meisen.dissertation.model.parser.query.IQueryResult;
  * @author pmeisen
  * 
  */
-public class InsertResult implements IQueryResult {
+public class InsertResult implements IQueryResultSingleInteger {
 
 	private int amount;
 
@@ -46,5 +46,15 @@ public class InsertResult implements IQueryResult {
 	 */
 	public void setAmount(final int amount) {
 		this.amount = amount;
+	}
+
+	@Override
+	public int getResult() {
+		return getAmount();
+	}
+	
+	@Override
+	public int[] getCollectedIds() {
+		return null;
 	}
 }

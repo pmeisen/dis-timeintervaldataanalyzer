@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.alive;
 
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -39,5 +40,15 @@ public class AliveQuery implements IQuery {
 	@Override
 	public String toString() {
 		return "alive";
+	}
+
+	@Override
+	public QueryType getQueryType() {
+		return QueryType.MANIPULATION;
+	}
+
+	@Override
+	public void enableIdCollection(final boolean enableIdCollection) {
+		// ignore not supported
 	}
 }

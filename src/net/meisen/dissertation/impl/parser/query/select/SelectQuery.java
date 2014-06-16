@@ -9,6 +9,7 @@ import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluato
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -174,5 +175,15 @@ public class SelectQuery implements IQuery {
 	 */
 	public boolean isTransposed() {
 		return transposed;
+	}
+	
+	@Override
+	public QueryType getQueryType() {
+		return QueryType.QUERY;
+	}
+	
+	@Override
+	public void enableIdCollection(final boolean enableIdCollection) {
+		// ignore not supported
 	}
 }

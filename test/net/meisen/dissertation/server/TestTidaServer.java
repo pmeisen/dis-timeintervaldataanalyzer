@@ -5,14 +5,17 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
+import net.meisen.dissertation.jdbc.QueryResponseHandler;
+import net.meisen.dissertation.jdbc.TidaResultSetType;
+import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.jdbc.protocol.IResponseHandler;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
-import net.meisen.dissertation.jdbc.protocol.RetrievedValue;
+import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.jdbc.protocol.ResponseType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +29,7 @@ import org.junit.Test;
  * 
  */
 public class TestTidaServer {
+
 	private TidaServer server;
 	private Socket socket;
 
@@ -61,50 +65,23 @@ public class TestTidaServer {
 		final Protocol p = new Protocol(socket);
 
 		// create a handler for testing
-		final IResponseHandler handler = new IResponseHandler() {
-
-			@Override
-			public InputStream getResourceStream(final String resource) {
-				return getClass().getResourceAsStream(resource);
-			}
-
-			@Override
-			public void setHeader(final Class<?>[] header) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public void setHeaderNames(final String[] header) {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public boolean handleResult(final RetrievedValue value) {
-				try {
-					System.out.println(new String(value.bytes, "UTF8"));
-				} catch (final UnsupportedEncodingException e) {
-					// ignore
-				}
-
-				return true;
-			}
-
-			@Override
-			public void signalEORReached() {
-				// TODO Auto-generated method stub
-			}
-		};
+		final QueryResponseHandler handler = new QueryResponseHandler();
+		handler.setExpectedResultSetType(TidaResultSetType.MODIFY);
 
 		// load a model
-		p.write("LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'");
-		p.handleResponse(handler);
+		p.writeAndHandle(
+				"LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'",
+				handler);
 
+		handler.setExpectedResultSetType(TidaResultSetType.QUERY);
 		for (int i = 0; i < 10; i++) {
-			p.write("select timeseries of count(PERSON) AS PERSON from testPersonModel");
-			p.handleResponse(handler);
+			p.writeAndHandle(
+					"select timeseries of count(PERSON) AS PERSON from testPersonModel",
+					handler);
 		}
 
-		p.write("unload testPersonModel");
+		handler.setExpectedResultSetType(TidaResultSetType.MODIFY);
+		p.writeAndHandle("unload testPersonModel", handler);
 		p.handleResponse(handler);
 
 		// close the socket
@@ -120,11 +97,11 @@ public class TestTidaServer {
 	 */
 	@Test
 	public void testCloseSocketAfterShutdown() throws IOException {
+		final IResponseHandler handler = new QueryResponseHandler();
 		final Protocol p = new Protocol(socket);
 
 		// send a message everything should just work fine
-		p.write("ALIVE");
-		p.read();
+		p.writeAndHandle("ALIVE", handler);
 
 		// shut the server down
 		server.shutdown();
@@ -132,14 +109,13 @@ public class TestTidaServer {
 		// the socket should be closed
 		Exception exception = null;
 		try {
-			p.write("ALIVE");
-			p.read();
+			p.writeAndHandle("ALIVE", handler);
 		} catch (final SocketException e) {
 			exception = e;
 		}
 		assertNotNull(exception);
 		assertTrue(exception.getMessage().contains("caused connection abort"));
-		
+
 		// close the socket
 		p.close();
 	}

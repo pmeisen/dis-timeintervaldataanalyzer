@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.load;
 
-import net.meisen.dissertation.model.parser.query.IQueryResult;
+import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 
 /**
  * The result provided by a {@code LoadQuery}.
@@ -10,7 +10,7 @@ import net.meisen.dissertation.model.parser.query.IQueryResult;
  * @see LoadQuery
  * 
  */
-public class LoadResult implements IQueryResult {
+public class LoadResult implements IQueryResultSingleInteger {
 	private String modelId;
 
 	/**
@@ -35,5 +35,15 @@ public class LoadResult implements IQueryResult {
 	@Override
 	public String toString() {
 		return modelId;
+	}
+
+	@Override
+	public int getResult() {
+		return 0;
+	}
+	
+	@Override
+	public int[] getCollectedIds() {
+		return null;
 	}
 }

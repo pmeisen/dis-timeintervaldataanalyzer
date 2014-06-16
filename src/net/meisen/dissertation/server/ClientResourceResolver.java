@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
-import net.meisen.dissertation.jdbc.protocol.Protocol.WrappedException;
+import net.meisen.dissertation.jdbc.protocol.WrappedException;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 

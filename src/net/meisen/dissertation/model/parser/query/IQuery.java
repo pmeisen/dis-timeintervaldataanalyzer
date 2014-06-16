@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.parser.query;
 
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
@@ -66,4 +67,19 @@ public interface IQuery {
 	public IQueryResult evaluate(final TidaModelHandler handler,
 			final TidaModel model, final IResourceResolver resolver)
 			throws ForwardedRuntimeException;
+
+	public QueryType getQueryType();
+
+	/**
+	 * Enables the collection of identifiers for the query. For some queries it
+	 * might be possible that the query collects identifiers of records which
+	 * were modified, added or deleted. The concrete implementation of the
+	 * evaluator of the query has to determine which identifiers are meaningful
+	 * to be collected if activated. If the query does not support and
+	 * collection or cannot collect anything the call can just be ignored.
+	 * 
+	 * @param enableIdCollection
+	 *            {@code true} to enable the collection, otherwise {@code false}
+	 */
+	public void enableIdCollection(final boolean enableIdCollection);
 }

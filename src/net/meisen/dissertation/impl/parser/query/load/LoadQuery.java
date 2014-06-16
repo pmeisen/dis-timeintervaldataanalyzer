@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -155,5 +156,15 @@ public class LoadQuery implements IQuery {
 		} else {
 			return (T) value;
 		}
+	}
+	
+	@Override
+	public QueryType getQueryType() {
+		return QueryType.MANIPULATION;
+	}
+	
+	@Override
+	public void enableIdCollection(final boolean enableIdCollection) {
+		// ignore not supported
 	}
 }

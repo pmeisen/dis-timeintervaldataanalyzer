@@ -12,16 +12,29 @@ import net.meisen.general.genmisc.types.Strings;
 public class TimePointLabels {
 	private final String[] labels;
 	private final Object[] labelValues;
+	private final Class<?> type;
 
 	/**
 	 * Standard constructor defining the amount of labels
 	 * 
 	 * @param size
 	 *            the amount of labels, i.e. granules
+	 * @param type
+	 *            the type of the {@code labelValues}
 	 */
-	public TimePointLabels(final int size) {
+	public TimePointLabels(final int size, final Class<?> type) {
 		this.labels = new String[size];
 		this.labelValues = new Object[size];
+		this.type = type;
+	}
+
+	/**
+	 * Gets the type of the label values.
+	 * 
+	 * @return the type of the label values
+	 */
+	public Class<?> getType() {
+		return type;
 	}
 
 	/**
@@ -65,8 +78,35 @@ public class TimePointLabels {
 		return this.labels[pos];
 	}
 
+	/**
+	 * Gets the specified labels.
+	 * 
+	 * @return the specified labels
+	 */
+	public String[] getLabels() {
+		return labels;
+	}
+
+	/**
+	 * Gets the specified label-values.
+	 * 
+	 * @return the specified label-values
+	 */
+	public Object[] getLabelValues() {
+		return labelValues;
+	}
+
 	@Override
 	public String toString() {
 		return Strings.join(",", labels);
+	}
+
+	/**
+	 * Gets the amount of labels specified.
+	 * 
+	 * @return the amount of labels specified.
+	 */
+	public int size() {
+		return labels.length;
 	}
 }
