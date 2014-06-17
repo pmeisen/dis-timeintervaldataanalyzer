@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.WrappedException;
@@ -18,6 +21,8 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class ClientResourceResolver implements IResourceResolver {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(ClientResourceResolver.class);
 
 	private final Protocol protocol;
 
@@ -34,6 +39,12 @@ public class ClientResourceResolver implements IResourceResolver {
 
 	@Override
 	public InputStream resolve(final String resource) {
+
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Trying to resolve resource '" + resource
+					+ "' from client.");
+		}
+
 		try {
 
 			// tell the client that we need a resource
