@@ -102,7 +102,6 @@ public class TestInsertQueries extends LoaderBasedTest {
 		assertEquals(2, query.getStartPosition());
 		assertEquals(0, query.getEndPosition());
 		assertEquals(2, query.sizeOfRecords());
-		assertEquals(2, query.sizeOfRecords());
 
 		assertEquals(IntervalType.INCLUDE, query.getInterval(0).getOpenType());
 		assertEquals(IntervalType.INCLUDE, query.getInterval(0).getCloseType());
@@ -236,6 +235,97 @@ public class TestInsertQueries extends LoaderBasedTest {
 
 		// check the result
 		assertEquals(6, res.getAmount());
+
+		// check if the data was added
+		assertEquals(6, model.getAmountOfRecords());
+		assertEquals(6, model.getNextDataId());
+
+		// check the Model
+		final MetaDataModel metaDataModel = model.getMetaDataModel();
+		DescriptorModel<?> descModel;
+		descModel = metaDataModel.getDescriptorModel("NAME");
+		assertEquals(Object.class, descModel.getValueType());
+		assertEquals(GeneralDescriptor.class, descModel.getDescriptorClass());
+		assertEquals(4, descModel.getDescriptors().size());
+		assertNotNull(descModel.getDescriptorByValue("Philipp"));
+		assertNotNull(descModel.getDescriptorByValue("Tobias"));
+		assertNotNull(descModel.getDescriptorByValue("Andrea"));
+		assertNotNull(descModel.getDescriptorByValue("Edison"));
+
+		descModel = metaDataModel.getDescriptorModel("PRIORITY");
+		assertEquals(Object.class, descModel.getValueType());
+		assertEquals(GeneralDescriptor.class, descModel.getDescriptorClass());
+		assertEquals(3, descModel.getDescriptors().size());
+		assertNotNull(descModel.getDescriptorByValue("High"));
+		assertNotNull(descModel.getDescriptorByValue("Normal"));
+		assertNotNull(descModel.getDescriptorByValue("Low"));
+
+		descModel = metaDataModel.getDescriptorModel("POSITION");
+		assertEquals(Integer.class, descModel.getValueType());
+		assertEquals(IntegerDescriptor.class, descModel.getDescriptorClass());
+		assertEquals(5, descModel.getDescriptors().size());
+		assertNotNull(descModel.getDescriptorByValue(19));
+		assertNotNull(descModel.getDescriptorByValue(0));
+		assertNotNull(descModel.getDescriptorByValue(8));
+		assertNotNull(descModel.getDescriptorByValue(22));
+		assertNotNull(descModel.getDescriptorByValue(-1));
+
+		// get slices
+		final SliceWithDescriptors<?>[] slices = model.getIndex()
+				.getIntervalIndexSlices(
+						Dates.parseDate("20.01.2000", "dd.MM.yyyy"),
+						Dates.parseDate("21.01.2000", "dd.MM.yyyy"), true,
+						false);
+		assertEquals(1440, slices.length);
+
+		for (final SliceWithDescriptors<?> s : slices) {
+			assertNotNull(s);
+			assertEquals(3, s.getDescriptors("NAME").size());
+			assertEquals(1, s.getDescriptors("PRIORITY").size());
+			assertEquals(2, s.getDescriptors("POSITION").size());
+		}
+	}
+
+	/**
+	 * Tests the insertion of multiple records and the retrieval of the added
+	 * identifiers.
+	 * 
+	 * @throws ParseException
+	 *             if the query cannot be parsed
+	 */
+	@Test
+	public void testInsertionOfMultipleWithIdRetrieval() throws ParseException {
+
+		// load the Model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testEmptyModel.xml";
+		final TidaModel model = m(xml);
+		assertEquals(0, model.getAmountOfRecords());
+		assertEquals(0, model.getNextDataId());
+
+		// the query
+		String q = "INSERT INTO testEmptyModel ";
+		q += "([END], NAME, [START+], PRIORITY, POSITION) VALUES ";
+		q += "(20.01.2000 23:59:00, 'Philipp', 20.01.2000, 'High', '19'), ";
+		q += "(20.01.2000 23:59:00, 'Tobias', 20.01.2000, 'High', '19'), ";
+		q += "(20.01.2000 23:59:00, 'Andrea', 20.01.2000, 'High', '22'), ";
+		q += "(22.08.2013 23:59:00, 'Edison', 22.08.2013, 'High', '0'), ";
+		q += "(05.04.2014, 'Philipp', NULL, 'Normal', '-1'), ";
+		q += "(23.04.2014 22:22:22, 'Philipp', 23.04.2014 10:00:00, 'Low', '8')";
+
+		// evaluate the query
+		final InsertQuery query = q(q);
+		query.enableIdCollection(true);
+
+		final InsertResult res = factory.evaluateQuery(query, null);
+
+		// check the result
+		assertEquals(6, res.getAmount());
+		assertEquals(0, res.getIds()[0]);
+		assertEquals(1, res.getIds()[1]);
+		assertEquals(2, res.getIds()[2]);
+		assertEquals(3, res.getIds()[3]);
+		assertEquals(4, res.getIds()[4]);
+		assertEquals(5, res.getIds()[5]);
 
 		// check if the data was added
 		assertEquals(6, model.getAmountOfRecords());
