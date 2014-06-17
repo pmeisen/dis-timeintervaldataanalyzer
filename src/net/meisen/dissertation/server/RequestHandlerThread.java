@@ -105,37 +105,35 @@ public class RequestHandlerThread extends WorkerThread {
 
 					// parse the query and send the type
 					final IQuery query = queryFactory.parseQuery(msg);
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Writing queryType of '" + msg + "' as '"
+								+ query.getQueryType() + "'.");
+					}
 					p.writeQueryType(query.getQueryType());
 
 					// check the status
 					final QueryStatus status = p.readQueryStatus();
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Got queryStatus '" + status
+								+ "' from client for query '" + msg + "'.");
+					}
 					if (!QueryStatus.CANCEL.equals(status)) {
+
+						// enable identifier collection if needed
 						final boolean enableIdCollection = QueryStatus.PROCESSANDGETIDS
 								.equals(status);
 						query.enableIdCollection(enableIdCollection);
 
+						// retrieve the result
 						final IQueryResult result = queryFactory.evaluateQuery(
 								query, new ClientResourceResolver(p));
 
-						if (result instanceof IQueryResultSingleInteger) {
-							final IQueryResultSingleInteger res = (IQueryResultSingleInteger) result;
-							p.writeInt(res.getResult());
-						} else if (result instanceof IQueryResultSet) {
-							final IQueryResultSet res = (IQueryResultSet) result;
-
-							// write the header
-							final DataType[] header = p.writeHeader(res
-									.getTypes());
-							p.writeHeaderNames(res.getNames());
-
-							// write the records
-							for (final Object[] values : res) {
-								p.writeResult(header, values);
-							}
-						}
-
 						// write the collected identifiers if it was activated
 						if (enableIdCollection) {
+							if (LOG.isTraceEnabled()) {
+								LOG.trace("Writing the collected identifiers.");
+							}
+
 							final int[] collectedIds = result.getCollectedIds();
 							if (collectedIds == null) {
 								p.writeInts(collectedIds);
@@ -143,10 +141,52 @@ public class RequestHandlerThread extends WorkerThread {
 								p.writeInts(new int[0]);
 							}
 						}
+
+						// write the result
+						if (result instanceof IQueryResultSingleInteger) {
+							final IQueryResultSingleInteger res = (IQueryResultSingleInteger) result;
+
+							if (LOG.isTraceEnabled()) {
+								LOG.trace("Replying to query '" + msg
+										+ "' with single integer "
+										+ res.getResult() + ".");
+							}
+
+							p.writeInt(res.getResult());
+						} else if (result instanceof IQueryResultSet) {
+							final IQueryResultSet res = (IQueryResultSet) result;
+
+							// write the header
+							if (LOG.isTraceEnabled()) {
+								LOG.trace("Writing headers of reply of query '"
+										+ msg + "'.");
+							}
+							final DataType[] header = p.writeHeader(res
+									.getTypes());
+							p.writeHeaderNames(res.getNames());
+
+							// write the records
+							if (LOG.isTraceEnabled()) {
+								LOG.trace("Writing records of reply of query '"
+										+ msg + "'.");
+							}
+							for (final Object[] values : res) {
+								p.writeResult(header, values);
+							}
+						}
+					}
+
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Answer of '" + msg + "' sent, sending eor.");
 					}
 
 					p.writeEndOfResult();
 				} catch (final Exception e) {
+					if (LOG.isTraceEnabled()) {
+						LOG.trace("Exception while handling '" + msg
+								+ "' sending '" + e.getMessage() + "'.");
+					}
+
 					p.writeException(e);
 				}
 			}

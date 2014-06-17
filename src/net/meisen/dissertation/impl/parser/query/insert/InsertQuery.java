@@ -49,10 +49,9 @@ public class InsertQuery implements IQuery {
 	public InsertQuery() {
 		this.data = new ArrayList<List<String>>();
 		this.intervals = new ArrayList<Interval<?>>();
-
-		this.enableIdCollection = false;
-
 		this.descIds = Collections.emptyList();
+
+		this.enableIdCollection(false);
 	}
 
 	/**
@@ -142,7 +141,15 @@ public class InsertQuery implements IQuery {
 	@Override
 	public IQueryResult evaluate(final TidaModelHandler handler,
 			final TidaModel model, final IResourceResolver resolver) {
-		return new InsertResult(model.bulkLoadData(getDataStructure(), it()));
+
+		if (isEnableIdCollection()) {
+			final int[] ids = model.bulkLoadDataWithIds(getDataStructure(),
+					it());
+			return new InsertResult(ids);
+		} else {
+			final int amount = model.bulkLoadData(getDataStructure(), it());
+			return new InsertResult(amount);
+		}
 	}
 
 	/**
@@ -317,5 +324,15 @@ public class InsertQuery implements IQuery {
 	@Override
 	public void enableIdCollection(final boolean enableIdCollection) {
 		this.enableIdCollection = enableIdCollection;
+	}
+
+	/**
+	 * Checks if the collection of identifiers is enabled.
+	 * 
+	 * @return {@code true} if the collection is enabled, otherwise
+	 *         {@code false}
+	 */
+	public boolean isEnableIdCollection() {
+		return enableIdCollection;
 	}
 }

@@ -1,21 +1,18 @@
 package net.meisen.dissertation.server;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 
 import net.meisen.dissertation.jdbc.QueryResponseHandler;
 import net.meisen.dissertation.jdbc.TidaResultSetType;
-import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.jdbc.protocol.IResponseHandler;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
-import net.meisen.dissertation.jdbc.protocol.QueryType;
-import net.meisen.dissertation.jdbc.protocol.ResponseType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,19 +67,27 @@ public class TestTidaServer {
 
 		// load a model
 		p.writeAndHandle(
-				"LOAD FROM '/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'",
+				"LOAD FROM 'classpath:/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'",
 				handler);
 
 		handler.setExpectedResultSetType(TidaResultSetType.QUERY);
 		for (int i = 0; i < 10; i++) {
-			p.writeAndHandle(
+			p.initializeCommunication(
 					"select timeseries of count(PERSON) AS PERSON from testPersonModel",
 					handler);
+
+			int counter = 0;
+			while (!p.handleResponse(handler)) {
+				counter++;
+			}
+
+			// we expect one answer per query
+			assertEquals(1, counter);
 		}
 
 		handler.setExpectedResultSetType(TidaResultSetType.MODIFY);
 		p.writeAndHandle("unload testPersonModel", handler);
-		p.handleResponse(handler);
+		assertTrue(handler.reachedEOR());
 
 		// close the socket
 		p.close();

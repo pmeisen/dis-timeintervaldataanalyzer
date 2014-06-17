@@ -11,6 +11,7 @@ import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 public class InsertResult implements IQueryResultSingleInteger {
 
 	private int amount;
+	private int[] ids;
 
 	/**
 	 * Default constructor, initializing the amount with {@code 0}.
@@ -27,6 +28,20 @@ public class InsertResult implements IQueryResultSingleInteger {
 	 */
 	public InsertResult(final int amount) {
 		setAmount(amount);
+
+		this.ids = null;
+	}
+
+	/**
+	 * Constructor to specify the {@code amount} of data added.
+	 * 
+	 * @param ids
+	 *            the {@code ids} of the inserted records
+	 */
+	public InsertResult(final int[] ids) {
+		this(ids.length);
+
+		this.ids = ids;
 	}
 
 	/**
@@ -52,9 +67,28 @@ public class InsertResult implements IQueryResultSingleInteger {
 	public int getResult() {
 		return getAmount();
 	}
-	
+
 	@Override
 	public int[] getCollectedIds() {
-		return null;
+		return getIds();
+	}
+
+	/**
+	 * Depending on the query this method might contain the identifiers added.
+	 * 
+	 * @return the identifiers added
+	 */
+	public int[] getIds() {
+		return ids;
+	}
+
+	/**
+	 * Sets the identifiers added by the insertion.
+	 * 
+	 * @param ids
+	 *            the identifiers added
+	 */
+	public void setIds(final int[] ids) {
+		this.ids = ids;
 	}
 }

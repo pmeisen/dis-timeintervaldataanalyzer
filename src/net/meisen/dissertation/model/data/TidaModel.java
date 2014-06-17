@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.data;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -334,7 +336,7 @@ public class TidaModel implements IPersistable {
 	 *            the {@code DataStructure} to be used for the data
 	 * @param record
 	 *            the {@code DataRecord} to be loaded
-	 *            
+	 * 
 	 * @return the identifier of the record written
 	 */
 	protected int _loadRecord(final DataStructure dataStructure,
@@ -381,6 +383,46 @@ public class TidaModel implements IPersistable {
 	 */
 	public int bulkLoadData(final DataStructure dataStructure,
 			final Iterator<IDataRecord> it) {
+		final int[] res = bulkLoadData(dataStructure, it, false);
+
+		return res[0];
+	}
+
+	/**
+	 * Loads the specified data in a bulk-load, i.e. the data is not persisted
+	 * until all data is read.
+	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
+	 * @param it
+	 *            the {@code iterator} for the data to be loaded
+	 * 
+	 * @return the identifiers added
+	 */
+	public int[] bulkLoadDataWithIds(final DataStructure dataStructure,
+			final Iterator<IDataRecord> it) {
+		return bulkLoadData(dataStructure, it, true);
+	}
+
+	/**
+	 * Loads the specified data in a bulk-load, i.e. the data is not persisted
+	 * until all data is read.
+	 * 
+	 * @param dataStructure
+	 *            the {@code DataStructure} to be used for the data
+	 * @param it
+	 *            the {@code iterator} for the data to be loaded
+	 * @param retrieveIdentifiers
+	 *            {@code true} if the returned array should contain all the
+	 *            created identifiers, {@code false} if it should just contain a
+	 *            single value, i.e. the amount of data added
+	 * 
+	 * @return depending on the {@code retrievedIdentifiers} flag, the amount of
+	 *         data added (array with just one entry) or an array of the added
+	 *         identifiers
+	 */
+	protected int[] bulkLoadData(final DataStructure dataStructure,
+			final Iterator<IDataRecord> it, final boolean retrieveIdentifiers) {
 
 		// make sure the model is initialized
 		if (!isInitialized()) {
@@ -391,6 +433,9 @@ public class TidaModel implements IPersistable {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Start adding of records...");
 		}
+
+		// create the list of identifiers
+		final TIntArrayList res = new TIntArrayList();
 
 		// inform the cache about bulk-loads
 		loadLock.writeLock().lock();
@@ -405,7 +450,12 @@ public class TidaModel implements IPersistable {
 
 			try {
 				while (it.hasNext()) {
-					_loadRecord(dataStructure, it.next());
+
+					if (retrieveIdentifiers) {
+						res.add(_loadRecord(dataStructure, it.next()));
+					} else {
+						_loadRecord(dataStructure, it.next());
+					}
 
 					if (++amountOfData % 10000 == 0 && LOG.isDebugEnabled()) {
 						LOG.debug("... added " + amountOfData + " records...");
@@ -433,11 +483,16 @@ public class TidaModel implements IPersistable {
 			LOG.debug("Finished adding of " + amountOfData + " records.");
 		}
 
+		// if no identifiers are needed than just add the amount
+		if (!retrieveIdentifiers) {
+			res.add(amountOfData);
+		}
+
 		// optimize the indexes after the loading
 		this.idx.optimize();
 
 		// return the amount of data written
-		return amountOfData;
+		return res.toArray();
 	}
 
 	/**

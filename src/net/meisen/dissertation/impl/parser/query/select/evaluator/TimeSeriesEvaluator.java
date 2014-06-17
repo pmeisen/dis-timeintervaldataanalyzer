@@ -259,7 +259,7 @@ public class TimeSeriesEvaluator {
 
 		// create the result
 		final TimeSeriesCollection result = new TimeSeriesCollection(
-				amountOfGranules, interval.getType(), indexFactory);
+				amountOfGranules, startPoint.getClass(), indexFactory);
 		for (int i = 0; i < amountOfGranules; i++) {
 
 			// create a label for the timeSlice
