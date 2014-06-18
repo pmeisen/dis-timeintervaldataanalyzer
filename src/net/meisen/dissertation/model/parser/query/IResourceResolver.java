@@ -2,6 +2,7 @@ package net.meisen.dissertation.model.parser.query;
 
 import java.io.InputStream;
 
+import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -22,7 +23,11 @@ public interface IResourceResolver {
 	 * 
 	 * @return the {@code InputStream} to the resource
 	 * 
+	 * @throws CancellationException
+	 *             if the resolving was cancelled
+	 * 
 	 * @see ForwardedRuntimeException
 	 */
-	public InputStream resolve(final String resource);
+	public InputStream resolve(final String resource)
+			throws CancellationException;
 }

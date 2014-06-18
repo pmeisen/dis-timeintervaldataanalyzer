@@ -1,6 +1,7 @@
 package net.meisen.dissertation.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -13,6 +14,7 @@ import net.meisen.dissertation.jdbc.QueryResponseHandler;
 import net.meisen.dissertation.jdbc.TidaResultSetType;
 import net.meisen.dissertation.jdbc.protocol.IResponseHandler;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
+import net.meisen.dissertation.jdbc.protocol.ResponseType;
 
 import org.junit.After;
 import org.junit.Before;
@@ -120,6 +122,47 @@ public class TestTidaServer {
 		}
 		assertNotNull(exception);
 		assertTrue(exception.getMessage().contains("caused connection abort"));
+
+		// close the socket
+		p.close();
+	}
+
+	@Test
+	public void testCancellation() throws IOException {
+		final boolean[] control = new boolean[] { false };
+		final QueryResponseHandler handler = new QueryResponseHandler() {
+
+			@Override
+			public boolean handleResult(final ResponseType type,
+					final Object[] value) {
+				super.handleResult(type, value);
+
+				return control[0];
+			}
+		};
+		final Protocol p = new Protocol(socket);
+
+		// send a message which might take a while
+		p.initializeCommunication(
+				"LOAD FROM 'classpath:/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'",
+				handler);
+
+		// interrupt the current thread
+		Thread.currentThread().interrupt();
+
+		// start the handling
+		while (!handler.isEOR()) {
+			p.handleResponse(handler);
+		}
+
+		// check that the flag was removed
+		assertFalse(Thread.currentThread().isInterrupted());
+		control[0] = true;
+
+		// use the protocol again, it should work just fine
+		p.writeAndHandle(
+				"LOAD FROM 'classpath:/net/meisen/dissertation/impl/parser/query/testPersonModel.xml'",
+				handler);
 
 		// close the socket
 		p.close();

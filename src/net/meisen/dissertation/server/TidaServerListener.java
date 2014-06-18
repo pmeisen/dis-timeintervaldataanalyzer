@@ -55,7 +55,7 @@ public class TidaServerListener extends BaseListener {
 					TidaServerListenerException.class, 1000, timeoutInMs);
 		}
 
-		return new RequestHandlerThread(socket, queryFactory);
+		return new RequestHandlerThread(socket, queryFactory, getExceptionRegistry());
 	}
 
 	@Override

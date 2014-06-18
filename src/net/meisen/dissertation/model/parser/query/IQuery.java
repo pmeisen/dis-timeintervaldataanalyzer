@@ -3,6 +3,7 @@ package net.meisen.dissertation.model.parser.query;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -63,10 +64,12 @@ public interface IQuery {
 	 * @throws ForwardedRuntimeException
 	 *             if an evaluation error occurs or if a needed {@code resolver}
 	 *             is not specified
+	 * @throws CancellationException
+	 *             if the processing was cancelled by the client
 	 */
 	public IQueryResult evaluate(final TidaModelHandler handler,
 			final TidaModel model, final IResourceResolver resolver)
-			throws ForwardedRuntimeException;
+			throws ForwardedRuntimeException, CancellationException;
 
 	public QueryType getQueryType();
 

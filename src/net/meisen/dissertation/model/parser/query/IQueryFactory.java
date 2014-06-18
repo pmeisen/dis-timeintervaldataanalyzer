@@ -2,6 +2,7 @@ package net.meisen.dissertation.model.parser.query;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
+import net.meisen.dissertation.server.CancellationException;
 
 /**
  * Factory to create {@code Query} instances for the specified string.
@@ -45,8 +46,11 @@ public interface IQueryFactory {
 	 * @return the result of the query
 	 * 
 	 * @throws QueryEvaluationException
-	 *             of the evaluation fails
+	 *             if the evaluation fails
+	 * @throws CancellationException
+	 *             if the evaluation was cancelled from the client
 	 */
 	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
-			final IResourceResolver resolver) throws QueryEvaluationException;
+			final IResourceResolver resolver) throws QueryEvaluationException,
+			CancellationException;
 }

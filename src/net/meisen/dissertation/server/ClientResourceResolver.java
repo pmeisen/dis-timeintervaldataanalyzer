@@ -38,7 +38,8 @@ public class ClientResourceResolver implements IResourceResolver {
 	}
 
 	@Override
-	public InputStream resolve(final String resource) {
+	public InputStream resolve(final String resource)
+			throws CancellationException {
 
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Trying to resolve resource '" + resource
@@ -52,9 +53,13 @@ public class ClientResourceResolver implements IResourceResolver {
 
 			// wait for the resource
 			final byte[] resourceAsBytes = this.protocol.readResource();
+			if (resourceAsBytes == null) {
+				throw new CancellationException();
+			} else {
 
-			// return the resource
-			return new ByteArrayInputStream(resourceAsBytes);
+				// return the resource
+				return new ByteArrayInputStream(resourceAsBytes);
+			}
 		} catch (final IOException e) {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1015, e, resource);

@@ -13,6 +13,7 @@ import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
+import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Streams;
 
@@ -41,7 +42,7 @@ public class LoadQuery implements IQuery {
 
 	@Override
 	public IQueryResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver) {
+			final TidaModel model, final IResourceResolver resolver) throws CancellationException {
 
 		final String modelId;
 		if (getPath() == null) {
@@ -74,18 +75,18 @@ public class LoadQuery implements IQuery {
 
 		// check if the model should be registered for autoload
 		final Boolean autoload = getProperty("autoload", null);
-		
+
 		// do not change the setting
 		if (autoload == null) {
 			// do nothing
-		} 
+		}
 		// autoload should be enabled
 		else if (autoload) {
-
-		} 
+			handler.enableAutoload(modelId);
+		}
 		// autoload should be disabled
 		else {
-			
+			handler.disableAutoload(modelId);
 		}
 
 		// create the result, the loading is finished
@@ -157,12 +158,12 @@ public class LoadQuery implements IQuery {
 			return (T) value;
 		}
 	}
-	
+
 	@Override
 	public QueryType getQueryType() {
 		return QueryType.MANIPULATION;
 	}
-	
+
 	@Override
 	public void enableIdCollection(final boolean enableIdCollection) {
 		// ignore not supported

@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
+import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -138,7 +139,7 @@ public class QueryFactory implements IQueryFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
-			final IResourceResolver resolver) throws QueryEvaluationException {
+			final IResourceResolver resolver) throws QueryEvaluationException, CancellationException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Evaluating the query '" + query + "'.");
 		}
@@ -152,28 +153,28 @@ public class QueryFactory implements IQueryFactory {
 			if (model == null) {
 				exceptionRegistry.throwRuntimeException(
 						QueryEvaluationException.class, 1001, modelId);
-			} 
+			}
 		} else {
 			model = null;
 		}
 
 		try {
 			return (T) query.evaluate(handler, model, resolver);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry
+					.throwRuntimeException((ForwardedRuntimeException) e);
+		} catch (final CancellationException e) {
+			throw e;
 		} catch (final Exception e) {
-			if (e instanceof ForwardedRuntimeException) {
-				exceptionRegistry
-						.throwRuntimeException((ForwardedRuntimeException) e);
-			} else {
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Unknown error occurred during evaluation.", e);
-				}
-
-				exceptionRegistry.throwRuntimeException(
-						QueryEvaluationException.class, 1000, e, query);
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Unknown error occurred during evaluation.", e);
 			}
 
-			// unreachable code
-			return null;
+			exceptionRegistry.throwRuntimeException(
+					QueryEvaluationException.class, 1000, e, query);
 		}
+
+		// unreachable code
+		return null;
 	}
 }
