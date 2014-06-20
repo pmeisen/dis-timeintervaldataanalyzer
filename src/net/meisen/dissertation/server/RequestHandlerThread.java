@@ -133,7 +133,7 @@ public class RequestHandlerThread extends WorkerThread {
 
 					// cancel if wished for
 					if (QueryStatus.CANCEL.equals(status)) {
-						p.writeEndOfResult();
+						p.writeEndOfResponse();
 						continue;
 					}
 
@@ -175,14 +175,14 @@ public class RequestHandlerThread extends WorkerThread {
 							LOG.trace("Handling of '" + msg
 									+ "' was canceled during evaluation.");
 						}
-						p.writeEndOfResult();
+						p.writeEndOfResponse();
 						continue;
 					}
 
 					if (LOG.isTraceEnabled()) {
 						LOG.trace("Answer of '" + msg + "' sent, sending eor.");
 					}
-					p.writeEndOfResult();
+					p.writeEndOfResponse();
 				} catch (final SocketException e) {
 					if (LOG.isTraceEnabled()) {
 						LOG.trace("Exception while handling '" + msg
@@ -232,6 +232,9 @@ public class RequestHandlerThread extends WorkerThread {
 		}
 		final DataType[] header = p.writeHeader(res.getTypes());
 		p.writeHeaderNames(res.getNames());
+
+		// send an end of meta, so that the client knows that data will follow
+		p.writeEndOfMeta();
 
 		// write the records
 		if (LOG.isTraceEnabled()) {
@@ -315,7 +318,7 @@ public class RequestHandlerThread extends WorkerThread {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Handling of '" + msg + "' canceled.");
 			}
-			p.writeEndOfResult();
+			p.writeEndOfResponse();
 			return true;
 		} else {
 			exceptionRegistry.throwRuntimeException(

@@ -77,6 +77,9 @@ public class TestTidaServer {
 			p.initializeCommunication(
 					"select timeseries of count(PERSON) AS PERSON from testPersonModel",
 					handler);
+			
+			// handle data up to the meta-data
+			p.handleResponse(handler);
 
 			int counter = 0;
 			while (!p.handleResponse(handler)) {
@@ -127,6 +130,12 @@ public class TestTidaServer {
 		p.close();
 	}
 
+	/**
+	 * Tests the cancellation of a statement on client side.
+	 * 
+	 * @throws IOException
+	 *             if some error occurs
+	 */
 	@Test
 	public void testCancellation() throws IOException {
 		final boolean[] control = new boolean[] { false };
