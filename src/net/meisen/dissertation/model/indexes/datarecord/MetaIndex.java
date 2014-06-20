@@ -2,20 +2,15 @@ package net.meisen.dissertation.model.indexes.datarecord;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.List;
 
-import net.meisen.dissertation.exceptions.MetaDataModelException;
-import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
-import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A {@code MetaIndex} is used to index meta information associated to data. It
