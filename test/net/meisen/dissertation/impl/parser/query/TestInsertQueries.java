@@ -22,6 +22,7 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -375,5 +376,37 @@ public class TestInsertQueries extends LoaderBasedTest {
 			assertEquals(1, s.getDescriptors("PRIORITY").size());
 			assertEquals(2, s.getDescriptors("POSITION").size());
 		}
+	}
+
+	/**
+	 * Tests the creation of a new descriptor when added by an insertion.
+	 */
+	@Test
+	public void testInsertValueWithNewDescriptor() {
+
+		// load the testModel
+		final TidaModel m = m("/net/meisen/dissertation/impl/parser/query/testEmptyNumberModel.xml");
+		final MetaDataModel metaDataModel = m.getMetaDataModel();
+
+		// -> verify that there aren't any descriptors
+		assertEquals(1, metaDataModel.getDescriptorModels().size());
+		assertEquals(0, metaDataModel.getDescriptors().size());
+		assertEquals(0, metaDataModel.getDescriptorModel("NUMBER").size());
+
+		// add the data of the reported bug
+		final IQuery query = factory
+				.parseQuery("INSERT INTO testNumberModel ([START], [END], NUMBER) VALUES (2, 3, '100'), (1, 5, '100')");
+		factory.evaluateQuery(query, null);
+
+		// -> first approach check if the MetaData is created after the insert
+		assertEquals(1, metaDataModel.getDescriptors().size());
+		assertEquals(1, metaDataModel.getDescriptorModel("NUMBER").size());
+		final Descriptor<Integer, ?, ?> desc = metaDataModel
+				.getDescriptorByValue("NUMBER", 100);
+		assertNotNull(desc);
+
+		// -> second check the index, it should have been updated
+		assertNotNull(m.getIndex().getMetaIndexDimensionSlice("NUMBER",
+				desc.getId()));
 	}
 }

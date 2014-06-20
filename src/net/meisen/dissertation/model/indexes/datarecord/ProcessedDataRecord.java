@@ -32,7 +32,7 @@ public class ProcessedDataRecord {
 			.getLogger(ProcessedDataRecord.class);
 
 	private final IDataRecord raw;
-	private final Map<MetaStructureEntry, Descriptor<?, ?, ?>> processedMeta;
+	private final Map<String, Descriptor<?, ?, ?>> processedMeta;
 	private final int id;
 
 	private long start = -1;
@@ -72,7 +72,7 @@ public class ProcessedDataRecord {
 			final IDataRecord raw, final TidaModel model, final int id) {
 		this.id = id;
 		this.raw = raw;
-		this.processedMeta = new HashMap<MetaStructureEntry, Descriptor<?, ?, ?>>();
+		this.processedMeta = new HashMap<String, Descriptor<?, ?, ?>>();
 
 		// handle the IntervalStructureEntries
 		final List<IntervalStructureEntry> intervalEntries = dataStructure
@@ -118,7 +118,19 @@ public class ProcessedDataRecord {
 	 * @return the {@code Descriptor} for the specified {@code entry}
 	 */
 	public Descriptor<?, ?, ?> getDescriptor(final MetaStructureEntry entry) {
-		return processedMeta.get(entry);
+		return processedMeta.get(entry.getDescriptorModel());
+	}
+
+	/**
+	 * Get the {@code Descriptor} of the specified {@code model}.
+	 * 
+	 * @param model
+	 *            the {@code DescriptorModel} to get the {@code Descriptor} for
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code model}
+	 */
+	public Descriptor<?, ?, ?> getDescriptor(final DescriptorModel<?> model) {
+		return processedMeta.get(model.getId());
 	}
 
 	/**
@@ -199,7 +211,7 @@ public class ProcessedDataRecord {
 		final MetaDataHandling handling = model.getMetaDataHandling();
 		final Descriptor<?, ?, ?> desc = descModel.getDescriptorByValue(value,
 				handling);
-		processedMeta.put(metaEntry, desc);
+		processedMeta.put(metaEntry.getDescriptorModel(), desc);
 	}
 
 	/**
@@ -229,7 +241,7 @@ public class ProcessedDataRecord {
 			final Object end = getValue(raw, endEntry);
 			final IntervalDataHandling handling = model
 					.getIntervalDataHandling();
-						
+
 			final MappingResult res = intervalModel.mapToTimeline(start, end,
 					handling, startInclusive, endInclusive);
 

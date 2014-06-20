@@ -72,6 +72,8 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
 						desc.getModelId(), desc.getId());
 
+				System.out.println(desc + " " + metaSlice);
+				
 				// get the bitmap
 				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
 				sum += bmp.determineCardinality() * desc.getFact();

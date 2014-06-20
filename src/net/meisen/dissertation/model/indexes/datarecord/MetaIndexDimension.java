@@ -45,7 +45,6 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 			.getLogger(MetaIndexDimension.class);
 
 	private final DescriptorModel<I> model;
-	private final MetaStructureEntry metaEntry;
 	private final IBitmapCache cache;
 	private final IIndexedCollection index;
 
@@ -55,9 +54,6 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * Constructor used to create a {@code MetaIndexDimension} for the specified
 	 * {@code metaEntry}, the specified {@code model}
 	 * 
-	 * @param metaEntry
-	 *            the {@code MetaStructureEntry} which defines this
-	 *            {@code MetaIndexDimension}
 	 * @param model
 	 *            the {@code DescriptorModel} referred by the
 	 *            {@code MetaStructureEntry}
@@ -71,25 +67,15 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @see MetaStructureEntry
 	 * @see DescriptorModel
 	 */
-	public MetaIndexDimension(final MetaStructureEntry metaEntry,
-			final DescriptorModel<I> model, final IBitmapCache cache,
-			final BaseIndexFactory indexFactory) {
+	public MetaIndexDimension(final DescriptorModel<I> model,
+			final IBitmapCache cache, final BaseIndexFactory indexFactory) {
 		if (model == null) {
 			throw new NullPointerException("The model cannot be null.");
-		} else if (metaEntry == null) {
-			throw new NullPointerException("The metaEntry cannot be null.");
-		} else if (!model.getId().equals(metaEntry.getDescriptorModel())) {
-			throw new IllegalArgumentException("The model identifier '"
-					+ model.getId()
-					+ "' must be equal to the entries descriptorModel '"
-					+ metaEntry.getDescriptorModel() + "'.");
 		} else if (LOG.isTraceEnabled()) {
-			LOG.trace("Creating MetaIndexDimension for '"
-					+ metaEntry.getDescriptorModel() + "'...");
+			LOG.trace("Creating MetaIndexDimension for '" + model + "'...");
 		}
 
 		// set the values
-		this.metaEntry = metaEntry;
 		this.model = model;
 		this.cache = cache;
 
@@ -111,9 +97,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 
 		// log the successful creation
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Created MetaIndexDimension for '"
-					+ metaEntry.getDescriptorModel() + "' with index '"
-					+ this.index.getClass().getName()
+			LOG.trace("Created MetaIndexDimension for '" + model
+					+ "' with index '" + this.index.getClass().getName()
 					+ "' for identifiers of model of type '"
 					+ model.getIdClass().getName() + "'.");
 		}
@@ -148,11 +133,11 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		// get the id
 		@SuppressWarnings("unchecked")
 		final Descriptor<?, ?, I> desc = (Descriptor<?, ?, I>) rec
-				.getDescriptor(metaEntry);
+				.getDescriptor(model);
 		if (desc == null) {
 			throw new IllegalArgumentException(
 					"The processed record is not compatible to the datastructure of the index. A descriptor for '"
-							+ metaEntry
+							+ model.getId()
 							+ "' could not be found in '"
 							+ rec
 							+ "'.");
@@ -283,8 +268,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	}
 
 	/**
-	 * Gets the class of the {@code Index} using to index the different
-	 * slices of the {@code MetaIndexDimension}.
+	 * Gets the class of the {@code Index} using to index the different slices
+	 * of the {@code MetaIndexDimension}.
 	 * 
 	 * @return the class of the {@code Index}
 	 */

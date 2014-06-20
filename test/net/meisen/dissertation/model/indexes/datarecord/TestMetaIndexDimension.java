@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.TidaConfig;
@@ -13,12 +12,10 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.persistence.FileLocation;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
-import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
-import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
@@ -52,16 +49,12 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 				.loadViaXslt("/net/meisen/dissertation/model/indexes/datarecord/tidaStaticMetaIndex.xml");
 
 		final MetaDataModel metaModel = model.getMetaDataModel();
-		final DataStructure structure = model.getDataStructure();
 		final DescriptorModel<?> descModel = metaModel
 				.getDescriptorModel("FAMILY");
-		final List<MetaStructureEntry> metaStructures = structure
-				.getEntriesByClass(MetaStructureEntry.class);
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		final MetaIndexDimension idx = new MetaIndexDimension(
-				metaStructures.get(0), descModel, model.getBitmapCache(),
-				model.getIndexFactory());
+		final MetaIndexDimension idx = new MetaIndexDimension(descModel,
+				model.getBitmapCache(), model.getIndexFactory());
 		final IClosableIterator<IDataRecord> it = model.getDataModel()
 				.iterator();
 		int i = 0;
@@ -101,17 +94,10 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		// get the defined model and the structure
 		final MetaDataModel metaModel = model.getMetaDataModel();
-		final DataStructure structure = model.getDataStructure();
 		final DescriptorModel<?> fixedDescModel = metaModel
 				.getDescriptorModel("FIXED");
 		final DescriptorModel<?> randomDescModel = metaModel
 				.getDescriptorModel("RANDOMINT");
-
-		// get the defined metaStructures
-		final List<MetaStructureEntry> metaStructures = structure
-				.getEntriesByClass(MetaStructureEntry.class);
-		final MetaStructureEntry fixedStructure = metaStructures.get(0);
-		final MetaStructureEntry randomStructure = metaStructures.get(1);
 
 		// check the descriptors
 		assertEquals(3, fixedDescModel.size());
@@ -121,12 +107,11 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		// create the indexDimensions
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension fixedIdx = new MetaIndexDimension(
-				fixedStructure, fixedDescModel, model.getBitmapCache(),
-				model.getIndexFactory());
+				fixedDescModel, model.getBitmapCache(), model.getIndexFactory());
 
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		final MetaIndexDimension randomIdx = new MetaIndexDimension(
-				randomStructure, randomDescModel, model.getBitmapCache(),
+				randomDescModel, model.getBitmapCache(),
 				model.getIndexFactory());
 
 		// add the data to the indexDimensions
@@ -190,20 +175,13 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		// get the defined model and the structure
 		final MetaDataModel metaModel = model.getMetaDataModel();
-		final DataStructure structure = model.getDataStructure();
 		final DescriptorModel<?> descModel = metaModel
 				.getDescriptorModel("FAMILY");
 
-		// get the defined metaStructures
-		final List<MetaStructureEntry> metaStructures = structure
-				.getEntriesByClass(MetaStructureEntry.class);
-		final MetaStructureEntry metaStructure = metaStructures.get(0);
-
 		// get the save-index
 		@SuppressWarnings({ "rawtypes" })
-		final MetaIndexDimension saveIdx = new MetaIndexDimension(
-				metaStructure, descModel, model.getBitmapCache(),
-				model.getIndexFactory());
+		final MetaIndexDimension saveIdx = new MetaIndexDimension(descModel,
+				model.getBitmapCache(), model.getIndexFactory());
 		assertEquals(0, saveIdx.getAmountOfSlices());
 
 		// add data
@@ -235,9 +213,8 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 		// get the load-index
 		@SuppressWarnings({ "rawtypes" })
-		final MetaIndexDimension loadIdx = new MetaIndexDimension(
-				metaStructure, descModel, model.getBitmapCache(),
-				model.getIndexFactory());
+		final MetaIndexDimension loadIdx = new MetaIndexDimension(descModel,
+				model.getBitmapCache(), model.getIndexFactory());
 		assertEquals(0, loadIdx.getAmountOfSlices());
 
 		/*

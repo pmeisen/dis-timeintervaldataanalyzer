@@ -154,7 +154,7 @@ public class TidaIndex implements IPersistable {
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
 				dataStructure, record, model, dataId);
-
+		
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.index(processedRecord);
@@ -259,7 +259,7 @@ public class TidaIndex implements IPersistable {
 	public Slice getMetaIndexDimensionSlice(final String modelId,
 			final Object id) {
 		final MetaIndexDimension metaIdxDim = metaIndex.get(modelId);
-
+		
 		if (metaIdxDim == null) {
 			return null;
 		} else {
