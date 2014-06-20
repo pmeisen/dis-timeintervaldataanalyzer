@@ -830,8 +830,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	/**
 	 * Determines if the {@code IntervalType} presented by the {@code ctx} (see
-	 * {@link #resolveIntervalType(SelectorIntervalDefContext)}) is for the
-	 * start (open) or the end (close).
+	 * {@link #resolveIntervalType(ParserRuleContext)}) is for the start (open)
+	 * or the end (close).
 	 * 
 	 * @param ctx
 	 *            the {@code SelectorIntervalDefContext} to determine the
@@ -892,7 +892,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * @param ctx
 	 *            the {@code SelectorSelectTypeContext} to determine if the
 	 *            result should be transposed
-	 *            
+	 * 
 	 * @return {@code true} if the result should be transposed, otherwise
 	 *         {@code false}
 	 */
