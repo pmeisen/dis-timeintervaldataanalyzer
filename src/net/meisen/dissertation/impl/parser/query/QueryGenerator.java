@@ -31,6 +31,8 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadSetPropertyContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectRecordsContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectTimeSeriesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
@@ -47,7 +49,6 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorSelectTypeContext;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
@@ -491,11 +492,19 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
-	public void exitSelectorSelectType(final SelectorSelectTypeContext ctx) {
+	public void exitExprSelectTimeSeries(final ExprSelectTimeSeriesContext ctx) {
 		final ResultType type = resolveResultType(ctx);
 		final boolean transposed = resolveTransposition(ctx);
+
 		q(SelectQuery.class).setResultType(type);
 		q(SelectQuery.class).setTransposed(transposed);
+	}
+
+	@Override
+	public void exitExprSelectRecords(final ExprSelectRecordsContext ctx) {
+		final ResultType type = resolveResultType(ctx);
+
+		q(SelectQuery.class).setResultType(type);
 	}
 
 	@Override
@@ -873,7 +882,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 *             the {@code QueryParsingException} is wrapped within a
 	 *             {@code ForwardedRuntimeException}
 	 */
-	protected ResultType resolveResultType(final SelectorSelectTypeContext ctx)
+	protected ResultType resolveResultType(final ParserRuleContext ctx)
 			throws QueryParsingException {
 
 		if (ctx.getToken(QueryGrammarParser.TYPE_RECORDS, 0) != null) {
@@ -890,13 +899,12 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * Checks if the result should be transposed.
 	 * 
 	 * @param ctx
-	 *            the {@code SelectorSelectTypeContext} to determine if the
-	 *            result should be transposed
+	 *            the context of the parser to be checked
 	 * 
 	 * @return {@code true} if the result should be transposed, otherwise
 	 *         {@code false}
 	 */
-	protected boolean resolveTransposition(final SelectorSelectTypeContext ctx) {
+	protected boolean resolveTransposition(final ParserRuleContext ctx) {
 		if (ctx.getToken(QueryGrammarParser.OP_TRANSPOSE, 0) != null) {
 			return true;
 		} else {

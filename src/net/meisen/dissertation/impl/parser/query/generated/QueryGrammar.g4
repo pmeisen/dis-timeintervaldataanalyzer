@@ -25,7 +25,7 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive) EOF;
+root   : (exprInsert | exprSelectTimeSeries | exprSelectRecords | exprLoad | exprUnload | exprAlive) EOF;
 
 /*
  * Define the different expressions/parts of the alive statement
@@ -54,12 +54,14 @@ exprValues    : BRACKET_ROUND_OPENED compValueElement (SEPARATOR compValueElemen
 /*
  * Define the different expressions/parts of the select statement
  */
-exprSelect   : STMT_SELECT selectorSelectType (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
-exprMeasure  : compNamedMeasure (SEPARATOR compNamedMeasure)*;
-exprInterval : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
-exprComp     : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
-exprGroup    : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
-exprAggregate: selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
+exprSelect          : exprSelectRecords | exprSelectTimeSeries;
+exprSelectRecords   : STMT_SELECT TYPE_RECORDS OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)?;
+exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
+exprMeasure         : compNamedMeasure (SEPARATOR compNamedMeasure)*;
+exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
+exprComp            : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
+exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
+exprAggregate       : selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 
 /*
  * Define the different redudant definitions within the parts of the statement
@@ -84,7 +86,6 @@ compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | se
 selectorModelId             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
-selectorSelectType          : TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED | TYPE_RECORDS;
 selectorDateInterval        : DATE SEPARATOR DATE;
 selectorIntInterval         : INT SEPARATOR INT;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);

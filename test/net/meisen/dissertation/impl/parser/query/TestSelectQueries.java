@@ -29,6 +29,7 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResultTimeSeries;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
@@ -1153,8 +1154,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1186,8 +1187,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1228,8 +1229,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1266,8 +1267,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("05.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1304,8 +1305,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1342,8 +1343,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("08.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1390,8 +1391,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
 		assertEquals("01.01.2014 00:00:00,000", tsRes.getLabel(0));
@@ -1484,8 +1485,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 
 		// check the labels
@@ -1527,8 +1528,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		int counter = 0;
 		for (final Object[] o : res) {

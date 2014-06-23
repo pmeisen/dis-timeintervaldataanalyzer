@@ -1,10 +1,12 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
-import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * An evaluator used to evaluate select queries.
@@ -36,7 +38,7 @@ public class SelectEvaluator {
 	public SelectResult evaluate(final SelectQuery query) {
 
 		// the result holder
-		final SelectResult queryResult = new SelectResult(query);
+		final SelectResult queryResult = createSelectResult(query);
 
 		// determine the filter results
 		final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
@@ -55,14 +57,33 @@ public class SelectEvaluator {
 		final Bitmap validRecords = model.getValidRecords();
 		queryResult.setValidRecords(validRecords);
 
-		// determine the slice
-		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
-				model);
-		final TimeSeriesCollection timeSeriesCollection = timeSeriesEvaluator
-				.evaluateInterval(query.getInterval(), query.getMeasures(),
-						queryResult);
-		queryResult.setTimeSeriesResult(timeSeriesCollection);
+		// determine the result
+		queryResult.determineResult(model);
 
 		return queryResult;
+	}
+
+	/**
+	 * Factory method used to create the right {@code SelectQuery} instance
+	 * depending on the {@code ResultType} of the query
+	 * 
+	 * @param query
+	 *            the {@code SelectQuery} the result will be based one
+	 * 
+	 * @return the created {@code SelectResult}
+	 * 
+	 * @see SelectQuery#getResultType()
+	 */
+	protected SelectResult createSelectResult(final SelectQuery query) {
+		final ResultType resultType = query.getResultType();
+
+		if (ResultType.TIMESERIES.equals(resultType)) {
+			return new SelectResultTimeSeries(query);
+		} else if (ResultType.RECORDS.equals(resultType)) {
+			return new SelectResultRecords(query);
+		} else {
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1018, resultType == null ? null : resultType.toString());
+		}
 	}
 }

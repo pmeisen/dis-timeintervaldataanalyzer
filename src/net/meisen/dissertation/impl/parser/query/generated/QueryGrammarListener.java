@@ -22,17 +22,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprAlive(@NotNull QueryGrammarParser.ExprAliveContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorSelectType}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectorSelectType(@NotNull QueryGrammarParser.SelectorSelectTypeContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorSelectType}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectorSelectType(@NotNull QueryGrammarParser.SelectorSelectTypeContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compStructureElement}.
 	 * @param ctx the parse tree
 	 */
@@ -53,6 +42,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitRoot(@NotNull QueryGrammarParser.RootContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelectTimeSeries}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprSelectTimeSeries(@NotNull QueryGrammarParser.ExprSelectTimeSeriesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprSelectTimeSeries}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprSelectTimeSeries(@NotNull QueryGrammarParser.ExprSelectTimeSeriesContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDescriptorId}.
@@ -295,6 +295,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelectRecords}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprSelectRecords(@NotNull QueryGrammarParser.ExprSelectRecordsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprSelectRecords}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprSelectRecords(@NotNull QueryGrammarParser.ExprSelectRecordsContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescValueTupel}.
