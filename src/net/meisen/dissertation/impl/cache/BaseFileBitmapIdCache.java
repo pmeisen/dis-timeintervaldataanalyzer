@@ -751,16 +751,21 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		}
 
 		// remove the bitmaps from the cache and the owner
-		for (final BitmapId<?> removedId : removedIds) {
+		this.ownersLock.readLock().lock();
+		try {
+			for (final BitmapId<?> removedId : removedIds) {
 
-			// remove the identifier from the cache
-			final T cacheable = cache.remove(removedId);
+				// remove the identifier from the cache
+				final T cacheable = cache.remove(removedId);
 
-			// release the bitmap from the owner
-			final IBitmapIdOwner owner = this.owners.get(removedId);
-			if (owner != null) {
-				owner.release(cacheable);
+				// release the bitmap from the owner
+				final IBitmapIdOwner owner = this.owners.get(removedId);
+				if (owner != null) {
+					owner.release(cacheable);
+				}
 			}
+		} finally {
+			this.ownersLock.readLock().unlock();
 		}
 
 		if (LOG.isTraceEnabled()) {

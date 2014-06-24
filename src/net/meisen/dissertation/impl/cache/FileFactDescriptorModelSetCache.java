@@ -7,6 +7,7 @@ import java.util.Set;
 
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCacheConfig;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
@@ -22,7 +23,8 @@ import net.meisen.general.genmisc.types.Streams;
  */
 public class FileFactDescriptorModelSetCache extends
 		BaseFileBitmapIdCache<FactDescriptorModelSet> implements
-		IFactDescriptorModelSetCache {
+		IFactDescriptorModelSetCache,
+		IReleaseMechanismCache<BitmapId<?>, FactDescriptorModelSet> {
 
 	/**
 	 * The name of the file used as index-table.
@@ -134,7 +136,7 @@ public class FileFactDescriptorModelSetCache extends
 	}
 
 	@Override
-	public FactDescriptorModelSet getSet(final BitmapId<?> bitmapId) {
+	public FactDescriptorModelSet get(final BitmapId<?> bitmapId) {
 		return getCacheable(bitmapId);
 	}
 }

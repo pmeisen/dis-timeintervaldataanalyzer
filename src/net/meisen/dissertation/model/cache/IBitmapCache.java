@@ -3,7 +3,6 @@ package net.meisen.dissertation.model.cache;
 import java.util.Collection;
 
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
@@ -37,16 +36,6 @@ public interface IBitmapCache {
 	public void setConfig(final IBitmapCacheConfig configuration);
 
 	/**
-	 * Registers a {@code BitmapOwner} within the cache. The {@code BitmapOwner}
-	 * is the own getting informed if the {@code Bitmap} should be released from
-	 * memory (i.e. the garbage collection can take place).
-	 * 
-	 * @param owner
-	 *            the owner to be registered
-	 */
-	public void registerOwner(final IBitmapIdOwner owner);
-
-	/**
 	 * Caches the specified {@code bitmap} for the specified {@code bitmapId}.
 	 * 
 	 * @param bitmapId
@@ -76,20 +65,6 @@ public interface IBitmapCache {
 	 * @return a collection of all the cached {@code BitmapId} instances
 	 */
 	public Collection<BitmapId<?>> getBitmapIdentifiers();
-
-	/**
-	 * Gets the {@code Bitmap} with the specified {@code bitmapId} from the
-	 * cache. This method never returns {@code null} instead a new
-	 * {@code Bitmap} should be created using
-	 * {@link BaseIndexFactory#createBitmap()} if no {@code Bitmap} is available
-	 * with the specified {@code BitmapId}.
-	 * 
-	 * @param bitmapId
-	 *            the {@code BitmapId} of the {@code Bitmap} to be retrieved
-	 * 
-	 * @return the {@code Bitmap} for the specified {@code BitmapId}
-	 */
-	public Bitmap getBitmap(final BitmapId<?> bitmapId);
 
 	/**
 	 * Releases all of the resources used by the cache.

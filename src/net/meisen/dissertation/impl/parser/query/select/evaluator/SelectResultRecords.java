@@ -46,6 +46,12 @@ public class SelectResultRecords extends SelectResult {
 	public void determineResult(final TidaModel model) {
 		final RecordsEvaluator recordsEvaluator = new RecordsEvaluator(model);
 
+		/*
+		 * Just an idea, maybe we just return the Descriptors and the Keys as
+		 * well as the Interval. Well the Interval could be a problem... because
+		 * we don't have it anywhere yet...
+		 */
+
 		// get the types
 
 		// get the names

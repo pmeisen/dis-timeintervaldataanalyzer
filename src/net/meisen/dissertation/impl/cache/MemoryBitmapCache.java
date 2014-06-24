@@ -7,6 +7,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -18,14 +19,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 /**
  * The {@code MemoryBitmapCache} implementation is mainly used to create
  * {@code Bitmap} instances, when a bitmap is retrieved using the
- * {@link #getBitmap(BitmapId)} method. The cache expects that everything (i.e.
- * all bitmaps} is kept in-memory by the index structures. Therefore updates are
- * not recognized, nor any releases are published by this implementation.
+ * {@link #get(BitmapId)} method. The cache expects that everything (i.e. all
+ * bitmaps} is kept in-memory by the index structures. Therefore updates are not
+ * recognized, nor any releases are published by this implementation.
  * 
  * @author pmeisen
  * 
  */
-public class MemoryBitmapCache implements IBitmapCache {
+public class MemoryBitmapCache implements IBitmapCache,
+		IReleaseMechanismCache<BitmapId<?>, Bitmap> {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
@@ -37,7 +39,7 @@ public class MemoryBitmapCache implements IBitmapCache {
 	}
 
 	@Override
-	public Bitmap getBitmap(final BitmapId<?> bitmapId) {
+	public Bitmap get(final BitmapId<?> bitmapId) {
 		return factory.createBitmap();
 	}
 

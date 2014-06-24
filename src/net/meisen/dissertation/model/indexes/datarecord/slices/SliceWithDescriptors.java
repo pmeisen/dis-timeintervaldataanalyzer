@@ -2,16 +2,21 @@ package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IReferenceMechanismCache;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A slice of a dimension which has associated {@code Descriptors}.
@@ -25,6 +30,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	private IFactDescriptorModelSetCache factsCache;
 
 	private FactDescriptorModelSet facts = null;
+	private WeakReference<FactDescriptorModelSet> refFacts = null;
 
 	/**
 	 * Default constructor to create a slice with descriptors.
@@ -233,6 +239,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 		if (instance != null
 				&& instance.getClass().equals(FactDescriptorModelSet.class)) {
 			facts = null;
+			refFacts = null;
 		} else {
 			super.release(instance);
 		}
@@ -245,11 +252,38 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * 
 	 * @return the {@code DescriptorModels} associated to the slice
 	 */
+	@SuppressWarnings("unchecked")
 	public FactDescriptorModelSet getFactsSet() {
-		if (facts == null) {
-			facts = factsCache.getSet(getSliceId());
+		FactDescriptorModelSet result;
+
+		if (facts != null) {
+			result = facts;
+		} else if (refFacts != null && (result = refFacts.get()) != null) {
+			// do nothing the result is set
+		} else {
+			if (factsCache instanceof IReleaseMechanismCache) {
+				facts = ((IReleaseMechanismCache<BitmapId<I>, FactDescriptorModelSet>) factsCache)
+						.get(getSliceId());
+				refFacts = null;
+
+				result = facts;
+			} else if (factsCache instanceof IReferenceMechanismCache) {
+				facts = null;
+				result = ((IReferenceMechanismCache<BitmapId<I>, FactDescriptorModelSet>) factsCache)
+						.get(getSliceId());
+
+				// just keep a weakReference
+				refFacts = new WeakReference<FactDescriptorModelSet>(result);
+			} else {
+				throw new ForwardedRuntimeException(TidaIndexException.class,
+						1002,
+						IReleaseMechanismCache.class.getSimpleName()
+								+ ", "
+								+ IReferenceMechanismCache.class
+										.getSimpleName());
+			}
 		}
 
-		return facts;
+		return result;
 	}
 }

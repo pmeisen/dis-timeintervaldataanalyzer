@@ -2,10 +2,15 @@ package net.meisen.dissertation.model.indexes.datarecord.slices;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
+import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.cache.IBitmapCache;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
+import net.meisen.dissertation.model.cache.IReferenceMechanismCache;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -27,10 +32,8 @@ public abstract class BaseSlice<I extends Object> implements
 	private final SliceId<I> id;
 	private final IBitmapCache cache;
 
-	/**
-	 * The {@code Bitmap} of the slice
-	 */
-	private Bitmap bitmap;
+	private Bitmap bitmap = null;
+	private WeakReference<Bitmap> refBitmap = null;
 
 	/**
 	 * Creates a slice with no the specified {@code recId} added (i.e.
@@ -46,7 +49,9 @@ public abstract class BaseSlice<I extends Object> implements
 		this.cache = cache;
 
 		// register the instance as user
-		cache.registerOwner(this);
+		if (cache instanceof IReleaseMechanismCache) {
+			((IReleaseMechanismCache<?, ?>) cache).registerOwner(this);
+		}
 	}
 
 	/**
@@ -132,19 +137,47 @@ public abstract class BaseSlice<I extends Object> implements
 		return id.toString() + " (" + getBitmap() + ")";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Bitmap getBitmap() {
-		if (bitmap == null) {
-			bitmap = cache.getBitmap(id);
+		Bitmap result;
+
+		if (bitmap != null) {
+			result = bitmap;
+		} else if (refBitmap != null && (result = refBitmap.get()) != null) {
+			// do nothing the result is set
+		} else {
+			if (cache instanceof IReleaseMechanismCache) {
+				bitmap = ((IReleaseMechanismCache<BitmapId<I>, Bitmap>) cache)
+						.get(getSliceId());
+				refBitmap = null;
+
+				result = bitmap;
+			} else if (cache instanceof IReferenceMechanismCache) {
+				bitmap = null;
+				result = ((IReferenceMechanismCache<BitmapId<I>, Bitmap>) cache)
+						.get(getSliceId());
+
+				// just keep a weakReference
+				refBitmap = new WeakReference<Bitmap>(result);
+			} else {
+				throw new ForwardedRuntimeException(TidaIndexException.class,
+						1002,
+						IReleaseMechanismCache.class.getSimpleName()
+								+ ", "
+								+ IReferenceMechanismCache.class
+										.getSimpleName());
+			}
 		}
 
-		return bitmap;
+		return result;
 	}
 
 	@Override
 	public void release(final IBitmapIdCacheable instance) {
 		if (instance != null && instance.getClass().equals(Bitmap.class)) {
 			bitmap = null;
+			refBitmap = null;
 		}
 	}
 

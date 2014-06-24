@@ -34,16 +34,6 @@ public interface IFactDescriptorModelSetCache {
 	public void setConfig(final IFactDescriptorModelSetCacheConfig configuration);
 
 	/**
-	 * Registers a {@code BitmapOwner} within the cache. The {@code BitmapOwner}
-	 * is the own getting informed if the {@code Bitmap} should be released from
-	 * memory (i.e. the garbage collection can take place).
-	 * 
-	 * @param owner
-	 *            the owner to be registered
-	 */
-	public void registerOwner(final IBitmapIdOwner owner);
-
-	/**
 	 * Caches the specified {@code set} for the specified {@code bitmapId}.
 	 * 
 	 * @param bitmapId
@@ -56,21 +46,6 @@ public interface IFactDescriptorModelSetCache {
 	 */
 	public void cacheFactDescriptorModelSet(final BitmapId<?> bitmapId,
 			final FactDescriptorModelSet set);
-
-	/**
-	 * Gets the {@code FactDescriptorModelSet} with the specified
-	 * {@code bitmapId} from the cache. This method never returns {@code null}
-	 * instead a new {@code FactDescriptorModelSet} should be created if no
-	 * {@code FactDescriptorModelSet} is available with the specified
-	 * {@code BitmapId}.
-	 * 
-	 * @param bitmapId
-	 *            the {@code BitmapId} of the {@code Bitmap} to be retrieved
-	 * 
-	 * @return the {@code FactDescriptorModelSet} for the specified
-	 *         {@code BitmapId}
-	 */
-	public FactDescriptorModelSet getSet(final BitmapId<?> bitmapId);
 
 	/**
 	 * Releases all of the resources used by the cache.

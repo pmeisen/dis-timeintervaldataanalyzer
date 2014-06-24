@@ -3,6 +3,7 @@ package net.meisen.dissertation.impl.cache;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCacheConfig;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
@@ -14,7 +15,8 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorMod
  * 
  */
 public class MemoryFactDescriptorModelSetCache implements
-		IFactDescriptorModelSetCache {
+		IFactDescriptorModelSetCache,
+		IReleaseMechanismCache<BitmapId<?>, FactDescriptorModelSet> {
 
 	@Override
 	public void initialize(final TidaModel model) {
@@ -22,7 +24,7 @@ public class MemoryFactDescriptorModelSetCache implements
 	}
 
 	@Override
-	public FactDescriptorModelSet getSet(final BitmapId<?> bitmapId) {
+	public FactDescriptorModelSet get(final BitmapId<?> bitmapId) {
 		return new FactDescriptorModelSet();
 	}
 
@@ -51,7 +53,7 @@ public class MemoryFactDescriptorModelSetCache implements
 	public void release() {
 		// nothing to be released
 	}
-	
+
 	@Override
 	public boolean setPersistency(final boolean enable) {
 		return false;

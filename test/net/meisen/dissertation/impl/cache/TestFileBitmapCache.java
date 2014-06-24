@@ -218,7 +218,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final BitmapId<?> id = new BitmapId<Integer>(i, IntervalIndex.class);
 
 			assertFalse(fc.isCached(id));
-			assertEquals(emptyBitmap, fc.getBitmap(id));
+			assertEquals(emptyBitmap, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 	}
@@ -243,12 +243,12 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// retrieve the bitmap and check the cache status
 			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 
 		fc.clearCache();
-		
+
 		// check to read all the bitmaps
 		for (int i = 0; i < 50000; i++) {
 			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
@@ -257,7 +257,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// get the bitmap from the cache
 			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 	}
@@ -281,7 +281,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			fc.cacheBitmap(id, bmp);
 
 			// retrieve the bitmap and check the cache status
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 
@@ -302,7 +302,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// get the bitmap from the cache
 			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 	}
@@ -332,7 +332,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			fc.cacheBitmap(id, bmp);
 
 			// retrieve the bitmap and check the cache status
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 
@@ -350,7 +350,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// get the bitmap from the cache
 			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 		}
 	}
 
@@ -376,7 +376,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// retrieve the bitmap and check the cache status
 			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.getBitmap(id));
+			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
 
@@ -484,7 +484,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// get the bitmap for 0, this cannot be empty now
 		for (int i = 0; i < 100; i++) {
-			final Bitmap bmp = spy.getBitmap(createBitmapId(i));
+			final Bitmap bmp = spy.get(createBitmapId(i));
 			assertEquals(1, bmp.getIds().length);
 			assertTrue(Arrays.binarySearch(bmp.getIds(), i + 20) != -1);
 		}
@@ -511,7 +511,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		// let's also get some values we don't have yet
 		final Bitmap emptyBitmap = model.getIndexFactory().createBitmap();
 		for (int i = 100; i < 200; i++) {
-			final Bitmap bmp = spy.getBitmap(createBitmapId(i));
+			final Bitmap bmp = spy.get(createBitmapId(i));
 			assertEquals(0, bmp.getIds().length);
 			assertEquals(emptyBitmap, bmp);
 		}
@@ -554,13 +554,13 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 				assertFalse(fc.isCached(createBitmapId(1)));
 
 				// this one is cached by
-				assertNotNull(fc.getBitmap(createBitmapId(0)));
+				assertNotNull(fc.get(createBitmapId(0)));
 
 				// the first call 1 isn't cached
 				if (!fc.isCached(createBitmapId(1))) {
 					i++;
 				}
-				assertNotNull(fc.getBitmap(createBitmapId(1)));
+				assertNotNull(fc.get(createBitmapId(1)));
 			}
 		};
 
@@ -620,7 +620,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 					int nr = r.nextInt(amount);
 					final BitmapId<?> id = new BitmapId<Integer>(nr,
 							MetaIndex.class, "Classifier1");
-					final Bitmap res = fc.getBitmap(id);
+					final Bitmap res = fc.get(id);
 					final Bitmap bmp = Bitmap.createBitmap(
 							model.getIndexFactory(), nr);
 
@@ -688,7 +688,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// use every 2nd bitmap
 			if (i % 2 == 0) {
-				fc.getBitmap(createBitmapId(i));
+				fc.get(createBitmapId(i));
 			}
 
 			// there should never be more than 10 elements cached
@@ -815,7 +815,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		for (int i = 0; i < amount; i++) {
 
 			// get the bitmap and check the cardinality
-			final Bitmap bitmap = fc.getBitmap(createBitmapId(i));
+			final Bitmap bitmap = fc.get(createBitmapId(i));
 			assertTrue(bitmap.determineCardinality() == 0
 					|| bitmap.determineCardinality() == 1);
 
@@ -839,7 +839,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final int maxNumber) {
 		for (int i = 0; i < runs; i++) {
 			final int nr = rnd.nextInt(maxNumber);
-			final Bitmap bitmap = fc.getBitmap(createBitmapId(nr));
+			final Bitmap bitmap = fc.get(createBitmapId(nr));
 			final int[] ids = bitmap.getIds();
 
 			assertEquals(1, ids.length);
