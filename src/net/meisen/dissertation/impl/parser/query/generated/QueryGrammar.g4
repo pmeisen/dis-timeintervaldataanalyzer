@@ -25,7 +25,7 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelectTimeSeries | exprSelectRecords | exprLoad | exprUnload | exprAlive) EOF;
+root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive) EOF;
 
 /*
  * Define the different expressions/parts of the alive statement
