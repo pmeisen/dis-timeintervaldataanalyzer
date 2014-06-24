@@ -5,16 +5,25 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.Serializable;
 
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
-import org.mapdb.Serializer;
+public class MapDbBitmapSerializer implements
+		IModelDependendMapDbSerializer<Bitmap>, Serializable {
+	private transient BaseIndexFactory factory;
 
-public class MapDbBitmapSerializer implements Serializer<Bitmap>, Serializable {
-	private final transient BaseIndexFactory factory;
+	public MapDbBitmapSerializer() {
+		this(null);
+	}
 
 	public MapDbBitmapSerializer(final BaseIndexFactory factory) {
 		this.factory = factory;
+	}
+
+	@Override
+	public void init(final TidaModel model) {
+		factory = model.getIndexFactory();
 	}
 
 	@Override

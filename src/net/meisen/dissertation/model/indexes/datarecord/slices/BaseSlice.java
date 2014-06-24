@@ -206,4 +206,16 @@ public abstract class BaseSlice<I extends Object> implements
 	public int count() {
 		return getBitmap().determineCardinality();
 	}
+	
+	public boolean isStrongReference() {
+		getBitmap();
+		
+		return refBitmap == null;
+	}
+	
+	public boolean isWeakReference() {
+		getBitmap();
+		
+		return refBitmap != null;
+	}
 }

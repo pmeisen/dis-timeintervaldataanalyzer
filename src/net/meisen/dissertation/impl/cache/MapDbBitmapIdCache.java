@@ -3,6 +3,7 @@ package net.meisen.dissertation.impl.cache;
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
+import java.util.SortedMap;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapIdCache;
@@ -94,13 +95,13 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		if (MapDbType.BTree.equals(type)) {
 			final BTreeMapMaker mapMaker = db.createTreeMap(mapName);
 			mapMaker.keySerializerWrap(new MapDbBitmapIdSerializer());
-			mapMaker.valueSerializer(createValueSerializer());
+			mapMaker.valueSerializer(getValueSerializer(db, model));
 
 			map = mapMaker.makeOrGet();
 		} else if (MapDbType.HashMap.equals(type)) {
 			final HTreeMapMaker mapMaker = db.createHashMap(mapName);
 			mapMaker.keySerializer(new MapDbBitmapIdSerializer());
-			mapMaker.valueSerializer(createValueSerializer());
+			mapMaker.valueSerializer(getValueSerializer(db, model));
 
 			map = mapMaker.makeOrGet();
 		} else {
@@ -111,6 +112,53 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		init = true;
 	}
 
+	/**
+	 * Gets the {@code ValueSerializer}. The {@code Serializer} is created using
+	 * {@link #createValueSerializer()} if not found in the catalog of the
+	 * database. If the {@code Serializer} is of type
+	 * {@code IModelDependendMapDbSerializer} it is additionally initialized.
+	 * 
+	 * @param db
+	 *            the database, can be {@code null}
+	 * @param model
+	 *            the model needed for initialization
+	 * 
+	 * @return the created or retrieved and initialized {@code Serializer}
+	 */
+	@SuppressWarnings("unchecked")
+	protected Serializer<T> getValueSerializer(final DB db,
+			final TidaModel model) {
+
+		// get the Serializer of the db
+		Serializer<T> serializer = null;
+		if (db != null) {
+			final SortedMap<String, Object> catalog = db.getCatalog();
+			if (catalog != null) {
+				serializer = (Serializer<T>) catalog.get(getMapName()
+						+ ".valueSerializer");
+			}
+		}
+
+		// if we still don't have any Serializer create one
+		if (serializer == null) {
+			serializer = createValueSerializer();
+		}
+
+		// initialize the Serializer if it's one that can be initialized
+		if (serializer instanceof IModelDependendMapDbSerializer) {
+			((IModelDependendMapDbSerializer<T>) serializer).init(model);
+		}
+
+		return serializer;
+	}
+
+	/**
+	 * Method is called to create an instance of a {@code Serializer} used to
+	 * serialize the value stored in the {@code mapDb}.
+	 * 
+	 * @return the created {@code Serializer}, might be {@code null} if no
+	 *         specifal {@code Serializer} is needed
+	 */
 	protected abstract Serializer<T> createValueSerializer();
 
 	/**
@@ -318,7 +366,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	public boolean isInit() {
 		return init;
 	}
-	
+
 	public int size() {
 		return map.size();
 	}
