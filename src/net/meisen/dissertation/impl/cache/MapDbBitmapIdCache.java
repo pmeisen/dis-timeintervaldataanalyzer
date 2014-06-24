@@ -22,6 +22,15 @@ import org.mapdb.Serializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * Base implementation of a {@code mapDb} used to associate an instance to a
+ * {@code BitmapId}.
+ * 
+ * @author pmeisen
+ * 
+ * @param <T>
+ *            the type of the instance to be associated
+ */
 public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		implements IBitmapIdCache<T>, IReferenceMechanismCache<BitmapId<?>, T> {
 
@@ -43,6 +52,9 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	private DB db;
 	private Map<BitmapId<?>, T> map;
 
+	/**
+	 * Default constructor.
+	 */
 	public MapDbBitmapIdCache() {
 		this.cacheSize = getDefaultCacheSize();
 
@@ -357,16 +369,29 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		return map.keySet();
 	}
 
+	/**
+	 * Commits the current data if persistancy is disabled.
+	 */
 	protected void commit() {
 		if (this.persistency) {
 			db.commit();
 		}
 	}
 
+	/**
+	 * Checks if the cache is initialized.
+	 * 
+	 * @return {@code true} if initialized, otherwise {@code false}
+	 */
 	public boolean isInit() {
 		return init;
 	}
 
+	/**
+	 * Get the amount of elements currently cached.
+	 * 
+	 * @return the amount of elements currently cached
+	 */
 	public int size() {
 		return map.size();
 	}

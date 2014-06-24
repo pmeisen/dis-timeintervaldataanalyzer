@@ -4,6 +4,12 @@ import java.io.File;
 
 import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 
+/**
+ * Configuration of a cache based on a {@code mapDb}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MapDbBitmapIdCacheConfig implements IBitmapIdCacheConfig {
 	private File location;
 	private Integer cacheSize;
@@ -57,14 +63,31 @@ public class MapDbBitmapIdCacheConfig implements IBitmapIdCacheConfig {
 		this.cacheSize = cacheSize;
 	}
 
+	/**
+	 * Gets the type of the {@code MapDb} to be used.
+	 * 
+	 * @return the type of the {@code MapDb} to be used
+	 */
 	public MapDbType getType() {
 		return type;
 	}
 
+	/**
+	 * Defines the type of the {@code MapDb} to be used.
+	 * 
+	 * @param type
+	 *            the type of the {@code MapDb} to be used
+	 */
 	public void setType(final MapDbType type) {
 		this.type = type == null ? MapDbType.getDefault() : type;
 	}
 
+	/**
+	 * Defines the type of the {@code MapDb} to be used.
+	 * 
+	 * @param type
+	 *            the type of the {@code MapDb} to be used
+	 */
 	public void setMapDbType(final String type) {
 		this.type = MapDbType.find(type);
 	}

@@ -206,16 +206,28 @@ public abstract class BaseSlice<I extends Object> implements
 	public int count() {
 		return getBitmap().determineCardinality();
 	}
-	
+
+	/**
+	 * Checks if a strong-reference is used.
+	 * 
+	 * @return {@code true} if a strong-reference is used for the bitmap,
+	 *         otherwise {@code false}
+	 */
 	public boolean isStrongReference() {
 		getBitmap();
-		
+
 		return refBitmap == null;
 	}
-	
+
+	/**
+	 * Checks if a weak-reference is used.
+	 * 
+	 * @return {@code true} if a weak-reference is used for the bitmap,
+	 *         otherwise {@code false}
+	 */
 	public boolean isWeakReference() {
 		getBitmap();
-		
+
 		return refBitmap != null;
 	}
 }

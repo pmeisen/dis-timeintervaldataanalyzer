@@ -9,8 +9,15 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
 import org.mapdb.Serializer;
 
+/**
+ * A {@code Serializer} used to serialize and deserialize a {@code BitmapId}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MapDbBitmapIdSerializer implements Serializer<BitmapId<?>>,
 		Serializable {
+	private static final long serialVersionUID = 1l;
 
 	@Override
 	public void serialize(final DataOutput out, final BitmapId<?> value)

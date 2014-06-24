@@ -9,8 +9,16 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorMod
 
 import org.mapdb.Serializer;
 
+/**
+ * {@code Serializer} of a {@code mapDb} used to serialize and deserialize a
+ * {@code FactDescriptorModel}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MapDbFactDescriptorModelSerializer implements
 		Serializer<FactDescriptorModelSet>, Serializable {
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void serialize(final DataOutput out, final FactDescriptorModelSet fdm)

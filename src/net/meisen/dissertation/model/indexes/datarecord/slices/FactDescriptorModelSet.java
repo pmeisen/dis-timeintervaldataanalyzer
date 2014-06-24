@@ -500,7 +500,15 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		}
 	}
 
-	// write the amount of models to be expected
+	/**
+	 * Serializes {@code this} to the specified {@code out}.
+	 * 
+	 * @param out
+	 *            the stream to write to
+	 * 
+	 * @throws IOException
+	 *             if {@code this} cannot be serialized
+	 */
 	public void serialize(final DataOutput out) throws IOException {
 		final Set<String> models = getModels();
 		out.write(Streams.intToByte(models.size()));
@@ -522,6 +530,19 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		}
 	}
 
+	/**
+	 * Deserializes {@code this} instance from the specified {@code DataInput}.
+	 * If {@code this} is currently filled, i.e. contains any data, the data is
+	 * removed prior to loading.
+	 * 
+	 * @param in
+	 *            the {@code DataInput} to read from
+	 * 
+	 * @return {@code this}
+	 * 
+	 * @throws IOException
+	 *             if the data cannot be used for deserialization
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public FactDescriptorModelSet deserialize(final DataInput in)
 			throws IOException {
