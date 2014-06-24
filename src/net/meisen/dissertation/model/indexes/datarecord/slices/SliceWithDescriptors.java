@@ -8,9 +8,8 @@ import java.util.Collection;
 import java.util.List;
 
 import net.meisen.dissertation.exceptions.TidaIndexException;
-import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
 import net.meisen.dissertation.model.cache.IReferenceMechanismCache;
 import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.descriptors.Descriptor;
@@ -27,7 +26,7 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  *            the type of the identifier of the slice
  */
 public class SliceWithDescriptors<I> extends BaseSlice<I> {
-	private IFactDescriptorModelSetCache factsCache;
+	private IBitmapIdCache<FactDescriptorModelSet> factsCache;
 
 	private FactDescriptorModelSet facts = null;
 	private WeakReference<FactDescriptorModelSet> refFacts = null;
@@ -42,12 +41,11 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * @param factsCache
 	 *            the {@code FactDescriptorModelSetCache} used
 	 * 
-	 * @see IBitmapCache
-	 * @see IFactDescriptorModelSetCache
+	 * @see IBitmapIdCache
 	 */
 	public SliceWithDescriptors(final SliceId<I> sliceId,
-			final IBitmapCache bitmapCache,
-			final IFactDescriptorModelSetCache factsCache) {
+			final IBitmapIdCache<Bitmap> bitmapCache,
+			final IBitmapIdCache<FactDescriptorModelSet> factsCache) {
 		super(sliceId, bitmapCache);
 
 		this.factsCache = factsCache;
@@ -123,7 +121,7 @@ public class SliceWithDescriptors<I> extends BaseSlice<I> {
 	 * currently set once.
 	 */
 	protected void updateFactsCache() {
-		factsCache.cacheFactDescriptorModelSet(getSliceId(), getFactsSet());
+		factsCache.cache(getSliceId(), getFactsSet());
 	}
 
 	/**

@@ -11,14 +11,14 @@ import org.junit.Test;
  * @author pmeisen
  * 
  */
-public class TestFileBitmapCacheConfig {
+public class TestFileBitmapIdCacheConfig {
 
 	/**
 	 * Tests the calculation of the configured max file-size.
 	 */
 	@Test
 	public void testMaxFileSize() {
-		final FileBitmapCacheConfig c = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig c = new FileBitmapIdCacheConfig();
 
 		// check default value
 		assertNull(c.getMaxFileSizeInByte());

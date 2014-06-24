@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 import net.meisen.dissertation.exceptions.TidaIndexException;
-import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
 import net.meisen.dissertation.model.cache.IReferenceMechanismCache;
@@ -30,7 +30,7 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 public abstract class BaseSlice<I extends Object> implements
 		Comparable<BaseSlice<I>>, IBitmapContainer, IBitmapIdOwner {
 	private final SliceId<I> id;
-	private final IBitmapCache cache;
+	private final IBitmapIdCache<Bitmap> cache;
 
 	private Bitmap bitmap = null;
 	private WeakReference<Bitmap> refBitmap = null;
@@ -44,7 +44,8 @@ public abstract class BaseSlice<I extends Object> implements
 	 * @param cache
 	 *            the cache used for the {@code Bitmap} instances
 	 */
-	public BaseSlice(final SliceId<I> sliceId, final IBitmapCache cache) {
+	public BaseSlice(final SliceId<I> sliceId,
+			final IBitmapIdCache<Bitmap> cache) {
 		this.id = sliceId;
 		this.cache = cache;
 
@@ -96,7 +97,7 @@ public abstract class BaseSlice<I extends Object> implements
 	 * Updates the cache by caching the current bitmap of the slice.
 	 */
 	protected void updateBitmapCache() {
-		cache.cacheBitmap(getSliceId(), getBitmap());
+		cache.cache(getSliceId(), getBitmap());
 	}
 
 	@Override

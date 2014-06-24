@@ -50,7 +50,6 @@ import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
-import net.meisen.dissertation.model.datastructure.KeyStructureEntry;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
@@ -302,11 +301,10 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testStructure() {
 		final DataStructure s = getDataStructure("/net/meisen/dissertation/config/xslt/structure.xml");
-		assertEquals(9, s.getSize());
+		assertEquals(6, s.getSize());
 
 		// check the read types
 		assertEquals(4, s.getEntriesByClass(MetaStructureEntry.class).size());
-		assertEquals(3, s.getEntriesByClass(KeyStructureEntry.class).size());
 		assertEquals(2, s.getEntriesByClass(IntervalStructureEntry.class)
 				.size());
 
@@ -327,21 +325,6 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 				assertEquals(-1, e.getPosition());
 			} else {
 				fail("Entry with invalid name '" + e.getName() + "' found");
-			}
-		}
-
-		// get the keys
-		for (final KeyStructureEntry e : s
-				.getEntriesByClass(KeyStructureEntry.class)) {
-			if ("autoid1".equals(e.getName())) {
-				assertEquals(-1, e.getPosition());
-			} else if ("autoid2".equals(e.getName())) {
-				assertEquals(-1, e.getPosition());
-			} else if (e.getPosition() == 3) {
-				assertNull(e.getName());
-			} else {
-				fail("Entry with invalid name '" + e.getName()
-						+ "' with position '" + e.getPosition() + "' found");
 			}
 		}
 
@@ -478,7 +461,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertEquals(1, model.sizeOfRetrievers());
 		assertNotNull(model.getDataRetriever("db_test"));
 		assertNull(model.getDataRetriever("another_id"));
-		
+
 		// get the expected
 		final Set<Integer> expected = new HashSet<Integer>();
 		for (int i = 1; i <= 10000; i = i == 9 ? 9991 : i + 1) {

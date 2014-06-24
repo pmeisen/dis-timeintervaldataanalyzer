@@ -10,3 +10,5 @@ http\://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd=net/meisen/disse
 http\://dev.meisen.net/xsd/dissertation/tidaFileIdentifierCache.xsd=net/meisen/dissertation/impl/cache/FileIdentifierCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd=net/meisen/dissertation/impl/cache/FileMetaDataCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/FileFactDescriptorModelSetCache.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaMapDbBitmapCache.xsd=net/meisen/dissertation/impl/cache/MapDbBitmapCache.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaMapDbFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/MapDbFactDescriptorModelSetCache.xsd

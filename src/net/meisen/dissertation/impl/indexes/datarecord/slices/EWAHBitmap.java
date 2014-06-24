@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
 
 import com.googlecode.javaewah.EWAHCompressedBitmap;
+import com.googlecode.javaewah.IntIterator;
 
 /**
  * Implementation of a {@code Bitmap} using the {@code EWAHCompressedBitmap}
@@ -249,5 +251,23 @@ public class EWAHBitmap extends Bitmap {
 	@Override
 	public int getMinId() {
 		return 0;
+	}
+
+	@Override
+	public IIntIterator intIterator() {
+
+		return new IIntIterator() {
+			private final IntIterator it = bitmap.intIterator();
+
+			@Override
+			public int next() {
+				return it.next();
+			}
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+		};
 	}
 }

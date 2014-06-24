@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
 
 import org.roaringbitmap.FastAggregation;
+import org.roaringbitmap.IntIterator;
 
 /**
  * A bitmap based on {@link org.roaringbitmap.RoaringBitmap RoaringBitmap}.
@@ -189,5 +191,23 @@ public class RoaringBitmap extends Bitmap {
 		}
 
 		return list.toArray(new org.roaringbitmap.RoaringBitmap[list.size()]);
+	}
+
+	@Override
+	public IIntIterator intIterator() {
+
+		return new IIntIterator() {
+			private final IntIterator it = bitmap.getIntIterator();
+
+			@Override
+			public int next() {
+				return it.next();
+			}
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+		};
 	}
 }

@@ -15,8 +15,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaModelException;
-import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
@@ -27,6 +26,7 @@ import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.IPersistable;
@@ -81,11 +81,11 @@ public class TidaModel implements IPersistable {
 
 	@Autowired
 	@Qualifier(DefaultValues.BITMAPCACHE_ID)
-	private IBitmapCache bitmapCache;
+	private IBitmapIdCache<Bitmap> bitmapCache;
 
 	@Autowired
 	@Qualifier(DefaultValues.FACTSETSCACHE_ID)
-	private IFactDescriptorModelSetCache factsCache;
+	private IBitmapIdCache<FactDescriptorModelSet> factsCache;
 
 	@Autowired
 	@Qualifier(DefaultValues.METADATACACHE_ID)
@@ -786,9 +786,9 @@ public class TidaModel implements IPersistable {
 	 * 
 	 * @return the {@code BitmapCache} used by the model
 	 * 
-	 * @see IBitmapCache
+	 * @see IBitmapIdCache
 	 */
-	public IBitmapCache getBitmapCache() {
+	public IBitmapIdCache<Bitmap> getBitmapCache() {
 		return bitmapCache;
 	}
 
@@ -797,9 +797,9 @@ public class TidaModel implements IPersistable {
 	 * 
 	 * @return the {@code FactDescriptorModelSetCache} used by the model
 	 * 
-	 * @see IFactDescriptorModelSetCache
+	 * @see IBitmapIdCache
 	 */
-	public IFactDescriptorModelSetCache getFactsCache() {
+	public IBitmapIdCache<FactDescriptorModelSet> getFactsCache() {
 		return factsCache;
 	}
 

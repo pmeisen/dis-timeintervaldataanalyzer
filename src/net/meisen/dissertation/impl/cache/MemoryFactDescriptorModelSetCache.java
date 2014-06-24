@@ -1,8 +1,11 @@
 package net.meisen.dissertation.impl.cache;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCacheConfig;
 import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
@@ -15,7 +18,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorMod
  * 
  */
 public class MemoryFactDescriptorModelSetCache implements
-		IFactDescriptorModelSetCache,
+		IBitmapIdCache<FactDescriptorModelSet>,
 		IReleaseMechanismCache<BitmapId<?>, FactDescriptorModelSet> {
 
 	@Override
@@ -29,7 +32,7 @@ public class MemoryFactDescriptorModelSetCache implements
 	}
 
 	@Override
-	public void cacheFactDescriptorModelSet(final BitmapId<?> bitmapId,
+	public void cache(final BitmapId<?> bitmapId,
 			final FactDescriptorModelSet set) {
 		/*
 		 * no interest the bitmap is already updated in memory
@@ -45,7 +48,7 @@ public class MemoryFactDescriptorModelSetCache implements
 	}
 
 	@Override
-	public void setConfig(IFactDescriptorModelSetCacheConfig configuration) {
+	public void setConfig(final IBitmapIdCacheConfig configuration) {
 		// ignore there is no configuration
 	}
 
@@ -57,5 +60,15 @@ public class MemoryFactDescriptorModelSetCache implements
 	@Override
 	public boolean setPersistency(final boolean enable) {
 		return false;
+	}
+
+	@Override
+	public boolean contains(BitmapId<?> bitmapId) {
+		return false;
+	}
+
+	@Override
+	public Collection<BitmapId<?>> getBitmapIdentifiers() {
+		return Collections.emptyList();
 	}
 }

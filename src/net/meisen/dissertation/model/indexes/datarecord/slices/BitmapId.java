@@ -21,7 +21,7 @@ import net.meisen.general.genmisc.types.Strings;
  * @param <I>
  *            the type of the identifier used within the {@code BitmapId}
  */
-public class BitmapId<I> {
+public class BitmapId<I> implements Comparable<BitmapId<I>> {
 
 	private final static List<Class<? extends IDataRecordIndex>> bitmapClasses;
 	static {
@@ -238,5 +238,21 @@ public class BitmapId<I> {
 		 * (Byte.MAX_VALUE)
 		 */
 		return 1 + Byte.MAX_VALUE + Byte.MAX_VALUE;
+	}
+
+	@Override
+	public int compareTo(final BitmapId<I> bitmapId) {
+
+		// compare each attribute
+		int cmp = Objects.compare(getId(), bitmapId.getId());
+		if (cmp == 0) {
+			cmp = Objects.compare(getType(), bitmapId.getType());
+			if (cmp == 0) {
+				cmp = Objects
+						.compare(getClassifier(), bitmapId.getClassifier());
+			}
+		}
+
+		return cmp;
 	}
 }

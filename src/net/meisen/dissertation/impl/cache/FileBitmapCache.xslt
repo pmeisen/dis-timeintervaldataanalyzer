@@ -5,7 +5,7 @@
                               xmlns:file="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file">
 
   <xsl:template match="file:config">
-    <bean class="net.meisen.dissertation.impl.cache.FileBitmapCacheConfig">
+    <bean class="net.meisen.dissertation.impl.cache.FileBitmapIdCacheConfig">
       <xsl:if test="@folder">
         <xsl:variable name="folder" select="@folder" />
         <property name="location" value="{$folder}" />

@@ -190,7 +190,6 @@
                 </xs:complexType>
               </xs:element>
 
-              <xs:element name="key" minOccurs="0" maxOccurs="unbounded" type="structurelement" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>

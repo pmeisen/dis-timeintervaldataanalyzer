@@ -16,7 +16,7 @@ import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.help.ThreadForTesting;
-import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
@@ -83,7 +83,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 *            the offset between the id and the data to be set within the
 	 *            generated bitmap
 	 */
-	protected void cacheBitmap(final FileBitmapCache fc, final int amount,
+	protected void cache(final FileBitmapCache fc, final int amount,
 			final int dataOffset) {
 		for (int i = 0; i < amount; i++) {
 			final BitmapId<?> id = createBitmapId(i);
@@ -91,7 +91,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 					+ dataOffset);
 
 			// cache the bitmap
-			fc.cacheBitmap(id, bmp);
+			fc.cache(id, bmp);
 		}
 	}
 
@@ -118,7 +118,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		thrown.expectMessage("cache does not support a configuration of type");
 
 		// initialize and change the configuration
-		fc.setConfig(new IBitmapCacheConfig() {
+		fc.setConfig(new IBitmapIdCacheConfig() {
 		});
 	}
 
@@ -154,7 +154,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		thrown.expectMessage("unable to create the cache location");
 
 		// use an invalid character for a folder
-		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
 		config.setLocation(null);
 		fc.setConfig(config);
 
@@ -236,7 +236,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
-			fc.cacheBitmap(id, bmp);
+			fc.cache(id, bmp);
 
 			// clear the cache
 			fc.clearCache();
@@ -278,7 +278,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
-			fc.cacheBitmap(id, bmp);
+			fc.cache(id, bmp);
 
 			// retrieve the bitmap and check the cache status
 			assertEquals(bmp, fc.get(id));
@@ -313,7 +313,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testBulkPersistanceWithReorganization() {
-		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
 		config.setLocation(fc.getLocation());
 		config.setCacheSize(10000);
 		config.setCacheCleaningFactor(1.0);
@@ -329,7 +329,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
-			fc.cacheBitmap(id, bmp);
+			fc.cache(id, bmp);
 
 			// retrieve the bitmap and check the cache status
 			assertEquals(bmp, fc.get(id));
@@ -369,7 +369,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
-			fc.cacheBitmap(id, bmp);
+			fc.cache(id, bmp);
 
 			// clear the cache
 			fc.clearCache();
@@ -397,14 +397,14 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		spy.initialize(model);
 
 		// let's cache 100 bitmaps for testing purposes
-		cacheBitmap(spy, 100, 0);
+		cache(spy, 100, 0);
 
 		// the generation of a line should have been called exactly 100 times
 		verify(spy, times(100)).generateIndexLine(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
 
 		// modify the Bitmaps
-		cacheBitmap(spy, 200, 100);
+		cache(spy, 200, 100);
 
 		/*
 		 * The modification shouldn't have triggered the generation again,
@@ -442,7 +442,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		for (int i = 0; i < 100000; i++) {
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), 1,
 					1000, 2000, Integer.MAX_VALUE - 2000);
-			fc.cacheBitmap(createBitmapId(0), bmp);
+			fc.cache(createBitmapId(0), bmp);
 		}
 
 		assertEquals(8, fc.getNumberOfFiles());
@@ -456,7 +456,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	@Test
 	public void testIndexLoading() {
 		final FileBitmapCache spy = Mockito.spy(fc);
-		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
 		config.setLocation(spy.getLocation());
 		config.setMaxFileSize("1K");
 		config.setCacheSize(100);
@@ -465,8 +465,8 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// create a cache with some data
 		spy.initialize(model);
-		cacheBitmap(spy, 100, 20);
-		verify(spy, times(100)).cacheBitmap(Mockito.any(BitmapId.class),
+		cache(spy, 100, 20);
+		verify(spy, times(100)).cache(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
 		verify(spy, times(100))._index(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
@@ -501,7 +501,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		verify(spy, times(100)).read(Mockito.any(IndexEntry.class));
 
 		// every Bitmap had to be added to the cache, but not updated
-		verify(spy, times(100)).cacheBitmap(Mockito.any(BitmapId.class),
+		verify(spy, times(100)).cache(Mockito.any(BitmapId.class),
 				Mockito.any(Bitmap.class));
 		verify(spy, times(100))._index(Mockito.any(BitmapId.class),
 				Mockito.any(IndexEntry.class));
@@ -569,7 +569,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			@Override
 			public void _run() {
 				for (int i = 0; i < 100000; i++) {
-					fc.cacheBitmap(createBitmapId(0), model.getIndexFactory()
+					fc.cache(createBitmapId(0), model.getIndexFactory()
 							.createBitmap());
 					assertTrue(fc.getCacheSize() > 0 && fc.getCacheSize() < 3);
 				}
@@ -600,7 +600,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testMultiThreadWithBulkWrite() throws InterruptedException {
-		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
 		config.setLocation(fc.getLocation());
 		config.setCacheSize(10000);
 		config.setCacheCleaningFactor(0.3);
@@ -646,7 +646,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 							model.getIndexFactory(), i);
 
 					// cache the bitmap
-					fc.cacheBitmap(id, bmp);
+					fc.cache(id, bmp);
 				}
 				fc.setPersistency(true);
 			}
@@ -672,7 +672,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	public void testCleaning() {
 
 		// create a new configuration
-		final FileBitmapCacheConfig fcc = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig fcc = new FileBitmapIdCacheConfig();
 		fcc.setCacheCleaningFactor(0.5);
 		fcc.setCacheSize(10);
 		fcc.setLocation(fc.getLocation());
@@ -683,8 +683,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// add 100 values to the cache
 		for (int i = 0; i < 100; i++) {
-			fc.cacheBitmap(createBitmapId(i), model.getIndexFactory()
-					.createBitmap());
+			fc.cache(createBitmapId(i), model.getIndexFactory().createBitmap());
 
 			// use every 2nd bitmap
 			if (i % 2 == 0) {
@@ -722,7 +721,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		final int amountOfBitmaps = 30000;
 		final int amountOfRuns = 30000;
 
-		final FileBitmapCacheConfig config = new FileBitmapCacheConfig();
+		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
 		config.setLocation(fc.getLocation());
 		config.setMaxFileSize(30 * amountOfBitmaps + "b");
 		config.setCacheSize((int) (amountOfBitmaps * 0.7));
@@ -820,7 +819,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 					|| bitmap.determineCardinality() == 1);
 
 			// cache a newly created bitmap
-			fc.cacheBitmap(createBitmapId(i),
+			fc.cache(createBitmapId(i),
 					Bitmap.createBitmap(model.getIndexFactory(), i + offset));
 		}
 	}

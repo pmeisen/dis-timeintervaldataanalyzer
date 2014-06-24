@@ -23,8 +23,11 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
+import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -50,7 +53,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @see IBitmapIdCacheable
  * 
  */
-public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
+public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
+		implements IBitmapIdCache<T>, IReleaseMechanismCache<BitmapId<?>, T> {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseFileBitmapIdCache.class);
 
@@ -130,17 +134,10 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		this.init = false;
 
 		// use the default configuration
-		setConfiguration(null);
+		setConfig(null);
 	}
 
-	/**
-	 * Initializes the {@code Cache} for the specified {@code model}.
-	 * 
-	 * @param model
-	 *            the {@code TidaModel} to initialize the cache for
-	 * 
-	 * @see TidaModel
-	 */
+	@Override
 	public synchronized void initialize(final TidaModel model) {
 
 		// if already initialized we are done
@@ -562,8 +559,8 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	}
 
 	/**
-	 * Creates a new instance of the {@code Cacheable} from the specified
-	 * {@code in}.
+	 * Creates a new instance of the {@code IBitmapIdCacheable} from the
+	 * specified {@code in}.
 	 * 
 	 * @param in
 	 *            the {@code DataInput} to read from
@@ -575,9 +572,9 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 	protected abstract T createFromInput(final DataInput in) throws IOException;
 
 	/**
-	 * Creates an empty, new instance of the {@code Cacheable}.
+	 * Creates an empty, new instance of the {@code IBitmapIdCacheable}.
 	 * 
-	 * @return an empty, new instance of the {@code Cacheable}
+	 * @return an empty, new instance of the {@code IBitmapIdCacheable}
 	 */
 	protected abstract T createNewInstance();
 
@@ -939,14 +936,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		}
 	}
 
-	/**
-	 * Caches the {@code cacheable} under the specified {@code bitmapId}.
-	 * 
-	 * @param bitmapId
-	 *            the identifier of the {@code cacheable}
-	 * @param cacheable
-	 *            the instance to be cached
-	 */
+	@Override
 	public void cache(final BitmapId<?> bitmapId, final T cacheable) {
 		if (!init) {
 			exceptionRegistry.throwException(getExceptionClass(1010), 1010);
@@ -990,16 +980,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		}
 	}
 
-	/**
-	 * Registers a {@code BitmapOwner} within the cache. The {@code Owner} is
-	 * the own getting informed if the {@code Cacheable} should be released from
-	 * memory (i.e. the garbage collection can take place).
-	 * 
-	 * @param owner
-	 *            the owner to be registered
-	 * 
-	 * @see IBitmapIdOwner
-	 */
+	@Override
 	public void registerOwner(final IBitmapIdOwner owner) {
 		if (!init) {
 			exceptionRegistry.throwException(getExceptionClass(1010), 1010);
@@ -1040,22 +1021,19 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		return this.modelLocation;
 	}
 
-	/**
-	 * Configures the concrete {@code Cache} implementation.
-	 * 
-	 * @param config
-	 *            the configuration to be used for the concrete {@code Cache}
-	 *            implementation
-	 */
-	protected void setConfiguration(final BaseFileBitmapIdCacheConfig config) {
+	@Override
+	public void setConfig(final IBitmapIdCacheConfig config) {
 		if (init) {
 			exceptionRegistry.throwException(getExceptionClass(1000), 1000);
 		} else if (config == null) {
 			this.location = null;
 			this.cacheSize = getDefaultCacheSize();
 			this.maxFileSizeInByte = getDefaultMaxFileSizeInByte();
+		} else if (config instanceof FileBitmapIdCacheConfig == false) {
+			exceptionRegistry.throwException(getExceptionClass(1001), 1001,
+					config.getClass().getName());
 		} else {
-			final BaseFileBitmapIdCacheConfig cc = (BaseFileBitmapIdCacheConfig) config;
+			final FileBitmapIdCacheConfig cc = (FileBitmapIdCacheConfig) config;
 
 			final File cLoc = cc.getLocation();
 			this.location = cLoc == null ? null : cc.getLocation();
@@ -1120,9 +1098,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		return Integer.MAX_VALUE;
 	}
 
-	/**
-	 * Releases all of the resources used by the cache.
-	 */
+	@Override
 	public synchronized void release() {
 		if (!this.init) {
 			return;
@@ -1315,17 +1291,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		return curFileNumber + 1;
 	}
 
-	/**
-	 * Method used to disable or enable (default) the persistency. During the
-	 * time the persistency is disable all changes are just done within the
-	 * memory. Whenever the persistency is enabled again, all data are persisted
-	 * to the hard-drive.
-	 * 
-	 * @param enable
-	 *            {@code true} to enable persistency, otherwise {@code false}
-	 * 
-	 * @return the old value of the persistency setting
-	 */
+	@Override
 	public synchronized boolean setPersistency(final boolean enable) {
 
 		/*
@@ -1342,11 +1308,16 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 			if (oldPersistency == this.persistency) {
 				// nothing
 			}
-			// persistency was enabled
+			/*
+			 * Persistency was enabled and is disabled now.
+			 */
 			else if (oldPersistency) {
 				notPersisted.clear();
 			}
-			// persistency was disabled, write the not persisted once
+			/*
+			 * Persistency was disabled and is enabled now, write the not
+			 * persisted once.
+			 */
 			else {
 				_bulkWrite(null);
 			}
@@ -1420,11 +1391,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		return persistency;
 	}
 
-	/**
-	 * Gets a collection of all the cached {@code BitmapId} instances.
-	 * 
-	 * @return a collection of all the cached {@code BitmapId} instances
-	 */
+	@Override
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		final List<BitmapId<?>> keys;
 
@@ -1438,15 +1405,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable> {
 		return keys;
 	}
 
-	/**
-	 * Checks if the cache contains a bitmap with the specified {@code bitmapId}
-	 * .
-	 * 
-	 * @param bitmapId
-	 *            the identifier to be checked
-	 * 
-	 * @return {@code true} if an instance is contained, otherwise {@code false}
-	 */
+	@Override
 	public boolean contains(final BitmapId<?> bitmapId) {
 		idxLock.readLock().lock();
 		try {

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IBitmapCacheConfig;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapIdOwner;
 import net.meisen.dissertation.model.cache.IReleaseMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author pmeisen
  * 
  */
-public class MemoryBitmapCache implements IBitmapCache,
+public class MemoryBitmapCache implements IBitmapIdCache<Bitmap>,
 		IReleaseMechanismCache<BitmapId<?>, Bitmap> {
 
 	@Autowired
@@ -44,7 +44,7 @@ public class MemoryBitmapCache implements IBitmapCache,
 	}
 
 	@Override
-	public void cacheBitmap(final BitmapId<?> bitmapId, final Bitmap bitmap) {
+	public void cache(final BitmapId<?> bitmapId, final Bitmap bitmap) {
 		/*
 		 * no interest the bitmap is already updated in memory
 		 */
@@ -59,7 +59,7 @@ public class MemoryBitmapCache implements IBitmapCache,
 	}
 
 	@Override
-	public void setConfig(final IBitmapCacheConfig configuration) {
+	public void setConfig(final IBitmapIdCacheConfig configuration) {
 		// ignore there is no configuration
 	}
 

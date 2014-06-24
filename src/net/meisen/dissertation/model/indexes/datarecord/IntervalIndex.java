@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.PersistorException;
-import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -22,7 +21,9 @@ import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.persistence.BasePersistor;
@@ -50,8 +51,8 @@ public class IntervalIndex implements IDataRecordIndex {
 	private final static String EXTENSION = ".slice";
 
 	private final MetaDataModel metaDataModel;
-	private final IBitmapCache bitmapCache;
-	private final IFactDescriptorModelSetCache factsCache;
+	private final IBitmapIdCache<Bitmap> bitmapCache;
+	private final IBitmapIdCache<FactDescriptorModelSet> factsCache;
 	private final IRangeQueryOptimized index;
 	private final BaseMapper<?> mapper;
 
@@ -86,8 +87,9 @@ public class IntervalIndex implements IDataRecordIndex {
 	 *            the factory used to create indexes
 	 */
 	public IntervalIndex(final IntervalModel intervalModel,
-			final MetaDataModel metaDataModel, final IBitmapCache bitmapCache,
-			final IFactDescriptorModelSetCache factsCache,
+			final MetaDataModel metaDataModel,
+			final IBitmapIdCache<Bitmap> bitmapCache,
+			final IBitmapIdCache<FactDescriptorModelSet> factsCache,
 			final BaseIndexFactory indexFactory) {
 		this.bitmapCache = bitmapCache;
 		this.factsCache = factsCache;

@@ -1,5 +1,8 @@
 package net.meisen.dissertation.model.indexes.datarecord.slices;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +17,9 @@ import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
+import net.meisen.general.genmisc.resources.IByteBufferReader;
 import net.meisen.general.genmisc.types.Objects;
+import net.meisen.general.genmisc.types.Streams;
 
 /**
  * An index used to keep the sorted facts of descriptors. That means that the
@@ -493,5 +498,67 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		} else {
 			return false;
 		}
+	}
+
+	// write the amount of models to be expected
+	public void serialize(final DataOutput out) throws IOException {
+		final Set<String> models = getModels();
+		out.write(Streams.intToByte(models.size()));
+
+		// write each model
+		for (final String modelId : models) {
+			final FactDescriptorSet facts = getDescriptors(modelId);
+
+			// write the modelIdentifier
+			out.write(Streams.objectToByte(modelId));
+			out.write(Streams.intToByte(facts.size()));
+
+			// add the different values
+			for (final FactDescriptor<?> fact : facts) {
+				out.write(Streams.doubleToByte(fact.getFact()));
+				out.write(Streams.booleanToByte(fact.isRecordInvariant()));
+				out.write(Streams.objectToByte(fact.getId()));
+			}
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public FactDescriptorModelSet deserialize(final DataInput in)
+			throws IOException {
+		facts.clear();
+
+		final IByteBufferReader reader = Streams.createByteBufferReader(in,
+				1024);
+
+		// get the amount of models
+		final int modelsSize = Streams.readNextObject(reader, Integer.class);
+
+		// read each model
+		for (int i = 0; i < modelsSize; i++) {
+			final String descModelId = (String) Streams.readNextObject(reader);
+			final int factsSize = Streams.readNextObject(reader, Integer.class);
+
+			// read the facts of the model
+			for (int k = 0; k < factsSize; k++) {
+				final double fact = Streams
+						.readNextObject(reader, Double.class);
+				final boolean invariant = Streams.readNextObject(reader,
+						Boolean.class);
+				final Object descId = Streams.readNextObject(reader);
+
+				// create the FactDescriptor
+				final FactDescriptor des;
+				if (invariant) {
+					des = new FactDescriptor(descModelId, descId, fact);
+				} else {
+					des = new FactDescriptor(descModelId, descId);
+				}
+
+				// add the descriptor
+				add(des);
+			}
+		}
+
+		return this;
 	}
 }

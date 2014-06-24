@@ -8,6 +8,7 @@ import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class SelectResultRecords extends SelectResult {
@@ -27,19 +28,39 @@ public class SelectResultRecords extends SelectResult {
 	@Override
 	public Class<?>[] getTypes() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Class<?>[] { Integer.class };
 	}
 
 	@Override
 	public String[] getNames() {
 		// TODO Auto-generated method stub
-		return null;
+		return new String[] { "ID" };
 	}
 
 	@Override
 	public Iterator<Object[]> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+
+		return new Iterator<Object[]>() {
+			private final IIntIterator it = recordsBitmap.intIterator();
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public Object[] next() {
+				final int id = it.next();
+
+				return new Object[] { id };
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
+			}
+		};
 	}
 
 	@Override

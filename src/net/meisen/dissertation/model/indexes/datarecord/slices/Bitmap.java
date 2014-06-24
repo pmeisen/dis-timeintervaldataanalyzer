@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
@@ -19,7 +20,8 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
  * @see BaseIndexFactory
  * 
  */
-public abstract class Bitmap implements IBitmapContainer, IBitmapIdCacheable {
+public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
+		IBitmapIdCacheable {
 
 	/**
 	 * The logical types to combine a bitmap with another.
@@ -259,6 +261,41 @@ public abstract class Bitmap implements IBitmapContainer, IBitmapIdCacheable {
 		bitmap.deserialize(in);
 
 		return bitmap;
+	}
+
+	/**
+	 * Gets an iterator used to iterate over the available integers set by
+	 * {@code this}.
+	 * 
+	 * @return an iterator used to iterate over the available integers set by
+	 *         {@code this}
+	 */
+	public abstract IIntIterator intIterator();
+
+	/**
+	 * Consider to use {@link #intIterator()} instead of {@code this}.
+	 */
+	@Override
+	public Iterator<Integer> iterator() {
+		return new Iterator<Integer>() {
+			private final IIntIterator it = intIterator();
+
+			@Override
+			public boolean hasNext() {
+				return it == null ? false : it.hasNext();
+			}
+
+			@Override
+			public Integer next() {
+				return it.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
+			}
+		};
 	}
 
 	/**

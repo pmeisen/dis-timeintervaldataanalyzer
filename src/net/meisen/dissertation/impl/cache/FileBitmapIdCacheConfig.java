@@ -4,13 +4,15 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
+
 /**
  * Configuration of the {@code FileBitmapCache}.
  * 
  * @author pmeisen
  * 
  */
-public abstract class BaseFileBitmapIdCacheConfig {
+public class FileBitmapIdCacheConfig implements IBitmapIdCacheConfig {
 	private File location;
 	private Integer cacheSize;
 	private Double cacheCleaningFactor;
@@ -20,7 +22,7 @@ public abstract class BaseFileBitmapIdCacheConfig {
 	 * Creates a {@code FileBitmapCacheConfig} used to configure a
 	 * {@code FileBitmapCache}.
 	 */
-	public BaseFileBitmapIdCacheConfig() {
+	public FileBitmapIdCacheConfig() {
 		setLocation(null);
 		setCacheSize(null);
 		setCacheCleaningFactor(null);

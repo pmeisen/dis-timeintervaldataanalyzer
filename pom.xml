@@ -87,25 +87,12 @@
     </dependency>
     
     <!-- Caching implementations --> 
-    <!-- Currently no caching is available for a mapDb.
-         Maybe I'll implement one when I find some time, 
-         it is important that the owners will only use
-         WeakReferences in that case, so that
-         GC can take place as soon as the bitmaps are
-         removed from the memory (i.e. the cache). An
-         information about releasing is not needed/possible
-         anymore. 
-         
-         see IReferenceMechanismCache
-      -->
-    <!--
     <dependency>
       <groupId>org.mapdb</groupId>
       <artifactId>mapdb</artifactId>
       <version>1.0.3</version>
       <optional>true</optional>
     </dependency>
-    -->
     
     <!-- parser -->
     <dependency>

@@ -40,7 +40,6 @@ public class TidaIndex implements IPersistable {
 	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
 	private final IntervalIndex intervalIndex;
 	private final MetaIndex metaIndex;
-	private final KeyIndex keyIndex;
 
 	private int dataId;
 	private Group persistentGroup = null;
@@ -94,11 +93,9 @@ public class TidaIndex implements IPersistable {
 		// create the indexes
 		intervalIndex = new IntervalIndex(model);
 		metaIndex = new MetaIndex(model);
-		keyIndex = new KeyIndex(model);
 
 		// add the dimensions of the MetaDataModel, Key and Interval
 		indexes.put(MetaIndex.class, metaIndex);
-		indexes.put(KeyIndex.class, keyIndex);
 		indexes.put(IntervalIndex.class, intervalIndex);
 	}
 

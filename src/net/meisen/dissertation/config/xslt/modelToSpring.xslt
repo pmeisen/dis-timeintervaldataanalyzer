@@ -11,8 +11,7 @@
   <xsl:import href="dataretriever://includeXslts" />
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="bitmapcache://includeXslts" />
-  <xsl:import href="factdescriptormodelsetcache://includeXslts" />
+  <xsl:import href="bitmapidcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
   <xsl:import href="identifiercache://includeXslts" />
 
@@ -414,13 +413,7 @@
                         <xsl:call-template name="beanStructureEntryConstructorArgs" />
                       </bean>
                     </xsl:when>
-                    
-                    <xsl:when test="local-name() = 'key'">
-                      <bean class="net.meisen.dissertation.model.datastructure.KeyStructureEntry">
-                        <xsl:call-template name="beanStructureEntryConstructorArgs" />
-                      </bean>
-                    </xsl:when>
-                    
+                                        
                     <xsl:when test="local-name() = 'interval'">
                       <bean class="net.meisen.dissertation.model.datastructure.IntervalStructureEntry">
                         <constructor-arg type="java.lang.String"><value><xsl:value-of select="@type" /></value></constructor-arg>

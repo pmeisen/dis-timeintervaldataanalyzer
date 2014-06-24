@@ -1,21 +1,22 @@
 package net.meisen.dissertation.model.cache;
 
+import java.util.Collection;
+
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 
 /**
- * Interface which describes the requirements of a cache used to handle
- * {@code FactDescriptorModelSet} instances.
+ * Interface for a cache which stores {@code BitmapId} related instances.
  * 
  * @author pmeisen
  * 
+ * @param <T>
+ *            the type of the instance stored by the cache
  */
-public interface IFactDescriptorModelSetCache {
+public interface IBitmapIdCache<T extends IBitmapIdCacheable> {
 
 	/**
-	 * Initializes the {@code FactDescriptorModelSetCache} for the specified
-	 * {@code model}.
+	 * Initializes the {@code Cache} for the specified {@code model}.
 	 * 
 	 * @param model
 	 *            the {@code TidaModel} to initialize the cache for
@@ -31,21 +32,37 @@ public interface IFactDescriptorModelSetCache {
 	 *            the configuration to be used for the concrete {@code Cache}
 	 *            implementation
 	 */
-	public void setConfig(final IFactDescriptorModelSetCacheConfig configuration);
+	public void setConfig(final IBitmapIdCacheConfig configuration);
 
 	/**
-	 * Caches the specified {@code set} for the specified {@code bitmapId}.
+	 * Caches the specified instance for the specified {@code bitmapId}.
 	 * 
 	 * @param bitmapId
-	 *            the {@code BitmapId} of the {@code bitmap} to be cached
-	 * @param set
-	 *            the {@code FactDescriptorModelSet} to be cached
+	 *            the {@code BitmapId} of the instance to be cached
+	 * @param instance
+	 *            the instance to be cached
 	 * 
 	 * @see BitmapId
-	 * @see FactDescriptorModelSet
 	 */
-	public void cacheFactDescriptorModelSet(final BitmapId<?> bitmapId,
-			final FactDescriptorModelSet set);
+	public void cache(final BitmapId<?> bitmapId, final T instance);
+
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
+	public Collection<BitmapId<?>> getBitmapIdentifiers();
+
+	/**
+	 * Checks if the cache contains an instance with the specified
+	 * {@code bitmapId} .
+	 * 
+	 * @param bitmapId
+	 *            the identifier to be checked
+	 * 
+	 * @return {@code true} if an instance is contained, otherwise {@code false}
+	 */
+	public boolean contains(final BitmapId<?> bitmapId);
 
 	/**
 	 * Releases all of the resources used by the cache.
@@ -60,7 +77,7 @@ public interface IFactDescriptorModelSetCache {
 	 * 
 	 * @param enable
 	 *            {@code true} to enable persistency, otherwise {@code false}
-	 *            
+	 * 
 	 * @return the old value of the persistency setting
 	 */
 	public boolean setPersistency(final boolean enable);

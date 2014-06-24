@@ -7,7 +7,7 @@ import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.cache.TestCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
-import net.meisen.dissertation.impl.cache.TestFileBitmapCacheConfig;
+import net.meisen.dissertation.impl.cache.TestFileBitmapIdCacheConfig;
 import net.meisen.dissertation.impl.cache.TestFileCaches;
 import net.meisen.dissertation.impl.cache.TestFileFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.TestFileIdentifierCache;
@@ -192,7 +192,7 @@ import org.junit.runners.Suite;
 		TestFileMetaDataCache.class,
 		TestMemoryIdentifierCache.class,
 		TestFileIdentifierCache.class,
-		TestFileBitmapCacheConfig.class,
+		TestFileBitmapIdCacheConfig.class,
 		TestCachingStrategy.class,
 		TestFileBitmapCache.class,
 		TestFileFactDescriptorModelSetCache.class,

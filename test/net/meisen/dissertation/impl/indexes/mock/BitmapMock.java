@@ -5,6 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
 
 /**
  * A mock of a {@code Bitmap} used to test the definition of a bitmap type using
@@ -93,5 +94,10 @@ public class BitmapMock extends Bitmap {
 	@Override
 	public int getMinId() {
 		return 0;
+	}
+
+	@Override
+	public IIntIterator intIterator() {
+		return null;
 	}
 }

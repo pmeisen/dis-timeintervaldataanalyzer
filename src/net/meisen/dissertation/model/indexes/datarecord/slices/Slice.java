@@ -3,7 +3,7 @@ package net.meisen.dissertation.model.indexes.datarecord.slices;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 
 /**
  * A slice of an index's dimension, i.e. from a data point of view the slice
@@ -31,7 +31,7 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	 * @param cache
 	 *            the {@code BitmapCache} to be used
 	 */
-	public Slice(final SliceId<I> sliceId, final IBitmapCache cache) {
+	public Slice(final SliceId<I> sliceId, final IBitmapIdCache<Bitmap> cache) {
 		super(sliceId, cache);
 	}
 

@@ -10,13 +10,14 @@ import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.PersistorException;
-import net.meisen.dissertation.model.cache.IBitmapCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
@@ -45,7 +46,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 			.getLogger(MetaIndexDimension.class);
 
 	private final DescriptorModel<I> model;
-	private final IBitmapCache cache;
+	private final IBitmapIdCache<Bitmap> cache;
 	private final IIndexedCollection index;
 
 	private Group persistentGroup = null;
@@ -68,7 +69,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 * @see DescriptorModel
 	 */
 	public MetaIndexDimension(final DescriptorModel<I> model,
-			final IBitmapCache cache, final BaseIndexFactory indexFactory) {
+			final IBitmapIdCache<Bitmap> cache,
+			final BaseIndexFactory indexFactory) {
 		if (model == null) {
 			throw new NullPointerException("The model cannot be null.");
 		} else if (LOG.isTraceEnabled()) {

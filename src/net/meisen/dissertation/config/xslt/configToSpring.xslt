@@ -10,8 +10,7 @@
 
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="bitmapcache://includeXslts" />
-  <xsl:import href="factdescriptormodelsetcache://includeXslts" />
+  <xsl:import href="bitmapidcache://includeXslts" />
   <xsl:import href="metadatacache://includeXslts" />
   <xsl:import href="identifiercache://includeXslts" />
 
@@ -133,7 +132,7 @@
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
-        <property name="class" value="net.meisen.dissertation.model.cache.IBitmapCacheConfig" />
+        <property name="class" value="net.meisen.dissertation.model.cache.IBitmapIdCacheConfig" />
       </bean>
       
       <!-- read the default factSetsCache configuration -->
@@ -148,7 +147,7 @@
             <xsl:otherwise><null /></xsl:otherwise>
           </xsl:choose>
         </property>
-        <property name="class" value="net.meisen.dissertation.model.cache.IFactDescriptorModelSetCacheConfig" />
+        <property name="class" value="net.meisen.dissertation.model.cache.IBitmapIdCacheConfig" />
       </bean>
 
       <!-- define the default factories' classes -->

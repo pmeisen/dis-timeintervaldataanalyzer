@@ -12,10 +12,6 @@
 
     <interval position="1" type="start" />
     <interval name="intervalend" type="end" />
-
-    <key name="autoid1" />
-    <key name="autoid2" />
-    <key position="3" />
   </structure>
 
   <data />

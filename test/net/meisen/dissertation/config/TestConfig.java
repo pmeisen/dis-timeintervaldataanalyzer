@@ -26,11 +26,12 @@ import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
-import net.meisen.dissertation.model.cache.IBitmapCache;
-import net.meisen.dissertation.model.cache.IFactDescriptorModelSetCache;
+import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -229,7 +230,7 @@ public class TestConfig {
 			assertNotNull(idCache);
 			assertEquals(MemoryIdentifierCache.class, idCache.getClass());
 
-			final IBitmapCache bmpCache = modulesHolder
+			final IBitmapIdCache<Bitmap> bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
 			assertEquals(MemoryBitmapCache.class, bmpCache.getClass());
@@ -239,7 +240,7 @@ public class TestConfig {
 			assertNotNull(mdCache);
 			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
 
-			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+			final IBitmapIdCache<FactDescriptorModelSet> fdmsCache = modulesHolder
 					.getModule(DefaultValues.FACTSETSCACHE_ID);
 			assertNotNull(fdmsCache);
 			assertEquals(MemoryFactDescriptorModelSetCache.class,
@@ -266,7 +267,7 @@ public class TestConfig {
 					"config-identifier"),
 					((FileIdentifierCache) idCache).getLocation());
 
-			final IBitmapCache bmpCache = modulesHolder
+			final IBitmapIdCache<Bitmap> bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
 			assertEquals(FileBitmapCache.class, bmpCache.getClass());
@@ -281,7 +282,7 @@ public class TestConfig {
 					"config-metadata"),
 					((FileMetaDataCache) mdCache).getLocation());
 
-			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+			final IBitmapIdCache<FactDescriptorModelSet> fdmsCache = modulesHolder
 					.getModule(DefaultValues.FACTSETSCACHE_ID);
 			assertNotNull(fdmsCache);
 			assertEquals(FileFactDescriptorModelSetCache.class,
@@ -312,7 +313,7 @@ public class TestConfig {
 			assertNotNull(idCache);
 			assertEquals(MemoryIdentifierCache.class, idCache.getClass());
 
-			final IBitmapCache bmpCache = modulesHolder
+			final IBitmapIdCache<Bitmap> bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
 			assertEquals(MemoryBitmapCache.class, bmpCache.getClass());
@@ -322,7 +323,7 @@ public class TestConfig {
 			assertNotNull(mdCache);
 			assertEquals(MemoryMetaDataCache.class, mdCache.getClass());
 
-			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+			final IBitmapIdCache<FactDescriptorModelSet> fdmsCache = modulesHolder
 					.getModule(DefaultValues.FACTSETSCACHE_ID);
 			assertNotNull(fdmsCache);
 			assertEquals(MemoryFactDescriptorModelSetCache.class,
@@ -350,7 +351,7 @@ public class TestConfig {
 					"model-identifier"),
 					((FileIdentifierCache) idCache).getLocation());
 
-			final IBitmapCache bmpCache = modulesHolder
+			final IBitmapIdCache<Bitmap> bmpCache = modulesHolder
 					.getModule(DefaultValues.BITMAPCACHE_ID);
 			assertNotNull(bmpCache);
 			assertEquals(FileBitmapCache.class, bmpCache.getClass());
@@ -365,7 +366,7 @@ public class TestConfig {
 					"model-metadata"),
 					((FileMetaDataCache) mdCache).getLocation());
 
-			final IFactDescriptorModelSetCache fdmsCache = modulesHolder
+			final IBitmapIdCache<FactDescriptorModelSet> fdmsCache = modulesHolder
 					.getModule(DefaultValues.FACTSETSCACHE_ID);
 			assertNotNull(fdmsCache);
 			assertEquals(FileFactDescriptorModelSetCache.class,

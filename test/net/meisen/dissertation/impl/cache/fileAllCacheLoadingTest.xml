@@ -74,8 +74,6 @@
     
     <interval name="INTERVAL_START" type="start" />
     <interval name="INTERVAL_END" type="end" />
-    
-    <key name="KEY" />
   </structure>
   
   <data metahandling="fail" intervalhandling="failOnNull" />
