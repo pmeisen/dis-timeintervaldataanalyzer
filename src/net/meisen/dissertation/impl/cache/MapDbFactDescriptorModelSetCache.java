@@ -10,7 +10,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorMod
  * 
  */
 public class MapDbFactDescriptorModelSetCache extends
-		MapDbBitmapIdCache<FactDescriptorModelSet> {
+		BaseMapDbBitmapIdCache<FactDescriptorModelSet> {
 
 	@Override
 	protected String getIndexFileName() {

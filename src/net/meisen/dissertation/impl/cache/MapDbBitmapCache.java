@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author pmeisen
  * 
  */
-public class MapDbBitmapCache extends MapDbBitmapIdCache<Bitmap> {
+public class MapDbBitmapCache extends BaseMapDbBitmapIdCache<Bitmap> {
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)

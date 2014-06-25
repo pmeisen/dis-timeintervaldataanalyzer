@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @param <T>
  *            the type of the instance to be associated
  */
-public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
+public abstract class BaseMapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		implements IBitmapIdCache<T>, IReferenceMechanismCache<BitmapId<?>, T> {
 
 	/**
@@ -55,7 +55,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	/**
 	 * Default constructor.
 	 */
-	public MapDbBitmapIdCache() {
+	public BaseMapDbBitmapIdCache() {
 		this.cacheSize = getDefaultCacheSize();
 
 		this.init = false;
@@ -89,7 +89,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 
 		// create the location
 		if (!this.modelLocation.exists() && !this.modelLocation.mkdirs()) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1004, modelLocation);
 		}
 
@@ -117,7 +117,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 
 			map = mapMaker.makeOrGet();
 		} else {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1002, type);
 		}
 
@@ -247,7 +247,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	public T get(final BitmapId<?> id) {
 		if (!isInit()) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1003);
 		}
 
@@ -263,7 +263,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	public void setConfig(final IBitmapIdCacheConfig config) {
 		if (init) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1000);
 		} else if (config == null) {
 			this.location = null;
@@ -278,7 +278,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 			final Integer cSize = c.getCacheSize();
 			this.cacheSize = cSize == null ? getDefaultCacheSize() : cSize;
 		} else {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1001, config.getClass().getName());
 		}
 	}
@@ -341,7 +341,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	public boolean contains(final BitmapId<?> bitmapId) {
 		if (!isInit()) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1003);
 		}
 
@@ -351,7 +351,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	public void cache(final BitmapId<?> bitmapId, final T instance) {
 		if (!isInit()) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1003);
 		}
 
@@ -362,7 +362,7 @@ public abstract class MapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		if (!isInit()) {
-			exceptionRegistry.throwException(MapDbBitmapIdCacheException.class,
+			exceptionRegistry.throwException(BaseMapDbBitmapIdCacheException.class,
 					1003);
 		}
 
