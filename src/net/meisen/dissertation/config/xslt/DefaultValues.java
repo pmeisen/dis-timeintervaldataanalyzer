@@ -163,6 +163,10 @@ public class DefaultValues {
 	 */
 	public static final String FACTSETSCACHE_ID = "factSetsCacheId";
 	/**
+	 * Id of the {@code DataRecordCache} to be used.
+	 */
+	public static final String DATARECORDCACHE_ID = "recordCacheId";
+	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;

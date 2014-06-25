@@ -40,6 +40,7 @@ public class TidaIndex implements IPersistable {
 	private final Map<Class<? extends IDataRecordIndex>, IDataRecordIndex> indexes;
 	private final IntervalIndex intervalIndex;
 	private final MetaIndex metaIndex;
+	private final DataRecordIndex recordIndex;
 
 	private int dataId;
 	private Group persistentGroup = null;
@@ -93,10 +94,54 @@ public class TidaIndex implements IPersistable {
 		// create the indexes
 		intervalIndex = new IntervalIndex(model);
 		metaIndex = new MetaIndex(model);
+		recordIndex = new DataRecordIndex(model);
 
 		// add the dimensions of the MetaDataModel, Key and Interval
 		indexes.put(MetaIndex.class, metaIndex);
 		indexes.put(IntervalIndex.class, intervalIndex);
+		indexes.put(DataRecordIndex.class, recordIndex);
+	}
+
+	/**
+	 * Gets the record of the specified {@code recordId}.
+	 * 
+	 * @param recordId
+	 *            the identifier of the record to retrieve the values for
+	 * 
+	 * @return the values of the record, {@code null} if the identifier is
+	 *         invalid
+	 */
+	public Object[] getRecord(final int recordId) {
+		return recordIndex.get(recordId);
+	}
+
+	/**
+	 * Gets the types of record values.
+	 * 
+	 * @return the types of the record values
+	 */
+	public Class<?>[] getRecordTypes() {
+		return recordIndex.getTypes();
+	}
+
+	/**
+	 * Gets the names of record values.
+	 * 
+	 * @return the names of the record values
+	 */
+	public String[] getRecordNames() {
+		return recordIndex.getNames();
+	}
+
+	/**
+	 * Gets the {@code DataRecordIndex} created.
+	 * 
+	 * @return the {@code DataRecordIndex}
+	 * 
+	 * @see DataRecordIndex
+	 */
+	protected DataRecordIndex getDataRecordIndex() {
+		return recordIndex;
 	}
 
 	/**
@@ -151,7 +196,7 @@ public class TidaIndex implements IPersistable {
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
 				dataStructure, record, model, dataId);
-		
+
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.index(processedRecord);
@@ -256,7 +301,7 @@ public class TidaIndex implements IPersistable {
 	public Slice getMetaIndexDimensionSlice(final String modelId,
 			final Object id) {
 		final MetaIndexDimension metaIdxDim = metaIndex.get(modelId);
-		
+
 		if (metaIdxDim == null) {
 			return null;
 		} else {

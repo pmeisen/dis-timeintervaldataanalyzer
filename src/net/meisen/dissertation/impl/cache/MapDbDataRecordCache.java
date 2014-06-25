@@ -1,0 +1,148 @@
+package net.meisen.dissertation.impl.cache;
+
+import java.util.Collection;
+
+import net.meisen.dissertation.jdbc.protocol.DataType;
+import net.meisen.dissertation.model.cache.IDataRecordCache;
+import net.meisen.dissertation.model.data.FieldNameGenerator;
+import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.indexes.datarecord.ProcessedDataRecord;
+import net.meisen.dissertation.model.time.mapper.BaseMapper;
+
+/**
+ * A cache based on the {@code mapDb} implementation, used to cache the
+ * different records.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
+		implements IDataRecordCache {
+
+	private BaseMapper<?> mapper;
+
+	private String[] names;
+	private Class<?>[] types;
+	private DataType[] dataTypes;
+
+	@Override
+	public void initialize(final TidaModel model) {
+
+		// get the needed values
+		mapper = model.getIntervalModel().getTimelineMapper();
+
+		final Class<?> intervalType = model.getIntervalModel()
+				.getTimelineMapper().getMappedType();
+		final MetaDataModel metaDataModel = model.getMetaDataModel();
+		final Collection<DescriptorModel<?>> descModels = metaDataModel
+				.getDescriptorModels();
+
+		// id + interval + descriptors
+		final int size = 1 + 2 + descModels.size();
+		names = new String[size];
+		types = new Class<?>[size];
+		dataTypes = new DataType[size];
+
+		final FieldNameGenerator fg = FieldNameGenerator.get();
+		names[0] = fg.getIdFieldName();
+		dataTypes[0] = DataType.find(int.class);
+		types[0] = dataTypes[0].getRepresentorClass();
+
+		names[1] = fg.getIntervalStartFieldName();
+		dataTypes[1] = DataType.find(intervalType);
+		types[1] = dataTypes[1].getRepresentorClass();
+
+		names[2] = fg.getIntervalEndFieldName();
+		dataTypes[2] = DataType.find(intervalType);
+		types[2] = dataTypes[2].getRepresentorClass();
+
+		// create the record types
+		int pos = 3;
+		for (final DescriptorModel<?> descModel : descModels) {
+			names[pos] = descModel.getId();
+			dataTypes[pos] = DataType.find(descModel.getValueType());
+			if (dataTypes[pos] == null) {
+				dataTypes[pos] = DataType.STRING;
+			}
+			types[pos] = dataTypes[pos].getRepresentorClass();
+
+			pos++;
+		}
+
+		// now initialize the real cache, so that the types and names are known
+		super.initialize(model);
+	}
+
+	@Override
+	public String[] getNames() {
+		return names;
+	}
+
+	@Override
+	public Class<?>[] getTypes() {
+		return types;
+	}
+
+	/**
+	 * Gets the used {@code DataTypes} of the different values of the record.
+	 * 
+	 * @return the used {@code DataTypes} of the different values of the record
+	 */
+	public DataType[] getDataTypes() {
+		return dataTypes;
+	}
+
+	@Override
+	public void cache(final ProcessedDataRecord record) {
+		final Object[] res = new Object[names.length];
+
+		// get the values
+		res[0] = record.getId();
+		res[1] = mapper.resolve(record.getStart());
+		res[2] = mapper.resolve(record.getEnd());
+
+		for (int pos = 3; pos < names.length; pos++) {
+			final Descriptor<?, ?, ?> desc = record.getDescriptor(names[pos]);
+
+			// if we have a string use the uniqueString
+			if (DataType.STRING.equals(dataTypes[pos])) {
+				res[pos] = desc.getUniqueString();
+			} else {
+				res[pos] = desc.getValue();
+			}
+
+			pos++;
+		}
+
+		// cache the value now
+		cache(record.getId(), res);
+	}
+
+	@Override
+	public Object[] get(int recordId) {
+		return super.get(recordId);
+	}
+
+	@Override
+	protected MapDbType getDefaultType() {
+		return MapDbType.BTree;
+	}
+
+	@Override
+	protected Object[] createNewInstance() {
+		return null;
+	}
+
+	@Override
+	protected MapDbDataRecordSerializer createValueSerializer() {
+		return new MapDbDataRecordSerializer();
+	}
+
+	@Override
+	protected String getIndexFileName() {
+		return "mapDbRecord.idx";
+	}
+}

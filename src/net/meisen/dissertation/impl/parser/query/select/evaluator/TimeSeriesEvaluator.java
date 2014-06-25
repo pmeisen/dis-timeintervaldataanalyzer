@@ -114,7 +114,7 @@ public class TimeSeriesEvaluator {
 	 * @return the created {@code TimeSeries}
 	 * 
 	 * @see TimeSeries
-	 * @see SelectResult
+	 * @see SelectResultTimeSeries
 	 */
 	public TimeSeriesCollection evaluateInterval(final Interval<?> interval,
 			final Collection<DescriptorMathTree> measures,

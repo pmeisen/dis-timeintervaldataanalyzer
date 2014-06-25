@@ -146,7 +146,7 @@ public class IntervalIndex implements IDataRecordIndex {
 					+ mapper.getTargetType().getName() + "'.");
 		}
 
-		// read the data from the cache which is available
+		// create the slices from the cache
 		for (final BitmapId<?> bitmapId : bitmapCache.getBitmapIdentifiers()) {
 			if (IntervalIndex.class.equals(bitmapId.getType())) {
 				index.addObject(createSlice((Number) bitmapId.getId()));
@@ -402,12 +402,21 @@ public class IntervalIndex implements IDataRecordIndex {
 	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-
+		
+		// check if the values are out of bound
+		if (mapper.isLargerThanEnd(start)) {
+			return new SliceWithDescriptors<?>[0];
+		} else if (mapper.isSmallerThanStart(end)) {
+			return new SliceWithDescriptors<?>[0];
+		}
+		
+		// get the mapped values
 		final long lStart = startInclusive ? mapper.mapToLong(start) : mapper
 				.shiftToLong(start, 1, false);
 		final long lEnd = endInclusive ? mapper.mapToLong(end) : mapper
 				.shiftToLong(end, 1, true);
-
+		
+		// get the slices
 		return getSlices(lStart, lEnd);
 	}
 

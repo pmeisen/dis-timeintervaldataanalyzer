@@ -31,6 +31,6 @@ public class MapDbBitmapCache extends BaseMapDbBitmapIdCache<Bitmap> {
 
 	@Override
 	protected MapDbBitmapSerializer createValueSerializer() {
-		return new MapDbBitmapSerializer(factory);
+		return new MapDbBitmapSerializer();
 	}
 }

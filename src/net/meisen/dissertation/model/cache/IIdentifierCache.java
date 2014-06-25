@@ -1,7 +1,6 @@
 package net.meisen.dissertation.model.cache;
 
 import net.meisen.dissertation.impl.cache.BaseIdentifierCacheException;
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 
 /**
@@ -10,17 +9,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
  * @author pmeisen
  * 
  */
-public interface IIdentifierCache {
-
-	/**
-	 * Initializes the cache for the specified {@code model}.
-	 * 
-	 * @param model
-	 *            the {@code TidaModel} to initialize {@code this} for
-	 * 
-	 * @see TidaModel
-	 */
-	public void initialize(final TidaModel model);
+public interface IIdentifierCache extends ICache {
 
 	/**
 	 * Get the last used identifier.
@@ -75,24 +64,6 @@ public interface IIdentifierCache {
 	 *            the identifiers marked as not to be used
 	 */
 	public void markIdentifierAsInvalid(final int... invalidIdentifier);
-
-	/**
-	 * Sets the persistency of the cache, i.e. if values are persisted to the
-	 * underlying persistence level (depending on the concrete
-	 * {@code implementation} or not.
-	 * 
-	 * @param enable
-	 *            {@code true} to enable persistency, otherwise {@code false}
-	 * 
-	 * @return the old value
-	 */
-	public boolean setPersistency(final boolean enable);
-
-	/**
-	 * Releases the cache and all bound resources. The cache should not be used
-	 * anymore after releasing it.
-	 */
-	public void release();
 
 	/**
 	 * Sets the configuration of the cache. The method can only be called prior

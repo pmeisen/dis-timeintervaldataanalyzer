@@ -109,7 +109,7 @@ public class ProcessedDataRecord {
 	}
 
 	/**
-	 * Get the {@code Descriptor} of the specified {@code entry}.
+	 * Gets the {@code Descriptor} of the specified {@code entry}.
 	 * 
 	 * @param entry
 	 *            the {@code MetaStructureEntry} to get the {@code Descriptor}
@@ -130,7 +130,20 @@ public class ProcessedDataRecord {
 	 * @return the {@code Descriptor} for the specified {@code model}
 	 */
 	public Descriptor<?, ?, ?> getDescriptor(final DescriptorModel<?> model) {
-		return processedMeta.get(model.getId());
+		return getDescriptor(model.getId());
+	}
+
+	/**
+	 * Get the {@code Descriptor} of the specified {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel} to get the
+	 *            {@code Descriptor} for
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code model}
+	 */
+	public Descriptor<?, ?, ?> getDescriptor(final String modelId) {
+		return processedMeta.get(modelId);
 	}
 
 	/**

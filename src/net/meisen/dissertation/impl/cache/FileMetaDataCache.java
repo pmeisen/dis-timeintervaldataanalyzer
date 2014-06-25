@@ -424,4 +424,9 @@ public class FileMetaDataCache implements IMetaDataCache {
 	public File getModelLocation() {
 		return this.modelLocation;
 	}
+
+	@Override
+	public boolean setPersistency(final boolean enable) {
+		return true;
+	}
 }

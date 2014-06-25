@@ -9,6 +9,7 @@ import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
+import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
@@ -77,7 +78,10 @@ public class SelectResultTimeSeries extends SelectResult {
 	@Override
 	public String[] getNames() {
 		if (getQuery().isTransposed()) {
-			return new String[] { "ID", "VALUE", "LABEL", "RAWLABEL" };
+			final FieldNameGenerator fg = FieldNameGenerator.get();
+
+			return new String[] { fg.getIdFieldName(), fg.getValueFieldName(),
+					fg.getLabelFieldName(), fg.getRawLabelFieldName() };
 		} else {
 
 			// get the labels and add the identifier label to it

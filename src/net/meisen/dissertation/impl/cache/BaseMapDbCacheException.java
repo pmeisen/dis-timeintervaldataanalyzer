@@ -6,7 +6,7 @@ package net.meisen.dissertation.impl.cache;
  * @author pmeisen
  * 
  */
-public class BaseMapDbBitmapIdCacheException extends RuntimeException {
+public class BaseMapDbCacheException extends RuntimeException {
 	private static final long serialVersionUID = -6980990874427448882L;
 
 	/**
@@ -16,7 +16,7 @@ public class BaseMapDbBitmapIdCacheException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public BaseMapDbBitmapIdCacheException(final String message) {
+	public BaseMapDbCacheException(final String message) {
 		super(message);
 	}
 
@@ -29,7 +29,7 @@ public class BaseMapDbBitmapIdCacheException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public BaseMapDbBitmapIdCacheException(final String message, final Throwable t) {
+	public BaseMapDbCacheException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

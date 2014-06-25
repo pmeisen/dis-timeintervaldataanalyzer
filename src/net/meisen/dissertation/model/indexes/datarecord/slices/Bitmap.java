@@ -390,4 +390,27 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 			return null;
 		}
 	}
+
+	/**
+	 * Removes all the {@code null} values passed.
+	 * 
+	 * @param bitmaps
+	 *            the bitmaps to remove {@code null} from
+	 * 
+	 * @return the none {@code null}-bitmaps
+	 */
+	public static Bitmap[] removeNulls(final Bitmap... bitmaps) {
+		if (bitmaps == null || bitmaps.length == 0) {
+			return new Bitmap[0];
+		} else {
+			final List<Bitmap> res = new ArrayList<Bitmap>(bitmaps.length);
+			for (final Bitmap bitmap : bitmaps) {
+				if (bitmap != null) {
+					res.add(bitmap);
+				}
+			}
+
+			return res.toArray(new Bitmap[0]);
+		}
+	}
 }

@@ -29,6 +29,7 @@ import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResultRecords;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectResultTimeSeries;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
@@ -43,6 +44,7 @@ import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Dates;
 
@@ -1543,5 +1545,139 @@ public class TestSelectQueries extends LoaderBasedTest {
 		}
 
 		assertEquals(counter, tsRes.sizeOfLabels() * tsRes.size());
+	}
+
+	/**
+	 * Test the selection of records by time, which does not retrieve any
+	 * records.
+	 */
+	@Test
+	public void testEmptyRecordSelectionByTime() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel in [05.03.2014, 05.03.2014 02:32:00]";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 0, ids.length);
+	}
+
+	/**
+	 * Test the selection of records by time, which retrieves some records.
+	 */
+	@Test
+	public void testRecordSelectionByTime() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel in [03.03.2014, 03.03.2014 02:32:00]";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) != -1);
+		assertTrue(Arrays.binarySearch(ids, 1) != -1);
+		assertTrue(Arrays.binarySearch(ids, 4) != -1);
+		assertTrue(Arrays.binarySearch(ids, 5) != -1);
+	}
+
+	/**
+	 * Test the selection of records by time, which retrieves all records.
+	 */
+	@Test
+	public void testAllRecordSelectionByTime() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel in [01.03.2014, 05.03.2014 02:32:00]";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 6, ids.length);
+	}
+	
+	/**
+	 * Test the selection of records by a filter, which retrieves no records.
+	 */
+	@Test
+	public void testEmptyRecordSelectionByFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel filter by PERSON='notavailable'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 0, ids.length);
+	}
+	
+	/**
+	 * Test the selection of records by a filter, which retrieves some records.
+	 */
+	@Test
+	public void testRecordSelectionByFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel filter by PERSON='Philipp'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 3, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) != -1);
+		assertTrue(Arrays.binarySearch(ids, 2) != -1);
+		assertTrue(Arrays.binarySearch(ids, 3) != -1);
+	}
+	
+	/**
+	 * Test the selection of records by a filter, which retrieves some records.
+	 */
+	@Test
+	public void testAllSelectionByFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel filter by PERSON='Philipp' OR LOCATION='Aachen'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+		final Bitmap records = res.getSelectedRecords();
+		final int[] ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 6, ids.length);
 	}
 }

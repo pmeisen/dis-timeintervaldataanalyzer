@@ -84,4 +84,9 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 	public boolean isInitialized() {
 		return init;
 	}
+
+	@Override
+	public boolean setPersistency(final boolean enable) {
+		return true;
+	}
 }

@@ -2,7 +2,6 @@ package net.meisen.dissertation.model.cache;
 
 import java.util.Collection;
 
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
 /**
@@ -13,17 +12,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
  * @param <T>
  *            the type of the instance stored by the cache
  */
-public interface IBitmapIdCache<T extends IBitmapIdCacheable> {
-
-	/**
-	 * Initializes the {@code Cache} for the specified {@code model}.
-	 * 
-	 * @param model
-	 *            the {@code TidaModel} to initialize the cache for
-	 * 
-	 * @see TidaModel
-	 */
-	public void initialize(final TidaModel model);
+public interface IBitmapIdCache<T extends IBitmapIdCacheable> extends ICache {
 
 	/**
 	 * Configures the concrete {@code Cache} implementation.
@@ -63,22 +52,4 @@ public interface IBitmapIdCache<T extends IBitmapIdCacheable> {
 	 * @return {@code true} if an instance is contained, otherwise {@code false}
 	 */
 	public boolean contains(final BitmapId<?> bitmapId);
-
-	/**
-	 * Releases all of the resources used by the cache.
-	 */
-	public void release();
-
-	/**
-	 * Method used to disable or enable (default) the persistency. During the
-	 * time the persistency is disable all changes are just done within the
-	 * memory. Whenever the persistency is enabled again, all data have to be
-	 * persisted if supported by the cache.
-	 * 
-	 * @param enable
-	 *            {@code true} to enable persistency, otherwise {@code false}
-	 * 
-	 * @return the old value of the persistency setting
-	 */
-	public boolean setPersistency(final boolean enable);
 }

@@ -2,7 +2,6 @@ package net.meisen.dissertation.model.cache;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.data.MetaDataModel;
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
@@ -18,7 +17,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
  * @author pmeisen
  * 
  */
-public interface IMetaDataCache {
+public interface IMetaDataCache extends ICache {
 
 	/**
 	 * Caches the specified {@code MetaDataModel}.
@@ -51,19 +50,4 @@ public interface IMetaDataCache {
 	 * @see IMetaDataCacheConfig
 	 */
 	public void setConfig(final IMetaDataCacheConfig config);
-
-	/**
-	 * Initializes the {@code MetaDataCache} for the specified {@code model}.
-	 * 
-	 * @param model
-	 *            the {@code TidaModel} to initialize the cache for
-	 * 
-	 * @see TidaModel
-	 */
-	public void initialize(final TidaModel model);
-
-	/**
-	 * Releases the {@code MetaDataCache} and all the resources bound.
-	 */
-	public void release();
 }

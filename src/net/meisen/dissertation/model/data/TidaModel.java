@@ -16,6 +16,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.cache.IBitmapIdCache;
+import net.meisen.dissertation.model.cache.IDataRecordCache;
 import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
@@ -86,6 +87,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.FACTSETSCACHE_ID)
 	private IBitmapIdCache<FactDescriptorModelSet> factsCache;
+
+	@Autowired(required = false)
+	@Qualifier(DefaultValues.DATARECORDCACHE_ID)
+	private IDataRecordCache recordCache;
 
 	@Autowired
 	@Qualifier(DefaultValues.METADATACACHE_ID)
@@ -222,6 +227,9 @@ public class TidaModel implements IPersistable {
 		getIdentifierCache().initialize(this);
 		getBitmapCache().initialize(this);
 		getFactsCache().initialize(this);
+		if (getDataRecordCache() != null) {
+			getDataRecordCache().initialize(this);
+		}
 
 		/*
 		 * Get the cached metaData and use it. Afterwards the data is stored in
@@ -268,6 +276,9 @@ public class TidaModel implements IPersistable {
 		getBitmapCache().release();
 		getFactsCache().release();
 		getIdentifierCache().release();
+		if (getDataRecordCache() != null) {
+			getDataRecordCache().release();
+		}
 
 		// delete created files if necessary
 		if (deleteLocation && getLocation().exists()) {
@@ -443,10 +454,15 @@ public class TidaModel implements IPersistable {
 		boolean oldPersistencyBitmap = true;
 		boolean oldPersistencyFacts = true;
 		boolean oldPersistencyId = true;
+		boolean oldPersistencyRecord = true;
 		try {
 			oldPersistencyBitmap = getBitmapCache().setPersistency(false);
 			oldPersistencyFacts = getFactsCache().setPersistency(false);
 			oldPersistencyId = getIdentifierCache().setPersistency(false);
+			if (getDataRecordCache() != null) {
+				oldPersistencyRecord = getDataRecordCache().setPersistency(false);
+			}
+			
 
 			try {
 				while (it.hasNext()) {
@@ -474,6 +490,9 @@ public class TidaModel implements IPersistable {
 			getBitmapCache().setPersistency(oldPersistencyBitmap);
 			getFactsCache().setPersistency(oldPersistencyFacts);
 			getIdentifierCache().setPersistency(oldPersistencyId);
+			if (getDataRecordCache() != null) {
+				getDataRecordCache().setPersistency(oldPersistencyRecord);
+			}
 
 			loadLock.writeLock().unlock();
 		}
@@ -790,6 +809,17 @@ public class TidaModel implements IPersistable {
 	 */
 	public IBitmapIdCache<Bitmap> getBitmapCache() {
 		return bitmapCache;
+	}
+
+	/**
+	 * Gets the {@code DataRecordCache} used by the model.
+	 * 
+	 * @return the {@code DataRecordCache} used by the model
+	 * 
+	 * @see IDataRecordCache
+	 */
+	public IDataRecordCache getDataRecordCache() {
+		return recordCache;
 	}
 
 	/**

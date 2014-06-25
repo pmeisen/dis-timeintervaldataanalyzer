@@ -3,7 +3,6 @@ package net.meisen.dissertation.impl.cache;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.io.Serializable;
 
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -17,33 +16,13 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
  * 
  */
 public class MapDbBitmapSerializer implements
-		IModelDependendMapDbSerializer<Bitmap>, Serializable {
+		IModelDependendMapDbSerializer<Bitmap> {
 	private static final long serialVersionUID = 1L;
 
 	private transient BaseIndexFactory factory;
 
-	/**
-	 * Default constructor, which needs initialization prior to usage.
-	 */
-	public MapDbBitmapSerializer() {
-		this(null);
-	}
-
-	/**
-	 * Constructor which initializes {@code this}, with the passed (none
-	 * {@code null} {@code factory}).
-	 * 
-	 * @param factory
-	 *            the {@code IndexFactory} used to deserialize a {@code Bitmap}
-	 * 
-	 * @see Bitmap#createFromInput(BaseIndexFactory, DataInput)
-	 */
-	public MapDbBitmapSerializer(final BaseIndexFactory factory) {
-		this.factory = factory;
-	}
-
 	@Override
-	public void init(final TidaModel model) {
+	public void init(final BaseMapDbCache<?, ?> cache, final TidaModel model) {
 		factory = model.getIndexFactory();
 	}
 
