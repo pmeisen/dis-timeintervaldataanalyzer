@@ -1750,7 +1750,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(0, ids.length);
 
 		// check a finishingWith-query outside the end-range
-		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 04.03.2014 23:59]");
+		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 04.03.2014 23:59:00]");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
