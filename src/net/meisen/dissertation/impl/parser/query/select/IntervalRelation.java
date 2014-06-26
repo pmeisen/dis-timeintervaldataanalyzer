@@ -132,13 +132,13 @@ public enum IntervalRelation {
 					bitmap = during(index, lStart, lEnd, mapper, timeWindow);
 					break;
 				case STARTINGWITH:
-					bitmap = startingWith(index, lStart, mapper);
+					bitmap = startingWith(index, lStart, mapper, timeWindow);
 					break;
 				case FINISHINGWITH:
-					bitmap = finishingWith(index, lEnd, mapper);
+					bitmap = finishingWith(index, lEnd, mapper, timeWindow);
 					break;
 				case EQUALTO:
-					bitmap = equalTo(index, lStart, lEnd, mapper);
+					bitmap = equalTo(index, lStart, lEnd, mapper, timeWindow);
 					break;
 				case BEFORE:
 					bitmap = before(index, lStart, mapper);
@@ -147,7 +147,7 @@ public enum IntervalRelation {
 					bitmap = after(index, lEnd, mapper);
 					break;
 				case MEETING:
-					bitmap = meeting(index, lStart, lEnd, mapper);
+					bitmap = meeting(index, lStart, lEnd, mapper, timeWindow);
 					break;
 				case CONTAINING:
 					bitmap = containing(index, lStart, lEnd, mapper);
@@ -190,20 +190,22 @@ public enum IntervalRelation {
 	}
 
 	protected Bitmap meeting(final TidaIndex index, final long lStart,
-			final long lEnd, final BaseMapper<?> mapper) {
+			final long lEnd, final BaseMapper<?> mapper,
+			final Interval timeWindow) {
 
 		final Bitmap attachedAtStart;
 		if (mapper.getNormStartAsLong() == lStart) {
 			attachedAtStart = null;
 		} else {
-			attachedAtStart = finishingWith(index, lStart - 1, mapper);
+			attachedAtStart = finishingWith(index, lStart - 1, mapper,
+					timeWindow);
 		}
 
 		final Bitmap attachedAtEnd;
 		if (mapper.getNormEndAsLong() == lEnd) {
 			attachedAtEnd = null;
 		} else {
-			attachedAtEnd = startingWith(index, lEnd + 1, mapper);
+			attachedAtEnd = startingWith(index, lEnd + 1, mapper, timeWindow);
 		}
 
 		// determine the result
@@ -250,13 +252,14 @@ public enum IntervalRelation {
 	}
 
 	protected Bitmap during(final TidaIndex index, final long lStart,
-			final long lEnd, final BaseMapper<?> mapper, final Interval interval) {
+			final long lEnd, final BaseMapper<?> mapper,
+			final Interval timeWindow) {
 		final long tStart = mapper.getNormStartAsLong();
 		final long tEnd = mapper.getNormEndAsLong();
 
 		final long start;
-		if ((interval == null && lStart == tStart)
-				|| (interval != null && mapper.isSmallerThanStart(interval
+		if ((timeWindow == null && lStart == tStart)
+				|| (timeWindow != null && mapper.isSmallerThanStart(timeWindow
 						.getStart()))) {
 			start = tStart;
 		} else {
@@ -264,8 +267,8 @@ public enum IntervalRelation {
 		}
 
 		final long end;
-		if ((interval == null && lEnd == tEnd)
-				|| (interval != null && mapper.isLargerThanEnd(interval
+		if ((timeWindow == null && lEnd == tEnd)
+				|| (timeWindow != null && mapper.isLargerThanEnd(timeWindow
 						.getEnd()))) {
 			end = tEnd;
 		} else {
@@ -320,9 +323,12 @@ public enum IntervalRelation {
 	}
 
 	protected Bitmap startingWith(final TidaIndex index, final long lStart,
-			final BaseMapper<?> mapper) {
+			final BaseMapper<?> mapper, final Interval<?> timeWindow) {
 
-		if (mapper.getNormStartAsLong() == lStart) {
+		if (timeWindow != null
+				&& mapper.isSmallerThanStart(timeWindow.getStart())) {
+			return null;
+		} else if (mapper.getNormStartAsLong() == lStart) {
 			final SliceWithDescriptors<?>[] finishSlices = index
 					.getIntervalIndexSlices(lStart, lStart);
 			return getBitmap(finishSlices, 0, 1);
@@ -341,9 +347,11 @@ public enum IntervalRelation {
 	}
 
 	protected Bitmap finishingWith(final TidaIndex index, final long lEnd,
-			final BaseMapper<?> mapper) {
+			final BaseMapper<?> mapper, final Interval<?> timeWindow) {
 
-		if (mapper.getNormEndAsLong() == lEnd) {
+		if (timeWindow != null && mapper.isLargerThanEnd(timeWindow.getEnd())) {
+			return null;
+		} else if (mapper.getNormEndAsLong() == lEnd) {
 			final SliceWithDescriptors<?>[] finishSlices = index
 					.getIntervalIndexSlices(lEnd, lEnd);
 			return getBitmap(finishSlices, 0, 1);
@@ -362,9 +370,10 @@ public enum IntervalRelation {
 	}
 
 	protected Bitmap equalTo(final TidaIndex index, final long lStart,
-			final long lEnd, final BaseMapper<?> mapper) {
-		final Bitmap startWith = startingWith(index, lStart, mapper);
-		final Bitmap finishWith = finishingWith(index, lEnd, mapper);
+			final long lEnd, final BaseMapper<?> mapper,
+			final Interval<?> timeWindow) {
+		final Bitmap startWith = startingWith(index, lStart, mapper, timeWindow);
+		final Bitmap finishWith = finishingWith(index, lEnd, mapper, timeWindow);
 
 		if (startWith == null || finishWith == null) {
 			return null;

@@ -1704,11 +1704,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		query = q("select RECORDS from testPersonModel startingWith [01.03.2014, 03.03.2014 02:32:00]");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
-		assertEquals(4, ids.length);
-		assertTrue(Arrays.binarySearch(ids, 0) > -1);
-		assertTrue(Arrays.binarySearch(ids, 1) > -1);
-		assertTrue(Arrays.binarySearch(ids, 4) > -1);
-		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+		assertEquals(0, ids.length);
 
 		// check a startingWith-query with an exact start
 		query = q("select RECORDS from testPersonModel startingWith [03.03.2014 00:00:00, 05.03.2014 02:32:00]");
@@ -1751,9 +1747,15 @@ public class TestSelectQueries extends LoaderBasedTest {
 		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 05.03.2014 02:32:00]");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check a finishingWith-query outside the end-range
+		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 04.03.2014 23:59]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
-		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 		assertTrue(Arrays.binarySearch(ids, 4) > -1);
 		assertTrue(Arrays.binarySearch(ids, 5) > -1);
 	}
@@ -2117,8 +2119,14 @@ public class TestSelectQueries extends LoaderBasedTest {
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
-		// check an eqaulTo-query bound by the time-line
+		// check an eqaulTo-query with exceeded end
 		query = q("select RECORDS from testPersonModel equalTo [01.03.2014 00:00:00, 28.03.2014 16:20:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an eqaulTo-query bound by the time-line
+		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 04.03.2014 23:59:00]");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(3, ids.length);
