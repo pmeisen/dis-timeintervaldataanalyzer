@@ -48,10 +48,12 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
@@ -503,8 +505,12 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitExprSelectRecords(final ExprSelectRecordsContext ctx) {
 		final ResultType type = resolveResultType(ctx);
+		final boolean idsOnly = resolveIdsOnly(ctx);
+		final boolean count = resolveCount(ctx);
 
 		q(SelectQuery.class).setResultType(type);
+		q(SelectQuery.class).setIdsOnly(idsOnly);
+		q(SelectQuery.class).setCount(count);
 	}
 
 	@Override
@@ -515,6 +521,14 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void enterExprAggregate(
 			final QueryGrammarParser.ExprAggregateContext ctx) {
+	}
+
+	@Override
+	public void exitSelectorIntervalRelation(
+			final SelectorIntervalRelationContext ctx) {
+		final IntervalRelation relation = resolveIntervalRelation(ctx);
+
+		q(SelectQuery.class).setIntervalRelation(relation);
 	}
 
 	@Override
@@ -895,6 +909,34 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 	}
 
+	private IntervalRelation resolveIntervalRelation(
+			final SelectorIntervalRelationContext ctx) {
+		if (ctx.getToken(QueryGrammarParser.IR_WITHIN, 0) != null) {
+			return IntervalRelation.WITHIN;
+		} else if (ctx.getToken(QueryGrammarParser.IR_EQUALTO, 0) != null) {
+			return IntervalRelation.EQUALTO;
+		} else if (ctx.getToken(QueryGrammarParser.IR_BEFORE, 0) != null) {
+			return IntervalRelation.BEFORE;
+		} else if (ctx.getToken(QueryGrammarParser.IR_AFTER, 0) != null) {
+			return IntervalRelation.AFTER;
+		} else if (ctx.getToken(QueryGrammarParser.IR_MEETING, 0) != null) {
+			return IntervalRelation.MEETING;
+		} else if (ctx.getToken(QueryGrammarParser.IR_OVERLAPPING, 0) != null) {
+			return IntervalRelation.OVERLAPPING;
+		} else if (ctx.getToken(QueryGrammarParser.IR_DURING, 0) != null) {
+			return IntervalRelation.DURING;
+		} else if (ctx.getToken(QueryGrammarParser.IR_CONTAINING, 0) != null) {
+			return IntervalRelation.CONTAINING;
+		} else if (ctx.getToken(QueryGrammarParser.IR_STARTINGWITH, 0) != null) {
+			return IntervalRelation.STARTINGWITH;
+		} else if (ctx.getToken(QueryGrammarParser.IR_FINISHINGWITH, 0) != null) {
+			return IntervalRelation.FINISHINGWITH;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1019, ctx.getText());
+		}
+	}
+
 	/**
 	 * Checks if the result should be transposed.
 	 * 
@@ -906,6 +948,40 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 */
 	protected boolean resolveTransposition(final ParserRuleContext ctx) {
 		if (ctx.getToken(QueryGrammarParser.OP_TRANSPOSE, 0) != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if the result should be counted.
+	 * 
+	 * @param ctx
+	 *            the context of the parser to be checked
+	 * 
+	 * @return {@code true} if the result should be counted, otherwise
+	 *         {@code false}
+	 */
+	protected boolean resolveCount(final ParserRuleContext ctx) {
+		if (ctx.getToken(QueryGrammarParser.AGGR_COUNT, 0) != null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if the result should be the identifiers only.
+	 * 
+	 * @param ctx
+	 *            the context of the parser to be checked
+	 * 
+	 * @return {@code true} if the result should be the identifiers only,
+	 *         otherwise {@code false}
+	 */
+	protected boolean resolveIdsOnly(final ParserRuleContext ctx) {
+		if (ctx.getToken(QueryGrammarParser.OP_IDONLY, 0) != null) {
 			return true;
 		} else {
 			return false;

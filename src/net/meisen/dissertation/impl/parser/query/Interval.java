@@ -17,6 +17,19 @@ public class Interval<T> {
 	private final IntervalType closeType;
 
 	/**
+	 * Creates an interval {@code [start, end]}.
+	 * 
+	 * @param start
+	 *            the start value
+	 * @param end
+	 *            the end value
+	 */
+	public Interval(final BaseIntervalValue<T> start,
+			final BaseIntervalValue<T> end) {
+		this(start, IntervalType.INCLUDE, end, IntervalType.INCLUDE);
+	}
+
+	/**
 	 * Creates an interval with the specified {@code start} and {@code end}
 	 * value. The {@code IntervalType} instances define if the {@code start} and
 	 * {@code end} is excluded or included, i.e. {@code [start, end]},

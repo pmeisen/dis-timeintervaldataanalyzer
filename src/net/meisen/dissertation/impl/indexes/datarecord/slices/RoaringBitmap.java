@@ -210,4 +210,9 @@ public class RoaringBitmap extends Bitmap {
 			}
 		};
 	}
+
+	@Override
+	public boolean isBitSet() {
+		return !bitmap.isEmpty();
+	}
 }

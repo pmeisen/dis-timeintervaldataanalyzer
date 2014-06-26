@@ -297,7 +297,9 @@ public class IntervalIndex implements IDataRecordIndex {
 	 *         added to the slice yet
 	 */
 	public SliceWithDescriptors<?>[] getSlices(final long start, final long end) {
-		return castSlices(index.getObjectsByStartAndEnd(start, end));
+		return castSlices(index.getObjectsByStartAndEnd(
+				Math.max(mapper.getNormStartAsLong(), start),
+				Math.min(mapper.getNormEndAsLong(), end)));
 	}
 
 	/**
@@ -402,20 +404,20 @@ public class IntervalIndex implements IDataRecordIndex {
 	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		
+
 		// check if the values are out of bound
 		if (mapper.isLargerThanEnd(start)) {
 			return new SliceWithDescriptors<?>[0];
 		} else if (mapper.isSmallerThanStart(end)) {
 			return new SliceWithDescriptors<?>[0];
 		}
-		
+
 		// get the mapped values
 		final long lStart = startInclusive ? mapper.mapToLong(start) : mapper
 				.shiftToLong(start, 1, false);
 		final long lEnd = endInclusive ? mapper.mapToLong(end) : mapper
 				.shiftToLong(end, 1, true);
-		
+
 		// get the slices
 		return getSlices(lStart, lEnd);
 	}

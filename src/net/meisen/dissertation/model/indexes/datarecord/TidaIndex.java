@@ -11,6 +11,7 @@ import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
@@ -100,6 +101,15 @@ public class TidaIndex implements IPersistable {
 		indexes.put(MetaIndex.class, metaIndex);
 		indexes.put(IntervalIndex.class, intervalIndex);
 		indexes.put(DataRecordIndex.class, recordIndex);
+	}
+
+	/**
+	 * Get the {@code IndexFactory} used by the model.
+	 * 
+	 * @return the {@code IndexFactory} used by the model
+	 */
+	public BaseIndexFactory getIndexFactory() {
+		return model.getIndexFactory();
 	}
 
 	/**
@@ -331,6 +341,23 @@ public class TidaIndex implements IPersistable {
 			final boolean endInclusive) {
 		return intervalIndex.getSlicesByTimePoints(start, end, startInclusive,
 				endInclusive);
+	}
+
+	/**
+	 * Get the slices for the specified mapped {@code start} (included) to
+	 * mapped {@code end} (included).
+	 * 
+	 * @param start
+	 *            the mapped start point (included)
+	 * @param end
+	 *            the mapped end point (included)
+	 * 
+	 * @return the slices, which might contain {@code null} values if no data is
+	 *         added to the slice yet
+	 */
+	public SliceWithDescriptors<?>[] getIntervalIndexSlices(final long start,
+			final long end) {
+		return intervalIndex.getSlices(start, end);
 	}
 
 	/**

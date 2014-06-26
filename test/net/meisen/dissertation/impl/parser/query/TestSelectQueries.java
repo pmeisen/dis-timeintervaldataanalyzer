@@ -25,6 +25,7 @@ import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.measures.Mode;
 import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
+import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
@@ -180,6 +181,71 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(ResultType.RECORDS, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
+	}
+
+	/**
+	 * Tests the query which selects the identifiers of all records.
+	 */
+	@Test
+	public void testAllRecordIdsSelectQuery() {
+		final SelectQuery query = q("SELECT IDS(RECORDS) FROM MODELID");
+
+		assertEquals("MODELID", query.getModelId());
+		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertFalse(query.isTransposed());
+		assertNull(query.getInterval());
+	}
+
+	/**
+	 * Tests the query which selects only the count of selected records.
+	 */
+	@Test
+	public void testAllRecordsCountSelectQuery() {
+		final SelectQuery query = q("SELECT COUNT(RECORDS) FROM MODELID");
+
+		assertEquals("MODELID", query.getModelId());
+		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertFalse(query.isTransposed());
+		assertNull(query.getInterval());
+	}
+
+	/**
+	 * Tests the query which defines different interval-relations.
+	 */
+	@Test
+	public void testRecordSelectQueryWithIntervalRelation() {
+		SelectQuery query;
+
+		query = q("SELECT RECORDS FROM MODELID");
+		assertNull(query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID DURING [5, 9]");
+		assertEquals(IntervalRelation.DURING, query.getIntervalRelation());
+
+		query = q("SELECT COUNT(RECORDS) FROM MODELID CONtaining [5, 9] FILTER BY DESC='VAL'");
+		assertEquals(IntervalRelation.CONTAINING, query.getIntervalRelation());
+
+		query = q("SELECT IDS(RECORDS) FROM MODELID before [5, 9]");
+		assertEquals(IntervalRelation.BEFORE, query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID after [5, 9]");
+		assertEquals(IntervalRelation.AFTER, query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID equalto [5, 9]");
+		assertEquals(IntervalRelation.EQUALTO, query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID finishingwith [5, 9]");
+		assertEquals(IntervalRelation.FINISHINGWITH,
+				query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID startingwiTH [5, 9]");
+		assertEquals(IntervalRelation.STARTINGWITH, query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID overlapping [5, 9]");
+		assertEquals(IntervalRelation.OVERLAPPING, query.getIntervalRelation());
+
+		query = q("SELECT RECORDS FROM MODELID meeting [5, 9]");
+		assertEquals(IntervalRelation.MEETING, query.getIntervalRelation());
 	}
 
 	/**
@@ -1552,9 +1618,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 * records.
 	 */
 	@Test
-	public void testEmptyRecordSelectionByTime() {
+	public void testEmptyRecordSelectionWithinTime() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select RECORDS from testPersonModel in [05.03.2014, 05.03.2014 02:32:00]";
+		final String query = "select RECORDS from testPersonModel within [05.03.2014, 05.03.2014 02:32:00]";
 
 		// load the model
 		m(xml);
@@ -1573,9 +1639,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 * Test the selection of records by time, which retrieves some records.
 	 */
 	@Test
-	public void testRecordSelectionByTime() {
+	public void testRecordSelectionWithinTime() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select RECORDS from testPersonModel in [03.03.2014, 03.03.2014 02:32:00]";
+		final String query = "select RECORDS from testPersonModel within [03.03.2014, 03.03.2014 02:32:00]";
 
 		// load the model
 		m(xml);
@@ -1588,19 +1654,19 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check the result
 		assertEquals(4, ids.length);
-		assertTrue(Arrays.binarySearch(ids, 0) != -1);
-		assertTrue(Arrays.binarySearch(ids, 1) != -1);
-		assertTrue(Arrays.binarySearch(ids, 4) != -1);
-		assertTrue(Arrays.binarySearch(ids, 5) != -1);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
 	}
 
 	/**
 	 * Test the selection of records by time, which retrieves all records.
 	 */
 	@Test
-	public void testAllRecordSelectionByTime() {
+	public void testAllRecordSelectionWithinTime() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select RECORDS from testPersonModel in [01.03.2014, 05.03.2014 02:32:00]";
+		final String query = "select RECORDS from testPersonModel within [01.03.2014, 05.03.2014 02:32:00]";
 
 		// load the model
 		m(xml);
@@ -1614,7 +1680,453 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the result
 		assertEquals(records.toString(), 6, ids.length);
 	}
-	
+
+	/**
+	 * Test the selection of records using startingWith by time.
+	 */
+	@Test
+	public void testRecordSelectionStartingWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check a startingWith-query outside the start- & end-range
+		query = q("select RECORDS from testPersonModel startingWith [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check a startingWith-query outside the start-range
+		query = q("select RECORDS from testPersonModel startingWith [01.03.2014, 03.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// check a startingWith-query with an exact start
+		query = q("select RECORDS from testPersonModel startingWith [03.03.2014 00:00:00, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// check another startingWith-query with an exact start
+		query = q("select RECORDS from testPersonModel startingWith [03.03.2014 16:20:00, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+	}
+
+	/**
+	 * Test the selection of records using endingWith by time.
+	 */
+	@Test
+	public void testRecordSelectionFinishingWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check a finishingWith-query outside the start- & end-range
+		query = q("select RECORDS from testPersonModel finishingWith [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check a finishingWith-query outside the end-range
+		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+	}
+
+	/**
+	 * Test the selection of records using during by time.
+	 */
+	@Test
+	public void testRecordSelectionDuringWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check a during-query outside the start-range
+		query = q("select RECORDS from testPersonModel during [01.03.2014, 02.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check a during-query outside the end-range
+		query = q("select RECORDS from testPersonModel during [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check a during-query with end outside
+		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 03.03.2014 17:30:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+
+		// check a during-query outside the end
+		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 05.03.2020 00:00:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+
+		// check a during-query exactly on the end
+		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 04.03.2014 23:59:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+
+		// check a during-query with complete range
+		query = q("select RECORDS from testPersonModel during (01.03.2014 16:17:20, 20.03.2014 16:30:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(6, ids.length);
+
+		// check a during-query with edge-timewindow's range
+		query = q("select RECORDS from testPersonModel during [02.03.2014 00:00:00, 05.03.2014 00:00:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(6, ids.length);
+
+		// check a during-query with edge-timewindow's range
+		query = q("select RECORDS from testPersonModel during [03.03.2014 00:00:00, 05.03.2014 00:00:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+	}
+
+	/**
+	 * Test the selection of records using before by time.
+	 */
+	@Test
+	public void testRecordSelectionBeforeWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check an before-query outside the start-range
+		query = q("select RECORDS from testPersonModel before [01.03.2014, 02.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an before-query outside the end-range
+		query = q("select RECORDS from testPersonModel before [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(6, ids.length);
+
+		// check an before-query
+		query = q("select RECORDS from testPersonModel before (03.03.2014 16:19:00, 03.03.2014 16:30:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+
+		// check an before-query
+		query = q("select RECORDS from testPersonModel before (03.03.2014 17:22:00, 30.03.2014 16:30:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+	}
+
+	/**
+	 * Test the selection of records using containing by time.
+	 */
+	@Test
+	public void testRecordSelectionContainingWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check an containing-query outside the start-range
+		query = q("select RECORDS from testPersonModel containing [01.03.2014, 02.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an containing-query outside the end-range
+		query = q("select RECORDS from testPersonModel Containing [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an containing-query selecting some values
+		query = q("select RECORDS from testPersonModel Containing [03.03.2014 16:19:00, 04.03.2014 23:59:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(3, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// check an containing-query on the edge of an interval
+		query = q("select RECORDS from testPersonModel Containing (03.03.2014 17:22:00, 03.03.2014 17:23:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+	}
+
+	/**
+	 * Test the selection of records using overlapping by time.
+	 */
+	@Test
+	public void testRecordSelectionOverlappingWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check an overlapping-query outside the start- and end-range
+		query = q("select RECORDS from testPersonModel overlapping [01.01.2014, 24.12.2014)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an overlapping-query using the whole range
+		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 05.03.2014)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an overlapping-query at the edge at the start
+		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 01.03.2014]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an overlapping-query at the edge at the end
+		query = q("select RECORDS from testPersonModel overlapping [04.03.2014 23:59:00, 05.03.2014)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an overlapping-query with just one point
+		query = q("select RECORDS from testPersonModel overlapping [04.03.2014 23:58:00, 04.03.2014 23:58:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// overlapping at start and end
+		query = q("select RECORDS from testPersonModel overlapping [03.03.2014 16:15:00, 05.03.2014]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// overlapping at the end of the time-window
+		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 03.03.2014 17:10:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(4, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// overlapping at the start of the time-window
+		query = q("select RECORDS from testPersonModel overlapping [03.03.2014 16:15:00, 03.03.2014 17:10:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+	}
+
+	/**
+	 * Test the selection of records using meeting by time.
+	 */
+	@Test
+	public void testRecordSelectionMeetingWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// checking meeting the start-edge of time-line
+		query = q("select RECORDS from testPersonModel meeting [03.03.2014 00:00:00, 03.03.2014 00:00:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// checking meeting the end-edge of time-line
+		query = q("select RECORDS from testPersonModel meeting [04.03.2014 23:59:00, 04.03.2014 23:59:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// checking meeting one interval
+		query = q("select RECORDS from testPersonModel meeting [03.03.2014 17:20:00, 03.03.2014 17:21:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+
+		// checking meeting specific points
+		query = q("select RECORDS from testPersonModel meeting [03.03.2014 16:20:00, 03.03.2014 17:21:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+
+	}
+
+	/**
+	 * Test the selection of records using after by time.
+	 */
+	@Test
+	public void testRecordSelectionAfterWithTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check an after-query outside the start-range
+		query = q("select RECORDS from testPersonModel after [01.03.2014, 02.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(6, ids.length);
+
+		// check an after-query outside the end-range
+		query = q("select RECORDS from testPersonModel after [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an after-query
+		query = q("select RECORDS from testPersonModel after [01.03.2014, 03.03.2014 16:20:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+
+		// check an after-query
+		query = q("select RECORDS from testPersonModel after [01.03.2014, 03.03.2014 16:19:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(2, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+	}
+
+	/**
+	 * Test the selection of records using equalTo by time, which retrieves all
+	 * records.
+	 */
+	@Test
+	public void testRecordSelectionEqualToTime() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// check an equalTo-query outside the end-range
+		query = q("select RECORDS from testPersonModel equalTo [05.03.2014, 05.03.2014 02:32:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an equalTo-query outside the start-range
+		query = q("select RECORDS from testPersonModel equalTo [01.01.2014, 20.01.2014 08:07:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an equalTo-query selecting one value
+		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 03.03.2014 16:19:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+
+		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 03.03.2014 16:20:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+
+		query = q("select RECORDS from testPersonModel equalTo (03.03.2014 16:19:00, 03.03.2014 17:22:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+
+		query = q("select RECORDS from testPersonModel equalTo (03.03.2014 16:19:00, 03.03.2014 17:22:00]");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+
+		// check an eqaulTo-query bound by the time-line
+		query = q("select RECORDS from testPersonModel equalTo [01.03.2014 00:00:00, 28.03.2014 16:20:00)");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(3, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+	}
+
 	/**
 	 * Test the selection of records by a filter, which retrieves no records.
 	 */
@@ -1635,7 +2147,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the result
 		assertEquals(records.toString(), 0, ids.length);
 	}
-	
+
 	/**
 	 * Test the selection of records by a filter, which retrieves some records.
 	 */
@@ -1655,11 +2167,11 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check the result
 		assertEquals(records.toString(), 3, ids.length);
-		assertTrue(Arrays.binarySearch(ids, 1) != -1);
-		assertTrue(Arrays.binarySearch(ids, 2) != -1);
-		assertTrue(Arrays.binarySearch(ids, 3) != -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 	}
-	
+
 	/**
 	 * Test the selection of records by a filter, which retrieves some records.
 	 */

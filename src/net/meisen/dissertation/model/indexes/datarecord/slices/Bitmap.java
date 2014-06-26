@@ -69,6 +69,14 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 	public abstract int determineCardinality();
 
 	/**
+	 * Checks if the bitmap has at least one bit set.
+	 * 
+	 * @return {@code true} if the bitmap has at least one bit set, otherwise
+	 *         {@code false}
+	 */
+	public abstract boolean isBitSet();
+
+	/**
 	 * Optimizes the bitmap considering performance and storage.
 	 */
 	public abstract void optimize();

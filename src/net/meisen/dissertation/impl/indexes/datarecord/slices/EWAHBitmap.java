@@ -270,4 +270,9 @@ public class EWAHBitmap extends Bitmap {
 			}
 		};
 	}
+
+	@Override
+	public boolean isBitSet() {
+		return bitmap.intIterator().hasNext();
+	}
 }

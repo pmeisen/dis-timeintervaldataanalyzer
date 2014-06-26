@@ -100,4 +100,9 @@ public class BitmapMock extends Bitmap {
 	public IIntIterator intIterator() {
 		return null;
 	}
+
+	@Override
+	public boolean isBitSet() {
+		return false;
+	}
 }

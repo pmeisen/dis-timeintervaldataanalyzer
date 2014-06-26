@@ -1,7 +1,9 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import net.meisen.dissertation.impl.parser.query.Interval;
+import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -18,6 +20,7 @@ public class RecordsEvaluator {
 
 	private final TidaIndex index;
 	private final BaseIndexFactory indexFactory;
+	private final IntervalModel intervalModel;
 
 	/**
 	 * Default constructor specifying for which {@code model} the evaluation
@@ -27,6 +30,7 @@ public class RecordsEvaluator {
 	 *            the model the evaluation takes place for
 	 */
 	public RecordsEvaluator(final TidaModel model) {
+		this.intervalModel = model.getIntervalModel();
 		this.index = model.getIndex();
 		this.indexFactory = model.getIndexFactory();
 	}
@@ -36,6 +40,8 @@ public class RecordsEvaluator {
 	 * 
 	 * @param interval
 	 *            the interval to evaluate the records for
+	 * @param relation
+	 *            the {@code IntervalRelation} to determine the result for
 	 * @param queryResult
 	 *            the result of the parsing and interpretation of the select
 	 *            statement
@@ -45,45 +51,36 @@ public class RecordsEvaluator {
 	 * @see SelectResultRecords
 	 */
 	public Bitmap evaluateInterval(final Interval<?> interval,
-			final SelectResult queryResult) {
+			final IntervalRelation relation, final SelectResult queryResult) {
 
-		// determine the interval
-		final SliceWithDescriptors<?>[] timeSlices = getIntervalIndexSlices(interval);
+		// get the relation or use a default one if none is defined
+		final IntervalRelation intervalRelation = relation == null ? IntervalRelation.WITHIN
+				: relation;
 
-		// check the combination
+		// the result bitmap
 		Bitmap bitmap = null;
-		if (timeSlices != null && timeSlices.length >= 0) {
-			for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
-				final Bitmap timeSliceBitmap = timeSlice.getBitmap();
 
-				// check if there is a bitmap defined
-				if (timeSliceBitmap != null) {
-					if (bitmap == null) {
-						bitmap = timeSliceBitmap;
-					} else {
-						bitmap = Bitmap.or(indexFactory, bitmap,
-								timeSliceBitmap);
-					}
-				}
-			}
+		// combine the valid once with it
+		final Bitmap validBitmap = queryResult.getValidRecords();
+		bitmap = combine(bitmap, validBitmap);
 
-			// combine the valid once with it
-			final Bitmap validBitmap = queryResult.getValidRecords();
-			if (validBitmap != null) {
-				bitmap = Bitmap.and(indexFactory, bitmap, validBitmap);
-			}
+		// combine the time with it
+		if (bitmap == null || bitmap.isBitSet()) {
+			final Bitmap timeBitmap = intervalRelation.determine(intervalModel,
+					index, interval);
+			bitmap = combine(bitmap, timeBitmap);
+		}
 
-			// combine the filter with it
+		// combine the filter with it
+		if (bitmap == null || bitmap.isBitSet()) {
 			final DescriptorLogicResult filterResult = queryResult
 					.getFilterResult();
 			final Bitmap filterBitmap = filterResult == null ? null
 					: filterResult.getBitmap();
-			if (filterBitmap != null) {
-				bitmap = Bitmap.and(indexFactory, bitmap, filterBitmap);
-			}
+			bitmap = combine(bitmap, filterBitmap);
 		}
 
-		// create an empty one if we still don't have any
+		// if we don't have any result return null
 		if (bitmap == null) {
 			bitmap = indexFactory.createBitmap();
 		}
@@ -91,23 +88,13 @@ public class RecordsEvaluator {
 		return bitmap;
 	}
 
-	/**
-	 * Gets the {@code Slices} available for the defined {@code interval}.
-	 * 
-	 * @param interval
-	 *            the {@code Slices} available
-	 * 
-	 * @return the {@code Slices} selected by the {@code interval}
-	 */
-	protected SliceWithDescriptors<?>[] getIntervalIndexSlices(
-			final Interval<?> interval) {
-
-		if (interval == null) {
-			return index.getIntervalIndexSlices();
+	protected Bitmap combine(final Bitmap resBitmap, final Bitmap andBitmap) {
+		if (andBitmap == null) {
+			return resBitmap;
+		} else if (resBitmap == null) {
+			return andBitmap;
 		} else {
-			return index.getIntervalIndexSlices(interval.getStart(),
-					interval.getEnd(), interval.getOpenType().isInclusive(),
-					interval.getCloseType().isInclusive());
+			return Bitmap.and(indexFactory, resBitmap, andBitmap);
 		}
 	}
 }

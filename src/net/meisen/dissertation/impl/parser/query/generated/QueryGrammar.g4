@@ -55,7 +55,7 @@ exprValues    : BRACKET_ROUND_OPENED compValueElement (SEPARATOR compValueElemen
  * Define the different expressions/parts of the select statement
  */
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
-exprSelectRecords   : STMT_SELECT TYPE_RECORDS OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)?;
+exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)?;
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
 exprMeasure         : compNamedMeasure (SEPARATOR compNamedMeasure)*;
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
@@ -101,6 +101,7 @@ selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
 selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL | POS_END_EXCL);
 selectorBoolean             : LOGICAL_TRUE | LOGICAL_FALSE;
+selectorIntervalRelation    : IR_EQUALTO | IR_BEFORE | IR_AFTER | IR_MEETING | IR_OVERLAPPING | IR_DURING | IR_CONTAINING | IR_STARTINGWITH | IR_FINISHINGWITH | IR_WITHIN;
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -148,6 +149,19 @@ OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y;
 OP_TRANSPOSE: T R A N S P O S E;
+OP_IDONLY   : I D S;
+
+// reserved words used to express relations among the time-window and an interval
+IR_EQUALTO       : E Q U A L T O;
+IR_BEFORE        : B E F O R E;
+IR_AFTER         : A F T E R;
+IR_MEETING       : M E E T I N G;
+IR_OVERLAPPING   : O V E R L A P P I N G;
+IR_DURING        : D U R I N G;
+IR_WITHIN        : W I T H I N;
+IR_CONTAINING    : C O N T A I N I N G;
+IR_STARTINGWITH  : S T A R T I N G W I T H;
+IR_FINISHINGWITH : F I N I S H I N G W I T H;
 
 // reserved words used for logic expressions 
 LOGICAL_OR      : O R | '||';

@@ -35,6 +35,9 @@ public class SelectQuery implements IQuery {
 	private ResultType type;
 	private Interval<?> interval;
 	private boolean transposed;
+	private boolean idsOnly;
+	private boolean count;
+	private IntervalRelation intervalRelation;
 
 	/**
 	 * Default constructor initializing the query.
@@ -45,6 +48,9 @@ public class SelectQuery implements IQuery {
 		measures = new ArrayList<DescriptorMathTree>();
 
 		transposed = false;
+		idsOnly = false;
+		count = false;
+		intervalRelation = null;
 	}
 
 	/**
@@ -176,12 +182,76 @@ public class SelectQuery implements IQuery {
 	public boolean isTransposed() {
 		return transposed;
 	}
-	
+
+	/**
+	 * Specifies if the result of the selection should just be the identifiers
+	 * of records.
+	 * 
+	 * @param idsOnly
+	 *            {@code true} if it should be just the identifiers, otherwise
+	 *            {@code false}
+	 */
+	public void setIdsOnly(final boolean idsOnly) {
+		this.idsOnly = idsOnly;
+	}
+
+	/**
+	 * Checks if the result should be just the identifiers.
+	 * 
+	 * @return {@code true} if the result should be just the identifiers,
+	 *         otherwise {@code false}
+	 */
+	public boolean isIdsOnly() {
+		return idsOnly;
+	}
+
+	/**
+	 * Specifies if the result of the selection should just be the count of
+	 * records.
+	 * 
+	 * @param count
+	 *            {@code true} if it should be just the count, otherwise
+	 *            {@code false}
+	 */
+	public void setCount(final boolean count) {
+		this.count = count;
+	}
+
+	/**
+	 * Checks if the result should be just the count.
+	 * 
+	 * @return {@code true} if the result should be just the count, otherwise
+	 *         {@code false}
+	 */
+	public boolean isCount() {
+		return count;
+	}
+
+	/**
+	 * Sets the {@code IntervalRelation} defined for the query.
+	 * 
+	 * @param relation
+	 *            the {@code IntervalRelation} defined for the query
+	 */
+	public void setIntervalRelation(final IntervalRelation relation) {
+		this.intervalRelation = relation;
+	}
+
+	/**
+	 * Gets the {@code IntervalRelation} defined for the query, which might be
+	 * {@code null} if none was defined at all.
+	 * 
+	 * @return the {@code IntervalRelation} defined for the query
+	 */
+	public IntervalRelation getIntervalRelation() {
+		return intervalRelation;
+	}
+
 	@Override
 	public QueryType getQueryType() {
 		return QueryType.QUERY;
 	}
-	
+
 	@Override
 	public void enableIdCollection(final boolean enableIdCollection) {
 		// ignore not supported

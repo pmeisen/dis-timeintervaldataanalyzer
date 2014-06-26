@@ -71,10 +71,20 @@ public class FieldNameGenerator {
 	 * Gets the name used for the field containing the raw-value used for
 	 * labeling.
 	 * 
-	 * @return the name used for the field containing the labeled value
+	 * @return the name used for the field containing the raw-value used for
+	 *         labeling
 	 */
 	public String getRawLabelFieldName() {
 		return _generateReservedField("RAWVALUE");
+	}
+
+	/**
+	 * Gets the name used for the field containing the count-value.
+	 * 
+	 * @return the name used for the field containing the count-value
+	 */
+	public String getCountFieldName() {
+		return _generateReservedField("COUNT");
 	}
 
 	private String _generateReservedField(final String resWord) {

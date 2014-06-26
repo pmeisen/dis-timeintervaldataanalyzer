@@ -6,6 +6,7 @@ import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.select.ResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -22,6 +23,9 @@ public class SelectResultRecords extends SelectResult {
 
 	private Bitmap recordsBitmap;
 	private TidaIndex idx;
+
+	private Class<?>[] types;
+	private String[] names;
 
 	/**
 	 * Constructor specifying the {@code query}, which {@code this} is the
@@ -42,37 +46,111 @@ public class SelectResultRecords extends SelectResult {
 
 	@Override
 	public Class<?>[] getTypes() {
-		return idx.getRecordTypes();
+		if (types == null) {
+			if (getQuery().isCount()) {
+				types = new Class<?>[] { int.class };
+			} else if (getQuery().isIdsOnly()) {
+				types = new Class<?>[] { int.class };
+			} else {
+				types = idx.getRecordTypes();
+			}
+		}
+
+		return types;
 	}
 
 	@Override
 	public String[] getNames() {
-		return idx.getRecordNames();
+		if (names == null) {
+			if (getQuery().isCount()) {
+				names = new String[] { FieldNameGenerator.get()
+						.getCountFieldName() };
+			} else if (getQuery().isIdsOnly()) {
+				names = new String[] { FieldNameGenerator.get()
+						.getIdFieldName() };
+			} else {
+				names = idx.getRecordNames();
+			}
+		}
+
+		return names;
 	}
 
 	@Override
 	public Iterator<Object[]> iterator() {
 
-		return new Iterator<Object[]>() {
-			private final IIntIterator it = recordsBitmap.intIterator();
+		if (getQuery().isCount()) {
 
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
+			return new Iterator<Object[]>() {
+				private final int count = recordsBitmap.determineCardinality();
 
-			@Override
-			public Object[] next() {
-				final int id = it.next();
-				return idx.getRecord(id);
-			}
+				private boolean next = true;
 
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException(
-						"Remove is not supported.");
-			}
-		};
+				@Override
+				public boolean hasNext() {
+					if (next) {
+						next = false;
+						return true;
+					} else {
+						return false;
+					}
+				}
+
+				@Override
+				public Object[] next() {
+					next = false;
+					return new Object[] { count };
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException(
+							"Remove is not supported.");
+				}
+			};
+		} else if (getQuery().isIdsOnly()) {
+
+			return new Iterator<Object[]>() {
+				private final IIntIterator it = recordsBitmap.intIterator();
+
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
+
+				@Override
+				public Object[] next() {
+					return new Object[] { it.next() };
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException(
+							"Remove is not supported.");
+				}
+			};
+		} else {
+
+			return new Iterator<Object[]>() {
+				private final IIntIterator it = recordsBitmap.intIterator();
+
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
+
+				@Override
+				public Object[] next() {
+					return idx.getRecord(it.next());
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException(
+							"Remove is not supported.");
+				}
+			};
+		}
 	}
 
 	@Override
@@ -81,12 +159,17 @@ public class SelectResultRecords extends SelectResult {
 
 		// get the records
 		this.recordsBitmap = recordsEvaluator.evaluateInterval(getQuery()
-				.getInterval(), this);
+				.getInterval(), getQuery().getIntervalRelation(), this);
 
 		// get the types and names
 		this.idx = model.getIndex();
 	}
 
+	/**
+	 * Gets the bitmap with the selected records.
+	 * 
+	 * @return the bitmap with the selected records
+	 */
 	public Bitmap getSelectedRecords() {
 		return recordsBitmap;
 	}
