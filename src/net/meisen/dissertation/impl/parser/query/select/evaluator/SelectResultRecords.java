@@ -48,9 +48,9 @@ public class SelectResultRecords extends SelectResult {
 	public Class<?>[] getTypes() {
 		if (types == null) {
 			if (getQuery().isCount()) {
-				types = new Class<?>[] { int.class };
+				types = new Class<?>[] { Integer.class };
 			} else if (getQuery().isIdsOnly()) {
-				types = new Class<?>[] { int.class };
+				types = new Class<?>[] { Integer.class };
 			} else {
 				types = idx.getRecordTypes();
 			}
@@ -160,7 +160,7 @@ public class SelectResultRecords extends SelectResult {
 		// get the records
 		this.recordsBitmap = recordsEvaluator.evaluateInterval(getQuery()
 				.getInterval(), getQuery().getIntervalRelation(), this);
-
+	
 		// get the types and names
 		this.idx = model.getIndex();
 	}

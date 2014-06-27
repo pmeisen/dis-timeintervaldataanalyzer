@@ -6,17 +6,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
+import net.meisen.dissertation.help.Utilities;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.measures.Max;
 import net.meisen.dissertation.impl.measures.Mean;
@@ -47,6 +50,7 @@ import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Dates;
 
 import org.junit.Test;
@@ -2178,11 +2182,6 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 	}
-	
-	@Test
-	public void testRecordRetrieval() {
-		// TODO first check the cache implementation based on mapDb
-	}
 
 	/**
 	 * Test the selection of records by a filter, which retrieves some records.
@@ -2203,5 +2202,199 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check the result
 		assertEquals(records.toString(), 6, ids.length);
+	}
+
+	/**
+	 * Tests the retrieval of a record using a {@code Cache} supporting record
+	 * holding.
+	 * 
+	 * @throws ParseException
+	 *             if a date cannot be parsed
+	 */
+	@Test
+	public void testRecordRetrieval() throws ParseException {
+		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
+
+		// cleanUp temp of previous tests
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
+		final String query = "select RECORDS from selectQueriesRecordRetrieval filter by PERSON='Philipp' AND LOCATION='Aachen'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+
+		/*
+		 * Check the names!
+		 */
+		assertNotNull(res.getNames());
+		final List<String> names = Arrays.asList(res.getNames());
+		assertEquals(6, names.size());
+
+		// check the expected names to be found
+		assertTrue(names.contains("[ID]"));
+		assertTrue(names.contains("[START]"));
+		assertTrue(names.contains("[END]"));
+		assertTrue(names.contains("PERSON"));
+		assertTrue(names.contains("LOCATION"));
+		assertTrue(names.contains("SCREAMS"));
+
+		// determine the position if the values
+		final int posId = 0;
+		final int posStart = 1;
+		final int posEnd = 2;
+		final int posPerson = Collections.getPosition(names, "PERSON");
+		final int posLocation = Collections.getPosition(names, "LOCATION");
+		final int posScreams = Collections.getPosition(names, "SCREAMS");
+
+		/*
+		 * Check the types!
+		 */
+		final Class<?>[] types = res.getTypes();
+		assertNotNull(types);
+		assertEquals(6, types.length);
+		assertEquals(Integer.class, types[posId]);
+		assertEquals(Date.class, types[posStart]);
+		assertEquals(Date.class, types[posEnd]);
+		assertEquals(String.class, types[posPerson]);
+		assertEquals(String.class, types[posLocation]);
+		assertEquals(Integer.class, types[posScreams]);
+
+		// check the values of the record
+		final Iterator<Object[]> it = res.iterator();
+		int counter = 0;
+		while (it.hasNext()) {
+			final Object[] rec = it.next();
+
+			assertEquals(3, rec[posId]);
+			assertEquals(Dates.parseDate("03.03.2014 17:22:00",
+					"dd.MM.yyyy HH:mm:ss"), rec[posStart]);
+			assertEquals(Dates.parseDate("04.03.2014 23:59:00",
+					"dd.MM.yyyy HH:mm:ss"), rec[posEnd]);
+			assertEquals("Philipp", rec[posPerson]);
+			assertEquals("Aachen", rec[posLocation]);
+			assertEquals(0, rec[posScreams]);
+
+			counter++;
+		}
+		assertEquals(counter, 1);
+
+		// cleanUp as much as possible of this test
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
+	}
+
+	/**
+	 * Checks the retrieval of records only.
+	 */
+	@Test
+	public void testRecordIdRetrieval() {
+		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
+
+		// cleanUp temp of previous tests
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
+		final String query = "select IDS(RECORDS) from selectQueriesRecordRetrieval filter by PERSON='Tobias' OR LOCATION='Mönchengladbach'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+
+		/*
+		 * Check the names!
+		 */
+		assertNotNull(res.getNames());
+		final List<String> names = Arrays.asList(res.getNames());
+		assertEquals(1, names.size());
+
+		// check the expected names to be found
+		assertTrue(names.contains("[ID]"));
+
+		/*
+		 * Check the types!
+		 */
+		final Class<?>[] types = res.getTypes();
+		assertNotNull(types);
+		assertEquals(1, types.length);
+		assertEquals(Integer.class, types[0]);
+
+		// check the values of the record
+		final Iterator<Object[]> it = res.iterator();
+		int counter = 0;
+		while (it.hasNext()) {
+			final Object[] rec = it.next();
+
+			assertEquals(counter, rec[0]);
+			counter++;
+		}
+		assertEquals(counter, 2);
+
+		// cleanUp as much as possible of this test
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
+	}
+
+	/**
+	 * Checks the retrieval of count.
+	 */
+	@Test
+	public void testRecordCount() {
+		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
+
+		// cleanUp temp of previous tests
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
+		final String query = "select COUNT(RECORDS) from selectQueriesRecordRetrieval startingwith [03.03.2014 00:00:00, 03.03.2014 00:00:00] filter by LOCATION='Aachen'";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+
+		/*
+		 * Check the names!
+		 */
+		assertNotNull(res.getNames());
+		final List<String> names = Arrays.asList(res.getNames());
+		assertEquals(1, names.size());
+
+		// check the expected names to be found
+		assertTrue(names.contains("[COUNT]"));
+
+		/*
+		 * Check the types!
+		 */
+		final Class<?>[] types = res.getTypes();
+		assertNotNull(types);
+		assertEquals(1, types.length);
+		assertEquals(Integer.class, types[0]);
+
+		// check the values of the record
+		final Iterator<Object[]> it = res.iterator();
+		int counter = 0;
+		while (it.hasNext()) {
+			final Object[] rec = it.next();
+			assertEquals(3, rec[0]);
+			counter++;
+		}
+		assertEquals(counter, 1);
+
+		// cleanUp as much as possible of this test
+		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
+				System.getProperty("java.io.tmpdir")));
 	}
 }
