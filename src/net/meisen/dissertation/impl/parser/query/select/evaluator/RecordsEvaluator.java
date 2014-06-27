@@ -8,7 +8,6 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 
 /**
  * Evaluator used to evaluate the selected records of a {@code SelectResult}.
@@ -88,6 +87,20 @@ public class RecordsEvaluator {
 		return bitmap;
 	}
 
+	/**
+	 * Helper method to and-combine the {@code resBitmap} and the
+	 * {@code andBitmap}.
+	 * 
+	 * @param resBitmap
+	 *            the result bitmap, can be {@code null} if so it is ignored in
+	 *            combination
+	 * @param andBitmap
+	 *            the and-bitmap to be and-combined, can be {@code null} if so
+	 *            it is ignored in combination
+	 * 
+	 * @return the combination of the {@code resBitmap} and the
+	 *         {@code andBitmap}
+	 */
 	protected Bitmap combine(final Bitmap resBitmap, final Bitmap andBitmap) {
 		if (andBitmap == null) {
 			return resBitmap;
