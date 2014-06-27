@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/caches/records/mapdb" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/caches/records/mapdb" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+  <xs:element name="config">
+    <xs:complexType>    
+      <xs:attribute name="folder" type="xs:string" use="optional" />
+      <xs:attribute name="size" type="xs:positiveInteger" use="optional" />
+      <xs:attribute name="type" type="xs:string" use="optional" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

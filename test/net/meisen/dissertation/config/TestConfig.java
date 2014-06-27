@@ -18,6 +18,7 @@ import net.meisen.dissertation.impl.cache.FileBitmapCache;
 import net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.FileIdentifierCache;
 import net.meisen.dissertation.impl.cache.FileMetaDataCache;
+import net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
@@ -130,6 +131,11 @@ public class TestConfig {
 			assertNotNull(o);
 			assertTrue(o.getClass().getName(),
 					o instanceof MemoryFactDescriptorModelSetCache);
+
+			o = modulesHolder.getModule(DefaultValues.DATARECORDCACHE_ID);
+			assertNotNull(o);
+			assertTrue(o.getClass().getName(),
+					o instanceof IdsOnlyDataRecordCache);
 
 			// check folder configuration
 			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);

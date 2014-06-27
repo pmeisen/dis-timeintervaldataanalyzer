@@ -88,7 +88,7 @@ public class TidaModel implements IPersistable {
 	@Qualifier(DefaultValues.FACTSETSCACHE_ID)
 	private IBitmapIdCache<FactDescriptorModelSet> factsCache;
 
-	@Autowired(required = false)
+	@Autowired
 	@Qualifier(DefaultValues.DATARECORDCACHE_ID)
 	private IDataRecordCache recordCache;
 
@@ -227,9 +227,7 @@ public class TidaModel implements IPersistable {
 		getIdentifierCache().initialize(this);
 		getBitmapCache().initialize(this);
 		getFactsCache().initialize(this);
-		if (getDataRecordCache() != null) {
-			getDataRecordCache().initialize(this);
-		}
+		getDataRecordCache().initialize(this);
 
 		/*
 		 * Get the cached metaData and use it. Afterwards the data is stored in
@@ -276,9 +274,7 @@ public class TidaModel implements IPersistable {
 		getBitmapCache().release();
 		getFactsCache().release();
 		getIdentifierCache().release();
-		if (getDataRecordCache() != null) {
-			getDataRecordCache().release();
-		}
+		getDataRecordCache().release();
 
 		// delete created files if necessary
 		if (deleteLocation && getLocation().exists()) {
@@ -459,10 +455,7 @@ public class TidaModel implements IPersistable {
 			oldPersistencyBitmap = getBitmapCache().setPersistency(false);
 			oldPersistencyFacts = getFactsCache().setPersistency(false);
 			oldPersistencyId = getIdentifierCache().setPersistency(false);
-			if (getDataRecordCache() != null) {
-				oldPersistencyRecord = getDataRecordCache().setPersistency(false);
-			}
-			
+			oldPersistencyRecord = getDataRecordCache().setPersistency(false);
 
 			try {
 				while (it.hasNext()) {
@@ -490,9 +483,7 @@ public class TidaModel implements IPersistable {
 			getBitmapCache().setPersistency(oldPersistencyBitmap);
 			getFactsCache().setPersistency(oldPersistencyFacts);
 			getIdentifierCache().setPersistency(oldPersistencyId);
-			if (getDataRecordCache() != null) {
-				getDataRecordCache().setPersistency(oldPersistencyRecord);
-			}
+			getDataRecordCache().setPersistency(oldPersistencyRecord);
 
 			loadLock.writeLock().unlock();
 		}

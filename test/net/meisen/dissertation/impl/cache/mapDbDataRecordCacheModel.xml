@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:mapdb="http://dev.meisen.net/xsd/dissertation/caches/records/mapdb"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/records/mapdb http://dev.meisen.net/xsd/dissertation/tidaMapDbDataRecordCache.xsd"
+       
+       id="mapDbDataRecordCacheModel">
+  
+  <config>
+    <caches>
+      <records implementation="net.meisen.dissertation.impl.cache.MapDbDataRecordCache">
+        <mapdb:config folder="${java.io.tmpdir}/tmpMapDbDataRecordCacheModel-${test.rndUuid}" />
+      </records>
+    </caches>
+  </config>
+  
+  <time>
+    <timeline start="0" end="100" granularity="DAY" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="D1" name="idAsString" />
+      <integer id="D2" name="id" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+  
+  <structure>
+    <meta position="3" descriptor="D1" />
+    <meta position="4" descriptor="D2" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
+</model>

@@ -102,14 +102,26 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 		final String mapName = getMapName();
 		if (MapDbType.BTree.equals(type)) {
 			final BTreeMapMaker mapMaker = db.createTreeMap(mapName);
-			mapMaker.keySerializerWrap(new MapDbBitmapIdSerializer());
-			mapMaker.valueSerializer(getValueSerializer(db, model));
+			final Serializer<K> keySer = createKeySerializer();
+			final Serializer<T> valueSer = getValueSerializer(db, model);
+			if (keySer != null) {
+				mapMaker.keySerializerWrap(keySer);
+			}
+			if (valueSer != null) {
+				mapMaker.valueSerializer(valueSer);
+			}
 
 			map = mapMaker.makeOrGet();
 		} else if (MapDbType.HashMap.equals(type)) {
 			final HTreeMapMaker mapMaker = db.createHashMap(mapName);
-			mapMaker.keySerializer(new MapDbBitmapIdSerializer());
-			mapMaker.valueSerializer(getValueSerializer(db, model));
+			final Serializer<K> keySer = createKeySerializer();
+			final Serializer<T> valueSer = getValueSerializer(db, model);
+			if (keySer != null) {
+				mapMaker.keySerializer(keySer);
+			}
+			if (valueSer != null) {
+				mapMaker.valueSerializer(valueSer);
+			}
 
 			map = mapMaker.makeOrGet();
 		} else {
@@ -170,17 +182,14 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 			this.location = null;
 			this.cacheSize = getDefaultCacheSize();
 			this.type = getDefaultType();
-		} else if (config instanceof MapDbBitmapIdCacheConfig) {
-			final MapDbBitmapIdCacheConfig c = (MapDbBitmapIdCacheConfig) config;
+		} else {
+			final MapDbCacheConfig c = (MapDbCacheConfig) config;
 
 			final File cLoc = c.getLocation();
 			this.location = cLoc == null ? null : c.getLocation();
 
 			final Integer cSize = c.getCacheSize();
 			this.cacheSize = cSize == null ? getDefaultCacheSize() : cSize;
-		} else {
-			exceptionRegistry.throwException(BaseMapDbCacheException.class,
-					1001, config.getClass().getName());
 		}
 	}
 
@@ -416,9 +425,18 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 	 * serialize the value stored in the {@code mapDb}.
 	 * 
 	 * @return the created {@code Serializer}, might be {@code null} if no
-	 *         specifal {@code Serializer} is needed
+	 *         special {@code Serializer} is needed
 	 */
 	protected abstract Serializer<T> createValueSerializer();
+
+	/**
+	 * Method is called to create an instance of a {@code Serializer} used to
+	 * serialize the key stored in the {@code mapDb}.
+	 * 
+	 * @return the created {@code Serializer}, might be {@code null} if no
+	 *         special {@code Serializer} is needed
+	 */
+	protected abstract Serializer<K> createKeySerializer();
 
 	/**
 	 * Gets the name of the map to be used, should be unique.

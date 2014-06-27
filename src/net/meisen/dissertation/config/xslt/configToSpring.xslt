@@ -10,9 +10,7 @@
 
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="bitmapidcache://includeXslts" />
-  <xsl:import href="metadatacache://includeXslts" />
-  <xsl:import href="identifiercache://includeXslts" />
+  <xsl:import href="cache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -56,6 +54,12 @@
           <xsl:otherwise><xsl:value-of select="cdef:getDefaultFactSetsCache()" /></xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
+      <xsl:variable name="recordsCache">
+        <xsl:choose>
+          <xsl:when test="//cns:caches/cns:records/@implementation"><xsl:value-of select="//cns:caches/cns:records/@implementation" /></xsl:when>
+          <xsl:otherwise><xsl:value-of select="cdef:getDefaultRecordsCache()" /></xsl:otherwise>
+        </xsl:choose>
+      </xsl:variable>
       <xsl:variable name="indexFactory">
         <xsl:choose>
           <xsl:when test="//cns:factories/cns:indexes/@implementation"><xsl:value-of select="//cns:config/cns:factories/cns:indexes/@implementation" /></xsl:when>
@@ -89,6 +93,7 @@
       <bean id="defaultMetaDataCacheClass" class="java.lang.String"><constructor-arg value="{$metaDataCache}" /></bean>
       <bean id="defaultBitmapCacheClass" class="java.lang.String"><constructor-arg value="{$bitmapCache}" /></bean>
       <bean id="defaultFactSetsCacheClass" class="java.lang.String"><constructor-arg value="{$factSetsCache}" /></bean>
+      <bean id="defaultRecordsCacheClass" class="java.lang.String"><constructor-arg value="{$recordsCache}" /></bean>
 
       <!-- read the default identifierCache configuration -->
       <bean id="defaultIdentifierCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
@@ -148,6 +153,21 @@
           </xsl:choose>
         </property>
         <property name="class" value="net.meisen.dissertation.model.cache.IBitmapIdCacheConfig" />
+      </bean>
+      
+      <!-- read the default recordsCache configuration -->
+      <bean id="defaultRecordsCacheConfig" class="net.meisen.general.sbconfigurator.factories.BeanReference">
+        <property name="bean">
+          <xsl:choose>
+            <xsl:when test="//cns:caches/cns:records/node()">
+              <xsl:for-each select='//cns:caches/cns:records/node()'>
+                <xsl:apply-imports />
+              </xsl:for-each>
+            </xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </property>
+        <property name="class" value="net.meisen.dissertation.model.cache.IDataRecordCacheConfig" />
       </bean>
 
       <!-- define the default factories' classes -->

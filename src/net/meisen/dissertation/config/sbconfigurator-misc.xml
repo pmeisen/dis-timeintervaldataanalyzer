@@ -8,7 +8,5 @@
   <bean class="net.meisen.dissertation.config.xslt.DescriptorsXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.IndexFactoryXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.MapperFactoryXsltResolver" />
-  <bean class="net.meisen.dissertation.config.xslt.BitmapIdCacheXsltResolver" />
-  <bean class="net.meisen.dissertation.config.xslt.MetaDataCacheXsltResolver" />
-  <bean class="net.meisen.dissertation.config.xslt.IdentifierCacheXsltResolver" />
+  <bean class="net.meisen.dissertation.config.xslt.CacheXsltResolver" />
 </beans>

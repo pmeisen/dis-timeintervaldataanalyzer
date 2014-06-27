@@ -2,8 +2,11 @@ package net.meisen.dissertation.impl.cache;
 
 import java.util.Collection;
 
+import org.mapdb.Serializer;
+
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.cache.IDataRecordCache;
+import net.meisen.dissertation.model.cache.IDataRecordCacheConfig;
 import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -24,6 +27,7 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 
 	private BaseMapper<?> mapper;
 
+	private String[] descModelIds;
 	private String[] names;
 	private Class<?>[] types;
 	private DataType[] dataTypes;
@@ -34,8 +38,7 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 		// get the needed values
 		mapper = model.getIntervalModel().getTimelineMapper();
 
-		final Class<?> intervalType = model.getIntervalModel()
-				.getTimelineMapper().getMappedType();
+		final Class<?> intervalType = mapper.getMappedType();
 		final MetaDataModel metaDataModel = model.getMetaDataModel();
 		final Collection<DescriptorModel<?>> descModels = metaDataModel
 				.getDescriptorModels();
@@ -45,6 +48,7 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 		names = new String[size];
 		types = new Class<?>[size];
 		dataTypes = new DataType[size];
+		descModelIds = new String[descModels.size()];
 
 		final FieldNameGenerator fg = FieldNameGenerator.get();
 		names[0] = fg.getIdFieldName();
@@ -62,7 +66,9 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 		// create the record types
 		int pos = 3;
 		for (final DescriptorModel<?> descModel : descModels) {
-			names[pos] = descModel.getId();
+			descModelIds[pos - 3] = descModel.getId();
+
+			names[pos] = descModel.getName();
 			dataTypes[pos] = DataType.find(descModel.getValueType());
 			if (dataTypes[pos] == null) {
 				dataTypes[pos] = DataType.STRING;
@@ -105,7 +111,7 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 		res[2] = mapper.resolve(record.getEnd());
 
 		for (int pos = 3; pos < names.length; pos++) {
-			final Descriptor<?, ?, ?> desc = record.getDescriptor(names[pos]);
+			final Descriptor<?, ?, ?> desc = record.getDescriptor(descModelIds[pos - 3]);
 
 			// if we have a string use the uniqueString
 			if (DataType.STRING.equals(dataTypes[pos])) {
@@ -113,8 +119,6 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 			} else {
 				res[pos] = desc.getValue();
 			}
-
-			pos++;
 		}
 
 		// cache the value now
@@ -144,5 +148,20 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 	@Override
 	protected String getIndexFileName() {
 		return "mapDbRecord.idx";
+	}
+
+	@Override
+	public void setConfig(final IDataRecordCacheConfig config) {
+		if (config == null || config instanceof MapDbCacheConfig) {
+			super.setConfig((MapDbCacheConfig) config);
+		} else {
+			exceptionRegistry.throwException(BaseMapDbCacheException.class,
+					1001, config.getClass().getName());
+		}
+	}
+
+	@Override
+	protected Serializer<Integer> createKeySerializer() {
+		return null;
 	}
 }

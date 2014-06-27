@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.IntervalModel.MappingResult;
@@ -19,6 +20,7 @@ import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.datastructure.StructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A processed {@code DataRecord} is a record which is processed by a
@@ -219,6 +221,10 @@ public class ProcessedDataRecord {
 		// get the DescriptorModel
 		final DescriptorModel<?> descModel = metaDataModel
 				.getDescriptorModel(metaEntry.getDescriptorModel());
+		if (descModel == null) {
+			throw new ForwardedRuntimeException(TidaIndexException.class, 1003,
+					metaEntry.getDescriptorModel());
+		}
 
 		// get the Descriptor and add it
 		final MetaDataHandling handling = model.getMetaDataHandling();

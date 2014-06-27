@@ -11,9 +11,7 @@
   <xsl:import href="dataretriever://includeXslts" />
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
-  <xsl:import href="bitmapidcache://includeXslts" />
-  <xsl:import href="metadatacache://includeXslts" />
-  <xsl:import href="identifiercache://includeXslts" />
+  <xsl:import href="cache://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -29,6 +27,7 @@
   <xsl:variable name="identifierCacheId" select="mdef:getId('IDENTIFIERCACHE_ID')" />
   <xsl:variable name="metaDataCacheId" select="mdef:getId('METADATACACHE_ID')" />
   <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
+  <xsl:variable name="recordsCacheId" select="mdef:getId('DATARECORDCACHE_ID')" />
   <xsl:variable name="factSetsCacheId" select="mdef:getId('FACTSETSCACHE_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
 
@@ -177,6 +176,33 @@
             <property name="beanClass" ref="defaultFactSetsCacheClass" />
             <property name="properties">
               <map><entry key="config" value-ref="defaultFactSetsCacheConfig" /></map>
+            </property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
+      
+      <!-- create the dataRecordCache to be used -->
+      <xsl:choose>
+        <xsl:when test="//mns:config/mns:caches/mns:records/@implementation">
+          <xsl:variable name="recordsCache" select="//mns:config/mns:caches/mns:records/@implementation" />
+          <bean id="{$recordsCacheId}" class="{$recordsCache}" destroy-method="release">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//mns:config/mns:caches/mns:records/node()">
+                  <xsl:for-each select='//mns:config/mns:caches/mns:records/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><ref bean="defaultRecordsCacheConfig" /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>        
+          <bean id="{$recordsCacheId}" class="net.meisen.general.sbconfigurator.factories.BeanCreator">
+            <property name="beanClass" ref="defaultRecordsCacheClass" />
+            <property name="properties">
+              <map><entry key="config" value-ref="defaultRecordsCacheConfig" /></map>
             </property>
           </bean>
         </xsl:otherwise>

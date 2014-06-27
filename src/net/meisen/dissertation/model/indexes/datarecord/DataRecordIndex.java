@@ -3,7 +3,6 @@ package net.meisen.dissertation.model.indexes.datarecord;
 import java.io.InputStream;
 
 import net.meisen.dissertation.model.cache.IDataRecordCache;
-import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
@@ -23,42 +22,19 @@ public class DataRecordIndex implements IDataRecordIndex {
 
 	@Override
 	public void index(final ProcessedDataRecord record) {
-
-		/*
-		 * We don't use any additional data-structure for indexing, just the
-		 * cache.
-		 */
-		if (isEnabled()) {
-			this.recordCache.cache(record);
-		}
+		this.recordCache.cache(record);
 	}
 
 	public String[] getNames() {
-		if (isEnabled()) {
-			return this.recordCache.getNames();
-		} else {
-			return new String[] { FieldNameGenerator.get().getIdFieldName() };
-		}
+		return this.recordCache.getNames();
 	}
 
 	public Class<?>[] getTypes() {
-		if (isEnabled()) {
-			return this.recordCache.getTypes();
-		} else {
-			return new Class<?>[] { int.class };
-		}
+		return this.recordCache.getTypes();
 	}
 
 	public Object[] get(final int recordId) {
-		if (isEnabled()) {
-			return this.recordCache.get(recordId);
-		} else {
-			return new Object[] { recordId };
-		}
-	}
-
-	public boolean isEnabled() {
-		return this.recordCache != null;
+		return this.recordCache.get(recordId);
 	}
 
 	@Override

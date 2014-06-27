@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
@@ -165,7 +166,7 @@ public class DefaultValues {
 	/**
 	 * Id of the {@code DataRecordCache} to be used.
 	 */
-	public static final String DATARECORDCACHE_ID = "recordCacheId";
+	public static final String DATARECORDCACHE_ID = "dataRecordCacheId";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -215,6 +216,15 @@ public class DefaultValues {
 	 */
 	public static String getDefaultFactSetsCache() {
 		return MemoryFactDescriptorModelSetCache.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code DataRecordsCache} implementation to be used.
+	 * 
+	 * @return the default cache implementation to be used
+	 */
+	public static String getDefaultRecordsCache() {
+		return IdsOnlyDataRecordCache.class.getName();
 	}
 
 	/**

@@ -12,3 +12,4 @@ http\://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd=net/meisen/dis
 http\://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/FileFactDescriptorModelSetCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaMapDbBitmapCache.xsd=net/meisen/dissertation/impl/cache/MapDbBitmapCache.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaMapDbFactDescriptorModelSetCache.xsd=net/meisen/dissertation/impl/cache/MapDbFactDescriptorModelSetCache.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaMapDbDataRecordCache.xsd=net/meisen/dissertation/impl/cache/MapDbDataRecordCache.xsd

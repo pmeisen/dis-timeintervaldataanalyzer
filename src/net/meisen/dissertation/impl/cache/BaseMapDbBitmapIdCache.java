@@ -2,6 +2,8 @@ package net.meisen.dissertation.impl.cache;
 
 import java.util.Collection;
 
+import org.mapdb.Serializer;
+
 import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheConfig;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
@@ -37,5 +39,10 @@ public abstract class BaseMapDbBitmapIdCache<T extends IBitmapIdCacheable>
 	@Override
 	protected MapDbType getDefaultType() {
 		return MapDbType.BTree;
+	}
+
+	@Override
+	protected Serializer<BitmapId<?>> createKeySerializer() {
+		return new MapDbBitmapIdSerializer();
 	}
 }

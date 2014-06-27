@@ -46,6 +46,11 @@ public class TestMapDbBitmapCache extends ModuleBasedTest {
 	 */
 	@Before
 	public void create() {
+
+		// cleanUp temp of previous tests
+		Utilities.deleteDir("^tmpMapDbBitmapCacheModel\\-.*$",
+				new File(System.getProperty("java.io.tmpdir")));
+		
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 		setModulesHolder("/net/meisen/dissertation/impl/cache/mapDbBitmapCacheModel.xml");
 
@@ -53,10 +58,6 @@ public class TestMapDbBitmapCache extends ModuleBasedTest {
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
 		mc = modulesHolder.getModule(DefaultValues.BITMAPCACHE_ID);
 		assertNotNull(mc);
-
-		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpMapDbBitmapCacheModel\\-.*$",
-				new File(System.getProperty("java.io.tmpdir")));
 	}
 
 	/**

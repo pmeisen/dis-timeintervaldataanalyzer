@@ -2025,7 +2025,6 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
-
 	}
 
 	/**
@@ -2178,6 +2177,11 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+	}
+	
+	@Test
+	public void testRecordRetrieval() {
+		// TODO first check the cache implementation based on mapDb
 	}
 
 	/**
