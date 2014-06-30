@@ -8,6 +8,7 @@ import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
 import net.meisen.general.server.Server;
+import net.meisen.general.server.settings.pojos.Connector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,12 @@ public class TidaServer {
 	 * @see Server#start()
 	 */
 	public void start() {
+
+		for (final Connector connector : server.getServerSettings()
+				.getConnectorSettings()) {
+			System.out.println(connector.getPort());
+		}
+
 		server.start();
 	}
 

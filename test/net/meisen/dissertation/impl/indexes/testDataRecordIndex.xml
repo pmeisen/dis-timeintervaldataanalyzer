@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"   
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testDataRecordIndex">
+  
+  <config>
+    <caches>
+      <records implementation="net.meisen.dissertation.impl.cache.MemoryDataRecordCache" />
+    </caches>
+  </config>
+  
+  <time>
+    <timeline start="1" end="5" granularity="DAY" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <integer id="NUMBER" />
+    </descriptors>
+
+    <entries />
+  </meta>
+  
+  <structure>   
+    <meta position="3" descriptor="NUMBER" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="boundariesWhenNull">
+    <dataset>
+      <entry class="java.lang.Byte"    value="1" />
+      <entry class="java.lang.Byte"    value="2" />
+      <entry class="java.lang.Integer" value="100" />
+    </dataset>
+
+    <dataset>
+      <entry class="java.lang.Byte"    value="5" />
+      <entry class="java.lang.Byte"    value="5" />
+      <entry class="java.lang.Integer" value="200" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.lang.Byte"    value="1" />
+      <entry class="java.lang.Byte"    value="4" />
+      <entry class="java.lang.Integer" value="300" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.lang.Byte"    value="2" />
+      <entry class="java.lang.Byte"    value="3" />
+      <entry class="java.lang.Integer" value="100" />
+    </dataset>
+  </data>
+</model>

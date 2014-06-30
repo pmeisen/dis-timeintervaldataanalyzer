@@ -5,7 +5,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
+import net.meisen.dissertation.model.util.IIntIterator;
 
 /**
  * A mock of a {@code Bitmap} used to test the definition of a bitmap type using

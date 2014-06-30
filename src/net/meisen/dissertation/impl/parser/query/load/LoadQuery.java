@@ -42,7 +42,8 @@ public class LoadQuery implements IQuery {
 
 	@Override
 	public IQueryResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver) throws CancellationException {
+			final TidaModel model, final IResourceResolver resolver)
+			throws CancellationException {
 
 		final String modelId;
 		if (getPath() == null) {
@@ -50,8 +51,11 @@ public class LoadQuery implements IQuery {
 
 			// check if the model is already loaded
 			if (handler.getTidaModel(modelId) != null) {
-				throw new ForwardedRuntimeException(
-						QueryEvaluationException.class, 1013, modelId);
+				final boolean force = getProperty("force", true);
+				if (force) {
+					throw new ForwardedRuntimeException(
+							QueryEvaluationException.class, 1013, modelId);
+				}
 			}
 			// let's load the model otherwise
 			else {
@@ -67,13 +71,14 @@ public class LoadQuery implements IQuery {
 					1014, getPath());
 		} else {
 			final InputStream is = resolver.resolve(getPath());
-			final TidaModel loadedModel = handler.loadViaXslt(is);
+			final boolean force = getProperty("force", true);
+			final TidaModel loadedModel = handler.loadViaXslt(is, force);
 			Streams.closeIO(is);
 
 			modelId = loadedModel.getId();
 		}
 
-		// check if the model should be registered for autoload
+		// check if the model should be registered for auto-load
 		final Boolean autoload = getProperty("autoload", null);
 
 		// do not change the setting

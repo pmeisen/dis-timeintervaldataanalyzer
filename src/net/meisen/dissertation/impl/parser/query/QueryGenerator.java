@@ -38,6 +38,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAliasContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorBooleanContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueOrNullContext;
@@ -179,8 +180,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitExprLoadSetProperty(final ExprLoadSetPropertyContext ctx) {
 		final Map<String, Object> properties = new HashMap<String, Object>();
-		resolveProperty(properties, ctx.exprLoadProperty(),
-				ctx.selectorBoolean());
+		resolveProperty(properties, ctx);
 
 		final LoadQuery q = q(LoadQuery.class);
 		q.setProperties(properties);
@@ -1155,8 +1155,6 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 *            the map to set the determined property value in
 	 * @param propertyCtx
 	 *            the context to read the property name from
-	 * @param valueCtx
-	 *            the context to read the value from
 	 * 
 	 * @throws QueryParsingException
 	 *             if the value cannot be resolved, more detailed the
@@ -1165,29 +1163,57 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * 
 	 */
 	protected void resolveProperty(final Map<String, Object> properties,
-			final ParserRuleContext propertyCtx,
-			final ParserRuleContext valueCtx) throws QueryParsingException {
+			final ParserRuleContext propertyCtx) throws QueryParsingException {
+		final int[] propKeys = new int[] { QueryGrammarParser.PROP_AUTOLOAD,
+				QueryGrammarParser.PROP_FORCE };
 
-		final String key = propertyCtx.getText();
+		// find the property to be set
+		TerminalNode token = null;
+		for (int i = 0; i < propKeys.length; i++) {
+			token = propertyCtx.getToken(propKeys[i], 0);
+			if (token != null) {
+				break;
+			}
+		}
 
-		// determine the token we have
+		// couldn't find any token
+		if (token == null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1020, propertyCtx.getText());
+		}
+
+		// get the value
+		final String key = token.getText();
+		final Object value = resolvePropertyValue(propertyCtx.getRuleContext(
+				SelectorBooleanContext.class, 0));
+		properties.put(key, value);
+	}
+
+	/**
+	 * Resolves the value of a property defined within the specified
+	 * {@code valueCtx}.
+	 * 
+	 * @param valueCtx
+	 *            the context to retrieve the value from
+	 * 
+	 * @return the found value
+	 */
+	protected Object resolvePropertyValue(final ParserRuleContext valueCtx) {
+
 		TerminalNode token;
 		if ((token = valueCtx.getToken(QueryGrammarParser.LOGICAL_TRUE, 0)) != null) {
-			properties.put(key, true);
+			return true;
 		} else if ((token = valueCtx.getToken(QueryGrammarParser.LOGICAL_FALSE,
 				0)) != null) {
-			properties.put(key, false);
+			return false;
 		} else if ((token = valueCtx.getToken(QueryGrammarParser.NULL_VALUE, 0)) != null) {
-			properties.put(key, null);
+			return null;
 		} else if ((token = valueCtx.getToken(QueryGrammarParser.INT, 0)) != null) {
-			final Long l = Long.parseLong(token.getText());
-			properties.put(key, l);
+			return Long.parseLong(token.getText());
 		} else if ((token = valueCtx.getToken(QueryGrammarParser.DATE, 0)) != null) {
-			final Date date = Dates.isDate(token.getText(),
-					Dates.GENERAL_TIMEZONE);
-			properties.put(key, date);
+			return Dates.isDate(token.getText(), Dates.GENERAL_TIMEZONE);
 		} else if ((token = valueCtx.getToken(QueryGrammarParser.VALUE, 0)) != null) {
-			properties.put(key, getValue(token));
+			return getValue(token);
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1019, valueCtx.getText());

@@ -3,6 +3,7 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;

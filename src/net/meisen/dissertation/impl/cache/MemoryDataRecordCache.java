@@ -1,9 +1,10 @@
 package net.meisen.dissertation.impl.cache;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.Collection;
 import java.util.Iterator;
-
-import org.mapdb.Serializer;
 
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.cache.IDataRecordCache;
@@ -18,14 +19,12 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.model.util.IIntIterator;
 
 /**
- * A cache based on the {@code mapDb} implementation, used to cache the
- * different records.
+ * Cache which caches the records in memory only.
  * 
  * @author pmeisen
  * 
  */
-public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
-		implements IDataRecordCache {
+public class MemoryDataRecordCache implements IDataRecordCache {
 
 	private BaseMapper<?> mapper;
 
@@ -33,6 +32,8 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 	private String[] names;
 	private Class<?>[] types;
 	private DataType[] dataTypes;
+
+	private TIntObjectHashMap<Object[]> map = new TIntObjectHashMap<Object[]>();
 
 	@Override
 	public void initialize(final TidaModel model) {
@@ -79,28 +80,16 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 
 			pos++;
 		}
-
-		// now initialize the real cache, so that the types and names are known
-		super.initialize(model);
 	}
 
 	@Override
-	public String[] getNames() {
-		return names;
+	public boolean setPersistency(final boolean enable) {
+		return false;
 	}
 
 	@Override
-	public Class<?>[] getTypes() {
-		return types;
-	}
-
-	/**
-	 * Gets the used {@code DataTypes} of the different values of the record.
-	 * 
-	 * @return the used {@code DataTypes} of the different values of the record
-	 */
-	public DataType[] getDataTypes() {
-		return dataTypes;
+	public void release() {
+		map.clear();
 	}
 
 	@Override
@@ -130,73 +119,75 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 
 	@Override
 	public void cache(final int id, final Object[] record) {
-		cache(id, record);
+		map.put(id, record);
 	}
 
 	@Override
-	public Object[] get(int recordId) {
-		return super.get(recordId);
+	public Object[] get(final int recordId) {
+		return map.get(recordId);
 	}
 
 	@Override
-	protected MapDbType getDefaultType() {
-		return MapDbType.BTree;
+	public String[] getNames() {
+		return names;
 	}
 
 	@Override
-	protected Object[] createNewInstance() {
-		return null;
+	public Class<?>[] getTypes() {
+		return types;
 	}
 
 	@Override
-	protected MapDbDataRecordSerializer createValueSerializer() {
-		return new MapDbDataRecordSerializer();
-	}
-
-	@Override
-	protected String getIndexFileName() {
-		return "mapDbRecord.idx";
-	}
-
-	@Override
-	public void setConfig(final IDataRecordCacheConfig config) {
-		if (config == null || config instanceof MapDbCacheConfig) {
-			super.setConfig((MapDbCacheConfig) config);
-		} else {
-			exceptionRegistry.throwException(BaseMapDbCacheException.class,
-					1001, config.getClass().getName());
-		}
-	}
-
-	@Override
-	protected Serializer<Integer> createKeySerializer() {
-		return null;
+	public void setConfig(final IDataRecordCacheConfig config)
+			throws BaseIdentifierCacheException {
+		// nothing to do
 	}
 
 	@Override
 	public IIntIterator intIterator() {
 		return new IIntIterator() {
-			private final Iterator<Integer> it = keyIterator();
+			private final TIntIterator it = map.keySet().iterator();
+
+			@Override
+			public boolean hasNext() {
+				return it == null ? false : it.hasNext();
+			}
 
 			@Override
 			public int next() {
 				return it.next();
 			}
+		};
+	}
+
+	/**
+	 * Consider to use {@link #intIterator()} instead of {@code this}.
+	 */
+	@Override
+	public Iterator<Integer> iterator() {
+		return new Iterator<Integer>() {
+			private final IIntIterator it = intIterator();
 
 			@Override
 			public boolean hasNext() {
-				return it.hasNext();
+				return it == null ? false : it.hasNext();
+			}
+
+			@Override
+			public Integer next() {
+				return it.next();
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
 			}
 		};
 	}
 
 	@Override
-	public Iterator<Integer> iterator() {
-		return keyIterator();
-	}
-
-	@Override
 	public int size() {
-		return super.size();
+		return map.size();
 	}
 }

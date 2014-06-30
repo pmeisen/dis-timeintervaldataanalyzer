@@ -1,16 +1,14 @@
-package net.meisen.dissertation.impl.parser.query.select.evaluator;
+package net.meisen.dissertation.impl.parser.query.select;
 
 import java.util.Iterator;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.parser.query.select.ResultType;
-import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.RecordsEvaluator;
 import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
+import net.meisen.dissertation.model.util.IIntIterator;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**

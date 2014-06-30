@@ -52,8 +52,16 @@ public class TestLoadQueries extends LoaderBasedTest implements
 		// parse the load query with properties
 		query = factory.parseQuery("load FROM 'C:\\\\' SET autoload=true");
 		assertNull(query.getModelId());
-		assertEquals("C:\\", query.getPath()); 
+		assertEquals("C:\\", query.getPath());
 		assertEquals(true, query.getProperty("autoload", null));
+
+		// parse the load query with properties
+		query = factory
+				.parseQuery("load FROM 'C:\\\\' SET autoload=true, force=true");
+		assertNull(query.getModelId());
+		assertEquals("C:\\", query.getPath());
+		assertEquals(true, query.getProperty("autoload", null));
+		assertEquals(true, query.getProperty("force", null));
 	}
 
 	/**
@@ -105,7 +113,7 @@ public class TestLoadQueries extends LoaderBasedTest implements
 		m("/net/meisen/dissertation/impl/parser/query/testPersonModel.xml");
 
 		// now load it via the query
-		final LoadQuery query = factory.parseQuery("LOAD testPersonModel");
+		final LoadQuery query = factory.parseQuery("LOAD testPersonModel set force=true");
 		factory.evaluateQuery(query, null);
 	}
 

@@ -2,6 +2,7 @@ package net.meisen.dissertation.impl.cache;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -468,5 +469,14 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 		} else {
 			return res;
 		}
+	}
+
+	/**
+	 * Gets an iterator to iterate over the keys of the {@code map}.
+	 * 
+	 * @return an iterator to iterate over the keys
+	 */
+	public Iterator<K> keyIterator() {
+		return map.keySet().iterator();
 	}
 }

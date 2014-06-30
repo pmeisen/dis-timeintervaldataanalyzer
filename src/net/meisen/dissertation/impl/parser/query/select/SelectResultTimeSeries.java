@@ -1,12 +1,10 @@
-package net.meisen.dissertation.impl.parser.query.select.evaluator;
+package net.meisen.dissertation.impl.parser.query.select;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.parser.query.select.ResultType;
-import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.TimeSeriesEvaluator;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.FieldNameGenerator;

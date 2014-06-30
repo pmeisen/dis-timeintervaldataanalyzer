@@ -32,6 +32,7 @@ import net.meisen.dissertation.impl.idfactories.TestShortIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestUuIdsFactory;
 import net.meisen.dissertation.impl.indexes.TestCompositeIndexKey;
 import net.meisen.dissertation.impl.indexes.TestContinuousIntIndexedCollection;
+import net.meisen.dissertation.impl.indexes.TestDataRecordIndex;
 import net.meisen.dissertation.impl.indexes.TestIndexFactory;
 import net.meisen.dissertation.impl.indexes.TestIndexedCollectionDefinition;
 import net.meisen.dissertation.impl.indexes.TestIntArrayCollection;
@@ -210,6 +211,7 @@ import org.junit.runners.Suite;
 		TestMetaIndexDimension.class,
 		TestMetaIndex.class,
 		TestIntervalIndex.class,
+		TestDataRecordIndex.class,
 
 		// Test the fact-holder
 		TestMapFactsHolder.class,

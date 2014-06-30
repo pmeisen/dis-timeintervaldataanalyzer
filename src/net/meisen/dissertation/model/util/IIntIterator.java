@@ -1,4 +1,4 @@
-package net.meisen.dissertation.model.indexes.datarecord.slices;
+package net.meisen.dissertation.model.util;
 
 /**
  * Iterator used to iterate over the integers of a bitmap.

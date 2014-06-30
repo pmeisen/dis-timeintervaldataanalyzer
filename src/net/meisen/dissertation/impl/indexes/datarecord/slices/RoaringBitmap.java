@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IIntIterator;
+import net.meisen.dissertation.model.util.IIntIterator;
 
 import org.roaringbitmap.FastAggregation;
 import org.roaringbitmap.IntIterator;

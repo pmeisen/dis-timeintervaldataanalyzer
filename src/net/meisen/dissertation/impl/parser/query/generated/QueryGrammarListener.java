@@ -143,17 +143,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorDateInterval(@NotNull QueryGrammarParser.SelectorDateIntervalContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoadProperty}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprLoadProperty(@NotNull QueryGrammarParser.ExprLoadPropertyContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprLoadProperty}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprLoadProperty(@NotNull QueryGrammarParser.ExprLoadPropertyContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorSecondMathOperator}.
 	 * @param ctx the parse tree
 	 */

@@ -155,13 +155,18 @@ public class TidaModelHandler {
 	 * 
 	 * @param is
 	 *            the {@code InputStream} to load the modules from
+	 * @param force
+	 *            {@code true} if the model should be loaded even if this might
+	 *            lead to an exception, because another or the same model with
+	 *            the same identifier exists, otherwise {@code false}
 	 * 
 	 * @return the loaded {@code ModuleHolder}
 	 * 
 	 * @throws RuntimeException
 	 *             if the specified resource is invalid or falsely defined
 	 */
-	protected IModuleHolder getModuleHolder(final InputStream is) {
+	protected IModuleHolder getModuleHolder(final InputStream is,
+			final boolean force) {
 		if (is == null) {
 			exceptionRegistry.throwRuntimeException(
 					TidaModelHandlerException.class, 1000);
@@ -197,6 +202,8 @@ public class TidaModelHandler {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Loaded ModuleHolder '" + id + "'.");
 			}
+		} else if (!force) {
+			return moduleHolders.get(id);
 		} else {
 			exceptionRegistry.throwRuntimeException(
 					TidaModelHandlerException.class, 1001, id);
@@ -301,10 +308,30 @@ public class TidaModelHandler {
 	 * @return the loaded instance of the {@code TidaModel}
 	 */
 	public synchronized TidaModel loadViaXslt(final InputStream is) {
-		final TidaModel model = getModuleHolder(is).getModule(
+		return loadViaXslt(is, true);
+	}
+
+	/**
+	 * Loads a {@code TidaModel} from the specified {@code is}.
+	 * 
+	 * @param is
+	 *            the {@code InputStream} to load the {@code TidaModel} from
+	 * @param force
+	 *            {@code true} if the model should be loaded even if this might
+	 *            lead to an exception, because another or the same model with
+	 *            the same identifier exists, otherwise {@code false}
+	 * 
+	 * @return the loaded instance of the {@code TidaModel}
+	 */
+	public synchronized TidaModel loadViaXslt(final InputStream is,
+			final boolean force) {
+		final TidaModel model = getModuleHolder(is, force).getModule(
 				DefaultValues.TIDAMODEL_ID);
 
-		if (LOG.isInfoEnabled()) {
+		// check if the model is already loaded
+		if (!force && model.isInitialized()) {
+			return model;
+		} else if (LOG.isInfoEnabled()) {
 			LOG.info("Loaded TidaModel '" + model.getId()
 					+ "' from ModuleHolder '" + model.getId() + "'.");
 		}
@@ -721,9 +748,9 @@ public class TidaModelHandler {
 		} else {
 			final IByteBufferReader reader = Streams
 					.createByteBufferReader(autoloadFile);
-			
+
 			try {
-				
+
 				// read all the objects
 				while (reader.hasRemaining()) {
 					final String modelId = (String) Streams

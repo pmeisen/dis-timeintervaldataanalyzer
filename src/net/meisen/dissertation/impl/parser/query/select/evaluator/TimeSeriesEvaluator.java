@@ -6,6 +6,7 @@ import java.util.Iterator;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultTimeSeries;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;

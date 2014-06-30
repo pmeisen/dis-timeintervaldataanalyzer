@@ -9,6 +9,7 @@ import java.util.List;
 
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.util.IIntIterator;
 
 /**
  * A wrapper for a {@code Bitmap} implementation, e.g.

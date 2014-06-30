@@ -36,8 +36,7 @@ exprAlive     : STMT_ALIVE;
  * Define the different expressions/parts of the load statement
  */
 exprLoad            : STMT_LOAD (selectorModelId | (OP_FROM selectorFilePath)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
-exprLoadSetProperty : exprLoadProperty CMP_EQUAL selectorBoolean;
-exprLoadProperty    : PROP_AUTOLOAD;
+exprLoadSetProperty : (PROP_AUTOLOAD CMP_EQUAL selectorBoolean) | (PROP_FORCE CMP_EQUAL selectorBoolean);
 
 /*
  * Define the different expressions/parts of the unload statement
@@ -133,6 +132,7 @@ STMT_ALIVE    : A L I V E;
 
 // reserved words for properties
 PROP_AUTOLOAD : A U T O L O A D;
+PROP_FORCE    : F O R C E;
 
 // reserved words to define the types of data to select
 TYPE_TIMESERIES          : T I M E S E R I E S;
