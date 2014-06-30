@@ -125,12 +125,12 @@ public class MapDbDataRecordCache extends BaseMapDbCache<Integer, Object[]>
 		}
 
 		// cache the value now
-		cache(record.getId(), res);
+		super.cache(record.getId(), res);
 	}
 
 	@Override
 	public void cache(final int id, final Object[] record) {
-		cache(id, record);
+		super.cache(id, record);
 	}
 
 	@Override

@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.impl.persistence.FileLocation;
@@ -33,8 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author pmeisen
  * 
  */
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
+@ContextClass(TestConfig.class)
+@ContextFile("test-sbconfigurator-core.xml")
 public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 
 	@Autowired

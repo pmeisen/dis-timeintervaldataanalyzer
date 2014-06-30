@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
@@ -26,8 +26,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author pmeisen
  * 
  */
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
+@ContextClass(TestConfig.class)
+@ContextFile("test-sbconfigurator-core.xml")
 @RunWith(JUnitConfigurationRunner.class)
 public class LoaderBasedTest extends ExceptionBasedTest {
 

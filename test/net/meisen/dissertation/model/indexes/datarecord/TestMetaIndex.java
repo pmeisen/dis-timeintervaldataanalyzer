@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
 import static org.junit.Assert.assertEquals;
-import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
@@ -20,8 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author pmeisen
  * 
  */
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
+@ContextClass(TestConfig.class)
+@ContextFile("test-sbconfigurator-core.xml")
 public class TestMetaIndex extends ModuleAndDbBasedTest {
 
 	@Autowired

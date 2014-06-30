@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config xmlns="http://dev.meisen.net/xsd/dissertation/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
+
+  <caches>
+    <!-- Define the cache to be used for metadata.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.MemoryMetaDataCache
+          + net.meisen.dissertation.impl.cache.FileMetaDataCache
+      -->
+    <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+    
+    <!-- Define the cache to be used for bitmaps.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.MemoryBitmapCache
+          + net.meisen.dissertation.impl.cache.MapDbBitmapCache
+          + net.meisen.dissertation.impl.cache.FileBitmapCache
+      -->
+    <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+    
+    <!-- Define the cache to be used for fact-sets.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache
+          + net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache
+      -->
+    <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
+    
+    <!-- Define the cache to be used for records.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache
+          + net.meisen.dissertation.impl.cache.MemoryDataRecordCache
+          + net.meisen.dissertation.impl.cache.MapDbDataRecordCache
+      -->
+    <records implementation="net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache" />
+  </caches>
+
+  <factories>
+    <!-- Define the factory to be used to determine which IndexFactory
+         to be used.
+         
+         The following factories are available by default:
+          + net.meisen.dissertation.impl.indexes.IndexFactory
+      -->
+    <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory" />
+    
+    <!-- Define the factory to be used to determine which MapperFactory
+         to be used.
+         
+         The following factories are available by default:
+          + net.meisen.dissertation.impl.time.mapper.MapperFactory
+      -->
+    <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory" />
+    
+    <!-- Define the factory to be used to determine the granularity-factory.
+         
+         The following factories are available by default:
+          + net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory
+      -->
+    <granularities implementation="net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory" />
+    
+    <!-- Define the factory to be used to create queries.
+         
+         The following factories are available by default:
+          + net.meisen.dissertation.impl.parser.query.QueryFactory
+      -->
+    <queries implementation="net.meisen.dissertation.impl.parser.query.QueryFactory" />
+  </factories>
+  
+  <!-- Adds additional aggregation-functions or overrides the once available 
+       by default.
+       
+       The following aggregation-functions are added by default:
+        + net.meisen.dissertation.impl.measures.Count
+        + net.meisen.dissertation.impl.measures.Min
+        + net.meisen.dissertation.impl.measures.Max
+        + net.meisen.dissertation.impl.measures.Sum
+        + net.meisen.dissertation.impl.measures.Mean
+        + net.meisen.dissertation.impl.measures.Median
+        + net.meisen.dissertation.impl.measures.Mode
+    --> 
+  <aggregations>
+    <function implementation="net.meisen.dissertation.impl.measures.Count" />
+  </aggregations>
+</config>

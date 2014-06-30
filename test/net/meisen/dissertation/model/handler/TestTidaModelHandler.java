@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
 import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.help.DbBasedTest;
@@ -40,8 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  */
 @RunWith(JUnitConfigurationRunner.class)
-@ContextClass(TidaConfig.class)
-@ContextFile("sbconfigurator-core.xml")
+@ContextClass(TestConfig.class)
+@ContextFile("test-sbconfigurator-core.xml")
 public class TestTidaModelHandler extends DbBasedTest {
 
 	@Autowired
