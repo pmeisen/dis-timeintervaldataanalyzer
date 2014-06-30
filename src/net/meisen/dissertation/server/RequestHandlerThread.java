@@ -309,6 +309,18 @@ public class RequestHandlerThread extends WorkerThread {
 		return false;
 	}
 
+	/**
+	 * Checks if the currently handled request was cancelled by the client
+	 * during evaluation.
+	 * 
+	 * @param p
+	 *            the protocol to check for cancellation
+	 * 
+	 * @return {@code true} if it was cancelled, otherwise {@code false}
+	 * 
+	 * @throws IOException
+	 *             if the reading failed
+	 */
 	protected boolean checkCancellation(final Protocol p) throws IOException {
 		final String[] msg = new String[] { null };
 		final Boolean peek = p.peekForCancel(msg);

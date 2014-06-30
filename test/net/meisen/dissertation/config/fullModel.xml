@@ -23,7 +23,7 @@
 
   <config>
     <caches>
-      <!-- Define the cache to be used.
+      <!-- Define the cache to be used for metadata.
 
            The following cache implementations are available:
             + net.meisen.dissertation.impl.cache.MemoryMetaDataCache
@@ -31,21 +31,31 @@
         -->
       <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
       
-      <!-- Define the cache to be used.
+      <!-- Define the cache to be used for bitmaps.
 
            The following cache implementations are available:
             + net.meisen.dissertation.impl.cache.MemoryBitmapCache
+            + net.meisen.dissertation.impl.cache.MapDbBitmapCache
             + net.meisen.dissertation.impl.cache.FileBitmapCache
         -->
       <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
       
-      <!-- Define the cache to be used.
+      <!-- Define the cache to be used for fact-sets.
 
            The following cache implementations are available:
             + net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache
             + net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache
         -->
       <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
+      
+      <!-- Define the cache to be used for records.
+
+           The following cache implementations are available:
+            + net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache
+            + net.meisen.dissertation.impl.cache.MemoryDataRecordCache
+            + net.meisen.dissertation.impl.cache.MapDbDataRecordCache
+        -->
+      <records implementation="net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache" />
     </caches>
 
     <factories>

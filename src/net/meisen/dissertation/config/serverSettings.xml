@@ -7,7 +7,7 @@
                             http://dev.meisen.net/server/config/extension http://dev.meisen.net/xsd/server/serverConfigExtension.xsd">
 
   <!-- add the lightweight HTTP protocol -->
-  <connector id="HTTP" port="7000" listener="HTTP">
+  <connector id="HTTP" port="${tida.server.http.port}" listener="HTTP" enable="${tida.server.http.enabled}">
   	<e:extension>
       <servlet urlmatcher="/loader/*">net.meisen.dissertation.server.LoaderServlet</servlet>
       <servlet urlmatcher="/query/*">net.meisen.dissertation.server.QueryServlet</servlet>
@@ -24,11 +24,11 @@
   </connector>
   
   <!-- add the TSQL connector for queries -->
-  <connector id="TSQL" port="7001" listener="TSQL">
+  <connector id="TSQL" port="${tida.server.tsql.port}" listener="TSQL" enable="${tida.server.tsql.enabled}">
     <e:extension>
       
       <!-- Specify the timeout of a client-server connection in seconds, 0 disables the timeout -->
-      <client timeout="1800000" />
+      <client timeout="${tida.server.tsql.timeout}" />
     </e:extension>
   </connector>
 
