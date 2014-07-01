@@ -7,6 +7,12 @@ package net.meisen.dissertation.model.parser.query;
  * 
  */
 public interface IQueryResult {
-	
+
+	/**
+	 * Get the identifiers of the result. The method can return an empty array
+	 * if no identifiers are collected.
+	 * 
+	 * @return the identifiers of the result
+	 */
 	public int[] getCollectedIds();
 }

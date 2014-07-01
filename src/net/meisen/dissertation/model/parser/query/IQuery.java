@@ -71,6 +71,13 @@ public interface IQuery {
 			final TidaModel model, final IResourceResolver resolver)
 			throws ForwardedRuntimeException, CancellationException;
 
+	/**
+	 * Gets the type of the query.
+	 * 
+	 * @return the type of the query
+	 * 
+	 * @see QueryType
+	 */
 	public QueryType getQueryType();
 
 	/**
