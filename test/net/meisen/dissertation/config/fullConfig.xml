@@ -1,9 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
-<config xmlns="http://dev.meisen.net/xsd/dissertation/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
+<config xmlns="http://dev.meisen.net/xsd/dissertation/config" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+        xmlns:map="http://dev.meisen.net/xsd/dissertation/model/mapper"
+        
+        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config        http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd
+                            http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
+                            http://dev.meisen.net/xsd/dissertation/model/mapper  http://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd">
+
+  <!-- Define the location the server stores it's data at -->
+  <location folder="_data" />
 
   <caches>
+    <!-- Define the cache to be used for metadata.
+
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.cache.MemoryIdentifierCache
+          + net.meisen.dissertation.impl.cache.FileIdentifierCache
+      -->
+    <identifier implementation="net.meisen.dissertation.impl.cache.MemoryIdentifierCache" />
+  
     <!-- Define the cache to be used for metadata.
 
          The following cache implementations are available:
@@ -46,7 +63,30 @@
          The following factories are available by default:
           + net.meisen.dissertation.impl.indexes.IndexFactory
       -->
-    <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory" />
+    <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
+      <!-- Define the different indexes to be used.
+      
+           The following bitmap-indexes are available by default:
+            + net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap
+            + net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap
+           
+           The following implementations are by default available for specific 
+           primitive data types:
+            + net.meisen.dissertation.impl.indexes.FastUtilIntIndexedCollection
+            + net.meisen.dissertation.impl.indexes.FastUtilLongIndexedCollection
+            + net.meisen.dissertation.impl.indexes.HppcIntIndexedCollection
+            + net.meisen.dissertation.impl.indexes.HppcLongIndexedCollection
+            + net.meisen.dissertation.impl.indexes.TroveByteIndexedCollection
+            + net.meisen.dissertation.impl.indexes.TroveShortIndexedCollection
+            + net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection
+            + net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection 
+        -->
+      <idx:config bitmap="net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap"
+                  byte="net.meisen.dissertation.impl.indexes.TroveByteIndexedCollection"
+        	      short="net.meisen.dissertation.impl.indexes.TroveShortIndexedCollection"
+                  int="net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection"
+                  long="net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection" />
+    </indexes>
     
     <!-- Define the factory to be used to determine which MapperFactory
          to be used.
@@ -54,7 +94,18 @@
          The following factories are available by default:
           + net.meisen.dissertation.impl.time.mapper.MapperFactory
       -->
-    <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory" />
+    <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory">
+      <map:config>
+      
+        <!--
+          Adds mappers to the default once. The default once cannot be removed and are:
+           + net.meisen.dissertation.impl.time.mapper.DateMapper
+           + net.meisen.dissertation.impl.time.mapper.LongMapper
+          -->
+        <map:mapper implementation="net.meisen.dissertation.impl.time.mapper.DateMapper" />
+        <map:mapper implementation="net.meisen.dissertation.impl.time.mapper.LongMapper" />
+      </map:config>
+    </mappers>
     
     <!-- Define the factory to be used to determine the granularity-factory.
          
@@ -86,4 +137,9 @@
   <aggregations>
     <function implementation="net.meisen.dissertation.impl.measures.Count" />
   </aggregations>
+  
+  <server>
+    <http port="7000" enable="true" />
+    <tsql port="7001" enable="true" />
+  </server>
 </config>

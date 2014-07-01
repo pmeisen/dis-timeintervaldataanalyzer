@@ -8,21 +8,27 @@
   -->
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
-       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
-       xmlns:fxd="http://dev.meisen.net/xsd/dissertation/model/fxd"
+       xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+       xmlns:map="http://dev.meisen.net/xsd/dissertation/model/mapper" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/db                  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/fxd                 http://dev.meisen.net/xsd/dissertation/tidaFixedStructureExtension.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
+                           http://dev.meisen.net/xsd/dissertation/model/indexes             http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/mapper              http://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd"
        
-       offlinemode="false"
-       
-       id="fullModel" name="My wonderful Model">
+       offlinemode="false" folder="_data/fullModel" id="fullModel" name="My wonderful Model">
 
   <config>
     <caches>
+      <!-- Define the cache to be used for metadata.
+  
+           The following cache implementations are available:
+            + net.meisen.dissertation.impl.cache.MemoryIdentifierCache
+            + net.meisen.dissertation.impl.cache.FileIdentifierCache
+        -->
+      <identifier implementation="net.meisen.dissertation.impl.cache.MemoryIdentifierCache" />
+    
       <!-- Define the cache to be used for metadata.
 
            The following cache implementations are available:
@@ -65,7 +71,30 @@
            The following factories are available by default:
             + net.meisen.dissertation.impl.indexes.IndexFactory
         -->
-      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory" />
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
+        <!-- Define the different indexes to be used.
+      
+             The following bitmap-indexes are available by default:
+              + net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap
+              + net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap
+           
+             The following implementations are by default available for specific 
+             primitive data types:
+              + net.meisen.dissertation.impl.indexes.FastUtilIntIndexedCollection
+              + net.meisen.dissertation.impl.indexes.FastUtilLongIndexedCollection
+              + net.meisen.dissertation.impl.indexes.HppcIntIndexedCollection
+              + net.meisen.dissertation.impl.indexes.HppcLongIndexedCollection
+              + net.meisen.dissertation.impl.indexes.TroveByteIndexedCollection
+              + net.meisen.dissertation.impl.indexes.TroveShortIndexedCollection
+              + net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection
+              + net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection 
+          -->
+        <idx:config bitmap="net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap"
+        			byte="net.meisen.dissertation.impl.indexes.TroveByteIndexedCollection"
+        			short="net.meisen.dissertation.impl.indexes.TroveShortIndexedCollection"
+                    int="net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection"
+                    long="net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection" />
+    </indexes>
       
       <!-- Define the factory to be used to determine which MapperFactory
            to be used.
@@ -73,7 +102,29 @@
            The following factories are available by default:
             + net.meisen.dissertation.impl.time.mapper.MapperFactory
         -->
-      <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory" />
+      <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory">
+      
+        <!-- The inheritance of the default mappers (default means in that case the once
+             defined in the global configuration) can be true or false.
+          -->
+        <map:config inheritDefault="true">
+      
+          <!--
+            Adds mappers to the default once. The default once cannot be removed and are:
+             + net.meisen.dissertation.impl.time.mapper.DateMapper
+             + net.meisen.dissertation.impl.time.mapper.LongMapper
+            -->
+          <map:mapper implementation="net.meisen.dissertation.impl.time.mapper.DateMapper" />
+          <map:mapper implementation="net.meisen.dissertation.impl.time.mapper.LongMapper" />
+        </map:config>
+      </mappers>
+      
+      <!-- Define the factory to be used to determine the granularity-factory.
+         
+           The following factories are available by default:
+            + net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory
+        -->
+      <granularities implementation="net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory" />
     </factories>
   </config>
   

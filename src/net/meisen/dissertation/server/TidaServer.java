@@ -3,8 +3,6 @@ package net.meisen.dissertation.server;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -105,21 +103,6 @@ public class TidaServer {
 		}
 	}
 
-	public static Properties getDefaultProperties() {
-		final Properties properties = new Properties();
-
-		properties.setProperty("tida.config.selector", "tidaConfig.xml");
-
-		properties.setProperty("tida.server.http.port", "7000");
-		properties.setProperty("tida.server.http.enabled", "true");
-
-		properties.setProperty("tida.server.tsql.port", "7001");
-		properties.setProperty("tida.server.tsql.enabled", "true");
-		properties.setProperty("tida.server.tsql.timeout", "1800000");
-
-		return properties;
-	}
-
 	/**
 	 * Creates an instance of a {@code TidaServer}, which is completely
 	 * auto-wired according to the configuration.
@@ -127,40 +110,6 @@ public class TidaServer {
 	 * @return the created {@code TidaServer} instance
 	 */
 	public static TidaServer create() {
-		return create(null);
-	}
-
-	/**
-	 * Creates an instance of a {@code TidaServer}, which is completely
-	 * auto-wired according to the configuration.
-	 * 
-	 * @param props
-	 *            the properties to be used for the server, can be {@code null}
-	 *            if the default properties should be used
-	 * 
-	 * @return the created {@code TidaServer} instance
-	 * 
-	 * @see #getDefaultProperties()
-	 */
-	public static TidaServer create(final Properties props) {
-
-		// start with the default properties
-		final Properties properties = getDefaultProperties();
-
-		// override the properties
-		if (props != null) {
-			for (final Entry<Object, Object> property : props.entrySet()) {
-				properties.put(property.getKey(), property.getValue());
-			}
-		}
-
-		// set the values as system properties
-		for (final Entry<Object, Object> property : properties.entrySet()) {
-			final String key = (String) property.getKey();
-			final String val = (String) property.getValue();
-
-			System.setProperty(key, val);
-		}
 
 		// create the instance
 		final ConfigurationCoreSettings settings = ConfigurationCoreSettings

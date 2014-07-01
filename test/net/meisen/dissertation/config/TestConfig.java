@@ -199,6 +199,50 @@ public class TestConfig {
 	}
 
 	/**
+	 * Tests the loading of a fully configured file.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/fullConfig.xml")
+	public static class TestFullConfig extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/simplestModel.xml");
+		}
+	}
+
+	/**
+	 * Tests the loading of a fully configured model.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	public static class TestFullModel extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/fullModel.xml");
+		}
+	}
+
+	/**
+	 * Tests the loading of a fully configured configuration and model.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/config/fullConfig.xml")
+	public static class TestFullConfigWithFullModel extends BaseTest {
+
+		@Override
+		public void test() {
+			setModulesHolder("/net/meisen/dissertation/config/fullModel.xml");
+		}
+	}
+
+	/**
 	 * Tests the changing of the location for the model.
 	 * 
 	 * @author pmeisen
@@ -393,7 +437,8 @@ public class TestConfig {
 	 * 
 	 */
 	@RunWith(Suite.class)
-	@Suite.SuiteClasses({ TestDefaultConfiguration.class,
+	@Suite.SuiteClasses({ TestDefaultConfiguration.class, TestFullConfig.class,
+			TestFullModel.class, TestFullConfigWithFullModel.class,
 			TestCustomizedConfiguration.class, TestModelSpecificLocation.class,
 			TestConfigMemoryCache.class, TestConfigFileCache.class,
 			TestModuleMemoryCache.class, TestModuleFileCache.class })

@@ -7,14 +7,5 @@
     <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_FALLBACK" />
     <property name="localOverride" value="false" />
     <property name="otherHolderOverride" value="false" />
-    <property name="properties">
-      <value>
-        tida.server.http.port=7000
-		tida.server.http.enabled=true
-		tida.server.tsql.port=7001
-		tida.server.tsql.enabled=true
-		tida.server.tsql.timeout=1800000
-      </value>
-    </property>
   </bean>
 </beans>

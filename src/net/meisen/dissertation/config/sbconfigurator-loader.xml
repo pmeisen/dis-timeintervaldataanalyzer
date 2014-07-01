@@ -15,4 +15,7 @@
               selector="${tida.config.selector}" loadFromClassPath="true" loadFromWorkingDir="false" 
               defaultSelector="net/meisen/dissertation/config/defaultConfig.xml" defaultLoadFromClassPath="true" defaultLoadFromWorkingDir="false"
               xslt="net/meisen/dissertation/config/xslt/configToSpring.xslt" />
+
+  <!-- add the loader of the server, after the loader of the configuration -->
+  <import resource="classpath:/net/meisen/general/server/sbconfigurator-server-loader.xml" />
 </beans>

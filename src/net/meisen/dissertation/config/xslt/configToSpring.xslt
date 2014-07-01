@@ -22,7 +22,7 @@
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-
+ 
       <!-- read the values configured -->
       <xsl:variable name="folder">
         <xsl:choose>
@@ -242,6 +242,31 @@
         <property name="defaultLocation" ref="defaultLocation" /> 
       </bean>
   
+      <!-- set the server properties, those are set prior to any further loading -->
+      <xsl:if test="//cns:config/cns:server/node()">
+        <bean class="net.meisen.general.sbconfigurator.config.PropertyInjectorBean">
+          <property name="properties">
+            <props>
+              <xsl:if test="//cns:config/cns:server/http/@port">
+                <prop key="tida.server.http.port"><xsl:value-of select="//cns:config/cns:server/http/@port" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/http/@enabled">
+                <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/http/@enabled" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/tsql/@port">
+                <prop key="tida.server.tsql.port"><xsl:value-of select="//cns:config/cns:server/tsql/@port" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/tsql/@enabled">
+                <prop key="tida.server.tsql.enabled"><xsl:value-of select="//cns:config/cns:server/tsql/@enabled" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/tsql/@timeout">
+                <prop key="tida.server.tsql.timeout"><xsl:value-of select="//cns:config/cns:server/tsql/@timeout" /></prop>
+              </xsl:if>
+            </props>
+          </property>
+        </bean>
+      </xsl:if>
+      
       <!-- define the tidaServer -->
       <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />
 

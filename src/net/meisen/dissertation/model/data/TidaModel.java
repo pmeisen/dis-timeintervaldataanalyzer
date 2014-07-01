@@ -172,6 +172,11 @@ public class TidaModel implements IPersistable {
 		setMetaDataHandling(null);
 		setIntervalDataHandling(null);
 		setOfflineMode(null);
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Created model '" + getId() + "' defined with location '"
+					+ getLocation() + "'.");
+		}
 	}
 
 	/**
