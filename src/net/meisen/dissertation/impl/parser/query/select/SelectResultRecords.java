@@ -139,7 +139,7 @@ public class SelectResultRecords extends SelectResult {
 
 				@Override
 				public Object[] next() {
-					return idx.getRecord(it.next());
+					return idx.getRecordAsArray(it.next());
 				}
 
 				@Override
@@ -158,7 +158,7 @@ public class SelectResultRecords extends SelectResult {
 		// get the records
 		this.recordsBitmap = recordsEvaluator.evaluateInterval(getQuery()
 				.getInterval(), getQuery().getIntervalRelation(), this);
-	
+
 		// get the types and names
 		this.idx = model.getIndex();
 	}

@@ -8,6 +8,7 @@ import java.util.UUID;
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.model.cache.IDataRecordCache;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.persistence.BasePersistor;
 import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.Identifier;
@@ -24,6 +25,7 @@ public class DataRecordIndex implements IDataRecordIndex {
 	private final static String EXTENSION = ".records";
 
 	private final IDataRecordCache recordCache;
+	private final IDataRecordFactory recordFactory;
 
 	private Group persistentGroup = null;
 
@@ -35,7 +37,7 @@ public class DataRecordIndex implements IDataRecordIndex {
 	 *            the model the index is created for
 	 */
 	public DataRecordIndex(final TidaModel model) {
-		this(model.getDataRecordCache());
+		this(model.getDataRecordCache(), model.getDataRecordFactory());
 	}
 
 	/**
@@ -43,9 +45,13 @@ public class DataRecordIndex implements IDataRecordIndex {
 	 * 
 	 * @param recordCache
 	 *            the cache to be used for the index
+	 * @param factory
+	 *            the {@code DataRecordFactory} to be used to create the records
 	 */
-	public DataRecordIndex(final IDataRecordCache recordCache) {
+	public DataRecordIndex(final IDataRecordCache recordCache,
+			final IDataRecordFactory factory) {
 		this.recordCache = recordCache;
+		this.recordFactory = factory;
 	}
 
 	@Override
@@ -54,32 +60,44 @@ public class DataRecordIndex implements IDataRecordIndex {
 	}
 
 	/**
-	 * Gets the names of the records to be retrieved from the index.
+	 * Gets the meta-information of records indexed.
 	 * 
-	 * @return the names of the records to be retrieved from the index
+	 * @return the meta-information of records indexed.
 	 */
-	public String[] getNames() {
-		return this.recordCache.getNames();
-	}
-
-	/**
-	 * Gets the types of the records to be retrieved from the index.
-	 * 
-	 * @return the names of the records to be retrieved from the index
-	 */
-	public Class<?>[] getTypes() {
-		return this.recordCache.getTypes();
+	public IDataRecordMeta getMeta() {
+		return this.recordFactory.getMeta();
 	}
 
 	/**
 	 * Gets the record with the specified {@code recordId} from the index.
 	 * 
 	 * @param recordId
-	 *            the identifier to get the record for
+	 *            the identifier of the record for
 	 * 
-	 * @return the record with the specified {@code recordId}
+	 * @return the record with the specified {@code recordId}; {@code null} if
+	 *         no record with the specified identifier exists
 	 */
-	public Object[] get(final int recordId) {
+	public IDataRecord get(final int recordId) {
+		final Object[] rec = getArray(recordId);
+		if (rec == null) {
+			return null;
+		} else {
+			return recordFactory.create(rec);
+		}
+	}
+
+	/**
+	 * Gets the object-array representing the values of the record with the
+	 * specified {@code recordId} from the index.
+	 * 
+	 * @param recordId
+	 *            the identifier of the record for
+	 * 
+	 * @return the object-array representing the values of the record with the
+	 *         specified {@code recordId}; {@code null} if no record with the
+	 *         specified identifier exists
+	 */
+	public Object[] getArray(final int recordId) {
 		return this.recordCache.get(recordId);
 	}
 
@@ -109,7 +127,7 @@ public class DataRecordIndex implements IDataRecordIndex {
 			 * write the amount of entries per record, as well as the amount of
 			 * records
 			 */
-			persistor.writeInt(out, getNames().length);
+			persistor.writeInt(out, getMeta().getDataTypes().length);
 			persistor.writeInt(out, recordCache.size());
 
 			/*
@@ -119,7 +137,7 @@ public class DataRecordIndex implements IDataRecordIndex {
 				final int recordId = it.next();
 				persistor.writeInt(out, recordId);
 
-				final Object[] record = this.get(recordId);
+				final Object[] record = recordCache.get(recordId);
 				for (final Object rec : record) {
 					persistor.writeObject(out, rec);
 				}
@@ -150,8 +168,8 @@ public class DataRecordIndex implements IDataRecordIndex {
 				}
 
 				// cache the stuff
-				if (this.recordCache.get(recId) == null) {
-					this.recordCache.cache(recId, record);
+				if (recordCache.get(recId) == null) {
+					recordCache.cache(recId, record);
 				} else {
 					throw new ForwardedRuntimeException(
 							PersistorException.class, 1004,

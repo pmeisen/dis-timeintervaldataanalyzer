@@ -5,6 +5,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
+import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * Base implementation of an {@code AggregationFunction}.
@@ -36,7 +37,9 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 		// otherwise get the sum and calculate the average
 		double sum = 0.0;
-		for (final double fact : facts.facts()) {
+		final IDoubleIterator it = facts.factsIterator();
+		while (it.hasNext()) {
+			final double fact = it.next();
 			sum += fact;
 		}
 
@@ -71,7 +74,7 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 				// get the slice
 				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
 						desc.getModelId(), desc.getId());
-				
+
 				// get the bitmap
 				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
 				sum += bmp.determineCardinality() * desc.getFact();

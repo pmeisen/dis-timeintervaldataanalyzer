@@ -1,0 +1,62 @@
+package net.meisen.dissertation.impl.cache;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
+
+import net.meisen.dissertation.help.LoaderBasedTest;
+import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.IDataRecordMeta;
+
+/**
+ * Tests the implementation of {@code IdsOnlyDataRecordCache}.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class TestIdsOnlyDataRecordCache extends LoaderBasedTest {
+
+	/**
+	 * Tests the implementation and creation of records using
+	 * {@link IdsOnlyDataRecordCache#get(int)}.
+	 */
+	@Test
+	public void testRecordCreation() {
+		final TidaModel m = m("/net/meisen/dissertation/impl/cache/idsOnlyDataRecordCache.xml");
+		final IDataRecordMeta meta = m.getDataRecordFactory().getMeta();
+
+		/*
+		 * Check some records, the method is called indirectly using the index's
+		 * getRecord method.
+		 */
+		IDataRecord rec;
+
+		rec = m.getIndex().getRecord(0);
+		assertEquals(0, rec.getValue(meta.getPosRecordId()));
+		assertNull(rec.getValue(meta.getPosStart()));
+		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(100, rec.getValue(meta.getFirstPosDescModelIds()));
+
+		rec = m.getIndex().getRecord(1);
+		assertEquals(1, rec.getValue(meta.getPosRecordId()));
+		assertNull(rec.getValue(meta.getPosStart()));
+		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(200, rec.getValue(meta.getFirstPosDescModelIds()));
+
+		rec = m.getIndex().getRecord(2);
+		assertEquals(2, rec.getValue(meta.getPosRecordId()));
+		assertNull(rec.getValue(meta.getPosStart()));
+		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(300, rec.getValue(meta.getFirstPosDescModelIds()));
+
+		rec = m.getIndex().getRecord(3);
+		assertEquals(3, rec.getValue(meta.getPosRecordId()));
+		assertNull(rec.getValue(meta.getPosStart()));
+		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(100, rec.getValue(meta.getFirstPosDescModelIds()));
+		
+		assertNull(m.getIndex().getRecord(4));
+	}
+}

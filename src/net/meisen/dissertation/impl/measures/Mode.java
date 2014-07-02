@@ -7,6 +7,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * Implementation of the {@code Mode} aggregation function.
@@ -67,7 +68,10 @@ public class Mode extends BaseAggregationFunction {
 		// iterate over the values
 		int counter = 0;
 		double mode = Double.NaN;
-		for (final double fact : facts.sortedFacts()) {
+		final IDoubleIterator it = facts.sortedFactsIterator();
+		while (it.hasNext()) {
+			final double fact = it.next();
+
 			if (lastFact == fact) {
 				counter++;
 			} else if (counter > maxAmount) {

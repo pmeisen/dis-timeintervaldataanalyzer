@@ -6,6 +6,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * Used to determine the minimum value of the facts and the amount of records.
@@ -42,7 +43,10 @@ public class Min extends BaseAggregationFunction {
 		}
 
 		double min = Double.MAX_VALUE;
-		for (double fact : facts.facts()) {
+		final IDoubleIterator it = facts.factsIterator();
+		while (it.hasNext()) {
+			final double fact = it.next();
+
 			if (fact < min) {
 				min = fact;
 			}

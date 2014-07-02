@@ -1,91 +1,207 @@
 package net.meisen.dissertation.impl.measures;
 
+import java.util.Iterator;
+
+import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
+import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IDoubleIterator;
+import net.meisen.dissertation.model.util.IIntIterator;
 
-public class MapFactsDescriptorBased extends MapFactsArrayBased {
+/**
+ * A map containing facts which is based on descriptors.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class MapFactsDescriptorBased implements IFactsHolder {
 	private final FactDescriptorSet descriptors;
+	private final TidaIndex index;
+	private final Bitmap bitmap;
 
-	private TidaIndex index;
-	private Bitmap bitmap;
+	private final MapFactsArrayBased array;
 
+	/**
+	 * Constructor to create a {@code MapFactsDescriptorBased} for the specified
+	 * {@code FactDescriptorSet}.
+	 * 
+	 * @param descriptors
+	 *            the {@code FactDescriptorSet} the facts descriptor is based on
+	 * @param index
+	 *            the index
+	 * @param bitmap
+	 *            the {@code Bitmap} which defines the pre-selection, i.e. a
+	 *            filter or valid records
+	 */
 	public MapFactsDescriptorBased(final FactDescriptorSet descriptors,
 			final TidaIndex index, final Bitmap bitmap) {
-		super(index.getLastRecordId());
 
 		this.index = index;
 		this.bitmap = bitmap;
 		this.descriptors = descriptors;
+
+		if (this.descriptors.containsVariantRecords()) {
+			array = new MapFactsArrayBased(index.getLastRecordId());
+
+			// set all the invariant once
+			for (final FactDescriptor<?> factDesc : descriptors) {
+				final Bitmap bmp = getBitmap(factDesc);
+
+				// the invariant version can be done easier
+				if (factDesc.isRecordInvariant()) {
+					array.setAll(bmp.intIterator(), factDesc.getFact());
+				}
+				// the variant once have to be done one by one
+				else {
+					final Descriptor<?, ?, ?> desc = index
+							.getDescriptor(factDesc);
+
+					final IIntIterator it = bmp.intIterator();
+					while (it.hasNext()) {
+						final int recId = it.next();
+
+						final IDataRecord rec = index.getRecord(recId);
+						array.set(recId, desc.getFactValue(rec));
+					}
+				}
+			}
+		} else {
+			array = null;
+		}
+	}
+
+	/**
+	 * Gets the bitmap of the {@code desc} combined with the selected
+	 * identifiers of {@code this}.
+	 * 
+	 * @param desc
+	 *            the {@code FactDescriptor} to get the bitmap for
+	 * 
+	 * @return the bitmap
+	 */
+	protected Bitmap getBitmap(final FactDescriptor<?> desc) {
+		final Slice<?> slice = index.getMetaIndexDimensionSlice(
+				desc.getModelId(), desc.getId());
+
+		return bitmap == null ? slice.getBitmap() : bitmap.and(slice
+				.getBitmap());
 	}
 
 	@Override
 	public double getFactOfRecord(final int recordId) {
-		fillMap(false);
-		return super.getFactOfRecord(recordId);
+		if (array == null) {
+			final Bitmap recordBitmap = Bitmap.createBitmap(
+					index.getIndexFactory(), recordId);
+
+			for (final FactDescriptor<?> factDesc : descriptors) {
+				final Bitmap bmp = getBitmap(factDesc);
+				if (recordBitmap.and(bmp).isBitSet()) {
+					return factDesc.getFact();
+				}
+			}
+
+			return Double.NaN;
+		} else {
+			return array.getFactOfRecord(recordId);
+		}
 	}
 
-	protected double[] fillMap(final boolean returnSortedFacts) {
-		if (size() > 0) {
-			if (returnSortedFacts) {
-				return super.sortedFacts();
-			} else {
-				return null;
-			}
+	@Override
+	public IIntIterator recordIdsIterator() {
+		if (array == null) {
+			return bitmap.intIterator();
+		} else {
+			return array.recordIdsIterator();
 		}
+	}
 
-		// add all the values of the descriptors
-		final double[] facts = returnSortedFacts ? new double[index
-				.getNextDataId()] : null;
-		for (final FactDescriptor<?> desc : descriptors) {
+	@Override
+	public IDoubleIterator factsIterator() {
+		if (array == null) {
+			return new IDoubleIterator() {
+				private final Iterator<FactDescriptor<?>> it = descriptors
+						.iterator();
 
-			if (desc.isRecordInvariant()) {
-				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
-						desc.getModelId(), desc.getId());
+				private double curFact = Double.NaN;
+				private int amountOfFacts = -1;
+				private int nextPos = 0;
 
-				// get the bitmap
-				final Bitmap bmp = bitmap == null ? metaSlice.getBitmap()
-						: bitmap.and(metaSlice.getBitmap());
-				final double val = desc.getFact();
+				@Override
+				public boolean hasNext() {
+					return checkNext();
+				}
 
-				// add the values to the identifiers
-				final int[] ids = bmp.getIds();
-				for (int i = 0; i < ids.length; i++) {
-					final int id = ids[i];
+				@Override
+				public double next() {
+					if (checkNext()) {
 
-					// add the value and set it
-					set(id, val);
-					if (returnSortedFacts) {
-						facts[i] = val;
+						nextPos++;
+						return curFact;
+					} else {
+						throw new IllegalStateException(
+								"No next value available.");
 					}
 				}
 
-			} else {
-				// TODO add support
-				throw new UnsupportedOperationException(
-						"Currently not supported!");
-			}
+				private boolean checkNext() {
+
+					// make sure we have the current amount
+					if (nextPos + 1 > amountOfFacts) {
+						amountOfFacts = -1;
+
+						while (amountOfFacts < 1) {
+							if (it.hasNext()) {
+								final FactDescriptor<?> desc = it.next();
+								final Bitmap bmp = getBitmap(desc);
+
+								curFact = desc.getFact();
+								amountOfFacts = bmp.determineCardinality();
+								nextPos = 0;
+							} else {
+								return false;
+							}
+						}
+
+						return true;
+					} else {
+						return true;
+					}
+				}
+			};
+		} else {
+			return array.factsIterator();
 		}
-
-		return facts;
 	}
 
 	@Override
-	public int[] recordIds() {
-		fillMap(false);
-		return super.recordIds();
+	public IDoubleIterator sortedFactsIterator() {
+		if (array == null) {
+			return factsIterator();
+		} else {
+			return array.sortedFactsIterator();
+		}
 	}
 
 	@Override
-	public double[] facts() {
-		fillMap(false);
-		return super.facts();
+	public int amountOfFacts() {
+		return bitmap.determineCardinality();
 	}
 
-	@Override
-	public double[] sortedFacts() {
-		return fillMap(true);
+	/**
+	 * The methods determines which implementation is used. If at least one
+	 * {@code FactDescriptor} does not have invariant facts, the
+	 * {@code MapFactsArrayBased} implementation is used by {@code this} in the
+	 * background.
+	 * 
+	 * @return {@code true} if the {@code MapFactsArrayBased} implementation is
+	 *         used in the background, otherwise {@code false}
+	 */
+	public boolean usesArrayImplementation() {
+		return array != null;
 	}
 }

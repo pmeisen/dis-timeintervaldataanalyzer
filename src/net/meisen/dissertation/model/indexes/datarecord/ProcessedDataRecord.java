@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.meisen.dissertation.exceptions.TidaIndexException;
+import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.IntervalModel.MappingResult;
@@ -20,6 +21,7 @@ import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.dissertation.model.datastructure.StructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -299,5 +301,43 @@ public class ProcessedDataRecord {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	/**
+	 * The mapper used to resolve the start and end values of the record.
+	 * 
+	 * @param meta
+	 *            the {@code DataRecordMeta} used to create the object-array
+	 * @param mapper
+	 *            the {@code BaseMapper} used to resolve the start and end
+	 *            values; can be {@code null} if so the start and end will be
+	 *            set to {@code null}
+	 * 
+	 * @return the created object-array
+	 */
+	public Object[] createObjectArray(final IDataRecordMeta meta,
+			final BaseMapper<?> mapper) {
+		final DataType[] dataTypes = meta.getDataTypes();
+		final Object[] res = new Object[dataTypes.length];
+
+		// get the values
+		res[0] = getId();
+		res[1] = mapper == null ? null : mapper.resolve(getStart());
+		res[2] = mapper == null ? null : mapper.resolve(getEnd());
+
+		for (int pos = meta.getFirstPosDescModelIds(); pos <= meta
+				.getLastPosDescModelIds(); pos++) {
+			final String descModelId = meta.getDescriptorModelId(pos);
+			final Descriptor<?, ?, ?> desc = getDescriptor(descModelId);
+
+			// if we have a string use the uniqueString
+			if (DataType.STRING.equals(dataTypes[pos])) {
+				res[pos] = desc.getUniqueString();
+			} else {
+				res[pos] = desc.getValue();
+			}
+		}
+
+		return res;
 	}
 }

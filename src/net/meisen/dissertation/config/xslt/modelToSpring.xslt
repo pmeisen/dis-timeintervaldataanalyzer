@@ -22,6 +22,7 @@
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
+  <xsl:variable name="dataRecordFactoryId" select="mdef:getId('DATARECORDFACTORY_ID')" />
   <xsl:variable name="granularityFactoryId" select="mdef:getId('GRANULARITYFACTORY_ID')" />
   <xsl:variable name="timelineDefinitionId" select="mdef:getId('TIMELINEDEFINITION_ID')" />
   <xsl:variable name="identifierCacheId" select="mdef:getId('IDENTIFIERCACHE_ID')" />
@@ -207,7 +208,7 @@
           </bean>
         </xsl:otherwise>
       </xsl:choose>
-      
+            
       <!-- create the indexFactory to be used -->
       <xsl:choose>
         <xsl:when test="//mns:config/mns:factories/mns:indexes/@implementation">
@@ -522,6 +523,9 @@
           </constructor-arg>
         </bean>
       </xsl:for-each>
+      
+      <!-- create the dataRecordFactory -->
+      <bean id="{$dataRecordFactoryId}" class="net.meisen.dissertation.impl.indexes.datarecord.IndexedDataRecordFactory" />
       
       <!-- create the tidaModel -->      
       <bean id="{$tidaModelId}" class="net.meisen.dissertation.model.data.TidaModel">

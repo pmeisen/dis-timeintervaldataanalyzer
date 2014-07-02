@@ -12,6 +12,7 @@ import net.meisen.dissertation.impl.cache.TestFileCaches;
 import net.meisen.dissertation.impl.cache.TestFileFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.TestFileIdentifierCache;
 import net.meisen.dissertation.impl.cache.TestFileMetaDataCache;
+import net.meisen.dissertation.impl.cache.TestIdsOnlyDataRecordCache;
 import net.meisen.dissertation.impl.cache.TestMapDbBitmapCache;
 import net.meisen.dissertation.impl.cache.TestMapDbDataRecordCache;
 import net.meisen.dissertation.impl.cache.TestMemoryIdentifierCache;
@@ -42,7 +43,8 @@ import net.meisen.dissertation.impl.indexes.TestNestedIndexedCollection;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestBitmapId;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestEWAHBitmap;
 import net.meisen.dissertation.impl.indexes.datarecord.slices.TestRoaringBitmap;
-import net.meisen.dissertation.impl.measures.TestMapFactsHolder;
+import net.meisen.dissertation.impl.measures.TestMapFactsArrayBased;
+import net.meisen.dissertation.impl.measures.TestMapFactsDescriptorBased;
 import net.meisen.dissertation.impl.parser.query.TestAliveQueries;
 import net.meisen.dissertation.impl.parser.query.TestInsertQueries;
 import net.meisen.dissertation.impl.parser.query.TestLoadQueries;
@@ -72,6 +74,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.indexes.datarecord.TestProcessedDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.TestTidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.TestFactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.TestFactDescriptorSet;
 import net.meisen.dissertation.model.persistence.TestBasePersistor;
@@ -202,6 +205,7 @@ import org.junit.runners.Suite;
 		TestFileCaches.TestFileCachesSuite.class,
 		TestMapDbBitmapCache.class,
 		TestMapDbDataRecordCache.class,
+		TestIdsOnlyDataRecordCache.class,
 
 		// Test the index for facts
 		TestFactDescriptorSet.class,
@@ -212,9 +216,11 @@ import org.junit.runners.Suite;
 		TestMetaIndex.class,
 		TestIntervalIndex.class,
 		TestDataRecordIndex.class,
+		TestTidaIndex.class,
 
 		// Test the fact-holder
-		TestMapFactsHolder.class,
+		TestMapFactsArrayBased.class,
+		TestMapFactsDescriptorBased.class,
 
 		// Test the query
 		TestDescriptorValue.class, TestDescriptorComperator.class,

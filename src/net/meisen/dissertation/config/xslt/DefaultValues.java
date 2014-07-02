@@ -36,6 +36,7 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.indexes.datarecord.IDataRecordFactory;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
@@ -117,6 +118,13 @@ public class DefaultValues {
 	 * @see ITimeGranularityFactory
 	 */
 	public static final String GRANULARITYFACTORY_ID = "granularityFactory";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code DataRecordFactory}.
+	 * 
+	 * @see IDataRecordFactory
+	 */
+	public static final String DATARECORDFACTORY_ID = "dataRecordFactory";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code AggregationFunctionHandler}.

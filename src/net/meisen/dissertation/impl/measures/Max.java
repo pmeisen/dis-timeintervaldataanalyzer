@@ -6,6 +6,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * {@code AggregationFunction} to get the maximum value.
@@ -42,11 +43,15 @@ public class Max extends BaseAggregationFunction {
 		}
 
 		double max = Double.MIN_VALUE;
-		for (double fact : facts.facts()) {
+		final IDoubleIterator it = facts.factsIterator();
+		while (it.hasNext()) {
+			final double fact = it.next();
+
 			if (fact > max) {
 				max = fact;
 			}
 		}
+
 		return max;
 	}
 

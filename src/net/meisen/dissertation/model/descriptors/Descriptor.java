@@ -93,9 +93,9 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	 * Gets the fact value for {@code this}.
 	 * 
 	 * @param record
-	 *            the record to determine the fact value for
+	 *            the record to determine the fact value from
 	 * 
-	 * @return the fact value for the descriptor
+	 * @return the fact value of the descriptor
 	 */
 	public abstract double getFactValue(final IDataRecord record);
 
@@ -142,7 +142,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 
 	@Override
 	public abstract T clone();
-	
+
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + ": " + getUniqueString();

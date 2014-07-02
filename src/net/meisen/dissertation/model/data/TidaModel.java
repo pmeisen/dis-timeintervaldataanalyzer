@@ -23,6 +23,7 @@ import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.indexes.datarecord.IDataRecordFactory;
 import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -71,6 +72,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private BaseIndexFactory indexFactory;
+
+	@Autowired
+	@Qualifier(DefaultValues.DATARECORDFACTORY_ID)
+	private IDataRecordFactory dataRecordFactory;
 
 	@Autowired
 	@Qualifier(DefaultValues.DATASTRUCTURE_ID)
@@ -226,6 +231,9 @@ public class TidaModel implements IPersistable {
 			exceptionRegistry.throwException(TidaModelException.class, 1003,
 					loc);
 		}
+
+		// initialize the dataRecordFactory
+		dataRecordFactory.initialize(this);
 
 		// initialize the caches
 		this.metaDataCache.initialize(this);
@@ -845,5 +853,14 @@ public class TidaModel implements IPersistable {
 	 */
 	public Bitmap getValidRecords() {
 		return getIdentifierCache().getValidIdentifiers();
+	}
+
+	/**
+	 * Gets the used {@code DataRecordFactory}.
+	 * 
+	 * @return the used {@code DataRecordFactory}
+	 */
+	public IDataRecordFactory getDataRecordFactory() {
+		return dataRecordFactory;
 	}
 }

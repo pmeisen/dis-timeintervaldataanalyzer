@@ -50,7 +50,7 @@ public class TestTidaServer {
 
 		// directly create a socket
 		socket = new Socket();
-		socket.connect(new InetSocketAddress("localhost", 7001), 1000);
+		socket.connect(new InetSocketAddress("localhost", 7000), 1000);
 	}
 
 	/**

@@ -1,12 +1,12 @@
 package net.meisen.dissertation.model.util;
 
 /**
- * Iterator used to iterate over integers.
+ * Iterator used to iterate over doubles.
  * 
  * @author pmeisen
  * 
  */
-public interface IIntIterator {
+public interface IDoubleIterator {
 
 	/**
 	 * Is there more?
@@ -16,10 +16,10 @@ public interface IIntIterator {
 	public boolean hasNext();
 
 	/**
-	 * Return the next integer.
+	 * Return the next double.
 	 * 
-	 * @return the integer
+	 * @return the double
 	 */
-	public int next();
+	public double next();
 
 }

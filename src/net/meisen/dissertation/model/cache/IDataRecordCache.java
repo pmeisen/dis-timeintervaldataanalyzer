@@ -44,20 +44,6 @@ public interface IDataRecordCache extends ICache, Iterable<Integer> {
 	public Object[] get(final int recordId);
 
 	/**
-	 * Get the names of the different values of a record.
-	 * 
-	 * @return the names of the different values of a record
-	 */
-	public String[] getNames();
-
-	/**
-	 * Get the types of the different values of a record.
-	 * 
-	 * @return the types of the different values of a record
-	 */
-	public Class<?>[] getTypes();
-
-	/**
 	 * Gets an iterator used to iterate over the identifiers.
 	 * 
 	 * @return an iterator used to iterate over the identifiers

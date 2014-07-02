@@ -42,7 +42,9 @@
         <entry key="net.meisen.dissertation.exceptions.QueryEvaluationException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.TidaServerListenerException" 
-               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />  
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.exceptions.IndexedDataRecordFactoryException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" /> 
         <entry key="net.meisen.dissertation.impl.cache.BaseIdentifierCacheException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.impl.cache.FileIdentifierCacheException" 

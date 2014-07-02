@@ -7,6 +7,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * {@code AggregationFunction} to calculate the {@code Median}.
@@ -101,11 +102,21 @@ public class Median extends BaseAggregationFunction {
 
 		// calculate the median
 		final double median;
-		final double[] sortedFacts = facts.sortedFacts();
+		final IDoubleIterator it = facts.sortedFactsIterator();
+		int curPos = 0;
+		while (it.hasNext()) {
+			if (curPos == firstPos) {
+				break;
+			}
+			it.next();
+			
+			curPos++;
+		}
+
 		if (even) {
-			median = 0.5 * (sortedFacts[firstPos] + sortedFacts[firstPos + 1]);
+			median = 0.5 * (it.next() + it.next());
 		} else {
-			median = sortedFacts[firstPos];
+			median = it.next();
 		}
 
 		return median;

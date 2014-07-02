@@ -11,6 +11,8 @@ import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
@@ -121,8 +123,23 @@ public class TidaIndex implements IPersistable {
 	 * @return the values of the record, {@code null} if the identifier is
 	 *         invalid
 	 */
-	public Object[] getRecord(final int recordId) {
+	public IDataRecord getRecord(final int recordId) {
 		return recordIndex.get(recordId);
+	}
+
+	/**
+	 * Gets the object-array representing the values of the record with the
+	 * specified {@code recordId}.
+	 * 
+	 * @param recordId
+	 *            the identifier of the record for
+	 * 
+	 * @return the object-array representing the values of the record with the
+	 *         specified {@code recordId}; {@code null} if no record with the
+	 *         specified identifier exists
+	 */
+	public Object[] getRecordAsArray(final int recordId) {
+		return recordIndex.getArray(recordId);
 	}
 
 	/**
@@ -131,7 +148,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the types of the record values
 	 */
 	public Class<?>[] getRecordTypes() {
-		return recordIndex.getTypes();
+		return recordIndex.getMeta().getTypes();
 	}
 
 	/**
@@ -140,7 +157,7 @@ public class TidaIndex implements IPersistable {
 	 * @return the names of the record values
 	 */
 	public String[] getRecordNames() {
-		return recordIndex.getNames();
+		return recordIndex.getMeta().getNames();
 	}
 
 	/**
@@ -448,5 +465,91 @@ public class TidaIndex implements IPersistable {
 	 */
 	public int getLastRecordId() {
 		return dataId - 1;
+	}
+
+	/**
+	 * Gets the {@code Descriptor} for the specified {@code FactDescriptor}.
+	 * 
+	 * @param desc
+	 *            the {@code FactDescriptor} to get the {@code Descriptor} for
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code FactDescriptor}
+	 *         or {@code null} if non exists
+	 * 
+	 * @see Descriptor
+	 * @see FactDescriptor
+	 */
+	public Descriptor<?, ?, ?> getDescriptor(final FactDescriptor<?> desc) {
+		if (desc == null) {
+			return null;
+		} else {
+			return getDescriptor(desc.getModelId(), desc.getId());
+		}
+	}
+
+	/**
+	 * Gets the {@code Descriptor} for the specified {@code descModelId} and
+	 * {@code descId}.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the {@code DescriptorModel} the
+	 *            {@code Descriptor} belongs to
+	 * @param descId
+	 *            the identifier of the {@code Descriptor} to be retrieved
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code descModelId} and
+	 *         {@code descId} or {@code null} if non exists
+	 * 
+	 * @see Descriptor
+	 * @see FactDescriptor
+	 */
+	public Descriptor<?, ?, ?> getDescriptor(final String descModelId,
+			final Object descId) {
+		return model.getMetaDataModel().getDescriptor(descModelId, descId);
+	}
+
+	/**
+	 * Gets the {@code Descriptor} of the {@code Record} for the specified
+	 * {@code DescriptorModel}.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the {@code DescriptorModel}
+	 * @param recordId
+	 *            the identifier of the record to get the {@code Descriptor} for
+	 * 
+	 * @return the {@code Descriptor} for the specified {@code descModelId} and
+	 *         {@code recordId}, or {@code null} if non could be found
+	 */
+	public Descriptor<?, ?, ?> getDescriptorOfRecord(final String descModelId,
+			final int recordId) {
+
+		// make sure we have a valid record identifier
+		if (recordId < 0 || recordId > getLastRecordId()) {
+			return null;
+		}
+
+		// get the dimension of the DescriptorModel
+		final MetaIndexDimension<?> dim = getMetaIndex().get(descModelId);
+		if (dim == null) {
+			return null;
+		}
+
+		// create a bitmap of the one record
+		final Bitmap recBmp = Bitmap.createBitmap(getIndexFactory(), recordId);
+
+		// check if the record is valid
+		if (!recBmp.and(model.getValidRecords()).isBitSet()) {
+			return null;
+		}
+
+		// search for the record's slice
+		for (final Slice<?> slice : dim.getSlices()) {
+			final Bitmap bmp = slice.getBitmap();
+			if (recBmp.and(bmp).isBitSet()) {
+				return getDescriptor(descModelId, slice.getId());
+			}
+		}
+
+		return null;
 	}
 }

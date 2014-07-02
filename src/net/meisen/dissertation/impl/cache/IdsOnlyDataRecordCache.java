@@ -4,9 +4,11 @@ import java.util.Iterator;
 
 import net.meisen.dissertation.model.cache.IDataRecordCache;
 import net.meisen.dissertation.model.cache.IDataRecordCacheConfig;
-import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.indexes.datarecord.IDataRecordMeta;
 import net.meisen.dissertation.model.indexes.datarecord.ProcessedDataRecord;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.util.IIntIterator;
 
 /**
@@ -17,6 +19,13 @@ import net.meisen.dissertation.model.util.IIntIterator;
  * 
  */
 public class IdsOnlyDataRecordCache implements IDataRecordCache {
+
+	private TidaModel model;
+
+	@Override
+	public void initialize(final TidaModel model) {
+		this.model = model;
+	}
 
 	@Override
 	public boolean setPersistency(final boolean enable) {
@@ -29,15 +38,10 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 	}
 
 	@Override
-	public void initialize(final TidaModel model) {
-		// nothing to do
-	}
-
-	@Override
 	public void cache(final ProcessedDataRecord record) {
 		// nothing to do
 	}
-	
+
 	@Override
 	public void cache(final int id, final Object[] record) {
 		// nothing to do
@@ -45,17 +49,33 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 
 	@Override
 	public Object[] get(final int recordId) {
-		return new Object[] { recordId };
-	}
+		final TidaIndex index = model.getIndex();
+		final IDataRecordMeta meta = model.getDataRecordFactory().getMeta();
 
-	@Override
-	public String[] getNames() {
-		return new String[] { FieldNameGenerator.get().getIdFieldName() };
-	}
+		// make sure we have a valid record identifier
+		if (recordId < 0 || recordId > index.getLastRecordId()) {
+			return null;
+		}
 
-	@Override
-	public Class<?>[] getTypes() {
-		return new Class<?>[] { int.class };
+		// create the result
+		final Object[] res = new Object[meta.getTypes().length];
+		res[meta.getPosRecordId()] = recordId;
+		res[meta.getPosStart()] = null;
+		res[meta.getPosEnd()] = null;
+		for (int pos = meta.getFirstPosDescModelIds(); pos <= meta
+				.getLastPosDescModelIds(); pos++) {
+			final String descModelId = meta.getDescriptorModelId(pos);
+			final Descriptor<?, ?, ?> desc = index.getDescriptorOfRecord(
+					descModelId, recordId);
+
+			if (desc == null) {
+				res[pos] = null;
+			} else {
+				res[pos] = desc.getValue();
+			}
+		}
+
+		return res;
 	}
 
 	@Override

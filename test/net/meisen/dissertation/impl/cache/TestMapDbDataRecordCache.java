@@ -49,8 +49,8 @@ public class TestMapDbDataRecordCache extends ModuleBasedTest {
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 		setModulesHolder("/net/meisen/dissertation/impl/cache/mapDbDataRecordCacheModel.xml");
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+		model.initialize();
 		recCache = modulesHolder.getModule(DefaultValues.DATARECORDCACHE_ID);
-		recCache.initialize(model);
 	}
 
 	/**
@@ -59,7 +59,6 @@ public class TestMapDbDataRecordCache extends ModuleBasedTest {
 	@Test
 	public void testCachingAndReloading() {
 		final int amountOfRecords = 100;
-		model.initialize();
 
 		// cache some records
 		recCache.setPersistency(false);

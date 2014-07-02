@@ -1,27 +1,54 @@
 package net.meisen.dissertation.model.measures;
 
-import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
+import net.meisen.dissertation.model.util.IDoubleIterator;
+import net.meisen.dissertation.model.util.IIntIterator;
 
+/**
+ * A holder containing facts of records.
+ * 
+ * @author pmeisen
+ * 
+ */
 public interface IFactsHolder {
 
-	public void init(final int maxRecordId, final int capacity);
-
-	public void init(final FactDescriptorSet descriptors,
-			final TidaIndex index, final Bitmap bitmap);
-
+	/**
+	 * Get the fact of the record with the specified {@code recordId}. Returns
+	 * {@link Double#NaN} if no value is known.
+	 * 
+	 * @param recordId
+	 *            the identifier to get the value for
+	 * 
+	 * @return the fact associated to the record's identifier
+	 */
 	public double getFactOfRecord(final int recordId);
 
-	public void set(final int recordId, final double factValue);
-
-	public int maxRecordId();
-
+	/**
+	 * Gets the amount of facts contained in the holder.
+	 * 
+	 * @return the amount of facts
+	 */
 	public int amountOfFacts();
 
-	public int[] recordIds();
+	/**
+	 * Gets an iterator to iterate over the identifiers of the records with
+	 * fact-values.
+	 * 
+	 * @return an iterator to iterate over the identifiers
+	 */
+	public IIntIterator recordIdsIterator();
 
-	public double[] facts();
+	/**
+	 * Gets an iterator to iterate over the facts. The order is not defined and
+	 * can be of any order.
+	 * 
+	 * @return an iterator to iterate over the facts
+	 */
+	public IDoubleIterator factsIterator();
 
-	public double[] sortedFacts();
+	/**
+	 * Gets an iterator to iterate over the sorted facts.
+	 * 
+	 * @return an iterator to iterate over the sorted facts
+	 */
+	public IDoubleIterator sortedFactsIterator();
 }

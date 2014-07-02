@@ -1,7 +1,8 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.measures.MapFactsHolder;
+import net.meisen.dissertation.impl.measures.MapFactsArrayBased;
+import net.meisen.dissertation.impl.measures.MapFactsDescriptorBased;
 import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
@@ -13,6 +14,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.util.IIntIterator;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -257,12 +259,12 @@ public class MathExpressionEvaluator {
 	 * 
 	 * @return the unaggregated single values of each record of the descriptor
 	 */
-	protected MapFactsHolder evaluateMathForNode(final DescriptorLeaf node) {
+	protected IFactsHolder evaluateMathForNode(final DescriptorLeaf node) {
 		final String descModelId = node.get();
 
 		// create the result
-		final MapFactsHolder res = new MapFactsHolder();
-		res.init(facts.getDescriptors(descModelId), index, resultBitmap);
+		final MapFactsDescriptorBased res = new MapFactsDescriptorBased(
+				facts.getDescriptors(descModelId), index, resultBitmap);
 
 		return res;
 	}
@@ -289,11 +291,14 @@ public class MathExpressionEvaluator {
 		assert res1.amountOfFacts() == res2.amountOfFacts();
 
 		// create the result, res1 and res2 are both of the same size
-		final MapFactsHolder res = new MapFactsHolder();
-		res.init(index.getLastRecordId(), res1.amountOfFacts());
+		final MapFactsArrayBased res = new MapFactsArrayBased(
+				res1.amountOfFacts());
 
 		// set the values within the map
-		for (final int key : res1.recordIds()) {
+		final IIntIterator it = res1.recordIdsIterator();
+		while (it.hasNext()) {
+			final int key = it.next();
+
 			final double value = calculate(operator, res1.getFactOfRecord(key),
 					res2.getFactOfRecord(key));
 			res.set(key, value);
