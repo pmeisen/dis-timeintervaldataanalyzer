@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Properties;
 
 import net.meisen.dissertation.jdbc.QueryResponseHandler;
 import net.meisen.dissertation.jdbc.TidaResultSetType;
@@ -40,7 +41,12 @@ public class TestTidaServer {
 	 */
 	@Before
 	public void startServer() throws Exception {
-		server = TidaServer.create();
+
+		final Properties properties = new Properties();
+		properties.setProperty("tida.server.tsql.port", "9000");
+		
+
+		server = TidaServer.create(properties);
 		server.startAsync();
 
 		// wait for the server to start
@@ -50,7 +56,7 @@ public class TestTidaServer {
 
 		// directly create a socket
 		socket = new Socket();
-		socket.connect(new InetSocketAddress("localhost", 7000), 1000);
+		socket.connect(new InetSocketAddress("localhost", 9000), 1000);
 	}
 
 	/**
@@ -77,7 +83,7 @@ public class TestTidaServer {
 			p.initializeCommunication(
 					"select timeseries of count(PERSON) AS PERSON from testPersonModel",
 					handler);
-			
+
 			// handle data up to the meta-data
 			p.handleResponse(handler);
 

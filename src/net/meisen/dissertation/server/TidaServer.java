@@ -3,6 +3,7 @@ package net.meisen.dissertation.server;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -10,6 +11,7 @@ import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
+import net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder;
 import net.meisen.general.server.Server;
 import net.meisen.general.server.settings.pojos.Connector;
 
@@ -17,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.core.io.support.PropertiesLoaderSupport;
 
 /**
  * The server implementation.
@@ -41,6 +45,20 @@ public class TidaServer {
 	 * @see Server#startAsync()
 	 */
 	public void startAsync() {
+		if (LOG.isInfoEnabled()) {
+			final List<String> s = new ArrayList<String>();
+			for (final Connector connector : server.getServerSettings()
+					.getConnectorSettings()) {
+				if (connector.isEnable()) {
+					s.add(connector.getListener() + " (" + connector.getPort()
+							+ ")");
+				}
+			}
+
+			LOG.info("Server started asynchroniously with: "
+					+ Collections.concate(", ", s));
+		}
+
 		server.startAsync();
 	}
 
@@ -104,16 +122,46 @@ public class TidaServer {
 	}
 
 	/**
+	 * Creates an instance using the default properties.
+	 * 
+	 * @return the created {@code TidaServer}
+	 */
+	public static TidaServer create() {
+		return create(null);
+	}
+
+	/**
 	 * Creates an instance of a {@code TidaServer}, which is completely
 	 * auto-wired according to the configuration.
 	 * 
+	 * @param properties
+	 *            properties to be set for the configuration
+	 * 
 	 * @return the created {@code TidaServer} instance
 	 */
-	public static TidaServer create() {
+	public static TidaServer create(final Properties properties) {
+
+		final List<PropertiesLoaderSupport> holders;
+		if (properties == null) {
+			holders = null;
+		} else {
+			holders = new ArrayList<PropertiesLoaderSupport>();
+
+			// create a propertyHolder for the properties
+			final SpringPropertyHolder holder = new SpringPropertyHolder();
+			holder.setProperties(properties);
+			holder.setLocalOverride(true);
+			holder.setSystemPropertiesMode(PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_NEVER);
+			holder.setOtherHolderOverride(false);
+
+			// add the propertyHolder
+			holders.add(holder);
+		}
 
 		// create the instance
 		final ConfigurationCoreSettings settings = ConfigurationCoreSettings
-				.loadCoreSettings("sbconfigurator-core.xml", TidaConfig.class);
+				.loadCoreSettings("sbconfigurator-core.xml", TidaConfig.class,
+						holders, null);
 		return settings.getConfiguration().getModule("tidaServer");
 	}
 
