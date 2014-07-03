@@ -14,13 +14,13 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.help.Utilities;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceId;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -48,9 +48,9 @@ public class TestMapDbBitmapCache extends ModuleBasedTest {
 	public void create() {
 
 		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpMapDbBitmapCacheModel\\-.*$",
-				new File(System.getProperty("java.io.tmpdir")));
-		
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpMapDbBitmapCacheModel\\-.*$");
+
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 		setModulesHolder("/net/meisen/dissertation/impl/cache/mapDbBitmapCacheModel.xml");
 
@@ -222,10 +222,10 @@ public class TestMapDbBitmapCache extends ModuleBasedTest {
 
 		// delete all the created files
 		if (mc.getModelLocation() != null && mc.getModelLocation().exists()) {
-			Utilities.deleteDir(mc.getModelLocation());
+			Files.deleteOnExitDir(mc.getModelLocation());
 		}
 		if (mc.getLocation() != null && mc.getLocation().exists()) {
-			Utilities.deleteDir(mc.getLocation());
+			Files.deleteOnExitDir(mc.getLocation());
 		}
 	}
 }

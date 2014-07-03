@@ -10,11 +10,11 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.help.Utilities;
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -42,8 +42,8 @@ public class TestMapDbDataRecordCache extends ModuleBasedTest {
 	public void loadCache() {
 
 		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpMapDbDataRecordCacheModel\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpMapDbDataRecordCacheModel\\-.*$");
 
 		// load the model and get the cache
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
@@ -118,11 +118,11 @@ public class TestMapDbDataRecordCache extends ModuleBasedTest {
 			// delete all the created files
 			if (recCache.getModelLocation() != null
 					&& recCache.getModelLocation().exists()) {
-				Utilities.deleteDir(recCache.getModelLocation());
+				Files.deleteOnExitDir(recCache.getModelLocation());
 			}
 			if (recCache.getLocation() != null
 					&& recCache.getLocation().exists()) {
-				Utilities.deleteDir(recCache.getLocation());
+				Files.deleteOnExitDir(recCache.getLocation());
 			}
 		}
 	}

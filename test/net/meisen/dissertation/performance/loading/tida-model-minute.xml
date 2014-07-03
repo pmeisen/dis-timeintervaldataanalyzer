@@ -24,6 +24,7 @@
       <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
       <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
       <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
+      <records implementation="net.meisen.dissertation.impl.cache.MapDbDataRecordCache" />
     </caches>
 
     <dataretrievers>
@@ -74,8 +75,6 @@
     
     <interval name="INTERVAL_START" type="start" />
     <interval name="INTERVAL_END" type="end" />
-    
-    <key name="KEY" />
   </structure>
   
   <data metahandling="fail" intervalhandling="failOnNull">

@@ -1,13 +1,12 @@
 package net.meisen.dissertation.help;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.general.genmisc.types.Files;
@@ -99,13 +98,17 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 
 		// release all models
 		for (final TidaModel model : models) {
-			model.release(true);
+			try {
+				model.release(true);
+			} catch (final TidaModelException exception) {
+				// ignore
+			}
 		}
 
 		// clear the models
 		models.clear();
 
 		// delete the directory of the system
-		assertTrue(Files.deleteDir(new File(loader.getDefaultLocation())));
+		Files.deleteOnExitDir(new File(loader.getDefaultLocation()));
 	}
 }

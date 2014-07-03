@@ -168,8 +168,9 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 				+ amount);
 
 		// add more data
+		final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(retriever, config);
 		final MultipleDataSetIterator it = new MultipleDataSetIterator(
-				OfflineMode.FALSE, new DataRetrieverDataSet(retriever, config));
+				OfflineMode.FALSE, dataSet);
 
 		performance.start();
 		model.bulkLoadData(it);

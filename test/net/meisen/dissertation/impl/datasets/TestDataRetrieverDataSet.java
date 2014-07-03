@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureQueryConfig;
 import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
+import net.meisen.dissertation.model.dataretriever.DataCollection;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 
 import org.junit.Test;
@@ -44,8 +45,11 @@ public class TestDataRetrieverDataSet {
 			assertFalse(retriever.isValidPosition(i));
 		}
 
-		assertNotNull(retriever.getCollection());
-		assertEquals(0, retriever.getCollection().get().size());
+		final DataCollection<String> coll = retriever.createCollection();
+		assertNotNull(coll);
+		assertEquals(0, coll.get().size());
+		
+		coll.release();
 	}
 
 	/**

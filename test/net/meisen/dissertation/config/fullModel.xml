@@ -51,6 +51,7 @@
            The following cache implementations are available:
             + net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache
             + net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache
+            + net.meisen.dissertation.impl.cache.MapDbFactDescriptorModelSetCache
         -->
       <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
       

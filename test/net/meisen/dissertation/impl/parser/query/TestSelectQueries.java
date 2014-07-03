@@ -19,7 +19,6 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
-import net.meisen.dissertation.help.Utilities;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.measures.Max;
 import net.meisen.dissertation.impl.measures.Mean;
@@ -52,6 +51,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Files;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2216,8 +2216,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 
 		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
 		final String query = "select RECORDS from selectQueriesRecordRetrieval filter by PERSON='Philipp' AND LOCATION='Aachen'";
@@ -2285,8 +2285,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(counter, 1);
 
 		// cleanUp as much as possible of this test
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 	}
 
 	/**
@@ -2297,8 +2297,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 
 		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
 		final String query = "select IDS(RECORDS) from selectQueriesRecordRetrieval filter by PERSON='Tobias' OR LOCATION='Mönchengladbach'";
@@ -2340,8 +2340,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(counter, 2);
 
 		// cleanUp as much as possible of this test
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 	}
 
 	/**
@@ -2352,8 +2352,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		System.setProperty("test.rndUuid", UUID.randomUUID().toString());
 
 		// cleanUp temp of previous tests
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
 		final String query = "select COUNT(RECORDS) from selectQueriesRecordRetrieval startingwith [03.03.2014 00:00:00, 03.03.2014 00:00:00] filter by LOCATION='Aachen'";
@@ -2394,7 +2394,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(counter, 1);
 
 		// cleanUp as much as possible of this test
-		Utilities.deleteDir("^tmpSelectQueriesRecordRetrieval\\-.*$", new File(
-				System.getProperty("java.io.tmpdir")));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
+				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 	}
 }

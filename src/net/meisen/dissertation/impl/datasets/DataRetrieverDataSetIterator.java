@@ -17,6 +17,7 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
  */
 public class DataRetrieverDataSetIterator implements
 		IClosableIterator<IDataRecord> {
+	private DataCollection<String> collection;
 	private final DataIterator<String> it;
 
 	/**
@@ -26,6 +27,7 @@ public class DataRetrieverDataSetIterator implements
 	 * @param collection
 	 */
 	public DataRetrieverDataSetIterator(final DataCollection<String> collection) {
+		this.collection = collection;
 		this.it = collection.iterator();
 	}
 
@@ -49,5 +51,7 @@ public class DataRetrieverDataSetIterator implements
 		if (it instanceof ICloseableDataIterator) {
 			((ICloseableDataIterator) it).close();
 		}
+		
+		collection.release();
 	}
 }

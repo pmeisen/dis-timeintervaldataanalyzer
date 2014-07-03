@@ -436,7 +436,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 	/**
 	 * Tests the implementation of a {@code DataModel} using two
-	 * {@code DataRetrieverDataSet}.
+	 * {@code DataRetrieverDataSet} instances.
 	 * 
 	 * @throws TransformationFailedException
 	 *             if the xml cannot be read

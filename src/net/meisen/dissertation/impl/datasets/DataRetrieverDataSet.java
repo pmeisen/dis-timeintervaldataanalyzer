@@ -1,6 +1,5 @@
 package net.meisen.dissertation.impl.datasets;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -26,7 +25,7 @@ public class DataRetrieverDataSet implements IDataSet {
 	private final BaseDataRetriever retriever;
 	private final IQueryConfiguration query;
 
-	private DataCollection<String> coll = null;
+	private Collection<String> names;
 
 	/**
 	 * Constructor of a {@code DataSet} which defines the {@code DataRetriever}
@@ -61,14 +60,12 @@ public class DataRetrieverDataSet implements IDataSet {
 	 *         {@code DataRetriever}
 	 */
 	@SuppressWarnings("unchecked")
-	protected DataCollection<String> getCollection() {
+	protected DataCollection<String> createCollection() {
 		if (retriever == null) {
 			return EMPTYCOLL;
-		} else if (coll == null) {
-			coll = (DataCollection<String>) retriever.retrieve(query);
+		} else {
+			return (DataCollection<String>) retriever.retrieve(query);
 		}
-
-		return coll;
 	}
 
 	/**
@@ -77,13 +74,22 @@ public class DataRetrieverDataSet implements IDataSet {
 	 * @return the names of the data available within the {@code DataCollection}
 	 */
 	protected Collection<String> getNames() {
-		final DataCollection<String> coll = getCollection();
-		return coll == null ? new ArrayList<String>(0) : coll.getNames();
+
+		if (names == null) {
+			final DataCollection<String> coll = createCollection();
+			names = coll.getNames();
+
+			// release the collection again
+			coll.release();
+		}
+
+		return names;
 	}
 
 	@Override
 	public Iterator<IDataRecord> iterator() {
-		return new DataRetrieverDataSetIterator(getCollection());
+		final DataCollection<String> coll = createCollection();
+		return new DataRetrieverDataSetIterator(coll);
 	}
 
 	@Override

@@ -290,20 +290,29 @@ public class TidaModel implements IPersistable {
 		getDataRecordCache().release();
 
 		// delete created files if necessary
+		final boolean deleted;
 		if (deleteLocation && getLocation().exists()) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Deleting the files of the model '" + getId()
 						+ "' at '" + getLocation() + ".");
 			}
 
-			if (!Files.deleteDir(getLocation())) {
-				exceptionRegistry.throwException(TidaModelException.class,
-						1004, getLocation());
-			}
+			deleted = Files.deleteOnExitDir(getLocation());
+		} else {
+			deleted = true;
 		}
 
 		// the model isn't initialized anymore
 		initialized = false;
+
+		/*
+		 * Throw an exception after the successful releasing, if the directory
+		 * could not be deleted.
+		 */
+		if (!deleted) {
+			exceptionRegistry.throwException(TidaModelException.class, 1004,
+					getLocation());
+		}
 	}
 
 	/**
