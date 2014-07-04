@@ -25,10 +25,11 @@ public class Median extends BaseAggregationFunction {
 			return getDefaultValue();
 		}
 
-		// get the first descriptor to check if invariants are contained
 		if (descriptors.containsVariantRecords()) {
-			// TODO support it
-			throw new UnsupportedOperationException("Currently not supported!");
+
+			// use the implementation of the factHolders to handle this
+			return aggregate(index, bitmap, new MapFactsDescriptorBased(
+					descriptors, index, bitmap));
 		} else {
 			final int amount = bitmap.determineCardinality();
 
@@ -109,7 +110,7 @@ public class Median extends BaseAggregationFunction {
 				break;
 			}
 			it.next();
-			
+
 			curPos++;
 		}
 

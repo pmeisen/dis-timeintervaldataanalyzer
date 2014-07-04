@@ -51,4 +51,11 @@ public interface IFactsHolder {
 	 * @return an iterator to iterate over the sorted facts
 	 */
 	public IDoubleIterator sortedFactsIterator();
+
+	/**
+	 * Gets an iterator to iterate over the sorted facts (descending).
+	 * 
+	 * @return an iterator to iterate over the sorted facts (descending)
+	 */
+	public IDoubleIterator descSortedFactsIterator();
 }

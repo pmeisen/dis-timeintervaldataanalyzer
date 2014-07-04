@@ -31,6 +31,7 @@ public class TestMapFactsArrayBased extends ExceptionBasedTest {
 		assertFalse(map.recordIdsIterator().hasNext());
 		assertFalse(map.factsIterator().hasNext());
 		assertFalse(map.sortedFactsIterator().hasNext());
+		assertFalse(map.descSortedFactsIterator().hasNext());
 
 		assertEquals(0, map.amountOfFacts());
 		assertEquals(Double.NaN, map.getFactOfRecord(4), 0.0);
@@ -82,5 +83,10 @@ public class TestMapFactsArrayBased extends ExceptionBasedTest {
 		assertEquals(3.0, sortedFactsIt.next(), 0.0);
 		assertEquals(3.2, sortedFactsIt.next(), 0.0);
 
+		// check the descending sorted facts iterator
+		final IDoubleIterator descSortedFactsIt = map.descSortedFactsIterator();
+		assertEquals(3.2, descSortedFactsIt.next(), 0.0);
+		assertEquals(3.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(1.1, descSortedFactsIt.next(), 0.0);
 	}
 }

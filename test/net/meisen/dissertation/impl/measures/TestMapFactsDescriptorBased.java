@@ -68,6 +68,7 @@ public class TestMapFactsDescriptorBased extends LoaderBasedTest {
 		assertFalse(map.recordIdsIterator().hasNext());
 		assertFalse(map.factsIterator().hasNext());
 		assertFalse(map.sortedFactsIterator().hasNext());
+		assertFalse(map.descSortedFactsIterator().hasNext());
 
 		assertEquals(0, map.amountOfFacts());
 		assertEquals(Double.NaN, map.getFactOfRecord(4), 0.0);
@@ -230,5 +231,30 @@ public class TestMapFactsDescriptorBased extends LoaderBasedTest {
 		sortedFactsIt = createMap(5).sortedFactsIterator();
 		assertEquals(110.0, sortedFactsIt.next(), 0.0);
 		assertEquals(110.0, sortedFactsIt.next(), 0.0);
+
+		// check the descendant sorted facts iterator
+		IDoubleIterator descSortedFactsIt;
+		descSortedFactsIt = createMap(1).descSortedFactsIterator();
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(100.0, descSortedFactsIt.next(), 0.0);
+
+		descSortedFactsIt = createMap(2).descSortedFactsIterator();
+		assertEquals(130.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(100.0, descSortedFactsIt.next(), 0.0);
+
+		descSortedFactsIt = createMap(3).descSortedFactsIterator();
+		assertEquals(130.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+
+		descSortedFactsIt = createMap(4).descSortedFactsIterator();
+		assertEquals(130.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+
+		descSortedFactsIt = createMap(5).descSortedFactsIterator();
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
+		assertEquals(110.0, descSortedFactsIt.next(), 0.0);
 	}
 }

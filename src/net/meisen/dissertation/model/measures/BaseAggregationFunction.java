@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.measures;
 
+import net.meisen.dissertation.impl.measures.MapFactsDescriptorBased;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -66,8 +67,9 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 		double sum = 0;
 		if (descriptors.containsVariantRecords()) {
-			// TODO support it
-			throw new UnsupportedOperationException("Currently not supported!");
+			
+			// use the implementation of the factHolders to handle this
+			return sum(new MapFactsDescriptorBased(descriptors, index, bitmap));
 		} else {
 			for (final FactDescriptor<?> desc : descriptors) {
 

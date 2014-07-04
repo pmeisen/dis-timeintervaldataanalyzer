@@ -146,4 +146,27 @@ public class MapFactsArrayBased implements IFactsHolder {
 			}
 		};
 	}
+
+	@Override
+	public IDoubleIterator descSortedFactsIterator() {
+		final double[] facts = map.values();
+		Arrays.sort(facts);
+
+		return new IDoubleIterator() {
+			int pos = facts.length - 1;
+
+			@Override
+			public boolean hasNext() {
+				return pos > -1;
+			}
+
+			@Override
+			public double next() {
+				final int lastPos = pos;
+				pos--;
+
+				return facts[lastPos];
+			}
+		};
+	}
 }

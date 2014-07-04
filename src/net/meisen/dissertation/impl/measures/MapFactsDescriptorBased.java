@@ -20,6 +20,65 @@ import net.meisen.dissertation.model.util.IIntIterator;
  * 
  */
 public class MapFactsDescriptorBased implements IFactsHolder {
+
+	private final class DoubleIterator implements IDoubleIterator {
+		private final Iterator<FactDescriptor<?>> it;
+
+		private double curFact = Double.NaN;
+		private int amountOfFacts = -1;
+		private int nextPos = 0;
+
+		public DoubleIterator(final FactDescriptorSet descriptors,
+				final boolean ascOrder) {
+			if (ascOrder) {
+				it = descriptors.iterator();
+			} else {
+				it = descriptors.descendingIterator();
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return checkNext();
+		}
+
+		@Override
+		public double next() {
+			if (checkNext()) {
+
+				nextPos++;
+				return curFact;
+			} else {
+				throw new IllegalStateException("No next value available.");
+			}
+		}
+
+		private boolean checkNext() {
+
+			// make sure we have the current amount
+			if (nextPos + 1 > amountOfFacts) {
+				amountOfFacts = -1;
+
+				while (amountOfFacts < 1) {
+					if (it.hasNext()) {
+						final FactDescriptor<?> desc = it.next();
+						final Bitmap bmp = getBitmap(desc);
+
+						curFact = desc.getFact();
+						amountOfFacts = bmp.determineCardinality();
+						nextPos = 0;
+					} else {
+						return false;
+					}
+				}
+
+				return true;
+			} else {
+				return true;
+			}
+		}
+	};
+
 	private final FactDescriptorSet descriptors;
 	private final TidaIndex index;
 	private final Bitmap bitmap;
@@ -123,58 +182,18 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 	@Override
 	public IDoubleIterator factsIterator() {
 		if (array == null) {
-			return new IDoubleIterator() {
-				private final Iterator<FactDescriptor<?>> it = descriptors
-						.iterator();
-
-				private double curFact = Double.NaN;
-				private int amountOfFacts = -1;
-				private int nextPos = 0;
-
-				@Override
-				public boolean hasNext() {
-					return checkNext();
-				}
-
-				@Override
-				public double next() {
-					if (checkNext()) {
-
-						nextPos++;
-						return curFact;
-					} else {
-						throw new IllegalStateException(
-								"No next value available.");
-					}
-				}
-
-				private boolean checkNext() {
-
-					// make sure we have the current amount
-					if (nextPos + 1 > amountOfFacts) {
-						amountOfFacts = -1;
-
-						while (amountOfFacts < 1) {
-							if (it.hasNext()) {
-								final FactDescriptor<?> desc = it.next();
-								final Bitmap bmp = getBitmap(desc);
-
-								curFact = desc.getFact();
-								amountOfFacts = bmp.determineCardinality();
-								nextPos = 0;
-							} else {
-								return false;
-							}
-						}
-
-						return true;
-					} else {
-						return true;
-					}
-				}
-			};
+			return new DoubleIterator(descriptors, true);
 		} else {
 			return array.factsIterator();
+		}
+	}
+
+	@Override
+	public IDoubleIterator descSortedFactsIterator() {
+		if (array == null) {
+			return new DoubleIterator(descriptors, false);
+		} else {
+			return array.descSortedFactsIterator();
 		}
 	}
 

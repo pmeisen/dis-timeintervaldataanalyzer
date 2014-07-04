@@ -24,15 +24,17 @@ public class Min extends BaseAggregationFunction {
 			return getDefaultValue();
 		}
 
-		// get the first descriptor to check if invariants are contained
 		if (descriptors.containsVariantRecords()) {
-			// TODO support it
-			throw new UnsupportedOperationException("Currently not supported!");
-		}
 
-		// get the first descriptor and get it's value
-		final FactDescriptor<?> first = descriptors.first();
-		return first.getFact();
+			// use the implementation of the factHolders to handle this
+			return aggregate(index, bitmap, new MapFactsDescriptorBased(
+					descriptors, index, bitmap));
+		} else {
+
+			// get the first descriptor and get it's value
+			final FactDescriptor<?> first = descriptors.first();
+			return first.getFact();
+		}
 	}
 
 	@Override
@@ -43,13 +45,9 @@ public class Min extends BaseAggregationFunction {
 		}
 
 		double min = Double.MAX_VALUE;
-		final IDoubleIterator it = facts.factsIterator();
-		while (it.hasNext()) {
-			final double fact = it.next();
-
-			if (fact < min) {
-				min = fact;
-			}
+		final IDoubleIterator it = facts.sortedFactsIterator();
+		if (it.hasNext()) {
+			min = it.next();
 		}
 
 		return min;
