@@ -50,11 +50,6 @@ public class TestTidaServer {
 		server = TidaServer.create(properties);
 		server.startAsync();
 		
-		// wait for the server to start
-		while (!server.isRunning()) {
-			Thread.sleep(50);
-		}
-
 		// directly create a socket
 		socket = new Socket();
 		socket.connect(new InetSocketAddress("localhost", serverPort), 1000);

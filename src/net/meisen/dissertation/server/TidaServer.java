@@ -40,11 +40,15 @@ public class TidaServer {
 	private TidaModelHandler handler;
 
 	/**
-	 * Starts the server asynchronously.
+	 * Starts the server asynchronously. The methods holds until the server is
+	 * started.
 	 * 
 	 * @see Server#startAsync()
 	 */
 	public void startAsync() {
+		server.startAsync();
+		server.waitForStart();
+
 		if (LOG.isInfoEnabled()) {
 			final List<String> s = new ArrayList<String>();
 			for (final Connector connector : server.getServerSettings()
@@ -58,8 +62,6 @@ public class TidaServer {
 			LOG.info("Server started asynchroniously with: "
 					+ Collections.concate(", ", s));
 		}
-
-		server.startAsync();
 	}
 
 	/**
@@ -78,19 +80,11 @@ public class TidaServer {
 				}
 			}
 
-			LOG.info("Server started with: " + Collections.concate(", ", s));
+			LOG.info("Server will be started with: "
+					+ Collections.concate(", ", s));
 		}
 
 		server.start();
-	}
-
-	/**
-	 * Checks if the server is running.
-	 * 
-	 * @return {@code true} if the server is running, otherwise {@code false}
-	 */
-	public boolean isRunning() {
-		return server.isRunning();
 	}
 
 	/**
