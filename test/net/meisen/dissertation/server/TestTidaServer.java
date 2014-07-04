@@ -29,6 +29,7 @@ import org.junit.Test;
  * 
  */
 public class TestTidaServer {
+	private final int serverPort = 6666;
 
 	private TidaServer server;
 	private Socket socket;
@@ -43,12 +44,12 @@ public class TestTidaServer {
 	public void startServer() throws Exception {
 
 		final Properties properties = new Properties();
-		properties.setProperty("tida.server.tsql.port", "9000");
+		properties.setProperty("tida.server.tsql.port", "" + serverPort);
 		
 
 		server = TidaServer.create(properties);
 		server.startAsync();
-
+		
 		// wait for the server to start
 		while (!server.isRunning()) {
 			Thread.sleep(50);
@@ -56,7 +57,7 @@ public class TestTidaServer {
 
 		// directly create a socket
 		socket = new Socket();
-		socket.connect(new InetSocketAddress("localhost", 9000), 1000);
+		socket.connect(new InetSocketAddress("localhost", serverPort), 1000);
 	}
 
 	/**
