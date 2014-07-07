@@ -147,7 +147,7 @@ OP_SET      : S E T;
 OP_VALUES   : V A L U E S;
 OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
-OP_FILTERBY : F I L T E R ' ' B Y;
+OP_FILTERBY : F I L T E R ' ' B Y | W H E R E;
 OP_TRANSPOSE: T R A N S P O S E;
 OP_IDONLY   : I D S;
 
