@@ -106,6 +106,10 @@ public class TidaServer {
 	public void shutdown(final boolean cleanUp) {
 		server.shutdown();
 
+		if (LOG.isInfoEnabled()) {
+			LOG.info("The server is shut down.");
+		}
+
 		if (cleanUp) {
 			if (!Files.deleteDir(new File(handler.getDefaultLocation()))) {
 				if (LOG.isWarnEnabled()) {
