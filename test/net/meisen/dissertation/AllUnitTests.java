@@ -46,6 +46,7 @@ import net.meisen.dissertation.impl.indexes.datarecord.slices.TestRoaringBitmap;
 import net.meisen.dissertation.impl.measures.TestMapFactsArrayBased;
 import net.meisen.dissertation.impl.measures.TestMapFactsDescriptorBased;
 import net.meisen.dissertation.impl.parser.query.TestAliveQueries;
+import net.meisen.dissertation.impl.parser.query.TestGetQueries;
 import net.meisen.dissertation.impl.parser.query.TestInsertQueries;
 import net.meisen.dissertation.impl.parser.query.TestLoadQueries;
 import net.meisen.dissertation.impl.parser.query.TestSelectQueries;
@@ -227,7 +228,7 @@ import org.junit.runners.Suite;
 		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
 		TestGroupEvaluator.class, TestAliveQueries.class,
 		TestLoadQueries.class, TestUnloadQueries.class,
-		TestSelectQueries.class, TestInsertQueries.class,
+		TestSelectQueries.class, TestInsertQueries.class, TestGetQueries.class,
 
 		// Test the server
 		TestTidaServer.class })

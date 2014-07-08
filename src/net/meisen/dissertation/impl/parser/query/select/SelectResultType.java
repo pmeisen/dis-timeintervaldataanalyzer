@@ -1,12 +1,13 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
 /**
- * Enum definition of the different results possible when querying for data.
+ * Enum definition of the different results possible when querying for data
+ * using a select-statement.
  * 
  * @author pmeisen
  * 
  */
-public enum ResultType {
+public enum SelectResultType {
 	/**
 	 * The user expects a time-series as result.
 	 */

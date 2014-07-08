@@ -28,7 +28,7 @@ import net.meisen.dissertation.impl.measures.Mode;
 import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
-import net.meisen.dissertation.impl.parser.query.select.ResultType;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
@@ -156,7 +156,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT TIMESERIES FROM MODELID");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
 	}
@@ -169,7 +169,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT TRANSPOSE(TIMESERIES) FROM MODELID");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 		assertTrue(query.isTransposed());
 		assertNull(query.getInterval());
 	}
@@ -182,7 +182,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT RECORDS FROM MODELID");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
 	}
@@ -195,7 +195,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT IDS(RECORDS) FROM MODELID");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
 	}
@@ -208,7 +208,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT COUNT(RECORDS) FROM MODELID");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.RECORDS, query.getResultType());
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
 	}
@@ -261,7 +261,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT TIMESERIES FROM MODELID IN (500 ,600)");
 
 		assertEquals("MODELID", query.getModelId());
-		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 
 		final Interval<?> interval = query.getInterval();
 		assertNotNull(interval);
@@ -285,7 +285,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("SELECT TIMESERIES FROM ModelId IN (15.06.2014 , 15.06.2015 20:10:11]");
 
 		assertEquals("ModelId", query.getModelId());
-		assertEquals(ResultType.TIMESERIES, query.getResultType());
+		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 
 		final Interval<?> interval = query.getInterval();
 		assertNotNull(interval);

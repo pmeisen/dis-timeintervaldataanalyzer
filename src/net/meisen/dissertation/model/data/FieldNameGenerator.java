@@ -86,6 +86,15 @@ public class FieldNameGenerator {
 	public String getCountFieldName() {
 		return _generateReservedField("COUNT");
 	}
+	
+	/**
+	 * Gets the name used for the field containing the model-id-value.
+	 * 
+	 * @return the name used for the field containing the model-id-value
+	 */
+	public String getModelIdFieldName() {
+		return _generateReservedField("MODELID");
+	}
 
 	private String _generateReservedField(final String resWord) {
 		return "[" + resWord + "]";

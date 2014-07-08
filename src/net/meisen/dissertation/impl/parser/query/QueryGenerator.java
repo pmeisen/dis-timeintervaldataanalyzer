@@ -25,6 +25,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAliveContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGetContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprInsertContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
@@ -51,11 +52,13 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
+import net.meisen.dissertation.impl.parser.query.get.GetQuery;
+import net.meisen.dissertation.impl.parser.query.get.GetResultType;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
-import net.meisen.dissertation.impl.parser.query.select.ResultType;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
@@ -305,10 +308,24 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		q.addData(interval, data);
 	}
 
-	/**
-	 * Create the {@code query} and mark the process to be in-progress, i.e.
-	 * {@link #isFinalized()} returns {@code false}.
-	 */
+	@Override
+	public void enterExprGet(final ExprGetContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new GetQuery();
+	}
+
+	@Override
+	public void exitExprGet(final ExprGetContext ctx) {
+		
+		q(GetQuery.class).setResultType(resolveGetResultType(ctx));
+		
+		finalized = true;
+	}
+
 	@Override
 	public void enterExprSelect(final ExprSelectContext ctx) {
 		if (this.query != null) {
@@ -495,7 +512,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprSelectTimeSeries(final ExprSelectTimeSeriesContext ctx) {
-		final ResultType type = resolveResultType(ctx);
+		final SelectResultType type = resolveSelectResultType(ctx);
 		final boolean transposed = resolveTransposition(ctx);
 
 		q(SelectQuery.class).setResultType(type);
@@ -504,7 +521,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprSelectRecords(final ExprSelectRecordsContext ctx) {
-		final ResultType type = resolveResultType(ctx);
+		final SelectResultType type = resolveSelectResultType(ctx);
 		final boolean idsOnly = resolveIdsOnly(ctx);
 		final boolean count = resolveCount(ctx);
 
@@ -884,25 +901,49 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	/**
-	 * Determines the {@code ResultType} from the context.
+	 * Determines the {@code SelectResultType} from the context.
 	 * 
 	 * @param ctx
 	 *            the context of the parser to be checked
 	 * 
-	 * @return the resolved {@code ResultType}
+	 * @return the resolved {@code SelectResultType}
 	 * 
 	 * @throws QueryParsingException
-	 *             if the {@code IntervalType} cannot be resolved, more detailed
-	 *             the {@code QueryParsingException} is wrapped within a
-	 *             {@code ForwardedRuntimeException}
+	 *             if the {@code SelectResultType} cannot be resolved, more
+	 *             detailed the {@code QueryParsingException} is wrapped within
+	 *             a {@code ForwardedRuntimeException}
 	 */
-	protected ResultType resolveResultType(final ParserRuleContext ctx)
-			throws QueryParsingException {
+	protected SelectResultType resolveSelectResultType(
+			final ParserRuleContext ctx) throws QueryParsingException {
 
 		if (ctx.getToken(QueryGrammarParser.TYPE_RECORDS, 0) != null) {
-			return ResultType.RECORDS;
+			return SelectResultType.RECORDS;
 		} else if (ctx.getToken(QueryGrammarParser.TYPE_TIMESERIES, 0) != null) {
-			return ResultType.TIMESERIES;
+			return SelectResultType.TIMESERIES;
+		} else {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1005, ctx.getText());
+		}
+	}
+
+	/**
+	 * Determines the {@code GetResultType} from the context.
+	 * 
+	 * @param ctx
+	 *            the context of the parser to be checked
+	 * 
+	 * @return the resolved {@code GetResultType}
+	 * 
+	 * @throws QueryParsingException
+	 *             if the {@code GetResultType} cannot be resolved, more
+	 *             detailed the {@code QueryParsingException} is wrapped within
+	 *             a {@code ForwardedRuntimeException}
+	 */
+	protected GetResultType resolveGetResultType(final ParserRuleContext ctx)
+			throws QueryParsingException {
+
+		if (ctx.getToken(QueryGrammarParser.TYPE_MODELS, 0) != null) {
+			return GetResultType.MODELS;
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());

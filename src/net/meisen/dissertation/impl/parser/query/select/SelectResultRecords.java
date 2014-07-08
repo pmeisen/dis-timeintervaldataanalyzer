@@ -35,9 +35,9 @@ public class SelectResultRecords extends SelectResult {
 	public SelectResultRecords(final SelectQuery query) {
 		super(query);
 
-		if (!ResultType.RECORDS.equals(query.getResultType())) {
+		if (!SelectResultType.RECORDS.equals(query.getResultType())) {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					1019, ResultType.RECORDS.toString(), query.getResultType()
+					1019, SelectResultType.RECORDS.toString(), query.getResultType()
 							.toString());
 		}
 	}

@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.parser.query.select.ResultType;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
@@ -77,15 +77,15 @@ public class SelectEvaluator {
 	 * @see SelectQuery#getResultType()
 	 */
 	protected SelectResult createSelectResult(final SelectQuery query) {
-		final ResultType resultType = query.getResultType();
+		final SelectResultType selectResultType = query.getResultType();
 
-		if (ResultType.TIMESERIES.equals(resultType)) {
+		if (SelectResultType.TIMESERIES.equals(selectResultType)) {
 			return new SelectResultTimeSeries(query);
-		} else if (ResultType.RECORDS.equals(resultType)) {
+		} else if (SelectResultType.RECORDS.equals(selectResultType)) {
 			return new SelectResultRecords(query);
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					1018, resultType == null ? null : resultType.toString());
+					1018, selectResultType == null ? null : selectResultType.toString());
 		}
 	}
 }

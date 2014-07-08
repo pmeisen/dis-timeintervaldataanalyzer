@@ -31,9 +31,9 @@ public class SelectResultTimeSeries extends SelectResult {
 	public SelectResultTimeSeries(final SelectQuery query) {
 		super(query);
 
-		if (!ResultType.TIMESERIES.equals(query.getResultType())) {
+		if (!SelectResultType.TIMESERIES.equals(query.getResultType())) {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					1019, ResultType.TIMESERIES.toString(), query
+					1019, SelectResultType.TIMESERIES.toString(), query
 							.getResultType().toString());
 		}
 	}

@@ -32,7 +32,7 @@ public class SelectQuery implements IQuery {
 	private final List<DescriptorMathTree> measures;
 
 	private String modelId;
-	private ResultType type;
+	private SelectResultType type;
 	private Interval<?> interval;
 	private boolean transposed;
 	private boolean idsOnly;
@@ -58,7 +58,7 @@ public class SelectQuery implements IQuery {
 	 * 
 	 * @param type
 	 */
-	public void setResultType(final ResultType type) {
+	public void setResultType(final SelectResultType type) {
 		this.type = type;
 	}
 
@@ -67,7 +67,7 @@ public class SelectQuery implements IQuery {
 	 * 
 	 * @return the {@code ResultType}
 	 */
-	public ResultType getResultType() {
+	public SelectResultType getResultType() {
 		return type;
 	}
 

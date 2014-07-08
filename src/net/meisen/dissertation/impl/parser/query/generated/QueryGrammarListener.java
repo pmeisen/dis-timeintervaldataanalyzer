@@ -209,6 +209,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitCompDescriptorEqual(@NotNull QueryGrammarParser.CompDescriptorEqualContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprGet}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprGet(@NotNull QueryGrammarParser.ExprGetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprGet}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprGet(@NotNull QueryGrammarParser.ExprGetContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorOpenInterval}.
 	 * @param ctx the parse tree
 	 */

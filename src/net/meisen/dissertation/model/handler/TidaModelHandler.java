@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -128,6 +129,15 @@ public class TidaModelHandler {
 
 	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
 	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
+
+	/**
+	 * The {@code TidaModel} instances held by {@code this}.
+	 * 
+	 * @return a set of loaded {@code TidaModel} instances
+	 */
+	public Set<String> getTidaModels() {
+		return Collections.unmodifiableSet(moduleHolders.keySet());
+	}
 
 	/**
 	 * Gets the {@code TidaModel} loaded by the {@code ModuleHolder} with the

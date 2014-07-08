@@ -25,7 +25,12 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive) EOF;
+root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet) EOF;
+
+/*
+ * Define the different expressions/parts of the get statement
+ */
+exprGet       : STMT_GET TYPE_MODELS;
 
 /*
  * Define the different expressions/parts of the alive statement
@@ -124,6 +129,7 @@ POS_START_EXCL : BRACKET_SQUARE_OPENED S T A R T '-' BRACKET_SQUARE_CLOSED;
 POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 
 // reserved words to define a SELECT statement
+STMT_GET      : G E T;
 STMT_SELECT   : S E L E C T;
 STMT_INSERT   : I N S E R T;
 STMT_LOAD     : L O A D;
@@ -134,9 +140,10 @@ STMT_ALIVE    : A L I V E;
 PROP_AUTOLOAD : A U T O L O A D;
 PROP_FORCE    : F O R C E;
 
-// reserved words to define the types of data to select
-TYPE_TIMESERIES          : T I M E S E R I E S;
-TYPE_RECORDS             : R E C O R D S;
+// reserved words to define the types of data to select/get
+TYPE_TIMESERIES  : T I M E S E R I E S;
+TYPE_RECORDS     : R E C O R D S;
+TYPE_MODELS      : M O D E L S;
 
 // reserved words to define special positions in the statement
 OP_FROM     : F R O M;
