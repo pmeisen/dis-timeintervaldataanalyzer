@@ -320,9 +320,9 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprGet(final ExprGetContext ctx) {
-		
+
 		q(GetQuery.class).setResultType(resolveGetResultType(ctx));
-		
+
 		finalized = true;
 	}
 
@@ -944,6 +944,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		if (ctx.getToken(QueryGrammarParser.TYPE_MODELS, 0) != null) {
 			return GetResultType.MODELS;
+		} else if (ctx.getToken(QueryGrammarParser.TYPE_VERSION, 0) != null) {
+			return GetResultType.VERSION;
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());

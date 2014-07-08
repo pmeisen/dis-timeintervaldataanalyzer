@@ -86,7 +86,7 @@ public class FieldNameGenerator {
 	public String getCountFieldName() {
 		return _generateReservedField("COUNT");
 	}
-	
+
 	/**
 	 * Gets the name used for the field containing the model-id-value.
 	 * 
@@ -94,6 +94,33 @@ public class FieldNameGenerator {
 	 */
 	public String getModelIdFieldName() {
 		return _generateReservedField("MODELID");
+	}
+
+	/**
+	 * Gets the name used for the field containing the db-title-value.
+	 * 
+	 * @return the name used for the field containing the db-title-value
+	 */
+	public String getDbTitleFieldName() {
+		return _generateReservedField("DBIMPLTITLE");
+	}
+
+	/**
+	 * Gets the name used for the field containing the db-version-value.
+	 * 
+	 * @return the name used for the field containing the db-version-value
+	 */
+	public String getDbVersionFieldName() {
+		return _generateReservedField("DBIMPLVERSION");
+	}
+
+	/**
+	 * Gets the name used for the field containing the build-value.
+	 * 
+	 * @return the name used for the field containing the build-value
+	 */
+	public String getInternalRevisionFieldName() {
+		return _generateReservedField("DBIMPLBUILD");
 	}
 
 	private String _generateReservedField(final String resWord) {

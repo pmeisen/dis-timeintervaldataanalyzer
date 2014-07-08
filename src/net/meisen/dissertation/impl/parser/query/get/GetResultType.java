@@ -11,5 +11,9 @@ public enum GetResultType {
 	/**
 	 * The user expects a set of known {@code TidaModel} instances as result.
 	 */
-	MODELS;
+	MODELS,
+	/**
+	 * The user expects information about the version of the database.
+	 */
+	VERSION;
 }

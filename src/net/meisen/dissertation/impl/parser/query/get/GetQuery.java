@@ -1,9 +1,11 @@
 package net.meisen.dissertation.impl.parser.query.get;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
 import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
@@ -34,10 +36,17 @@ public class GetQuery implements IQuery {
 	}
 
 	@Override
-	public GetResult evaluate(final TidaModelHandler handler,
+	public IQueryResultSet evaluate(final TidaModelHandler handler,
 			final TidaModel model, final IResourceResolver resolver)
 			throws ForwardedRuntimeException, CancellationException {
-		return new GetResult(handler.getTidaModels());
+		if (getResultType().equals(GetResultType.MODELS)) {
+			return new GetResultModels(handler.getTidaModels());
+		} else if (getResultType().equals(GetResultType.VERSION)) {
+			return new GetResultVersion();
+		} else {
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1018, getResultType());
+		}
 	}
 
 	@Override
@@ -67,5 +76,10 @@ public class GetQuery implements IQuery {
 	 */
 	public void setResultType(final GetResultType resultType) {
 		this.resultType = resultType;
+	}
+	
+	@Override
+	public String toString() {
+		return "GET " + this.resultType;
 	}
 }

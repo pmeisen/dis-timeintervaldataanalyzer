@@ -13,14 +13,14 @@ import net.meisen.dissertation.model.parser.query.IQueryResultSet;
  * @author pmeisen
  * 
  */
-public class GetResult implements IQueryResultSet {
+public class GetResultModels implements IQueryResultSet {
 
 	private final Set<String> tidaModels;
 
 	/**
 	 * Default constructor which creates an empty result.
 	 */
-	public GetResult() {
+	public GetResultModels() {
 		this(null);
 	}
 
@@ -30,7 +30,7 @@ public class GetResult implements IQueryResultSet {
 	 * @param tidaModels
 	 *            the result, i.e. the models
 	 */
-	public GetResult(final Set<String> tidaModels) {
+	public GetResultModels(final Set<String> tidaModels) {
 		if (tidaModels == null) {
 			this.tidaModels = new HashSet<String>();
 		} else {

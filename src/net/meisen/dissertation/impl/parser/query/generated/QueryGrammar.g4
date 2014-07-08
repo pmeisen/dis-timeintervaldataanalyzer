@@ -30,7 +30,7 @@ root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet)
 /*
  * Define the different expressions/parts of the get statement
  */
-exprGet       : STMT_GET TYPE_MODELS;
+exprGet       : STMT_GET (TYPE_MODELS | TYPE_VERSION);
 
 /*
  * Define the different expressions/parts of the alive statement
@@ -144,6 +144,7 @@ PROP_FORCE    : F O R C E;
 TYPE_TIMESERIES  : T I M E S E R I E S;
 TYPE_RECORDS     : R E C O R D S;
 TYPE_MODELS      : M O D E L S;
+TYPE_VERSION     : V E R S I O N;
 
 // reserved words to define special positions in the statement
 OP_FROM     : F R O M;
