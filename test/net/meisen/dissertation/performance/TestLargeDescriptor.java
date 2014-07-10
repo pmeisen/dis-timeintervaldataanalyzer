@@ -22,7 +22,7 @@ public class TestLargeDescriptor {
 	 */
 	@Test
 	public void testLargeDescriptor() {
-		final long max = Integer.MAX_VALUE;
+		final long max = 3000000;
 		final DescriptorModel<UUID> model = new DescriptorModel<UUID>("ID",
 				"MODEL", GeneralDescriptor.class, new UuIdsFactory(),
 				new IndexFactory());

@@ -5,6 +5,8 @@ import net.meisen.dissertation.config.xsd.TestXsdTidaModel;
 import net.meisen.dissertation.config.xslt.TestDefaultValues;
 import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
+import net.meisen.dissertation.impl.auth.shiro.TestMapDbAuthorizingRealm;
+import net.meisen.dissertation.impl.auth.shiro.TestShiroAuthManager;
 import net.meisen.dissertation.impl.cache.TestCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
 import net.meisen.dissertation.impl.cache.TestFileBitmapIdCacheConfig;
@@ -229,6 +231,9 @@ import org.junit.runners.Suite;
 		TestGroupEvaluator.class, TestAliveQueries.class,
 		TestLoadQueries.class, TestUnloadQueries.class,
 		TestSelectQueries.class, TestInsertQueries.class, TestGetQueries.class,
+
+		// Test authentication manager
+		TestMapDbAuthorizingRealm.class, TestShiroAuthManager.class,
 
 		// Test the server
 		TestTidaServer.class })

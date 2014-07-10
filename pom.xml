@@ -86,12 +86,14 @@
       <optional>true</optional>
     </dependency>
     
-    <!-- Caching implementations --> 
+    <!-- 
+      Internally used database for users, additionally
+      a cache implementation using mapDb is available.
+      --> 
     <dependency>
       <groupId>org.mapdb</groupId>
       <artifactId>mapdb</artifactId>
       <version>1.0.3</version>
-      <optional>true</optional>
     </dependency>
     
     <!-- parser -->

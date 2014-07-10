@@ -603,6 +603,29 @@ public class TidaModelHandler {
 	 * @return the default location under which the models are stored
 	 */
 	public String getDefaultLocation() {
+		return getDefaultLocation(false);
+	}
+
+	/**
+	 * Gets the default location under which the models are stored. If needed
+	 * (i.e. {@code createIfNotAvailable} is set to {@code true}) the location
+	 * is created.
+	 * 
+	 * @param createIfNotAvailable
+	 *            {@code true} if the location should be created if not
+	 *            available, otherwise {@code false}
+	 *            
+	 * @return the default location under which the models are stored
+	 */
+	public String getDefaultLocation(final boolean createIfNotAvailable) {
+		if (createIfNotAvailable) {
+			final File locFile = new File(defaultLocation);
+			if (!locFile.exists() && !locFile.mkdirs()) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1011, defaultLocation);
+			}
+		}
+
 		return defaultLocation;
 	}
 

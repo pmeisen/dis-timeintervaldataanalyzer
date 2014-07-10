@@ -14,6 +14,24 @@
             <xs:attribute name="folder" type="xs:string" use="required" />
           </xs:complexType>
         </xs:element>
+        
+        <xs:element name="auth" minOccurs="0">
+          <xs:complexType>
+          
+            <xs:sequence>
+
+              <xs:element name="manager" minOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="unbounded" />
+                  </xs:sequence>
+
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
 
         <xs:element name="caches" minOccurs="0">
           <xs:complexType>

@@ -45,11 +45,10 @@ public class TestTidaServer {
 
 		final Properties properties = new Properties();
 		properties.setProperty("tida.server.tsql.port", "" + serverPort);
-		
 
 		server = TidaServer.create(properties);
 		server.startAsync();
-		
+
 		// directly create a socket
 		socket = new Socket();
 		socket.connect(new InetSocketAddress("localhost", serverPort), 1000);
@@ -64,7 +63,8 @@ public class TestTidaServer {
 	@Test
 	public void testProtocol() throws IOException {
 		final Protocol p = new Protocol(socket);
-
+		p.writeCredential("", "");
+		
 		// create a handler for testing
 		final QueryResponseHandler handler = new QueryResponseHandler();
 		handler.setExpectedResultSetType(TidaResultSetType.MODIFY);
@@ -111,6 +111,7 @@ public class TestTidaServer {
 	public void testCloseSocketAfterShutdown() throws IOException {
 		final IResponseHandler handler = new QueryResponseHandler();
 		final Protocol p = new Protocol(socket);
+		p.writeCredential("", "");
 
 		// send a message everything should just work fine
 		p.writeAndHandle("ALIVE", handler);
@@ -152,6 +153,7 @@ public class TestTidaServer {
 			}
 		};
 		final Protocol p = new Protocol(socket);
+		p.writeCredential("", "");
 
 		// send a message which might take a while
 		p.initializeCommunication(
@@ -178,7 +180,7 @@ public class TestTidaServer {
 		// close the socket
 		p.close();
 	}
-
+	
 	/**
 	 * Shutdowns the server.
 	 * 

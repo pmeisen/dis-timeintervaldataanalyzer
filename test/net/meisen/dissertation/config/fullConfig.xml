@@ -12,6 +12,16 @@
   <!-- Define the location the server stores it's data at -->
   <location folder="_data" />
 
+  <auth>
+    <!-- Define the manager used for authentication:
+         
+         The following cache implementations are available:
+          + net.meisen.dissertation.impl.auth.AllAccessAuthManager
+          + net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager
+      -->
+    <manager implementation="net.meisen.dissertation.impl.auth.AllAccessAuthManager" />
+  </auth>
+
   <caches>
     <!-- Define the cache to be used for metadata.
 

@@ -11,12 +11,14 @@
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
   <xsl:import href="cache://includeXslts" />
+  <xsl:import href="authmanager://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
   <xsl:variable name="queryFactoryId" select="cdef:getId('QUERYFACTORY_ID')" />
   <xsl:variable name="handlerId" select="cdef:getId('HANDLER_ID')" />
   <xsl:variable name="aggFuncId" select="cdef:getId('AGGREGATIONFUNCTIONHANDLER_ID')" />
+  <xsl:variable name="authManagerId" select="cdef:getId('AUTHMANAGER_ID')" />
 
   <xsl:template match="/cns:config">
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -233,6 +235,33 @@
         	</bean>
         </constructor-arg>
       </bean>
+      
+      <!-- create the authManager -->
+      <xsl:choose>
+        <xsl:when test="//cns:config/cns:auth/cns:manager/@implementation">
+          <xsl:variable name="authManager" select="//cns:config/cns:auth/cns:manager/@implementation" />
+
+          <bean id="{$authManagerId}" class="{$authManager}" init-method="init" destroy-method="release">
+            <property name="config">
+              <xsl:choose>
+                <xsl:when test="//cns:config/cns:auth/cns:manager/node()">
+                  <xsl:for-each select='//cns:config/cns:auth/cns:manager/node()'>
+                    <xsl:apply-imports />
+                  </xsl:for-each>
+                </xsl:when>
+                <xsl:otherwise><null /></xsl:otherwise>
+              </xsl:choose>
+            </property>
+          </bean>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:variable name="authManager" select="cdef:getDefaultAuthManager()" />
+          
+          <bean id="{$authManagerId}" class="{$authManager}" init-method="init" destroy-method="release">
+            <property name="config"><null /></property>
+          </bean>
+        </xsl:otherwise>
+      </xsl:choose>
 
       <!-- create the queryFactory to be used -->
       <bean id="{$queryFactoryId}" class="{$queryFactory}" />
@@ -241,7 +270,7 @@
       <bean id="{$handlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler">
         <property name="defaultLocation" ref="defaultLocation" /> 
       </bean>
-  
+        
       <!-- set the server properties, those are set prior to any further loading -->
       <xsl:if test="//cns:config/cns:server/node()">
         <bean class="net.meisen.general.sbconfigurator.config.PropertyInjectorBean">

@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 
+import net.meisen.dissertation.exceptions.AuthException;
+import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.QueryStatus;
 import net.meisen.dissertation.jdbc.protocol.WrappedException;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
@@ -34,6 +38,7 @@ public class RequestHandlerThread extends WorkerThread {
 
 	private final IExceptionRegistry exceptionRegistry;
 	private final QueryFactory queryFactory;
+	private final IAuthManager authManager;
 
 	private Exception lastException = null;
 
@@ -44,25 +49,41 @@ public class RequestHandlerThread extends WorkerThread {
 	 *            the {@code Socket} to retrieve the requests on
 	 * @param queryFactory
 	 *            the factory used to interprete a request
+	 * @param authManager
+	 *            the {@code AuthManager} used to check permissions
 	 * @param exceptionRegistry
+	 *            the registry of exceptions
 	 */
 	public RequestHandlerThread(final Socket input,
-			final QueryFactory queryFactory,
+			final QueryFactory queryFactory, final IAuthManager authManager,
 			final IExceptionRegistry exceptionRegistry) {
 		super(input);
 
 		this.queryFactory = queryFactory;
+		this.authManager = authManager;
 		this.exceptionRegistry = exceptionRegistry;
 	}
 
 	@Override
 	public void run() {
+		Protocol p = null;
+
 		try {
-			handleRequests();
+			p = new Protocol(getSocket());
+
+			authenticate(p);
+			handleRequests(p);
 		} catch (final SocketException e) {
+
 			// ignore any kind of socket exception, it is closed
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Exception thrown while handling a request.", e);
+				LOG.trace("SocketException thrown while handling a request.", e);
+			}
+		} catch (final AuthException e) {
+			try {
+				p.writeException(e);
+			} catch (final IOException ioe) {
+
 			}
 		} catch (final Exception e) {
 			lastException = e;
@@ -71,18 +92,62 @@ public class RequestHandlerThread extends WorkerThread {
 				LOG.error("Exception thrown while handling a request.", e);
 			}
 		} finally {
+
+			// make sure the DataInputStream is closed now
+			Streams.closeIO(p);
+
+			// close the socket for sure
 			close();
+
+			// make sure the user is logged out
+			authManager.logout();
+		}
+	}
+
+	/**
+	 * Authenticates the handling. Each handling has to be authenticated once
+	 * prior to any other activitity.
+	 * 
+	 * @param p
+	 *            the {@code Protocol} used to validate the authentication
+	 * 
+	 * @throws AuthException
+	 *             if the authentication fails
+	 */
+	protected void authenticate(final Protocol p) throws AuthException {
+
+		// read the username and password from the socket
+		final String username;
+		final String password;
+		try {
+			final String[] credential = p.readCredential();
+			username = credential[0];
+			password = credential[1];
+		} catch (final IOException e) {
+			exceptionRegistry.throwRuntimeException(AuthException.class, 1002);
+			return;
+		}
+
+		// use the authManager to authenticate
+		authManager.login(username, password);
+
+		// check if the permission to use this kind of connection is available
+		if (!authManager.hasPermission(Permission.connectTSQL.create())) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, Permission.connectTSQL);
 		}
 	}
 
 	/**
 	 * Handles a request by reading a string using the current {@code Protocol}.
 	 * 
+	 * @param p
+	 *            the {@code Protocol} used to handle the request
+	 * 
 	 * @throws IOException
 	 *             if the requests handling fails
 	 */
-	public void handleRequests() throws IOException {
-		final Protocol p = new Protocol(getSocket());
+	protected void handleRequests(final Protocol p) throws IOException {
 
 		try {
 			while (!Thread.interrupted()) {
@@ -99,7 +164,7 @@ public class RequestHandlerThread extends WorkerThread {
 
 					/*
 					 * The client send an exception, we can just log it here.
-					 * All other exception (not send just occuring) are serious
+					 * All other exception (not send just occurring) are serious
 					 * enough to close the connection completely.
 					 */
 					if (LOG.isErrorEnabled()) {
@@ -185,9 +250,17 @@ public class RequestHandlerThread extends WorkerThread {
 					p.writeEndOfResponse();
 				} catch (final SocketException e) {
 					if (LOG.isTraceEnabled()) {
-						LOG.trace("Exception while handling '" + msg
+						LOG.trace("SocketException while handling '" + msg
 								+ "' sending '" + e.getMessage() + "'.");
 					}
+				} catch (final PermissionException e) {
+					if (LOG.isTraceEnabled()) {
+						LOG.trace(
+								"User tried to execute an invalid operation.",
+								e);
+					}
+
+					p.writeException(e);
 				} catch (final Exception e) {
 					if (LOG.isErrorEnabled()) {
 						LOG.error("Exception while handling '" + msg
@@ -199,9 +272,6 @@ public class RequestHandlerThread extends WorkerThread {
 			}
 		} catch (final EOFException e) {
 			// indicates that the stream was just closed
-		} finally {
-			// make sure the DataInputStream is closed now
-			Streams.closeIO(p);
 		}
 	}
 

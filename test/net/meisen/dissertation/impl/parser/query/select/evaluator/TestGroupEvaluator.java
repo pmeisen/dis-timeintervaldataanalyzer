@@ -11,6 +11,7 @@ import java.util.List;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
@@ -23,11 +24,9 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
-import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.internal.matchers.TypeSafeMatcher;
 
 /**
  * Tests the implementation of a {@code GroupEvaluator}.
@@ -101,19 +100,8 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 	@Test
 	public void testGenerateGroupsWithInvalidModelDescriptor() {
 		thrown.expect(ForwardedRuntimeException.class);
-		thrown.expect(new TypeSafeMatcher<ForwardedRuntimeException>() {
-			private final String expected = "Number: '1000'";
-
-			@Override
-			public void describeTo(final Description description) {
-				description.appendText(expected);
-			}
-
-			@Override
-			public boolean matchesSafely(final ForwardedRuntimeException item) {
-				return item.toString().contains(expected);
-			}
-		});
+		thrown.expect(new ForwardExceptionMatcher(
+				GroupEvaluatorException.class, 1000));
 
 		// create the evaluator
 		final GroupEvaluator evaluator = new GroupEvaluator(model);

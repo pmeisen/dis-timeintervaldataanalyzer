@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.meisen.dissertation.impl.auth.AllAccessAuthManager;
 import net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache;
 import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
@@ -29,6 +30,7 @@ import net.meisen.dissertation.impl.measures.Sum;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
+import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.data.DataModel;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.IntervalModel;
@@ -176,6 +178,10 @@ public class DefaultValues {
 	 */
 	public static final String DATARECORDCACHE_ID = "dataRecordCacheId";
 	/**
+	 * Id of the {@code AuthManager} to be used.
+	 */
+	public static final String AUTHMANAGER_ID = "authManagerId";
+	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;
@@ -214,6 +220,17 @@ public class DefaultValues {
 	 */
 	public static String getDefaultBitmapCache() {
 		return MemoryBitmapCache.class.getName();
+	}
+
+	/**
+	 * Gets the default {@code AuthManager} implementation to be used.
+	 * 
+	 * @return the default auth-manager implementation to be used
+	 * 
+	 * @see IAuthManager
+	 */
+	public static String getDefaultAuthManager() {
+		return AllAccessAuthManager.class.getName();
 	}
 
 	/**

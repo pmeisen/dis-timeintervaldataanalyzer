@@ -6,6 +6,7 @@ import java.net.SocketException;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaServerListenerException;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.general.server.api.impl.BaseListener;
 import net.meisen.general.server.settings.pojos.Connector;
 import net.meisen.general.server.settings.pojos.Extension;
@@ -31,6 +32,10 @@ public class TidaServerListener extends BaseListener {
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
 	private QueryFactory queryFactory;
 
+	@Autowired
+	@Qualifier(DefaultValues.AUTHMANAGER_ID)
+	private IAuthManager authManager;
+
 	private int timeoutInMs = -1;
 
 	@Override
@@ -55,7 +60,8 @@ public class TidaServerListener extends BaseListener {
 					TidaServerListenerException.class, 1000, timeoutInMs);
 		}
 
-		return new RequestHandlerThread(socket, queryFactory, getExceptionRegistry());
+		return new RequestHandlerThread(socket, queryFactory, authManager,
+				getExceptionRegistry());
 	}
 
 	@Override

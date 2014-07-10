@@ -2,9 +2,13 @@ package net.meisen.dissertation.help;
 
 import java.util.Locale;
 
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
+import org.hamcrest.Description;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.internal.matchers.TypeSafeMatcher;
 import org.junit.rules.ExpectedException;
 
 /**
@@ -16,6 +20,43 @@ import org.junit.rules.ExpectedException;
  * 
  */
 public class ExceptionBasedTest {
+
+	/**
+	 * Matcher used to match {@code ForwardedRuntimeException} instances.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	public static class ForwardExceptionMatcher extends
+			TypeSafeMatcher<ForwardedRuntimeException> {
+		private final String expectedNumber;
+		private final String expectedClass;
+
+		/**
+		 * Constructor specifying the {@code clazz} and the {@code number} of
+		 * the expected exception.
+		 * 
+		 * @param clazz
+		 *            the class
+		 * @param number
+		 *            the number
+		 */
+		public ForwardExceptionMatcher(final Class<?> clazz, final int number) {
+			expectedNumber = "Number: '" + number + "'";
+			expectedClass = "Exception '" + clazz.getName() + "'";
+		}
+
+		@Override
+		public void describeTo(final Description description) {
+			description.appendText(expectedClass + ", " + expectedNumber);
+		}
+
+		@Override
+		public boolean matchesSafely(final ForwardedRuntimeException item) {
+			return item.toString().contains(expectedNumber)
+					&& item.toString().contains(expectedClass);
+		}
+	}
 
 	/**
 	 * Rule to evaluate exceptions
