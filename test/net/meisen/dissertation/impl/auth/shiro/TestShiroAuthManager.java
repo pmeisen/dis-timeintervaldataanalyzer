@@ -82,6 +82,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.login("philipp", "password2");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for adding a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToAddUser() {
 		thrown.expect(PermissionException.class);
@@ -90,6 +94,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.addUser("philipp", "password", null, null);
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for deleting a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToDeleteUser() {
 		thrown.expect(PermissionException.class);
@@ -98,6 +106,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.deleteUser("philipp");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for modify a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToModifyUser() {
 		thrown.expect(PermissionException.class);
@@ -106,6 +118,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.modifyPassword("philipp", "password");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for adding a role.
+	 */
 	@Test
 	public void testInsufficientPermissionToAddRole() {
 		thrown.expect(PermissionException.class);
@@ -114,6 +130,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.addRole("myRole", null);
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for deleting a role.
+	 */
 	@Test
 	public void testInsufficientPermissionToDeleteRole() {
 		thrown.expect(PermissionException.class);
@@ -122,6 +142,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.deleteRole("myRole");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for assigning a role to a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToAssignRoleToUser() {
 		thrown.expect(PermissionException.class);
@@ -130,6 +154,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.assignRoleToUser("myRole", "philipp");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for removing a role from a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToRemoveRoleFromUser() {
 		thrown.expect(PermissionException.class);
@@ -138,6 +166,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.removeRoleFromUser("myRole", "philipp");
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for granting permissions to a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToGrantPermissionsToUser() {
 		thrown.expect(PermissionException.class);
@@ -146,6 +178,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.grantPermissionsToUser("philipp", null);
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for revoking permissions from a user.
+	 */
 	@Test
 	public void testInsufficientPermissionToRevokePermissionsFromUser() {
 		thrown.expect(PermissionException.class);
@@ -154,6 +190,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.revokePermissionsFromUser("philipp", null);
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for granting permissions to a role.
+	 */
 	@Test
 	public void testInsufficientPermissionToGrantPermissionsToRole() {
 		thrown.expect(PermissionException.class);
@@ -162,6 +202,10 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 		authManager.grantPermissionsToRole("myRole", null);
 	}
 
+	/**
+	 * Tests the exception to be thrown if the needed permissions are not
+	 * available for revoking permissions from a role.
+	 */
 	@Test
 	public void testInsufficientPermissionToRevokePermissionsFromRole() {
 		thrown.expect(PermissionException.class);
@@ -229,7 +273,7 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 				+ "' is currently connected");
 		authManager.login("philipp", "password");
 	}
-
+	
 	/**
 	 * Remove everything from the {@code AuthManager}, which might have been
 	 * added during the test.

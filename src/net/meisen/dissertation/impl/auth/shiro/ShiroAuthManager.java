@@ -1,8 +1,5 @@
 package net.meisen.dissertation.impl.auth.shiro;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
@@ -31,6 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * A {@code AuthManager} based on Shiro.
+ * 
+ * @author pmeisen
+ * 
+ * @see IAuthManager
+ * 
+ */
 public class ShiroAuthManager implements IAuthManager {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ShiroAuthManager.class);
@@ -73,6 +78,11 @@ public class ShiroAuthManager implements IAuthManager {
 		this.manager = manager;
 	}
 
+	/**
+	 * Gets the managable realm of the manager.
+	 * 
+	 * @return the {@code MapDbAuthorizingRealm} used
+	 */
 	protected MapDbAuthorizingRealm getManageableRealm() {
 		for (final Realm realm : manager.getRealms()) {
 			if (realm instanceof MapDbAuthorizingRealm) {
@@ -114,6 +124,12 @@ public class ShiroAuthManager implements IAuthManager {
 		}
 	}
 
+	/**
+	 * Gets the subject of the current thread. There can only be one subject
+	 * logged in within a thread.
+	 * 
+	 * @return the current subject of the current thread
+	 */
 	protected Subject getSubject() {
 		Subject subject = ThreadContext.getSubject();
 		if (subject == null) {
@@ -218,7 +234,8 @@ public class ShiroAuthManager implements IAuthManager {
 	}
 
 	@Override
-	public void addRole(final String role, final DefinedPermission[] permissions) {
+	public void addRole(final String role, final DefinedPermission[] permissions)
+			throws AuthManagementException, PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
@@ -234,80 +251,111 @@ public class ShiroAuthManager implements IAuthManager {
 	}
 
 	@Override
-	public void deleteRole(final String role) {
+	public void deleteRole(final String role) throws AuthManagementException,
+			PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
-		// TODO Auto-generated method stub
+
+		try {
+			getManageableRealm().deleteRole(role);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
-	public void assignRoleToUser(final String username, final String role) {
+	public void assignRoleToUser(final String username, final String role)
+			throws AuthManagementException, PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
-		// TODO Auto-generated method stub
+
+		try {
+			getManageableRealm().assignRoleToUser(username, role);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
-	public void removeRoleFromUser(final String username, final String role) {
+	public void removeRoleFromUser(final String username, final String role)
+			throws AuthManagementException, PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
-		// TODO Auto-generated method stub
+
+		try {
+			getManageableRealm().removeRoleFromUser(username, role);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
 	public void grantPermissionsToUser(final String username,
-			final String[] permissions) {
+			final String[] permissions) throws AuthManagementException,
+			PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
-		// TODO Auto-generated method stub
+
+		try {
+			getManageableRealm().grantPermissionsToUser(username, permissions);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
 	public void revokePermissionsFromUser(final String username,
-			final String[] permissions) {
+			final String[] permissions) throws AuthManagementException,
+			PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
-		// TODO Auto-generated method stub
+
+		try {
+			getManageableRealm().revokePermissionsFromUser(username,
+					permissions);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
 	public void grantPermissionsToRole(final String role,
-			final String[] permissions) throws AuthManagementException {
+			final String[] permissions) throws AuthManagementException,
+			PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
+
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void revokePermissionsFromRole(final String role,
-			final String[] permissions) throws AuthManagementException {
+			final String[] permissions) throws AuthManagementException,
+			PermissionException {
 		if (!hasPermission(Permission.manageUsers.create())) {
 			exceptionRegistry.throwException(PermissionException.class, 1000,
 					Permission.manageUsers);
 		}
-		
+
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * Removes everything (i.e. roles and users) from the realm.
+	 */
 	protected void clear() {
 		getManageableRealm().clear();
 	}

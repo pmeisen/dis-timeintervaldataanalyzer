@@ -3,11 +3,12 @@ package net.meisen.dissertation.impl.auth.shiro;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.AuthManagementException;
-import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Files;
 
@@ -24,6 +25,7 @@ import org.apache.shiro.authz.SimpleRole;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.util.Destroyable;
 import org.apache.shiro.util.PermissionUtils;
 import org.mapdb.DB;
@@ -41,9 +43,11 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			.getLogger(MapDbAuthorizingRealm.class);
 	private final static String dbFile = "mapDbAuth.db";
 
-	private final DB db;
-	protected final Map<String, SimpleAccount> users;
-	protected final Map<String, SimpleRole> roles;
+	private final File location;
+
+	private DB db;
+	protected Map<String, SimpleAccount> users;
+	protected Map<String, SimpleRole> roles;
 
 	public MapDbAuthorizingRealm(final File location) {
 		this(Files.getCanonicalPath(location));
@@ -60,9 +64,71 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	}
 
 	public MapDbAuthorizingRealm(final String location) {
+		this.location = new File(location, dbFile);
+	}
+
+	/**
+	 * Validates the specified {@code role} to be used as role.
+	 * 
+	 * @param role
+	 *            the role to be validated
+	 * 
+	 * @return {@code true} if the role is valid, otherwise {@code false}
+	 */
+	public boolean validateRole(final String role) {
+		if (role == null || role.trim().isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Validates the specified {@code name} to be used as user-name.
+	 * 
+	 * @param name
+	 *            the user-name to be validated
+	 * 
+	 * @return {@code true} if the user-name is valid, otherwise {@code false}
+	 */
+	public boolean validateUser(final String name) {
+		if (name == null || name.trim().isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Helper method which is used to cast a {@code Collection} to a {@code Set}
+	 * . If the {@code Collection} isn't an instance of a {@code Set}.
+	 * 
+	 * @param coll
+	 *            the {@code Collection} to be casted
+	 * 
+	 * @return the casted collection or a set
+	 */
+	protected <T> Set<T> cast(final Collection<T> coll) {
+		if (coll == null) {
+			return null;
+		} else if (coll instanceof Set) {
+			return (Set<T>) coll;
+		} else {
+			return new HashSet<T>(coll);
+		}
+	}
+
+	@Override
+	public void onInit() {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Initializing the '"
+					+ MapDbAuthorizingRealm.class.getSimpleName() + "'.");
+		}
+
+		super.onInit();
 
 		// create the maker of the database and create it
-		final DBMaker<?> maker = DBMaker.newFileDB(new File(location, dbFile));
+		final DBMaker<?> maker = DBMaker.newFileDB(location);
 		maker.cacheHardRefEnable();
 		maker.cacheLRUEnable();
 		maker.cacheSize(1000);
@@ -99,7 +165,14 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	}
 
 	@Override
-	public void destroy() {
+	public void destroy() throws Exception {
+		this.release();
+	}
+
+	/**
+	 * Releases all the resources used by the realm.
+	 */
+	public void release() {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Destroying the '"
 					+ MapDbAuthorizingRealm.class.getSimpleName() + "'.");
@@ -131,10 +204,25 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			final String[] roles, final String[] permissions)
 			throws ForwardedRuntimeException {
 
-		if (this.users.containsKey(name)) {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (!validateUser(name)) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1007, name);
+		} else if (this.users.containsKey(name)) {
 			throw new ForwardedRuntimeException(AuthManagementException.class,
 					1000, name);
 		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Adding user '"
+						+ name
+						+ "' with roles '"
+						+ (roles == null ? null : Arrays.asList(roles))
+						+ "' and permissions '"
+						+ (permissions == null ? null : Arrays
+								.asList(permissions)) + "'.");
+			}
 
 			// create the account
 			final SimpleAccount account = new SimpleAccount(name, password,
@@ -164,10 +252,22 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	 * 
 	 * @param name
 	 *            the user to be removed
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed
 	 */
-	public void deleteUser(final String name) {
-		this.users.remove(name);
-		db.commit();
+	public void deleteUser(final String name) throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Deleting user '" + name + "'.");
+			}
+
+			this.users.remove(name);
+			db.commit();
+		}
 	}
 
 	/**
@@ -184,46 +284,334 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	 */
 	public void modifyPassword(final String name, final String password)
 			throws ForwardedRuntimeException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		}
+
 		final SimpleAccount account = this.users.get(name);
 
 		if (account == null) {
 			throw new ForwardedRuntimeException(AuthManagementException.class,
 					1001, name);
 		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Modifying password of user '" + name + "'.");
+			}
 
 			// set the new credentials
-			account.setCredentials(password);
+			final SimpleAccount clone = clone(account);
+			clone.setCredentials(password);
 
 			// remove and add the modified account
-			this.users.remove(name);
-			this.users.put(name, account);
+			this.users.put(name, clone);
 			db.commit();
 		}
 	}
 
+	/**
+	 * Adds a role to the realm.
+	 * 
+	 * @param role
+	 *            the name of the role to be added
+	 * 
+	 * @param permissions
+	 *            the permissions assign to the role
+	 * @throws AuthManagementException
+	 *             if another role with the same name already exists
+	 */
 	public void addRole(final String role, final String[] permissions)
-			throws AuthManagementException, PermissionException {
+			throws AuthManagementException {
 
-		if (this.roles.containsKey(role)) {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (!validateRole(role)) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1006, role);
+		} else if (this.roles.containsKey(role)) {
 			throw new ForwardedRuntimeException(AuthManagementException.class,
 					1002, role);
 		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Adding role '"
+						+ role
+						+ "' with permissions '"
+						+ (permissions == null ? null : Arrays
+								.asList(permissions)) + ".");
+			}
+
 			final Set<Permission> perms = PermissionUtils.resolvePermissions(
 					Arrays.asList(permissions), getPermissionResolver());
 
-			add(new SimpleRole(role, perms));
+			final SimpleRole r = new SimpleRole(role, perms);
+			roles.put(role, r);
+			db.commit();
 		}
 	}
 
-	protected void add(final SimpleRole role) {
-		roles.put(role.getName(), role);
+	/**
+	 * Deletes the role from the realm.
+	 * 
+	 * @param role
+	 *            the role to be removed
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed
+	 */
+	public void deleteRole(final String role) throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Removing role '" + role + "'.");
+			}
 
-		db.commit();
+			this.roles.remove(role);
+			db.commit();
+		}
+	}
+
+	/**
+	 * Assigns the specified {@code role} to the specified {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to assign the role to
+	 * @param role
+	 *            the role to be assigned
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed or if the user does not exist
+	 */
+	public void assignRoleToUser(final String username, final String role)
+			throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (!validateRole(role)) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1006, role);
+		}
+		final SimpleAccount account = this.users.get(username);
+
+		if (account == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1004, role, username);
+		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Assigning role '" + role + "' to user '" + username
+						+ "'.");
+			}
+			final SimpleAccount clone = clone(account);
+			clone.addRole(role);
+
+			// remove and add the modified account
+			this.users.put(username, clone);
+			db.commit();
+		}
+	}
+
+	/**
+	 * Removes the specified {@code role} from the specified {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to remove the role from
+	 * @param role
+	 *            the role to be removed
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed or if the user does not exist
+	 */
+	public void removeRoleFromUser(final String username, final String role)
+			throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		}
+		final SimpleAccount account = this.users.get(username);
+		if (account == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1005, role, username);
+		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Removing role '" + role + "' from user '" + username
+						+ "'.");
+			}
+			final SimpleAccount clone = clone(account);
+			final Collection<String> roles = clone.getRoles();
+			if (roles != null && roles.size() > 0) {
+
+				// we need a set so get one
+				final Set<String> setOfRoles = cast(roles);
+				setOfRoles.remove(role);
+
+				// set null if there aren't any
+				if (setOfRoles.size() == 0) {
+					clone.setRoles(null);
+				} else {
+					clone.setRoles(setOfRoles);
+				}
+
+				// remove and add the modified account
+				this.users.put(username, clone);
+				db.commit();
+			}
+		}
+	}
+
+	/**
+	 * Grants the specified {@code permissions} to the specified
+	 * {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to grant the permissions to
+	 * @param permissions
+	 *            the permissions to be granted (cannot be {@code null} or
+	 *            empty)
+	 * 
+	 * @throws AuthManagementException
+	 *             if the permissions are empty, if the {@code username} does
+	 *             not exist or if the realm is closed
+	 */
+	public void grantPermissionsToUser(final String username,
+			final String[] permissions) throws AuthManagementException {
+
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (permissions == null || permissions.length == 0) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1008, username);
+		}
+		final SimpleAccount account = this.users.get(username);
+
+		if (account == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1009, Arrays.asList(permissions), username);
+		} else {
+			final List<String> perms = Arrays.asList(permissions);
+
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Granting '" + perms + "' to user '" + username
+						+ "'.");
+			}
+			final SimpleAccount clone = clone(account);
+			clone.addObjectPermissions(PermissionUtils.resolvePermissions(
+					perms, getPermissionResolver()));
+
+			// remove and add the modified account
+			this.users.put(username, clone);
+			db.commit();
+		}
+	}
+
+	/**
+	 * Revokes the specified {@code permissions} from the specified
+	 * {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to revoke the permissions from
+	 * @param permissions
+	 *            the permissions to be revoked
+	 * 
+	 * @throws AuthManagementException
+	 *             if the {@code username} does not exist or if the realm is
+	 *             closed
+	 */
+	public void revokePermissionsFromUser(final String username,
+			final String[] permissions) throws AuthManagementException {
+
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (permissions == null || permissions.length == 0) {
+			return;
+		}
+		final SimpleAccount account = this.users.get(username);
+
+		if (account == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1010, Arrays.asList(permissions), username);
+		} else {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Revoking '" + Arrays.asList(permissions)
+						+ "' from user '" + username + "'.");
+			}
+			final SimpleAccount clone = clone(account);
+
+			// get the permissions of the account
+			final Set<Permission> objPerms = cast(clone.getObjectPermissions());
+			final Set<String> strPerms = cast(clone.getStringPermissions());
+
+			// get the defined permissions to be revoked as ObjectPermissions
+			final Set<Permission> objPermissions = PermissionUtils
+					.resolvePermissions(Arrays.asList(permissions),
+							getPermissionResolver());
+
+			// check the ObjectPermissions and remove the permissions there
+			if (objPerms != null) {
+				for (final Permission perm : objPermissions) {
+					objPerms.remove(perm);
+				}
+				clone.setObjectPermissions(objPerms);
+			}
+
+			// check the StringPermissions and remove the permissions there
+			if (strPerms != null) {
+				for (final String perm : permissions) {
+					strPerms.remove(perm);
+				}
+				clone.setStringPermissions(strPerms);
+			}
+
+			// remove and add the modified account
+			this.users.put(username, clone);
+			db.commit();
+		}
+	}
+
+	/**
+	 * Clones a {@code SimpleAccount} instance. The MapDb documentation suggests
+	 * that a persisted instance should be immutable.
+	 * 
+	 * @param account
+	 *            the account to be cloned
+	 * 
+	 * @return the cloned instance
+	 */
+	protected SimpleAccount clone(final SimpleAccount account) {
+		if (account == null) {
+			return null;
+		}
+
+		final Set<String> roles;
+		if (account.getRoles() == null) {
+			roles = null;
+		} else {
+			roles = new HashSet<String>();
+			roles.addAll(account.getRoles());
+		}
+		final Set<Permission> permissions;
+		if (account.getObjectPermissions() == null) {
+			permissions = null;
+		} else {
+			permissions = new HashSet<Permission>();
+			permissions.addAll(account.getObjectPermissions());
+		}
+
+		return new SimpleAccount(account.getPrincipals(),
+				account.getCredentials(), roles, permissions);
 	}
 
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(
 			final AuthenticationToken token) throws AuthenticationException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		}
+
 		final UsernamePasswordToken upToken = (UsernamePasswordToken) token;
 		final SimpleAccount account = this.users.get(upToken.getUsername());
 
@@ -247,6 +635,11 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(
 			final PrincipalCollection principals) {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		}
+
 		final String username = getAvailablePrincipal(principals).toString();
 		return this.users.get(username);
 	}
@@ -257,23 +650,45 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	public void clear() {
 		this.users.clear();
 		this.roles.clear();
-		db.commit();
 
-		// add the administrator again
-		checkAdministrator();
+		/*
+		 * Check if the administrator was added, if so a commit was triggered.
+		 * Otherwise it still has to be done.
+		 */
+		if (!checkAdministrator()) {
+			db.commit();
+		}
 	}
 
-	protected void checkAdministrator() {
+	/**
+	 * Checks if the realm is closed, i.e. if no modifications or retrievals can
+	 * be processed anymore.
+	 * 
+	 * @return {@code true} if it's closed, otherwise {@code true}
+	 */
+	public boolean isClosed() {
+		return db == null || db.isClosed();
+	}
 
-		// check if we have values already, otherwise add an administrator-role
-		if (this.roles.size() == 0) {
-			addRole("administrator", new String[] { "*" });
+	/**
+	 * Checks if there is at least one user. If not an administrator (i.e. all
+	 * permissions are granted) using {@link #adminName} and
+	 * {@link #adminPassword} is created and committed.
+	 * 
+	 * @return {@code true} if the admin was added, otherwise {@code false}
+	 * 
+	 * @throws AuthManagementException
+	 *             if the underlying database is closed
+	 */
+	protected boolean checkAdministrator() throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (this.users.size() == 0) {
+			addUser(adminName, adminPassword, null, new String[] { "*" });
+			return true;
 		}
 
-		// check if we have values already, otherwise add an administrator
-		if (this.users.size() == 0) {
-			addUser(adminName, adminPassword, new String[] { "administrator" },
-					null);
-		}
+		return false;
 	}
 }
