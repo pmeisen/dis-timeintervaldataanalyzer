@@ -20,7 +20,9 @@ import org.apache.shiro.authc.SimpleAccount;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.util.PermissionUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -573,6 +575,53 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 				new String[] { "permission" });
 	}
 
+	@Test
+	public void testGrantPermissionsToRole() {
+		Collection<Permission> perms;
+
+		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
+				realmDbDir);
+		realm.init();
+
+		realm.addRole("role", new String[] { "perm1", "perm2", "perm3" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(3, perms.size());
+		assertTrue(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+
+		// grant the same permissions again
+		realm.grantPermissionsToRole("role", new String[] { "perm1", "perm2",
+				"perm3" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(3, perms.size());
+		assertTrue(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+
+		// grant new once
+		realm.grantPermissionsToRole("role", new String[] { "perm4", "perm2",
+				"perm3" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(4, perms.size());
+		assertTrue(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+		assertTrue(realm.isPermitted("role", "perm4"));
+		
+		// cleanUp
+		realm.release();
+		
+		// TODO:
+		// - test revoking of permissions
+		// - add granting and revoking to authManager
+		// - add JavaDocs
+		// - implement revoking
+	}
+
 	/**
 	 * Tests the cloning of a {@code SimpleAccount}.
 	 * 
@@ -588,7 +637,7 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		realm.init();
 
 		// null clone
-		assertNull(realm.clone(null));
+		assertNull(realm.clone((SimpleAccount) null));
 
 		// simple clone
 		account = new SimpleAccount("eddie", "mine", "realm");

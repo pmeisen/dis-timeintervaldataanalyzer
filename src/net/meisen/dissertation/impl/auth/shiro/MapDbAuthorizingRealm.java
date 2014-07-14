@@ -3,7 +3,7 @@ package net.meisen.dissertation.impl.auth.shiro;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +114,7 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		} else if (coll instanceof Set) {
 			return (Set<T>) coll;
 		} else {
-			return new HashSet<T>(coll);
+			return new LinkedHashSet<T>(coll);
 		}
 	}
 
@@ -303,7 +303,6 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			final SimpleAccount clone = clone(account);
 			clone.setCredentials(password);
 
-			// remove and add the modified account
 			this.users.put(name, clone);
 			db.commit();
 		}
@@ -406,7 +405,6 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			final SimpleAccount clone = clone(account);
 			clone.addRole(role);
 
-			// remove and add the modified account
 			this.users.put(username, clone);
 			db.commit();
 		}
@@ -453,7 +451,6 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 					clone.setRoles(setOfRoles);
 				}
 
-				// remove and add the modified account
 				this.users.put(username, clone);
 				db.commit();
 			}
@@ -500,7 +497,6 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			clone.addObjectPermissions(PermissionUtils.resolvePermissions(
 					perms, getPermissionResolver()));
 
-			// remove and add the modified account
 			this.users.put(username, clone);
 			db.commit();
 		}
@@ -565,10 +561,63 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 				clone.setStringPermissions(strPerms);
 			}
 
-			// remove and add the modified account
 			this.users.put(username, clone);
 			db.commit();
 		}
+	}
+
+	public void grantPermissionsToRole(final String role,
+			final String[] permissions) throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (permissions == null || permissions.length == 0) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1013, role);
+		}
+
+		final SimpleRole simpleRole = this.roles.get(role);
+		if (simpleRole == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1011, Arrays.asList(permissions), role);
+		} else {
+			final SimpleRole clone = clone(simpleRole);
+			final Set<Permission> perms = PermissionUtils.resolvePermissions(
+					Arrays.asList(permissions), getPermissionResolver());
+			clone.addAll(perms);
+
+			this.roles.put(role, clone);
+			db.commit();
+		}
+	}
+
+	public void revokePermissionsFromRole(final String role,
+			final String[] permissions) throws AuthManagementException {
+		if (isClosed()) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1003);
+		} else if (permissions == null || permissions.length == 0) {
+			return;
+		}
+
+		final SimpleRole simpleRole = this.roles.get(role);
+		if (simpleRole == null) {
+			throw new ForwardedRuntimeException(AuthManagementException.class,
+					1012, Arrays.asList(permissions), role);
+		} else {
+
+		}
+	}
+
+	public boolean isPermitted(final String role, final String permission) {
+		final SimpleRole simpleRole = this.roles.get(role);
+		if (simpleRole == null) {
+			return false;
+		}
+
+		final Permission perm = getPermissionResolver().resolvePermission(
+				permission);
+		return simpleRole.isPermitted(perm);
 	}
 
 	/**
@@ -589,19 +638,35 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		if (account.getRoles() == null) {
 			roles = null;
 		} else {
-			roles = new HashSet<String>();
+			roles = new LinkedHashSet<String>();
 			roles.addAll(account.getRoles());
 		}
 		final Set<Permission> permissions;
 		if (account.getObjectPermissions() == null) {
 			permissions = null;
 		} else {
-			permissions = new HashSet<Permission>();
+			permissions = new LinkedHashSet<Permission>();
 			permissions.addAll(account.getObjectPermissions());
 		}
 
 		return new SimpleAccount(account.getPrincipals(),
 				account.getCredentials(), roles, permissions);
+	}
+
+	protected SimpleRole clone(final SimpleRole role) {
+		if (role == null) {
+			return null;
+		}
+
+		final Set<Permission> permissions;
+		if (role.getPermissions() == null) {
+			permissions = null;
+		} else {
+			permissions = new LinkedHashSet<Permission>();
+			permissions.addAll(role.getPermissions());
+		}
+
+		return new SimpleRole(role.getName(), permissions);
 	}
 
 	@Override
