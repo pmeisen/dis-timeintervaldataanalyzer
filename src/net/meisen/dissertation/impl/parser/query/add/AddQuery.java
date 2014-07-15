@@ -209,7 +209,7 @@ public class AddQuery implements IQuery {
 
 	@Override
 	public String toString() {
-		return entityType + " " + entityName + " (permissions: "
+		return "ADD " + entityType + " " + entityName + " (permissions: "
 				+ getPermissions() + ", roles: " + getRoles() + ")";
 	}
 }

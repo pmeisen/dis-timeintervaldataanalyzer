@@ -11,6 +11,8 @@ import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.add.AddQuery;
 import net.meisen.dissertation.impl.parser.query.add.AddType;
 import net.meisen.dissertation.impl.parser.query.alive.AliveQuery;
+import net.meisen.dissertation.impl.parser.query.drop.DropQuery;
+import net.meisen.dissertation.impl.parser.query.drop.DropType;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompAggrFunctionContext;
@@ -28,6 +30,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAliveContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprDropContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGetContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprInsertContext;
@@ -187,6 +190,35 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			q.setEntityType(AddType.ROLE);
 		} else if (ctx.TYPE_USER() != null) {
 			q.setEntityType(AddType.USER);
+		}
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		finalized = true;
+	}
+
+	@Override
+	public void enterExprDrop(final ExprDropContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new DropQuery();
+	}
+
+	@Override
+	public void exitExprDrop(final ExprDropContext ctx) {
+		final DropQuery q = q(DropQuery.class);
+
+		// set the type
+		if (ctx.TYPE_ROLE() != null) {
+			q.setEntityType(DropType.ROLE);
+		} else if (ctx.TYPE_USER() != null) {
+			q.setEntityType(DropType.USER);
 		}
 
 		// set the name
