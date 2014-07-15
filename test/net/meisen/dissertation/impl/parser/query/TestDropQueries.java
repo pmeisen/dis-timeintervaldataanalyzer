@@ -11,7 +11,6 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager;
-import net.meisen.dissertation.impl.parser.query.add.AddResult;
 import net.meisen.dissertation.impl.parser.query.drop.DropQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropResult;
 import net.meisen.dissertation.impl.parser.query.drop.DropType;
