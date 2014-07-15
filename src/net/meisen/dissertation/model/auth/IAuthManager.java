@@ -1,12 +1,19 @@
 package net.meisen.dissertation.model.auth;
 
-import java.util.Collection;
-
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
 import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 
+/**
+ * An authentication manager is used to check authentications and permissions.
+ * The manager is available using auto-wiring with a qualifier defined by
+ * {@link DefaultValues#AUTHMANAGER_ID}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public interface IAuthManager {
 
 	/**
@@ -226,13 +233,53 @@ public interface IAuthManager {
 			final String[] permissions) throws AuthManagementException,
 			PermissionException;
 
+	/**
+	 * Grants the specified {@code permissions} to the specified {@code role}.
+	 * 
+	 * @param role
+	 *            the role to apply the {@code permissions} to
+	 * @param permissions
+	 *            the permissions to be applied
+	 * 
+	 * @throws AuthManagementException
+	 *             if the specified {@code role} does not exist, if the defined
+	 *             {@code permissions} are {@code null} or empty, or if another
+	 *             problem with granting the permissions occurs
+	 * @throws PermissionException
+	 *             if the current user is not allowed to grant permissions
+	 */
 	public void grantPermissionsToRole(final String role,
 			final String[] permissions) throws AuthManagementException,
 			PermissionException;
 
+	/**
+	 * Revokes the specified {@code permissions} from the specified {@code role}
+	 * .
+	 * 
+	 * @param role
+	 *            the role to revoke the {@code permissions} from
+	 * @param permissions
+	 *            the permissions to be revoked
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed, if the specified {@code role} does
+	 *             not exist, or if another problem with granting the
+	 *             permissions occurs
+	 * @throws PermissionException
+	 *             if the current user is not allowed to revoke permissions
+	 */
 	public void revokePermissionsFromRole(final String role,
 			final String[] permissions) throws AuthManagementException,
 			PermissionException;
 
+	/**
+	 * Checks if the current user has the specified {@code permission}.
+	 * 
+	 * @param permission
+	 *            the permission to be checked
+	 * 
+	 * @return {@code true} if the user has the permission, otherwise
+	 *         {@code false}.
+	 */
 	public boolean hasPermission(final DefinedPermission permission);
 }

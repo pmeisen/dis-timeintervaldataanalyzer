@@ -20,9 +20,7 @@ import org.apache.shiro.authc.SimpleAccount;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
-import org.apache.shiro.authz.permission.WildcardPermission;
 import org.apache.shiro.subject.SimplePrincipalCollection;
-import org.apache.shiro.util.PermissionUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -575,6 +573,10 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 				new String[] { "permission" });
 	}
 
+	/**
+	 * Tests the implementation of
+	 * {@link MapDbAuthorizingRealm#grantPermissionsToRole(String, String[])}.
+	 */
 	@Test
 	public void testGrantPermissionsToRole() {
 		Collection<Permission> perms;
@@ -611,15 +613,114 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		assertTrue(realm.isPermitted("role", "perm2"));
 		assertTrue(realm.isPermitted("role", "perm3"));
 		assertTrue(realm.isPermitted("role", "perm4"));
-		
+
 		// cleanUp
 		realm.release();
-		
-		// TODO:
-		// - test revoking of permissions
-		// - add granting and revoking to authManager
-		// - add JavaDocs
-		// - implement revoking
+	}
+
+	/**
+	 * Tests the exception to be thrown if the role to revoke the permissions
+	 * from does not exist.
+	 */
+	@Test
+	public void testGrantPermissionsToRoleNoRoleException() {
+		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
+				realmDbDir);
+		realm.init();
+
+		// tests the exception to be thrown
+		thrown.expect(ForwardedRuntimeException.class);
+		thrown.expect(new ForwardExceptionMatcher(
+				AuthManagementException.class, 1011));
+		realm.grantPermissionsToRole("notExists", new String[] { "permission" });
+	}
+
+	/**
+	 * Tests the exception to be thrown if someone tries to add empty
+	 * permissions to the role.
+	 */
+	@Test
+	public void testGrantPermissionsToRoleNoPermissionsException() {
+		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
+				realmDbDir);
+		realm.init();
+
+		// tests the exception to be thrown
+		thrown.expect(ForwardedRuntimeException.class);
+		thrown.expect(new ForwardExceptionMatcher(
+				AuthManagementException.class, 1013));
+		realm.grantPermissionsToRole("notExists", new String[] {});
+	}
+
+	/**
+	 * Tests the implementation of
+	 * {@link MapDbAuthorizingRealm#revokePermissionsFromRole(String, String[])}
+	 * .
+	 */
+	@Test
+	public void testRevokePermissionsFromRole() {
+		Collection<Permission> perms;
+
+		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
+				realmDbDir);
+		realm.init();
+
+		realm.addRole("role", new String[] { "perm1", "perm2", "perm3" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(3, perms.size());
+		assertTrue(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+
+		// revoke a permission which does not exist
+		realm.revokePermissionsFromRole("role", new String[] { "perm4" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(3, perms.size());
+		assertTrue(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+
+		// revoke a single permission
+		realm.revokePermissionsFromRole("role", new String[] { "perm1" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(2, perms.size());
+		assertFalse(realm.isPermitted("role", "perm1"));
+		assertTrue(realm.isPermitted("role", "perm2"));
+		assertTrue(realm.isPermitted("role", "perm3"));
+
+		// revoke all permission
+		realm.revokePermissionsFromRole("role", new String[] { "perm2",
+				"perm3", "perm4" });
+		perms = realm.getRolePermissionResolver().resolvePermissionsInRole(
+				"role");
+		assertEquals(0, perms.size());
+		assertFalse(realm.isPermitted("role", "perm1"));
+		assertFalse(realm.isPermitted("role", "perm2"));
+		assertFalse(realm.isPermitted("role", "perm3"));
+
+		// cleanUp
+		realm.release();
+	}
+
+	/**
+	 * Tests the exception to be thrown if a permission is revoked from a role,
+	 * which does not exist.
+	 */
+	@Test
+	public void testRevokePermissionsFromRoleNoRoleException() {
+		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
+				realmDbDir);
+		realm.init();
+
+		// tests the exception to be thrown
+		thrown.expect(ForwardedRuntimeException.class);
+		thrown.expect(new ForwardExceptionMatcher(
+				AuthManagementException.class, 1012));
+		realm.revokePermissionsFromRole("notExists",
+				new String[] { "permission" });
 	}
 
 	/**
@@ -656,7 +757,6 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 
 		// cleanUp
 		realm.release();
-
 	}
 
 	/**

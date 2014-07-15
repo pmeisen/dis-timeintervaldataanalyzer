@@ -337,8 +337,11 @@ public class ShiroAuthManager implements IAuthManager {
 					Permission.manageUsers);
 		}
 
-		// TODO Auto-generated method stub
-
+		try {
+			getManageableRealm().grantPermissionsToRole(role, permissions);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	@Override
@@ -350,7 +353,11 @@ public class ShiroAuthManager implements IAuthManager {
 					Permission.manageUsers);
 		}
 
-		// TODO Auto-generated method stub
+		try {
+			getManageableRealm().revokePermissionsFromRole(role, permissions);
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 	}
 
 	/**

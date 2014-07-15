@@ -25,7 +25,6 @@ import org.apache.shiro.authz.SimpleRole;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.util.Destroyable;
 import org.apache.shiro.util.PermissionUtils;
 import org.mapdb.DB;
@@ -34,10 +33,25 @@ import org.mapdb.DBMaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A realm usable as shiro realm which uses mapDb to store the realms
+ * information.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		Destroyable {
-	public final static String adminName = "admin";
-	public final static String adminPassword = "fuckyou";
+	/**
+	 * The name of the administrator account, created if no other account is
+	 * specified.
+	 */
+	protected final static String adminName = "admin";
+	/**
+	 * The password of the administrator account, which is created if no other
+	 * account exists.
+	 */
+	protected final static String adminPassword = "password";
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(MapDbAuthorizingRealm.class);
@@ -46,23 +60,55 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	private final File location;
 
 	private DB db;
-	protected Map<String, SimpleAccount> users;
-	protected Map<String, SimpleRole> roles;
+	private Map<String, SimpleAccount> users;
+	private Map<String, SimpleRole> roles;
 
+	/**
+	 * Constructor specifying the {@code location}, where the files of the users
+	 * should be stored.
+	 * 
+	 * @param location
+	 *            the location to store the files at
+	 */
 	public MapDbAuthorizingRealm(final File location) {
 		this(Files.getCanonicalPath(location));
 	}
 
+	/**
+	 * Constructor specifying the {@code location}, where the files of the users
+	 * should be stored, and the name of the realm.
+	 * 
+	 * @param location
+	 *            the location to store the files at
+	 * @param name
+	 *            the name of the realm
+	 */
 	public MapDbAuthorizingRealm(final File location, final String name) {
 		this(Files.getCanonicalPath(location));
 		setName(name);
 	}
 
+	/**
+	 * Constructor specifying the {@code location}, where the files of the users
+	 * should be stored, and the name of the realm.
+	 * 
+	 * @param location
+	 *            the location to store the files at
+	 * @param name
+	 *            the name of the realm
+	 */
 	public MapDbAuthorizingRealm(final String location, final String name) {
 		this(location);
 		setName(name);
 	}
 
+	/**
+	 * Constructor specifying the {@code location}, where the files of the users
+	 * should be stored.
+	 * 
+	 * @param location
+	 *            the location to store the files at
+	 */
 	public MapDbAuthorizingRealm(final String location) {
 		this.location = new File(location, dbFile);
 	}
@@ -566,6 +612,19 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		}
 	}
 
+	/**
+	 * Grants the specified {@code permissions} to the specified {@code role}.
+	 * 
+	 * @param role
+	 *            the role to apply the {@code permissions} to
+	 * @param permissions
+	 *            the permissions to be applied
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed, if the specified {@code role} does
+	 *             not exist or if the defined {@code permissions} are
+	 *             {@code null} or empty
+	 */
 	public void grantPermissionsToRole(final String role,
 			final String[] permissions) throws AuthManagementException {
 		if (isClosed()) {
@@ -591,6 +650,19 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		}
 	}
 
+	/**
+	 * Revokes the specified {@code permissions} from the specified {@code role}
+	 * .
+	 * 
+	 * @param role
+	 *            the role to revoke the {@code permissions} from
+	 * @param permissions
+	 *            the permissions to be revoked
+	 * 
+	 * @throws AuthManagementException
+	 *             if the realm is closed or if the specified {@code role} does
+	 *             not exist
+	 */
 	public void revokePermissionsFromRole(final String role,
 			final String[] permissions) throws AuthManagementException {
 		if (isClosed()) {
@@ -605,10 +677,30 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 			throw new ForwardedRuntimeException(AuthManagementException.class,
 					1012, Arrays.asList(permissions), role);
 		} else {
+			final SimpleRole clone = clone(simpleRole);
+			final Set<Permission> perms = PermissionUtils.resolvePermissions(
+					Arrays.asList(permissions), getPermissionResolver());
+			final Set<Permission> rolePermissions = clone.getPermissions();
+			rolePermissions.removeAll(perms);
+			clone.setPermissions(rolePermissions);
 
+			this.roles.put(role, clone);
+			db.commit();
 		}
 	}
 
+	/**
+	 * Checks if the specified {@code role} has the specified {@code permission}
+	 * .
+	 * 
+	 * @param role
+	 *            the role to be checked for permission
+	 * @param permission
+	 *            the permission to be checked
+	 * 
+	 * @return {@code true} if the role has the permission, otherwise
+	 *         {@code false}
+	 */
 	public boolean isPermitted(final String role, final String permission) {
 		final SimpleRole simpleRole = this.roles.get(role);
 		if (simpleRole == null) {
@@ -653,6 +745,14 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 				account.getCredentials(), roles, permissions);
 	}
 
+	/**
+	 * Clones the specified {@code role}.
+	 * 
+	 * @param role
+	 *            the role to be cloned
+	 * 
+	 * @return the clone
+	 */
 	protected SimpleRole clone(final SimpleRole role) {
 		if (role == null) {
 			return null;
