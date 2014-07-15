@@ -2,6 +2,9 @@ package net.meisen.dissertation.impl.parser.query.get;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -36,9 +39,10 @@ public class GetQuery implements IQuery {
 	}
 
 	@Override
-	public IQueryResultSet evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver)
-			throws ForwardedRuntimeException, CancellationException {
+	public IQueryResultSet evaluate(final IAuthManager authManager,
+			final TidaModelHandler handler, final TidaModel model,
+			final IResourceResolver resolver) throws ForwardedRuntimeException,
+			CancellationException {
 		if (getResultType().equals(GetResultType.MODELS)) {
 			return new GetResultModels(handler.getTidaModels());
 		} else if (getResultType().equals(GetResultType.VERSION)) {
@@ -77,9 +81,15 @@ public class GetQuery implements IQuery {
 	public void setResultType(final GetResultType resultType) {
 		this.resultType = resultType;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "GET " + this.resultType;
+	}
+
+	@Override
+	public DefinedPermission[][] getNeededPermissions() {
+		return new DefinedPermission[][] { new DefinedPermission[] { Permission.get
+				.create() } };
 	}
 }

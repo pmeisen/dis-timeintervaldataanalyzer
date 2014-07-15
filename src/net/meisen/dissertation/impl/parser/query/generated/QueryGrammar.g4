@@ -25,12 +25,40 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet) EOF;
+root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet | exprAdd | exprDrop | exprModify | exprGrant | exprRevoke) EOF;
+
+/*
+ * Define the expressions to add users or roles.
+ */
+exprAdd             : STMT_ADD (TYPE_USER VALUE exprWithPassword ((exprWithRoles exprWithPermissions? | exprWithPermissions exprWithRoles?))? | (TYPE_ROLE VALUE exprWithPermissions?));
+exprWithPassword    : OP_WITH PROP_PASSWORD VALUE;
+exprWithPermissions : OP_WITH TYPE_PERMISSIONS selectorValueList;
+exprWithRoles       : OP_WITH TYPE_ROLES selectorValueList;
+
+/*
+ * Define the expressions to add users or roles.
+ */
+exprDrop            : STMT_DROP (TYPE_USER | TYPE_ROLE) VALUE;
+
+/*
+ * Define the expressions to modify a user's password.
+ */
+exprModify          : STMT_MODIFY TYPE_USER OP_SET (PROP_PASSWORD CMP_EQUAL VALUE);
+
+/*
+ * Define the expressions to grant permissions to a user or a role.
+ */
+exprGrant           : STMT_GRANT TYPE_PERMISSIONS selectorValueList OP_TO (TYPE_USER | TYPE_ROLE);
+
+/*
+ * Define the expressions to revoke permissions from a user or a role.
+ */
+exprRevoke          : STMT_REVOKE TYPE_PERMISSIONS selectorValueList OP_FROM (TYPE_USER | TYPE_ROLE);
 
 /*
  * Define the different expressions/parts of the get statement
  */
-exprGet       : STMT_GET (TYPE_MODELS | TYPE_VERSION);
+exprGet       : STMT_GET (TYPE_MODELS | TYPE_VERSION | TYPE_USERS | TYPE_PERMISSIONS);
 
 /*
  * Define the different expressions/parts of the alive statement
@@ -40,7 +68,7 @@ exprAlive     : STMT_ALIVE;
 /*
  * Define the different expressions/parts of the load statement
  */
-exprLoad            : STMT_LOAD (selectorModelId | (OP_FROM selectorFilePath)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
+exprLoad            : STMT_LOAD (selectorModelId | (OP_FROM VALUE)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
 exprLoadSetProperty : (PROP_AUTOLOAD CMP_EQUAL selectorBoolean) | (PROP_FORCE CMP_EQUAL selectorBoolean);
 
 /*
@@ -99,13 +127,13 @@ selectorIntValueOrNull      : (INT | NULL_VALUE);
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 selectorDescValue           : (VALUE | NULL_VALUE);
-selectorFilePath            : VALUE;
 selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
 selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL | POS_END_EXCL);
 selectorBoolean             : LOGICAL_TRUE | LOGICAL_FALSE;
 selectorIntervalRelation    : IR_EQUALTO | IR_BEFORE | IR_AFTER | IR_MEETING | IR_OVERLAPPING | IR_DURING | IR_CONTAINING | IR_STARTINGWITH | IR_FINISHINGWITH | IR_WITHIN;
+selectorValueList           : VALUE (SEPARATOR VALUE)*;
 
 /*
  * Define the different tokens, order is important because of first match, 
@@ -135,20 +163,33 @@ STMT_INSERT   : I N S E R T;
 STMT_LOAD     : L O A D;
 STMT_UNLOAD   : U N L O A D;
 STMT_ALIVE    : A L I V E;
+STMT_ADD      : A D D;
+STMT_DROP     : D R O P;
+STMT_MODIFY   : M O D I F Y;
+STMT_GRANT    : G R A N T;
+STMT_REVOKE   : R E V O K E;
 
 // reserved words for properties
 PROP_AUTOLOAD : A U T O L O A D;
 PROP_FORCE    : F O R C E;
+PROP_PASSWORD : P A S S W O R D;
 
-// reserved words to define the types of data to select/get
+// reserved words to define the types of modifications
 TYPE_TIMESERIES  : T I M E S E R I E S;
 TYPE_RECORDS     : R E C O R D S;
 TYPE_MODELS      : M O D E L S;
 TYPE_VERSION     : V E R S I O N;
+TYPE_PERMISSIONS : P E R M I S S I O N S;
+TYPE_ROLES       : R O L E S;
+TYPE_USERS       : U S E R S;
+TYPE_PERMISSION  : P E R M I S S I O N;
+TYPE_ROLE        : R O L E;
+TYPE_USER        : U S E R;
 
 // reserved words to define special positions in the statement
 OP_FROM     : F R O M;
 OP_OF       : O F;
+OP_TO       : T O;
 OP_IN       : I N;
 OP_INTO     : I N T O;
 OP_SET      : S E T;
@@ -158,6 +199,7 @@ OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y | W H E R E;
 OP_TRANSPOSE: T R A N S P O S E;
 OP_IDONLY   : I D S;
+OP_WITH     : W I T H;
 
 // reserved words used to express relations among the time-window and an interval
 IR_EQUALTO       : E Q U A L T O;

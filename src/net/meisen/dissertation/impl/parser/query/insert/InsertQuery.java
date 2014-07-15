@@ -9,6 +9,9 @@ import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.IntervalType;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -139,8 +142,9 @@ public class InsertQuery implements IQuery {
 	}
 
 	@Override
-	public IQueryResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver) {
+	public IQueryResult evaluate(final IAuthManager authManager,
+			final TidaModelHandler handler, final TidaModel model,
+			final IResourceResolver resolver) {
 
 		if (isEnableIdCollection()) {
 			final int[] ids = model.bulkLoadDataWithIds(getDataStructure(),
@@ -334,5 +338,12 @@ public class InsertQuery implements IQuery {
 	 */
 	public boolean isEnableIdCollection() {
 		return enableIdCollection;
+	}
+
+	@Override
+	public DefinedPermission[][] getNeededPermissions() {
+		return new DefinedPermission[][] {
+				new DefinedPermission[] { Permission.modify.create(modelId) },
+				new DefinedPermission[] { Permission.modifyAll.create() } };
 	}
 }

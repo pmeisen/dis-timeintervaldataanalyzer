@@ -1,6 +1,9 @@
 package net.meisen.dissertation.impl.parser.query.unload;
 
 import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -33,9 +36,9 @@ public class UnloadQuery implements IQuery {
 	}
 
 	@Override
-	public IQueryResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver)
-			throws ForwardedRuntimeException {
+	public IQueryResult evaluate(final IAuthManager authManager,
+			final TidaModelHandler handler, final TidaModel model,
+			final IResourceResolver resolver) throws ForwardedRuntimeException {
 
 		// unload the model
 		handler.unload(modelId);
@@ -47,9 +50,15 @@ public class UnloadQuery implements IQuery {
 	public QueryType getQueryType() {
 		return QueryType.MANIPULATION;
 	}
-	
+
 	@Override
 	public void enableIdCollection(final boolean enableIdCollection) {
 		// ignore not supported
+	}
+
+	@Override
+	public DefinedPermission[][] getNeededPermissions() {
+		return new DefinedPermission[][] { new DefinedPermission[] { Permission.unload
+				.create() } };
 	}
 }

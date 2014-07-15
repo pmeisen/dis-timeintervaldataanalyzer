@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.QueryParsingException;
+import net.meisen.dissertation.impl.parser.query.add.AddQuery;
+import net.meisen.dissertation.impl.parser.query.add.AddType;
 import net.meisen.dissertation.impl.parser.query.alive.AliveQuery;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
@@ -22,6 +24,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompStructureElementContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompValueElementContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAddContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAliveContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
@@ -37,6 +40,9 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprWithPasswordContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprWithPermissionsContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprWithRolesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorAliasContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorBooleanContext;
@@ -45,26 +51,27 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorFilePathContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueListContext;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
 import net.meisen.dissertation.impl.parser.query.get.GetResultType;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
-import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.impl.parser.query.unload.UnloadQuery;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -152,7 +159,74 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprLoad(final ExprLoadContext ctx) {
+		final LoadQuery q = q(LoadQuery.class);
+
+		if (ctx.VALUE() != null) {
+			q.setPath(getValue(ctx.VALUE()));
+		}
+
 		finalized = true;
+	}
+
+	@Override
+	public void enterExprAdd(final ExprAddContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new AddQuery();
+	}
+
+	@Override
+	public void exitExprAdd(final ExprAddContext ctx) {
+		final AddQuery q = q(AddQuery.class);
+
+		// set the type
+		if (ctx.TYPE_ROLE() != null) {
+			q.setEntityType(AddType.ROLE);
+		} else if (ctx.TYPE_USER() != null) {
+			q.setEntityType(AddType.USER);
+		}
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		finalized = true;
+	}
+
+	@Override
+	public void exitExprWithRoles(final ExprWithRolesContext ctx) {
+		final AddQuery q = q(AddQuery.class);
+
+		final List<String> roles = getValues(ctx.selectorValueList());
+		q.setRoles(roles);
+	}
+
+	@Override
+	public void exitExprWithPermissions(final ExprWithPermissionsContext ctx) {
+		final AddQuery q = q(AddQuery.class);
+
+		final List<String> permissions = getValues(ctx.selectorValueList());
+		final List<DefinedPermission> perms = new ArrayList<DefinedPermission>();
+		for (final String permission : permissions) {
+			final DefinedPermission perm = DefinedPermission
+					.fromString(permission);
+			perms.add(perm);
+		}
+
+		q.setPermissions(perms);
+	}
+
+	@Override
+	public void exitExprWithPassword(final ExprWithPasswordContext ctx) {
+		final AddQuery q = q(AddQuery.class);
+
+		if (ctx.VALUE() != null) {
+			q.setEntityPassword(getValue(ctx.VALUE()));
+		}
 	}
 
 	@Override
@@ -192,12 +266,6 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitExprInsert(final ExprInsertContext ctx) {
 		finalized = true;
-	}
-
-	@Override
-	public void exitSelectorFilePath(final SelectorFilePathContext ctx) {
-		final LoadQuery q = q(LoadQuery.class);
-		q.setPath(getValue(ctx.VALUE()));
 	}
 
 	@Override
@@ -649,6 +717,25 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			// get the value the descriptor should have
 			return getValue(selectorDesc.VALUE());
 		}
+	}
+
+	/**
+	 * Gets the defined values within the {@code SelectorValueListContext}.
+	 * 
+	 * @param selectorValueList
+	 *            the context to get the defined values from
+	 * @return the defined values
+	 */
+	protected List<String> getValues(
+			final SelectorValueListContext selectorValueList) {
+		final List<String> values = new ArrayList<String>();
+
+		final List<TerminalNode> valueNodes = selectorValueList.VALUE();
+		for (final TerminalNode valueNode : valueNodes) {
+			values.add(getValue(valueNode));
+		}
+
+		return values;
 	}
 
 	/**

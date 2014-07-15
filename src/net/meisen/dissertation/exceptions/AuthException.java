@@ -1,11 +1,10 @@
 package net.meisen.dissertation.exceptions;
 
 /**
- * Permission used whenever a user was unable to authenticate (e.g. because of
- * an invalid password or a locked account).
+ * Exception used whenever a user was unable to authenticate (e.g. because of an
+ * invalid password or a locked account).
  * 
  * @author pmeisen
- * 
  */
 public class AuthException extends RuntimeException {
 	private static final long serialVersionUID = -6430882835793129389L;

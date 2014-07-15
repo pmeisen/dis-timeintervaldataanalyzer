@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.parser.query;
 
+import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.server.CancellationException;
@@ -49,8 +50,10 @@ public interface IQueryFactory {
 	 *             if the evaluation fails
 	 * @throws CancellationException
 	 *             if the evaluation was cancelled from the client
+	 * @throws PermissionException
+	 *             if the current user is not allowed to evaluate the query
 	 */
 	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
 			final IResourceResolver resolver) throws QueryEvaluationException,
-			CancellationException;
+			CancellationException, PermissionException;
 }

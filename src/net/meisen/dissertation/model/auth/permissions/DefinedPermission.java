@@ -1,5 +1,9 @@
 package net.meisen.dissertation.model.auth.permissions;
 
+import java.util.regex.Pattern;
+
+import com.google.common.base.Objects;
+
 /**
  * A defined (i.e. if a model is needed, it's defined) {@code Permission}. Use
  * {@link Permission#create(String)} to create a {@code DefinedPermission}
@@ -9,6 +13,11 @@ package net.meisen.dissertation.model.auth.permissions;
  * 
  */
 public class DefinedPermission {
+	/**
+	 * Separator used if none is specified
+	 */
+	protected final static String DEF_SEPARATOR = ".";
+
 	private final Permission permission;
 	private final String modelId;
 
@@ -66,6 +75,11 @@ public class DefinedPermission {
 		return modelId;
 	}
 
+	@Override
+	public String toString() {
+		return toString(DEF_SEPARATOR);
+	}
+
 	/**
 	 * A string representation which separates the different parts of the
 	 * permission using the specified {@code separator}.
@@ -79,5 +93,114 @@ public class DefinedPermission {
 	 */
 	public String toString(final String separator) {
 		return permission.toString(modelId, separator);
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof DefinedPermission) {
+			final DefinedPermission perm = (DefinedPermission) obj;
+
+			return Objects.equal(getModelId(), perm.getModelId())
+					&& Objects.equal(getPermission(), perm.getPermission());
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(getPermission(), getModelId());
+	}
+
+	/**
+	 * Generates a string for the specified set of sets of
+	 * {@code DefinedPermission}.
+	 * 
+	 * @param permSets
+	 *            the set of sets
+	 * 
+	 * @return the string representation
+	 */
+	public static String toString(final DefinedPermission[][] permSets) {
+		if (permSets == null || permSets.length == 0) {
+			return "";
+		}
+
+		final StringBuilder sb = new StringBuilder();
+		for (int k = 0; k < permSets.length; k++) {
+			final DefinedPermission[] permSet = permSets[k];
+			if (k > 0) {
+				sb.append(", ");
+			}
+
+			// validate if the permission is really available
+			sb.append("(");
+			for (int i = 0; i < permSet.length; i++) {
+				final DefinedPermission perm = permSet[i];
+				if (i > 0) {
+					sb.append(", ");
+				}
+
+				sb.append(perm.toString(DEF_SEPARATOR));
+			}
+			sb.append(")");
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * Retrieves {@code DefinedPermission} from a string representation using
+	 * the {@link DefinedPermission#DEF_SEPARATOR}.
+	 * 
+	 * @param permission
+	 *            the string representation of the {@code DefinedPermission}
+	 * 
+	 * @return the presented {@code DefinitionPermission}
+	 */
+	public static DefinedPermission fromString(final String permission) {
+		return fromString(permission, null);
+	}
+
+	/**
+	 * Retrieves {@code DefinedPermission} from a string representation using
+	 * the specified {@code separator}.
+	 * 
+	 * @param permission
+	 *            the string representation of the {@code DefinedPermission}
+	 * @param separator
+	 *            the separator used by the representation
+	 * 
+	 * @return the presented {@code DefinitionPermission}
+	 */
+	public static DefinedPermission fromString(final String permission,
+			final String separator) {
+		final String sep;
+		if (separator == null) {
+			sep = DEF_SEPARATOR;
+		} else {
+			sep = separator;
+		}
+
+		final String[] parts = permission.split("\\s*" + Pattern.quote(sep)
+				+ "\\s*");
+		final Permission perm;
+		final String modelId;
+		if (parts.length == 2) {
+			PermissionLevel.valueOf(parts[0]);
+			perm = Permission.valueOf(parts[1]);
+			modelId = null;
+		} else if (parts.length == 3) {
+			PermissionLevel.valueOf(parts[0]);
+			modelId = parts[1];
+			perm = Permission.valueOf(parts[2]);
+		} else {
+			throw new IllegalArgumentException("The permission '" + permission
+					+ "' cannot be resolved.");
+		}
+
+		return new DefinedPermission(perm, modelId);
 	}
 }

@@ -3,7 +3,6 @@ package net.meisen.dissertation.model.auth;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
-import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 
 /**
@@ -91,12 +90,10 @@ public interface IAuthManager {
 	 * 
 	 * @throws AuthManagementException
 	 *             if a user with the specified {@code name} already exists
-	 * @throws PermissionException
-	 *             if the current user is not allowed to add a user
 	 */
 	public void addUser(final String name, final String password,
 			final String[] roles, final DefinedPermission[] permissions)
-			throws AuthManagementException, PermissionException;
+			throws AuthManagementException;
 
 	/**
 	 * Deletes the specified user.
@@ -106,11 +103,8 @@ public interface IAuthManager {
 	 * 
 	 * @throws AuthManagementException
 	 *             if the deletion failed of any reason
-	 * @throws PermissionException
-	 *             if the current user is not allowed to delete a user
 	 */
-	public void deleteUser(final String name) throws AuthManagementException,
-			PermissionException;
+	public void deleteUser(final String name) throws AuthManagementException;
 
 	/**
 	 * Modifies the password of the specified user to the {@code password}.
@@ -122,11 +116,9 @@ public interface IAuthManager {
 	 * 
 	 * @throws AuthManagementException
 	 *             if the password cannot be modified because of an error
-	 * @throws PermissionException
-	 *             if the current user is not allowed to modify a user
 	 */
 	public void modifyPassword(final String name, final String password)
-			throws AuthManagementException, PermissionException;
+			throws AuthManagementException;
 
 	/**
 	 * Adds a role to the manager.
@@ -139,11 +131,9 @@ public interface IAuthManager {
 	 * 
 	 * @throws AuthManagementException
 	 *             if the deletion failed of any reason
-	 * @throws PermissionException
-	 *             if the current user is not allowed to delete a role
 	 */
 	public void addRole(final String role, final DefinedPermission[] permissions)
-			throws AuthManagementException, PermissionException;
+			throws AuthManagementException;
 
 	/**
 	 * Deletes a role from the manager.
@@ -154,11 +144,8 @@ public interface IAuthManager {
 	 * @throws AuthManagementException
 	 *             if the adding failed, e.g. because another role with the same
 	 *             name is already added to the manager
-	 * @throws PermissionException
-	 *             if the current user is not allowed to delete a role
 	 */
-	public void deleteRole(final String role) throws AuthManagementException,
-			PermissionException;
+	public void deleteRole(final String role) throws AuthManagementException;
 
 	/**
 	 * Assigns the specified {@code role} to the specified {@code username}. The
@@ -172,11 +159,9 @@ public interface IAuthManager {
 	 * @throws AuthManagementException
 	 *             if the user does not exist or if the assignment fails because
 	 *             of another reason
-	 * @throws PermissionException
-	 *             if the current user is not allowed to assign a role
 	 */
 	public void assignRoleToUser(final String username, final String role)
-			throws AuthManagementException, PermissionException;
+			throws AuthManagementException;
 
 	/**
 	 * Removes the specified {@code role} from the specified {@code username}.
@@ -188,11 +173,9 @@ public interface IAuthManager {
 	 * 
 	 * @throws AuthManagementException
 	 *             if the user does not exist
-	 * @throws PermissionException
-	 *             if the current user is not allowed to remove a role
 	 */
 	public void removeRoleFromUser(final String username, final String role)
-			throws AuthManagementException, PermissionException;
+			throws AuthManagementException;
 
 	/**
 	 * Grants the specified {@code permissions} to the specified
@@ -207,12 +190,9 @@ public interface IAuthManager {
 	 *             if the user does not exist or if the {@code permissions} to
 	 *             be granted are empty or {@code null} or if the granting fails
 	 *             because of another problem
-	 * @throws PermissionException
-	 *             if the current user is not allowed to grant permissions
 	 */
 	public void grantPermissionsToUser(final String username,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException;
+			final String[] permissions) throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified
@@ -226,12 +206,9 @@ public interface IAuthManager {
 	 * @throws AuthManagementException
 	 *             if the user does not exist or if the revoking fails because
 	 *             of another problem
-	 * @throws PermissionException
-	 *             if the current user is not allowed to revoke permissions
 	 */
 	public void revokePermissionsFromUser(final String username,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException;
+			final String[] permissions) throws AuthManagementException;
 
 	/**
 	 * Grants the specified {@code permissions} to the specified {@code role}.
@@ -245,12 +222,9 @@ public interface IAuthManager {
 	 *             if the specified {@code role} does not exist, if the defined
 	 *             {@code permissions} are {@code null} or empty, or if another
 	 *             problem with granting the permissions occurs
-	 * @throws PermissionException
-	 *             if the current user is not allowed to grant permissions
 	 */
 	public void grantPermissionsToRole(final String role,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException;
+			final String[] permissions) throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified {@code role}
@@ -265,12 +239,9 @@ public interface IAuthManager {
 	 *             if the realm is closed, if the specified {@code role} does
 	 *             not exist, or if another problem with granting the
 	 *             permissions occurs
-	 * @throws PermissionException
-	 *             if the current user is not allowed to revoke permissions
 	 */
 	public void revokePermissionsFromRole(final String role,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException;
+			final String[] permissions) throws AuthManagementException;
 
 	/**
 	 * Checks if the current user has the specified {@code permission}.

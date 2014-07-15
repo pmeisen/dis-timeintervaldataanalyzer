@@ -10,6 +10,9 @@ import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -112,9 +115,9 @@ public class SelectQuery implements IQuery {
 	}
 
 	@Override
-	public SelectResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver)
-			throws ForwardedRuntimeException {
+	public SelectResult evaluate(final IAuthManager authManager,
+			final TidaModelHandler handler, final TidaModel model,
+			final IResourceResolver resolver) throws ForwardedRuntimeException {
 		final SelectEvaluator evaluator = new SelectEvaluator(model);
 		return evaluator.evaluate(this);
 	}
@@ -255,5 +258,12 @@ public class SelectQuery implements IQuery {
 	@Override
 	public void enableIdCollection(final boolean enableIdCollection) {
 		// ignore not supported
+	}
+
+	@Override
+	public DefinedPermission[][] getNeededPermissions() {
+		return new DefinedPermission[][] {
+				new DefinedPermission[] { Permission.query.create(modelId) },
+				new DefinedPermission[] { Permission.queryAll.create() } };
 	}
 }

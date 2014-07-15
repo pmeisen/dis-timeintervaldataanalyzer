@@ -1,10 +1,13 @@
 package net.meisen.dissertation.impl.parser.query;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarLexer;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
@@ -50,6 +53,13 @@ public class QueryFactory implements IQueryFactory {
 	@Autowired
 	@Qualifier(DefaultValues.AGGREGATIONFUNCTIONHANDLER_ID)
 	protected AggregationFunctionHandler aggFuncHandler;
+
+	/**
+	 * The handler used to resolve aggregation-functions.
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.AUTHMANAGER_ID)
+	protected IAuthManager authManager;
 
 	@Autowired
 	@Qualifier(DefaultValues.HANDLER_ID)
@@ -139,12 +149,16 @@ public class QueryFactory implements IQueryFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IQueryResult> T evaluateQuery(final IQuery query,
-			final IResourceResolver resolver) throws QueryEvaluationException, CancellationException {
+			final IResourceResolver resolver) throws QueryEvaluationException,
+			CancellationException {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("Evaluating the query '" + query + "'.");
 		}
 
-		// get the model
+		// check the permissions
+		checkPermission(query);
+
+		// get the model if needed
 		final TidaModel model;
 		if (query.expectsModel()) {
 			final String modelId = query.getModelId();
@@ -158,8 +172,9 @@ public class QueryFactory implements IQueryFactory {
 			model = null;
 		}
 
+		// evaluate
 		try {
-			return (T) query.evaluate(handler, model, resolver);
+			return (T) query.evaluate(authManager, handler, model, resolver);
 		} catch (final ForwardedRuntimeException e) {
 			exceptionRegistry
 					.throwRuntimeException((ForwardedRuntimeException) e);
@@ -176,5 +191,52 @@ public class QueryFactory implements IQueryFactory {
 
 		// unreachable code
 		return null;
+	}
+
+	/**
+	 * Checks if the current user has the permission to process the specified
+	 * {@code query}.
+	 * 
+	 * @param query
+	 *            the query to be checked
+	 * 
+	 * @throws PermissionException
+	 *             if the permission is not available
+	 */
+	protected void checkPermission(final IQuery query)
+			throws PermissionException {
+		boolean permissionGranted = false;
+
+		final DefinedPermission[][] permSets = query.getNeededPermissions();
+		if (permSets == null) {
+			permissionGranted = true;
+		} else if (permSets.length == 0) {
+			permissionGranted = true;
+		} else {
+			permissionGranted = false;
+
+			// iterate and check
+			for (final DefinedPermission[] permSet : permSets) {
+				permissionGranted = true;
+
+				// validate if the permission is really available
+				for (final DefinedPermission perm : permSet) {
+					if (!authManager.hasPermission(perm)) {
+						permissionGranted = false;
+						break;
+					}
+				}
+
+				// if one of the sets grants permission to process stop
+				if (permissionGranted) {
+					break;
+				}
+			}
+		}
+
+		if (!permissionGranted) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, DefinedPermission.toString(permSets));
+		}
 	}
 }

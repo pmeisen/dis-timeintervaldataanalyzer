@@ -62,6 +62,7 @@ import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
 import net.meisen.dissertation.impl.time.mapper.TestMapperFactory;
+import net.meisen.dissertation.model.auth.permissions.TestDefinedPermission;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
 import net.meisen.dissertation.model.data.TestMetaDataModel;
@@ -233,7 +234,8 @@ import org.junit.runners.Suite;
 		TestSelectQueries.class, TestInsertQueries.class, TestGetQueries.class,
 
 		// Test authentication manager
-		TestMapDbAuthorizingRealm.class, TestShiroAuthManager.class,
+		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,
+		TestShiroAuthManager.class,
 
 		// Test the server
 		TestTidaServer.class })

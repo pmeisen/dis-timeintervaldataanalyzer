@@ -1,6 +1,8 @@
 package net.meisen.dissertation.model.parser.query;
 
 import net.meisen.dissertation.jdbc.protocol.QueryType;
+import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.server.CancellationException;
@@ -48,6 +50,8 @@ public interface IQuery {
 	/**
 	 * Evaluates the query against the specified {@code model}.
 	 * 
+	 * @param authManager
+	 *            the {@code AuthManager} of the running application
 	 * @param handler
 	 *            the {@code TidaModelHandler} to retrieve or load additional
 	 *            information
@@ -67,9 +71,10 @@ public interface IQuery {
 	 * @throws CancellationException
 	 *             if the processing was cancelled by the client
 	 */
-	public IQueryResult evaluate(final TidaModelHandler handler,
-			final TidaModel model, final IResourceResolver resolver)
-			throws ForwardedRuntimeException, CancellationException;
+	public IQueryResult evaluate(final IAuthManager authManager,
+			final TidaModelHandler handler, final TidaModel model,
+			final IResourceResolver resolver) throws ForwardedRuntimeException,
+			CancellationException;
 
 	/**
 	 * Gets the type of the query.
@@ -92,4 +97,37 @@ public interface IQuery {
 	 *            {@code true} to enable the collection, otherwise {@code false}
 	 */
 	public void enableIdCollection(final boolean enableIdCollection);
+
+	/**
+	 * Method to retrieve sets of {@code DefinedPermissions}. Each set defines
+	 * needed {@code DefinedPermissions} to process the query, i.e.
+	 * 
+	 * <pre>
+	 * return new DefinedPermission[][] {
+	 * 		new DefinedPermission[] { Permission.modify.create(modelId) },
+	 * 		new DefinedPermission[] { Permission.modifyAll.create() } };
+	 * </pre>
+	 * 
+	 * Defines two possibilities to process the query. The first one is given if
+	 * the permission to modify the specific model (defined by it's identifier)
+	 * is available. The second one is given if the permission to modify all
+	 * instances is granted. It is also possible to define several permissions
+	 * needed to process.
+	 * 
+	 * <pre>
+	 * return new DefinedPermission[][] {
+	 * 		new DefinedPermission[] { Permission.modify.create(modelId) },
+	 * 		new DefinedPermission[] { Permission.modifyAll.create(),
+	 * 				Permission.connectTSQL.create() } };
+	 * </pre>
+	 * 
+	 * Defines again two possibilities to process the query. The first one is
+	 * given if the permission to modify the specific model (defined by it's
+	 * identifier) is available. The second one is given if the permission to
+	 * modify all instances <b>and</b> the permission to connect via tsql is
+	 * granted.
+	 * 
+	 * @return sets of needed permissions
+	 */
+	public DefinedPermission[][] getNeededPermissions();
 }

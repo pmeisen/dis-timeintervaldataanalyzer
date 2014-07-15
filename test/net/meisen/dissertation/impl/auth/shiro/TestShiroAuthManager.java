@@ -7,7 +7,6 @@ import java.io.File;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
-import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
@@ -83,138 +82,6 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 	}
 
 	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for adding a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToAddUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.addUser("philipp", "password", null, null);
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for deleting a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToDeleteUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.deleteUser("philipp");
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for modify a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToModifyUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.modifyPassword("philipp", "password");
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for adding a role.
-	 */
-	@Test
-	public void testInsufficientPermissionToAddRole() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.addRole("myRole", null);
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for deleting a role.
-	 */
-	@Test
-	public void testInsufficientPermissionToDeleteRole() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.deleteRole("myRole");
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for assigning a role to a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToAssignRoleToUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.assignRoleToUser("myRole", "philipp");
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for removing a role from a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToRemoveRoleFromUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.removeRoleFromUser("myRole", "philipp");
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for granting permissions to a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToGrantPermissionsToUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.grantPermissionsToUser("philipp", null);
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for revoking permissions from a user.
-	 */
-	@Test
-	public void testInsufficientPermissionToRevokePermissionsFromUser() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.revokePermissionsFromUser("philipp", null);
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for granting permissions to a role.
-	 */
-	@Test
-	public void testInsufficientPermissionToGrantPermissionsToRole() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.grantPermissionsToRole("myRole", null);
-	}
-
-	/**
-	 * Tests the exception to be thrown if the needed permissions are not
-	 * available for revoking permissions from a role.
-	 */
-	@Test
-	public void testInsufficientPermissionToRevokePermissionsFromRole() {
-		thrown.expect(PermissionException.class);
-		thrown.expectMessage("Insufficient permission '"
-				+ Permission.manageUsers.toString() + "'");
-		authManager.revokePermissionsFromRole("myRole", null);
-	}
-
-	/**
 	 * Tests a valid login and a user creation.
 	 */
 	@Test
@@ -273,7 +140,7 @@ public class TestShiroAuthManager extends LoaderBasedTest {
 				+ "' is currently connected");
 		authManager.login("philipp", "password");
 	}
-	
+
 	/**
 	 * Remove everything from the {@code AuthManager}, which might have been
 	 * added during the test.
