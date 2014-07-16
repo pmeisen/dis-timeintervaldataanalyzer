@@ -21,9 +21,10 @@ public interface IQuery {
 	 * by the identifier retrieved via {@link #getModelId}. The method returns
 	 * {@code true} if a {@code TidaModel} is needed, otherwise {@code false}.
 	 * If {@code false} is set, the method
-	 * {@link #evaluate(TidaModelHandler, TidaModel, IResourceResolver)} will be
-	 * called with {@code null} for the {@code TidaModel}. If {@code true} is
-	 * returned by this method it is ensured that the {@code TidaModel} is set.
+	 * {@link #evaluate(IAuthManager, TidaModelHandler, TidaModel, IResourceResolver)}
+	 * will be called with {@code null} for the {@code TidaModel}. If
+	 * {@code true} is returned by this method it is ensured that the
+	 * {@code TidaModel} is set.
 	 * 
 	 * @return {@code true} if a model is needed, otherwise {@code false}
 	 */
