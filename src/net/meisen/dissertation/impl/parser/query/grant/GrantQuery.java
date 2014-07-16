@@ -1,8 +1,7 @@
-package net.meisen.dissertation.impl.parser.query.add;
+package net.meisen.dissertation.impl.parser.query.grant;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
@@ -18,72 +17,42 @@ import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
- * A query used to add users or roles.
+ * A query used to grant permissions to an entity, i.e. user or role.
  * 
  * @author pmeisen
  * 
+ * @see GrantType
+ * 
  */
-public class AddQuery implements IQuery {
-	private final Set<String> roles = new LinkedHashSet<String>();
+public class GrantQuery implements IQuery {
 	private final Set<DefinedPermission> permissions = new LinkedHashSet<DefinedPermission>();
 
-	private AddType entityType;
+	private GrantType entityType;
 	private String entityName;
-	private String entityPassword;
 
 	/**
-	 * Gets the type of the entity to be added.
+	 * Gets the type of the entity to be granted.
 	 * 
-	 * @return the type of the entity to be added
+	 * @return the type of the entity to be granted
 	 */
-	public AddType getEntityType() {
+	public GrantType getEntityType() {
 		return entityType;
 	}
 
 	/**
-	 * Sets the type of the entity to be added.
+	 * Sets the type of the entity to be granted.
 	 * 
 	 * @param type
-	 *            the type of the entity to be added
+	 *            the type of the entity to be granted
 	 */
-	public void setEntityType(final AddType type) {
+	public void setEntityType(final GrantType type) {
 		this.entityType = type;
 	}
 
 	/**
-	 * Gets the roles defined for the entity to be added.
+	 * Gets the permissions defined for the entity to be granted.
 	 * 
-	 * @return the roles defined for the entity to be added
-	 */
-	public Set<String> getRoles() {
-		return roles;
-	}
-
-	/**
-	 * Sets the roles defined for the entity to be added.
-	 * 
-	 * @param roles
-	 *            the roles defined for the entity to be added
-	 */
-	public void setRoles(final List<String> roles) {
-		this.roles.clear();
-		this.roles.addAll(roles);
-	}
-
-	/**
-	 * Adds the roles for the entity to be added to the one defined so far.
-	 * 
-	 * @param roles
-	 *            the roles for the entity to be added to the one defined so far
-	 */
-	public void addRoles(final List<String> roles) {
-		this.roles.addAll(roles);
-	}
-
-	/**
-	 * Gets the permissions defined for the entity to be added.
-	 * 
-	 * @return the permissions defined for the entity to be added
+	 * @return the permissions defined for the entity to be granted
 	 */
 	public Set<DefinedPermission> getPermissions() {
 		return permissions;
@@ -102,7 +71,7 @@ public class AddQuery implements IQuery {
 
 	/**
 	 * Adds the permissions to the already defined once, which should be granted
-	 * to the entity to be added.
+	 * to the entity.
 	 * 
 	 * @param permissions
 	 *            the permissions, which should be added to the already defined
@@ -113,41 +82,22 @@ public class AddQuery implements IQuery {
 	}
 
 	/**
-	 * Sets the name of the entity to be added.
+	 * Sets the name of the entity to be granted.
 	 * 
 	 * @param entityName
-	 *            the name of the entity to be added
+	 *            the name of the entity to be granted
 	 */
 	public void setEntityName(final String entityName) {
 		this.entityName = entityName;
 	}
 
 	/**
-	 * Gets the name of the entity to be added.
+	 * Gets the name of the entity to be granted.
 	 * 
-	 * @return the name of the entity to be added
+	 * @return the name of the entity to be granted
 	 */
 	public String getEntityName() {
 		return entityName;
-	}
-
-	/**
-	 * Gets the password specified for the entity to be added.
-	 * 
-	 * @return the password specified for the entity to be added
-	 */
-	public String getEntityPassword() {
-		return entityPassword;
-	}
-
-	/**
-	 * Sets the password for the entity to be added.
-	 * 
-	 * @param entityPassword
-	 *            the password for the entity to be added
-	 */
-	public void setEntityPassword(final String entityPassword) {
-		this.entityPassword = entityPassword;
 	}
 
 	@Override
@@ -166,29 +116,27 @@ public class AddQuery implements IQuery {
 	}
 
 	@Override
-	public AddResult evaluate(final IAuthManager authManager,
+	public GrantResult evaluate(final IAuthManager authManager,
 			final TidaModelHandler handler, final TidaModel model,
 			final IResourceResolver resolver) throws ForwardedRuntimeException,
 			CancellationException {
 
-		if (AddType.USER.equals(getEntityType())) {
-			final String[] roles = getRoles().toArray(new String[0]);
+		if (GrantType.USER.equals(getEntityType())) {
 			final DefinedPermission[] perms = getPermissions().toArray(
 					new DefinedPermission[0]);
 
-			authManager.addUser(getEntityName(), getEntityPassword(), roles,
-					perms);
-		} else if (AddType.ROLE.equals(getEntityType())) {
+			authManager.grantPermissionsToUser(getEntityName(), perms);
+		} else if (GrantType.ROLE.equals(getEntityType())) {
 			final DefinedPermission[] perms = getPermissions().toArray(
 					new DefinedPermission[0]);
 
-			authManager.addRole(getEntityName(), perms);
+			authManager.grantPermissionsToRole(getEntityName(), perms);
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1020, getEntityType());
 		}
 
-		return new AddResult();
+		return new GrantResult();
 	}
 
 	@Override
@@ -203,13 +151,13 @@ public class AddQuery implements IQuery {
 
 	@Override
 	public DefinedPermission[][] getNeededPermissions() {
-		return new DefinedPermission[][] { new DefinedPermission[] { Permission.manageUsers
+		return new DefinedPermission[][] { new DefinedPermission[] { Permission.grantPermissions
 				.create() } };
 	}
 
 	@Override
 	public String toString() {
-		return "ADD " + entityType + " " + entityName + " (permissions: "
-				+ getPermissions() + ", roles: " + getRoles() + ")";
+		return "GRANT " + entityType + " " + entityName + " (permissions: "
+				+ getPermissions() + ")";
 	}
 }

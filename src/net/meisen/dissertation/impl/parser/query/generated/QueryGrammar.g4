@@ -43,17 +43,22 @@ exprDrop            : STMT_DROP (TYPE_USER | TYPE_ROLE) VALUE;
 /*
  * Define the expressions to modify a user's password.
  */
-exprModify          : STMT_MODIFY TYPE_USER OP_SET (PROP_PASSWORD CMP_EQUAL VALUE);
+exprModify          : STMT_MODIFY TYPE_USER VALUE exprSetPassword;
+exprSetPassword     : OP_SET PROP_PASSWORD OP_TO VALUE;
 
 /*
  * Define the expressions to grant permissions to a user or a role.
  */
-exprGrant           : STMT_GRANT TYPE_PERMISSIONS selectorValueList OP_TO (TYPE_USER | TYPE_ROLE);
+exprGrant           : STMT_GRANT TYPE_PERMISSIONS selectorValueList OP_TO (TYPE_USER | TYPE_ROLE) VALUE;
 
 /*
  * Define the expressions to revoke permissions from a user or a role.
  */
-exprRevoke          : STMT_REVOKE TYPE_PERMISSIONS selectorValueList OP_FROM (TYPE_USER | TYPE_ROLE);
+exprRevoke          : STMT_REVOKE TYPE_PERMISSIONS selectorValueList OP_FROM (TYPE_USER | TYPE_ROLE) VALUE;
+
+exprAssign          : STMT_ASSIGN TYPE_ROLE OP_TO selectorValueList;
+    
+exprRemove          : STMT_REMOVE TYPE_ROLE OP_FROM selectorValueList;
 
 /*
  * Define the different expressions/parts of the get statement
@@ -168,6 +173,8 @@ STMT_DROP     : D R O P;
 STMT_MODIFY   : M O D I F Y;
 STMT_GRANT    : G R A N T;
 STMT_REVOKE   : R E V O K E;
+STMT_ASSIGN   : A S S I G N;
+STMT_REMOVE   : R E M O V E;
 
 // reserved words for properties
 PROP_AUTOLOAD : A U T O L O A D;

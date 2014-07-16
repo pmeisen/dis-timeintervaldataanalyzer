@@ -15,8 +15,7 @@ import net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager;
 import net.meisen.dissertation.impl.parser.query.add.AddQuery;
 import net.meisen.dissertation.impl.parser.query.add.AddResult;
 import net.meisen.dissertation.impl.parser.query.add.AddType;
-import net.meisen.dissertation.impl.parser.query.get.GetQuery;
-import net.meisen.dissertation.impl.parser.query.get.GetResultModels;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -32,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Tests the implementation of {@link GetQuery} and {@link GetResultModels}.
+ * Tests the implementation of {@link AddQuery}.
  * 
  * @author pmeisen
  * 
@@ -191,7 +190,7 @@ public class TestAddQueries extends LoaderBasedTest {
 	 * Tests the evaluation of a {@code AddQuery}.
 	 */
 	@Test
-	public void testAddQueryRoleEvaluation() {
+	public void testAddQueryEvaluation() {
 		String query;
 
 		// fire the query and get the result
@@ -201,7 +200,7 @@ public class TestAddQueries extends LoaderBasedTest {
 
 		// no exception means the role was really created
 		authManager.grantPermissionsToRole("newRole",
-				new String[] { "unneeded" });
+				new DefinedPermission[] { Permission.connectHTML.create() });
 
 		// add a new user and log in as the new user
 		query = "ADD USER 'user1' WITH PASSWORD 'user1_password'";

@@ -1,16 +1,16 @@
-package net.meisen.dissertation.impl.parser.query.add;
+package net.meisen.dissertation.impl.parser.query.grant;
 
 import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 
 /**
- * The result of an {@code AddQuery}.
+ * The result of a {@code GrantQuery}.
  * 
  * @author pmeisen
  * 
- * @see AddQuery
+ * @see GrantQuery
  * 
  */
-public class AddResult implements IQueryResultSingleInteger {
+public class GrantResult implements IQueryResultSingleInteger {
 
 	@Override
 	public int getResult() {

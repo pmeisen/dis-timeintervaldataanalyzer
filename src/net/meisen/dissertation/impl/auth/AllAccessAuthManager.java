@@ -98,25 +98,27 @@ public class AllAccessAuthManager implements IAuthManager {
 
 	@Override
 	public void grantPermissionsToUser(final String username,
-			final String[] permissions) {
+			final DefinedPermission[] permissions) {
 		// nothing to be done, it's not manageable
 	}
 
 	@Override
 	public void revokePermissionsFromUser(final String username,
-			final String[] permissions) {
+			final DefinedPermission[] permissions) {
 		// nothing to be done, it's not manageable
 	}
 
 	@Override
 	public void grantPermissionsToRole(final String role,
-			final String[] permissions) throws AuthManagementException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException {
 		// nothing to be done, it's not manageable
 	}
 
 	@Override
 	public void revokePermissionsFromRole(final String role,
-			final String[] permissions) throws AuthManagementException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException {
 		// nothing to be done, it's not manageable
 	}
 }

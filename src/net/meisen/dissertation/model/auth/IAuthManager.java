@@ -192,7 +192,7 @@ public interface IAuthManager {
 	 *             because of another problem
 	 */
 	public void grantPermissionsToUser(final String username,
-			final String[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions) throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified
@@ -208,7 +208,7 @@ public interface IAuthManager {
 	 *             of another problem
 	 */
 	public void revokePermissionsFromUser(final String username,
-			final String[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions) throws AuthManagementException;
 
 	/**
 	 * Grants the specified {@code permissions} to the specified {@code role}.
@@ -224,7 +224,7 @@ public interface IAuthManager {
 	 *             problem with granting the permissions occurs
 	 */
 	public void grantPermissionsToRole(final String role,
-			final String[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions) throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified {@code role}
@@ -241,7 +241,7 @@ public interface IAuthManager {
 	 *             permissions occurs
 	 */
 	public void revokePermissionsFromRole(final String role,
-			final String[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions) throws AuthManagementException;
 
 	/**
 	 * Checks if the current user has the specified {@code permission}.

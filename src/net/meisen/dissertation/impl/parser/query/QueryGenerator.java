@@ -32,14 +32,17 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprDropContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGetContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGrantContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGroupContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprInsertContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadSetPropertyContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprModifyContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectRecordsContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectTimeSeriesContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSetPasswordContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
@@ -63,8 +66,11 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueListContext;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
 import net.meisen.dissertation.impl.parser.query.get.GetResultType;
+import net.meisen.dissertation.impl.parser.query.grant.GrantQuery;
+import net.meisen.dissertation.impl.parser.query.grant.GrantType;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
+import net.meisen.dissertation.impl.parser.query.modify.ModifyQuery;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
@@ -201,6 +207,40 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
+	public void enterExprGrant(final ExprGrantContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new GrantQuery();
+	}
+
+	@Override
+	public void exitExprGrant(final ExprGrantContext ctx) {
+		final GrantQuery q = q(GrantQuery.class);
+
+		// set the type
+		if (ctx.TYPE_ROLE() != null) {
+			q.setEntityType(GrantType.ROLE);
+		} else if (ctx.TYPE_USER() != null) {
+			q.setEntityType(GrantType.USER);
+		}
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		// set the permissions
+		final List<DefinedPermission> perms = getPermissions(ctx
+				.selectorValueList());
+		q.setPermissions(perms);
+
+		finalized = true;
+	}
+
+	@Override
 	public void enterExprDrop(final ExprDropContext ctx) {
 		if (this.query != null) {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
@@ -230,6 +270,37 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
+	public void enterExprModify(final ExprModifyContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new ModifyQuery();
+	}
+
+	@Override
+	public void exitExprModify(final ExprModifyContext ctx) {
+		final ModifyQuery q = q(ModifyQuery.class);
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		finalized = true;
+	}
+
+	@Override
+	public void exitExprSetPassword(final ExprSetPasswordContext ctx) {
+		final ModifyQuery q = q(ModifyQuery.class);
+
+		if (ctx.VALUE() != null) {
+			q.setEntityPassword(getValue(ctx.VALUE()));
+		}
+	}
+
+	@Override
 	public void exitExprWithRoles(final ExprWithRolesContext ctx) {
 		final AddQuery q = q(AddQuery.class);
 
@@ -241,14 +312,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	public void exitExprWithPermissions(final ExprWithPermissionsContext ctx) {
 		final AddQuery q = q(AddQuery.class);
 
-		final List<String> permissions = getValues(ctx.selectorValueList());
-		final List<DefinedPermission> perms = new ArrayList<DefinedPermission>();
-		for (final String permission : permissions) {
-			final DefinedPermission perm = DefinedPermission
-					.fromString(permission);
-			perms.add(perm);
-		}
-
+		final List<DefinedPermission> perms = getPermissions(ctx
+				.selectorValueList());
 		q.setPermissions(perms);
 	}
 
@@ -752,10 +817,35 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	/**
+	 * Gets the {@code DefinedPermissions} within the
+	 * {@code SelectorValueListContext}.
+	 * 
+	 * @param selectorValueList
+	 *            the context to get the {@code DefinedPermissions} from
+	 * 
+	 * @return the {@code DefinedPermissions}
+	 * 
+	 * @see DefinedPermission
+	 */
+	protected List<DefinedPermission> getPermissions(
+			final SelectorValueListContext selectorValueList) {
+		final List<String> permissions = getValues(selectorValueList);
+		final List<DefinedPermission> perms = new ArrayList<DefinedPermission>();
+		for (final String permission : permissions) {
+			final DefinedPermission perm = DefinedPermission
+					.fromString(permission);
+			perms.add(perm);
+		}
+
+		return perms;
+	}
+
+	/**
 	 * Gets the defined values within the {@code SelectorValueListContext}.
 	 * 
 	 * @param selectorValueList
 	 *            the context to get the defined values from
+	 * 
 	 * @return the defined values
 	 */
 	protected List<String> getValues(

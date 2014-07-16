@@ -51,8 +51,10 @@ import net.meisen.dissertation.impl.parser.query.TestAddQueries;
 import net.meisen.dissertation.impl.parser.query.TestAliveQueries;
 import net.meisen.dissertation.impl.parser.query.TestDropQueries;
 import net.meisen.dissertation.impl.parser.query.TestGetQueries;
+import net.meisen.dissertation.impl.parser.query.TestGrantQueries;
 import net.meisen.dissertation.impl.parser.query.TestInsertQueries;
 import net.meisen.dissertation.impl.parser.query.TestLoadQueries;
+import net.meisen.dissertation.impl.parser.query.TestModifyQueries;
 import net.meisen.dissertation.impl.parser.query.TestSelectQueries;
 import net.meisen.dissertation.impl.parser.query.TestUnloadQueries;
 import net.meisen.dissertation.impl.parser.query.select.TestDescriptorComperator;
@@ -234,7 +236,8 @@ import org.junit.runners.Suite;
 		TestGroupEvaluator.class, TestAliveQueries.class,
 		TestLoadQueries.class, TestUnloadQueries.class,
 		TestSelectQueries.class, TestInsertQueries.class, TestGetQueries.class,
-		TestAddQueries.class, TestDropQueries.class,
+		TestAddQueries.class, TestDropQueries.class, TestModifyQueries.class,
+		TestGrantQueries.class,
 
 		// Test authentication manager
 		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,

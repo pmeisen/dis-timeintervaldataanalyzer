@@ -140,7 +140,11 @@ public class QueryFactory implements IQueryFactory {
 	public <T extends IQuery> T parseQuery(final String queryString)
 			throws QueryParsingException {
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Parsing the query '" + queryString + "'.");
+			if (queryString.contains("PASSWORD")) {
+				LOG.trace("Parsing a query containing password information.");
+			} else {
+				LOG.trace("Parsing the query '" + queryString + "'.");
+			}
 		}
 
 		return (T) parseQuery(queryString, true);

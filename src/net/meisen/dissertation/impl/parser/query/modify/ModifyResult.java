@@ -1,16 +1,16 @@
-package net.meisen.dissertation.impl.parser.query.add;
+package net.meisen.dissertation.impl.parser.query.modify;
 
 import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
 
 /**
- * The result of an {@code AddQuery}.
+ * The result of an {@code ModifyQuery}.
  * 
  * @author pmeisen
  * 
- * @see AddQuery
+ * @see ModifyQuery
  * 
  */
-public class AddResult implements IQueryResultSingleInteger {
+public class ModifyResult implements IQueryResultSingleInteger {
 
 	@Override
 	public int getResult() {

@@ -262,10 +262,12 @@ public class ShiroAuthManager implements IAuthManager {
 
 	@Override
 	public void grantPermissionsToUser(final String username,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException, PermissionException {
 		try {
-			getManageableRealm().grantPermissionsToUser(username, permissions);
+			final String[] perms = Permission.transform(permissions,
+					permissionSeparator);
+			getManageableRealm().grantPermissionsToUser(username, perms);
 		} catch (final ForwardedRuntimeException e) {
 			exceptionRegistry.throwRuntimeException(e);
 		}
@@ -273,11 +275,12 @@ public class ShiroAuthManager implements IAuthManager {
 
 	@Override
 	public void revokePermissionsFromUser(final String username,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException, PermissionException {
 		try {
-			getManageableRealm().revokePermissionsFromUser(username,
-					permissions);
+			final String[] perms = Permission.transform(permissions,
+					permissionSeparator);
+			getManageableRealm().revokePermissionsFromUser(username, perms);
 		} catch (final ForwardedRuntimeException e) {
 			exceptionRegistry.throwRuntimeException(e);
 		}
@@ -285,10 +288,12 @@ public class ShiroAuthManager implements IAuthManager {
 
 	@Override
 	public void grantPermissionsToRole(final String role,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException, PermissionException {
 		try {
-			getManageableRealm().grantPermissionsToRole(role, permissions);
+			final String[] perms = Permission.transform(permissions,
+					permissionSeparator);
+			getManageableRealm().grantPermissionsToRole(role, perms);
 		} catch (final ForwardedRuntimeException e) {
 			exceptionRegistry.throwRuntimeException(e);
 		}
@@ -296,10 +301,12 @@ public class ShiroAuthManager implements IAuthManager {
 
 	@Override
 	public void revokePermissionsFromRole(final String role,
-			final String[] permissions) throws AuthManagementException,
-			PermissionException {
+			final DefinedPermission[] permissions)
+			throws AuthManagementException, PermissionException {
 		try {
-			getManageableRealm().revokePermissionsFromRole(role, permissions);
+			final String[] perms = Permission.transform(permissions,
+					permissionSeparator);
+			getManageableRealm().revokePermissionsFromRole(role, perms);
 		} catch (final ForwardedRuntimeException e) {
 			exceptionRegistry.throwRuntimeException(e);
 		}
