@@ -25,7 +25,7 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet | exprAdd | exprDrop | exprModify | exprGrant | exprRevoke) EOF;
+root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet | exprAdd | exprDrop | exprModify | exprGrant | exprRevoke | exprAssign | exprRemove) EOF;
 
 /*
  * Define the expressions to add users or roles.
@@ -56,9 +56,19 @@ exprGrant           : STMT_GRANT TYPE_PERMISSIONS selectorValueList OP_TO (TYPE_
  */
 exprRevoke          : STMT_REVOKE TYPE_PERMISSIONS selectorValueList OP_FROM (TYPE_USER | TYPE_ROLE) VALUE;
 
-exprAssign          : STMT_ASSIGN TYPE_ROLE OP_TO selectorValueList;
-    
-exprRemove          : STMT_REMOVE TYPE_ROLE OP_FROM selectorValueList;
+/*
+ * Define the expressions to assign a role to a user.
+ */
+exprAssign                : STMT_ASSIGN (exprAssignSingleRole | exprAssignMultipleRoles) OP_TO TYPE_USER VALUE;
+exprAssignSingleRole      : TYPE_ROLE VALUE;
+exprAssignMultipleRoles   : TYPE_ROLES selectorValueList;
+
+/*
+ * Define the expressions to remove a role from a user.
+ */
+exprRemove                : STMT_REMOVE (exprRemoveSingleRole | exprRemoveMultipleRoles) OP_FROM TYPE_USER VALUE;
+exprRemoveSingleRole      : TYPE_ROLE VALUE;
+exprRemoveMultipleRoles   : TYPE_ROLES selectorValueList;
 
 /*
  * Define the different expressions/parts of the get statement

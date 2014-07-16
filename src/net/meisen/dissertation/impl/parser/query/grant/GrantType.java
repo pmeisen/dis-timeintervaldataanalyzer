@@ -8,11 +8,11 @@ package net.meisen.dissertation.impl.parser.query.grant;
  */
 public enum GrantType {
 	/**
-	 * Type specifying that a user is granted.
+	 * Type specifying that the permissions are granted to a user.
 	 */
 	USER,
 	/**
-	 * Type specifying that a role is granted.
+	 * Type specifying that the permissions are granted to a role.
 	 */
 	ROLE;
 }

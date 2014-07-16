@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.parser.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.impl.parser.query.add.AddQuery;
 import net.meisen.dissertation.impl.parser.query.add.AddType;
 import net.meisen.dissertation.impl.parser.query.alive.AliveQuery;
+import net.meisen.dissertation.impl.parser.query.assign.AssignQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropType;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
@@ -29,6 +31,9 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAddContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAggregateContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAliveContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAssignContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAssignMultipleRolesContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAssignSingleRoleContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprDropContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGetContext;
@@ -39,6 +44,10 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprLoadSetPropertyContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprModifyContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprRemoveContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprRemoveMultipleRolesContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprRemoveSingleRoleContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprRevokeContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectRecordsContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectTimeSeriesContext;
@@ -71,6 +80,9 @@ import net.meisen.dissertation.impl.parser.query.grant.GrantType;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.modify.ModifyQuery;
+import net.meisen.dissertation.impl.parser.query.remove.RemoveQuery;
+import net.meisen.dissertation.impl.parser.query.revoke.RevokeQuery;
+import net.meisen.dissertation.impl.parser.query.revoke.RevokeType;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
@@ -207,6 +219,88 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
+	public void enterExprAssign(final ExprAssignContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new AssignQuery();
+	}
+
+	@Override
+	public void exitExprAssign(final ExprAssignContext ctx) {
+		final AssignQuery q = q(AssignQuery.class);
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		finalized = true;
+	}
+
+	@Override
+	public void exitExprAssignSingleRole(final ExprAssignSingleRoleContext ctx) {
+		final AssignQuery q = q(AssignQuery.class);
+
+		if (ctx.VALUE() != null) {
+			final String role = getValue(ctx.VALUE());
+			q.setRoles(Arrays.asList(new String[] { role }));
+		}
+	}
+
+	@Override
+	public void exitExprAssignMultipleRoles(
+			final ExprAssignMultipleRolesContext ctx) {
+		final AssignQuery q = q(AssignQuery.class);
+
+		final List<String> roles = getValues(ctx.selectorValueList());
+		q.setRoles(roles);
+	}
+
+	@Override
+	public void enterExprRemove(final ExprRemoveContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new RemoveQuery();
+	}
+
+	@Override
+	public void exitExprRemove(final ExprRemoveContext ctx) {
+		final RemoveQuery q = q(RemoveQuery.class);
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		finalized = true;
+	}
+
+	@Override
+	public void exitExprRemoveSingleRole(final ExprRemoveSingleRoleContext ctx) {
+		final RemoveQuery q = q(RemoveQuery.class);
+
+		if (ctx.VALUE() != null) {
+			final String role = getValue(ctx.VALUE());
+			q.setRoles(Arrays.asList(new String[] { role }));
+		}
+	}
+
+	@Override
+	public void exitExprRemoveMultipleRoles(
+			final ExprRemoveMultipleRolesContext ctx) {
+		final RemoveQuery q = q(RemoveQuery.class);
+
+		final List<String> roles = getValues(ctx.selectorValueList());
+		q.setRoles(roles);
+	}
+
+	@Override
 	public void enterExprGrant(final ExprGrantContext ctx) {
 		if (this.query != null) {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
@@ -225,6 +319,40 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			q.setEntityType(GrantType.ROLE);
 		} else if (ctx.TYPE_USER() != null) {
 			q.setEntityType(GrantType.USER);
+		}
+
+		// set the name
+		if (ctx.VALUE() != null) {
+			q.setEntityName(getValue(ctx.VALUE()));
+		}
+
+		// set the permissions
+		final List<DefinedPermission> perms = getPermissions(ctx
+				.selectorValueList());
+		q.setPermissions(perms);
+
+		finalized = true;
+	}
+
+	@Override
+	public void enterExprRevoke(final ExprRevokeContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new RevokeQuery();
+	}
+
+	@Override
+	public void exitExprRevoke(final ExprRevokeContext ctx) {
+		final RevokeQuery q = q(RevokeQuery.class);
+
+		// set the type
+		if (ctx.TYPE_ROLE() != null) {
+			q.setEntityType(RevokeType.ROLE);
+		} else if (ctx.TYPE_USER() != null) {
+			q.setEntityType(RevokeType.USER);
 		}
 
 		// set the name

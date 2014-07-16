@@ -44,15 +44,15 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitRoot(@NotNull QueryGrammarParser.RootContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoad}.
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprRemoveMultipleRoles}.
 	 * @param ctx the parse tree
 	 */
-	void enterExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx);
+	void enterExprRemoveMultipleRoles(@NotNull QueryGrammarParser.ExprRemoveMultipleRolesContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprLoad}.
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprRemoveMultipleRoles}.
 	 * @param ctx the parse tree
 	 */
-	void exitExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx);
+	void exitExprRemoveMultipleRoles(@NotNull QueryGrammarParser.ExprRemoveMultipleRolesContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorIntIntervalWithNull}.
@@ -64,6 +64,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorIntIntervalWithNull(@NotNull QueryGrammarParser.SelectorIntIntervalWithNullContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoad}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprLoad}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAggregate}.
@@ -185,6 +196,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorIntervalDef(@NotNull QueryGrammarParser.SelectorIntervalDefContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAssignMultipleRoles}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprAssignMultipleRoles(@NotNull QueryGrammarParser.ExprAssignMultipleRolesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprAssignMultipleRoles}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprAssignMultipleRoles(@NotNull QueryGrammarParser.ExprAssignMultipleRolesContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprWithRoles}.
@@ -484,6 +506,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprRemove(@NotNull QueryGrammarParser.ExprRemoveContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprRemoveSingleRole}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprRemoveSingleRole(@NotNull QueryGrammarParser.ExprRemoveSingleRoleContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprRemoveSingleRole}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprRemoveSingleRole(@NotNull QueryGrammarParser.ExprRemoveSingleRoleContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAdd}.
 	 * @param ctx the parse tree
 	 */
@@ -528,17 +561,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprComp}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprComp}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateValueOrNull}.
 	 * @param ctx the parse tree
 	 */
@@ -548,6 +570,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorDateValueOrNull(@NotNull QueryGrammarParser.SelectorDateValueOrNullContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprComp}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprComp}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprComp(@NotNull QueryGrammarParser.ExprCompContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelectRecords}.
@@ -605,6 +638,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprModify(@NotNull QueryGrammarParser.ExprModifyContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAssignSingleRole}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprAssignSingleRole(@NotNull QueryGrammarParser.ExprAssignSingleRoleContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprAssignSingleRole}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprAssignSingleRole(@NotNull QueryGrammarParser.ExprAssignSingleRoleContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescriptorFormula}.
 	 * @param ctx the parse tree
 	 */
@@ -616,17 +660,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitCompDescriptorFormula(@NotNull QueryGrammarParser.CompDescriptorFormulaContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelect}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#exprSelect}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprLoadSetProperty}.
 	 * @param ctx the parse tree
 	 */
@@ -636,6 +669,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprLoadSetProperty(@NotNull QueryGrammarParser.ExprLoadSetPropertyContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelect}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprSelect}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compMeasure}.

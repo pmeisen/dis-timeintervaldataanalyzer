@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.parser.query.grant;
+package net.meisen.dissertation.impl.parser.query.revoke;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -17,52 +17,52 @@ import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
- * A query used to grant permissions to an entity, i.e. user or role.
+ * A query used to revoke permissions from an entity, i.e. user or role.
  * 
  * @author pmeisen
  * 
- * @see GrantType
+ * @see RevokeType
  * 
  */
-public class GrantQuery implements IQuery {
+public class RevokeQuery implements IQuery {
 	private final Set<DefinedPermission> permissions = new LinkedHashSet<DefinedPermission>();
 
-	private GrantType entityType;
+	private RevokeType entityType;
 	private String entityName;
 
 	/**
-	 * Gets the type of the entity to grant the permissions to.
+	 * Gets the type of the entity to revoke the permissions from.
 	 * 
-	 * @return the type of the entity to grant the permissions to
+	 * @return the type of the entity to revoke the permissions from
 	 */
-	public GrantType getEntityType() {
+	public RevokeType getEntityType() {
 		return entityType;
 	}
 
 	/**
-	 * Sets the type of the entity to grant the permissions to.
+	 * Sets the type of the entity to revoke the permissions from.
 	 * 
 	 * @param type
-	 *            the type of the entity to grant the permissions to
+	 *            the type of the entity to revoke the permissions from
 	 */
-	public void setEntityType(final GrantType type) {
+	public void setEntityType(final RevokeType type) {
 		this.entityType = type;
 	}
 
 	/**
-	 * Gets the permissions defined for the entity to be granted.
+	 * Gets the permissions defined for the entity to be revoked.
 	 * 
-	 * @return the permissions defined for the entity to be granted
+	 * @return the permissions defined for the entity to be revoked
 	 */
 	public Set<DefinedPermission> getPermissions() {
 		return permissions;
 	}
 
 	/**
-	 * Sets the permissions to be granted to the entity.
+	 * Sets the permissions to be revoked from the entity.
 	 * 
 	 * @param permissions
-	 *            the permissions to be granted to the entity
+	 *            the permissions to be revoked from the entity
 	 */
 	public void setPermissions(final Collection<DefinedPermission> permissions) {
 		this.permissions.clear();
@@ -70,31 +70,31 @@ public class GrantQuery implements IQuery {
 	}
 
 	/**
-	 * Adds the permissions to the already defined once, which should be granted
-	 * to the entity.
+	 * Adds the permissions to the already defined once, which should be revoked
+	 * from the entity.
 	 * 
 	 * @param permissions
 	 *            the permissions, which should be added to the already defined
-	 *            once, to be granted to the entity
+	 *            once, to be revoked from the entity
 	 */
 	public void addPermissions(final Collection<DefinedPermission> permissions) {
 		this.permissions.addAll(permissions);
 	}
 
 	/**
-	 * Sets the name of the entity to grant the permissions to.
+	 * Sets the name of the entity to revoke the permissions from.
 	 * 
 	 * @param entityName
-	 *            the name of the entity to grant the permissions to
+	 *            the name of the entity to revoke the permissions from
 	 */
 	public void setEntityName(final String entityName) {
 		this.entityName = entityName;
 	}
 
 	/**
-	 * Gets the name of the entity to grant the permissions to.
+	 * Gets the name of the entity to revoke the permissions from.
 	 * 
-	 * @return the name of the entity to grant the permissions to
+	 * @return the name of the entity to revoke the permissions from
 	 */
 	public String getEntityName() {
 		return entityName;
@@ -116,27 +116,27 @@ public class GrantQuery implements IQuery {
 	}
 
 	@Override
-	public GrantResult evaluate(final IAuthManager authManager,
+	public RevokeResult evaluate(final IAuthManager authManager,
 			final TidaModelHandler handler, final TidaModel model,
 			final IResourceResolver resolver) throws ForwardedRuntimeException,
 			CancellationException {
 
-		if (GrantType.USER.equals(getEntityType())) {
+		if (RevokeType.USER.equals(getEntityType())) {
 			final DefinedPermission[] perms = getPermissions().toArray(
 					new DefinedPermission[0]);
 
-			authManager.grantPermissionsToUser(getEntityName(), perms);
-		} else if (GrantType.ROLE.equals(getEntityType())) {
+			authManager.revokePermissionsFromUser(getEntityName(), perms);
+		} else if (RevokeType.ROLE.equals(getEntityType())) {
 			final DefinedPermission[] perms = getPermissions().toArray(
 					new DefinedPermission[0]);
 
-			authManager.grantPermissionsToRole(getEntityName(), perms);
+			authManager.revokePermissionsFromRole(getEntityName(), perms);
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1020, getEntityType());
 		}
 
-		return new GrantResult();
+		return new RevokeResult();
 	}
 
 	@Override
