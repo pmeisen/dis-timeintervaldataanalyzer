@@ -622,7 +622,7 @@ public class TidaModelHandler {
 			final File locFile = new File(defaultLocation);
 			if (!locFile.exists() && !locFile.mkdirs()) {
 				exceptionRegistry.throwRuntimeException(
-						TidaModelHandlerException.class, 1011, defaultLocation);
+						TidaModelHandlerException.class, 1015, defaultLocation);
 			}
 		}
 
