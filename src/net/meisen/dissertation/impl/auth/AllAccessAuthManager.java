@@ -1,5 +1,9 @@
 package net.meisen.dissertation.impl.auth;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.meisen.dissertation.exceptions.AuthManagementException;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.IAuthManagerConfig;
@@ -120,5 +124,31 @@ public class AllAccessAuthManager implements IAuthManager {
 			final DefinedPermission[] permissions)
 			throws AuthManagementException {
 		// nothing to be done, it's not manageable
+	}
+
+	@Override
+	public Set<String> getUsers() {
+		return Collections.<String> emptySet();
+	}
+
+	@Override
+	public Set<String> getUserRoles(final String username) {
+		return Collections.<String> emptySet();
+	}
+
+	@Override
+	public Set<DefinedPermission> getUserPermissions(final String username) {
+		final Set<DefinedPermission> perms = new HashSet<DefinedPermission>();
+
+		// add all available permission, use a wild-char for the models
+		for (final Permission perm : Permission.values()) {
+			if (perm.isGlobal()) {
+				perms.add(perm.create());
+			} else {
+				perms.add(perm.create("*"));
+			}
+		}
+
+		return perms;
 	}
 }

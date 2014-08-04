@@ -238,10 +238,10 @@ import org.junit.runners.Suite;
 		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
 		TestGroupEvaluator.class, TestAliveQueries.class,
 		TestLoadQueries.class, TestUnloadQueries.class,
-		TestSelectQueries.class, TestInsertQueries.class, TestGetQueries.class,
-		TestAddQueries.class, TestDropQueries.class, TestModifyQueries.class,
-		TestGrantQueries.class, TestRevokeQueries.class,
-		TestAssignQueries.class, TestRemoveQueries.class,
+		TestSelectQueries.class, TestInsertQueries.class, TestAddQueries.class,
+		TestDropQueries.class, TestModifyQueries.class, TestGrantQueries.class,
+		TestRevokeQueries.class, TestAssignQueries.class,
+		TestRemoveQueries.class, TestGetQueries.class,
 
 		// Test authentication manager
 		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,

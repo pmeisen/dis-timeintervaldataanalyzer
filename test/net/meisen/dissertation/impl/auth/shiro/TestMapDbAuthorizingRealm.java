@@ -8,10 +8,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.AuthManagementException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Files;
 
@@ -85,6 +87,8 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testAddUser() {
+		Set<String> roles;
+
 		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
 				realmDbDir);
 		realm.init();
@@ -122,6 +126,10 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 				"eddie", realm.getName());
 		realm.addUser("eddie", "password", new String[] { "aRole" }, null);
 
+		roles = realm.getUserRoles("eddie");
+		assertEquals(1, roles.size());
+		assertTrue(roles.contains("aRole"));
+
 		final AuthorizationInfo edInfo = realm.doGetAuthorizationInfo(edPr);
 		assertNotNull(edInfo);
 		assertNull(edInfo.getObjectPermissions());
@@ -133,10 +141,24 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		realm.addUser("debbie", "password", new String[] { "aRole",
 				"anotherRole" }, new String[] { "cando", "notcando" });
 
+		roles = realm.getUserRoles("debbie");
+		assertEquals(2, roles.size());
+		assertTrue(roles.contains("aRole"));
+		assertTrue(roles.contains("anotherRole"));
+
 		final AuthorizationInfo deInfo = realm.doGetAuthorizationInfo(dePr);
 		assertNotNull(deInfo);
 		assertEquals(2, deInfo.getObjectPermissions().size());
 		assertEquals(2, deInfo.getRoles().size());
+
+		// check the users
+		final Set<String> users = realm.getUsers();
+		assertEquals(5, users.size());
+		assertTrue(users.contains("admin"));
+		assertTrue(users.contains("philipp"));
+		assertTrue(users.contains("tobias"));
+		assertTrue(users.contains("eddie"));
+		assertTrue(users.contains("debbie"));
 
 		// cleanUp
 		realm.release();
@@ -387,6 +409,8 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testRemoveRoleFromUser() {
+		Set<String> perms;
+
 		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
 				realmDbDir);
 		realm.init();
@@ -404,12 +428,20 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		assertNull(edInfo.getRoles());
 		assertNull(edInfo.getObjectPermissions());
 
+		perms = realm.getUserPermissions("eddie",
+				ShiroAuthManager.permissionSeparator);
+		assertEquals(0, perms.size());
+
 		// assign a role to the user
 		realm.assignRoleToUser("eddie", "aRole");
 		edInfo = realm.doGetAuthorizationInfo(edPr);
 		assertNotNull(edInfo);
 		assertNotNull(edInfo.getRoles());
 		assertEquals(1, edInfo.getRoles().size());
+
+		perms = realm.getUserPermissions("eddie",
+				ShiroAuthManager.permissionSeparator);
+		assertEquals(perms.toString(), 0, perms.size());
 
 		// remove it
 		realm.removeRoleFromUser("eddie", "aRole");
@@ -459,11 +491,26 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		assertNull(edInfo.getObjectPermissions());
 
 		// grant the permissions and check
-		realm.grantPermissionsToUser("eddie", new String[] { "playing",
-				"screaming" });
+		final String[] perms = net.meisen.dissertation.model.auth.permissions.Permission
+				.transform(
+						new net.meisen.dissertation.model.auth.permissions.Permission[] {
+								net.meisen.dissertation.model.auth.permissions.Permission.connectHTML,
+								net.meisen.dissertation.model.auth.permissions.Permission.modify },
+						"myModel", ShiroAuthManager.permissionSeparator);
+		realm.grantPermissionsToUser("eddie", perms);
 		edInfo = realm.doGetAuthorizationInfo(edPr);
 		assertNotNull(edInfo.getObjectPermissions());
 		assertEquals(2, edInfo.getObjectPermissions().size());
+
+		final Set<String> userPerms = realm.getUserPermissions("eddie",
+				ShiroAuthManager.permissionSeparator);
+		assertEquals(2, userPerms.size());
+
+		assertTrue(userPerms.toString() + " contains " + perms[0],
+				userPerms.contains(perms[0]));
+
+		assertTrue(userPerms.toString() + " contains " + perms[1],
+				userPerms.contains(perms[1]));
 
 		// cleanUp
 		realm.release();
@@ -510,46 +557,68 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 	 */
 	@Test
 	public void testRevokePermissionsFromUser() {
+		final String sep = ShiroAuthManager.permissionSeparator;
+
 		final MapDbAuthorizingRealm realm = new MapDbAuthorizingRealm(
 				realmDbDir);
 		realm.init();
 
-		realm.addUser("philipp", "password", null, new String[] {
-				"permission1", "permission2", "permission3" });
+		final DefinedPermission[] perms = new DefinedPermission[] {
+				net.meisen.dissertation.model.auth.permissions.Permission.connectHTML
+						.create(),
+				net.meisen.dissertation.model.auth.permissions.Permission.query
+						.create("myModel"),
+				net.meisen.dissertation.model.auth.permissions.Permission.grantPermissions
+						.create() };
+
+		realm.addUser("philipp", "password", null,
+				net.meisen.dissertation.model.auth.permissions.Permission
+						.transform(perms, sep));
 
 		final SimplePrincipalCollection phPr = new SimplePrincipalCollection(
 				"philipp", realm.getName());
-		assertTrue(realm.isPermitted(phPr, "permission1"));
-		assertTrue(realm.isPermitted(phPr, "permission2"));
-		assertTrue(realm.isPermitted(phPr, "permission3"));
+		assertTrue(realm.isPermitted(phPr, perms[0].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[1].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[2].toString(sep)));
 
 		// revoke a permission which does not exist
-		realm.revokePermissionsFromUser("philipp",
-				new String[] { "permissionX" });
-		assertTrue(realm.isPermitted(phPr, "permission1"));
-		assertTrue(realm.isPermitted(phPr, "permission2"));
-		assertTrue(realm.isPermitted(phPr, "permission3"));
+		realm.revokePermissionsFromUser(
+				"philipp",
+				new String[] { net.meisen.dissertation.model.auth.permissions.Permission.connectTSQL
+						.create().toString() });
+		assertTrue(realm.isPermitted(phPr, perms[0].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[1].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[2].toString(sep)));
 
 		// revoke one permission
 		realm.revokePermissionsFromUser("philipp",
-				new String[] { "permission1" });
-		assertFalse(realm.isPermitted(phPr, "permission1"));
-		assertTrue(realm.isPermitted(phPr, "permission2"));
-		assertTrue(realm.isPermitted(phPr, "permission3"));
+				new String[] { perms[0].toString(sep) });
+		assertFalse(realm.isPermitted(phPr, perms[0].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[1].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[2].toString(sep)));
+
+		final Set<String> userPerms = realm.getUserPermissions("philipp",
+				ShiroAuthManager.permissionSeparator);
+		assertEquals(2, userPerms.size());
+		assertTrue(userPerms.toString(),
+				userPerms.contains(perms[1].toString(sep)));
+		assertTrue(userPerms.toString(),
+				userPerms.contains(perms[2].toString(sep)));
 
 		// revoke it again permission
 		realm.revokePermissionsFromUser("philipp",
-				new String[] { "permission1" });
-		assertFalse(realm.isPermitted(phPr, "permission1"));
-		assertTrue(realm.isPermitted(phPr, "permission2"));
-		assertTrue(realm.isPermitted(phPr, "permission3"));
+				new String[] { perms[0].toString(sep) });
+		assertFalse(realm.isPermitted(phPr, perms[0].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[1].toString(sep)));
+		assertTrue(realm.isPermitted(phPr, perms[2].toString(sep)));
 
 		// revoke all
-		realm.revokePermissionsFromUser("philipp", new String[] {
-				"permission3", "permission2", "dontexist" });
-		assertFalse(realm.isPermitted(phPr, "permission1"));
-		assertFalse(realm.isPermitted(phPr, "permission2"));
-		assertFalse(realm.isPermitted(phPr, "permission3"));
+		realm.revokePermissionsFromUser("philipp",
+				new String[] { perms[1].toString(sep), perms[2].toString(sep),
+						"dontexist" });
+		assertFalse(realm.isPermitted(phPr, perms[0].toString(sep)));
+		assertFalse(realm.isPermitted(phPr, perms[1].toString(sep)));
+		assertFalse(realm.isPermitted(phPr, perms[2].toString(sep)));
 
 		// cleanUp
 		realm.release();

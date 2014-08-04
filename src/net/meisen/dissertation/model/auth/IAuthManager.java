@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.auth;
 
+import java.util.Set;
+
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
@@ -192,7 +194,8 @@ public interface IAuthManager {
 	 *             because of another problem
 	 */
 	public void grantPermissionsToUser(final String username,
-			final DefinedPermission[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions)
+			throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified
@@ -208,7 +211,8 @@ public interface IAuthManager {
 	 *             of another problem
 	 */
 	public void revokePermissionsFromUser(final String username,
-			final DefinedPermission[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions)
+			throws AuthManagementException;
 
 	/**
 	 * Grants the specified {@code permissions} to the specified {@code role}.
@@ -224,7 +228,8 @@ public interface IAuthManager {
 	 *             problem with granting the permissions occurs
 	 */
 	public void grantPermissionsToRole(final String role,
-			final DefinedPermission[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions)
+			throws AuthManagementException;
 
 	/**
 	 * Revokes the specified {@code permissions} from the specified {@code role}
@@ -241,7 +246,8 @@ public interface IAuthManager {
 	 *             permissions occurs
 	 */
 	public void revokePermissionsFromRole(final String role,
-			final DefinedPermission[] permissions) throws AuthManagementException;
+			final DefinedPermission[] permissions)
+			throws AuthManagementException;
 
 	/**
 	 * Checks if the current user has the specified {@code permission}.
@@ -253,4 +259,34 @@ public interface IAuthManager {
 	 *         {@code false}.
 	 */
 	public boolean hasPermission(final DefinedPermission permission);
+
+	/**
+	 * Gets all the users known to the manager.
+	 * 
+	 * @return all the users known to the manager
+	 */
+	public Set<String> getUsers();
+
+	/**
+	 * Get all the roles of the user.
+	 * 
+	 * @param username
+	 *            the name of the user
+	 * 
+	 * @return the roles of the user
+	 */
+	public Set<String> getUserRoles(final String username);
+
+	/**
+	 * Get all the permissions of the user. If the user has the permission to
+	 * use a model specific permission for all models (i.e. because the user is
+	 * an administrator), the {@code *} should be used as model identifier, to
+	 * mark the permission to be available for all models.
+	 * 
+	 * @param username
+	 *            the name of the user
+	 * 
+	 * @return the permissions of the user
+	 */
+	public Set<DefinedPermission> getUserPermissions(final String username);
 }

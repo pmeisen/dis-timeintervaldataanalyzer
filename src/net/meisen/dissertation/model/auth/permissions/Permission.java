@@ -149,6 +149,16 @@ public enum Permission {
 	}
 
 	/**
+	 * Checks if the {@code PermissionLevel} of {@code this} is
+	 * {@link PermissionLevel#GLOBAL}.
+	 * 
+	 * @return {@code true} if the level is global, otherwise {@code false}
+	 */
+	public boolean isGlobal() {
+		return PermissionLevel.GLOBAL.equals(getLevel());
+	}
+
+	/**
 	 * Gets all the {@code Permissions} of the specified {@code level}.
 	 * 
 	 * @param level

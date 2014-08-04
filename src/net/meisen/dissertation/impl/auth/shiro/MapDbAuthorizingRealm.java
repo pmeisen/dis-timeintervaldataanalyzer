@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.AuthManagementException;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Files;
 
@@ -22,6 +23,7 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.SimpleRole;
+import org.apache.shiro.authz.permission.PermissionResolver;
 import org.apache.shiro.authz.permission.RolePermissionResolver;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		Destroyable {
+
 	/**
 	 * The name of the administrator account, created if no other account is
 	 * specified.
@@ -111,6 +114,15 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	 */
 	public MapDbAuthorizingRealm(final String location) {
 		this.location = new File(location, dbFile);
+
+		// make the permission resolver case sensitive
+		setPermissionResolver(new PermissionResolver() {
+
+			@Override
+			public Permission resolvePermission(final String permissionString) {
+				return new ExtendedWildcardPermission(permissionString);
+			}
+		});
 	}
 
 	/**
@@ -855,5 +867,143 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get all the users known by the realm.
+	 * 
+	 * @return all the users known by the realm
+	 */
+	public Set<String> getUsers() {
+		final Set<String> users = new LinkedHashSet<String>();
+		users.addAll(this.users.keySet());
+
+		return users;
+	}
+
+	/**
+	 * Gets the roles assigned to the specified {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to retrieve the roles for
+	 * 
+	 * @return the roles of the user
+	 */
+	public Set<String> getUserRoles(final String username) {
+		final SimpleAccount account = this.users.get(username);
+		final Set<String> roles = new LinkedHashSet<String>();
+
+		if (account != null) {
+			final Collection<String> accountRoles = account.getRoles();
+			if (accountRoles != null) {
+				roles.addAll(accountRoles);
+			}
+		}
+
+		return roles;
+	}
+
+	/**
+	 * Gets the permissions assigned to the specified {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to retrieve the permissions for
+	 * @param separator
+	 * 
+	 * @return the permissions of the user
+	 */
+	public Set<String> getUserPermissions(final String username,
+			final String separator) {
+		final SimpleAccount account = this.users.get(username);
+		final Set<String> permissions = new LinkedHashSet<String>();
+
+		if (account != null) {
+			Collection<Permission> collPerm = account.getObjectPermissions();
+			if (collPerm != null) {
+				for (final Permission perm : collPerm) {
+					permissions.addAll(resolvePermission(perm, separator));
+				}
+			}
+
+			Collection<String> collStr = account.getStringPermissions();
+			if (collStr != null) {
+				for (final String perm : collStr) {
+					permissions.add(perm.toString());
+				}
+			}
+
+			collStr = account.getRoles();
+			if (collStr != null) {
+				for (final Object role : collStr) {
+					final SimpleRole r = this.roles.get(role);
+					collPerm = r == null ? null : r.getPermissions();
+					if (collPerm != null) {
+						for (final Permission perm : collPerm) {
+							permissions.addAll(resolvePermission(perm,
+									separator));
+						}
+					}
+				}
+			}
+		}
+
+		return permissions;
+	}
+
+	/**
+	 * Resolve the specified {@code perm} to a set of {@code Permissions}.
+	 * 
+	 * @param perm
+	 *            the {@code ExtendedWildcardPermission} to resolve the
+	 *            permissions from
+	 * @param separator
+	 *            the separator used to separate the different parts of the
+	 *            permission
+	 * 
+	 * @return the resolved permissions
+	 * 
+	 * @see ExtendedWildcardPermission
+	 */
+	protected Set<String> resolvePermission(final Permission perm,
+			final String separator) {
+		final Set<String> permissions = new LinkedHashSet<String>();
+
+		if (perm == null) {
+			// do nothing
+		} else {
+			for (final net.meisen.dissertation.model.auth.permissions.Permission sysPerm : net.meisen.dissertation.model.auth.permissions.Permission
+					.values()) {
+
+				final String strPerm = (sysPerm.isGlobal() ? sysPerm.create()
+						: sysPerm.create("*")).toString(separator);
+				final Set<Permission> resPerms = PermissionUtils
+						.resolveDelimitedPermissions(strPerm,
+								getPermissionResolver());
+
+				final Permission resPerm;
+				if (resPerms == null || resPerms.size() != 1) {
+					continue;
+				} else {
+					resPerm = resPerms.iterator().next();
+				}
+
+				if (perm.implies(resPerm) || resPerm.implies(perm)) {
+
+					// check if the perm contains a model
+					if (perm instanceof ExtendedWildcardPermission) {
+						final ExtendedWildcardPermission wPerm = (ExtendedWildcardPermission) perm;
+						final DefinedPermission defPerm = wPerm.get();
+
+						if (defPerm == null) {
+							permissions.add(strPerm);
+						} else {
+							permissions.add(defPerm.toString(separator));
+						}
+					}
+				}
+			}
+		}
+
+		return permissions;
 	}
 }

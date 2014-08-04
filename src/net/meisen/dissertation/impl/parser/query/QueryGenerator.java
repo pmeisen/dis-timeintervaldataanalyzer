@@ -1283,6 +1283,10 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			return GetResultType.MODELS;
 		} else if (ctx.getToken(QueryGrammarParser.TYPE_VERSION, 0) != null) {
 			return GetResultType.VERSION;
+		} else if (ctx.getToken(QueryGrammarParser.TYPE_USERS, 0) != null) {
+			return GetResultType.USERS;
+		} else if (ctx.getToken(QueryGrammarParser.TYPE_PERMISSIONS, 0) != null) {
+			return GetResultType.PERMISSIONS;
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());

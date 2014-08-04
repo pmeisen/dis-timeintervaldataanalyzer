@@ -123,6 +123,43 @@ public class FieldNameGenerator {
 		return _generateReservedField("DBIMPLBUILD");
 	}
 
+	/**
+	 * Gets the name used for the field containing the user-names.
+	 * 
+	 * @return the name used for the field containing the user-names
+	 */
+	public String getUserFieldName() {
+		return _generateReservedField("USERNAME");
+	}
+
+	/**
+	 * Gets the name used for the field containing the roles of an entity.
+	 * 
+	 * @return the name used for the field containing the roles of an entity
+	 */
+	public String getRolesFieldName() {
+		return _generateReservedField("ROLES");
+	}
+
+	/**
+	 * Gets the name used for the field containing the permissions of an entity.
+	 * 
+	 * @return the name used for the field containing the permissions of an
+	 *         entity
+	 */
+	public String getPermissionsFieldName() {
+		return _generateReservedField("PERMISSIONS");
+	}
+
+	/**
+	 * Gets the name used for the field containing a permission.
+	 * 
+	 * @return the name used for the field containing a permission
+	 */
+	public String getPermissionFieldName() {
+		return _generateReservedField("PERMISSION");
+	}
+
 	private String _generateReservedField(final String resWord) {
 		return "[" + resWord + "]";
 	}

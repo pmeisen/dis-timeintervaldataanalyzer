@@ -12,11 +12,11 @@ import com.google.common.base.Objects;
  * @author pmeisen
  * 
  */
-public class DefinedPermission {
+public class DefinedPermission implements Comparable<DefinedPermission> {
 	/**
 	 * Separator used if none is specified
 	 */
-	protected final static String DEF_SEPARATOR = ".";
+	public final static String DEF_SEPARATOR = ".";
 
 	private final Permission permission;
 	private final String modelId;
@@ -67,7 +67,9 @@ public class DefinedPermission {
 	}
 
 	/**
-	 * Gets the {@code modelId} of {@code this}.
+	 * Gets the {@code modelId} of {@code this}. The method will return
+	 * {@code null} if the level of the permission is global (i.e.
+	 * {@link PermissionLevel#GLOBAL}).
 	 * 
 	 * @return the {@code modelId} of {@code this}
 	 */
@@ -202,5 +204,10 @@ public class DefinedPermission {
 		}
 
 		return new DefinedPermission(perm, modelId);
+	}
+
+	@Override
+	public int compareTo(final DefinedPermission o) {
+		return toString().compareTo(o.toString());
 	}
 }

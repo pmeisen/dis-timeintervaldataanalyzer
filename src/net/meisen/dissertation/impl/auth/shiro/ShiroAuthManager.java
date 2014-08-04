@@ -1,5 +1,8 @@
 package net.meisen.dissertation.impl.auth.shiro;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
@@ -39,7 +42,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class ShiroAuthManager implements IAuthManager {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(ShiroAuthManager.class);
-	private final static String permissionSeparator = ":";
+
+	/**
+	 * The separator used to separate the permission levels internally.
+	 */
+	protected final static String permissionSeparator = ":";
 
 	@Autowired
 	@Qualifier(DefaultValues.HANDLER_ID)
@@ -317,5 +324,27 @@ public class ShiroAuthManager implements IAuthManager {
 	 */
 	protected void clear() {
 		getManageableRealm().clear();
+	}
+
+	@Override
+	public Set<String> getUsers() {
+		return getManageableRealm().getUsers();
+	}
+
+	@Override
+	public Set<String> getUserRoles(final String username) {
+		return getManageableRealm().getUserRoles(username);
+	}
+
+	@Override
+	public Set<DefinedPermission> getUserPermissions(final String username) {
+		final Set<String> permissions = getManageableRealm()
+				.getUserPermissions(username, permissionSeparator);
+		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
+		for (final String permission : permissions) {
+			perms.add(DefinedPermission.fromString(permission, permissionSeparator));
+		}
+
+		return perms;
 	}
 }

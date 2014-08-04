@@ -15,5 +15,13 @@ public enum GetResultType {
 	/**
 	 * The user expects information about the version of the database.
 	 */
-	VERSION;
+	VERSION,
+	/**
+	 * The users available with their permissions.
+	 */
+	USERS,
+	/**
+	 * The available permissions for each user and model.
+	 */
+	PERMISSIONS;
 }
