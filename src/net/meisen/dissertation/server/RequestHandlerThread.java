@@ -421,13 +421,6 @@ public class RequestHandlerThread extends WorkerThread {
 	@Override
 	public void close() {
 		if (getSocket().isClosed()) {
-
-			// even if it's marked close, close it for sure
-			try {
-				getSocket().close();
-			} catch (final IOException e) {
-				// ignore
-			}
 			return;
 		}
 
