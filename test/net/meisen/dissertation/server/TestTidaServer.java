@@ -64,7 +64,7 @@ public class TestTidaServer {
 	public void testProtocol() throws IOException {
 		final Protocol p = new Protocol(socket);
 		p.writeCredential("", "");
-		
+
 		// create a handler for testing
 		final QueryResponseHandler handler = new QueryResponseHandler();
 		handler.setExpectedResultSetType(TidaResultSetType.MODIFY);
@@ -180,7 +180,7 @@ public class TestTidaServer {
 		// close the socket
 		p.close();
 	}
-	
+
 	/**
 	 * Shutdowns the server.
 	 * 
