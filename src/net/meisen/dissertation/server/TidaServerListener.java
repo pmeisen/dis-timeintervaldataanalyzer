@@ -55,6 +55,13 @@ public class TidaServerListener extends BaseListener {
 	protected Thread createWorkerThread(final Socket socket) {
 		try {
 			socket.setSoTimeout(timeoutInMs);
+
+			/*
+			 * The server should never be needed to close a socket. Only if the
+			 * socket is unusable, in that case linger can be 0 and the socket
+			 * can be directly reused.
+			 */
+			socket.setSoLinger(true, 0);
 		} catch (final SocketException e) {
 			getExceptionRegistry().throwException(
 					TidaServerListenerException.class, 1000, timeoutInMs);

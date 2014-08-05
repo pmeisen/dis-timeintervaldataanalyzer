@@ -289,4 +289,11 @@ public interface IAuthManager {
 	 * @return the permissions of the user
 	 */
 	public Set<DefinedPermission> getUserPermissions(final String username);
+
+	/**
+	 * Gets the name of the current user.
+	 * 
+	 * @return the name of the current user
+	 */
+	public String getCurrentUsername();
 }

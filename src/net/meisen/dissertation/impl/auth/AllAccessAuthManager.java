@@ -24,6 +24,8 @@ public class AllAccessAuthManager implements IAuthManager {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(AllAccessAuthManager.class);
 
+	private ThreadLocal<String> username = new ThreadLocal<String>();
+
 	@Override
 	public void init() {
 		if (LOG.isTraceEnabled()) {
@@ -51,12 +53,20 @@ public class AllAccessAuthManager implements IAuthManager {
 
 	@Override
 	public void login(final String username, final String password) {
-		// do nothing everything is available anyways
+		final String curUser = this.username.get();
+		if (curUser != null && !curUser.equalsIgnoreCase(username)) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Trying to login multiple times: " + curUser + " vs. "
+						+ username);
+			}
+		}
+
+		this.username.set(username);
 	}
 
 	@Override
 	public void logout() {
-		// do nothing everything is available anyways
+		this.username.set(null);
 	}
 
 	@Override
@@ -150,5 +160,10 @@ public class AllAccessAuthManager implements IAuthManager {
 		}
 
 		return perms;
+	}
+
+	@Override
+	public String getCurrentUsername() {
+		return this.username.get();
 	}
 }

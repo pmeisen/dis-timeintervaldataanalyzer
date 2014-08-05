@@ -131,6 +131,18 @@ public class ShiroAuthManager implements IAuthManager {
 		}
 	}
 
+	@Override
+	public String getCurrentUsername() {
+		final Subject currentUser = getSubject();
+		final Object principal = currentUser.getPrincipal();
+
+		if (principal == null) {
+			return null;
+		} else {
+			return principal.toString();
+		}
+	}
+
 	/**
 	 * Gets the subject of the current thread. There can only be one subject
 	 * logged in within a thread.
@@ -342,7 +354,8 @@ public class ShiroAuthManager implements IAuthManager {
 				.getUserPermissions(username, permissionSeparator);
 		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
 		for (final String permission : permissions) {
-			perms.add(DefinedPermission.fromString(permission, permissionSeparator));
+			perms.add(DefinedPermission.fromString(permission,
+					permissionSeparator));
 		}
 
 		return perms;

@@ -102,6 +102,12 @@ public class RequestHandlerThread extends WorkerThread {
 			// close the socket for sure
 			close();
 
+			// log the disconnection
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Closed socket of user '"
+						+ authManager.getCurrentUsername() + "'.");
+			}
+
 			// make sure the user is logged out
 			authManager.logout();
 		}
@@ -138,6 +144,10 @@ public class RequestHandlerThread extends WorkerThread {
 		if (!authManager.hasPermission(Permission.connectTSQL.create())) {
 			exceptionRegistry.throwRuntimeException(PermissionException.class,
 					1000, Permission.connectTSQL);
+		}
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Connected user '" + username + "'.");
 		}
 	}
 
@@ -428,8 +438,8 @@ public class RequestHandlerThread extends WorkerThread {
 		}
 
 		// log the closing and do it
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Closing socket used for request handling...");
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Closing socket used for request handling...");
 		}
 		super.close();
 	}

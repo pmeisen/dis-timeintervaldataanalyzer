@@ -61,4 +61,9 @@ public class UnloadQuery implements IQuery {
 		return new DefinedPermission[][] { new DefinedPermission[] { Permission.unload
 				.create() } };
 	}
+
+	@Override
+	public String toString() {
+		return "UNLOAD " + modelId;
+	}
 }
