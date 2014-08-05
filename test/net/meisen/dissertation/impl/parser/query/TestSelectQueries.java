@@ -1246,6 +1246,74 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the retrieval of facts using no filter but a grouping expression.
+	 */
+	@Test
+	public void testGroupByFactsCalculationWithoutFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries of sum(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] group by LOCATION";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
+		assertEquals(3, tsRes.size());
+
+		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
+		assertEquals(3.0, tsMg.getValue(0), 0.0);
+		assertEquals(3.0, tsMg.getValue(1), 0.0);
+		assertEquals(0.0, tsMg.getValue(2), 0.0);
+		assertEquals(0.0, tsMg.getValue(3), 0.0);
+
+		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
+		assertEquals(12.0, tsAc.getValue(0), 0.0);
+		assertEquals(12.0, tsAc.getValue(1), 0.0);
+		assertEquals(12.0, tsAc.getValue(2), 0.0);
+		assertEquals(12.0, tsAc.getValue(3), 0.0);
+
+		final TimeSeries tsUn = tsRes.getSeries("Undefined (SCREAMS)");
+		assertEquals(0.0, tsUn.getValue(0), 0.0);
+		assertEquals(0.0, tsUn.getValue(1), 0.0);
+		assertEquals(0.0, tsUn.getValue(2), 0.0);
+		assertEquals(0.0, tsUn.getValue(3), 0.0);
+	}
+
+	/**
+	 * Tests the retrieval of facts using a filter, a grouping expression and
+	 * ignore.
+	 */
+	@Test
+	public void testGroupByFactsCalculationWithFilter() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries of sum(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] filter by !LOCATION='Aachen' group by LOCATION ignore {('Undefined')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
+
+		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
+		assertEquals(3.0, tsMg.getValue(0), 0.0);
+		assertEquals(3.0, tsMg.getValue(1), 0.0);
+		assertEquals(0.0, tsMg.getValue(2), 0.0);
+		assertEquals(0.0, tsMg.getValue(3), 0.0);
+
+		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
+		assertEquals(0.0, tsAc.getValue(0), 0.0);
+		assertEquals(0.0, tsAc.getValue(1), 0.0);
+		assertEquals(0.0, tsAc.getValue(2), 0.0);
+		assertEquals(0.0, tsAc.getValue(3), 0.0);
+
+		assertNull(tsRes.getSeries("Undefined (SCREAMS)"));
+	}
+
+	/**
 	 * Tests the implementation of the {@link Mean} aggregation-function.
 	 */
 	@Test

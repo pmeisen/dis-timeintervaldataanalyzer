@@ -58,6 +58,7 @@ public class GroupResultEntry implements IBitmapResult {
 
 	@Override
 	public String toString() {
-		return group.toString() + " (" + bitmap.determineCardinality() + ")";
+		return group.toString() + " (" + bitmap.determineCardinality() + ", "
+				+ bitmap + ")";
 	}
 }

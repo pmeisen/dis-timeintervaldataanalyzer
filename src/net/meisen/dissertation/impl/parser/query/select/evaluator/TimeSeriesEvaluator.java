@@ -134,47 +134,19 @@ public class TimeSeriesEvaluator {
 				timeSlices.length);
 
 		// create the iterables for the groups
-		int groupSize;
 		final Iterable<GroupResultEntry> itGroup;
-		if (groupResult == null || (groupSize = groupResult.size()) == 0) {
+		if (groupResult == null || groupResult.size() == 0) {
 			itGroup = noGroupIterable;
-			groupSize = 1;
 		} else {
 			itGroup = groupResult;
 		}
 
 		// create the iterables for the measures
-		int measureSize = measures.size();
 		final Iterable<DescriptorMathTree> itMeasures;
-		if (measures == null || (measureSize = measures.size()) == 0) {
+		if (measures == null || measures.size() == 0) {
 			itMeasures = noMeasureIterable;
-			measureSize = 1;
 		} else {
 			itMeasures = measures;
-		}
-
-		final int size = groupSize * measureSize;
-		final TimeSeries[] ts = new TimeSeries[size];
-		final DescriptorMathTree[] dmt = new DescriptorMathTree[size];
-
-		/*
-		 * Iterate over each group and measure and create the timeSeries for it.
-		 */
-		int counter = 0;
-		for (final GroupResultEntry groupResultEntry : itGroup) {
-			final String groupId = groupResultEntry == null ? null
-					: groupResultEntry.getGroup();
-
-			// calculate each measure
-			for (final DescriptorMathTree measure : itMeasures) {
-				final String timeSeriesId = groupId == null ? measure.getId()
-						: groupId + " (" + measure.getId() + ")";
-				final TimeSeries timeSeries = result.createSeries(timeSeriesId);
-
-				ts[counter] = timeSeries;
-				dmt[counter] = measure;
-				counter++;
-			}
 		}
 
 		// combine the filter with the valid records
@@ -185,8 +157,12 @@ public class TimeSeriesEvaluator {
 		 * Iterate over the different slices and calculate each measure.
 		 */
 		for (final GroupResultEntry groupResultEntry : itGroup) {
+			final String groupId = groupResultEntry == null ? null
+					: groupResultEntry.getGroup();
+
 			int timeSlicePos = 0;
 			for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
+
 				final Bitmap resultBitmap = combineBitmaps(timeSlice,
 						filteredValidRecords, groupResultEntry);
 				final FactDescriptorModelSet descriptors = timeSlice == null ? null
@@ -196,13 +172,20 @@ public class TimeSeriesEvaluator {
 				final MathExpressionEvaluator evaluator = new MathExpressionEvaluator(
 						index, resultBitmap, descriptors);
 
-				// calculate the measure for each timeSeries
-				int i = 0;
-				for (final TimeSeries timeSeries : ts) {
-					final double value = evaluator.evaluateMeasure(dmt[i]);
-					timeSeries.setValue(timeSlicePos, value);
+				// calculate each measure
+				for (final DescriptorMathTree measure : itMeasures) {
+					final String timeSeriesId = groupId == null ? measure
+							.getId() : groupId + " (" + measure.getId() + ")";
 
-					i++;
+					// get or create the series
+					TimeSeries timeSeries = result.getSeries(timeSeriesId);
+					if (timeSeries == null) {
+						timeSeries = result.createSeries(timeSeriesId);
+					}
+
+					// get the value of the series
+					final double value = evaluator.evaluateMeasure(measure);
+					timeSeries.setValue(timeSlicePos, value);
 				}
 
 				timeSlicePos++;

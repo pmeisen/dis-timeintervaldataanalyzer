@@ -19,7 +19,7 @@ public class QueryGrammarParser extends Parser {
 	public static final int
 		MARKED_ID=1, VALUE=2, NULL_VALUE=3, POS_START_INCL=4, POS_END_INCL=5, 
 		POS_START_EXCL=6, POS_END_EXCL=7, STMT_GET=8, STMT_SELECT=9, STMT_INSERT=10, 
-		STMT_LOADMODEL=11, STMT_LOAD=12, STMT_UNLOAD=13, STMT_ALIVE=14, STMT_ADD=15, 
+		STMT_OPEN=11, STMT_LOAD=12, STMT_UNLOAD=13, STMT_ALIVE=14, STMT_ADD=15, 
 		STMT_DROP=16, STMT_MODIFY=17, STMT_GRANT=18, STMT_REVOKE=19, STMT_ASSIGN=20, 
 		STMT_REMOVE=21, PROP_AUTOLOAD=22, PROP_FORCE=23, PROP_PASSWORD=24, TYPE_TIMESERIES=25, 
 		TYPE_RECORDS=26, TYPE_MODELS=27, TYPE_VERSION=28, TYPE_PERMISSIONS=29, 
@@ -38,20 +38,19 @@ public class QueryGrammarParser extends Parser {
 	public static final String[] tokenNames = {
 		"<INVALID>", "MARKED_ID", "VALUE", "NULL_VALUE", "POS_START_INCL", "POS_END_INCL", 
 		"POS_START_EXCL", "POS_END_EXCL", "STMT_GET", "STMT_SELECT", "STMT_INSERT", 
-		"STMT_LOADMODEL", "STMT_LOAD", "STMT_UNLOAD", "STMT_ALIVE", "STMT_ADD", 
-		"STMT_DROP", "STMT_MODIFY", "STMT_GRANT", "STMT_REVOKE", "STMT_ASSIGN", 
-		"STMT_REMOVE", "PROP_AUTOLOAD", "PROP_FORCE", "PROP_PASSWORD", "TYPE_TIMESERIES", 
-		"TYPE_RECORDS", "TYPE_MODELS", "TYPE_VERSION", "TYPE_PERMISSIONS", "TYPE_ROLES", 
-		"TYPE_USERS", "TYPE_PERMISSION", "TYPE_ROLE", "TYPE_USER", "OP_FROM", 
-		"OP_OF", "OP_TO", "OP_IN", "OP_INTO", "OP_SET", "OP_VALUES", "OP_ALIAS", 
-		"OP_GROUPBY", "OP_FILTERBY", "OP_TRANSPOSE", "OP_IDONLY", "OP_WITH", "IR_EQUALTO", 
-		"IR_BEFORE", "IR_AFTER", "IR_MEETING", "IR_OVERLAPPING", "IR_DURING", 
-		"IR_WITHIN", "IR_CONTAINING", "IR_STARTINGWITH", "IR_FINISHINGWITH", "LOGICAL_OR", 
-		"LOGICAL_AND", "LOGICAL_NOT", "LOGICAL_IGNORE", "LOGICAL_TRUE", "LOGICAL_FALSE", 
-		"'*'", "'/'", "'+'", "'-'", "AGGR_COUNT", "AGGR_SUM", "AGGR_MIN", "AGGR_MAX", 
-		"AGGR_AVERAGE", "AGGR_MODE", "AGGR_MEAN", "AGGR_MEDIAN", "'='", "'('", 
-		"')'", "'['", "']'", "'{'", "'}'", "','", "DATE", "INT", "SIMPLE_ID", 
-		"ENHANCED_ID", "WHITESPACE"
+		"STMT_OPEN", "STMT_LOAD", "STMT_UNLOAD", "STMT_ALIVE", "STMT_ADD", "STMT_DROP", 
+		"STMT_MODIFY", "STMT_GRANT", "STMT_REVOKE", "STMT_ASSIGN", "STMT_REMOVE", 
+		"PROP_AUTOLOAD", "PROP_FORCE", "PROP_PASSWORD", "TYPE_TIMESERIES", "TYPE_RECORDS", 
+		"TYPE_MODELS", "TYPE_VERSION", "TYPE_PERMISSIONS", "TYPE_ROLES", "TYPE_USERS", 
+		"TYPE_PERMISSION", "TYPE_ROLE", "TYPE_USER", "OP_FROM", "OP_OF", "OP_TO", 
+		"OP_IN", "OP_INTO", "OP_SET", "OP_VALUES", "OP_ALIAS", "OP_GROUPBY", "OP_FILTERBY", 
+		"OP_TRANSPOSE", "OP_IDONLY", "OP_WITH", "IR_EQUALTO", "IR_BEFORE", "IR_AFTER", 
+		"IR_MEETING", "IR_OVERLAPPING", "IR_DURING", "IR_WITHIN", "IR_CONTAINING", 
+		"IR_STARTINGWITH", "IR_FINISHINGWITH", "LOGICAL_OR", "LOGICAL_AND", "LOGICAL_NOT", 
+		"LOGICAL_IGNORE", "LOGICAL_TRUE", "LOGICAL_FALSE", "'*'", "'/'", "'+'", 
+		"'-'", "AGGR_COUNT", "AGGR_SUM", "AGGR_MIN", "AGGR_MAX", "AGGR_AVERAGE", 
+		"AGGR_MODE", "AGGR_MEAN", "AGGR_MEDIAN", "'='", "'('", "')'", "'['", "']'", 
+		"'{'", "'}'", "','", "DATE", "INT", "SIMPLE_ID", "ENHANCED_ID", "WHITESPACE"
 	};
 	public static final int
 		RULE_root = 0, RULE_exprAdd = 1, RULE_exprWithPassword = 2, RULE_exprWithPermissions = 3, 
@@ -182,7 +181,7 @@ public class QueryGrammarParser extends Parser {
 				setState(125); exprSelect();
 				}
 				break;
-			case STMT_LOADMODEL:
+			case STMT_OPEN:
 			case STMT_LOAD:
 				{
 				setState(126); exprLoad();
@@ -1106,7 +1105,6 @@ public class QueryGrammarParser extends Parser {
 			return getRuleContext(SelectorModelIdContext.class,0);
 		}
 		public TerminalNode OP_SET() { return getToken(QueryGrammarParser.OP_SET, 0); }
-		public TerminalNode STMT_LOADMODEL() { return getToken(QueryGrammarParser.STMT_LOADMODEL, 0); }
 		public TerminalNode SEPARATOR(int i) {
 			return getToken(QueryGrammarParser.SEPARATOR, i);
 		}
@@ -1117,6 +1115,7 @@ public class QueryGrammarParser extends Parser {
 		public List<ExprLoadSetPropertyContext> exprLoadSetProperty() {
 			return getRuleContexts(ExprLoadSetPropertyContext.class);
 		}
+		public TerminalNode STMT_OPEN() { return getToken(QueryGrammarParser.STMT_OPEN, 0); }
 		public ExprLoadSetPropertyContext exprLoadSetProperty(int i) {
 			return getRuleContext(ExprLoadSetPropertyContext.class,i);
 		}
@@ -1143,7 +1142,7 @@ public class QueryGrammarParser extends Parser {
 			{
 			setState(239);
 			_la = _input.LA(1);
-			if ( !(_la==STMT_LOADMODEL || _la==STMT_LOAD) ) {
+			if ( !(_la==STMT_OPEN || _la==STMT_LOAD) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
