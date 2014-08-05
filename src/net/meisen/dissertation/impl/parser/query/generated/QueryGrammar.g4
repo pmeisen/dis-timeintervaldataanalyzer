@@ -83,7 +83,7 @@ exprAlive     : STMT_ALIVE;
 /*
  * Define the different expressions/parts of the load statement
  */
-exprLoad            : STMT_LOAD (selectorModelId | (OP_FROM VALUE)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
+exprLoad            : (STMT_LOAD | STMT_LOADMODEL) (selectorModelId | (OP_FROM VALUE)) (OP_SET exprLoadSetProperty (SEPARATOR exprLoadSetProperty)*)?;
 exprLoadSetProperty : (PROP_AUTOLOAD CMP_EQUAL selectorBoolean) | (PROP_FORCE CMP_EQUAL selectorBoolean);
 
 /*
@@ -175,6 +175,7 @@ POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 STMT_GET      : G E T;
 STMT_SELECT   : S E L E C T;
 STMT_INSERT   : I N S E R T;
+STMT_LOADMODEL: L O A D M O D E L;
 STMT_LOAD     : L O A D;
 STMT_UNLOAD   : U N L O A D;
 STMT_ALIVE    : A L I V E;
