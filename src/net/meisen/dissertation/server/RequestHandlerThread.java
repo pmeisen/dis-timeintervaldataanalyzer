@@ -75,7 +75,10 @@ public class RequestHandlerThread extends WorkerThread {
 			handleRequests(p);
 		} catch (final SocketException e) {
 
-			// ignore any kind of socket exception, it is closed
+			/*
+			 * ignore any kind of socket exception, it is probably closed (with
+			 * no linger)
+			 */
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("SocketException thrown while handling a request.", e);
 			}
