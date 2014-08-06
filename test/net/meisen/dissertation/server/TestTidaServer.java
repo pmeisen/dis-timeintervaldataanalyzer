@@ -127,7 +127,11 @@ public class TestTidaServer {
 			exception = e;
 		}
 		assertNotNull(exception);
-		assertTrue(exception.getMessage().contains("caused connection abort"));
+		assertTrue(
+				exception.getMessage(),
+				exception.getMessage().contains("Connection reset by peer")
+						|| exception.getMessage().contains(
+								"caused connection abort"));
 
 		// close the socket
 		p.close();
