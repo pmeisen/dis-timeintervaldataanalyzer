@@ -97,6 +97,7 @@ import net.meisen.dissertation.model.time.granularity.TestDateFormat;
 import net.meisen.dissertation.model.time.granularity.TestMinute;
 import net.meisen.dissertation.model.time.mapper.TestBaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TestTimelineDefinition;
+import net.meisen.dissertation.server.TestCommunication;
 import net.meisen.dissertation.server.TestTidaServer;
 
 import org.junit.runner.RunWith;
@@ -248,7 +249,7 @@ import org.junit.runners.Suite;
 		TestShiroAuthManager.class,
 
 		// Test the server
-		TestTidaServer.class })
+		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class })
 public class AllUnitTests {
 
 }

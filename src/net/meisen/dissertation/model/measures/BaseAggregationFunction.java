@@ -33,7 +33,9 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 		// make sure we have values
 		if (facts == null) {
-			return 0.0;
+			return getDefaultValue();
+		} else if (facts.amountOfFacts() == 0) {
+			return getDefaultValue();
 		}
 
 		// otherwise get the sum and calculate the average
@@ -63,14 +65,16 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 			final FactDescriptorSet descriptors) {
 		if (bitmap == null || descriptors == null) {
 			return getDefaultValue();
+		} else if (bitmap.determineCardinality() == 0) {
+			return getDefaultValue();
 		}
 
-		double sum = 0;
 		if (descriptors.containsVariantRecords()) {
-			
+
 			// use the implementation of the factHolders to handle this
 			return sum(new MapFactsDescriptorBased(descriptors, index, bitmap));
 		} else {
+			double sum = 0.0;
 			for (final FactDescriptor<?> desc : descriptors) {
 
 				// get the slice

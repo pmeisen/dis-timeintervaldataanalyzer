@@ -36,9 +36,4 @@ public class Sum extends BaseAggregationFunction {
 	public String getName() {
 		return name;
 	}
-
-	@Override
-	public double getDefaultValue() {
-		return 0.0;
-	}
 }

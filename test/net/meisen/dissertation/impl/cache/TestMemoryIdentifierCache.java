@@ -103,7 +103,7 @@ public class TestMemoryIdentifierCache extends ModuleBasedTest {
 	 * The memory cache should ignore the persistency setting.
 	 */
 	@Test
-	public void testIngoringOfPersistency() {
+	public void testIgnoringOfPersistency() {
 		int[] valid;
 
 		assertEquals(-1, memIdCache.getLastUsedIdentifier());

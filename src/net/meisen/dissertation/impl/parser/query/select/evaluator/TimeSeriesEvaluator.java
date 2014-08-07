@@ -162,7 +162,6 @@ public class TimeSeriesEvaluator {
 
 			int timeSlicePos = 0;
 			for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
-
 				final Bitmap resultBitmap = combineBitmaps(timeSlice,
 						filteredValidRecords, groupResultEntry);
 				final FactDescriptorModelSet descriptors = timeSlice == null ? null

@@ -1265,8 +1265,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
-		assertEquals(0.0, tsMg.getValue(2), 0.0);
-		assertEquals(0.0, tsMg.getValue(3), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(3), 0.0);
 
 		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
 		assertEquals(12.0, tsAc.getValue(0), 0.0);
@@ -1275,10 +1275,47 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(12.0, tsAc.getValue(3), 0.0);
 
 		final TimeSeries tsUn = tsRes.getSeries("Undefined (SCREAMS)");
-		assertEquals(0.0, tsUn.getValue(0), 0.0);
-		assertEquals(0.0, tsUn.getValue(1), 0.0);
+		assertEquals(Double.NaN, tsUn.getValue(0), 0.0);
+		assertEquals(Double.NaN, tsUn.getValue(1), 0.0);
 		assertEquals(0.0, tsUn.getValue(2), 0.0);
 		assertEquals(0.0, tsUn.getValue(3), 0.0);
+	}
+
+	/**
+	 * Tests the retrieval of grouped values.
+	 */
+	@Test
+	public void testGroupByFactsCalculationWithSeveralGroups() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries of max(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] group by LOCATION, PERSON IGNORE {('*', 'D*'), ('*', 'P*'), ('*', 'T*')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null);
+		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
+		assertEquals(3, tsRes.size());
+
+		final TimeSeries tsMg = tsRes
+				.getSeries("Mönchengladbach, Edison (SCREAMS)");
+		assertEquals(Double.NaN, tsMg.getValue(0), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(1), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(3), 0.0);
+
+		final TimeSeries tsAc = tsRes.getSeries("Aachen, Edison (SCREAMS)");
+		assertEquals(12.0, tsAc.getValue(0), 0.0);
+		assertEquals(12.0, tsAc.getValue(1), 0.0);
+		assertEquals(12.0, tsAc.getValue(2), 0.0);
+		assertEquals(12.0, tsAc.getValue(3), 0.0);
+
+		final TimeSeries tsUn = tsRes.getSeries("Undefined, Edison (SCREAMS)");
+		assertEquals(Double.NaN, tsUn.getValue(0), 0.0);
+		assertEquals(Double.NaN, tsUn.getValue(1), 0.0);
+		assertEquals(Double.NaN, tsUn.getValue(2), 0.0);
+		assertEquals(Double.NaN, tsUn.getValue(3), 0.0);
 	}
 
 	/**
@@ -1301,14 +1338,14 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
-		assertEquals(0.0, tsMg.getValue(2), 0.0);
-		assertEquals(0.0, tsMg.getValue(3), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
+		assertEquals(Double.NaN, tsMg.getValue(3), 0.0);
 
 		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
-		assertEquals(0.0, tsAc.getValue(0), 0.0);
-		assertEquals(0.0, tsAc.getValue(1), 0.0);
-		assertEquals(0.0, tsAc.getValue(2), 0.0);
-		assertEquals(0.0, tsAc.getValue(3), 0.0);
+		assertEquals(Double.NaN, tsAc.getValue(0), 0.0);
+		assertEquals(Double.NaN, tsAc.getValue(1), 0.0);
+		assertEquals(Double.NaN, tsAc.getValue(2), 0.0);
+		assertEquals(Double.NaN, tsAc.getValue(3), 0.0);
 
 		assertNull(tsRes.getSeries("Undefined (SCREAMS)"));
 	}
@@ -1455,17 +1492,17 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the results
 		ts = tsRes.getSeries("PAX");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
 
 		ts = tsRes.getSeries("COMPLEX_SUM");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
 
 		ts = tsRes.getSeries("COMBINED_SUM");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
 	}
 

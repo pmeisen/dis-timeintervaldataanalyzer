@@ -34,8 +34,6 @@ public class GroupResult implements Iterable<GroupResultEntry> {
 	public void add(final List<String> group, final Bitmap bitmap) {
 		if (group == null) {
 			throw new NullPointerException("Cannot add a null group");
-		} else if (bitmap == null) {
-
 		}
 
 		final GroupResultEntry entry = new GroupResultEntry(group, bitmap);

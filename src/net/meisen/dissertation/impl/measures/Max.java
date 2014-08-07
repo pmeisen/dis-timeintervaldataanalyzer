@@ -1,9 +1,12 @@
 package net.meisen.dissertation.impl.measures;
 
+import java.util.Iterator;
+
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.util.IDoubleIterator;
@@ -29,11 +32,30 @@ public class Max extends BaseAggregationFunction {
 			// use the implementation of the factHolders to handle this
 			return aggregate(index, bitmap, new MapFactsDescriptorBased(
 					descriptors, index, bitmap));
-		} else {
+		}
 
-			// get the last descriptor and get it's value
-			final FactDescriptor<?> last = descriptors.last();
-			return last.getFact();
+		final int amountOfRecords = bitmap.determineCardinality();
+		if (amountOfRecords == 0) {
+			return getDefaultValue();
+		} else {
+			final Iterator<FactDescriptor<?>> it = descriptors
+					.descendingIterator();
+
+			// find the first bitmap which has a match
+			while (it.hasNext()) {
+				final FactDescriptor<?> desc = it.next();
+
+				// get the slice and the combined bitmap
+				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
+						desc.getModelId(), desc.getId());
+				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
+				final int amount = bmp.determineCardinality();
+				if (amount > 0) {
+					return desc.getFact();
+				}
+			}
+
+			return getDefaultValue();
 		}
 	}
 

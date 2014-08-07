@@ -280,8 +280,8 @@ public class GroupEvaluator {
 			// get all the bitmaps of the slices of the group
 			final List<Bitmap> bitmaps = new ArrayList<Bitmap>(group.size());
 			for (final Descriptor<?, ?, ?> d : group.getDescriptors()) {
-				final Slice<?> slice = index
-						.getMetaIndexDimensionSlice(d.getModelId(), d.getId());
+				final Slice<?> slice = index.getMetaIndexDimensionSlice(
+						d.getModelId(), d.getId());
 
 				/*
 				 * if a slice doesn't exist it means that there aren't any
@@ -316,10 +316,11 @@ public class GroupEvaluator {
 				result.add(group.toStringList(), bitmaps.get(0));
 			}
 			/*
-			 * if we have no bitmap at all create an empty one
+			 * if we have no bitmap at all, the group doesn't have any data
 			 */
 			else {
-				result.add(group.toStringList(), factory.createBitmap());
+				// so we don't add any empty bitmap here
+				// result.add(group.toStringList(), factory.createBitmap());
 			}
 		}
 

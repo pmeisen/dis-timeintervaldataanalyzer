@@ -22,7 +22,7 @@ public class Mean extends BaseAggregationFunction {
 			return getDefaultValue();
 		}
 
-		int setRecords = bitmap.determineCardinality();
+		final int setRecords = bitmap.determineCardinality();
 
 		// if there aren't any values 0.0 is the result
 		if (setRecords == 0) {
@@ -35,10 +35,14 @@ public class Mean extends BaseAggregationFunction {
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		int setRecords = facts.amountOfFacts();
 
-		// if there aren't any values 0.0 is the result
-		if (facts == null || setRecords == 0) {
+		// if there aren't any values the mean is not defined
+		if (facts == null) {
+			return getDefaultValue();
+		}
+
+		final int setRecords = facts.amountOfFacts();
+		if (setRecords == 0) {
 			return getDefaultValue();
 		} else {
 			return sum(facts) / setRecords;
