@@ -95,7 +95,7 @@
         			short="net.meisen.dissertation.impl.indexes.TroveShortIndexedCollection"
                     int="net.meisen.dissertation.impl.indexes.TroveIntIndexedCollection"
                     long="net.meisen.dissertation.impl.indexes.TroveLongIndexedCollection" />
-    </indexes>
+      </indexes>
       
       <!-- Define the factory to be used to determine which MapperFactory
            to be used.

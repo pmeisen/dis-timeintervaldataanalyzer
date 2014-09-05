@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testDescriptorModel">
+
+  <meta>
+    <descriptors>
+      <resource id="PERSON" name="Persons" />
+      <string id="LOCATION" />
+      <string id="BOOK" />
+      <integer id="SCREAMS" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="PERSON" value="Tobias" />
+      <entry descriptor="PERSON" value="Philipp" />
+      <entry descriptor="PERSON" value="Edison" />
+      <entry descriptor="PERSON" value="Debbie" />
+
+      <entry descriptor="LOCATION" value="Aachen, Deutschland" />
+      <entry descriptor="LOCATION" value="Mönchengladbach, Deutschland" />
+      <entry descriptor="LOCATION" value="Köln, Deutschland" />
+      <entry descriptor="LOCATION" value="Jacksonville, USA" />
+      <entry descriptor="LOCATION" value="Miami, USA" />
+      <entry descriptor="LOCATION" value="Qaqortoq" />
+      <entry descriptor="LOCATION" value="Vatikanstaat" />
+      
+      <entry descriptor="BOOK" value="TITLE" />
+      <entry descriptor="BOOK" value="TOC" />
+      <entry descriptor="BOOK" value="A1" />
+      <entry descriptor="BOOK" value="B1" />
+      <entry descriptor="BOOK" value="B5" />
+      <entry descriptor="BOOK" value="2" />
+    </entries>
+  </meta>
+    
+  <data metahandling="create" />
+</model>

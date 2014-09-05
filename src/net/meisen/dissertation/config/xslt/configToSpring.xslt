@@ -276,20 +276,20 @@
         <bean class="net.meisen.general.sbconfigurator.config.PropertyInjectorBean">
           <property name="properties">
             <props>
-              <xsl:if test="//cns:config/cns:server/http/@port">
-                <prop key="tida.server.http.port"><xsl:value-of select="//cns:config/cns:server/http/@port" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:http/@port">
+                <prop key="tida.server.http.port"><xsl:value-of select="//cns:config/cns:server/cns:http/@port" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/http/@enabled">
-                <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/http/@enabled" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:http/@enabled">
+                <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/cns:http/@enabled" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/tsql/@port">
-                <prop key="tida.server.tsql.port"><xsl:value-of select="//cns:config/cns:server/tsql/@port" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:tsql/@port">
+                <prop key="tida.server.tsql.port"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@port" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/tsql/@enabled">
-                <prop key="tida.server.tsql.enabled"><xsl:value-of select="//cns:config/cns:server/tsql/@enabled" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:tsql/@enabled">
+                <prop key="tida.server.tsql.enabled"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@enabled" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/tsql/@timeout">
-                <prop key="tida.server.tsql.timeout"><xsl:value-of select="//cns:config/cns:server/tsql/@timeout" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:tsql/@timeout">
+                <prop key="tida.server.tsql.timeout"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@timeout" /></prop>
               </xsl:if>
             </props>
           </property>

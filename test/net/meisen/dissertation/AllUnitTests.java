@@ -28,6 +28,8 @@ import net.meisen.dissertation.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestGeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestIntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestLongDescriptor;
+import net.meisen.dissertation.impl.dimensions.TestDescriptorDimension;
+import net.meisen.dissertation.impl.dimensions.graph.TestDimensionGraph;
 import net.meisen.dissertation.impl.idfactories.TestByteIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
@@ -247,6 +249,9 @@ import org.junit.runners.Suite;
 		// Test authentication manager
 		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,
 		TestShiroAuthManager.class,
+
+		// Tests dimensions
+		TestDescriptorDimension.class, TestDimensionGraph.class,
 
 		// Test the server
 		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class })
