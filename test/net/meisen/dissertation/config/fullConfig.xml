@@ -149,7 +149,7 @@
   </aggregations>
   
   <server>
-    <http port="7000" enable="true" />
-    <tsql port="7001" enable="true" />
+    <http port="7000" enabled="true" />
+    <tsql port="7001" enabled="true" />
   </server>
 </config>
