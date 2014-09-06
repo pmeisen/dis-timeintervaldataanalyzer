@@ -149,7 +149,8 @@
   </aggregations>
   
   <server>
-    <http port="7000" enabled="true" />
-    <tsql port="7001" enabled="true" />
+    <http port="7000" enable="true" />
+    <tsql port="7001" timeout="1800000" enable="true" />
+    <control port="7002" enable="false" />
   </server>
 </config>

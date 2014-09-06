@@ -279,17 +279,23 @@
               <xsl:if test="//cns:config/cns:server/cns:http/@port">
                 <prop key="tida.server.http.port"><xsl:value-of select="//cns:config/cns:server/cns:http/@port" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/cns:http/@enabled">
-                <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/cns:http/@enabled" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:http/@enable">
+                <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/cns:http/@enable" /></prop>
               </xsl:if>
               <xsl:if test="//cns:config/cns:server/cns:tsql/@port">
                 <prop key="tida.server.tsql.port"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@port" /></prop>
               </xsl:if>
-              <xsl:if test="//cns:config/cns:server/cns:tsql/@enabled">
-                <prop key="tida.server.tsql.enabled"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@enabled" /></prop>
+              <xsl:if test="//cns:config/cns:server/cns:tsql/@enable">
+                <prop key="tida.server.tsql.enabled"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@enable" /></prop>
               </xsl:if>
               <xsl:if test="//cns:config/cns:server/cns:tsql/@timeout">
                 <prop key="tida.server.tsql.timeout"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@timeout" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/cns:control/@port">
+                <prop key="tida.server.control.port"><xsl:value-of select="//cns:config/cns:server/cns:control/@port" /></prop>
+              </xsl:if>
+              <xsl:if test="//cns:config/cns:server/cns:control/@enable">
+                <prop key="tida.server.control.enabled"><xsl:value-of select="//cns:config/cns:server/cns:control/@enable" /></prop>
               </xsl:if>
             </props>
           </property>

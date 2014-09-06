@@ -32,6 +32,9 @@
     </e:extension>
   </connector>
 
+  <!-- add the CONTROL connector, which is disabled by default -->
+  <connector id="CONTROL" port="${tida.server.control.port}" listener="CONTROL" enable="${tida.server.control.enabled}"/>
+
   <!-- disable the default connector -->
   <connector id="DEFAULT" port="${server.settings.defaultPort}" listener="${server.settings.defaultListener}" enable="false" />
 </server>
