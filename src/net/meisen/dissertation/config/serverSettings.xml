@@ -9,6 +9,7 @@
   <!-- add the lightweight HTTP protocol -->
   <connector id="HTTP" port="${tida.server.http.port}" listener="HTTP" enable="${tida.server.http.enabled}">
   	<e:extension>
+  	  <servlet urlmatcher="/auth/*">net.meisen.dissertation.server.AuthServlet</servlet>
       <servlet urlmatcher="/loader/*">net.meisen.dissertation.server.LoaderServlet</servlet>
       <servlet urlmatcher="/query/*">net.meisen.dissertation.server.QueryServlet</servlet>
       

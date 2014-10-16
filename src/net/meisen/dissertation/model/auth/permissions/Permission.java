@@ -20,13 +20,15 @@ public enum Permission {
 	 */
 	grantPermissions(PermissionLevel.GLOBAL),
 	/**
-	 * 
+	 * Permission to connect on the TSQL socket to fire queries against the
+	 * database.
 	 */
 	connectTSQL(PermissionLevel.GLOBAL),
 	/**
-	 * 
+	 * Permission to connect on the HTTP socket to any services, other than
+	 * login servlet.
 	 */
-	connectHTML(PermissionLevel.GLOBAL),
+	connectHTTP(PermissionLevel.GLOBAL),
 	/**
 	 * 
 	 */

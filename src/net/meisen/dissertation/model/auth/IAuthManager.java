@@ -6,6 +6,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.server.sessions.Session;
 
 /**
  * An authentication manager is used to check authentications and permissions.
@@ -43,7 +44,7 @@ public interface IAuthManager {
 
 	/**
 	 * Logs the specified user in. If the login fails (e.g. because of invalid
-	 * credentials) an {@code AuthException} has to be thrown. If not exception
+	 * credentials) an {@code AuthException} has to be thrown. If no exception
 	 * is thrown, the system assumes a valid login.
 	 * 
 	 * @param username
@@ -56,6 +57,32 @@ public interface IAuthManager {
 	 */
 	public void login(final String username, final String password)
 			throws AuthException;
+
+	/**
+	 * Binds the user associated to the specified {@code sessionId} to the
+	 * current thread. In a multi-thread environment, each thread has to call
+	 * this method once prior to accessing any auth-information. Additionally,
+	 * the method has to be called right after a valid login, so that the
+	 * sessionId is associated to the logged in subject.
+	 * 
+	 * @param session
+	 *            the {@code Session} to bind the manager to
+	 * 
+	 * @throws AuthException
+	 *             if the current subject cannot be bound to the session
+	 */
+	public void bind(final Session session) throws AuthException;
+
+	/**
+	 * Unbinds any bounded authentication from the current thread. This method
+	 * is called in an environment, where the user authenticates itself once and
+	 * is reused across different threads. Each thread has to unbind itself,
+	 * otherwise a memory leak may be possible.
+	 * 
+	 * @throws AuthException
+	 *             if the unbinding fails
+	 */
+	public void unbind() throws AuthException;
 
 	/**
 	 * Logs the current user out.
@@ -293,7 +320,8 @@ public interface IAuthManager {
 	/**
 	 * Gets the name of the current user.
 	 * 
-	 * @return the name of the current user
+	 * @return the name of the current user, must return {@code null} if no user
+	 *         is currently authenticated
 	 */
 	public String getCurrentUsername();
 }

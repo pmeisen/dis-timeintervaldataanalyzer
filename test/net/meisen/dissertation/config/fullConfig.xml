@@ -149,7 +149,9 @@
   </aggregations>
   
   <server>
-    <http port="7000" enable="true" />
+  	<!-- the timeout is defined in minutes -->
+    <http port="7000" timeout="30" enable="true" />
+    <!-- the timeout is defined in seconds -->
     <tsql port="7001" timeout="1800000" enable="true" />
     <control port="7002" enable="false" />
   </server>

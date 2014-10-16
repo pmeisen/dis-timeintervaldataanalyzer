@@ -47,6 +47,7 @@ import net.meisen.dissertation.model.time.granularity.ITimeGranularityFactory;
 import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.mapper.BaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
+import net.meisen.dissertation.server.sessions.SessionManager;
 import net.meisen.general.genmisc.types.Classes;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Strings;
@@ -134,6 +135,13 @@ public class DefaultValues {
 	 * @see AggregationFunctionHandler
 	 */
 	public static final String AGGREGATIONFUNCTIONHANDLER_ID = "aggFunctionHandler";
+	/**
+	 * The name of the module created by the XSLT process, which contains the
+	 * created {@code SessionManager}.
+	 * 
+	 * @see SessionManager
+	 */
+	public static final String SESSIONMANAGER_ID = "sessionManager";
 
 	/**
 	 * The name of the module created by the XSLT process, which contains the

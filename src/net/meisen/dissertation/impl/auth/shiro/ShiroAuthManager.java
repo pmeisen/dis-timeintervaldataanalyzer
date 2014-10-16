@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.auth.IAuthManagerConfig;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.server.sessions.Session;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
@@ -165,7 +166,6 @@ public class ShiroAuthManager implements IAuthManager {
 			throws AuthException {
 		final UsernamePasswordToken token = new UsernamePasswordToken(username,
 				password);
-		token.setRememberMe(true);
 
 		final Subject currentUser = getSubject();
 		if (currentUser.isAuthenticated()) {
@@ -195,13 +195,39 @@ public class ShiroAuthManager implements IAuthManager {
 	}
 
 	@Override
+	public void bind(final Session session) throws AuthException {
+		if (session == null) {
+			exceptionRegistry.throwRuntimeException(AuthException.class, 1000);
+		} else {
+
+			// check if there is a subject known
+			final Subject subject = session.get("subject");
+
+			// if not create one and bind it, ...
+			if (subject == null) {
+				session.bind("subject", getSubject());
+			}
+			// otherwise bind it now
+			else {
+				ThreadContext.bind(manager);
+				ThreadContext.bind(subject);
+			}
+		}
+	}
+
+	@Override
+	public void unbind() {
+		ThreadContext.unbindSubject();
+		ThreadContext.unbindSecurityManager();
+		ThreadContext.remove();
+	}
+
+	@Override
 	public void logout() {
 		final Subject currentUser = getSubject();
 		currentUser.logout();
 
-		ThreadContext.unbindSubject();
-		ThreadContext.unbindSecurityManager();
-		ThreadContext.remove();
+		unbind();
 	}
 
 	@Override

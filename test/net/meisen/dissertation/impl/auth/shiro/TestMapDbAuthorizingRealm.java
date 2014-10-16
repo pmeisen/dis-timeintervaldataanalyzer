@@ -494,7 +494,7 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		final String[] perms = net.meisen.dissertation.model.auth.permissions.Permission
 				.transform(
 						new net.meisen.dissertation.model.auth.permissions.Permission[] {
-								net.meisen.dissertation.model.auth.permissions.Permission.connectHTML,
+								net.meisen.dissertation.model.auth.permissions.Permission.connectHTTP,
 								net.meisen.dissertation.model.auth.permissions.Permission.modify },
 						"myModel", ShiroAuthManager.permissionSeparator);
 		realm.grantPermissionsToUser("eddie", perms);
@@ -564,7 +564,7 @@ public class TestMapDbAuthorizingRealm extends ExceptionBasedTest {
 		realm.init();
 
 		final DefinedPermission[] perms = new DefinedPermission[] {
-				net.meisen.dissertation.model.auth.permissions.Permission.connectHTML
+				net.meisen.dissertation.model.auth.permissions.Permission.connectHTTP
 						.create(),
 				net.meisen.dissertation.model.auth.permissions.Permission.query
 						.create("myModel"),

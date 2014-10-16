@@ -200,7 +200,7 @@ public class TestAddQueries extends LoaderBasedTest {
 
 		// no exception means the role was really created
 		authManager.grantPermissionsToRole("newRole",
-				new DefinedPermission[] { Permission.connectHTML.create() });
+				new DefinedPermission[] { Permission.connectHTTP.create() });
 
 		// add a new user and log in as the new user
 		query = "ADD USER 'user1' WITH PASSWORD 'user1_password'";
@@ -245,7 +245,7 @@ public class TestAddQueries extends LoaderBasedTest {
 		assertTrue(authManager.hasPermission(Permission.query.create("adm")));
 		assertTrue(authManager.hasPermission(Permission.modify.create("adm")));
 		assertTrue(authManager.hasPermission(Permission.get.create()));
-		assertFalse(authManager.hasPermission(Permission.connectHTML.create()));
+		assertFalse(authManager.hasPermission(Permission.connectHTTP.create()));
 		assertFalse(authManager.hasPermission(Permission.connectTSQL.create()));
 		authManager.logout();
 		authManager.login("admin", "password");

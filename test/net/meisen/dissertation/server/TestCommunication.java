@@ -12,10 +12,34 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+/**
+ * Test to test some communication between a client and a server via TSQL.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestCommunication {
 
+	/**
+	 * A simple test loading models and interacting with those.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestSimple extends BaseTestWithServerConnection {
 
+		@Override
+		public boolean isTSQL() {
+			return true;
+		}
+		
+		/**
+		 * Tests the loading of a model, insertion of data and the retrieval of
+		 * time-series.
+		 * 
+		 * @throws SQLException
+		 *             if a problem on client side occurs
+		 */
 		@Test
 		public void testDataInsertionAndTimeSeriesRetrieval()
 				throws SQLException {
@@ -110,12 +134,23 @@ public class TestCommunication {
 		}
 	}
 
+	/**
+	 * A test using authentication and communication.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestWithAuthentication extends
 			BaseTestWithServerConnection {
 
 		@Override
 		public String getConfig() {
 			return "net/meisen/dissertation/server/testShiroAuthConfig.xml";
+		}
+		
+		@Override
+		public boolean isTSQL() {
+			return true;
 		}
 
 		/**

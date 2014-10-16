@@ -19,6 +19,7 @@
   <xsl:variable name="handlerId" select="cdef:getId('HANDLER_ID')" />
   <xsl:variable name="aggFuncId" select="cdef:getId('AGGREGATIONFUNCTIONHANDLER_ID')" />
   <xsl:variable name="authManagerId" select="cdef:getId('AUTHMANAGER_ID')" />
+  <xsl:variable name="sessionManagerId" select="cdef:getId('SESSIONMANAGER_ID')" />
 
   <xsl:template match="/cns:config">
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -301,6 +302,14 @@
           </property>
         </bean>
       </xsl:if>
+      
+      <!-- define the SessionManager to be used -->
+      <bean id="{$sessionManagerId}" class="net.meisen.dissertation.server.sessions.SessionManager">
+      	<xsl:if test="//cns:config/cns:server/cns:control/@timeout">
+          <xsl:variable name="timeOutInMin" select="//cns:config/cns:server/cns:control/@timeout" />
+          <property name="timeOutInMin" value="{$timeOutInMin}" />
+        </xsl:if>
+      </bean>
       
       <!-- define the tidaServer -->
       <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />

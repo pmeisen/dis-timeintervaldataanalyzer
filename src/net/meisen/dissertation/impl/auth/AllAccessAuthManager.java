@@ -4,11 +4,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.AuthManagementException;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.IAuthManagerConfig;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.server.sessions.Session;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,5 +167,15 @@ public class AllAccessAuthManager implements IAuthManager {
 	@Override
 	public String getCurrentUsername() {
 		return this.username.get();
+	}
+
+	@Override
+	public void bind(final Session session) throws AuthException {
+		// nothing to do
+	}
+
+	@Override
+	public void unbind() throws AuthException {
+		// nothing to do
 	}
 }

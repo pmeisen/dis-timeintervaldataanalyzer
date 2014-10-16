@@ -99,8 +99,10 @@ import net.meisen.dissertation.model.time.granularity.TestDateFormat;
 import net.meisen.dissertation.model.time.granularity.TestMinute;
 import net.meisen.dissertation.model.time.mapper.TestBaseMapperFactory;
 import net.meisen.dissertation.model.time.timeline.TestTimelineDefinition;
+import net.meisen.dissertation.server.TestAuthServlet;
 import net.meisen.dissertation.server.TestCommunication;
 import net.meisen.dissertation.server.TestTidaServer;
+import net.meisen.dissertation.server.session.TestSession;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -244,7 +246,8 @@ import org.junit.runners.Suite;
 		TestSelectQueries.class, TestInsertQueries.class, TestAddQueries.class,
 		TestDropQueries.class, TestModifyQueries.class, TestGrantQueries.class,
 		TestRevokeQueries.class, TestAssignQueries.class,
-		TestRemoveQueries.class, TestGetQueries.class,
+		TestRemoveQueries.class,
+		TestGetQueries.class,
 
 		// Test authentication manager
 		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,
@@ -253,8 +256,12 @@ import org.junit.runners.Suite;
 		// Tests dimensions
 		TestDescriptorDimension.class, TestDimensionGraph.class,
 
+		// Test the session management
+		TestSession.class,
+		
 		// Test the server
-		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class })
+		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,
+		TestAuthServlet.class })
 public class AllUnitTests {
 
 }
