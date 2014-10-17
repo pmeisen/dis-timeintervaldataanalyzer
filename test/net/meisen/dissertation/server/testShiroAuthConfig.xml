@@ -9,4 +9,9 @@
   <auth>
     <manager implementation="net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager" />
   </auth>
+  
+  <server>
+    <http port="${tida.server.http.port}" timeout="30" enable="${tida.server.http.enabled}" />
+    <tsql port="${tida.server.tsql.port}" timeout="1800000" enable="${tida.server.tsql.enabled}" />
+  </server>
 </config>

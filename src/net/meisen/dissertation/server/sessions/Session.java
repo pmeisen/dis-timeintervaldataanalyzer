@@ -154,4 +154,17 @@ public class Session {
 	public Date getCreationDate() {
 		return creationDate;
 	}
+
+	@Override
+	public String toString() {
+		return getId()
+				+ " of user '"
+				+ getUsername()
+				+ "' ("
+				+ Dates.createStringFromDate(getCreationDate(),
+						"dd.MM.yyyy HH:mm:ss")
+				+ ", "
+				+ Dates.createStringFromDate(lastAccessDate,
+						"dd.MM.yyyy HH:mm:ss") + ")";
+	}
 }

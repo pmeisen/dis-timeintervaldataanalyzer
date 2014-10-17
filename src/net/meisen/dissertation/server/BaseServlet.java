@@ -1,6 +1,5 @@
 package net.meisen.dissertation.server;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -72,6 +71,9 @@ public abstract class BaseServlet implements IServlet {
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) {
+		
+		// TODO: we should make this one configurable... otherwise attacks may be possible
+		response.setHeader("Access-Control-Allow-Origin", "*");
 
 		String result;
 		ContentType type;

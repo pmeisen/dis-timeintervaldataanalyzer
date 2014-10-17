@@ -8,11 +8,15 @@ import java.util.Properties;
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.server.messages.ShutdownMessage;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.ConfigurationCoreSettings;
+import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder;
 import net.meisen.general.server.Server;
+import net.meisen.general.server.api.IControlMessagesManager;
+import net.meisen.general.server.control.DefaultControlMessagesManager;
 import net.meisen.general.server.settings.pojos.Connector;
 
 import org.slf4j.Logger;
@@ -36,8 +40,53 @@ public class TidaServer {
 	private Server server;
 
 	@Autowired
+	@Qualifier("controlMessagesManager")
+	private IControlMessagesManager serverControlMessagesManager;
+
+	@Autowired
 	@Qualifier(DefaultValues.HANDLER_ID)
 	private TidaModelHandler handler;
+
+	@Autowired
+	@Qualifier(IConfiguration.coreConfigurationId)
+	private IConfiguration configuration;
+
+	/**
+	 * Registers some control instances, i.e. a shutdown-hook and a control
+	 * message to shutdown the server.
+	 */
+	protected void registerControls() {
+
+		// override the shutdown message of the server with one of the
+		// tidaServer
+		serverControlMessagesManager.addControlMessage(ShutdownMessage.class,
+				true);
+
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+
+				// check if the server is running and shut it down if so
+				if (TidaServer.this.isRunning()) {
+					if (LOG.isInfoEnabled()) {
+						LOG.info("The server will be shut down because of a ShutdownHook.");
+					}
+
+					TidaServer.this.shutdown();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Checks if the server is currently running.
+	 * 
+	 * @return {@code true} if it's running, otherwise {@code false}
+	 */
+	public boolean isRunning() {
+		return server.isRunning();
+	}
 
 	/**
 	 * Starts the server asynchronously. The methods holds until the server is
@@ -46,7 +95,9 @@ public class TidaServer {
 	 * @see Server#startAsync()
 	 */
 	public void startAsync() {
-		server.startAsync();
+		registerControls();
+
+		server.startAsync(false);
 		server.waitForStart();
 
 		if (LOG.isInfoEnabled()) {
@@ -84,7 +135,8 @@ public class TidaServer {
 					+ Collections.concate(", ", s));
 		}
 
-		server.start();
+		registerControls();
+		server.start(false);
 	}
 
 	/**
@@ -104,14 +156,20 @@ public class TidaServer {
 	 *            {@code true} to delete all the files, otherwise {@code false}
 	 */
 	public void shutdown(final boolean cleanUp) {
+		final String location = handler.getDefaultLocation();
+
+		// shutdown the server
 		server.shutdown();
+
+		// release the configuration
+		configuration.release();
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("The server is shut down.");
 		}
 
 		if (cleanUp) {
-			if (!Files.deleteDir(new File(handler.getDefaultLocation()))) {
+			if (!Files.deleteDir(new File(location))) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn("CleanUp of server failed.");
 				}

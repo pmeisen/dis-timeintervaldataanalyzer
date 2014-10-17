@@ -2,7 +2,6 @@ package net.meisen.dissertation.server;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.server.sessions.Session;

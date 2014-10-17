@@ -1,7 +1,15 @@
 package net.meisen.dissertation.server.sessions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,14 +17,51 @@ import org.slf4j.LoggerFactory;
 public class SessionManager {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(SessionManager.class);
+	private final ScheduledExecutorService scheduler;
+	private int timeOutInMin;
 
 	private Map<String, Session> sessions;
-
-	private int timeOutInMin;
 
 	public SessionManager() {
 		sessions = new ConcurrentHashMap<String, Session>();
 		timeOutInMin = 30;
+
+		scheduler = Executors.newScheduledThreadPool(1);
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				SessionManager.this.cleanUp();
+			}
+		}, 1, 1, TimeUnit.MINUTES);
+	}
+
+	public void cleanUp() {
+		final int timeout = this.timeOutInMin;
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("CLEANUP CALLED. " + timeout);
+		}
+
+		// get all the expired sessions
+		final Collection<Session> sessions = getActiveSessions();
+		final List<String> expiredIds = new ArrayList<String>();
+		for (final Session session : sessions) {
+			if (Thread.interrupted()) {
+				return;
+			} else if (session.isTimedOut(timeout)) {
+				expiredIds.add(session.getId());
+			}
+		}
+
+		// remove those that are expired
+		for (final String expiredId : expiredIds) {
+			removeSession(expiredId);
+		}
+	}
+
+	public Collection<Session> getActiveSessions() {
+		return Collections.unmodifiableCollection(this.sessions.values());
 	}
 
 	public Session createSession(final String username) {
@@ -59,7 +104,12 @@ public class SessionManager {
 	public void removeSession(final String sessionId) {
 		Session session;
 
+		System.out.println("Removed session '" + sessionId + "'.");
+
 		if ((session = sessions.remove(sessionId)) != null) {
+
+			System.out.println(session);
+
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Removed session '" + sessionId + "' of user '"
 						+ session.getUsername() + "'.");
@@ -79,6 +129,15 @@ public class SessionManager {
 			}
 		} else {
 			this.timeOutInMin = timeOutInMin;
+		}
+	}
+
+	public void release() {
+		scheduler.shutdownNow();
+		try {
+			scheduler.awaitTermination(1, TimeUnit.SECONDS);
+		} catch (final InterruptedException e) {
+			// ignore it
 		}
 	}
 }
