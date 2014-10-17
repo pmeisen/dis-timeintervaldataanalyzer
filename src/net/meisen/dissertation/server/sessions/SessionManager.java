@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -38,10 +37,6 @@ public class SessionManager {
 
 	public void cleanUp() {
 		final int timeout = this.timeOutInMin;
-
-		if (LOG.isInfoEnabled()) {
-			LOG.info("CLEANUP CALLED. " + timeout);
-		}
 
 		// get all the expired sessions
 		final Collection<Session> sessions = getActiveSessions();
@@ -104,12 +99,7 @@ public class SessionManager {
 	public void removeSession(final String sessionId) {
 		Session session;
 
-		System.out.println("Removed session '" + sessionId + "'.");
-
 		if ((session = sessions.remove(sessionId)) != null) {
-
-			System.out.println(session);
-
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Removed session '" + sessionId + "' of user '"
 						+ session.getUsername() + "'.");

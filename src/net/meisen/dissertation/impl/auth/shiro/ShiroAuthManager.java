@@ -23,8 +23,11 @@ import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.DefaultSecurityManager;
 import org.apache.shiro.realm.Realm;
+import org.apache.shiro.session.mgt.AbstractValidatingSessionManager;
 import org.apache.shiro.session.mgt.DefaultSessionManager;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.Subject.Builder;
 import org.apache.shiro.util.Initializable;
 import org.apache.shiro.util.LifecycleUtils;
 import org.apache.shiro.util.ThreadContext;
@@ -60,6 +63,8 @@ public class ShiroAuthManager implements IAuthManager {
 
 	private DefaultSecurityManager manager;
 
+	private Builder builder;
+
 	@Override
 	public void init() {
 
@@ -85,6 +90,13 @@ public class ShiroAuthManager implements IAuthManager {
 		}
 
 		this.manager = manager;
+		final SessionManager sessionManager = this.manager.getSessionManager();
+		if (sessionManager instanceof AbstractValidatingSessionManager) {
+			((AbstractValidatingSessionManager) sessionManager)
+					.setSessionValidationSchedulerEnabled(false);
+		}
+		this.builder = new Subject.Builder(manager);
+		this.builder.sessionCreationEnabled(false);
 	}
 
 	/**
@@ -154,7 +166,7 @@ public class ShiroAuthManager implements IAuthManager {
 	protected Subject getSubject() {
 		Subject subject = ThreadContext.getSubject();
 		if (subject == null) {
-			subject = (new Subject.Builder(manager)).buildSubject();
+			subject = this.builder.buildSubject();
 			ThreadContext.bind(manager);
 			ThreadContext.bind(subject);
 		}
