@@ -304,18 +304,16 @@
       </xsl:if>
       
       <!-- define the SessionManager, which is only needed on HTTP connections -->
-      <xsl:choose>
-        <xsl:when test="//cns:config/cns:server/cns:http/@enable = 'true'">
-        
-          <!-- create a sessionManager -->
-          <bean id="{$sessionManagerId}" class="net.meisen.dissertation.server.sessions.SessionManager" destroy-method="release">
-      	    <xsl:if test="//cns:config/cns:server/cns:http/@timeout">
-              <xsl:variable name="timeOutInMin" select="//cns:config/cns:server/cns:http/@timeout" />
-              <property name="timeOutInMin" value="{$timeOutInMin}" />
-            </xsl:if>
-          </bean>
-        </xsl:when>
-      </xsl:choose>
+      <bean id="{$sessionManagerId}" class="net.meisen.dissertation.server.sessions.SessionManager" destroy-method="release">
+      	<xsl:if test="//cns:config/cns:server/cns:http/@enable">
+      	  <xsl:variable name="httpEnabled" select="//cns:config/cns:server/cns:http/@enable" />
+      	  <constructor-arg type="boolean" value="{$httpEnabled}"/>
+      	</xsl:if>
+        <xsl:if test="//cns:config/cns:server/cns:http/@timeout">
+          <xsl:variable name="timeOutInMin" select="//cns:config/cns:server/cns:http/@timeout" />
+          <property name="timeOutInMin" value="{$timeOutInMin}" />
+        </xsl:if>
+      </bean>
             
       <!-- define the tidaServer -->
       <bean id="tidaServer" class="net.meisen.dissertation.server.TidaServer" />

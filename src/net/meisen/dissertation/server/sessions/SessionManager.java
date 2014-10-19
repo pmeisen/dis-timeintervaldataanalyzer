@@ -22,17 +22,25 @@ public class SessionManager {
 	private Map<String, Session> sessions;
 
 	public SessionManager() {
+		this(true);
+	}
+
+	public SessionManager(final boolean enableAutoCleanUp) {
 		sessions = new ConcurrentHashMap<String, Session>();
 		timeOutInMin = 30;
 
-		scheduler = Executors.newScheduledThreadPool(1);
-		scheduler.scheduleAtFixedRate(new Runnable() {
+		if (enableAutoCleanUp) {
+			scheduler = Executors.newScheduledThreadPool(1);
+			scheduler.scheduleAtFixedRate(new Runnable() {
 
-			@Override
-			public void run() {
-				SessionManager.this.cleanUp();
-			}
-		}, 1, 1, TimeUnit.MINUTES);
+				@Override
+				public void run() {
+					SessionManager.this.cleanUp();
+				}
+			}, 1, 1, TimeUnit.MINUTES);
+		} else {
+			scheduler = null;
+		}
 	}
 
 	public void cleanUp() {
@@ -123,11 +131,13 @@ public class SessionManager {
 	}
 
 	public void release() {
-		scheduler.shutdownNow();
-		try {
-			scheduler.awaitTermination(1, TimeUnit.SECONDS);
-		} catch (final InterruptedException e) {
-			// ignore it
+		if (scheduler != null) {
+			scheduler.shutdownNow();
+			try {
+				scheduler.awaitTermination(1, TimeUnit.SECONDS);
+			} catch (final InterruptedException e) {
+				// ignore it
+			}
 		}
 	}
 }
