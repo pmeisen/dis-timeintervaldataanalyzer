@@ -89,7 +89,18 @@ public class AuthServlet extends BaseServlet {
 			}
 
 			// send the sessionsId
-			return new JsonObject().add("sessionId", session.getId());
+			return new JsonObject()
+					.add("sessionId", session.getId())
+					.add("username", session.getUsername())
+					.add("logintime",
+							Dates.createStringFromDate(
+									session.getCreationDate(),
+									"dd.MM.yyyy HH:mm:ss"))
+					.add("lasttime",
+							Dates.createStringFromDate(
+									session.getLastAccessTime(),
+									"dd.MM.yyyy HH:mm:ss"))
+					.add("timeOutInMin", sessionManager.getTimeOutInMin());
 		} else if ("logout".equals(method)) {
 			final String sessionId = parameters.get("sessionId");
 			sessionManager.removeSession(sessionId);
@@ -107,6 +118,7 @@ public class AuthServlet extends BaseServlet {
 				perms.add(permission.toString());
 			}
 
+			final int timeoutInMin = sessionManager.getTimeOutInMin();
 			return new JsonObject()
 					.add("sessionId", session.getId())
 					.add("username", session.getUsername())
@@ -114,7 +126,10 @@ public class AuthServlet extends BaseServlet {
 							Dates.createStringFromDate(
 									session.getCreationDate(),
 									"dd.MM.yyyy HH:mm:ss"))
-					.add("permissions", perms);
+					.add("permissions", perms)
+					.add("leftTimeoutInMin",
+							session.getLeftTimeoutInMin(timeoutInMin))
+					.add("timeoutInMin", timeoutInMin);
 		} else {
 			// TODO throw exception
 			throw new IllegalStateException("Unsupported method called.");

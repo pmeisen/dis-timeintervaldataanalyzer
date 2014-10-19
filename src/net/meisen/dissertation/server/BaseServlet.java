@@ -64,15 +64,16 @@ public abstract class BaseServlet implements IServlet {
 	protected Session checkSession(final String sessionId) {
 		final Session session = sessionManager.getSession(sessionId, true);
 		authManager.bind(session);
-		
+
 		return session;
 	}
 
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) {
-		
-		// TODO: we should make this one configurable... otherwise attacks may be possible
+
+		// TODO: we should make this one configurable... otherwise attacks may
+		// be possible
 		response.setHeader("Access-Control-Allow-Origin", "*");
 
 		String result;
@@ -85,7 +86,9 @@ public abstract class BaseServlet implements IServlet {
 
 			// first of all the user has to be checked in
 			if (needValidSession()) {
-				checkSession(parameters.get("sessionId"));
+				final Session session = checkSession(parameters
+						.get("sessionId"));
+				session.markAsUsed();
 			}
 
 			// do a check first

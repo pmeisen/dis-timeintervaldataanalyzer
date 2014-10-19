@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
-
 import net.meisen.general.genmisc.types.Dates;
 
 /**
@@ -151,8 +148,23 @@ public class Session {
 		return nowDiff > timeoutInMin;
 	}
 
+	public int getLeftTimeoutInMin(int timeoutInMin) {
+		if (isTimedOut(timeoutInMin)) {
+			return 0;
+		} else {
+			final Date now = provider.now();
+			final int nowDiff = Dates.getDateDiffInMinutes(now,
+					this.lastAccessDate);
+			return Math.min(timeoutInMin, Math.max(0, timeoutInMin - nowDiff));
+		}
+	}
+
 	public Date getCreationDate() {
 		return creationDate;
+	}
+
+	public Date getLastAccessTime() {
+		return lastAccessDate;
 	}
 
 	@Override
