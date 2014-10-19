@@ -39,8 +39,8 @@ public class TestSession {
 		});
 
 		assertFalse(s.isTimedOut(45));
-		assertFalse(s.isTimedOut(30));
 		assertFalse(s.isTimedOut(31));
+		assertTrue(s.isTimedOut(30));
 		assertTrue(s.isTimedOut(15));
 		assertTrue(s.isTimedOut(29));
 	}
