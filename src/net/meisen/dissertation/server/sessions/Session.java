@@ -145,7 +145,8 @@ public class Session {
 		// check the difference between now and the last usage
 		final int nowDiff = Dates
 				.getDateDiffInMinutes(now, this.lastAccessDate);
-		return nowDiff > timeoutInMin;
+		
+		return nowDiff >= timeoutInMin;
 	}
 
 	public int getLeftTimeoutInMin(int timeoutInMin) {

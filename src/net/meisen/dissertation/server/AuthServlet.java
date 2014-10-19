@@ -107,6 +107,17 @@ public class AuthServlet extends BaseServlet {
 			authManager.logout();
 
 			return new JsonObject().add("sessionId", (String) null);
+		} else if ("ping".equals(method)) {
+			final String sessionId = parameters.get("sessionId");
+
+			// check the session and the permission
+			final Session session = checkSession(sessionId);
+			checkHttpPermission();
+			
+			// refresh the session
+			session.markAsUsed();
+			
+			return new JsonObject().add("sessionId", (String) null);
 		} else if ("userinfo".equals(method)) {
 			final String sessionId = parameters.get("sessionId");
 			final Session session = checkSession(sessionId);
