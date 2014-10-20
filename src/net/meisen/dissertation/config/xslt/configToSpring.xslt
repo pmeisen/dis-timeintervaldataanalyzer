@@ -283,6 +283,9 @@
               <xsl:if test="//cns:config/cns:server/cns:http/@enable">
                 <prop key="tida.server.http.enabled"><xsl:value-of select="//cns:config/cns:server/cns:http/@enable" /></prop>
               </xsl:if>
+              <xsl:if test="//cns:config/cns:server/cns:http/@docroot">
+                <prop key="tida.server.http.docroot"><xsl:value-of select="//cns:config/cns:server/cns:http/@docroot" /></prop>
+              </xsl:if>
               <xsl:if test="//cns:config/cns:server/cns:tsql/@port">
                 <prop key="tida.server.tsql.port"><xsl:value-of select="//cns:config/cns:server/cns:tsql/@port" /></prop>
               </xsl:if>

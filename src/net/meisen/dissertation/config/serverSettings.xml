@@ -13,14 +13,7 @@
       <servlet urlmatcher="/loader/*">net.meisen.dissertation.server.LoaderServlet</servlet>
       <servlet urlmatcher="/query/*">net.meisen.dissertation.server.QueryServlet</servlet>
       
-      <servlet>
-      	<script>
-			response.setStatusCode(org.apache.http.HttpStatus.SC_OK);
-			var entity = new org.apache.http.entity.StringEntity('THE TEST WAS SUCCESSFUL USING THE SCRIPT');
-			response.setEntity(entity);
-      	</script>
-      	net.meisen.general.server.http.listener.servlets.ScriptedServlet
-      </servlet>
+      <docroot urlmatcher="*">${tida.server.http.docroot}</docroot>
     </e:extension>
   </connector>
   
