@@ -22,6 +22,10 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
+import org.apache.shiro.mgt.DefaultSubjectDAO;
+import org.apache.shiro.mgt.SessionStorageEvaluator;
+import org.apache.shiro.mgt.SubjectDAO;
 import org.apache.shiro.realm.Realm;
 import org.apache.shiro.session.mgt.AbstractValidatingSessionManager;
 import org.apache.shiro.session.mgt.SessionManager;
@@ -93,6 +97,15 @@ public class ShiroAuthManager implements IAuthManager {
 		if (sessionManager instanceof AbstractValidatingSessionManager) {
 			((AbstractValidatingSessionManager) sessionManager)
 					.setSessionValidationSchedulerEnabled(false);
+		}
+		final SubjectDAO subjectDao = this.manager.getSubjectDAO();
+		if (subjectDao instanceof DefaultSubjectDAO) {
+			final SessionStorageEvaluator sessionStorageEvaluator = ((DefaultSubjectDAO) this.manager
+					.getSubjectDAO()).getSessionStorageEvaluator();
+			if (sessionStorageEvaluator instanceof DefaultSessionStorageEvaluator) {
+				((DefaultSessionStorageEvaluator) sessionStorageEvaluator)
+						.setSessionStorageEnabled(false);
+			}
 		}
 		this.builder = new Subject.Builder(manager);
 		this.builder.sessionCreationEnabled(false);

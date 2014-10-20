@@ -28,26 +28,56 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
+/**
+ * Base implementation of a {@code Servlet}, which ensures the checking of
+ * permissions and binds the session to the thread of the servlet.
+ * 
+ * @author pmeisen
+ * 
+ */
 public abstract class BaseServlet implements IServlet {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseServlet.class);
 
+	/**
+	 * The used {@code AuthManager}.
+	 */
 	@Autowired
 	@Qualifier(DefaultValues.AUTHMANAGER_ID)
 	protected IAuthManager authManager;
 
+	/**
+	 * The used {@code SessionManager}.
+	 */
 	@Autowired
 	@Qualifier(DefaultValues.SESSIONMANAGER_ID)
 	protected SessionManager sessionManager;
 
+	/**
+	 * The used {@code ExceptionRegistry}.
+	 */
 	@Autowired(required = false)
 	@Qualifier(IConfiguration.coreExceptionRegistryId)
 	protected IExceptionRegistry exceptionRegistry;
 
+	/**
+	 * Enables the base implementation to check the
+	 * {@link Permission#connectHTTP}.
+	 * 
+	 * @return {@code true} to enable the checking for the servlet, otherwise
+	 *         {@code false}
+	 */
 	protected boolean doHttpPermissionCheck() {
 		return true;
 	}
 
+	/**
+	 * Enables the base implementation to check the
+	 * {@link Permission#connectHTTP}.
+	 * 
+	 * @return {@code true} to enable the checking for the servlet, otherwise
+	 *         {@code false}
+	 */
 	protected boolean needValidSession() {
 		return true;
 	}
