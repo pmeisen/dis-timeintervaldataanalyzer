@@ -245,6 +245,14 @@ public class FileMetaDataCache implements IMetaDataCache {
 		}
 
 		// create the new cache file and add the data
+		final File parentDir = metaDataFile.getParentFile();
+		if (!parentDir.exists() && !metaDataFile.getParentFile().mkdirs()) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1017, parentDir);
+		} else if (!parentDir.isDirectory()) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1018, parentDir);
+		}
 		try {
 			metaDataFile.createNewFile();
 		} catch (final IOException e) {
