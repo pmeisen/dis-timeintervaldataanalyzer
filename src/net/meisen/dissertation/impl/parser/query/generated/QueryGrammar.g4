@@ -89,7 +89,8 @@ exprLoadSetProperty : (PROP_AUTOLOAD CMP_EQUAL selectorBoolean) | (PROP_FORCE CM
 /*
  * Define the different expressions/parts of the unload statement
  */
-exprUnload      : STMT_UNLOAD selectorModelId;
+exprUnload            : STMT_UNLOAD selectorModelId (OP_SET exprUnloadSetProperty (SEPARATOR exprUnloadSetProperty)*)?;
+exprUnloadSetProperty : (PROP_AUTOLOAD CMP_EQUAL selectorBoolean);
 
 /*
  * Define the different expressions/parts of the insert statement

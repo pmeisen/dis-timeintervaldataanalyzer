@@ -112,7 +112,12 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 				mapMaker.valueSerializer(valueSer);
 			}
 
-			map = mapMaker.makeOrGet();
+			try {
+				map = mapMaker.makeOrGet();
+			} catch (final AssertionError e) {
+				exceptionRegistry.throwException(BaseMapDbCacheException.class,
+						1005, modelLocation, e.getMessage());
+			}
 		} else if (MapDbType.HashMap.equals(type)) {
 			final HTreeMapMaker mapMaker = db.createHashMap(mapName);
 			final Serializer<K> keySer = createKeySerializer();

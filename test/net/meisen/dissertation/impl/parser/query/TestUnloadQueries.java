@@ -38,6 +38,15 @@ public class TestUnloadQueries extends LoaderBasedTest {
 		// parse the load query with a path
 		query = factory.parseQuery("UNload myModel");
 		assertEquals("myModel", query.getModelId());
+
+		query = factory.parseQuery("UNLOAD myModel SET autoload=false");
+		assertEquals(false, query.getProperty("autoload", null));
+
+		query = factory.parseQuery("UNLOAD myModel SET autoload=true");
+		assertEquals(true, query.getProperty("autoload", null));
+
+		query = factory.parseQuery("UNLOAD myModel");
+		assertNull(query.getProperty("autoload", null));
 	}
 
 	/**

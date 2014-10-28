@@ -1,6 +1,6 @@
 package net.meisen.dissertation.impl.indexes;
 
-import net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap;
+import net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap;
 import net.meisen.dissertation.model.indexes.IIndexFactoryConfig;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -32,7 +32,7 @@ public class IndexFactoryConfig implements IIndexFactoryConfig {
 		this.shortClass = TroveShortIndexedCollection.class;
 		this.intClass = TroveIntIndexedCollection.class;
 		this.longClass = TroveLongIndexedCollection.class;
-		this.bitmapClass = EWAHBitmap.class;
+		this.bitmapClass = RoaringBitmap.class;
 	}
 
 	/**

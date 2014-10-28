@@ -84,6 +84,9 @@ public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
 				properties.setProperty("tida.config.test.location",
 						"!please activate temporary folder creation!");
 			}
+		} else if (createTemporaryFolder()) {
+			properties.setProperty("tida.model.test.location",
+					Files.getCanonicalPath(getTemporaryFolder()));
 		}
 		properties.setProperty("tida.server.tsql.port", "" + getTsqlPort());
 		properties.setProperty("tida.server.http.port", "" + getHttpPort());

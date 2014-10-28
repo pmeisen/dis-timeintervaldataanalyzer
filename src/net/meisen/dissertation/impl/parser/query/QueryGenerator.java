@@ -54,6 +54,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSetPasswordContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadSetPropertyContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprValuesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprWithPasswordContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprWithPermissionsContext;
@@ -485,6 +486,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		resolveProperty(properties, ctx);
 
 		final LoadQuery q = q(LoadQuery.class);
+		q.setProperties(properties);
+	}
+
+	@Override
+	public void exitExprUnloadSetProperty(final ExprUnloadSetPropertyContext ctx) {
+		final Map<String, Object> properties = new HashMap<String, Object>();
+		resolveProperty(properties, ctx);
+
+		final UnloadQuery q = q(UnloadQuery.class);
 		q.setProperties(properties);
 	}
 

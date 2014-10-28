@@ -209,6 +209,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprAssignMultipleRoles(@NotNull QueryGrammarParser.ExprAssignMultipleRolesContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprUnloadSetProperty}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprUnloadSetProperty(@NotNull QueryGrammarParser.ExprUnloadSetPropertyContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprUnloadSetProperty}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprUnloadSetProperty(@NotNull QueryGrammarParser.ExprUnloadSetPropertyContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprWithRoles}.
 	 * @param ctx the parse tree
 	 */

@@ -84,13 +84,13 @@
       <groupId>com.googlecode.javaewah</groupId>
       <artifactId>JavaEWAH</artifactId>
       <version>0.8.2</version>
+      <optional>true</optional>
     </dependency>
     
     <dependency>
       <groupId>org.roaringbitmap</groupId>
       <artifactId>RoaringBitmap</artifactId>
-      <version>0.3.4</version>
-      <optional>true</optional>
+      <version>0.4.3</version>
     </dependency>
     
     <!-- 

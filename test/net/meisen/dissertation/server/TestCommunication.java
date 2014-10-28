@@ -32,7 +32,7 @@ public class TestCommunication {
 		public boolean isTSQL() {
 			return true;
 		}
-		
+
 		/**
 		 * Tests the loading of a model, insertion of data and the retrieval of
 		 * time-series.
@@ -147,7 +147,7 @@ public class TestCommunication {
 		public String getConfig() {
 			return "net/meisen/dissertation/server/testShiroAuthConfig.xml";
 		}
-		
+
 		@Override
 		public boolean isTSQL() {
 			return true;
@@ -192,6 +192,101 @@ public class TestCommunication {
 		}
 	}
 
+	public static class TestLoadAndUnload extends BaseTestWithServerConnection {
+
+		@Override
+		public boolean isTSQL() {
+			return true;
+		}
+
+		/**
+		 * Checks if the loading of an unloaded model leads to an exception when
+		 * the model was changed.
+		 * 
+		 * @throws SQLException
+		 *             if some unexpected error occurs
+		 */
+		@Test
+		public void testInvalidReload() throws SQLException {
+			Statement stmt;
+			ResultSet res;
+
+			stmt = conn.createStatement();
+
+			// load the communicationModel
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
+
+			// @formatter:off
+			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+
+			// unload and load again
+			stmt.executeUpdate("UNLOAD testLoadAndUnload");
+			
+			// we expect the exception now
+			boolean error = false;
+			try {
+				stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload2.xml'");
+			} catch (final SQLException e) {
+				assertTrue(e.getMessage().contains("Unable to retrieve a result"));
+				error = true;
+			}
+			assertTrue(error);
+			// @formatter:on
+
+			res.close();
+			stmt.close();
+		}
+
+		/**
+		 * Tests the reloading of an unloaded model.
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected exception occurs
+		 */
+		@Test
+		public void testSimpleReload() throws SQLException {
+			Statement stmt;
+			ResultSet res;
+
+			stmt = conn.createStatement();
+
+			// load the communicationModel
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
+
+			// @formatter:off
+			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+			
+			// just for fun let's check the results
+			res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+			while (res.next()) {
+				if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
+					assertEquals(res.getDouble(2), 1.0, 0.0);
+				} else {
+					assertEquals(res.getDouble(2), 0.0, 0.0);
+				}
+			}
+			
+			// unload and load again
+			stmt.executeUpdate("UNLOAD testLoadAndUnload");
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
+			
+			// validate the values
+			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+			res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+			while (res.next()) {
+				if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
+					assertEquals(res.getDouble(2), 2.0, 0.0);
+				} else {
+					assertEquals(res.getDouble(2), 0.0, 0.0);
+				}
+			}
+			// @formatter:on
+
+			res.close();
+			stmt.close();
+		}
+	}
+
 	/**
 	 * Suite for different communication tests.
 	 * 
@@ -199,7 +294,8 @@ public class TestCommunication {
 	 * 
 	 */
 	@RunWith(Suite.class)
-	@Suite.SuiteClasses({ TestSimple.class, TestWithAuthentication.class })
+	@Suite.SuiteClasses({ TestSimple.class, TestWithAuthentication.class,
+			TestLoadAndUnload.class })
 	public static class TestCommunicationSuite {
 		// all tests are defined within the suite's annotation
 	}
