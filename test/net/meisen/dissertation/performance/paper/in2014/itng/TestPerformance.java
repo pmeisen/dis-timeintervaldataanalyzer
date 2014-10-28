@@ -18,7 +18,6 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -119,14 +118,16 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		// persist(false);
 	}
 
+	/**
+	 * Tests the insertion of values into a model.
+	 * 
+	 * @throws IOException
+	 *             if the model cannot be read
+	 */
 	@Test
 	// @Ignore
 	public void testInsert() throws IOException {
 		final int runs = 100;
-
-		Performance performance;
-
-		performance = new Performance();
 
 		final int[] sizes = { 1000, 10000, 100000, 1000000 };
 		final String[] model = { "ewah", "roaring" };
@@ -145,6 +146,8 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 									+ model[k] + "-" + sizes[i] + ".xml");
 					final TidaModel tidaModel = loader.getTidaModel(id);
 
+					// measure the performance
+					final Performance performance = new Performance();
 					performance.start();
 					tidaModel.bulkLoadDataFromDataModel();
 					results[l] = performance.stop()[0];
@@ -177,7 +180,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 	 *             if the model cannot be loaded
 	 */
 	@Test
-	@Ignore
+	// @Ignore
 	public void testRoaring() throws IOException {
 		loadModel("tida-model-minute-roaring");
 		measure("tidaModelRoaring");
@@ -191,7 +194,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 	 *             if the model cannot be loaded
 	 */
 	@Test
-	@Ignore
+	// @Ignore
 	public void testEwah() throws IOException {
 		loadModel("tida-model-minute-ewah");
 		measure("tidaModelEWAH");
