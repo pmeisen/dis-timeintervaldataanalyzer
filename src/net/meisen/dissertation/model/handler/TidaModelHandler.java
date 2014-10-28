@@ -432,7 +432,7 @@ public class TidaModelHandler {
 		final TidaModel model = loadViaXslt(configIs);
 		if (!"auto".equalsIgnoreCase(xml.getOldValue("offlinemode"))) {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn("The 'offlibemode' of the model was changed during the loading from the location '"
+				LOG.warn("The 'offlinemode' of the model was changed during the loading from the location '"
 						+ location
 						+ "' (old: '"
 						+ xml.getOldValue("offlinemode") + "', new: 'auto')");

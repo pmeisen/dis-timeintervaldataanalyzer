@@ -7,6 +7,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaServerListenerException;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.general.server.api.impl.BaseListener;
 import net.meisen.general.server.settings.pojos.Connector;
 import net.meisen.general.server.settings.pojos.Extension;
@@ -30,7 +31,7 @@ public class TidaServerListener extends BaseListener {
 
 	@Autowired
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
-	private QueryFactory queryFactory;
+	private IQueryFactory queryFactory;
 
 	@Autowired
 	@Qualifier(DefaultValues.AUTHMANAGER_ID)

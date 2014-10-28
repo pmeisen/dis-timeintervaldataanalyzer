@@ -8,7 +8,6 @@ import java.net.SocketException;
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.jdbc.protocol.Protocol;
 import net.meisen.dissertation.jdbc.protocol.QueryStatus;
@@ -16,6 +15,7 @@ import net.meisen.dissertation.jdbc.protocol.WrappedException;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
@@ -37,7 +37,7 @@ public class RequestHandlerThread extends WorkerThread {
 			.getLogger(RequestHandlerThread.class);
 
 	private final IExceptionRegistry exceptionRegistry;
-	private final QueryFactory queryFactory;
+	private final IQueryFactory queryFactory;
 	private final IAuthManager authManager;
 
 	private Exception lastException = null;
@@ -55,7 +55,7 @@ public class RequestHandlerThread extends WorkerThread {
 	 *            the registry of exceptions
 	 */
 	public RequestHandlerThread(final Socket input,
-			final QueryFactory queryFactory, final IAuthManager authManager,
+			final IQueryFactory queryFactory, final IAuthManager authManager,
 			final IExceptionRegistry exceptionRegistry) {
 		super(input);
 

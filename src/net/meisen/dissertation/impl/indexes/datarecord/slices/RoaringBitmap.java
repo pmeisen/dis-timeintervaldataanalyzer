@@ -19,7 +19,6 @@ import org.roaringbitmap.IntIterator;
  * 
  */
 public class RoaringBitmap extends Bitmap {
-
 	private org.roaringbitmap.RoaringBitmap bitmap;
 
 	/**

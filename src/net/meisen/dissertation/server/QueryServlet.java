@@ -3,7 +3,7 @@ package net.meisen.dissertation.server;
 import java.io.UnsupportedEncodingException;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.general.server.http.listener.api.IServlet;
 import net.meisen.general.server.settings.pojos.Extension;
 
@@ -18,7 +18,7 @@ public class QueryServlet implements IServlet {
 
 	@Autowired
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
-	private QueryFactory queryFactory;
+	private IQueryFactory queryFactory;
 
 	@Override
 	public void initialize(final Extension e) {

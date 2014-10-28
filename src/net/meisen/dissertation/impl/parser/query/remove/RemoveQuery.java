@@ -16,7 +16,7 @@ import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
- * A query to assign roles to a user.
+ * A query to remove roles from a user.
  * 
  * @author pmeisen
  * 
