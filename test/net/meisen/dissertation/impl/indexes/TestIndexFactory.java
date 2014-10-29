@@ -8,7 +8,7 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap;
+import net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap;
 import net.meisen.dissertation.impl.indexes.mock.BitmapMock;
 import net.meisen.dissertation.impl.indexes.mock.IndexedCollectionMock;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
@@ -97,7 +97,7 @@ public class TestIndexFactory {
 			factory = new IndexFactory();
 			bitmap = factory.createBitmap();
 			assertNotNull(bitmap);
-			assertEquals(EWAHBitmap.class, bitmap.getClass());
+			assertEquals(RoaringBitmap.class, bitmap.getClass());
 
 			// create a user-defined bitmap
 			config = new IndexFactoryConfig();
@@ -133,7 +133,7 @@ public class TestIndexFactory {
 
 			// get the configuration
 			final IndexFactoryConfig config = factory.getConfiguration();
-			assertEquals(EWAHBitmap.class, config.getBitmapClass());
+			assertEquals(RoaringBitmap.class, config.getBitmapClass());
 			assertEquals(TroveByteIndexedCollection.class,
 					config.getByteClass());
 			assertEquals(TroveShortIndexedCollection.class,

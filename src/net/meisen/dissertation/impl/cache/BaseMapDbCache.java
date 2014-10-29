@@ -18,6 +18,8 @@ import org.mapdb.DB.BTreeMapMaker;
 import org.mapdb.DB.HTreeMapMaker;
 import org.mapdb.DBMaker;
 import org.mapdb.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -33,6 +35,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  */
 public abstract class BaseMapDbCache<K, T> implements ICache,
 		IReferenceMechanismCache<K, T> {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(BaseMapDbCache.class);
 
 	/**
 	 * The {@code ExceptionRegistry}.
@@ -163,6 +167,10 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 	public void release() {
 
 		if (isInit()) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Releasing MapDbCache at '" + modelLocation + "' ("
+						+ getClass().getSimpleName() + ").");
+			}
 
 			// commit everything
 			db.commit();

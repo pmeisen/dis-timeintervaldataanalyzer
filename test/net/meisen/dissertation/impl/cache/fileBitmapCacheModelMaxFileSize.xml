@@ -2,8 +2,10 @@
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:file="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+       xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
                            http://dev.meisen.net/xsd/dissertation/caches/bitmap/file http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd"
        
        id="fileBitmapCacheModel">
@@ -14,6 +16,12 @@
         <file:config folder="${java.io.tmpdir}/tmpFileBitmapCacheModelTest" maxFileSize="1M" cleaningFactor="0.8" size="1000" />
       </bitmap>
     </caches>
+    
+	<factories>
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
+        <idx:config bitmap="net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap" />
+      </indexes>
+    </factories>
   </config>
   
   <data />

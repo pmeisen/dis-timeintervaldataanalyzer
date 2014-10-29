@@ -38,9 +38,11 @@
   <logger name="net.meisen.dissertation">
     <level value="TRACE"/>
   </logger>
+  <!--
   <logger name="net.meisen.general.sbconfigurator.config.DefaultConfiguration">
     <level value="TRACE"/>
   </logger>
+  -->
 
    <!-- ======================= --> 
    <!-- Setup the Root category -->

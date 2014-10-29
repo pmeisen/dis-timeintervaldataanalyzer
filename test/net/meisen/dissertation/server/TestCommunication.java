@@ -192,6 +192,12 @@ public class TestCommunication {
 		}
 	}
 
+	/**
+	 * Tests some functionality with load and unload over communication.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestLoadAndUnload extends BaseTestWithServerConnection {
 
 		@Override
@@ -249,40 +255,27 @@ public class TestCommunication {
 			ResultSet res;
 
 			stmt = conn.createStatement();
-
-			// load the communicationModel
-			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
-
-			// @formatter:off
-			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
-			
-			// just for fun let's check the results
-			res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
-			while (res.next()) {
-				if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
-					assertEquals(res.getDouble(2), 1.0, 0.0);
-				} else {
-					assertEquals(res.getDouble(2), 0.0, 0.0);
-				}
-			}
 			
 			// unload and load again
-			stmt.executeUpdate("UNLOAD testLoadAndUnload");
-			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
-			
-			// validate the values
-			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
-			res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
-			while (res.next()) {
-				if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
-					assertEquals(res.getDouble(2), 2.0, 0.0);
-				} else {
-					assertEquals(res.getDouble(2), 0.0, 0.0);
+			for (int i = 0; i < 10; i++) {			
+				stmt.executeUpdate("UNLOAD testLoadAndUnload");
+				stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
+				
+				// validate the values
+				res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+				res.close();
+				res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+				while (res.next()) {
+					if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
+						assertEquals(res.getDouble(2), i + 1, 0.0);
+					} else {
+						assertEquals(res.getDouble(2), 0.0, 0.0);
+					}
 				}
+				res.close();
 			}
 			// @formatter:on
 
-			res.close();
 			stmt.close();
 		}
 	}

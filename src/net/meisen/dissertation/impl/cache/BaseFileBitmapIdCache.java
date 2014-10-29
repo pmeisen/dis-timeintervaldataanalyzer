@@ -1,13 +1,11 @@
 package net.meisen.dissertation.impl.cache;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -87,7 +85,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	private final ReentrantReadWriteLock fileLock;
 
 	private final List<RandomAccessFile> fileReaders;
-	private final List<DataOutputStream> fileWriters;
+	private final List<FileBasedDataOutputStream> fileWriters;
 	private final List<File> files;
 
 	private final Set<BitmapId<?>> notPersisted;
@@ -127,7 +125,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		this.cacheCleaningFactor = getDefaultCacheCleaningFactor();
 
 		this.fileReaders = new ArrayList<RandomAccessFile>();
-		this.fileWriters = new ArrayList<DataOutputStream>();
+		this.fileWriters = new ArrayList<FileBasedDataOutputStream>();
 		this.files = new ArrayList<File>();
 
 		this.persistency = true;
@@ -235,7 +233,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			exceptionRegistry.throwException(getExceptionClass(1009), 1009,
 					idxTableFile);
 		} else if (LOG.isDebugEnabled()) {
-			LOG.debug("Loading cache from '" + modelLocation + "' ("
+			LOG.debug("Loading cache-file from '" + modelLocation + "' ("
 					+ getClass().getSimpleName() + ").");
 		}
 
@@ -324,11 +322,10 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 
 		// bitmap reader and writer
 		final RandomAccessFile reader;
-		final DataOutputStream writer;
+		final FileBasedDataOutputStream writer;
 		try {
 			reader = new RandomAccessFile(dataFile, "r");
-			writer = new DataOutputStream(new BufferedOutputStream(
-					new FileOutputStream(dataFile, true)));
+			writer = new FileBasedDataOutputStream(dataFile, true);
 		} catch (final IOException e) {
 			exceptionRegistry.throwException(getExceptionClass(1012), 1012, e,
 					dataFile);
@@ -462,10 +459,11 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		// write the byte-array to the writer
 		fileLock.readLock().lock();
 		try {
-			final DataOutputStream writer = fileWriters.get(curFileNumber);
+			final FileBasedDataOutputStream writer = fileWriters
+					.get(curFileNumber);
 
 			synchronized (writer) {
-				priorSize = writer.size();
+				priorSize = writer.getCurrentPosition();
 				fileNr = curFileNumber;
 
 				if (priorSize + resSize > getMaxFileSizeInByte()) {
@@ -1356,7 +1354,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 						+ getClass().getSimpleName() + ").");
 			} else {
 				LOG.debug("Persisting " + toBeWritten.size()
-						+ " cacheables during bulk writ ("
+						+ " cacheables during bulk write ("
 						+ getClass().getSimpleName() + ")e.");
 			}
 		}
