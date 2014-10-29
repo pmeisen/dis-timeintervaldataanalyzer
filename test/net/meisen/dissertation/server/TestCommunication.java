@@ -250,21 +250,62 @@ public class TestCommunication {
 		 *             if an unexpected exception occurs
 		 */
 		@Test
-		public void testSimpleReload() throws SQLException {
+		public void testReloadViaXslt() throws SQLException {
 			Statement stmt;
 			ResultSet res;
 
 			stmt = conn.createStatement();
-			
+
 			// unload and load again
-			for (int i = 0; i < 10; i++) {			
+			for (int i = 0; i < 5; i++) {
 				stmt.executeUpdate("UNLOAD testLoadAndUnload");
 				stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
-				
+
 				// validate the values
-				res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+				res = stmt
+						.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
 				res.close();
-				res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+				res = stmt
+						.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+				while (res.next()) {
+					if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
+						assertEquals(res.getDouble(2), i + 1, 0.0);
+					} else {
+						assertEquals(res.getDouble(2), 0.0, 0.0);
+					}
+				}
+				res.close();
+			}
+			// @formatter:on
+
+			stmt.close();
+		}
+
+		/**
+		 * Tests the reloading of a model using the id of it.
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected exception occurs
+		 */
+		@Test
+		public void testReloadViaId() throws SQLException {
+			Statement stmt;
+			ResultSet res;
+
+			stmt = conn.createStatement();
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
+
+			// unload and load again
+			for (int i = 0; i < 5; i++) {
+				stmt.executeUpdate("UNLOAD testLoadAndUnload");
+				stmt.executeUpdate("LOAD testLoadAndUnload");
+
+				// validate the values
+				res = stmt
+						.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+				res.close();
+				res = stmt
+						.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
 				while (res.next()) {
 					if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
 						assertEquals(res.getDouble(2), i + 1, 0.0);

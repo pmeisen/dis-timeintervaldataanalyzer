@@ -210,9 +210,6 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			exceptionRegistry.throwException(getExceptionClass(1006), 1006, e,
 					idxTableFile);
 		}
-
-		// create a first data-file
-		_createNewDataFile();
 	}
 
 	/**
@@ -452,35 +449,37 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 					resSize, cacheable, getMaxFileSizeInByte());
 		}
 
-		int priorSize;
-		int fileNr;
-		boolean written;
+		int priorSize = -1;
+		int fileNr = -1;
+		boolean written = false;
 
 		// write the byte-array to the writer
-		fileLock.readLock().lock();
-		try {
-			final FileBasedDataOutputStream writer = fileWriters
-					.get(curFileNumber);
+		if (curFileNumber > -1) {
+			fileLock.readLock().lock();
+			try {
+				final FileBasedDataOutputStream writer = fileWriters
+						.get(curFileNumber);
 
-			synchronized (writer) {
-				priorSize = writer.getCurrentPosition();
-				fileNr = curFileNumber;
+				synchronized (writer) {
+					priorSize = writer.getCurrentPosition();
+					fileNr = curFileNumber;
 
-				if (priorSize + resSize > getMaxFileSizeInByte()) {
-					written = false;
-				} else {
-					writer.write(result);
-					writer.flush();
+					if (priorSize + resSize > getMaxFileSizeInByte()) {
+						written = false;
+					} else {
+						writer.write(result);
+						writer.flush();
 
-					written = true;
+						written = true;
+					}
 				}
+			} catch (final IOException e) {
+				exceptionRegistry.throwException(getExceptionClass(1015), 1015,
+						e, cacheable);
+				return null;
+			} finally {
+				fileLock.readLock().unlock();
 			}
-		} catch (final IOException e) {
-			exceptionRegistry.throwException(getExceptionClass(1015), 1015, e,
-					cacheable);
-			return null;
-		} finally {
-			fileLock.readLock().unlock();
 		}
 
 		if (written) {
