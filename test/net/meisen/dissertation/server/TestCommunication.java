@@ -295,17 +295,17 @@ public class TestCommunication {
 			stmt = conn.createStatement();
 			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
 
-			// unload and load again
+			// @formatter:off
 			for (int i = 0; i < 5; i++) {
+				
+				// unload and load again via id
 				stmt.executeUpdate("UNLOAD testLoadAndUnload");
 				stmt.executeUpdate("LOAD testLoadAndUnload");
 
 				// validate the values
-				res = stmt
-						.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+				res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
 				res.close();
-				res = stmt
-						.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
+				res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
 				while (res.next()) {
 					if (res.getString(3).equals("01.01.2008 01:01:00,000")) {
 						assertEquals(res.getDouble(2), i + 1, 0.0);

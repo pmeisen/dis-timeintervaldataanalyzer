@@ -47,6 +47,8 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" /> 
         <entry key="net.meisen.dissertation.exceptions.AuthException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" /> 
+        <entry key="net.meisen.dissertation.exceptions.SessionManagerException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" /> 
         <entry key="net.meisen.dissertation.exceptions.PermissionException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.AuthManagementException" 

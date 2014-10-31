@@ -14,6 +14,12 @@ import org.junit.Test;
 
 import com.eclipsesource.json.JsonObject;
 
+/**
+ * Tests the implementation of the {@code AuthServlet}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TestAuthServlet extends BaseTestWithServerConnection {
 
 	@Override
@@ -82,7 +88,7 @@ public class TestAuthServlet extends BaseTestWithServerConnection {
 		assertEquals(
 				"Another user 'philipp' is currently connected, please perform a logout prior to relogin.",
 				value.get("message").asString());
-		
+
 		this.getResponse("/auth/logout", params);
 	}
 
@@ -114,8 +120,7 @@ public class TestAuthServlet extends BaseTestWithServerConnection {
 		assertNotNull(value);
 		assertNotNull(value.get("sessionId").asString());
 		assertEquals(value.get("username").asString(), "philipp");
-		assertEquals(6, value.get("permissions").asArray().values().size());
-		
+
 		this.getResponse("/auth/logout", params);
 	}
 }

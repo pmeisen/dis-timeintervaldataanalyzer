@@ -88,6 +88,13 @@ public class AuthServlet extends BaseServlet {
 				LOG.debug("Connected user '" + username + "'.");
 			}
 
+			final Set<DefinedPermission> permissions = authManager
+					.getUserPermissions(session.getUsername());
+			final JsonArray perms = new JsonArray();
+			for (final DefinedPermission permission : permissions) {
+				perms.add(permission.toString());
+			}
+
 			// send the sessionsId
 			return new JsonObject()
 					.add("sessionId", session.getId())
@@ -100,6 +107,7 @@ public class AuthServlet extends BaseServlet {
 							Dates.createStringFromDate(
 									session.getLastAccessTime(),
 									"dd.MM.yyyy HH:mm:ss"))
+					.add("permissions", perms)
 					.add("timeOutInMin", sessionManager.getTimeOutInMin());
 		} else if ("logout".equals(method)) {
 			final String sessionId = parameters.get("sessionId");
@@ -113,21 +121,14 @@ public class AuthServlet extends BaseServlet {
 			// check the session and the permission
 			final Session session = checkSession(sessionId);
 			checkHttpPermission();
-			
+
 			// refresh the session
 			session.markAsUsed();
-			
+
 			return new JsonObject().add("sessionId", (String) null);
 		} else if ("userinfo".equals(method)) {
 			final String sessionId = parameters.get("sessionId");
 			final Session session = checkSession(sessionId);
-
-			final Set<DefinedPermission> permissions = authManager
-					.getUserPermissions(session.getUsername());
-			final JsonArray perms = new JsonArray();
-			for (final DefinedPermission permission : permissions) {
-				perms.add(permission.toString());
-			}
 
 			final int timeoutInMin = sessionManager.getTimeOutInMin();
 			return new JsonObject()
@@ -137,7 +138,6 @@ public class AuthServlet extends BaseServlet {
 							Dates.createStringFromDate(
 									session.getCreationDate(),
 									"dd.MM.yyyy HH:mm:ss"))
-					.add("permissions", perms)
 					.add("leftTimeoutInMin",
 							session.getLeftTimeoutInMin(timeoutInMin))
 					.add("timeoutInMin", timeoutInMin);

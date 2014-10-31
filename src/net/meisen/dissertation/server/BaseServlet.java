@@ -82,6 +82,9 @@ public abstract class BaseServlet implements IServlet {
 		return true;
 	}
 
+	/**
+	 * Checks if the current user has the permission to connect via http.
+	 */
 	protected void checkHttpPermission() {
 
 		// check if the permission to use this kind of connection is available
@@ -91,6 +94,16 @@ public abstract class BaseServlet implements IServlet {
 		}
 	}
 
+	/**
+	 * Checks the session and binds it to the current thread. The method throws
+	 * an exception if the session is invalid.
+	 * 
+	 * @param sessionId
+	 *            the identifier of the session to be checked
+	 * 
+	 * @return the {@code Session} instance associated to the specified
+	 *         {@code sessionId}
+	 */
 	protected Session checkSession(final String sessionId) {
 		final Session session = sessionManager.getSession(sessionId, true);
 		authManager.bind(session);

@@ -10,14 +10,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import net.meisen.dissertation.exceptions.SessionManagerException;
+import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.sbconfigurator.api.IConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class SessionManager {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(SessionManager.class);
 	private final ScheduledExecutorService scheduler;
 	private int timeOutInMin;
+
+	@Autowired
+	@Qualifier(IConfiguration.coreExceptionRegistryId)
+	private IExceptionRegistry exceptionRegistry;
 
 	private Map<String, Session> sessions;
 
@@ -80,25 +90,31 @@ public class SessionManager {
 	}
 
 	public Session getSession(final String sessionId,
-			final boolean throwException) {
-		final Session session = sessions.get(sessionId);
+			final boolean throwException) throws SessionManagerException {
+		if (sessionId == null) {
+			if (throwException) {
+				exceptionRegistry.throwRuntimeException(
+						SessionManagerException.class, 1000);
+			}
+			return null;
+		}
 
+		// try to handle the session
+		final Session session = sessions.get(sessionId);
 		if (session == null) {
 			if (throwException) {
-				// TODO throw exception showing invalid sessionId
-				throw new IllegalStateException("Invalid session");
-			} else {
-				return null;
+				exceptionRegistry.throwRuntimeException(
+						SessionManagerException.class, 1001, sessionId);
 			}
+			return null;
 		} else if (session.isTimedOut(timeOutInMin)) {
 			sessions.remove(session);
 
 			if (throwException) {
-				// TODO throw exception showing time-out
-				throw new IllegalStateException("Session expired");
-			} else {
-				return null;
+				exceptionRegistry.throwRuntimeException(
+						SessionManagerException.class, 1002, sessionId);
 			}
+			return null;
 		} else {
 			return session;
 		}
@@ -107,7 +123,9 @@ public class SessionManager {
 	public void removeSession(final String sessionId) {
 		Session session;
 
-		if ((session = sessions.remove(sessionId)) != null) {
+		if (sessionId == null) {
+			// nothing to do
+		} else if ((session = sessions.remove(sessionId)) != null) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Removed session '" + sessionId + "' of user '"
 						+ session.getUsername() + "'.");

@@ -1,5 +1,6 @@
 package net.meisen.dissertation.server;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
 
@@ -10,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +38,8 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 
+import com.eclipsesource.json.JsonObject;
+
 /**
  * An implementation used for tests with a server connection.
  * 
@@ -43,7 +47,7 @@ import org.junit.Before;
  * 
  */
 public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
-	
+
 	/**
 	 * The connection to the server
 	 */
@@ -53,6 +57,12 @@ public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
 	 * The started server instance.
 	 */
 	protected TidaServer server;
+
+	/**
+	 * Is used by the implementation to keep the current sessionId. Use
+	 * {@link #signIn()} to sign-in and set the parameter.
+	 */
+	protected String sessionId = null;
 
 	/**
 	 * Start a test-server for testing purposes.
@@ -127,6 +137,9 @@ public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
 	 */
 	@After
 	public void shutdownServer() throws SQLException {
+
+		// sign-off
+		signOff();
 
 		if (this.conn != null) {
 			this.conn.close();
@@ -288,13 +301,25 @@ public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
 	 * 
 	 * @return the answer
 	 */
-	public byte[] getResponse(final String suffix, final String method,
-			final List<NameValuePair> params) {
+	public byte[] getResponse(final String suffix, String method,
+			List<NameValuePair> params) {
+
+		// check if we have a session
+		if (sessionId != null) {
+			if (params == null) {
+				params = new ArrayList<NameValuePair>();
+			}
+
+			params.add(new BasicNameValuePair("sessionId", sessionId));
+			method = "post";
+		}
+
 		final HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
 		final CloseableHttpClient httpClient = httpClientBuilder.build();
 		final String uri = "http://localhost:" + getHttpPort() + "/" + suffix;
 		final HttpRequestBase httpRequest = method.equalsIgnoreCase("post") ? new HttpPost(
 				uri) : new HttpGet(uri);
+
 		if (httpRequest instanceof HttpEntityEnclosingRequestBase) {
 			try {
 				((HttpEntityEnclosingRequestBase) httpRequest)
@@ -353,5 +378,47 @@ public abstract class BaseTestWithServerConnection extends ExceptionBasedTest {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Method to sign-in. The implementation keeps track and signs-off if
+	 * needed.
+	 * 
+	 * @return the sessionId of the session
+	 */
+	public String signIn() {
+		final Map<String, String> params = new HashMap<String, String>();
+		params.put("username", "admin");
+		params.put("password", "password");
+
+		// make sure we got a sessionId
+		JsonObject value;
+		try {
+			value = JsonObject.readFrom(new String(getResponse("/auth/login",
+					params), "UTF8"));
+		} catch (final UnsupportedEncodingException e) {
+			fail("Cannot happen '" + e.getMessage() + "'.");
+			value = null;
+		}
+		assertNotNull(value);
+
+		// let's try to login again, should lead to an exception
+		this.sessionId = value.get("sessionId").asString();
+		assertNotNull(this.sessionId);
+
+		return this.sessionId;
+	}
+
+	/**
+	 * Method to sign-off.
+	 */
+	public void signOff() {
+
+		if (sessionId != null) {
+
+			// make sure we got a sessionId
+			getResponse("/auth/logout");
+			sessionId = null;
+		}
 	}
 }
