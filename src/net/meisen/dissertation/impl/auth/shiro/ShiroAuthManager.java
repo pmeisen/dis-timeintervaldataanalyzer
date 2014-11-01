@@ -395,6 +395,11 @@ public class ShiroAuthManager implements IAuthManager {
 	}
 
 	@Override
+	public Set<String> getRoles() {
+		return getManageableRealm().getRoles();
+	}
+
+	@Override
 	public Set<String> getUserRoles(final String username) {
 		return getManageableRealm().getUserRoles(username);
 	}
@@ -403,6 +408,19 @@ public class ShiroAuthManager implements IAuthManager {
 	public Set<DefinedPermission> getUserPermissions(final String username) {
 		final Set<String> permissions = getManageableRealm()
 				.getUserPermissions(username, permissionSeparator);
+		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
+		for (final String permission : permissions) {
+			perms.add(DefinedPermission.fromString(permission,
+					permissionSeparator));
+		}
+
+		return perms;
+	}
+
+	@Override
+	public Set<DefinedPermission> getRolePermissions(final String role) {
+		final Set<String> permissions = getManageableRealm()
+				.getRolePermissions(role, permissionSeparator);
 		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
 		for (final String permission : permissions) {
 			perms.add(DefinedPermission.fromString(permission,

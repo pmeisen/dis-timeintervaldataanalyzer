@@ -1025,6 +1025,7 @@ public class QueryGrammarParser extends Parser {
 		public TerminalNode TYPE_VERSION() { return getToken(QueryGrammarParser.TYPE_VERSION, 0); }
 		public TerminalNode STMT_GET() { return getToken(QueryGrammarParser.STMT_GET, 0); }
 		public TerminalNode TYPE_PERMISSIONS() { return getToken(QueryGrammarParser.TYPE_PERMISSIONS, 0); }
+		public TerminalNode TYPE_ROLES() { return getToken(QueryGrammarParser.TYPE_ROLES, 0); }
 		public ExprGetContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1049,7 +1050,7 @@ public class QueryGrammarParser extends Parser {
 			setState(236); match(STMT_GET);
 			setState(237);
 			_la = _input.LA(1);
-			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TYPE_MODELS) | (1L << TYPE_VERSION) | (1L << TYPE_PERMISSIONS) | (1L << TYPE_USERS))) != 0)) ) {
+			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TYPE_MODELS) | (1L << TYPE_VERSION) | (1L << TYPE_PERMISSIONS) | (1L << TYPE_ROLES) | (1L << TYPE_USERS))) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			consume();
@@ -3941,9 +3942,9 @@ public class QueryGrammarParser extends Parser {
 		"\3\64\3\64\3\64\3\64\3\65\3\65\3\66\3\66\3\67\3\67\38\38\39\39\3:\3:\3"+
 		";\3;\3<\3<\3=\3=\5=\u022f\n=\3>\3>\3?\3?\3@\3@\3@\7@\u0238\n@\f@\16@\u023b"+
 		"\13@\3@\2A\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 \"$&(*,.\60\62\64\66"+
-		"8:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\2\24\3\2#$\4\2\35\37!!\3\2\r\16"+
-		"\4\2\60\60FF\3\2<=\4\2\3\3XY\4\2\5\5VV\4\2\5\5WW\4\2OOQQ\4\2PPRR\3\2\4"+
-		"\5\4\2FMXX\3\2BC\3\2DE\4\2\6\6\b\b\4\2\7\7\t\t\3\2@A\3\2\62;\u0238\2\u008d"+
+		"8:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\2\24\3\2#$\3\2\35!\3\2\r\16\4\2"+
+		"\60\60FF\3\2<=\4\2\3\3XY\4\2\5\5VV\4\2\5\5WW\4\2OOQQ\4\2PPRR\3\2\4\5\4"+
+		"\2FMXX\3\2BC\3\2DE\4\2\6\6\b\b\4\2\7\7\t\t\3\2@A\3\2\62;\u0238\2\u008d"+
 		"\3\2\2\2\4\u0091\3\2\2\2\6\u00a8\3\2\2\2\b\u00ac\3\2\2\2\n\u00b0\3\2\2"+
 		"\2\f\u00b4\3\2\2\2\16\u00b8\3\2\2\2\20\u00bd\3\2\2\2\22\u00c2\3\2\2\2"+
 		"\24\u00c9\3\2\2\2\26\u00d0\3\2\2\2\30\u00d9\3\2\2\2\32\u00dc\3\2\2\2\34"+

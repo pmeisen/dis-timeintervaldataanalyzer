@@ -882,6 +882,18 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	}
 
 	/**
+	 * Get all the roles known by the realm.
+	 * 
+	 * @return all the roles known by the realm
+	 */
+	public Set<String> getRoles() {
+		final Set<String> roles = new LinkedHashSet<String>();
+		roles.addAll(this.roles.keySet());
+
+		return roles;
+	}
+
+	/**
 	 * Gets the roles assigned to the specified {@code username}.
 	 * 
 	 * @param username
@@ -945,6 +957,29 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 					}
 				}
 			}
+		}
+
+		return permissions;
+	}
+
+	/**
+	 * Get the permissions associated to the specified role.
+	 * 
+	 * @param role
+	 *            the name of the role
+	 * @param separator
+	 *            the separator to be used to separate the different permissions
+	 * 
+	 * @return the set of permissions
+	 */
+	public Set<String> getRolePermissions(final String role,
+			final String separator) {
+		final Collection<Permission> perms = getRolePermissionResolver()
+				.resolvePermissionsInRole(role);
+
+		final Set<String> permissions = new LinkedHashSet<String>();
+		for (final Permission perm : perms) {
+			permissions.addAll(resolvePermission(perm, separator));
 		}
 
 		return permissions;

@@ -19,6 +19,7 @@ import net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
 import net.meisen.dissertation.impl.parser.query.get.GetResultModels;
 import net.meisen.dissertation.impl.parser.query.get.GetResultPermissions;
+import net.meisen.dissertation.impl.parser.query.get.GetResultRoles;
 import net.meisen.dissertation.impl.parser.query.get.GetResultType;
 import net.meisen.dissertation.impl.parser.query.get.GetResultUsers;
 import net.meisen.dissertation.impl.parser.query.get.GetResultVersion;
@@ -135,6 +136,11 @@ public class TestGetQueries extends LoaderBasedTest {
 		assertEquals(QueryType.QUERY, q.getQueryType());
 		assertEquals(GetResultType.USERS, q.getResultType());
 		assertNull(q.getModelId());
+
+		q = q("GET ROLES");
+		assertEquals(QueryType.QUERY, q.getQueryType());
+		assertEquals(GetResultType.ROLES, q.getResultType());
+		assertNull(q.getModelId());
 	}
 
 	/**
@@ -201,6 +207,39 @@ public class TestGetQueries extends LoaderBasedTest {
 		} else {
 			assertFalse(it.hasNext());
 		}
+	}
+
+	@Test
+	public void testQueryRolesRetrieval() {
+		Object[] row;
+		Iterator<Object[]> it;
+		GetResultRoles res;
+
+		// test the "empty" result
+		res = factory.evaluateQuery(q("GET ROLES"), null);
+		it = res.iterator();
+		assertFalse(it.hasNext());
+
+		// add a role
+		factory.evaluateQuery(
+				q("ADD ROLE 'role' WITH PERMISSIONS 'GLOBAL.get','MODEL.anotherModel.query'"),
+				null);
+
+		res = factory.evaluateQuery(q("GET ROLES"), null);
+		it = res.iterator();
+		assertTrue(it.hasNext());
+		row = it.next();
+		assertEquals("role", row[0]);
+		assertEquals("GLOBAL.get,MODEL.anotherModel.query", row[1]);
+		assertFalse(it.hasNext());
+
+		// remove the roles
+		factory.evaluateQuery(q("DROP ROLE 'role'"), null);
+
+		// check
+		res = factory.evaluateQuery(q("GET ROLES"), null);
+		it = res.iterator();
+		assertFalse(it.hasNext());
 	}
 
 	/**

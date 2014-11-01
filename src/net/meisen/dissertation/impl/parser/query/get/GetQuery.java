@@ -51,7 +51,9 @@ public class GetQuery implements IQuery {
 			return new GetResultUsers(authManager);
 		} else if (getResultType().equals(GetResultType.PERMISSIONS)) {
 			return new GetResultPermissions(authManager, handler.getTidaModels());
-		} else {
+		} else if (getResultType().equals(GetResultType.ROLES)) {
+			return new GetResultRoles(authManager);
+		}else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1018, getResultType());
 		}

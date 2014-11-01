@@ -73,7 +73,7 @@ exprRemoveMultipleRoles   : TYPE_ROLES selectorValueList;
 /*
  * Define the different expressions/parts of the get statement
  */
-exprGet       : STMT_GET (TYPE_MODELS | TYPE_VERSION | TYPE_USERS | TYPE_PERMISSIONS);
+exprGet       : STMT_GET (TYPE_MODELS | TYPE_VERSION | TYPE_USERS | TYPE_ROLES | TYPE_PERMISSIONS);
 
 /*
  * Define the different expressions/parts of the alive statement

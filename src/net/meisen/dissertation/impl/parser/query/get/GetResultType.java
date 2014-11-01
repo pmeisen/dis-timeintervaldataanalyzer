@@ -23,5 +23,9 @@ public enum GetResultType {
 	/**
 	 * The available permissions for each user and model.
 	 */
-	PERMISSIONS;
+	PERMISSIONS,
+	/**
+	 * The roles available with their permissions.
+	 */
+	ROLES;
 }

@@ -295,6 +295,13 @@ public interface IAuthManager {
 	public Set<String> getUsers();
 
 	/**
+	 * Gets all the roles known to the manager.
+	 * 
+	 * @return all the roles known to the manager
+	 */
+	public Set<String> getRoles();
+
+	/**
 	 * Get all the roles of the user.
 	 * 
 	 * @param username
@@ -305,7 +312,7 @@ public interface IAuthManager {
 	public Set<String> getUserRoles(final String username);
 
 	/**
-	 * Get all the permissions of the user. If the user has the permission to
+	 * Gets all the permissions of the user. If the user has the permission to
 	 * use a model specific permission for all models (i.e. because the user is
 	 * an administrator), the {@code *} should be used as model identifier, to
 	 * mark the permission to be available for all models.
@@ -316,6 +323,19 @@ public interface IAuthManager {
 	 * @return the permissions of the user
 	 */
 	public Set<DefinedPermission> getUserPermissions(final String username);
+
+	/**
+	 * Gets all the permissions of the role. If the role has the permission to
+	 * use a model specific permission for all models (i.e. because the user is
+	 * an administrator), the {@code *} should be used as model identifier, to
+	 * mark the permission to be available for all models.
+	 * 
+	 * @param role
+	 *            the role
+	 * 
+	 * @return the permissions of the role
+	 */
+	public Set<DefinedPermission> getRolePermissions(final String role);
 
 	/**
 	 * Gets the name of the current user.

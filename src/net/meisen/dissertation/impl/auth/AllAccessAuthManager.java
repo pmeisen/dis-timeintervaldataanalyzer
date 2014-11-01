@@ -142,6 +142,11 @@ public class AllAccessAuthManager implements IAuthManager {
 	public Set<String> getUsers() {
 		return Collections.<String> emptySet();
 	}
+	
+	@Override
+	public Set<String> getRoles() {
+		return Collections.<String> emptySet();
+	}
 
 	@Override
 	public Set<String> getUserRoles(final String username) {
@@ -150,6 +155,22 @@ public class AllAccessAuthManager implements IAuthManager {
 
 	@Override
 	public Set<DefinedPermission> getUserPermissions(final String username) {
+		final Set<DefinedPermission> perms = new HashSet<DefinedPermission>();
+
+		// add all available permission, use a wild-char for the models
+		for (final Permission perm : Permission.values()) {
+			if (perm.isGlobal()) {
+				perms.add(perm.create());
+			} else {
+				perms.add(perm.create("*"));
+			}
+		}
+
+		return perms;
+	}
+	
+	@Override
+	public Set<DefinedPermission> getRolePermissions(final String role) {
 		final Set<DefinedPermission> perms = new HashSet<DefinedPermission>();
 
 		// add all available permission, use a wild-char for the models

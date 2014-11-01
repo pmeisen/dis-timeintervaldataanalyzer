@@ -1297,6 +1297,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			return GetResultType.USERS;
 		} else if (ctx.getToken(QueryGrammarParser.TYPE_PERMISSIONS, 0) != null) {
 			return GetResultType.PERMISSIONS;
+		} else if (ctx.getToken(QueryGrammarParser.TYPE_ROLES, 0) != null) {
+			return GetResultType.ROLES;
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1005, ctx.getText());
