@@ -51,7 +51,6 @@ public class TestQueryServlet extends BaseTestWithServerConnection {
 		final JsonValue result = JsonValue
 				.readFrom(new String(response, "UTF8"));
 		assertTrue(result.isObject());
-		System.out.println(result);
 		assertEquals("set", ((JsonObject) result).get("type").asString());
 	}
 

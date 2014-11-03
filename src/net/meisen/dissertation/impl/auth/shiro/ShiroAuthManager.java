@@ -421,7 +421,7 @@ public class ShiroAuthManager implements IAuthManager {
 	public Set<DefinedPermission> getAssignedUserPermissions(
 			final String username) {
 		final Set<String> permissions = getManageableRealm()
-				.getUserPermissions(username, permissionSeparator);
+				.getUserPermissions(username, permissionSeparator, true, false);
 		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
 		for (final String permission : permissions) {
 			perms.add(DefinedPermission.fromString(permission,
