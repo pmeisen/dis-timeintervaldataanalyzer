@@ -92,10 +92,14 @@ public class QueryServlet extends BaseServlet {
 				}
 
 				final String username = parameters.get("username");
+				final String includeRoleString = parameters.get("includeRole");
+				final boolean includeRole = includeRoleString != null
+						&& includeRoleString.equals("true");
 
 				// get the permissions
-				final Set<DefinedPermission> perms = authManager
-						.getUserPermissions(username);
+				final Set<DefinedPermission> perms = includeRole ? authManager
+						.getUserPermissions(username) : authManager
+						.getAssignedUserPermissions(username);
 				final JsonArray permArray = new JsonArray();
 				for (final DefinedPermission p : perms) {
 					permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));

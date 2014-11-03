@@ -921,38 +921,70 @@ public class MapDbAuthorizingRealm extends AuthorizingRealm implements
 	 * @param username
 	 *            the name of the user to retrieve the permissions for
 	 * @param separator
+	 *            the separator used to separate the different parts of the
+	 *            permission
 	 * 
 	 * @return the permissions of the user
 	 */
 	public Set<String> getUserPermissions(final String username,
 			final String separator) {
+		return getUserPermissions(username, separator, true, true);
+	}
+
+	/**
+	 * Gets the permissions assigned to the specified {@code username}.
+	 * 
+	 * @param username
+	 *            the name of the user to retrieve the permissions for
+	 * @param separator
+	 *            the separator used to separate the different parts of the
+	 *            permission
+	 * @param directlyAssignedPermissions
+	 *            {@code true} if the directly assigned permissions should be
+	 *            included, otherwise {@code false}
+	 * @param rolePermissions
+	 *            {@code true} if the role permissions should be included,
+	 *            otherwise {@code false}
+	 * 
+	 * @return the permissions of the user
+	 */
+	public Set<String> getUserPermissions(final String username,
+			final String separator, final boolean directlyAssignedPermissions,
+			final boolean rolePermissions) {
 		final SimpleAccount account = this.users.get(username);
 		final Set<String> permissions = new LinkedHashSet<String>();
 
 		if (account != null) {
-			Collection<Permission> collPerm = account.getObjectPermissions();
-			if (collPerm != null) {
-				for (final Permission perm : collPerm) {
-					permissions.addAll(resolvePermission(perm, separator));
+			if (directlyAssignedPermissions) {
+				final Collection<Permission> collPerm = account
+						.getObjectPermissions();
+				if (collPerm != null) {
+					for (final Permission perm : collPerm) {
+						permissions.addAll(resolvePermission(perm, separator));
+					}
+				}
+
+				final Collection<String> collStr = account
+						.getStringPermissions();
+				if (collStr != null) {
+					for (final String perm : collStr) {
+						permissions.add(perm.toString());
+					}
 				}
 			}
 
-			Collection<String> collStr = account.getStringPermissions();
-			if (collStr != null) {
-				for (final String perm : collStr) {
-					permissions.add(perm.toString());
-				}
-			}
-
-			collStr = account.getRoles();
-			if (collStr != null) {
-				for (final Object role : collStr) {
-					final SimpleRole r = this.roles.get(role);
-					collPerm = r == null ? null : r.getPermissions();
-					if (collPerm != null) {
-						for (final Permission perm : collPerm) {
-							permissions.addAll(resolvePermission(perm,
-									separator));
+			if (rolePermissions) {
+				final Collection<String> collStr = account.getRoles();
+				if (collStr != null) {
+					for (final Object role : collStr) {
+						final SimpleRole r = this.roles.get(role);
+						final Collection<Permission> collPerm = r == null ? null
+								: r.getPermissions();
+						if (collPerm != null) {
+							for (final Permission perm : collPerm) {
+								permissions.addAll(resolvePermission(perm,
+										separator));
+							}
 						}
 					}
 				}

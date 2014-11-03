@@ -325,6 +325,19 @@ public interface IAuthManager {
 	public Set<DefinedPermission> getUserPermissions(final String username);
 
 	/**
+	 * Gets the directly assigned user permission available to the specified
+	 * user.
+	 * 
+	 * @param username
+	 *            the name of the user
+	 *            
+	 * @return the permissions assigned to the user directly (i.e.
+	 *         role-permissions are excluded)
+	 */
+	public Set<DefinedPermission> getAssignedUserPermissions(
+			final String username);
+
+	/**
 	 * Gets all the permissions of the role. If the role has the permission to
 	 * use a model specific permission for all models (i.e. because the user is
 	 * an administrator), the {@code *} should be used as model identifier, to

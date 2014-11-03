@@ -418,6 +418,20 @@ public class ShiroAuthManager implements IAuthManager {
 	}
 
 	@Override
+	public Set<DefinedPermission> getAssignedUserPermissions(
+			final String username) {
+		final Set<String> permissions = getManageableRealm()
+				.getUserPermissions(username, permissionSeparator);
+		final Set<DefinedPermission> perms = new LinkedHashSet<DefinedPermission>();
+		for (final String permission : permissions) {
+			perms.add(DefinedPermission.fromString(permission,
+					permissionSeparator));
+		}
+
+		return perms;
+	}
+
+	@Override
 	public Set<DefinedPermission> getRolePermissions(final String role) {
 		final Set<String> permissions = getManageableRealm()
 				.getRolePermissions(role, permissionSeparator);
