@@ -5,8 +5,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.PermissionException;
+import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
+import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
@@ -44,12 +48,105 @@ public class QueryServlet extends BaseServlet {
 		final String method = pos == -1 ? "" : path.substring(pos + 1);
 
 		// check the failure handling
-		if ("run".equals(method)) {
+		if ("tsql".equals(method)) {
 			return execQuery(parameters);
+		} else if ("system".equals(method)) {
+			return execSystemQuery(parameters);
 		} else {
 			// TODO throw exception
 			throw new IllegalStateException("Unsupported method '" + method
 					+ "' called.");
+		}
+	}
+
+	protected Object execSystemQuery(final Map<String, String> parameters)
+			throws Exception {
+
+		String o;
+		if ((o = parameters.get("object")) != null) {
+			if ("permissions".equals(o)) {
+
+				// check the permission to use this system retrieval
+				if (!authManager.hasPermission(Permission.manageUsers.create())) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000,
+							Permission.manageUsers);
+				}
+
+				// get the permissions
+				final JsonArray array = new JsonArray();
+				for (final String p : Permission.transform(Permission.values(),
+						"*", DefinedPermission.DEF_SEPARATOR)) {
+					array.add(p);
+				}
+
+				// return the permissions
+				return array.toString();
+			} else if ("user".equals(o)) {
+
+				// check the permission to use this system retrieval
+				if (!authManager.hasPermission(Permission.manageUsers.create())) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000,
+							Permission.manageUsers);
+				}
+
+				final String username = parameters.get("username");
+
+				// get the permissions
+				final Set<DefinedPermission> perms = authManager
+						.getUserPermissions(username);
+				final JsonArray permArray = new JsonArray();
+				for (final DefinedPermission p : perms) {
+					permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
+				}
+
+				// get the roles
+				final Set<String> roles = authManager.getUserRoles(username);
+				final JsonArray rolesArray = new JsonArray();
+				for (final String r : roles) {
+					rolesArray.add(r);
+				}
+
+				// create the response
+				final JsonObject object = new JsonObject();
+				object.add("permissions", permArray);
+				object.add("roles", rolesArray);
+				object.add("username", JsonValue.valueOf(username));
+
+				return object.toString();
+			} else if ("role".equals(o)) {
+
+				// check the permission to use this system retrieval
+				if (!authManager.hasPermission(Permission.manageUsers.create())) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000,
+							Permission.manageUsers);
+				}
+
+				final String rolename = parameters.get("rolename");
+
+				// get the permissions
+				final Set<DefinedPermission> perms = authManager
+						.getRolePermissions(rolename);
+				final JsonArray permArray = new JsonArray();
+				for (final DefinedPermission p : perms) {
+					permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
+				}
+
+				// create the response
+				final JsonObject object = new JsonObject();
+				object.add("permissions", permArray);
+				object.add("rolename", JsonValue.valueOf(rolename));
+
+				return object.toString();
+			} else {
+				throw new IllegalStateException("Unsupported object '" + o
+						+ "' defined.");
+			}
+		} else {
+			// TODO throw exception
+			throw new IllegalStateException("Object is not defined.");
 		}
 	}
 

@@ -121,16 +121,14 @@ public class QueryFactory implements IQueryFactory {
 			// return the created query
 			return generator.getQuery();
 
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+			return null;
+		} catch (final RuntimeException e) {
+			throw e;
 		} catch (final Exception e) {
-			if (e instanceof ForwardedRuntimeException) {
-				exceptionRegistry
-						.throwRuntimeException((ForwardedRuntimeException) e);
-			} else {
-				exceptionRegistry.throwRuntimeException(
-						QueryParsingException.class, 1000, e, queryString);
-			}
-
-			// unreachable code
+			exceptionRegistry.throwRuntimeException(
+					QueryParsingException.class, 1000, e, queryString);
 			return null;
 		}
 	}
@@ -183,6 +181,12 @@ public class QueryFactory implements IQueryFactory {
 			exceptionRegistry
 					.throwRuntimeException((ForwardedRuntimeException) e);
 		} catch (final CancellationException e) {
+			throw e;
+		} catch (final RuntimeException e) {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Error occurred during evaluation.", e);
+			}
+
 			throw e;
 		} catch (final Exception e) {
 			if (LOG.isErrorEnabled()) {

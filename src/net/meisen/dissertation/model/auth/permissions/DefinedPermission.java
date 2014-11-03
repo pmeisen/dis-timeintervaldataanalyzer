@@ -161,8 +161,12 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 	 *            the string representation of the {@code DefinedPermission}
 	 * 
 	 * @return the presented {@code DefinitionPermission}
+	 * 
+	 * @throws IllegalArgumentException
+	 *             exception thrown if the permission cannot be resolved
 	 */
-	public static DefinedPermission fromString(final String permission) {
+	public static DefinedPermission fromString(final String permission)
+			throws IllegalArgumentException {
 		return fromString(permission, null);
 	}
 
@@ -176,9 +180,12 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 	 *            the separator used by the representation
 	 * 
 	 * @return the presented {@code DefinitionPermission}
+	 * 
+	 * @throws IllegalArgumentException
+	 *             exception thrown if the permission cannot be resolved
 	 */
 	public static DefinedPermission fromString(final String permission,
-			final String separator) {
+			final String separator) throws IllegalArgumentException {
 		final String sep;
 		if (separator == null) {
 			sep = DEF_SEPARATOR;

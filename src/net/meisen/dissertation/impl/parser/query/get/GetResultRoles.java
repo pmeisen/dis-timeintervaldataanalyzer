@@ -12,7 +12,7 @@ import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
- * Gets a query asking for a {@link GetResultType#USERS}.
+ * Gets a query asking for a {@link GetResultType#ROLES}.
  * 
  * @author pmeisen
  * 

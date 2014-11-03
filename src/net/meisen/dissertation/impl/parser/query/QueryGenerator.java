@@ -970,9 +970,14 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		final List<String> permissions = getValues(selectorValueList);
 		final List<DefinedPermission> perms = new ArrayList<DefinedPermission>();
 		for (final String permission : permissions) {
-			final DefinedPermission perm = DefinedPermission
-					.fromString(permission);
-			perms.add(perm);
+			try {
+				final DefinedPermission perm = DefinedPermission
+						.fromString(permission);
+				perms.add(perm);
+			} catch (final IllegalArgumentException e) {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1021, permission);
+			}
 		}
 
 		return perms;

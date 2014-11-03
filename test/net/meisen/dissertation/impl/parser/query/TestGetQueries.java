@@ -209,6 +209,9 @@ public class TestGetQueries extends LoaderBasedTest {
 		}
 	}
 
+	/**
+	 * Tests the implementation of the {@code GET ROLES} query.
+	 */
 	@Test
 	public void testQueryRolesRetrieval() {
 		Object[] row;
