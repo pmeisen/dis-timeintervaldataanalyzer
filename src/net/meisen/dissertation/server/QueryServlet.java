@@ -29,6 +29,12 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.ParseException;
 
+/**
+ * Servlet used to fire TSQL queries via the HTTP connection.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class QueryServlet extends BaseServlet {
 
 	@Autowired
@@ -59,6 +65,18 @@ public class QueryServlet extends BaseServlet {
 		}
 	}
 
+	/**
+	 * Executes a so called system-query, to retrieve system specific
+	 * information not available via TSQL.
+	 * 
+	 * @param parameters
+	 *            the parameters passed with the request
+	 * 
+	 * @return the result
+	 * 
+	 * @throws Exception
+	 *             if an exception occurs
+	 */
 	protected Object execSystemQuery(final Map<String, String> parameters)
 			throws Exception {
 
@@ -154,6 +172,17 @@ public class QueryServlet extends BaseServlet {
 		}
 	}
 
+	/**
+	 * Fires a TSQL-query.
+	 * 
+	 * @param parameters
+	 *            the parameters passed with the request
+	 * 
+	 * @return the result
+	 * 
+	 * @throws Exception
+	 *             if an exception occurs
+	 */
 	protected Object execQuery(final Map<String, String> parameters)
 			throws Exception {
 		final String failure = parameters.get("failOnFailure");
