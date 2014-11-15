@@ -31,7 +31,7 @@ public class DbBasedTest extends ExceptionBasedTest {
 
 	/**
 	 * Helper method to load the specified database. The database is returned
-	 * but {@link Db#setUpDb()} is already called.
+	 * and {@link Db#setUpDb()} is already called.
 	 * 
 	 * @param name
 	 *            the name of the db, by default, i.e. {@code null} is passed,

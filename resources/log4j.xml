@@ -32,13 +32,17 @@
   <!-- ================ -->
   <!-- Limit loggers    -->
   <!-- ================ -->
+  <!--
   <logger name="org.springframework">
     <level value="WARN"/>
   </logger>
   <logger name="net.meisen.dissertation">
     <level value="TRACE"/>
   </logger>
-  <!--
+  <logger name="net.meisen.dissertation.model.indexes.datarecord">
+    <level value="DEBUG"/>
+  </logger>
+
   <logger name="net.meisen.general.sbconfigurator.config.DefaultConfiguration">
     <level value="TRACE"/>
   </logger>

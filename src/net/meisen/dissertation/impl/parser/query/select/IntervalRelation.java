@@ -646,7 +646,8 @@ public enum IntervalRelation {
 
 		if (slices != null && slices.length >= 0) {
 			for (final SliceWithDescriptors<?> timeSlice : slices) {
-				final Bitmap timeSliceBitmap = timeSlice.getBitmap();
+				final Bitmap timeSliceBitmap = timeSlice == null ? null
+						: timeSlice.getBitmap();
 
 				// check if there is a bitmap defined
 				if (timeSliceBitmap != null) {

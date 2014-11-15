@@ -3,6 +3,8 @@ package net.meisen.dissertation.impl.datasets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -41,6 +43,31 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 				if (object != null) {
 					this.entries[i] = new SingleStaticDataSetEntry(i, object);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Constructor to create a {@code SingleStaticDataSet} for the specified
+	 * {@code map}.
+	 * 
+	 * @param map
+	 *            the map with the data of the dataset.
+	 */
+	public SingleStaticDataSet(final Map<String, Object> map) {
+
+		if (map == null) {
+			this.entries = new SingleStaticDataSetEntry[0];
+		} else {
+			this.entries = new SingleStaticDataSetEntry[map.size()];
+
+			int i = 0;
+			for (final Entry<String, Object> entry : map.entrySet()) {
+				if (entry != null) {
+					this.entries[i] = new SingleStaticDataSetEntry(i,
+							entry.getKey(), entry.getValue());
+				}
+				i++;
 			}
 		}
 	}

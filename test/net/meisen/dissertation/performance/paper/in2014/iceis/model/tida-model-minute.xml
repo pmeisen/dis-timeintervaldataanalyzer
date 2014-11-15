@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- OfflineMode (i.e. what should happen if a dataretriever is not available)
+     is optional and can be one of the following values (case-insensitive):
+      + true, y, yes
+      + false, n, no
+      + auto
+  -->
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     	http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+       					   http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd"
+
+       offlinemode="false"
+       
+       id="tidaModel" name="Model used for performance test ICEIS 2015">
+ 
+  <config>
+
+    <factories>
+      <!-- Define the factory to be used to determine which IndexFactory
+           to be used.
+           
+           The following factories are available by default:
+            + net.meisen.dissertation.impl.indexes.IndexFactory
+        -->
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
+        <!-- Define the different indexes to be used.
+      
+             The following bitmap-indexes are available by default:
+              + net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap
+              + net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap
+          -->
+        <idx:config bitmap="net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap" />
+      </indexes>
+    </factories>
+  </config>
+ 
+  <time>
+    <timeline start="01.01.2008 00:00:00" end="30.12.2008 23:59:00" granularity="MINUTE" />
+  </time>
+
+  <meta>
+    <!-- As identifier-factory the following implementations are available:
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
+          
+         The null-attribute (true or false) defines if null values are allowed within 
+         the model.
+         The failonduplicates-attributes (true or false) specifies if duplicates are 
+         just ignored or if an exception is thrown.
+      -->
+    <descriptors>
+      <resource id="PERSON" failonduplicates="false" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="TASKTYPE" failonduplicates="false" null="false" name="tasktype" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="WORKAREA" failonduplicates="false" null="false" name="workarea" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+    
+  <structure>
+    <meta name="PERSON" descriptor="PERSON" />
+    <meta name="TASKTYPE" descriptor="TASKTYPE" />
+    <meta name="WORKAREA" descriptor="WORKAREA" />
+    
+    <interval name="INTERVAL_START" type="start" />
+    <interval name="INTERVAL_END" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="failOnNull" /> 
+</model>

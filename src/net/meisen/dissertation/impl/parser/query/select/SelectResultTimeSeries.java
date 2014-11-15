@@ -203,4 +203,9 @@ public class SelectResultTimeSeries extends SelectResult {
 		this.timeSeriesCollection = timeSeriesEvaluator.evaluateInterval(
 				getQuery().getInterval(), getQuery().getMeasures(), this);
 	}
+	
+	@Override
+	public String toString() {
+		return timeSeriesCollection.toString();
+	}
 }

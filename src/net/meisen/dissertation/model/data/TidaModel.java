@@ -434,6 +434,32 @@ public class TidaModel implements IPersistable {
 	}
 
 	/**
+	 * Enables the bulk loading.
+	 */
+	public void enableBulkLoad() {
+		loadLock.writeLock().lock();
+
+		getBitmapCache().setPersistency(false);
+		getFactsCache().setPersistency(false);
+		getIdentifierCache().setPersistency(false);
+		getDataRecordCache().setPersistency(false);
+	}
+
+	/**
+	 * Disables the bulk loading.
+	 */
+	public void disableBulkLoad() {
+
+		// enable the persistence again, everything is loaded
+		getBitmapCache().setPersistency(false);
+		getFactsCache().setPersistency(false);
+		getIdentifierCache().setPersistency(false);
+		getDataRecordCache().setPersistency(false);
+
+		loadLock.writeLock().unlock();
+	}
+
+	/**
 	 * Loads the specified data in a bulk-load, i.e. the data is not persisted
 	 * until all data is read.
 	 * 
@@ -501,7 +527,7 @@ public class TidaModel implements IPersistable {
 			}
 		} finally {
 
-			// enable the persistency again, everything is loaded
+			// enable the persistence again, everything is loaded
 			getBitmapCache().setPersistency(oldPersistencyBitmap);
 			getFactsCache().setPersistency(oldPersistencyFacts);
 			getIdentifierCache().setPersistency(oldPersistencyId);
