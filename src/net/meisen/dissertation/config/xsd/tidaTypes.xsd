@@ -8,19 +8,26 @@
       <xs:pattern value="[A-Za-z][A-Za-z0-9_\-]*" />
     </xs:restriction>
   </xs:simpleType>
-
+  
   <xs:simpleType name="javaClass">
     <xs:restriction base="xs:string">
       <xs:pattern value="[a-zA-Z_]{1}[a-zA-Z0-9_]*(\.[a-zA-Z_]{1}[a-zA-Z0-9_]*)*" />
     </xs:restriction>
   </xs:simpleType>
   
-  <xs:simpleType name="nonEmptyString">
+  <xs:simpleType name="nonEmptyStringWithoutWhitespaces">
     <xs:restriction base="xs:string">
       <xs:minLength value="1" />
       <xs:pattern value="[^\s]+" />
     </xs:restriction>
   </xs:simpleType>
+  
+  <xs:simpleType name="nonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+      <xs:whiteSpace value="collapse"/>
+    </xs:restriction>
+  </xs:simpleType>  
   
   <xs:simpleType name="date">
     <xs:restriction base="xs:string">

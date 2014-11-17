@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/dimension" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
+           targetNamespace="http://dev.meisen.net/xsd/dissertation/dimension" attributeFormDefault="unqualified" elementFormDefault="qualified">
+
+  <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
+
+  <xs:simpleType name="rollUpList">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\s*(\*|[A-Za-z][A-Za-z0-9_\-]*)\s*(,\s*(\*|[A-Za-z][A-Za-z0-9_\-]*)\s*)?" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="dimensions">
+    <xs:complexType>
+      <xs:sequence>
+
+        <xs:element name="dimension" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+            
+              <xs:element name="hierarchy" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                
+                  <xs:sequence>
+                    <xs:element name="level" minOccurs="1" maxOccurs="unbounded">
+                      <xs:complexType>
+                      
+                        <xs:sequence>
+                          <xs:element name="member" minOccurs="1" maxOccurs="unbounded">
+                            <xs:complexType>
+                              <xs:attribute name="id" type="types:identifier" use="required" />
+                              <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+                              <xs:attribute name="rollUpTo" type="rollUpList" use="required" />
+                              <xs:attribute name="reg" type="xs:string" use="optional" />
+                              <xs:attribute name="value" type="xs:string" use="optional" />
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      
+                        <xs:attribute name="id" type="types:identifier" use="required" />
+                        <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  
+                  <xs:attribute name="id" type="types:identifier" use="required" />
+                  <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+                  <xs:attribute name="all" type="types:nonEmptyString" use="optional" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            
+            <xs:attribute name="id" type="types:identifier" use="required" />
+            <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+            <xs:attribute name="descriptor" type="types:identifier" use="required" />
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

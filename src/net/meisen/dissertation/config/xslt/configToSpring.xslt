@@ -16,7 +16,8 @@
   <xsl:output method="xml" indent="yes" />
   
   <xsl:variable name="queryFactoryId" select="cdef:getId('QUERYFACTORY_ID')" />
-  <xsl:variable name="handlerId" select="cdef:getId('HANDLER_ID')" />
+  <xsl:variable name="modelHandlerId" select="cdef:getId('MODELHANDLER_ID')" />
+  <xsl:variable name="dimensionHandlerId" select="cdef:getId('DIMENSIONHANDLER_ID')" />
   <xsl:variable name="aggFuncId" select="cdef:getId('AGGREGATIONFUNCTIONHANDLER_ID')" />
   <xsl:variable name="authManagerId" select="cdef:getId('AUTHMANAGER_ID')" />
   <xsl:variable name="sessionManagerId" select="cdef:getId('SESSIONMANAGER_ID')" />
@@ -268,10 +269,13 @@
       <bean id="{$queryFactoryId}" class="{$queryFactory}" />
     
       <!-- define loaders used to load tidaModels -->
-      <bean id="{$handlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler">
+      <bean id="{$modelHandlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler">
         <property name="defaultLocation" ref="defaultLocation" /> 
       </bean>
-        
+      
+      <!-- define loaders used to load tidaDimensions -->
+      <bean id="{$dimensionHandlerId}" class="net.meisen.dissertation.model.handler.TidaDimensionHandler" />
+
       <!-- set the server properties, those are set prior to any further loading -->
       <xsl:if test="//cns:config/cns:server/node()">
         <bean class="net.meisen.general.sbconfigurator.config.PropertyInjectorBean">

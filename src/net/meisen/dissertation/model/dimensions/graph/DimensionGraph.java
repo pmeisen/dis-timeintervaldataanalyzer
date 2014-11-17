@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions.graph;
+package net.meisen.dissertation.model.dimensions.graph;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,10 +11,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.impl.dimensions.DescriptorDimension;
-import net.meisen.dissertation.impl.dimensions.DescriptorHierarchy;
-import net.meisen.dissertation.impl.dimensions.DescriptorLevel;
-import net.meisen.dissertation.impl.dimensions.DescriptorMember;
+import net.meisen.dissertation.model.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
+import net.meisen.dissertation.model.dimensions.DescriptorLevel;
+import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**

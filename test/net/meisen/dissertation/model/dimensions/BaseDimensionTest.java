@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -7,6 +7,8 @@ import java.util.Arrays;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
 
 import org.junit.Before;
 
@@ -28,7 +30,7 @@ public class BaseDimensionTest extends LoaderBasedTest {
 	 */
 	@Before
 	public void getDescriptors() {
-		final TidaModel model = m("/net/meisen/dissertation/impl/dimensions/testDescriptorModel.xml");
+		final TidaModel model = m("/net/meisen/dissertation/model/dimensions/testDescriptorModel.xml");
 		metaModel = model.getMetaDataModel();
 
 		assertNotNull(metaModel);

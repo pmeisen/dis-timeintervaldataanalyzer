@@ -14,6 +14,10 @@
   <sbc:loader id="tidaXsltModelLoader" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="false" loadFromWorkingDir="false"
               selector="?" xslt="net/meisen/dissertation/config/xslt/modelToSpring.xslt" />
               
+  <!-- Loader to load a dimension, by default nothing is loaded. -->
+  <sbc:loader id="tidaXsltDimensionLoader" validationEnabled="true" beanOverridingAllowed="false" loadFromClassPath="false" loadFromWorkingDir="false"
+              selector="?" xslt="net/meisen/dissertation/config/xslt/dimensionToSpring.xslt" />
+              
   <!-- add the loader of the server, after the loader of the configuration -->
   <import resource="classpath:/net/meisen/general/server/sbconfigurator-server-loader.xml" />
 </beans>

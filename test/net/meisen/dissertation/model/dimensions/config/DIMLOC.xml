@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<dimensions xmlns="http://dev.meisen.net/xsd/dissertation/dimension"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            
+            xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd">
+
+  <dimension id="DIMLOC" descriptor="LOC">
+    <hierarchy id="LOC" all="All Locations">
+      <level id="HOTEL">
+        <member id="DREAM" name="Traum" rollUpTo="*" />
+        <member id="STAR" rollUpTo="*" />
+        <member id="ADV" reg="TENT\d" rollUpTo="*" />
+        <member id="TENT" value="TENT" rollUpTo="*" />
+      </level>
+      <level id="ROOMS" name="Räume">
+        <member id="POSF" reg="POS F\d" rollUpTo="   DREAM   " />
+        <member id="POSG" reg="POS G\d" rollUpTo="  DREAM   , STAR  " />
+        <member id="POSA" reg="POS A\d" rollUpTo="STAR" />
+      </level>
+    </hierarchy>
+    <hierarchy id="GEO" name="Geo">
+      <level id="COUNTRY">
+        <member id="COUNTRYSEL" reg=".*" rollUpTo="*" />
+      </level>
+    </hierarchy>
+  </dimension>
+</dimensions>

@@ -1,6 +1,7 @@
 http\://dev.meisen.net/xsd/dissertation/tidaTypes.xsd=net/meisen/dissertation/config/xsd/tidaTypes.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaConfig.xsd=net/meisen/dissertation/config/xsd/tidaConfig.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaModel.xsd=net/meisen/dissertation/config/xsd/tidaModel.xsd
+http\://dev.meisen.net/xsd/dissertation/tidaDimension.xsd=net/meisen/dissertation/config/xsd/tidaDimension.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd=net/meisen/dissertation/impl/indexes/IndexFactory.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd=net/meisen/dissertation/impl/time/mapper/MapperFactory.xsd
 http\://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd=net/meisen/dissertation/impl/dataretriever/DbDataRetriever.xsd

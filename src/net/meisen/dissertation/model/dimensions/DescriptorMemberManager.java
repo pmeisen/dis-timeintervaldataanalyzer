@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,6 +80,18 @@ public class DescriptorMemberManager {
 
 	public DescriptorMember getMember(final String id) {
 		return members.get(id);
+	}
+
+	public Collection<DescriptorMember> getMembers(final String levelId) {
+		final List<DescriptorMember> members = new ArrayList<DescriptorMember>();
+
+		for (final DescriptorMember member : this.members.values()) {
+			if (member.getLevel().getId().equals(levelId)) {
+				members.add(member);
+			}
+		}
+
+		return members;
 	}
 
 	public Collection<DescriptorMember> getMembers() {

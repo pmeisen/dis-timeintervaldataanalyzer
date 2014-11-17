@@ -57,7 +57,7 @@ public class ShiroAuthManager implements IAuthManager {
 	protected final static String permissionSeparator = ":";
 
 	@Autowired
-	@Qualifier(DefaultValues.HANDLER_ID)
+	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	private TidaModelHandler handler;
 
 	@Autowired

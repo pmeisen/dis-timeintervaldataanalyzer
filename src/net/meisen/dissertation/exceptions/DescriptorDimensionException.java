@@ -1,9 +1,9 @@
 package net.meisen.dissertation.exceptions;
 
-import net.meisen.dissertation.impl.dimensions.DescriptorDimension;
-import net.meisen.dissertation.impl.dimensions.DescriptorHierarchy;
-import net.meisen.dissertation.impl.dimensions.DescriptorLevel;
-import net.meisen.dissertation.impl.dimensions.DescriptorMember;
+import net.meisen.dissertation.model.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
+import net.meisen.dissertation.model.dimensions.DescriptorLevel;
+import net.meisen.dissertation.model.dimensions.DescriptorMember;
 
 /**
  * Exception thrown whenever a problem with {@code DescriptorDimension},

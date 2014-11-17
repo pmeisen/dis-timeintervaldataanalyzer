@@ -41,7 +41,7 @@ public class TestGrantQueries extends LoaderBasedTest {
 	private static TidaModelHandler h = null;
 
 	@Autowired
-	@Qualifier(DefaultValues.HANDLER_ID)
+	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	private TidaModelHandler handler;
 
 	@Autowired

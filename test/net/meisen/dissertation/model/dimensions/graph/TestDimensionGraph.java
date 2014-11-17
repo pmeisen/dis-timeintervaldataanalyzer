@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions.graph;
+package net.meisen.dissertation.model.dimensions.graph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,8 +6,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.impl.dimensions.BaseDimensionTest;
-import net.meisen.dissertation.impl.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.BaseDimensionTest;
+import net.meisen.dissertation.model.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.graph.DimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.Level;
+import net.meisen.dissertation.model.dimensions.graph.Node;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.junit.Test;

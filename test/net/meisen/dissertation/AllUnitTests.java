@@ -28,8 +28,6 @@ import net.meisen.dissertation.impl.descriptors.TestDoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestGeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestIntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.TestLongDescriptor;
-import net.meisen.dissertation.impl.dimensions.TestDescriptorDimension;
-import net.meisen.dissertation.impl.dimensions.graph.TestDimensionGraph;
 import net.meisen.dissertation.impl.idfactories.TestByteIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestIntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.TestLongIdsFactory;
@@ -81,6 +79,9 @@ import net.meisen.dissertation.model.datasets.TestMultipleDataSetIterator;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
+import net.meisen.dissertation.model.dimensions.TestDescriptorDimension;
+import net.meisen.dissertation.model.dimensions.TestDescriptorDimensionLoader;
+import net.meisen.dissertation.model.dimensions.graph.TestDimensionGraph;
 import net.meisen.dissertation.model.handler.TestTidaModelHandler;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
@@ -245,20 +246,23 @@ import org.junit.runners.Suite;
 		TestLoadQueries.class, TestUnloadQueries.class,
 		TestSelectQueries.class, TestInsertQueries.class, TestAddQueries.class,
 		TestDropQueries.class, TestModifyQueries.class, TestGrantQueries.class,
-		TestRevokeQueries.class, TestAssignQueries.class,
+		TestRevokeQueries.class,
+		TestAssignQueries.class,
 		TestRemoveQueries.class,
 		TestGetQueries.class,
 
 		// Test authentication manager
-		TestDefinedPermission.class, TestMapDbAuthorizingRealm.class,
+		TestDefinedPermission.class,
+		TestMapDbAuthorizingRealm.class,
 		TestShiroAuthManager.class,
 
 		// Tests dimensions
 		TestDescriptorDimension.class, TestDimensionGraph.class,
+		TestDescriptorDimensionLoader.class,
 
 		// Test the session management
 		TestSession.class,
-		
+
 		// Test the server
 		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,
 		TestAuthServlet.class })

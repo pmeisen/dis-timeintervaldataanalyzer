@@ -133,8 +133,8 @@
                   <xs:attribute name="start" type="types:dateOrNumber" use="optional" />
                   <xs:attribute name="end" type="types:dateOrNumber" use="optional" />
                   <xs:attribute name="duration" type="xs:positiveInteger" use="optional" />
-                  <xs:attribute name="granularity" type="types:nonEmptyString" use="optional" />
-                  <xs:attribute name="durationgranularity" type="types:nonEmptyString" use="optional" />
+                  <xs:attribute name="granularity" type="types:nonEmptyStringWithoutWhitespaces" use="optional" />
+                  <xs:attribute name="durationgranularity" type="types:nonEmptyStringWithoutWhitespaces" use="optional" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -213,10 +213,10 @@
                     <xs:any namespace="##other" processContents="strict" minOccurs="0" maxOccurs="1" />
                     <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
-                        <xs:attribute name="type" type="types:nonEmptyString" use="optional" />
+                        <xs:attribute name="type" type="types:nonEmptyStringWithoutWhitespaces" use="optional" />
                         <xs:attribute name="class" type="types:javaClass" use="optional" />
                         <xs:attribute name="value" type="xs:string" use="optional" />
-                        <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+                        <xs:attribute name="name" type="types:nonEmptyStringWithoutWhitespaces" use="optional" />
                         <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
                       </xs:complexType>
                     </xs:element>
@@ -249,7 +249,7 @@
   </xs:complexType>
   
   <xs:complexType name="structurelement">
-    <xs:attribute name="name" type="types:nonEmptyString" use="optional" />
+    <xs:attribute name="name" type="types:nonEmptyStringWithoutWhitespaces" use="optional" />
     <xs:attribute name="position" type="xs:positiveInteger" use="optional" />
   </xs:complexType>
   

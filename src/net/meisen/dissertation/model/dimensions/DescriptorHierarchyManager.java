@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import java.util.Collection;
 import java.util.Collections;

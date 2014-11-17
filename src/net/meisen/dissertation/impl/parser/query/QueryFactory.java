@@ -62,7 +62,7 @@ public class QueryFactory implements IQueryFactory {
 	protected IAuthManager authManager;
 
 	@Autowired
-	@Qualifier(DefaultValues.HANDLER_ID)
+	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	private TidaModelHandler handler;
 
 	/**

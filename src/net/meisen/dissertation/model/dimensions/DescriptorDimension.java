@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import net.meisen.general.genmisc.types.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DescriptorDimension {
+public class DescriptorDimension implements IDimension {
 	public final static String ROOT_LEVEL_ID = "*";
 	public final static String ROOT_MEMBER_ID = "*";
 	public final static String UNASSIGNED_LEVEL_ID = "";
@@ -22,22 +22,38 @@ public class DescriptorDimension {
 
 	private final String id;
 	private final String name;
+	private final String descriptorId;
 
 	private final Set<String> sharedLevels;
 	private final DescriptorHierarchyManager hierarchies;
 
 	public DescriptorDimension(final DescriptorModel<?> descriptorModel) {
-		this(descriptorModel, descriptorModel.getName());
+		this(descriptorModel, descriptorModel == null ? null : descriptorModel
+				.getName());
 	}
 
 	public DescriptorDimension(final DescriptorModel<?> descriptorModel,
 			final String name) {
-		if (descriptorModel == null) {
+		this(descriptorModel == null ? null : descriptorModel.getId(),
+				descriptorModel == null ? null : descriptorModel.getId(), name);
+	}
+
+	public DescriptorDimension(final String id, final String descriptorId) {
+		this(id, descriptorId, null);
+	}
+
+	public DescriptorDimension(final String id, final String descriptorId,
+			final String name) {
+		if (id == null) {
 			throw new ForwardedRuntimeException(
-					DescriptorDimensionException.class, 1006, name);
+					DescriptorDimensionException.class, 1006, id);
+		} else if (descriptorId == null) {
+			throw new ForwardedRuntimeException(
+					DescriptorDimensionException.class, 1021, descriptorId);
 		}
-		
-		this.id = descriptorModel.getId();
+
+		this.id = id;
+		this.descriptorId = descriptorId;
 		this.name = name;
 
 		this.sharedLevels = new HashSet<String>();
@@ -77,12 +93,21 @@ public class DescriptorDimension {
 		return hierarchies.getHierarchies();
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
 	public String getName() {
-		return name;
+		return name == null ? getId() : name;
+	}
+
+	public boolean hasName() {
+		return name != null;
+	}
+
+	public String getDescriptorId() {
+		return descriptorId;
 	}
 
 	@Override
@@ -93,7 +118,8 @@ public class DescriptorDimension {
 			return false;
 		} else if (obj instanceof DescriptorDimension) {
 			final DescriptorDimension cmpDim = (DescriptorDimension) obj;
-			return Objects.equals(getId(), cmpDim.getId());
+			return Objects.equals(getDescriptorId(), cmpDim.getDescriptorId())
+					&& Objects.equals(getId(), cmpDim.getId());
 		} else {
 			return false;
 		}
@@ -101,5 +127,11 @@ public class DescriptorDimension {
 
 	public DescriptorHierarchy getHierarchy(final String hierarchyId) {
 		return hierarchies.getHierarchy(hierarchyId);
+	}
+
+	@Override
+	public String toString() {
+		return getId() + (hasName() ? " [" + getName() + "] " : "") + " ("
+				+ getDescriptorId() + ")";
 	}
 }

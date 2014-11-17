@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -123,7 +123,7 @@ public class DescriptorHierarchy {
 
 	@Override
 	public String toString() {
-		return getName() + "(" + getId() + ")";
+		return getName() + " (" + getId() + ")";
 	}
 
 	@Override
@@ -162,5 +162,9 @@ public class DescriptorHierarchy {
 
 	public Collection<DescriptorMember> getMembers() {
 		return memberManager.getMembers();
+	}
+
+	public Collection<DescriptorMember> getMembers(final String levelId) {
+		return memberManager.getMembers(levelId);
 	}
 }

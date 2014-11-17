@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import net.meisen.dissertation.impl.auth.AllAccessAuthManager;
@@ -164,7 +165,11 @@ public class DefaultValues {
 	/**
 	 * Id of the {@code TidaModelHandler} to be used.
 	 */
-	public static final String HANDLER_ID = "handlerId";
+	public static final String MODELHANDLER_ID = "modelHandlerId";
+	/**
+	 * Id of the module to load dimensions
+	 */
+	public static final String DIMENSIONHANDLER_ID = "dimensionHandlerId";
 	/**
 	 * Id of the {@code IdentifierCache} to be used.
 	 */

@@ -320,7 +320,7 @@
           </xsl:variable>
           <bean factory-bean="{$granularityFactoryId}" factory-method="find">
             <constructor-arg type="java.lang.String" value="{$granularity}" />
-          </bean>       
+          </bean>
         </constructor-arg>
       </bean>
       

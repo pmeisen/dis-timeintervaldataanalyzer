@@ -17,7 +17,7 @@ import net.meisen.general.server.settings.pojos.Extension;
 public class LoaderServlet implements IServlet {
 
 	@Autowired
-	@Qualifier(DefaultValues.HANDLER_ID)
+	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	private TidaModelHandler handler;
 
 	@Override

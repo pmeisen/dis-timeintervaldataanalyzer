@@ -1,4 +1,4 @@
-package net.meisen.dissertation.impl.dimensions;
+package net.meisen.dissertation.model.dimensions;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
