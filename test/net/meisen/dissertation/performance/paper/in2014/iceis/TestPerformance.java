@@ -96,6 +96,18 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		testSizedPerformance(1000000);
 	}
 
+	/**
+	 * Tests the performance for the specified size.
+	 * 
+	 * @param limit
+	 *            the limit (i.e. amount of data)
+	 * @throws IOException
+	 *             if a file cannot be read
+	 * @throws SQLException
+	 *             if the query cannot be fired to retrieve the data
+	 * @throws ParseException
+	 *             if a date cannot be parsed
+	 */
 	protected void testSizedPerformance(final int limit) throws IOException,
 			SQLException, ParseException {
 		System.out.println("Starting with LIMIT: " + limit);
@@ -202,6 +214,24 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		db.shutDownDb();
 	}
 
+	/**
+	 * Test the performance of a naive implemenation.
+	 * 
+	 * @param data
+	 *            the data
+	 * @param mapper
+	 *            the mapper to be used
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date
+	 * @param aggregation
+	 *            the aggregation to be used
+	 * @param filter
+	 *            the filter defined
+	 * @throws ParseException
+	 *             if an error occurres
+	 */
 	protected void measureNaive(final List<Map<String, Object>> data,
 			final BaseMapper<?> mapper, final String startDate,
 			final String endDate, final String aggregation,
@@ -254,6 +284,27 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		printResult("Naive", results);
 	}
 
+	/**
+	 * Measure the performance of the interval-tree.
+	 * 
+	 * @param iTree
+	 *            the interval tree
+	 * @param data
+	 *            the data
+	 * @param mapper
+	 *            the mapper to be used
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date
+	 * @param aggregation
+	 *            the aggregation to be used
+	 * @param filter
+	 *            the filter defined
+	 * 
+	 * @throws ParseException
+	 *             if an error occures
+	 */
 	protected void measureIntervalTree(final IntervalTree<Integer> iTree,
 			final List<Map<String, Object>> data, final BaseMapper<?> mapper,
 			final String startDate, final String endDate,
@@ -314,6 +365,22 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		printResult("IntervalTree", results);
 	}
 
+	/**
+	 * Function to test the performance of the TidaModel.
+	 * 
+	 * @param model
+	 *            the model to be tested
+	 * @param mapper
+	 *            the mapper to be used
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date
+	 * @param aggregation
+	 *            the aggregation to be used
+	 * @param filter
+	 *            the filter defined
+	 */
 	protected void measureTidaModel(final TidaModel model,
 			final BaseMapper<?> mapper, final String startDate,
 			final String endDate, final String aggregation,
@@ -346,6 +413,14 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		printResult("TidaModel", results);
 	}
 
+	/**
+	 * Print the results of the test.
+	 * 
+	 * @param type
+	 *            the type of the test
+	 * @param results
+	 *            the array of the results
+	 */
 	protected void printResult(final String type, final long[] results) {
 		long sum = 0;
 		long min = Long.MAX_VALUE;
@@ -364,6 +439,22 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		System.out.println("--------------------");
 	}
 
+	/**
+	 * Get the count of the slected records.
+	 * 
+	 * @param model
+	 *            the model
+	 * @param mapper
+	 *            the mapper
+	 * @param startDate
+	 *            the start date
+	 * @param endDate
+	 *            the end date
+	 * @param aggregation
+	 *            the aggregation function to be used
+	 * @param filter
+	 *            the filter defined
+	 */
 	protected void getCount(final TidaModel model, final BaseMapper<?> mapper,
 			final String startDate, final String endDate,
 			final String aggregation, final Map<String, Object> filter) {
