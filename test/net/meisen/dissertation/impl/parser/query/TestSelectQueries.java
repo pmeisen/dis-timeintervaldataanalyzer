@@ -1223,6 +1223,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertNotNull(gRes.getEntry("Edison"));
 	}
 
+	/**
+	 * Tests the parsing of dimensional filters.
+	 */
 	@Test
 	public void testTimeSeriesDimensionalParsing() {
 		final SelectQuery query = q("SELECT TIMESERIES FROM ModelId IN (15.06.2014 , 15.06.2015 20:10:11] WHERE DIM.HIER.LEVEL = '5'");
@@ -1243,6 +1246,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 				.getLevelId());
 	}
 
+	/**
+	 * Tests the parsing of dimensional filters.
+	 */
 	@Test
 	public void testRecordsDimensionalParsing() {
 		final SelectQuery query = q("SELECT RECORDS FROM ModelId WHERE DIM.HIER.LEVEL = '5' AND DIM2.HIER2.LEVEL2 = '6'");
@@ -2349,6 +2355,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 	}
 
+	/**
+	 * Tests the selection of dimensional filters when selecting records.
+	 */
 	@Test
 	public void testRecordSelectionByDimensionalFilter() {
 		String query;
@@ -2399,6 +2408,51 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 		assertTrue(Arrays.binarySearch(ids, 4) > -1);
 		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// fire the query and get the result
+		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='FEMALE' OR (PERSON='Philipp' AND NOT LOCATION='Aachen')";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		records = res.getSelectedRecords();
+		ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 3, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+
+		// fire the query and get the result
+		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='MALE' AND PERSON='Tobias'";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		records = res.getSelectedRecords();
+		ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+	}
+
+	/**
+	 * Tests the usage of dimensional filters while retrieving time-series.
+	 */
+	@Test
+	public void testTimeSeriesSelectionByDimensionalFilter() {
+		String query;
+		SelectResultTimeSeries res;
+		TimeSeries ts;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		query = "select TIMESERIES of count(PERSON) as CNT from testPersonModel IN [03.03.2014 16:19:00, 03.03.2014 16:20:00] where LOCATION.GEO.CONTINENT='UNKNOWN' OR PERSON='Tobias'";
+		res = (SelectResultTimeSeries) factory.evaluateQuery(q(query), null);
+		ts = res.getTimeSeriesResult().getSeries("CNT");
+		assertEquals(2, ts.size());
+		assertEquals(1.0, ts.getValue(0), 0.0);
+		assertEquals(2.0, ts.getValue(1), 0.0);
 	}
 
 	/**

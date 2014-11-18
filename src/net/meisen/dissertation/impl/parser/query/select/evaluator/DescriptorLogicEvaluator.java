@@ -8,9 +8,9 @@ import java.util.Set;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
-import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.ILogicalTreeElement;
@@ -21,7 +21,6 @@ import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.dissertation.model.dimensions.DescriptorLevel;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
 import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
@@ -196,6 +195,17 @@ public class DescriptorLogicEvaluator {
 		}
 	}
 
+	/**
+	 * Evaluator used to evaluate a {@code DimensionComperator}. The
+	 * implementation is currently really heavy, we should think about a better
+	 * solution, i.e. by caching some information about the dimensions (e.g.
+	 * each node should now it's leafs). [TODO]
+	 * 
+	 * @param cmp
+	 *            the {@code DimensionComperator} to be evaluated
+	 * 
+	 * @return the result of the evaluation
+	 */
 	protected Bitmap evaluateDimensionComperator(final DimensionComperator cmp) {
 		final DimensionSelector dimSelector = cmp.getDimension();
 		final String dimId = dimSelector.getDimensionId();
@@ -213,14 +223,17 @@ public class DescriptorLogicEvaluator {
 		final DescriptorModel<?> descModel = metaDataModel
 				.getDescriptorModel(modelId);
 		if (descModel == null) {
-			// TODO: THROW EXCEPTION
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1023, dimId, modelId);
 		}
 
 		// get the level of the defined hierarchy
 		final String hierarchyId = dimSelector.getHierarchyId();
-		final Level level = dim.getLevel(hierarchyId, dimSelector.getLevelId());
+		final String levelId = dimSelector.getLevelId();
+		final Level level = dim.getLevel(hierarchyId, levelId);
 		if (level == null) {
-			// TODO: THROW EXCEPTION
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1024, dimId, hierarchyId, levelId);
 		}
 
 		// get all the members selected
@@ -238,12 +251,12 @@ public class DescriptorLogicEvaluator {
 				}
 			}
 		}
-	
+
 		// get the bitmaps of the leaf-members
 		final List<Bitmap> bitmaps = new ArrayList<Bitmap>();
 		for (final Descriptor<?, ?, ?> desc : descModel.getAllDescriptors()) {
 			final String value = desc.getUniqueString();
-			
+
 			for (final DescriptorMember member : selectedMembers) {
 				if (value.matches(member.getPattern())) {
 
@@ -269,6 +282,14 @@ public class DescriptorLogicEvaluator {
 		}
 	}
 
+	/**
+	 * Evaluates a {@code DescriptorComperator}.
+	 * 
+	 * @param cmp
+	 *            the {@code DescriptorComperator} to be evaluated
+	 * 
+	 * @return the result of the evaluation
+	 */
 	protected Bitmap evaluateDescriptorComperator(final DescriptorComperator cmp) {
 
 		// get the addressed model
