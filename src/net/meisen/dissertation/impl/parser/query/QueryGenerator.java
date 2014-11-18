@@ -25,6 +25,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMeasureContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMemberEqualContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompStructureElementContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompValueElementContext;
@@ -65,14 +66,15 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueOrNullContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorMemberContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueListContext;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
 import net.meisen.dissertation.impl.parser.query.get.GetResultType;
@@ -85,6 +87,7 @@ import net.meisen.dissertation.impl.parser.query.remove.RemoveQuery;
 import net.meisen.dissertation.impl.parser.query.revoke.RevokeQuery;
 import net.meisen.dissertation.impl.parser.query.revoke.RevokeType;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
@@ -99,6 +102,7 @@ import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Strings;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -566,8 +570,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 							QueryParsingException.class, 1016, v, i,
 							q.getStartPosition(), q.getEndPosition());
 				}
-			} else if (value.selectorDescValue() != null) {
-				data.add(getDescValue(value.selectorDescValue()));
+			} else if (value.selectorValue() != null) {
+				data.add(getSelectorValue(value.selectorValue()));
 			} else {
 				throw new ForwardedRuntimeException(
 						QueryParsingException.class, 1014, value.getText());
@@ -779,10 +783,21 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitCompDescriptorEqual(final CompDescriptorEqualContext ctx) {
 		final String id = getDescriptorModelId(ctx.selectorDescriptorId());
-		final String value = getDescValue(ctx.selectorDescValue());
+		final String value = getSelectorValue(ctx.selectorValue());
 
 		final DescriptorComperator descCmp = new DescriptorComperator(id, value);
 		q(SelectQuery.class).getFilter().attach(descCmp);
+	}
+
+	@Override
+	public void exitCompMemberEqual(final CompMemberEqualContext ctx) {
+
+		final DimensionSelector dimSel = getMember(ctx.selectorMember());
+		final String value = getSelectorValue(ctx.selectorValue());
+
+		final DimensionComperator dimCmp = new DimensionComperator(dimSel,
+				value);
+		q(SelectQuery.class).getFilter().attach(dimCmp);
 	}
 
 	@Override
@@ -873,9 +888,9 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 			// determine the values
 			final List<String> values = new ArrayList<String>();
-			for (final SelectorDescValueContext selectorDesc : descValueCtx
-					.selectorDescValue()) {
-				values.add(getDescValue(selectorDesc));
+			for (final SelectorValueContext selectorDesc : descValueCtx
+					.selectorValue()) {
+				values.add(getSelectorValue(selectorDesc));
 			}
 
 			// add an exclusion
@@ -940,17 +955,17 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 * Gets the defined descriptor value from the parsed string, i.e.
 	 * {@code 'value' => value} or {@code 'v\\al\'ue' => v\al'ue}.
 	 * 
-	 * @param selectorDesc
+	 * @param selectorCtx
 	 *            the text to retrieve the descriptor value for
 	 * @return the descriptors value
 	 */
-	protected String getDescValue(final SelectorDescValueContext selectorDesc) {
-		if (selectorDesc.NULL_VALUE() != null) {
+	protected String getSelectorValue(final SelectorValueContext selectorCtx) {
+		if (selectorCtx.NULL_VALUE() != null) {
 			return null;
 		} else {
 
 			// get the value the descriptor should have
-			return getValue(selectorDesc.VALUE());
+			return getValue(selectorCtx.VALUE());
 		}
 	}
 
@@ -1054,6 +1069,39 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		} else {
 			return Strings.trimSequence(ctx.MARKED_ID().getText(), "\"");
 		}
+	}
+
+	/**
+	 * Gets the member defined within the {@code SelectorMemberContext}.
+	 * 
+	 * @param selMember
+	 *            the context to read the member from
+	 * 
+	 * @return the {@code DimensionSelector} defined by the context
+	 */
+	protected DimensionSelector getMember(final SelectorMemberContext selMember) {
+		final int childrenSize = selMember.getChildCount();
+
+		if (childrenSize != 5) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1022, selMember.getText());
+		}
+
+		final String dimId = selMember.getChild(TerminalNode.class, 0)
+				.getText();
+		final String hierarchyId = selMember.getChild(TerminalNode.class, 2)
+				.getText();
+		final String levelId = selMember.getChild(TerminalNode.class, 4)
+				.getText();
+
+		// make sure none is empty
+		if (Objects.empty(dimId) || Objects.empty(hierarchyId)
+				|| Objects.empty(levelId)) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1022, selMember.getText());
+		}
+
+		return new DimensionSelector(dimId, hierarchyId, levelId);
 	}
 
 	/**

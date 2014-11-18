@@ -107,7 +107,7 @@ exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACK
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
 exprMeasure         : compNamedMeasure (SEPARATOR compNamedMeasure)*;
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
-exprComp            : compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
+exprComp            : compMemberEqual | compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
 exprAggregate       : selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 
@@ -117,20 +117,22 @@ exprAggregate       : selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
 compNamedMeasure         : compMeasure (OP_ALIAS selectorAlias)?;
 compMeasure              : compMeasure selectorSecondMathOperator compMeasureAtom | compMeasureAtom;
 compMeasureAtom          : compAggrFunction | compMeasureAtom selectorFirstMathOperator compMeasureAtom | BRACKET_ROUND_OPENED compMeasure BRACKET_ROUND_CLOSED;
-compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorDescValue;
-compDescValueTupel       : BRACKET_ROUND_OPENED selectorDescValue (SEPARATOR selectorDescValue)* BRACKET_ROUND_CLOSED;
+compMemberEqual          : selectorMember CMP_EQUAL selectorValue;
+compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorValue;
+compDescValueTupel       : BRACKET_ROUND_OPENED selectorValue (SEPARATOR selectorValue)* BRACKET_ROUND_CLOSED;
 compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compAggrFunction         : selectorAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
 compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
-compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | selectorDescValue;
+compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | selectorValue;
 
 /*
  * Define special selectors which make up a semantic based on specific tokens, 
  * a selector is understood - in our case - as an atom, which cannot be a token,
  * because it's semantic is context based
  */
+selectorMember              : (MARKED_ID | SIMPLE_ID | ENHANCED_ID) DIMSEPARATOR (MARKED_ID | SIMPLE_ID | ENHANCED_ID) DIMSEPARATOR (MARKED_ID | SIMPLE_ID | ENHANCED_ID);
 selectorModelId             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
@@ -142,7 +144,7 @@ selectorDateValueOrNull     : (DATE | NULL_VALUE);
 selectorIntValueOrNull      : (INT | NULL_VALUE);
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
-selectorDescValue           : (VALUE | NULL_VALUE);
+selectorValue               : (VALUE | NULL_VALUE);
 selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
@@ -267,9 +269,6 @@ BRACKET_SQUARE_CLOSED : ']';
 BRACKET_CURLY_OPENED  : '{';
 BRACKET_CURLY_CLOSED  : '}';
 
-// reserved symbol used for separation
-SEPARATOR   : ',';
-
 // define some special data types
 DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
             [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9] |
@@ -280,6 +279,10 @@ DATE      : [0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9][0-9][0-9]' '[0-9][0-9]':'[0-9][
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9]' '[0-9][0-9]':'[0-9][0-9]':'[0-9][0-9] |
             [0-9][0-9][0-9][0-9]'.'[0-9][0-9]'.'[0-9][0-9];
 INT       : [0-9]+;
+
+// reserved symbol used for separation
+SEPARATOR   : ',';
+DIMSEPARATOR: '.';
 
 // define the strings allowed to occure 
 SIMPLE_ID   : [A-Za-z]+;

@@ -1,7 +1,7 @@
 package net.meisen.dissertation.exceptions;
 
 /**
- * Exception thrown whenever a {@code TidaModelHandler} has a problem.
+ * Exception thrown whenever a {@code TidaModel} has a problem.
  * 
  * @author pmeisen
  * 

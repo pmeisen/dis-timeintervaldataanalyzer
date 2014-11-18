@@ -70,6 +70,10 @@ public class TidaModel implements IPersistable {
 	private IntervalModel intervalModel;
 
 	@Autowired
+	@Qualifier(DefaultValues.DIMENSIONMODEL_ID)
+	private DimensionModel dimensionModel;
+
+	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private BaseIndexFactory indexFactory;
 
@@ -232,8 +236,9 @@ public class TidaModel implements IPersistable {
 					loc);
 		}
 
-		// initialize the dataRecordFactory
-		dataRecordFactory.initialize(this);
+		// initialize some instances
+		this.dataRecordFactory.initialize(this);
+		this.dimensionModel.initialize(this);
 
 		// initialize the caches
 		this.metaDataCache.initialize(this);
@@ -600,6 +605,15 @@ public class TidaModel implements IPersistable {
 	 */
 	public IntervalModel getIntervalModel() {
 		return intervalModel;
+	}
+
+	/**
+	 * Gets the {@code DimensionModel} of the instance.
+	 * 
+	 * @return the {@code DimensionModel}
+	 */
+	public DimensionModel getDimensionModel() {
+		return dimensionModel;
 	}
 
 	/**

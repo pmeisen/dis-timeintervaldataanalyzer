@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
 
 import net.meisen.dissertation.impl.auth.AllAccessAuthManager;
@@ -62,24 +61,29 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
  */
 public class DefaultValues {
 	/**
-	 * The name of the module created by the XSLT process, which contains the
+	 * The name of the module created by the XSLT process which contains the
 	 * created {@code MetaDataModel}.
 	 * 
 	 * @see MetaDataModel
 	 */
 	public static final String METADATAMODEL_ID = "metaDataModel";
 	/**
-	 * The name of the module created by the XSLT process, which contains the
+	 * The name of the module created by the XSLT process which contains the
 	 * define meta-data.
 	 */
 	public static final String METADATACOLLECTION_ID = "metaDataCollection";
 	/**
-	 * The name of the module created by the XSLT process, which contains the
+	 * The name of the module created by the XSLT process which contains the
 	 * created {@code IntervalModel}.
 	 * 
 	 * @see IntervalModel
 	 */
 	public static final String INTERVALMODEL_ID = "intervalModel";
+	/**
+	 * The name of the module created by the XSLT process which handles
+	 * dimensions.
+	 */
+	public static final String DIMENSIONMODEL_ID = "dimensionModel";
 	/**
 	 * The name of the module created by the XSLT process, which contains the
 	 * created {@code DataModel}.

@@ -7,11 +7,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Map;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
 import net.meisen.dissertation.model.handler.TidaDimensionHandler;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -51,12 +53,13 @@ public class TestDescriptorDimensionLoader {
 	 */
 	@Test
 	public void testEmpty() {
-		final Map<String, IDimension> dims = dimensionHandler
-				.loadDimensions(getClass()
-						.getResourceAsStream(
-								"/net/meisen/dissertation/model/dimensions/config/DIMEMPTY.xml"));
+		final InputStream stream = getClass()
+				.getResourceAsStream(
+						"/net/meisen/dissertation/model/dimensions/config/DIMEMPTY.xml");
+		final Map<String, IDimensionGraph> graphs = dimensionHandler
+				.loadDimensions(stream);
 
-		assertEquals(0, dims.size());
+		assertEquals(0, graphs.size());
 	}
 
 	/**
@@ -64,10 +67,10 @@ public class TestDescriptorDimensionLoader {
 	 */
 	@Test
 	public void testSimpleDimension() {
-		final Map<String, IDimension> dims = dimensionHandler
-				.loadDimensions(getClass()
-						.getResourceAsStream(
-								"/net/meisen/dissertation/model/dimensions/config/DIMLOC.xml"));
+		final InputStream stream = getClass().getResourceAsStream(
+				"/net/meisen/dissertation/model/dimensions/config/DIMLOC.xml");
+		final Map<String, IDimension> dims = DimensionHelper
+				.getDimensions(dimensionHandler.loadDimensions(stream));
 
 		// make sure we have the right dimension
 		assertEquals(1, dims.size());

@@ -106,12 +106,38 @@ public class Node {
 		children.add(child);
 	}
 
+	/**
+	 * Checks if the node is a source, i.e. has no children.
+	 * 
+	 * @return {@code true} if the node is a source, otherwise {@code false}
+	 */
 	public boolean isSource() {
 		return children.isEmpty();
 	}
 
 	public boolean isSink() {
 		return parents.isEmpty();
+	}
+
+	public Set<DescriptorMember> getReachableLeafs(final String hierarchyId) {
+		final Set<DescriptorMember> members = new HashSet<DescriptorMember>();
+
+		if (hierarchyId == null) {
+			return members;
+		} else if (this.isSource()) {
+			final DescriptorMember member = getMember();
+			if (hierarchyId.equals(member.getHierachy().getId())) {
+				members.add(member);
+			}
+			
+			return members;
+		} else {
+			for (final Node node : getChildren()) {
+				members.addAll(node.getReachableLeafs(hierarchyId));
+			}
+		}
+
+		return members;
 	}
 
 	@Override

@@ -9,13 +9,15 @@
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
        xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
-       xmlns:map="http://dev.meisen.net/xsd/dissertation/model/mapper" 
+       xmlns:map="http://dev.meisen.net/xsd/dissertation/model/mapper"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
                            http://dev.meisen.net/xsd/dissertation/model/indexes             http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
                            http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/mapper              http://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd"
+                           http://dev.meisen.net/xsd/dissertation/model/mapper              http://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd
+                           http://dev.meisen.net/xsd/dissertation/dimension                 http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
        
        offlinemode="false" folder="_data/fullModel" id="fullModel" name="My wonderful Model">
 
@@ -132,7 +134,7 @@
   <time>
     <timeline start="20.01.1981" duration="100" granularity="YEAR" />
   </time>
-
+  
   <meta>
     <!-- As identifier-factory the following implementations are available:
           + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
@@ -184,6 +186,27 @@
       <entry descriptor="D4" value="I" />
     </entries>
   </meta>
+  
+  <dim:dimensions>
+    <dim:dimension id="PERSON" descriptor="R1">
+      <dim:hierarchy id="GENDER" all="All Persons">
+        <dim:level id="GENDER">
+          <dim:member id="MALE" reg="Philipp|Edison" rollUpTo="*" />
+          <dim:member id="FEMALE" reg="Debbie" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+    
+    <dim:dimension id="TOY" descriptor="R2">
+      <dim:hierarchy id="TYPE" all="All Types">
+        <dim:level id="TYPE">
+          <dim:member id="WOOD" reg="rattle" rollUpTo="*" />
+          <dim:member id="STUFF" reg="teddy|doll" rollUpTo="*" />
+          <dim:member id="MISC" reg="cup" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+  </dim:dimensions>
     
   <structure />
   

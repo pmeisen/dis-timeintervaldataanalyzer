@@ -264,17 +264,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorValueList(@NotNull QueryGrammarParser.SelectorValueListContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDescValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorDescValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprValues}.
 	 * @param ctx the parse tree
 	 */
@@ -295,6 +284,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorFirstMathOperator}.
@@ -484,6 +484,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorValue(@NotNull QueryGrammarParser.SelectorValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorValue(@NotNull QueryGrammarParser.SelectorValueContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprGrant}.
 	 * @param ctx the parse tree
 	 */
@@ -570,6 +581,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorMember}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorMember(@NotNull QueryGrammarParser.SelectorMemberContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorMember}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorMember(@NotNull QueryGrammarParser.SelectorMemberContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateValueOrNull}.

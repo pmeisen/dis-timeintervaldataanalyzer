@@ -9,6 +9,7 @@ import java.util.Set;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
 import net.meisen.dissertation.model.dimensions.DescriptorLevel;
+import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class Level {
@@ -181,6 +182,48 @@ public class Level {
 		} else {
 			final DescriptorLevel first = levels.values().iterator().next();
 			return first.getId();
+		}
+	}
+
+	public Set<DescriptorMember> getMembers(final String hierarchyId) {
+		final Set<DescriptorMember> members = new HashSet<DescriptorMember>();
+		if (hierarchyId == null) {
+			return members;
+		}
+
+		for (final Node node : nodes) {
+			final DescriptorMember member = node.getMember();
+
+			// check the hierarchy
+			if (hierarchyId.equals(member.getHierachy().getId())) {
+				members.add(node.getMember());
+			}
+		}
+
+		return members;
+	}
+
+	public Set<DescriptorMember> getLeafMembers(final String hierarchyId,
+			final String memberId) {
+		if (hierarchyId == null) {
+			return new HashSet<DescriptorMember>();
+		}
+
+		Node root = null;
+		for (final Node node : nodes) {
+			final DescriptorMember member = node.getMember();
+			if (hierarchyId.equals(member.getHierachy().getId())
+					&& memberId.equals(member.getId())) {
+				root = node;
+				break;
+			}
+		}
+
+		// if we could not find the root, there are no leafs
+		if (root == null) {
+			return new HashSet<DescriptorMember>();
+		} else {
+			return root.getReachableLeafs(hierarchyId);
 		}
 	}
 }

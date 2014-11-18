@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 
 /**
@@ -19,7 +19,7 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
  */
 public class DescriptorLogicTree {
 	private final RootNode root;
-	
+
 	private LogicalOperatorNode currentNode;
 
 	/**
@@ -64,7 +64,7 @@ public class DescriptorLogicTree {
 	 * @param dc
 	 *            the {@code DescriptorComperator} to be attached
 	 */
-	public void attach(final DescriptorComperator dc) {
+	public void attach(final IComperator dc) {
 		this.currentNode.attachChild(dc);
 	}
 
@@ -169,7 +169,8 @@ public class DescriptorLogicTree {
 		 */
 		if (currentParentOp != null && currentParentOp.equals(current.get())) {
 			for (int i = currentChildren.size(); i > 0; i--) {
-				final ILogicalTreeElement currentChild = currentChildren.get(i - 1);
+				final ILogicalTreeElement currentChild = currentChildren
+						.get(i - 1);
 				currentParent.attachChildFirst(currentChild);
 				currentChild.setParent(currentParent);
 			}

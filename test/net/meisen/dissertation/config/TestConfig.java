@@ -224,6 +224,18 @@ public class TestConfig {
 		@Override
 		public void test() {
 			setModulesHolder("/net/meisen/dissertation/config/fullModel.xml");
+
+			// get the model and validate it
+			final TidaModel model = modulesHolder
+					.getModule(DefaultValues.TIDAMODEL_ID);
+			assertNotNull(model);
+			assertEquals("fullModel", model.getId());
+
+			// initialize the model
+			model.initialize();
+			
+			// check the dimensions of the model
+			assertEquals(2, model.getDimensionModel().getDimensions().size());
 		}
 	}
 

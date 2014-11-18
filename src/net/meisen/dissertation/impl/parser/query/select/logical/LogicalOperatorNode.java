@@ -3,7 +3,7 @@ package net.meisen.dissertation.impl.parser.query.select.logical;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
@@ -85,7 +85,8 @@ public class LogicalOperatorNode implements ILogicalTreeElement {
 	 * @throws IndexOutOfBoundsException
 	 *             if the i-th child doesn't exist
 	 */
-	public ILogicalTreeElement getChild(final int i) throws IndexOutOfBoundsException {
+	public ILogicalTreeElement getChild(final int i)
+			throws IndexOutOfBoundsException {
 		return children.get(i);
 	}
 
@@ -99,13 +100,13 @@ public class LogicalOperatorNode implements ILogicalTreeElement {
 	}
 
 	/**
-	 * Attaches a {@code DescriptorComperator} to the end of all the children of
+	 * Attaches a {@code IComperator} to the end of all the children of
 	 * {@code this}.
 	 * 
 	 * @param dc
-	 *            the {@code DescriptorComperator} to be attached
+	 *            the {@code IComperator} to be attached
 	 */
-	public void attachChild(final DescriptorComperator dc) {
+	public void attachChild(final IComperator dc) {
 		attachChild(new DescriptorLeaf(this, dc));
 	}
 

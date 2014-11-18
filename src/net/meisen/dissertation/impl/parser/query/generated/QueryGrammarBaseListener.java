@@ -318,19 +318,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitSelectorDescValue(@NotNull QueryGrammarParser.SelectorDescValueContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterExprValues(@NotNull QueryGrammarParser.ExprValuesContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -351,6 +338,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -578,6 +578,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSelectorValue(@NotNull QueryGrammarParser.SelectorValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorValue(@NotNull QueryGrammarParser.SelectorValueContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprGrant(@NotNull QueryGrammarParser.ExprGrantContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -676,6 +689,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorModelId(@NotNull QueryGrammarParser.SelectorModelIdContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorMember(@NotNull QueryGrammarParser.SelectorMemberContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorMember(@NotNull QueryGrammarParser.SelectorMemberContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

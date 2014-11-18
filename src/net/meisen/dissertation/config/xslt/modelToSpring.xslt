@@ -2,10 +2,13 @@
 
 <xsl:stylesheet version="1.0"
         xmlns="http://www.springframework.org/schema/beans"
-        xmlns:mns="http://dev.meisen.net/xsd/dissertation/model" 
+        xmlns:mns="http://dev.meisen.net/xsd/dissertation/model"
+        xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
         xmlns:uuid="java.util.UUID"
         xmlns:mdef="net.meisen.dissertation.config.xslt.DefaultValues"
         xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
+  <xsl:import href="classpath://net/meisen/dissertation/config/xslt/dimensionToSpring.xslt" />
 
   <xsl:import href="descriptors://includeXslts" />
   <xsl:import href="dataretriever://includeXslts" />
@@ -19,6 +22,7 @@
   <xsl:variable name="metaDataCollectionId" select="mdef:getId('METADATACOLLECTION_ID')" />
   <xsl:variable name="dataModelId" select="mdef:getId('DATAMODEL_ID')" />
   <xsl:variable name="intervalModelId" select="mdef:getId('INTERVALMODEL_ID')" />
+  <xsl:variable name="dimensionModelId" select="mdef:getId('DIMENSIONMODEL_ID')" />
   <xsl:variable name="dataStructureId" select="mdef:getId('DATASTRUCTURE_ID')" />
   <xsl:variable name="indexFactoryId" select="mdef:getId('INDEXFACTORY_ID')" />
   <xsl:variable name="mapperFactoryId" select="mdef:getId('MAPPERFACTORY_ID')" />
@@ -74,7 +78,7 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
-       <!-- create the identifierCache to be used -->     
+      <!-- create the identifierCache to be used -->     
       <xsl:choose>
         <xsl:when test="//mns:config/mns:caches/mns:identifier/@implementation">
           <xsl:variable name="identifierCache" select="//mns:config/mns:caches/mns:identifier/@implementation" />
@@ -424,6 +428,16 @@
         </constructor-arg>
       </bean>
       
+      <!-- create the dimensions -->
+      <bean id="{$dimensionModelId}" class="net.meisen.dissertation.model.data.DimensionModel" />
+      <xsl:choose>
+        <xsl:when test="//dim:dimensions">
+          <xsl:for-each select='//dim:dimensions/dim:dimension'>
+            <xsl:apply-imports />
+          </xsl:for-each>
+        </xsl:when>
+      </xsl:choose>
+            
       <!-- create the dataStructure -->
       <bean id="{$dataStructureId}" class="net.meisen.dissertation.model.data.DataStructure">
         <constructor-arg type="net.meisen.dissertation.model.datastructure.StructureEntry[]">

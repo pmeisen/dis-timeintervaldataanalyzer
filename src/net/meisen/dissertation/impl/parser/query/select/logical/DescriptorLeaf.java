@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.select.logical;
 
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 
 /**
@@ -13,7 +14,7 @@ import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
  */
 public class DescriptorLeaf implements ILogicalTreeElement {
 
-	private final DescriptorComperator descriptorComparator;
+	private final IComperator comparator;
 
 	private LogicalOperatorNode parent;
 
@@ -24,27 +25,27 @@ public class DescriptorLeaf implements ILogicalTreeElement {
 	 * @param parent
 	 *            the parent
 	 * @param dc
-	 *            the {@code DescriptorComperator} specifying the
+	 *            the {@code IComperator} specifying the
 	 *            {@code Descriptor} and the comparator
 	 */
 	public DescriptorLeaf(final LogicalOperatorNode parent,
-			final DescriptorComperator dc) {
+			final IComperator dc) {
 		this.parent = parent;
-		this.descriptorComparator = dc;
+		this.comparator = dc;
 	}
 
 	/**
-	 * Gets the {@code DescriptorComperator} defined for the leaf.
+	 * Gets the {@code IComperator} defined for the leaf.
 	 * 
-	 * @return the {@code DescriptorComperator} defined for the leaf
+	 * @return the {@code IComperator} defined for the leaf
 	 */
-	public DescriptorComperator get() {
-		return descriptorComparator;
+	public IComperator get() {
+		return comparator;
 	}
 
 	@Override
 	public String toString() {
-		return descriptorComparator.toString();
+		return comparator.toString();
 	}
 
 	@Override

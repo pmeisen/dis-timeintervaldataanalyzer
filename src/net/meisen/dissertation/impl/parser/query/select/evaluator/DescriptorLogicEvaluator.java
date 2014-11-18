@@ -2,19 +2,30 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.impl.parser.query.DimensionSelector;
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
 import net.meisen.dissertation.impl.parser.query.select.logical.ILogicalTreeElement;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
 import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
+import net.meisen.dissertation.model.data.DimensionModel;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.dimensions.DescriptorLevel;
+import net.meisen.dissertation.model.dimensions.DescriptorMember;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.Level;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -38,6 +49,7 @@ public class DescriptorLogicEvaluator {
 	private final BaseIndexFactory indexFactory;
 	private final TidaIndex index;
 	private final MetaDataModel metaDataModel;
+	private final DimensionModel dimensionModel;
 
 	/**
 	 * Constructor to create a evaluator used to evaluate a
@@ -48,13 +60,12 @@ public class DescriptorLogicEvaluator {
 	 */
 	public DescriptorLogicEvaluator(final TidaModel model) {
 
-		// get the metaDataModels
+		// get the needed models
+		dimensionModel = model.getDimensionModel();
 		metaDataModel = model.getMetaDataModel();
 
-		// get the index
+		// get the index and the factory
 		index = model.getIndex();
-
-		// get the indexFactory
 		indexFactory = model.getIndexFactory();
 	}
 
@@ -173,8 +184,92 @@ public class DescriptorLogicEvaluator {
 	 * @return the result of the selection of the {@code Descriptor}
 	 */
 	protected Bitmap evaluateDescriptorLeaf(final DescriptorLeaf leaf) {
+		final IComperator cmp = leaf.get();
 
-		final DescriptorComperator cmp = leaf.get();
+		if (cmp instanceof DescriptorComperator) {
+			return evaluateDescriptorComperator((DescriptorComperator) cmp);
+		} else if (cmp instanceof DimensionComperator) {
+			return evaluateDimensionComperator((DimensionComperator) cmp);
+		} else {
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1021, cmp == null ? null : cmp.getClass().getSimpleName());
+		}
+	}
+
+	protected Bitmap evaluateDimensionComperator(final DimensionComperator cmp) {
+		final DimensionSelector dimSelector = cmp.getDimension();
+		final String dimId = dimSelector.getDimensionId();
+
+		// get the dimension and check the type
+		final IDimensionGraph d = dimensionModel.getDimension(dimId);
+		if (d instanceof DescriptorDimensionGraph == false) {
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1022, dimId);
+		}
+		final DescriptorDimensionGraph dim = (DescriptorDimensionGraph) d;
+
+		// get the DescrptorModel used
+		final String modelId = dim.getDimension().getDescriptorId();
+		final DescriptorModel<?> descModel = metaDataModel
+				.getDescriptorModel(modelId);
+		if (descModel == null) {
+			// TODO: THROW EXCEPTION
+		}
+
+		// get the level of the defined hierarchy
+		final String hierarchyId = dimSelector.getHierarchyId();
+		final Level level = dim.getLevel(hierarchyId, dimSelector.getLevelId());
+		if (level == null) {
+			// TODO: THROW EXCEPTION
+		}
+
+		// get all the members selected
+		final Set<DescriptorMember> members = level.getMembers(hierarchyId);
+		final Set<DescriptorMember> selectedMembers = new HashSet<DescriptorMember>();
+		for (final DescriptorMember member : members) {
+			if (cmp.matches(member.getId())) {
+				final Set<DescriptorMember> leafMembers = level.getLeafMembers(
+						hierarchyId, member.getId());
+				selectedMembers.addAll(leafMembers);
+
+				// if there are no wild-chars we can stop, we found the one
+				if (!cmp.containsWildchar()) {
+					break;
+				}
+			}
+		}
+	
+		// get the bitmaps of the leaf-members
+		final List<Bitmap> bitmaps = new ArrayList<Bitmap>();
+		for (final Descriptor<?, ?, ?> desc : descModel.getAllDescriptors()) {
+			final String value = desc.getUniqueString();
+			
+			for (final DescriptorMember member : selectedMembers) {
+				if (value.matches(member.getPattern())) {
+
+					// get the slice for the model and the descriptor
+					final Slice<?> slice = index.getMetaIndexDimensionSlice(
+							modelId, desc.getId());
+
+					// add the slice if it's not null
+					if (slice != null) {
+						bitmaps.add(slice.getBitmap());
+					}
+				}
+			}
+		}
+
+		// create the result
+		if (bitmaps.size() == 0) {
+			return indexFactory.createBitmap();
+		} else if (bitmaps.size() == 1) {
+			return bitmaps.get(0);
+		} else {
+			return Bitmap.or(indexFactory, bitmaps.toArray());
+		}
+	}
+
+	protected Bitmap evaluateDescriptorComperator(final DescriptorComperator cmp) {
 
 		// get the addressed model
 		final DescriptorModel<?> descModel = metaDataModel

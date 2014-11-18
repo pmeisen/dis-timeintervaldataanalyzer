@@ -7,7 +7,7 @@ package net.meisen.dissertation.impl.parser.query.select;
  * @author pmeisen
  * 
  */
-public class DescriptorComperator extends DescriptorValue {
+public class DescriptorComperator extends DescriptorValue implements IComperator {
 	private String id;
 
 	/**

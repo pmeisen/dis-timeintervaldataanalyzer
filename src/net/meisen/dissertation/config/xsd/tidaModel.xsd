@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
+<xs:schema xmlns="http://dev.meisen.net/xsd/dissertation/model" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:types="http://dev.meisen.net/xsd/dissertation/types"
+           
            targetNamespace="http://dev.meisen.net/xsd/dissertation/model" attributeFormDefault="unqualified" elementFormDefault="qualified">
 
   <xs:import namespace="http://dev.meisen.net/xsd/dissertation/types" schemaLocation="http://dev.meisen.net/xsd/dissertation/tidaTypes.xsd" />
@@ -174,6 +177,9 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
+        
+        <!-- allow the dimensions here -->
+        <xs:any namespace="http://dev.meisen.net/xsd/dissertation/dimension" processContents="strict" minOccurs="0" maxOccurs="1" />
         
         <xs:element name="structure" minOccurs="0">
           <xs:complexType>

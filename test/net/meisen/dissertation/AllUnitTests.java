@@ -81,7 +81,7 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.dimensions.TestDescriptorDimension;
 import net.meisen.dissertation.model.dimensions.TestDescriptorDimensionLoader;
-import net.meisen.dissertation.model.dimensions.graph.TestDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.TestDescriptorDimensionGraph;
 import net.meisen.dissertation.model.handler.TestTidaModelHandler;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
@@ -257,7 +257,7 @@ import org.junit.runners.Suite;
 		TestShiroAuthManager.class,
 
 		// Tests dimensions
-		TestDescriptorDimension.class, TestDimensionGraph.class,
+		TestDescriptorDimension.class, TestDescriptorDimensionGraph.class,
 		TestDescriptorDimensionLoader.class,
 
 		// Test the session management

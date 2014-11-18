@@ -26,7 +26,9 @@ import net.meisen.dissertation.impl.measures.Median;
 import net.meisen.dissertation.impl.measures.Min;
 import net.meisen.dissertation.impl.measures.Mode;
 import net.meisen.dissertation.impl.measures.Sum;
+import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
+import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
@@ -56,6 +58,8 @@ import net.meisen.general.genmisc.types.Files;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+
+import com.google.common.primitives.Ints;
 
 /**
  * Tests the implementation of the {@code QueryFactory}, {@code QueryGenerator}
@@ -328,8 +332,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(order.get(0) instanceof DescriptorLeaf);
 
 		final DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
-		assertEquals("singleEqual", leaf.get().getId());
-		assertEquals("singleEqualValue", leaf.get().getRawValue());
+		assertEquals("singleEqual", ((DescriptorComperator) leaf.get()).getId());
+		assertEquals("singleEqualValue",
+				((DescriptorComperator) leaf.get()).getRawValue());
 	}
 
 	/**
@@ -346,8 +351,10 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(order.get(0) instanceof DescriptorLeaf);
 
 		final DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
-		assertEquals("bracketsSingleEqual", leaf.get().getId());
-		assertEquals("bracketsSingleEqualValue", leaf.get().getRawValue());
+		assertEquals("bracketsSingleEqual",
+				((DescriptorComperator) leaf.get()).getId());
+		assertEquals("bracketsSingleEqualValue",
+				((DescriptorComperator) leaf.get()).getRawValue());
 	}
 
 	/**
@@ -697,12 +704,15 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final LogicalOperatorNode or = (LogicalOperatorNode) order.get(4);
 
 		// check the values
-		assertEquals("first", first.get().getId());
-		assertEquals("firstValue", first.get().getRawValue());
-		assertEquals("second", second.get().getId());
-		assertEquals("secondValue", second.get().getRawValue());
-		assertEquals("third", third.get().getId());
-		assertEquals("thirdValue", third.get().getRawValue());
+		assertEquals("first", ((DescriptorComperator) first.get()).getId());
+		assertEquals("firstValue",
+				((DescriptorComperator) first.get()).getRawValue());
+		assertEquals("second", ((DescriptorComperator) second.get()).getId());
+		assertEquals("secondValue",
+				((DescriptorComperator) second.get()).getRawValue());
+		assertEquals("third", ((DescriptorComperator) third.get()).getId());
+		assertEquals("thirdValue",
+				((DescriptorComperator) third.get()).getRawValue());
 
 		assertEquals(LogicalOperator.AND, and.get());
 		assertEquals(first, and.getChild(0));
@@ -741,10 +751,10 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final LogicalOperatorNode and = (LogicalOperatorNode) order.get(4);
 
 		// check the values
-		assertEquals("HALLO", hallo.get().getId());
-		assertEquals("500", hallo.get().getRawValue());
-		assertEquals("HELLO", hello.get().getId());
-		assertEquals("LALA", hello.get().getRawValue());
+		assertEquals("HALLO", ((DescriptorComperator) hallo.get()).getId());
+		assertEquals("500", ((DescriptorComperator) hallo.get()).getRawValue());
+		assertEquals("HELLO", ((DescriptorComperator) hello.get()).getId());
+		assertEquals("LALA", ((DescriptorComperator) hello.get()).getRawValue());
 
 		assertEquals(LogicalOperator.NOT, notHallo.get());
 		assertEquals(hallo, notHallo.getChild(0));
@@ -823,7 +833,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		final Object o = order.iterator().next();
 		assertTrue(o instanceof DescriptorLeaf);
-		assertEquals("FROM", ((DescriptorLeaf) o).get().getId());
+		assertEquals("FROM",
+				((DescriptorComperator) ((DescriptorLeaf) o).get()).getId());
 	}
 
 	/**
@@ -1210,6 +1221,56 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(2, gRes.size());
 		assertNotNull(gRes.getEntry("Debbie"));
 		assertNotNull(gRes.getEntry("Edison"));
+	}
+
+	@Test
+	public void testTimeSeriesDimensionalParsing() {
+		final SelectQuery query = q("SELECT TIMESERIES FROM ModelId IN (15.06.2014 , 15.06.2015 20:10:11] WHERE DIM.HIER.LEVEL = '5'");
+		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
+
+		final DescriptorLogicTree tree = query.getFilter();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
+		assertEquals(1, order.size());
+		assertTrue(order.get(0) instanceof DescriptorLeaf);
+
+		final DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
+		assertTrue(leaf.get() instanceof DimensionComperator);
+		assertEquals("DIM", ((DimensionComperator) leaf.get()).getDimension()
+				.getDimensionId());
+		assertEquals("HIER", ((DimensionComperator) leaf.get()).getDimension()
+				.getHierarchyId());
+		assertEquals("LEVEL", ((DimensionComperator) leaf.get()).getDimension()
+				.getLevelId());
+	}
+
+	@Test
+	public void testRecordsDimensionalParsing() {
+		final SelectQuery query = q("SELECT RECORDS FROM ModelId WHERE DIM.HIER.LEVEL = '5' AND DIM2.HIER2.LEVEL2 = '6'");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+
+		final DescriptorLogicTree tree = query.getFilter();
+		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
+		assertEquals(3, order.size());
+
+		assertTrue(order.get(0) instanceof DescriptorLeaf);
+		DescriptorLeaf leaf = (DescriptorLeaf) order.get(0);
+		assertTrue(leaf.get() instanceof DimensionComperator);
+		assertEquals("DIM", ((DimensionComperator) leaf.get()).getDimension()
+				.getDimensionId());
+		assertEquals("HIER", ((DimensionComperator) leaf.get()).getDimension()
+				.getHierarchyId());
+		assertEquals("LEVEL", ((DimensionComperator) leaf.get()).getDimension()
+				.getLevelId());
+
+		assertTrue(order.get(1) instanceof DescriptorLeaf);
+		leaf = (DescriptorLeaf) order.get(1);
+		assertTrue(leaf.get() instanceof DimensionComperator);
+		assertEquals("DIM2", ((DimensionComperator) leaf.get()).getDimension()
+				.getDimensionId());
+		assertEquals("HIER2", ((DimensionComperator) leaf.get()).getDimension()
+				.getHierarchyId());
+		assertEquals("LEVEL2", ((DimensionComperator) leaf.get())
+				.getDimension().getLevelId());
 	}
 
 	/**
@@ -2286,6 +2347,58 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+	}
+
+	@Test
+	public void testRecordSelectionByDimensionalFilter() {
+		String query;
+		SelectResultRecords res;
+		Bitmap records;
+		int[] ids;
+
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		query = "select RECORDS from testPersonModel where LOCATION.GEO.CONTINENT='EUROPE'";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		records = res.getSelectedRecords();
+		ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 5, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
+
+		// fire the query and get the result
+		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='FEMALE'";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		records = res.getSelectedRecords();
+		ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+
+		// fire the query and get the result
+		query = "select RECORDS from testPersonModel where LOCATION.GEO.CONTINENT='*'";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		records = res.getSelectedRecords();
+		ids = records.getIds();
+
+		// check the result
+		assertEquals(records.toString(), 6, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		assertTrue(Arrays.binarySearch(ids, 3) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 5) > -1);
 	}
 
 	/**
