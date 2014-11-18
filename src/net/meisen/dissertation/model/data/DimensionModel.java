@@ -16,6 +16,12 @@ import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The model specifying the MDM of the model.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DimensionModel {
 
 	@Autowired
@@ -31,6 +37,9 @@ public class DimensionModel {
 	private boolean initialized;
 	private Collection<IDimension> addedDimensions;
 
+	/**
+	 * Default constructor.
+	 */
 	public DimensionModel() {
 		this.dimensions = new HashMap<String, IDimensionGraph>();
 

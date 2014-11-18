@@ -23,6 +23,12 @@ import net.meisen.general.sbconfigurator.api.IModuleHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * Handler used to load a dimension definition.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TidaDimensionHandler {
 
 	/**
@@ -40,6 +46,14 @@ public class TidaDimensionHandler {
 	@Qualifier("coreConfiguration")
 	protected IConfiguration configuration;
 
+	/**
+	 * Loads the dimensions defined within the specified {@code file}.
+	 * 
+	 * @param file
+	 *            the file to load the definition from
+	 * 
+	 * @return the loaded dimensions
+	 */
 	public Map<String, IDimensionGraph> loadDimensions(final File file) {
 		try {
 			return loadDimensions(new FileInputStream(file));
@@ -51,6 +65,14 @@ public class TidaDimensionHandler {
 		}
 	}
 
+	/**
+	 * Loads the dimensions defined within the specified {@code InputStream}.
+	 * 
+	 * @param resIo
+	 *            the stream to load the data from
+	 * 
+	 * @return the loaded dimensions
+	 */
 	public Map<String, IDimensionGraph> loadDimensions(final InputStream resIo) {
 
 		// check if null was passed
@@ -76,6 +98,16 @@ public class TidaDimensionHandler {
 		return dimensions;
 	}
 
+	/**
+	 * Creates a map of {@code DimensionGraph} instances for the specified
+	 * {@code Collection}. The method looks for {@code Dimension} instances and
+	 * converts those, all others are ignored and skipped.
+	 * 
+	 * @param dims
+	 *            the collection to be transformed
+	 * 
+	 * @return the created map
+	 */
 	public Map<String, IDimensionGraph> createMap(final Collection<?> dims) {
 		final Map<String, IDimensionGraph> dimensions = new HashMap<String, IDimensionGraph>();
 
@@ -95,7 +127,20 @@ public class TidaDimensionHandler {
 		return dimensions;
 	}
 
-	public IDimensionGraph createGraph(final IDimension dimension) {
+	/**
+	 * Factory method for {@code DimensionGraph} instances.
+	 * 
+	 * @param dimension
+	 *            the {@code Dimension} to create the {@code DimensionGraph} for
+	 * 
+	 * @return the created {@code DimensionGraph}
+	 * 
+	 * @throws TidaDimensionHandlerException
+	 *             if a {@code DimensionGraph} cannot be created, e.g. if no
+	 *             graph exists for the {@code Dimension}
+	 */
+	public IDimensionGraph createGraph(final IDimension dimension)
+			throws TidaDimensionHandlerException {
 		final IDimensionGraph graph;
 
 		// factory to pick the correct type for the dimension

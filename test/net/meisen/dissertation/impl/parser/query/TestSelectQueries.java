@@ -30,11 +30,11 @@ import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
 import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
-import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultTimeSeries;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
@@ -58,8 +58,6 @@ import net.meisen.general.genmisc.types.Files;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import com.google.common.primitives.Ints;
 
 /**
  * Tests the implementation of the {@code QueryFactory}, {@code QueryGenerator}
