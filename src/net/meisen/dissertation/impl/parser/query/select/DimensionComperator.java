@@ -35,10 +35,21 @@ public class DimensionComperator extends DescriptorValue implements IComperator 
 		return getDimension().toString() + " = " + getRawValue();
 	}
 
+	/**
+	 * Gets the {@code DimensionSelector} of {@code this}.
+	 * 
+	 * @return the {@code DimensionSelector} of {@code this}
+	 */
 	public DimensionSelector getDimension() {
 		return dim;
 	}
 
+	/**
+	 * Sets the {@code DimensionSelector} of {@code this}.
+	 * 
+	 * @param dim
+	 *            the {@code DimensionSelector} to be used
+	 */
 	public void setDimension(final DimensionSelector dim) {
 		this.dim = dim;
 	}
