@@ -265,7 +265,7 @@ public class TidaModel implements IPersistable {
 
 		// initialize the dimensionModel (uses the index)
 		this.dimensionModel.initialize(this);
-		
+
 		// log the initialization
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Initialized model '" + getId() + "' at '" + getLocation()
@@ -464,6 +464,34 @@ public class TidaModel implements IPersistable {
 		getDataRecordCache().setPersistency(false);
 
 		loadLock.writeLock().unlock();
+	}
+
+	/**
+	 * Invalidates the list of specified {@code ids}.
+	 * 
+	 * @param ids
+	 *            the list of {@code ids} to be invalidated
+	 * 
+	 * @return the records really invalidated
+	 */
+	public int[] invalidateRecords(final int[] ids) {
+
+		loadLock.writeLock().lock();
+
+		final Bitmap priorBitmap = getIdentifierCache().getValidIdentifiers();
+		Bitmap afterBitmap;
+		boolean oldPersistencyId = true;
+		try {
+			oldPersistencyId = getIdentifierCache().setPersistency(false);
+			getIdentifierCache().markIdentifierAsInvalid(ids);
+		} finally {
+			afterBitmap = getIdentifierCache().getValidIdentifiers();
+			getIdentifierCache().setPersistency(oldPersistencyId);
+			loadLock.writeLock().unlock();
+		}
+
+		// get the records really delete
+		return afterBitmap.xor(priorBitmap).getIds();
 	}
 
 	/**

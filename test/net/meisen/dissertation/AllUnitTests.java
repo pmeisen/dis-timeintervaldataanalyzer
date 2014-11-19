@@ -50,6 +50,7 @@ import net.meisen.dissertation.impl.measures.TestMapFactsDescriptorBased;
 import net.meisen.dissertation.impl.parser.query.TestAddQueries;
 import net.meisen.dissertation.impl.parser.query.TestAliveQueries;
 import net.meisen.dissertation.impl.parser.query.TestAssignQueries;
+import net.meisen.dissertation.impl.parser.query.TestDeleteQueries;
 import net.meisen.dissertation.impl.parser.query.TestDropQueries;
 import net.meisen.dissertation.impl.parser.query.TestGetQueries;
 import net.meisen.dissertation.impl.parser.query.TestGrantQueries;
@@ -246,10 +247,10 @@ import org.junit.runners.Suite;
 		TestLoadQueries.class, TestUnloadQueries.class,
 		TestSelectQueries.class, TestInsertQueries.class, TestAddQueries.class,
 		TestDropQueries.class, TestModifyQueries.class, TestGrantQueries.class,
-		TestRevokeQueries.class,
-		TestAssignQueries.class,
+		TestRevokeQueries.class, TestAssignQueries.class,
 		TestRemoveQueries.class,
 		TestGetQueries.class,
+		TestDeleteQueries.class,
 
 		// Test authentication manager
 		TestDefinedPermission.class,

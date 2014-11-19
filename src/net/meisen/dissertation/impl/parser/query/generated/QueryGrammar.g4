@@ -25,7 +25,7 @@ package net.meisen.dissertation.impl.parser.query.generated;
 package net.meisen.dissertation.impl.parser.query.generated;
 }
 
-root   : (exprInsert | exprSelect | exprLoad | exprUnload | exprAlive | exprGet | exprAdd | exprDrop | exprModify | exprGrant | exprRevoke | exprAssign | exprRemove) EOF;
+root   : (exprInsert | exprDelete | exprSelect | exprLoad | exprUnload | exprAlive | exprGet | exprAdd | exprDrop | exprModify | exprGrant | exprRevoke | exprAssign | exprRemove) EOF;
 
 /*
  * Define the expressions to add users or roles.
@@ -100,6 +100,11 @@ exprStructure : BRACKET_ROUND_OPENED compStructureElement (SEPARATOR compStructu
 exprValues    : BRACKET_ROUND_OPENED compValueElement (SEPARATOR compValueElement)* BRACKET_ROUND_CLOSED;
 
 /*
+ * Define the different parts of the delete statement
+ */
+exprDelete    : STMT_DELETE selectorIntIdList OP_FROM selectorModelId;
+
+/*
  * Define the different expressions/parts of the select statement
  */
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
@@ -138,6 +143,7 @@ selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDateInterval        : DATE SEPARATOR DATE;
 selectorIntInterval         : INT SEPARATOR INT;
+selectorIntIdList           : INT (SEPARATOR INT)*;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
 selectorIntIntervalWithNull : (INT | NULL_VALUE) SEPARATOR (INT | NULL_VALUE);
 selectorDateValueOrNull     : (DATE | NULL_VALUE);
@@ -178,6 +184,7 @@ POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
 STMT_GET      : G E T;
 STMT_SELECT   : S E L E C T;
 STMT_INSERT   : I N S E R T;
+STMT_DELETE   : D E L E T E;
 STMT_OPEN     : O P E N;
 STMT_LOAD     : L O A D;
 STMT_UNLOAD   : U N L O A D;

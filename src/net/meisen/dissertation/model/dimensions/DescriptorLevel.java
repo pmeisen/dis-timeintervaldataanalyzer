@@ -4,6 +4,12 @@ import net.meisen.dissertation.exceptions.DescriptorDimensionException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Objects;
 
+/**
+ * A level defined for a {@code DescriptorDimension}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DescriptorLevel {
 
 	private final String id;
@@ -11,10 +17,28 @@ public class DescriptorLevel {
 
 	private String name;
 
+	/**
+	 * Constructor specifying the {@code id} and the {@code owner} of the level.
+	 * 
+	 * @param id
+	 *            the identifier
+	 * @param owner
+	 *            the owning {@code DescriptorHierarchy}
+	 */
 	public DescriptorLevel(final String id, final DescriptorHierarchy owner) {
 		this(id, id, owner);
 	}
 
+	/**
+	 * Constructor specifying the {@code id} and the {@code owner} of the level.
+	 * 
+	 * @param id
+	 *            the identifier
+	 * @param name
+	 *            the name of the level
+	 * @param owner
+	 *            the owning {@code DescriptorHierarchy}
+	 */
 	public DescriptorLevel(final String id, final String name,
 			final DescriptorHierarchy owner) {
 		if (owner == null) {
@@ -27,18 +51,39 @@ public class DescriptorLevel {
 		this.owner = owner;
 	}
 
+	/**
+	 * Gets the identifier of the level.
+	 * 
+	 * @return the identifier of the level
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * Gets the name of the level.
+	 * 
+	 * @return the name of the level
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Sets the name of the level.
+	 * 
+	 * @param name
+	 *            the name of the level
+	 */
 	public void setName(final String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Gets the hierarchy {@code this} belongs to.
+	 * 
+	 * @return the hierarchy {@code this} belongs to
+	 */
 	public DescriptorHierarchy getHierachy() {
 		return owner;
 	}

@@ -13,6 +13,7 @@ import net.meisen.dissertation.impl.parser.query.add.AddQuery;
 import net.meisen.dissertation.impl.parser.query.add.AddType;
 import net.meisen.dissertation.impl.parser.query.alive.AliveQuery;
 import net.meisen.dissertation.impl.parser.query.assign.AssignQuery;
+import net.meisen.dissertation.impl.parser.query.delete.DeleteQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropType;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarBaseListener;
@@ -36,6 +37,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAssignMultipleRolesContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAssignSingleRoleContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprCompContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprDeleteContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprDropContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGetContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprGrantContext;
@@ -67,6 +69,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueOrNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIdListContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
@@ -181,6 +184,21 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		}
 
 		this.query = new LoadQuery();
+	}
+
+	@Override
+	public void enterExprDelete(final ExprDeleteContext ctx) {
+		if (this.query != null) {
+			throw new ForwardedRuntimeException(QueryParsingException.class,
+					1001);
+		}
+
+		this.query = new DeleteQuery();
+	}
+
+	@Override
+	public void exitExprDelete(final ExprDeleteContext ctx) {
+		finalized = true;
 	}
 
 	@Override
@@ -851,6 +869,18 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitSelectorModelId(final SelectorModelIdContext ctx) {
 		q(IQuery.class).setModelId(getModelId(ctx));
+	}
+
+	@Override
+	public void exitSelectorIntIdList(final SelectorIntIdListContext ctx) {
+		final List<TerminalNode> intNodes = ctx.INT();
+		final int[] idList = new int[intNodes.size()];
+
+		for (int i = 0; i < intNodes.size(); i++) {
+			idList[i] = Integer.parseInt(intNodes.get(i).getText());
+		}
+
+		q(DeleteQuery.class).setIdList(idList);
 	}
 
 	@Override

@@ -19,6 +19,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSelectorIntIdList(@NotNull QueryGrammarParser.SelectorIntIdListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorIntIdList(@NotNull QueryGrammarParser.SelectorIntIdListContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprAlive(@NotNull QueryGrammarParser.ExprAliveContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -39,6 +52,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompStructureElement(@NotNull QueryGrammarParser.CompStructureElementContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExprDelete(@NotNull QueryGrammarParser.ExprDeleteContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExprDelete(@NotNull QueryGrammarParser.ExprDeleteContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

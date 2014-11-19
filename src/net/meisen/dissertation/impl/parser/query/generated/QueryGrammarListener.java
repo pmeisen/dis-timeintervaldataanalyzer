@@ -11,6 +11,17 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface QueryGrammarListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorIntIdList}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorIntIdList(@NotNull QueryGrammarParser.SelectorIntIdListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorIntIdList}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorIntIdList(@NotNull QueryGrammarParser.SelectorIntIdListContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAlive}.
 	 * @param ctx the parse tree
 	 */
@@ -31,6 +42,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompStructureElement(@NotNull QueryGrammarParser.CompStructureElementContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprDelete}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprDelete(@NotNull QueryGrammarParser.ExprDeleteContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprDelete}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprDelete(@NotNull QueryGrammarParser.ExprDeleteContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#root}.
