@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
-       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
-       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model      http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
        
        id="testPersonModel">
   
@@ -29,6 +30,29 @@
       <entry descriptor="LOCATION" value="Mönchengladbach" />
     </entries>
   </meta>
+  
+  <dim:dimensions>
+    <dim:dimension id="PERSON" descriptor="PERSON">
+      <dim:hierarchy id="GENDER" all="All Persons">
+        <dim:level id="GENDER">
+          <dim:member id="MALE" reg="Philipp|Edison|Tobias" rollUpTo="*" />
+          <dim:member id="FEMALE" reg="Debbie" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+    
+    <dim:dimension id="LOCATION" descriptor="LOCATION">
+      <dim:hierarchy id="GEO" all="All Locations">
+        <dim:level id="CONTINENT">
+          <dim:member id="EUROPE" name="Europe" rollUpTo="*" />
+          <dim:member id="UNKNOWN" value="Undefined" rollUpTo="*" />
+        </dim:level>
+        <dim:level id="COUNTRY">
+          <dim:member id="GERMANY" reg="Aachen|Mönchengladbach" rollUpTo="EUROPE" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+  </dim:dimensions>
   
   <structure>   
     <meta position="3" descriptor="PERSON" />

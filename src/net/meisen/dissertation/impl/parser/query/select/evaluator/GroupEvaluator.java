@@ -6,20 +6,29 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.meisen.dissertation.exceptions.GroupEvaluatorException;
+import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExclusion;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
+import net.meisen.dissertation.model.data.DimensionModel;
+import net.meisen.dissertation.model.data.DimensionModel.IMemberFilter;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.dimensions.DescriptorMember;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.Level;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * A group evaluator is used to evaluate the part of a {@code group by} part of
@@ -33,13 +42,110 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 public class GroupEvaluator {
 
 	/**
+	 * An entry within a group.
+	 * 
+	 * @author pmeisen
+	 * 
+	 * @param <T>
+	 *            the type of the entry's meta-information
+	 */
+	protected static class GroupEntry<T> {
+
+		private final String id;
+		private final String label;
+		private final T meta;
+
+		/**
+		 * Entry of a group.
+		 * 
+		 * @param id
+		 *            the string representing the id
+		 * @param meta
+		 *            some meta-information
+		 */
+		public GroupEntry(final String id, final T meta) {
+			this(id, id, meta);
+		}
+
+		/**
+		 * The constructor to create a entry for.
+		 * 
+		 * @param id
+		 *            the identifier
+		 * @param label
+		 *            the label
+		 * @param meta
+		 *            the meta-inforamtion
+		 */
+		public GroupEntry(final String id, final String label, final T meta) {
+			this.id = id;
+			this.label = label;
+			this.meta = meta;
+		}
+
+		@Override
+		public String toString() {
+			return getId() + " (" + getMeta() + ")";
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.generateHashCode(1, 7, getId(), getLabel(),
+					getMeta());
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (obj == this) {
+				return true;
+			} else if (obj == null) {
+				return false;
+			} else if (obj instanceof GroupEntry) {
+				final GroupEntry<?> ge = (GroupEntry<?>) obj;
+				return Objects.equals(getId(), ge.getId())
+						&& Objects.equals(getLabel(), ge.getLabel())
+						&& Objects.equals(getMeta(), ge.getMeta());
+			} else {
+				return false;
+			}
+		}
+
+		/**
+		 * Gets the meta-information.
+		 * 
+		 * @return the meta-information
+		 */
+		public T getMeta() {
+			return meta;
+		}
+
+		/**
+		 * Gets the label.
+		 * 
+		 * @return the label
+		 */
+		public String getLabel() {
+			return label;
+		}
+
+		/**
+		 * Gets the identifier.
+		 * 
+		 * @return the identifier
+		 */
+		public String getId() {
+			return id;
+		}
+	}
+
+	/**
 	 * Helper class to store the descriptors which make up a specific group.
 	 * 
 	 * @author pmeisen
 	 * 
 	 */
-	protected static class Group implements Iterable<Descriptor<?, ?, ?>> {
-		private final List<Descriptor<?, ?, ?>> descriptors = new ArrayList<Descriptor<?, ?, ?>>();
+	protected static class Group implements Iterable<GroupEntry<?>> {
+		private final List<GroupEntry<?>> entries = new ArrayList<GroupEntry<?>>();
 
 		/**
 		 * Default constructor, creates an empty group.
@@ -49,123 +155,122 @@ public class GroupEvaluator {
 		}
 
 		/**
-		 * Constructor to create a group for the specified {@code descriptors}.
+		 * Constructor to create a group for the specified {@code entries}.
 		 * 
-		 * @param descriptors
-		 *            the descriptors which make up the group
+		 * @param entries
+		 *            the entries which make up the group
 		 * 
 		 * @see Descriptor F
 		 */
-		public Group(final Descriptor<?, ?, ?>... descriptors) {
-			append(descriptors);
+		public Group(final GroupEntry<?>... entries) {
+			append(entries);
 		}
 
 		/**
-		 * Constructor to create a group for the specified {@code descriptors}.
+		 * Constructor to create a group for the specified {@code entries}.
 		 * 
-		 * @param descriptors
-		 *            the descriptors which make up the group
+		 * @param entries
+		 *            the entries which make up the group
 		 * 
 		 * @see Descriptor
 		 */
-		public Group(final Collection<Descriptor<?, ?, ?>> descriptors) {
-			append(descriptors);
+		public Group(final Collection<GroupEntry<?>> entries) {
+			append(entries);
 		}
 
 		/**
 		 * Constructor to create a {@code group} based on another group.
-		 * Additionally, other {@code descriptors} can be appended.
+		 * Additionally, other {@code entries} can be appended.
 		 * 
 		 * @param group
 		 *            the group this instance is based on
-		 * @param descriptors
-		 *            additional descriptors to be added
+		 * @param entries
+		 *            additional entries to be added
 		 * 
 		 * @see Descriptor
 		 */
-		public Group(final Group group,
-				final Descriptor<?, ?, ?>... descriptors) {
-			this.descriptors.addAll(group.descriptors);
-			append(descriptors);
+		public Group(final Group group, final GroupEntry<?>... entries) {
+			this.entries.addAll(group.entries);
+			append(entries);
 		}
 
 		/**
 		 * Constructor to create a {@code group} based on another group.
-		 * Additionally, other {@code descriptors} can be appended.
+		 * Additionally, other {@code entries} can be appended.
 		 * 
 		 * @param group
 		 *            the group this instance is based on
 		 * @param descriptors
-		 *            additional descriptors to be added
+		 *            additional entries to be added
 		 * 
 		 * @see Descriptor
 		 */
 		public Group(final Group group,
-				final Collection<Descriptor<?, ?, ?>> descriptors) {
-			this.descriptors.addAll(group.descriptors);
+				final Collection<GroupEntry<?>> descriptors) {
+			this.entries.addAll(group.entries);
 			append(descriptors);
 		}
 
 		/**
-		 * Append the specified {@code descriptors} to the group.
+		 * Append the specified {@code entries} to the group.
 		 * 
-		 * @param descriptors
-		 *            the descriptors to be appended
+		 * @param entries
+		 *            the entries to be appended
 		 */
-		public void append(final Descriptor<?, ?, ?>... descriptors) {
-			if (descriptors == null) {
+		public void append(final GroupEntry<?>... entries) {
+			if (entries == null) {
 				return;
 			}
-			append(Arrays.asList(descriptors));
+			append(Arrays.asList(entries));
 		}
 
 		/**
-		 * Append the specified {@code descriptors} to the group.
+		 * Append the specified {@code entries} to the group.
 		 * 
-		 * @param descriptors
-		 *            the descriptors to be appended
+		 * @param entries
+		 *            the entries to be appended
 		 */
-		public void append(final Collection<Descriptor<?, ?, ?>> descriptors) {
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
-				if (desc == null) {
+		public void append(final Collection<GroupEntry<?>> entries) {
+			for (final GroupEntry<?> entry : entries) {
+				if (entry == null) {
 					throw new NullPointerException(
 							"Null descriptors are not allowed.");
 				}
 
 				// add the descriptor
-				this.descriptors.add(desc);
+				this.entries.add(entry);
 			}
 		}
 
 		/**
-		 * Gets the amount of descriptors within the group.
+		 * Gets the amount of entries within the group.
 		 * 
-		 * @return the amount of descriptors within the group
+		 * @return the amount of entries within the group
 		 */
 		public int size() {
-			return descriptors.size();
+			return entries.size();
 		}
 
 		/**
-		 * Get the descriptor at the specified {@code position} of the group.
+		 * Get the entries at the specified {@code position} of the group.
 		 * 
 		 * @param position
-		 *            the position to get the descriptor for (the position is
+		 *            the position to get the entry for (the position is
 		 *            0-based)
 		 * 
-		 * @return the descriptors of the group
+		 * @return the entry at the specified position of the group
 		 */
-		public Descriptor<?, ?, ?> getDescriptor(final int position) {
-			return descriptors.get(position);
+		public GroupEntry<?> getEntry(final int position) {
+			return entries.get(position);
 		}
 
 		/**
-		 * Get the descriptors of the group.
+		 * Get the entries of the group.
 		 * 
-		 * @return the descriptors of the group
+		 * @return the entries of the group
 		 */
-		public List<Descriptor<?, ?, ?>> getDescriptors() {
-			return Collections.unmodifiableList(descriptors);
+		public List<GroupEntry<?>> getEntries() {
+			return Collections.unmodifiableList(entries);
 		}
 
 		/**
@@ -178,8 +283,8 @@ public class GroupEvaluator {
 
 			// create a list
 			String separator = "";
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
-				sb.append(desc.getUniqueString());
+			for (final GroupEntry<?> entry : entries) {
+				sb.append(entry.getLabel());
 				sb.append(separator);
 
 				separator = ", ";
@@ -189,28 +294,27 @@ public class GroupEvaluator {
 		}
 
 		/**
-		 * Transforms the list of descriptors into a list of strings, using the
-		 * unique string of a descriptor (i.e.
-		 * {@link Descriptor#getUniqueString()}.
+		 * Transforms the list of entries into a list of strings, using the
+		 * label of an entry (i.e. {@link GroupEntry#getLabel()}.
 		 * 
 		 * @return a list of strings representing the group
 		 */
 		public List<String> toStringList() {
-			final List<String> list = new ArrayList<String>(descriptors.size());
-			for (final Descriptor<?, ?, ?> desc : descriptors) {
-				list.add(desc.getUniqueString());
+			final List<String> list = new ArrayList<String>(entries.size());
+			for (final GroupEntry<?> entry : entries) {
+				list.add(entry.getLabel());
 			}
 			return list;
 		}
 
 		@Override
 		public String toString() {
-			return descriptors.toString();
+			return entries.toString();
 		}
 
 		@Override
-		public Iterator<Descriptor<?, ?, ?>> iterator() {
-			return descriptors.iterator();
+		public Iterator<GroupEntry<?>> iterator() {
+			return entries.iterator();
 		}
 
 		@Override
@@ -221,7 +325,7 @@ public class GroupEvaluator {
 				return true;
 			} else if (o instanceof Group) {
 				final Group sg = (Group) o;
-				return this.descriptors.equals(sg.descriptors);
+				return this.entries.equals(sg.entries);
 			} else {
 				return false;
 			}
@@ -229,10 +333,11 @@ public class GroupEvaluator {
 
 		@Override
 		public int hashCode() {
-			return this.descriptors.hashCode();
+			return this.entries.hashCode();
 		}
 	}
 
+	private final DimensionModel dimensionModel;
 	private final MetaDataModel metaDataModel;
 	private final TidaIndex index;
 	private final BaseIndexFactory factory;
@@ -248,6 +353,7 @@ public class GroupEvaluator {
 	 * @see TidaModel
 	 */
 	public GroupEvaluator(final TidaModel model) {
+		dimensionModel = model.getDimensionModel();
 		metaDataModel = model.getMetaDataModel();
 		index = model.getIndex();
 		factory = model.getIndexFactory();
@@ -279,23 +385,31 @@ public class GroupEvaluator {
 
 			// get all the bitmaps of the slices of the group
 			final List<Bitmap> bitmaps = new ArrayList<Bitmap>(group.size());
-			for (final Descriptor<?, ?, ?> d : group.getDescriptors()) {
-				final Slice<?> slice = index.getMetaIndexDimensionSlice(
-						d.getModelId(), d.getId());
+			for (final GroupEntry<?> e : group) {
+				final Bitmap bitmap;
+				final Object meta = e.getMeta();
+				if (meta instanceof Descriptor) {
+					bitmap = getDescriptorBitmap((Descriptor<?, ?, ?>) meta);
+				} else if (meta instanceof DimensionSelector) {
+					bitmap = getDimensionSelectorBitmap(
+							(DimensionSelector) meta, e.getId());
+				} else {
+					throw new ForwardedRuntimeException(
+							GroupEvaluatorException.class, 1002,
+							meta == null ? null : meta.getClass()
+									.getSimpleName());
+				}
 
 				/*
-				 * if a slice doesn't exist it means that there aren't any
-				 * records
+				 * A null indicates that there aren't any records for the group.
+				 * If that is the case, we just clear the bitmap see the later
+				 * handling, which will not add any value for the group.
 				 */
-				if (slice == null) {
+				if (bitmap == null) {
 					bitmaps.clear();
 					break;
-				}
-				/*
-				 * get the bitmap of the slice
-				 */
-				else {
-					bitmaps.add(slice.getBitmap());
+				} else {
+					bitmaps.add(bitmap);
 				}
 			}
 
@@ -328,6 +442,59 @@ public class GroupEvaluator {
 	}
 
 	/**
+	 * Gets the bitmap for the specified descriptor.
+	 * 
+	 * @param desc
+	 *            the descriptor to get the bitmap for
+	 * 
+	 * @return the created bitmap
+	 */
+	protected Bitmap getDescriptorBitmap(final Descriptor<?, ?, ?> desc) {
+		final Slice<?> slice = index.getMetaIndexDimensionSlice(
+				desc.getModelId(), desc.getId());
+
+		/*
+		 * if a slice doesn't exist it means that there aren't any records
+		 */
+		if (slice == null) {
+			return null;
+		}
+		/*
+		 * get the bitmap of the slice
+		 */
+		else {
+			return slice.getBitmap();
+		}
+	}
+
+	/**
+	 * Gets the bitmap defined by the specified {@code dimSelector}.
+	 * 
+	 * @param dimSelector
+	 *            the selector of the level to look for the member
+	 * @param memberId
+	 *            the identifier of the member to create the bitmap for
+	 * 
+	 * @return the created bitmap
+	 */
+	protected Bitmap getDimensionSelectorBitmap(
+			final DimensionSelector dimSelector, final String memberId) {
+		return dimensionModel.getBitmap(dimSelector, false,
+				new IMemberFilter() {
+
+					@Override
+					public boolean selectOnlyOne() {
+						return true;
+					}
+
+					@Override
+					public boolean accept(final DescriptorMember member) {
+						return memberId.equals(member.getId());
+					}
+				});
+	}
+
+	/**
 	 * Generates the groups defined by the {@code GroupExpression}. The method
 	 * ensures that excluded group members are excluded.
 	 * 
@@ -343,48 +510,20 @@ public class GroupEvaluator {
 
 		// combine the groups
 		List<Group> result = null;
-		for (final String descId : groupExpression.getDescriptors()) {
-			final List<Group> iterationResult = new ArrayList<Group>();
+		for (final Object selector : groupExpression.getSelectors()) {
 
-			// get the DescriptorModel
-			final DescriptorModel<?> descModel = metaDataModel
-					.getDescriptorModel(descId);
-			if (descModel == null) {
-				throw new ForwardedRuntimeException(
-						GroupEvaluatorException.class, 1000, descId);
-			}
-
-			if (result == null) {
-				for (final Descriptor<?, ?, ?> desc : descModel
-						.getAllDescriptors()) {
-
-					// create the group and add it if not excluded already
-					final Group group = new Group(desc);
-					if (!excludes(group, exclusions)) {
-						iterationResult.add(new Group(desc));
-					}
-				}
+			if (selector instanceof String) {
+				result = appendDescriptorIdSelector((String) selector,
+						exclusions, result);
+			} else if (selector instanceof DimensionSelector) {
+				result = appendDimensionSelector((DimensionSelector) selector,
+						exclusions, result);
 			} else {
-				for (final Group selectGroup : result) {
-					for (final Descriptor<?, ?, ?> desc : descModel
-							.getAllDescriptors()) {
-
-						// create a new group with the appended value
-						final Group copiedGroup = new Group(selectGroup, desc);
-
-						/*
-						 * append the new descriptor and check only the new
-						 * value for exclusion
-						 */
-						if (!excludes(copiedGroup, exclusions)) {
-							iterationResult.add(copiedGroup);
-						}
-					}
-				}
+				throw new ForwardedRuntimeException(
+						GroupEvaluatorException.class, 1001, selector,
+						selector == null ? null : selector.getClass()
+								.getSimpleName());
 			}
-
-			// set the result for the next iteration
-			result = iterationResult;
 
 			// check if everything is filtered, nothing can be added
 			if (result.size() == 0) {
@@ -394,6 +533,134 @@ public class GroupEvaluator {
 
 		// null will be returned if nothing is defined for the group
 		return result;
+	}
+
+	/**
+	 * Appends the descriptors of the {@code DescriptorModel} specified by the
+	 * passed id.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the {@code DescriptorModel} to append the
+	 *            descriptors for
+	 * @param exclusions
+	 *            the definitions of groups to be excluded
+	 * @param result
+	 *            the current result from a previous creation
+	 * 
+	 * @return the new result containing the new groups
+	 */
+	protected List<Group> appendDescriptorIdSelector(final String descModelId,
+			final List<GroupExclusion> exclusions, final List<Group> result) {
+		final List<Group> iterationResult = new ArrayList<Group>();
+
+		// get the DescriptorModel
+		final DescriptorModel<?> descModel = metaDataModel
+				.getDescriptorModel(descModelId);
+		if (descModel == null) {
+			throw new ForwardedRuntimeException(GroupEvaluatorException.class,
+					1000, descModelId);
+		}
+
+		if (result == null) {
+			for (final Descriptor<?, ?, ?> desc : descModel.getAllDescriptors()) {
+
+				// create the group and add it if not excluded already
+				final GroupEntry<Descriptor<?, ?, ?>> entry = new GroupEntry<Descriptor<?, ?, ?>>(
+						desc.getUniqueString(), desc);
+				final Group group = new Group(entry);
+				if (!excludes(group, exclusions)) {
+					iterationResult.add(new Group(entry));
+				}
+			}
+		} else {
+			for (final Group selectGroup : result) {
+				for (final Descriptor<?, ?, ?> desc : descModel
+						.getAllDescriptors()) {
+					final GroupEntry<Descriptor<?, ?, ?>> entry = new GroupEntry<Descriptor<?, ?, ?>>(
+							desc.getUniqueString(), desc);
+
+					// create a new group with the appended value
+					final Group copiedGroup = new Group(selectGroup, entry);
+
+					/*
+					 * append the new descriptor and check only the new value
+					 * for exclusion
+					 */
+					if (!excludes(copiedGroup, exclusions)) {
+						iterationResult.add(copiedGroup);
+					}
+				}
+			}
+		}
+
+		return iterationResult;
+	}
+
+	/**
+	 * Appends the members of the {@code DimensionSelector} specified by the
+	 * passed id.
+	 * 
+	 * @param selector
+	 *            the {@code DimensionSelector} to append the members for
+	 * @param exclusions
+	 *            the definitions of groups to be excluded
+	 * @param result
+	 *            the current result from a previous creation
+	 * 
+	 * @return the new result containing the new groups
+	 */
+	protected List<Group> appendDimensionSelector(
+			final DimensionSelector selector,
+			final List<GroupExclusion> exclusions, final List<Group> result) {
+
+		final IDimensionGraph dimGraph = dimensionModel.getDimension(selector
+				.getDimensionId());
+		if (dimGraph == null) {
+			throw new ForwardedRuntimeException(GroupEvaluatorException.class,
+					1003, selector.getDimensionId());
+		} else if (dimGraph instanceof DescriptorDimensionGraph == false) {
+			throw new ForwardedRuntimeException(GroupEvaluatorException.class,
+					1004, selector.getDimensionId());
+		}
+
+		final List<Group> iterationResult = new ArrayList<Group>();
+
+		final DescriptorDimensionGraph descDimGraph = (DescriptorDimensionGraph) dimGraph;
+		final Level level = descDimGraph.getLevel(selector.getHierarchyId(),
+				selector.getLevelId());
+		final Set<DescriptorMember> members = level.getMembers(selector
+				.getHierarchyId());
+
+		if (result == null) {
+			for (final DescriptorMember member : members) {
+				final GroupEntry<DimensionSelector> entry = new GroupEntry<DimensionSelector>(
+						member.getId(), member.getName(), selector);
+				final Group group = new Group(entry);
+				if (!excludes(group, exclusions)) {
+					iterationResult.add(new Group(entry));
+				}
+			}
+		} else {
+			for (final Group selectGroup : result) {
+				for (final DescriptorMember member : members) {
+					final GroupEntry<DimensionSelector> entry = new GroupEntry<DimensionSelector>(
+							member.getId(), member.getName(), selector);
+
+					// create a new group with the appended value
+					final Group copiedGroup = new Group(selectGroup, entry);
+
+					/*
+					 * append the new descriptor and check only the new value
+					 * for exclusion
+					 */
+					if (!excludes(copiedGroup, exclusions)) {
+						iterationResult.add(copiedGroup);
+					}
+				}
+			}
+		}
+
+		return iterationResult;
 	}
 
 	/**
@@ -425,8 +692,8 @@ public class GroupEvaluator {
 				}
 
 				// get the descriptor and the string of it
-				final Descriptor<?, ?, ?> descriptor = group.getDescriptor(i);
-				final String uniqueString = descriptor.getUniqueString();
+				final GroupEntry<?> entry = group.getEntry(i);
+				final String uniqueString = entry.getId();
 
 				/*
 				 * if we don't match the exclusion we can stop here

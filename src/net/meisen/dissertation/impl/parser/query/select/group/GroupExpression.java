@@ -17,7 +17,7 @@ import net.meisen.general.genmisc.types.Strings;
  * 
  */
 public class GroupExpression {
-	private final Set<String> descriptorIds = new LinkedHashSet<String>();
+	private final Set<Object> selectors = new LinkedHashSet<Object>();
 	private final List<GroupExclusion> exclusions = new ArrayList<GroupExclusion>();
 
 	/**
@@ -30,88 +30,86 @@ public class GroupExpression {
 	/**
 	 * Constructor to create a group expression.
 	 * 
-	 * @param descriptorsIds
-	 *            the list of identifiers of the {@code DescriptorModel} to be
-	 *            grouped
+	 * @param selectors
+	 *            the list of identifiers to be grouped
 	 */
-	public GroupExpression(final String... descriptorsIds) {
-		setDescriptors(descriptorsIds);
+	public GroupExpression(final Object... selectors) {
+		setSelectors(selectors);
 	}
 
 	/**
 	 * Constructor to create a group expression.
 	 * 
-	 * @param descriptorsIds
-	 *            the list of identifiers of the {@code DescriptorModel} to be
-	 *            grouped
+	 * @param selectors
+	 *            the list of identifiers to be grouped
 	 */
-	public GroupExpression(final Collection<String> descriptorsIds) {
-		setDescriptors(descriptorsIds);
+	public GroupExpression(final Collection<Object> selectors) {
+		setSelectors(selectors);
 	}
 
 	/**
-	 * Sets the descriptors, i.e. all the actual added descriptors are removed.
+	 * Sets the selectors for the expression.
 	 * 
-	 * @param descriptorIds
-	 *            the descriptors to be set
+	 * @param selectors
+	 *            the selectors to be set, all other selectors are removed
 	 */
-	public void setDescriptors(final String... descriptorIds) {
-		if (descriptorIds == null) {
+	public void setSelectors(final Object... selectors) {
+		if (selectors == null) {
 			return;
 		}
 
-		setDescriptors(Arrays.asList(descriptorIds));
+		setSelectors(Arrays.asList(selectors));
 	}
 
 	/**
-	 * Sets the descriptors, i.e. all the actual added descriptors are removed.
+	 * Sets the selectors for the expression.
 	 * 
-	 * @param descriptorIds
-	 *            the descriptors to be set
+	 * @param selectors
+	 *            the selectors to be set, all other selectors are removed
 	 */
-	public void setDescriptors(final Collection<String> descriptorIds) {
-		if (descriptorIds == null) {
+	public void setSelectors(final Collection<Object> selectors) {
+		if (selectors == null) {
 			return;
 		}
 
-		this.descriptorIds.clear();
-		addDescriptors(descriptorIds);
+		this.selectors.clear();
+		addSelectors(selectors);
 	}
 
 	/**
 	 * Adds all the specified descriptors.
 	 * 
-	 * @param descriptorIds
-	 *            the descriptors' identifiers to be added
+	 * @param selectors
+	 *            the selectors to be added
 	 * 
-	 * @return {@code true} if all descriptors' identifiers were added,
-	 *         otherwise {@code false}
+	 * @return {@code true} if all selectors identifiers were added, otherwise
+	 *         {@code false}
 	 */
-	public boolean addDescriptors(final String... descriptorIds) {
-		if (descriptorIds == null) {
+	public boolean addSelectors(final Object... selectors) {
+		if (selectors == null) {
 			return true;
 		}
 
-		return addDescriptors(Arrays.asList(descriptorIds));
+		return addSelectors(Arrays.asList(selectors));
 	}
 
 	/**
 	 * Adds all the specified descriptors.
 	 * 
-	 * @param descriptorIds
-	 *            the descriptors' identifiers to be added
+	 * @param selectors
+	 *            the selectors to be added
 	 * 
-	 * @return {@code true} if all descriptors' identifiers were added,
-	 *         otherwise {@code false}
+	 * @return {@code true} if all selectors identifiers were added, otherwise
+	 *         {@code false}
 	 */
-	public boolean addDescriptors(final Collection<String> descriptorIds) {
-		if (descriptorIds == null) {
+	public boolean addSelectors(final Collection<Object> selectors) {
+		if (selectors == null) {
 			return true;
 		}
 
 		boolean ret = true;
-		for (final String descriptorId : descriptorIds) {
-			if (!addDescriptor(descriptorId)) {
+		for (final Object selector : selectors) {
+			if (!addSelector(selector)) {
 				ret = false;
 			}
 		}
@@ -120,29 +118,28 @@ public class GroupExpression {
 	}
 
 	/**
-	 * Adds the descriptor's identifier to the list of descriptors defining the
-	 * group. If the descriptor was already added, it will not be added again
-	 * and {@code false} will be returned.
+	 * Adds the selector defining the group. If the selector was already added,
+	 * it will not be added again and {@code false} will be returned.
 	 * 
-	 * @param descriptorId
-	 *            the identifier of the descriptor to be added
+	 * @param selector
+	 *            the selector to be added
 	 * 
-	 * @return {@code true} if the descriptor was added, otherwise {@code false}
+	 * @return {@code true} if the selector was added, otherwise {@code false}
 	 */
-	public boolean addDescriptor(final String descriptorId) {
-		if (descriptorId == null) {
+	public boolean addSelector(final Object selector) {
+		if (selector == null) {
 			return false;
 		}
-		return descriptorIds.add(descriptorId);
+		return selectors.add(selector);
 	}
 
 	/**
-	 * Gets all the specified descriptors.
+	 * Gets all the specified (ordered) selectors.
 	 * 
-	 * @return the descriptors making up the group, ordered by definition
+	 * @return the selectors making up the group, ordered by definition
 	 */
-	public Set<String> getDescriptors() {
-		return Collections.unmodifiableSet(descriptorIds);
+	public Set<Object> getSelectors() {
+		return Collections.unmodifiableSet(selectors);
 	}
 
 	/**
@@ -211,7 +208,7 @@ public class GroupExpression {
 	 *         {@code false}
 	 */
 	public boolean isValid() {
-		final int expectedSize = descriptorIds.size();
+		final int expectedSize = selectors.size();
 
 		for (final GroupExclusion exclusion : exclusions) {
 			if (expectedSize < exclusion.getAmountOfValues()) {
@@ -223,26 +220,26 @@ public class GroupExpression {
 	}
 
 	/**
-	 * Gets the position of a {@code DescriptorModel} within the group.
+	 * Gets the position of an expression within the group.
 	 * 
-	 * @param descId
-	 *            the identifier of the {@code DescriptorModel} to be found
+	 * @param selector
+	 *            the selector to be found
 	 * 
 	 * @return the position, or {@code -1} if it cannot be found
 	 */
-	public int getPosition(final String descId) {
-		if (descId == null) {
+	public int getPosition(final Object selector) {
+		if (selector == null) {
 			return -1;
 		}
 
 		return net.meisen.general.genmisc.collections.Collections.getPosition(
-				descriptorIds, descId);
+				selectors, selector);
 	}
 
 	@Override
 	public String toString() {
 		return "["
-				+ Strings.join(",", descriptorIds)
+				+ Strings.join(",", selectors)
 				+ "]"
 				+ (exclusions.size() > 0 ? " excluding {"
 						+ Strings.join(";", exclusions) + "}" : "");

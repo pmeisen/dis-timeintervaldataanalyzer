@@ -110,7 +110,10 @@ public class TidaDimensionHandler {
 	 */
 	public Map<String, IDimensionGraph> createMap(final Collection<?> dims) {
 		final Map<String, IDimensionGraph> dimensions = new HashMap<String, IDimensionGraph>();
-
+		if (dims == null) {
+			return dimensions;
+		}
+			
 		for (final Object dim : dims) {
 			if (dim instanceof IDimension) {
 				final IDimension dimension = (IDimension) dim;

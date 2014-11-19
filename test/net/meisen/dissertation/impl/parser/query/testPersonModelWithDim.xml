@@ -16,7 +16,7 @@
   <meta>
     <descriptors>
       <resource id="PERSON" />
-      <string id="LOCATION" />
+      <string id="LOCATION" null="true" />
       <integer id="SCREAMS" />
     </descriptors>
 
@@ -46,7 +46,7 @@
       <dim:hierarchy id="GEO" all="All Locations">
         <dim:level id="CONTINENT">
           <dim:member id="EUROPE" name="Europe" rollUpTo="*" />
-          <dim:member id="UNKNOWN" value="Undefined" rollUpTo="*" />
+          <dim:member id="UNKNOWN" null="true" rollUpTo="*" />
         </dim:level>
         <dim:level id="COUNTRY">
           <dim:member id="GERMANY" reg="Aachen|Mönchengladbach" rollUpTo="EUROPE" />
@@ -85,7 +85,7 @@
       <entry class="java.util.Date" value="03.03.2014 16:20:00" />
       <entry class="java.util.Date" value="03.03.2014 17:21:00" />
       <entry class="java.lang.String" value="Philipp" />
-      <entry class="java.lang.String" value="Undefined" />
+      <entry class="java.lang.String" />
       <entry class="java.lang.Integer" value="0" />
     </dataset>
     

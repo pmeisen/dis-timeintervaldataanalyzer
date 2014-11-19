@@ -109,7 +109,7 @@ exprMeasure         : compNamedMeasure (SEPARATOR compNamedMeasure)*;
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp            : compMemberEqual | compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
-exprAggregate       : selectorDescriptorId (SEPARATOR selectorDescriptorId)*;
+exprAggregate       : (selectorMember | selectorDescriptorId) (SEPARATOR (selectorMember | selectorDescriptorId))*;
 
 /*
  * Define the different redudant definitions within the parts of the statement

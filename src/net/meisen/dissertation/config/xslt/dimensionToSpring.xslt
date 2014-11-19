@@ -64,8 +64,10 @@
           <xsl:variable name="memberTypeFunction">
             <xsl:choose>
               <xsl:when test="@reg and @value"><xsl:message terminate="yes">Member has a reg and value defined, please specify only one value!</xsl:message></xsl:when>
+              <xsl:when test="@value and @null"><xsl:message terminate="yes">The null-attribute is only allowed alone, or with the reg-attribute!</xsl:message></xsl:when>
               <xsl:when test="@reg">addPatternMember</xsl:when>
               <xsl:when test="@value">addDescriptorMember</xsl:when>
+              <xsl:when test="@null">addPatternMember</xsl:when>
               <xsl:otherwise>addMember</xsl:otherwise>
             </xsl:choose>
           </xsl:variable>
@@ -86,6 +88,22 @@
             <xsl:if test="@value">
               <constructor-arg type="java.lang.String"><value><xsl:value-of select="@value" /></value></constructor-arg>
             </xsl:if>
+            
+            <!-- if reg and null -->
+            <xsl:choose>
+              <!-- check if we have reg and null -->
+              <xsl:when test="@reg and @null">
+                <constructor-arg type="boolean"><value><xsl:value-of select="@null" /></value></constructor-arg>
+              </xsl:when>
+              <!-- we have to add the regular expression and the null-value -->
+              <xsl:when test="@null">
+                <constructor-arg type="java.lang.String" value=" ^" />
+                <constructor-arg type="boolean"><value><xsl:value-of select="@null" /></value></constructor-arg>
+              </xsl:when>
+              <xsl:when test="@reg">
+                <constructor-arg type="boolean" value="false" />
+              </xsl:when>
+            </xsl:choose>
             
             <!-- levelId -->
             <constructor-arg type="java.lang.String" value="{$levelId}" />

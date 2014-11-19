@@ -33,7 +33,7 @@ public class DescriptorHierarchy {
 				DescriptorDimension.ROOT_LEVEL_ID, this);
 		this.levels.put(DescriptorDimension.ROOT_LEVEL_ID, rootLevel);
 		memberManager.addMember(DescriptorDimension.ROOT_MEMBER_ID,
-				rootLevel.getName(), null, rootLevel, null);
+				rootLevel.getName(), null, false, rootLevel, null);
 	}
 
 	public DescriptorMember addDescriptorMember(final String descriptor,
@@ -51,21 +51,22 @@ public class DescriptorHierarchy {
 	public DescriptorMember addDescriptorMember(final String id,
 			final String name, final String descriptor, final String levelId,
 			final Collection<String> rollUpTo) {
-		return addPatternMember(id, name, Pattern.quote(descriptor), levelId,
-				rollUpTo);
+		return addPatternMember(id, name, Pattern.quote(descriptor), false,
+				levelId, rollUpTo);
 	}
 
 	public DescriptorMember addPatternMember(final String id,
-			final String pattern, final String levelId,
-			final Collection<String> rollUpTo) {
-		return addPatternMember(id, id, pattern, levelId, rollUpTo);
+			final String pattern, final boolean includeNull,
+			final String levelId, final Collection<String> rollUpTo) {
+		return addPatternMember(id, id, pattern, includeNull, levelId, rollUpTo);
 	}
 
 	public DescriptorMember addPatternMember(final String id,
-			final String name, final String pattern, final String levelId,
-			final Collection<String> rollUpTo) {
+			final String name, final String pattern, final boolean includeNull,
+			final String levelId, final Collection<String> rollUpTo) {
 		final DescriptorLevel level = resolveMemberLevel(levelId);
-		return memberManager.addMember(id, name, pattern, level, rollUpTo);
+		return memberManager.addMember(id, name, pattern, includeNull, level,
+				rollUpTo);
 	}
 
 	public DescriptorMember addMember(final String id, final String levelId,
@@ -76,7 +77,7 @@ public class DescriptorHierarchy {
 	public DescriptorMember addMember(final String id, final String name,
 			final String levelId, final Collection<String> rollUpTo) {
 		final DescriptorLevel level = resolveMemberLevel(levelId);
-		return memberManager.addMember(id, name, null, level, rollUpTo);
+		return memberManager.addMember(id, name, null, false, level, rollUpTo);
 	}
 
 	public void modifyLevel(final String levelId, final String name) {

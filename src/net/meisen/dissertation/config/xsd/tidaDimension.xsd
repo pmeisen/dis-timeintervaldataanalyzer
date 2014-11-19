@@ -34,6 +34,7 @@
                               <xs:attribute name="rollUpTo" type="rollUpList" use="required" />
                               <xs:attribute name="reg" type="xs:string" use="optional" />
                               <xs:attribute name="value" type="xs:string" use="optional" />
+                              <xs:attribute name="null" type="xs:boolean" use="optional" />
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>

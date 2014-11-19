@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.parser.query;
 
+import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
@@ -8,7 +9,7 @@ import net.meisen.general.genmisc.types.Strings;
  * @author pmeisen
  * 
  */
-public class DimensionSelector {
+public class DimensionSelector implements Comparable<DimensionSelector> {
 	private final String dimensionId;
 	private final String hierarchyId;
 	private final String levelId;
@@ -62,5 +63,40 @@ public class DimensionSelector {
 	public String toString() {
 		return Strings.concate(".", getDimensionId(), getHierarchyId(),
 				getLevelId());
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj == null) {
+			return false;
+		} else if (obj instanceof DimensionSelector) {
+			final DimensionSelector ds = (DimensionSelector) obj;
+			return Objects.equals(getDimensionId(), ds.getDimensionId())
+					&& Objects.equals(getHierarchyId(), ds.getHierarchyId())
+					&& Objects.equals(getLevelId(), ds.getLevelId());
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.generateHashCode(23, 7, getDimensionId(),
+				getHierarchyId(), getLevelId());
+	}
+
+	@Override
+	public int compareTo(final DimensionSelector ds) {
+		int cmp = getDimensionId().compareTo(ds.getDimensionId());
+		if (cmp == 0) {
+			cmp = getHierarchyId().compareTo(ds.getHierarchyId());
+			if (cmp == 0) {
+				cmp = getLevelId().compareTo(getLevelId());
+			}
+		}
+
+		return cmp;
 	}
 }

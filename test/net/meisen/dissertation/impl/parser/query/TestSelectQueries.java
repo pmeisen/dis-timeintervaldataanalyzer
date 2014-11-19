@@ -36,6 +36,7 @@ import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultTimeSeries;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResultEntry;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
 import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
@@ -630,7 +631,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014)");
 		final GroupExpression group = query.getGroup();
 
-		final Set<String> descriptors = group.getDescriptors();
+		final Set<Object> descriptors = group.getSelectors();
 		assertEquals(0, descriptors.size());
 	}
 
@@ -642,9 +643,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third");
 		final GroupExpression group = query.getGroup();
 
-		final Set<String> descriptors = group.getDescriptors();
+		final Set<Object> descriptors = group.getSelectors();
 		assertEquals(3, descriptors.size());
-		final Iterator<String> it = descriptors.iterator();
+		final Iterator<Object> it = descriptors.iterator();
 		assertEquals("first", it.next());
 		assertEquals("second", it.next());
 		assertEquals("third", it.next());
@@ -658,9 +659,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third ignore {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
 		final GroupExpression group = query.getGroup();
 
-		final Set<String> descriptors = group.getDescriptors();
+		final Set<Object> descriptors = group.getSelectors();
 		assertEquals(3, descriptors.size());
-		final Iterator<String> itDesc = descriptors.iterator();
+		final Iterator<Object> itDesc = descriptors.iterator();
 		assertEquals("first", itDesc.next());
 		assertEquals("second", itDesc.next());
 		assertEquals("third", itDesc.next());
@@ -672,6 +673,32 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals("\\hallo\\", excls.get(0).getValue());
 		assertEquals("pleasematch.*", excls.get(1).getValue());
 		assertEquals("formula is a * b", excls.get(2).getValue());
+	}
+
+	/**
+	 * Tests the parsing of a dimensional expression within group-by.
+	 */
+	@Test
+	public void testParsingOfSimpleDimensionalGroupBy() {
+
+		// check just one dimensional expression
+		SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by DIM.HIER.LVL");
+		GroupExpression group = query.getGroup();
+
+		Set<Object> selectors = group.getSelectors();
+		assertEquals(1, selectors.size());
+		Iterator<Object> it = selectors.iterator();
+		assertEquals(new DimensionSelector("DIM", "HIER", "LVL"), it.next());
+
+		// check a mixture
+		query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by PERSON, DIM2.HIER.LVL");
+		group = query.getGroup();
+
+		selectors = group.getSelectors();
+		assertEquals(2, selectors.size());
+		it = selectors.iterator();
+		assertEquals("PERSON", it.next());
+		assertEquals(new DimensionSelector("DIM2", "HIER", "LVL"), it.next());
 	}
 
 	/**
@@ -1219,6 +1246,69 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(2, gRes.size());
 		assertNotNull(gRes.getEntry("Debbie"));
 		assertNotNull(gRes.getEntry("Edison"));
+	}
+
+	/**
+	 * Group-By of a dimensional expression with exclusion.
+	 */
+	@Test
+	public void testGroupByWithDimensionsAndExclusion() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON.GENDER.GENDER, LOCATION.GEO.CONTINENT ignore {('*', 'UNKNOWN')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				null);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+
+		assertEquals(2, gRes.size());
+		assertNotNull(gRes.getEntry("MALE", "Europe"));
+		assertNotNull(gRes.getEntry("FEMALE", "Europe"));
+
+		GroupResultEntry e = gRes.getEntry("MALE", "Europe");
+		assertEquals(0, e.getBitmap().getIds()[0]);
+		assertEquals(1, e.getBitmap().getIds()[1]);
+		assertEquals(3, e.getBitmap().getIds()[2]);
+		assertEquals(5, e.getBitmap().getIds()[3]);
+		e = gRes.getEntry("FEMALE", "Europe");
+		assertEquals(4, e.getBitmap().getIds()[0]);
+	}
+
+	/**
+	 * Group-By of a dimensional expression with exclusion.
+	 */
+	@Test
+	public void testGroupByWithExclusionOfNull() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+
+		// load the model
+		m(xml);
+
+		// 1. fire and check the query (excluding null)
+		String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION ignore {(NULL)}";
+		SelectResult res = (SelectResult) factory.evaluateQuery(q(query), null);
+		GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(2, gRes.size());
+		assertNotNull(gRes.getEntry("Mönchengladbach"));
+		assertNotNull(gRes.getEntry("Aachen"));
+
+		// 2. fire and check the query (including null)
+		query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION ";
+		res = (SelectResult) factory.evaluateQuery(q(query), null);
+		gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(3, gRes.size());
+		assertNotNull(gRes.getEntry((String) null));
+		assertEquals(2, gRes.getEntry((String) null).getBitmap().getIds()[0]);
+		assertNotNull(gRes.getEntry("Mönchengladbach"));
+		assertNotNull(gRes.getEntry("Aachen"));
 	}
 
 	/**

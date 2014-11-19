@@ -59,10 +59,10 @@ public class BaseDimensionTest extends LoaderBasedTest {
 
 		// add a pattern
 		hierarchy.addPatternMember("STADT_DE", "\\1", "(.*), Deutschland",
-				"Stadt", Arrays.asList("LAND_DE"));
-		hierarchy.addPatternMember("STADT_USA", "\\1", "(.*), USA", "Stadt",
-				Arrays.asList("USA"));
-		hierarchy.addPatternMember("STADT_ANDERE", ".*", "Stadt",
+				false, "Stadt", Arrays.asList("LAND_DE"));
+		hierarchy.addPatternMember("STADT_USA", "\\1", "(.*), USA", false,
+				"Stadt", Arrays.asList("USA"));
+		hierarchy.addPatternMember("STADT_ANDERE", ".*", false, "Stadt",
 				Arrays.asList("Unbekanntes"));
 
 		// add some members
@@ -94,9 +94,9 @@ public class BaseDimensionTest extends LoaderBasedTest {
 				Arrays.asList("0", "1"));
 
 		// add the chapter members
-		hierarchy.addPatternMember("A0-9", "\\0", "A[0-9]", "Paragraphs",
+		hierarchy.addPatternMember("A0-9", "A[0-9]", false, "Paragraphs",
 				Arrays.asList("1"));
-		hierarchy.addPatternMember("B0-9", "\\0", "B[0-9]", "Paragraphs",
+		hierarchy.addPatternMember("B0-9", "B[0-9]", false, "Paragraphs",
 				Arrays.asList("1"));
 
 		// add the preamble and the content level
@@ -176,7 +176,8 @@ public class BaseDimensionTest extends LoaderBasedTest {
 		// add the members
 		hierarchy.addDescriptorMember("TITLE", "Title", "Data",
 				Arrays.asList("PAGE"));
-		hierarchy.addPatternMember("REST", ".*", "Data", Arrays.asList("PAGE"));
+		hierarchy.addPatternMember("REST", ".*", false, "Data",
+				Arrays.asList("PAGE"));
 
 		return dim;
 	}
@@ -200,7 +201,7 @@ public class BaseDimensionTest extends LoaderBasedTest {
 		hierarchy.addMember("MEM_B1_1", "B1", null);
 		hierarchy.addMember("MEM_B2_1", "B2", null);
 		hierarchy.addMember("MEM_B2_2", "B2", Arrays.asList("*", "MEM_B1_1"));
-		hierarchy.addPatternMember("MEM_A_1", ".*", "A",
+		hierarchy.addPatternMember("MEM_A_1", ".*", false, "A",
 				Arrays.asList("MEM_B2_1", "MEM_B2_2"));
 
 		return dim;
@@ -229,7 +230,7 @@ public class BaseDimensionTest extends LoaderBasedTest {
 
 		hierarchy.addMember("MEM_B_1", "B", Arrays.asList("*", "MEM_A_2"));
 
-		hierarchy.addPatternMember("MEM_A_1", ".*", "A",
+		hierarchy.addPatternMember("MEM_A_1", ".*", false, "A",
 				Arrays.asList("MEM_B_1"));
 
 		return dim;
@@ -254,9 +255,9 @@ public class BaseDimensionTest extends LoaderBasedTest {
 
 		hierarchy.addMember("MEM_B1_1", "B1", null);
 		hierarchy.addMember("MEM_B2_1", "B2", null);
-		hierarchy.addPatternMember("MEM_B2_2", "B.*", "B2",
+		hierarchy.addPatternMember("MEM_B2_2", "B.*", false, "B2",
 				Arrays.asList("*", "MEM_B1_1"));
-		hierarchy.addPatternMember("MEM_A_1", ".*", "A",
+		hierarchy.addPatternMember("MEM_A_1", ".*", false, "A",
 				Arrays.asList("MEM_B2_1"));
 
 		return dim;

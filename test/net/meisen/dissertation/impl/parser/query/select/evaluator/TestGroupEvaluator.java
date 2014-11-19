@@ -15,7 +15,9 @@ import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
+import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.Group;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.GroupEntry;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -61,6 +63,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 	public void testExcludes() {
 		GroupExpression expr;
 		Group group;
+		Descriptor<?, ?, ?> desc;
 
 		// create the evaluator
 		final GroupEvaluator evaluator = new GroupEvaluator(model);
@@ -74,11 +77,15 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		expr.addExclusion("P*", "A*");
 
 		// add just one value, which fits but isn't excluded yet
-		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
+		desc = metaData.getDescriptorByValue("PERSON", "Philipp");
+		group.append(new GroupEntry<Descriptor<?, ?, ?>>(
+				desc.getUniqueString(), desc));
 		assertFalse(evaluator.excludes(group, expr.getExclusions()));
 
 		// append another value which achieves a fit
-		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
+		desc = metaData.getDescriptorByValue("LOCATION", "Aachen");
+		group.append(new GroupEntry<Descriptor<?, ?, ?>>(
+				desc.getUniqueString(), desc));
 		assertTrue(evaluator.excludes(group, expr.getExclusions()));
 
 		// test a fast fit - e.g. we don't need to scan the whole group
@@ -86,10 +93,28 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		expr = new GroupExpression("PERSON", "LOCATION", "SCREAMS");
 		expr.addExclusion("P*");
 
-		group.append(metaData.getDescriptorByValue("PERSON", "Philipp"));
+		desc = metaData.getDescriptorByValue("PERSON", "Philipp");
+		group.append(new GroupEntry<Descriptor<?, ?, ?>>(
+				desc.getUniqueString(), desc));
 		assertTrue(evaluator.excludes(group, expr.getExclusions()));
-		group.append(metaData.getDescriptorByValue("LOCATION", "Aachen"));
+		desc = metaData.getDescriptorByValue("LOCATION", "Aachen");
+		group.append(new GroupEntry<Descriptor<?, ?, ?>>(
+				desc.getUniqueString(), desc));
 		assertTrue(evaluator.excludes(group, expr.getExclusions()));
+
+		// check some DimensionalSelectors
+		final DimensionSelector sel = new DimensionSelector("PERSON", "GENDER",
+				"GENDER");
+		expr = new GroupExpression(sel);
+		expr.addExclusion("MALE");
+
+		group = new Group();
+		group.append(new GroupEntry<DimensionSelector>("MALE", sel));
+		assertTrue(evaluator.excludes(group, expr.getExclusions()));
+		group = new Group();
+		group.append(new GroupEntry<DimensionSelector>("FEMALE", sel));
+		assertFalse(evaluator.excludes(group, expr.getExclusions()));
+
 	}
 
 	/**
@@ -144,8 +169,8 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		assertEquals(12, res.size());
 		for (final Group g : res) {
 			assertEquals(2, g.size());
-			assertTrue(g.getDescriptor(0) instanceof IntegerDescriptor);
-			assertTrue(g.getDescriptor(1) instanceof ResourceDescriptor);
+			assertTrue(g.getEntry(0).getMeta() instanceof IntegerDescriptor);
+			assertTrue(g.getEntry(1).getMeta() instanceof ResourceDescriptor);
 		}
 
 		// generate a group for three descriptors
@@ -160,8 +185,8 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 			 * the 0 position contains also a NullDescriptor as well as a
 			 * GeneralDescriptor, therefore we don't test it here
 			 */
-			assertTrue(g.getDescriptor(1) instanceof IntegerDescriptor);
-			assertTrue(g.getDescriptor(2) instanceof ResourceDescriptor);
+			assertTrue(g.getEntry(1).getMeta() instanceof IntegerDescriptor);
+			assertTrue(g.getEntry(2).getMeta() instanceof ResourceDescriptor);
 		}
 
 		// test the exclusion of values
@@ -172,7 +197,8 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		for (final Group g : res) {
 
 			// the descriptor 'Philipp' should been excluded
-			assertTrue(!g.getDescriptor(1).getUniqueString().equals("Philipp"));
+			assertTrue(!((Descriptor<?, ?, ?>) g.getEntry(1).getMeta())
+					.getUniqueString().equals("Philipp"));
 		}
 
 		// test the usage of several exclusions
@@ -184,11 +210,11 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		for (final Group g : res) {
 
 			// the descriptor 'Philipp' should been excluded
-			assertTrue(!g.getDescriptor(1).getValue().equals("Philipp"));
+			assertTrue(!g.getEntry(1).getLabel().equals("Philipp"));
 
 			// the '*Edison*' with '12' screams should been excluded
-			assertTrue(!g.getDescriptor(1).getValue().equals("*Edison*")
-					|| !g.getDescriptor(0).getValue().equals(12));
+			assertTrue(!g.getEntry(1).getLabel().equals("*Edison*")
+					|| !g.getEntry(0).getLabel().equals("12"));
 		}
 
 		// test a full exclusion
@@ -205,7 +231,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		for (final Group g : res) {
 
 			// the null location should not be available
-			assertNotNull(g.getDescriptor(0).getValue());
+			assertNotNull(g.getEntry(0).getLabel());
 		}
 
 		group = new GroupExpression("PERSON", "LOCATION");
@@ -215,9 +241,9 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		for (final Group g : res) {
 
 			// the null location should not be available
-			assertTrue(g.toString(),
-					!g.getDescriptor(0).getValue().equals("Philipp")
-							|| g.getDescriptor(1).getValue() != null);
+			assertTrue(g.toString(), !g.getEntry(0).getLabel()
+					.equals("Philipp")
+					|| g.getEntry(1).getLabel() != null);
 		}
 	}
 
@@ -248,7 +274,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		// create the evaluator
 		final GroupEvaluator evaluator = new GroupEvaluator(model);
 		group = new GroupExpression();
-		group.setDescriptors("PERSON", "LOCATION");
+		group.setSelectors("PERSON", "LOCATION");
 		assertTrue(group.isValid());
 
 		final GroupResult res = evaluator.evaluateGroupExpression(group);
@@ -272,25 +298,50 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 	}
 
 	/**
-	 * 
+	 * Tests the evaluation of a group expression with dimensions.
 	 */
 	@Test
-	public void testEvaluateGroupExpressionWithExclusions() {
+	public void testEvaluateGroupExpressionWithDimensions() {
 		GroupExpression group;
+		GroupResult res;
+		GroupResultEntry resEntry;
 
-		// create the evaluator
 		final GroupEvaluator evaluator = new GroupEvaluator(model);
+
+		// create a simple expression
 		group = new GroupExpression();
-		group.setDescriptors("PERSON", "LOCATION");
+		group.setSelectors("LOCATION", new DimensionSelector("PERSON",
+				"GENDER", "GENDER"));
+		group.addExclusion("*", "MALE");
 		assertTrue(group.isValid());
 
-		evaluator.evaluateGroupExpression(group);
+		res = evaluator.evaluateGroupExpression(group);
+		assertEquals(3, res.size());
+
+		resEntry = res.getEntry("Mönchengladbach", "FEMALE");
+		assertEquals(0, resEntry.getBitmap().determineCardinality());
+
+		resEntry = res.getEntry(null, "FEMALE");
+		assertEquals(0, resEntry.getBitmap().determineCardinality());
+
+		resEntry = res.getEntry("Aachen", "FEMALE");
+		assertEquals(4, resEntry.getBitmap().getIds()[0]);
+
+		// create an expression with no results
+		group = new GroupExpression();
+		group.setSelectors("LOCATION", new DimensionSelector("PERSON",
+				"GENDER", "GENDER"));
+		group.addExclusion("*");
+		assertTrue(group.isValid());
+
+		res = evaluator.evaluateGroupExpression(group);
+		assertEquals(0, res.size());
 	}
 
 	private void assertContains(final List<Group> groups,
 			final Descriptor<String, ?, ?> desc, final int position) {
 		for (final Group group : groups) {
-			if (group.getDescriptor(position).equals(desc)) {
+			if (group.getEntry(position).getMeta().equals(desc)) {
 				return;
 			}
 		}

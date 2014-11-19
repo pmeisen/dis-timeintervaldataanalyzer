@@ -868,16 +868,29 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitExprAggregate(final ExprAggregateContext ctx) {
-		final List<String> identifiers = new ArrayList<String>();
+		final List<Object> selectors = new ArrayList<Object>();
 
 		// get all the defined identifiers
-		for (final SelectorDescriptorIdContext ctxId : ctx
-				.selectorDescriptorId()) {
-			identifiers.add(getDescriptorModelId(ctxId));
+		final int childrenSize = ctx.getChildCount();
+		for (int i = 0; i < childrenSize; i += 2) {
+			final ParseTree child = ctx.getChild(i);
+
+			final Object value;
+			if (child instanceof SelectorDescriptorIdContext) {
+				value = getDescriptorModelId((SelectorDescriptorIdContext) child);
+			} else if (child instanceof SelectorMemberContext) {
+				value = getMember((SelectorMemberContext) child);
+			} else {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1023, child == null ? null
+								: child.getClass().getSimpleName());
+			}
+
+			selectors.add(value);
 		}
 
 		// set the retrieved identifiers
-		q(SelectQuery.class).getGroup().setDescriptors(identifiers);
+		q(SelectQuery.class).getGroup().setSelectors(selectors);
 	}
 
 	@Override

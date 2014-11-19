@@ -107,7 +107,8 @@ public class DescriptorValue {
 		if (cmp == null && rawValue == null) {
 			return true;
 		} else if (cmp == null || rawValue == null) {
-			return false;
+			// * includes null as well
+			return usesAllMatcher();
 		} else if (containsWildchar) {
 			return cmp.matches(value);
 		} else {

@@ -236,9 +236,8 @@ public class TidaModel implements IPersistable {
 					loc);
 		}
 
-		// initialize some instances
+		// initialize the dataFactory
 		this.dataRecordFactory.initialize(this);
-		this.dimensionModel.initialize(this);
 
 		// initialize the caches
 		this.metaDataCache.initialize(this);
@@ -264,6 +263,9 @@ public class TidaModel implements IPersistable {
 		this.idx = new TidaIndex(this, getIdentifierCache()
 				.getLastUsedIdentifier());
 
+		// initialize the dimensionModel (uses the index)
+		this.dimensionModel.initialize(this);
+		
 		// log the initialization
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Initialized model '" + getId() + "' at '" + getLocation()
