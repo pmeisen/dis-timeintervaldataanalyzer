@@ -21,6 +21,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.google.common.primitives.Ints;
+
 /**
  * Tests the implementation of the {@code DeleteQuery}.
  * 
@@ -107,18 +109,18 @@ public class TestDeleteQueries extends LoaderBasedTest {
 		query.enableIdCollection(true);
 		res = factory.evaluateQuery(query, null);
 		assertEquals(5, res.getAmount());
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 2) != -1);
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 4) != -1);
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 6) != -1);
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 8) != -1);
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 10) != -1);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 2) < 0);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 4) < 0);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 6) < 0);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 8) < 0);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 10) < 0);
 
 		query = q("DELETE 1, 2, 3 FROM testEmptyModel");
 		query.enableIdCollection(true);
 		res = factory.evaluateQuery(query, null);
 		assertEquals(2, res.getAmount());
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 1) != -1);
-		assertFalse(Arrays.binarySearch(res.getCollectedIds(), 2) != -1);
-		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 3) != -1);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 1) < 0);
+		assertFalse(Arrays.binarySearch(res.getCollectedIds(), 2) < 0);
+		assertTrue(Arrays.binarySearch(res.getCollectedIds(), 3) < 0);
 	}
 }
