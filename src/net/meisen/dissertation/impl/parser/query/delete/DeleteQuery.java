@@ -4,7 +4,6 @@ import gnu.trove.list.array.TIntArrayList;
 
 import java.util.Collection;
 
-import net.meisen.dissertation.impl.parser.query.insert.InsertResult;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
