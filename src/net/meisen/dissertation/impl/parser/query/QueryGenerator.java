@@ -410,11 +410,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 			q.setEntityType(DropType.ROLE);
 		} else if (ctx.TYPE_USER() != null) {
 			q.setEntityType(DropType.USER);
+		} else if (ctx.TYPE_MODEL() != null) {
+			q.setEntityType(DropType.MODEL);
 		}
 
 		// set the name
 		if (ctx.VALUE() != null) {
 			q.setEntityName(getValue(ctx.VALUE()));
+		} else if (ctx.selectorModelId() != null) {
+			q.setEntityName(getModelId(ctx.selectorModelId()));
 		}
 
 		finalized = true;

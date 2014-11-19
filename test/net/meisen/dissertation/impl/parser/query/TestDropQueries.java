@@ -15,6 +15,7 @@ import net.meisen.dissertation.impl.parser.query.drop.DropQuery;
 import net.meisen.dissertation.impl.parser.query.drop.DropResult;
 import net.meisen.dissertation.impl.parser.query.drop.DropType;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Files;
@@ -112,10 +113,20 @@ public class TestDropQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the parsing of a drop-model-statement.
+	 */
+	@Test
+	public void testDropModelParsing() {
+		final DropQuery q = q("DROP MODEL myModel");
+		assertEquals(DropType.MODEL, q.getEntityType());
+		assertEquals("myModel", q.getEntityName());
+	}
+
+	/**
 	 * Tests the evaluation of a {@code AddQuery}.
 	 */
 	@Test
-	public void testDropQueryEvaluation() {
+	public void testDropQueryUserAndRoleEvaluation() {
 		boolean exception;
 
 		String query;
@@ -166,7 +177,43 @@ public class TestDropQueries extends LoaderBasedTest {
 		authManager.login("tobias", "password");
 		assertFalse(authManager.hasPermission(Permission.get.create()));
 		authManager.logout();
+	}
+
+	/**
+	 * Tests the dropping of a model.
+	 */
+	@Test
+	public void testDropQueryModelEvaluation() {
 		authManager.login("admin", "password");
 
+		// load the Model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testDropModel.xml";
+		TidaModel model = m(xml);
+		assertEquals(0, model.getAmountOfRecords());
+		assertEquals(0, model.getNextDataId());
+
+		// add some data
+		for (int i = 0; i < 100; i++) {
+			factory.evaluateQuery(
+					q("INSERT INTO testDropModel ([START], [END], VALUE) VALUES (01.01.2008 00:00:00, 01.01.2008 10:00:00, 'Philipp')"),
+					null);
+		}
+		assertEquals(100, model.getAmountOfRecords());
+		assertEquals(100, model.getNextDataId());
+
+		// drop and load again
+		factory.evaluateQuery(q("DROP MODEL testDropModel"), null);
+		model = m(xml);
+		assertEquals(0, model.getAmountOfRecords());
+		assertEquals(0, model.getNextDataId());
+		factory.evaluateQuery(q("DROP MODEL testDropModel"), null);
+
+		authManager.logout();
+
+		// remove the folders for sure
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir"),
+				"testDropModelIndex"));
+		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir"),
+				"testDropModel"));
 	}
 }

@@ -14,5 +14,9 @@ public enum DropType {
 	/**
 	 * Type specifying that a role is dropped.
 	 */
-	ROLE;
+	ROLE,
+	/**
+	 * Type specifying that a model is dropped.
+	 */
+	MODEL;
 }

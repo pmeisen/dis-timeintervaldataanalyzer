@@ -414,7 +414,7 @@ public class FileMetaDataCache implements IMetaDataCache {
 	}
 
 	/**
-	 * Gets the root-location of the caches. The {@code FileMetaDataCache}
+	 * Gets the root-location of the cache. The {@code FileMetaDataCache}
 	 * generates a sub-folder within this {@code location}.
 	 * 
 	 * @return the root-location of the caches
@@ -436,5 +436,19 @@ public class FileMetaDataCache implements IMetaDataCache {
 	@Override
 	public boolean setPersistency(final boolean enable) {
 		return true;
+	}
+
+	@Override
+	public void remove() {
+		if (init) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1019);
+		}
+		
+		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+			LOG.error("Unabel to delete the files created for the cache '"
+					+ getClass().getSimpleName() + "' at '"
+					+ Files.getCanonicalPath(getModelLocation()) + "'");
+		}
 	}
 }

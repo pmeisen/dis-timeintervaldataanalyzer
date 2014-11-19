@@ -89,4 +89,9 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 	public boolean setPersistency(final boolean enable) {
 		return true;
 	}
+	
+	@Override
+	public void remove() {
+		// nothing to do
+	}
 }

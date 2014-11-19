@@ -38,7 +38,7 @@ exprWithRoles       : OP_WITH TYPE_ROLES selectorValueList;
 /*
  * Define the expressions to add users or roles.
  */
-exprDrop            : STMT_DROP (TYPE_USER | TYPE_ROLE) VALUE;
+exprDrop            : STMT_DROP (((TYPE_USER | TYPE_ROLE) VALUE) | TYPE_MODEL selectorModelId);
 
 /*
  * Define the expressions to modify a user's password.
@@ -206,6 +206,7 @@ PROP_PASSWORD : P A S S W O R D;
 TYPE_TIMESERIES  : T I M E S E R I E S;
 TYPE_RECORDS     : R E C O R D S;
 TYPE_MODELS      : M O D E L S;
+TYPE_MODEL       : M O D E L;
 TYPE_VERSION     : V E R S I O N;
 TYPE_PERMISSIONS : P E R M I S S I O N S;
 TYPE_ROLES       : R O L E S;

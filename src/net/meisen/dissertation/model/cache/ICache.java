@@ -30,6 +30,11 @@ public interface ICache {
 	public void release();
 
 	/**
+	 * Method used to permanently remove the cache and all data persisted by it.
+	 */
+	public void remove();
+
+	/**
 	 * Initializes the cache for the specified {@code model}.
 	 * 
 	 * @param model

@@ -1,6 +1,10 @@
 package net.meisen.dissertation.impl.parser.query.drop;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
@@ -19,9 +23,11 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class DropQuery implements IQuery {
+	private final static Logger LOG = LoggerFactory.getLogger(DropQuery.class);
 
 	private DropType entityType;
 	private String entityName;
+	private String modelId;
 
 	/**
 	 * Gets the type of the entity to be dropped.
@@ -63,17 +69,17 @@ public class DropQuery implements IQuery {
 
 	@Override
 	public boolean expectsModel() {
-		return false;
+		return DropType.MODEL.equals(getEntityType());
 	}
 
 	@Override
 	public String getModelId() {
-		return null;
+		return modelId;
 	}
 
 	@Override
 	public void setModelId(final String modelId) {
-		// nothing to do
+		this.modelId = modelId;
 	}
 
 	@Override
@@ -86,6 +92,19 @@ public class DropQuery implements IQuery {
 			authManager.deleteUser(getEntityName());
 		} else if (DropType.ROLE.equals(getEntityType())) {
 			authManager.deleteRole(getEntityName());
+		} else if (DropType.MODEL.equals(getEntityType())) {
+			handler.disableAutoload(model.getId());
+			handler.unload(model.getId());
+
+			// delete the folder of the model
+			try {
+				model.release(true);
+			} catch (final TidaModelException e) {
+				// TODO: the directory might be not deletable, because of MapDB
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Could not clean-up correctly!", e);
+				}
+			}
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1020, getEntityType());

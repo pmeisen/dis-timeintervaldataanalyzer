@@ -8,6 +8,7 @@ import java.io.RandomAccessFile;
 import net.meisen.dissertation.model.cache.IIdentifierCacheConfig;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 
 import org.slf4j.Logger;
@@ -231,5 +232,19 @@ public class FileIdentifierCache extends BaseIdentifierCache {
 	 */
 	public File getModelLocation() {
 		return this.modelLocation;
+	}
+	
+	@Override
+	public void remove() {
+		if (isInitialized()) {
+			exceptionRegistry.throwException(FileIdentifierCacheException.class,
+					1011);
+		}
+		
+		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+			LOG.error("Unabel to delete the files created for the cache '"
+					+ getClass().getSimpleName() + "' at '"
+					+ Files.getCanonicalPath(getModelLocation()) + "'");
+		}
 	}
 }

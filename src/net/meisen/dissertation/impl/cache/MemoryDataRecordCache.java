@@ -115,4 +115,9 @@ public class MemoryDataRecordCache implements IDataRecordCache {
 	public int size() {
 		return map.size();
 	}
+
+	@Override
+	public void remove() {
+		// nothing to do
+	}
 }

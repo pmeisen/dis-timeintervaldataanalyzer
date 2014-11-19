@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:idfile="http://dev.meisen.net/xsd/dissertation/caches/identifier/file"
+       xmlns:mdfile="http://dev.meisen.net/xsd/dissertation/caches/metadata/file"
+       xmlns:bmpfile="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+       xmlns:factfile="http://dev.meisen.net/xsd/dissertation/caches/facts/file"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                   http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+       		               http://dev.meisen.net/xsd/dissertation/caches/identifier/file  http://dev.meisen.net/xsd/dissertation/tidaFileIdentifierCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/metadata/file    http://dev.meisen.net/xsd/dissertation/tidaFileMetaDataCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/bitmap/file      http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/facts/file       http://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd"
+
+       offlinemode="false" folder="${java.io.tmpdir}/testDropModel"
+       
+       id="testDropModel">
+
+  <config>
+    <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache">
+        <idfile:config folder="${java.io.tmpdir}/testDropModelIndex/model-identifier" />
+      </identifier>
+    
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache">
+        <mdfile:config folder="${java.io.tmpdir}/testDropModelIndex/model-metadata" />
+      </metadata>
+    
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+        <bmpfile:config folder="${java.io.tmpdir}/testDropModelIndex/model-bitmap" />
+      </bitmap>
+      
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache">
+        <factfile:config folder="${java.io.tmpdir}/testDropModelIndex/model-facts" size="10000" />
+      </factsets>
+      
+      <records implementation="net.meisen.dissertation.impl.cache.IdsOnlyDataRecordCache" />
+    </caches>
+  </config>
+
+  <time>
+    <timeline start="01.01.2008 00:00:00" end="30.12.2008 23:59:00" granularity="MINUTE" />
+  </time>
+
+  <meta>
+    <descriptors>
+      <string id="VALUE" failonduplicates="false" null="true" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+
+  <data metahandling="create" intervalhandling="failOnNull" />
+</model>

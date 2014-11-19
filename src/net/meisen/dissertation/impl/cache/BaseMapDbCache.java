@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.cache.IReferenceMechanismCache;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
+import net.meisen.general.genmisc.types.Files;
 
 import org.mapdb.DB;
 import org.mapdb.DB.BTreeMapMaker;
@@ -491,5 +492,19 @@ public abstract class BaseMapDbCache<K, T> implements ICache,
 	 */
 	public Iterator<K> keyIterator() {
 		return map.keySet().iterator();
+	}
+
+	@Override
+	public void remove() {
+		if (isInit()) {
+			exceptionRegistry.throwException(BaseMapDbCacheException.class,
+					1006);
+		}
+
+		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+			LOG.error("Unabel to delete the files created for the cache '"
+					+ getClass().getSimpleName() + "' at '"
+					+ Files.getCanonicalPath(getModelLocation()) + "'");
+		}
 	}
 }

@@ -26,4 +26,9 @@ public class MemoryIdentifierCache extends BaseIdentifierCache {
 	public void setConfig(final IIdentifierCacheConfig config) {
 		// nothing to be configured
 	}
+	
+	@Override
+	public void remove() {
+		// nothing to do
+	}
 }

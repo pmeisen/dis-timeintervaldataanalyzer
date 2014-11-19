@@ -257,7 +257,6 @@ public class TidaModel implements IPersistable {
 		this.metaDataModel.addMetaData(metaData);
 		this.metaDataCache.cacheMetaDataModel(this.metaDataModel);
 		this.metaDataCache.release();
-		this.metaDataCache = null;
 
 		// create the index
 		this.idx = new TidaIndex(this, getIdentifierCache()
@@ -297,16 +296,22 @@ public class TidaModel implements IPersistable {
 		getDataRecordCache().release();
 
 		// delete created files if necessary
-		final boolean deleted;
-		if (deleteLocation && getLocation().exists()) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Deleting the files of the model '" + getId()
-						+ "' at '" + getLocation() + ".");
-			}
+		boolean deleted = true;
+		if (deleteLocation) {
+			getBitmapCache().remove();
+			getFactsCache().remove();
+			getIdentifierCache().remove();
+			getDataRecordCache().remove();
+			this.metaDataCache.remove();
 
-			deleted = Files.deleteOnExitDir(getLocation());
-		} else {
-			deleted = true;
+			if (getLocation().exists()) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Deleting the files of the model '" + getId()
+							+ "' at '" + getLocation() + ".");
+				}
+
+				deleted = Files.deleteOnExitDir(getLocation());
+			}
 		}
 
 		// the model isn't initialized anymore
@@ -316,9 +321,9 @@ public class TidaModel implements IPersistable {
 		 * Throw an exception after the successful releasing, if the directory
 		 * could not be deleted.
 		 */
-		if (!deleted) {
-			exceptionRegistry.throwException(TidaModelException.class, 1004,
-					getLocation());
+		if (!deleted && LOG.isErrorEnabled()) {
+			LOG.error("Unable to delete the model-location '" + getLocation()
+					+ "'.");
 		}
 	}
 

@@ -130,4 +130,9 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 	public int size() {
 		return 0;
 	}
+
+	@Override
+	public void remove() {
+		// nothing to do
+	}
 }

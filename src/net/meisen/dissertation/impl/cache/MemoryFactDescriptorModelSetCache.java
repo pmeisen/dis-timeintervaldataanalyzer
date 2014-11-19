@@ -71,4 +71,9 @@ public class MemoryFactDescriptorModelSetCache implements
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		return Collections.emptyList();
 	}
+	
+	@Override
+	public void remove() {
+		// nothing to do
+	}
 }
