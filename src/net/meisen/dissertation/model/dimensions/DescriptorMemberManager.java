@@ -10,15 +10,47 @@ import java.util.Map;
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
+/**
+ * Manager to manage and organize the {@code DescriptorMember} instances of a
+ * {@code DescriptorHierarchy}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DescriptorMemberManager {
 	private final DescriptorHierarchy descriptorHierarchy;
 	private final Map<String, DescriptorMember> members;
 
+	/**
+	 * The default constructor specifying the hierarchy.
+	 * 
+	 * @param descriptorHierarchy
+	 *            the hierarchy the manager belongs to
+	 */
 	public DescriptorMemberManager(final DescriptorHierarchy descriptorHierarchy) {
 		this.descriptorHierarchy = descriptorHierarchy;
 		this.members = new HashMap<String, DescriptorMember>();
 	}
 
+	/**
+	 * Adds a member to the manager by creating it.
+	 * 
+	 * @param id
+	 *            the identifier to be used
+	 * @param name
+	 *            the name to be used
+	 * @param pattern
+	 *            the pattern to be used
+	 * @param includeNull
+	 *            {@code true} if {@code null} should be included, otherwise
+	 *            {@code false}
+	 * @param level
+	 *            the level the member belongs to
+	 * @param rollUpTo
+	 *            the members to roll up to
+	 * 
+	 * @return the created and added, or found member
+	 */
 	public DescriptorMember addMember(final String id, final String name,
 			final String pattern, final boolean includeNull,
 			final DescriptorLevel level, final Collection<String> rollUpTo) {
@@ -44,6 +76,14 @@ public class DescriptorMemberManager {
 		return member;
 	}
 
+	/**
+	 * Resolves the collection of member-identifiers specified.
+	 * 
+	 * @param rollUpTo
+	 *            the identifiers of the members to be resolved
+	 * 
+	 * @return the resolved members
+	 */
 	protected List<DescriptorMember> resolve(final Collection<String> rollUpTo) {
 		final List<DescriptorMember> rollUpToMembers = new ArrayList<DescriptorMember>();
 
@@ -78,10 +118,28 @@ public class DescriptorMemberManager {
 		return rollUpToMembers;
 	}
 
+	/**
+	 * Gets the member with the specified {@code id} from the manager.
+	 * 
+	 * @param id
+	 *            the identifier of the member to retrieve
+	 * 
+	 * @return the member associated, might be {@code null} if no member is
+	 *         associated to the member
+	 */
 	public DescriptorMember getMember(final String id) {
 		return members.get(id);
 	}
 
+	/**
+	 * Gets all the members of the specified level.
+	 * 
+	 * @param levelId
+	 *            the identifier of the level to get the members for
+	 * 
+	 * @return a collection of all the members associated to the specified
+	 *         {@code levelId}, never {@code null}
+	 */
 	public Collection<DescriptorMember> getMembers(final String levelId) {
 		final List<DescriptorMember> members = new ArrayList<DescriptorMember>();
 
@@ -94,6 +152,11 @@ public class DescriptorMemberManager {
 		return members;
 	}
 
+	/**
+	 * Get all the members of the manager.
+	 * 
+	 * @return the members of the manager
+	 */
 	public Collection<DescriptorMember> getMembers() {
 		return Collections.unmodifiableCollection(members.values());
 	}
