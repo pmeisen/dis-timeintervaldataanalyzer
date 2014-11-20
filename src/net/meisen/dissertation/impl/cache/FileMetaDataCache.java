@@ -445,7 +445,9 @@ public class FileMetaDataCache implements IMetaDataCache {
 					1019);
 		}
 		
-		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+		if (getModelLocation() == null) {
+			// nothing to do
+		} else if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
 			LOG.error("Unabel to delete the files created for the cache '"
 					+ getClass().getSimpleName() + "' at '"
 					+ Files.getCanonicalPath(getModelLocation()) + "'");

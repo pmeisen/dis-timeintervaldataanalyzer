@@ -218,8 +218,6 @@ public class TestFileMetaDataCache extends ModuleBasedTest {
 	public void testFallback() throws IOException {
 		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
 
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
-
 		// get the model and make sure it's not initialized
 		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
 

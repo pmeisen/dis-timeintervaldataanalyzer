@@ -1025,7 +1025,10 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			exceptionRegistry.throwException(getExceptionClass(1000), 1022);
 		}
 
-		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+		if (getModelLocation() == null) {
+			// nothing to do
+		} else if (!Files.deleteOnExitDir(getModelLocation())
+				&& LOG.isErrorEnabled()) {
 			LOG.error("Unabel to delete the files created for the cache '"
 					+ getClass().getSimpleName() + "' at '"
 					+ Files.getCanonicalPath(getModelLocation()) + "'");

@@ -252,11 +252,14 @@ public class TidaModel implements IPersistable {
 		 * cache. Before releasing the cache is used to persist the currently
 		 * loaded metaData.
 		 */
-		final MetaDataCollection metaData = this.metaDataCache
-				.createMetaDataCollection();
-		this.metaDataModel.addMetaData(metaData);
-		this.metaDataCache.cacheMetaDataModel(this.metaDataModel);
-		this.metaDataCache.release();
+		try {
+			final MetaDataCollection metaData = this.metaDataCache
+					.createMetaDataCollection();
+			this.metaDataModel.addMetaData(metaData);
+			this.metaDataCache.cacheMetaDataModel(this.metaDataModel);
+		} finally {
+			this.metaDataCache.release();
+		}
 
 		// create the index
 		this.idx = new TidaIndex(this, getIdentifierCache()

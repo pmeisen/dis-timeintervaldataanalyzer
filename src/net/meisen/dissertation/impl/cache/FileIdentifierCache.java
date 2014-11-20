@@ -233,15 +233,18 @@ public class FileIdentifierCache extends BaseIdentifierCache {
 	public File getModelLocation() {
 		return this.modelLocation;
 	}
-	
+
 	@Override
 	public void remove() {
 		if (isInitialized()) {
-			exceptionRegistry.throwException(FileIdentifierCacheException.class,
-					1011);
+			exceptionRegistry.throwException(
+					FileIdentifierCacheException.class, 1011);
 		}
-		
-		if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+
+		if (getModelLocation() == null) {
+			// nothing to do
+		} else if (!Files.deleteOnExitDir(getModelLocation())
+				&& LOG.isErrorEnabled()) {
 			LOG.error("Unabel to delete the files created for the cache '"
 					+ getClass().getSimpleName() + "' at '"
 					+ Files.getCanonicalPath(getModelLocation()) + "'");

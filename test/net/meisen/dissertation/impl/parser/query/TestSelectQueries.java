@@ -156,7 +156,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testAllTimeSeriesSelectQuery() {
-		final SelectQuery query = q("SELECT TIMESERIES FROM MODELID");
+		final SelectQuery query = q("SELECT TIMESERIES from MODELID");
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
@@ -169,7 +169,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testTransposition() {
-		final SelectQuery query = q("SELECT TRANSPOSE(TIMESERIES) FROM MODELID");
+		final SelectQuery query = q("SELECT TRANSPOSE(TIMESERIES) from MODELID");
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
@@ -182,7 +182,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testAllRecordsSelectQuery() {
-		final SelectQuery query = q("SELECT RECORDS FROM MODELID");
+		final SelectQuery query = q("SELECT RECORDS from MODELID");
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(SelectResultType.RECORDS, query.getResultType());
@@ -195,7 +195,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testAllRecordIdsSelectQuery() {
-		final SelectQuery query = q("SELECT IDS(RECORDS) FROM MODELID");
+		final SelectQuery query = q("SELECT IDS(RECORDS) from MODELID");
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(SelectResultType.RECORDS, query.getResultType());
@@ -208,7 +208,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testAllRecordsCountSelectQuery() {
-		final SelectQuery query = q("SELECT COUNT(RECORDS) FROM MODELID");
+		final SelectQuery query = q("SELECT COUNT(RECORDS) from MODELID");
 
 		assertEquals("MODELID", query.getModelId());
 		assertEquals(SelectResultType.RECORDS, query.getResultType());
@@ -223,35 +223,35 @@ public class TestSelectQueries extends LoaderBasedTest {
 	public void testRecordSelectQueryWithIntervalRelation() {
 		SelectQuery query;
 
-		query = q("SELECT RECORDS FROM MODELID");
+		query = q("SELECT RECORDS from modelId");
 		assertNull(query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID DURING [5, 9]");
+		query = q("SELECT RECORDS from modelId DURING [5, 9]");
 		assertEquals(IntervalRelation.DURING, query.getIntervalRelation());
 
-		query = q("SELECT COUNT(RECORDS) FROM MODELID CONtaining [5, 9] FILTER BY DESC='VAL'");
+		query = q("SELECT COUNT(RECORDS) from modelId CONtaining [5, 9] FILTER BY DESC='VAL'");
 		assertEquals(IntervalRelation.CONTAINING, query.getIntervalRelation());
 
-		query = q("SELECT IDS(RECORDS) FROM MODELID before [5, 9]");
+		query = q("SELECT IDS(RECORDS) from modelId before [5, 9]");
 		assertEquals(IntervalRelation.BEFORE, query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID after [5, 9]");
+		query = q("SELECT RECORDS from modelId after [5, 9]");
 		assertEquals(IntervalRelation.AFTER, query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID equalto [5, 9]");
+		query = q("SELECT RECORDS from modelId equalto [5, 9]");
 		assertEquals(IntervalRelation.EQUALTO, query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID finishingwith [5, 9]");
+		query = q("SELECT RECORDS from modelId finishingwith [5, 9]");
 		assertEquals(IntervalRelation.FINISHINGWITH,
 				query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID startingwiTH [5, 9]");
+		query = q("SELECT RECORDS from modelId startingwiTH [5, 9]");
 		assertEquals(IntervalRelation.STARTINGWITH, query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID overlapping [5, 9]");
+		query = q("SELECT RECORDS from modelId overlapping [5, 9]");
 		assertEquals(IntervalRelation.OVERLAPPING, query.getIntervalRelation());
 
-		query = q("SELECT RECORDS FROM MODELID meeting [5, 9]");
+		query = q("SELECT RECORDS from modelId meeting [5, 9]");
 		assertEquals(IntervalRelation.MEETING, query.getIntervalRelation());
 	}
 
@@ -261,9 +261,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testSelectQueryWithIntegerTimeWindow() {
-		final SelectQuery query = q("SELECT TIMESERIES FROM MODELID IN (500 ,600)");
+		final SelectQuery query = q("SELECT TIMESERIES from modelId IN (500 ,600)");
 
-		assertEquals("MODELID", query.getModelId());
+		assertEquals("modelId", query.getModelId());
 		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 
 		final Interval<?> interval = query.getInterval();
@@ -285,7 +285,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testSelectQueryWithDateTimeWindow() throws ParseException {
-		final SelectQuery query = q("SELECT TIMESERIES FROM ModelId IN (15.06.2014 , 15.06.2015 20:10:11]");
+		final SelectQuery query = q("SELECT TIMESERIES from ModelId IN (15.06.2014 , 15.06.2015 20:10:11]");
 
 		assertEquals("ModelId", query.getModelId());
 		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
@@ -307,7 +307,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 * Tests the created {@code DescriptorLogicTree} when no filter is defined.
 	 */
 	public void testParsingOfNoFilter() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014)");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014)");
 
 		assertEquals("model", query.getModelId());
 
@@ -323,7 +323,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfSingleValueFilter() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by singleEqual='singleEqualValue'");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) filter by singleEqual='singleEqualValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -342,7 +342,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfSingleValueWithBracketsFilter() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by (((bracketsSingleEqual='bracketsSingleEqualValue')))");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) filter by (((bracketsSingleEqual='bracketsSingleEqualValue')))");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -628,7 +628,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfNoGroupBy() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014)");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014)");
 		final GroupExpression group = query.getGroup();
 
 		final Set<Object> descriptors = group.getSelectors();
@@ -640,7 +640,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfSimpleGroupBy() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third");
 		final GroupExpression group = query.getGroup();
 
 		final Set<Object> descriptors = group.getSelectors();
@@ -656,7 +656,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfGroupByWithExclusion() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by first, second, third ignore {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third ignore {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
 		final GroupExpression group = query.getGroup();
 
 		final Set<Object> descriptors = group.getSelectors();
@@ -682,7 +682,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	public void testParsingOfSimpleDimensionalGroupBy() {
 
 		// check just one dimensional expression
-		SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by DIM.HIER.LVL");
+		SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by DIM.HIER.LVL");
 		GroupExpression group = query.getGroup();
 
 		Set<Object> selectors = group.getSelectors();
@@ -691,7 +691,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(new DimensionSelector("DIM", "HIER", "LVL"), it.next());
 
 		// check a mixture
-		query = q("select timeSeries from model in [03.03.2014,05.03.2014) group by PERSON, DIM2.HIER.LVL");
+		query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by PERSON, DIM2.HIER.LVL");
 		group = query.getGroup();
 
 		selectors = group.getSelectors();
@@ -706,7 +706,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleLinkage() {
-		final SelectQuery query = q("select timeSeries from model in [03.03.2014,05.03.2014) filter by first='firstValue' AND second='secondValue' OR third='thirdValue'");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) filter by first='firstValue' AND second='secondValue' OR third='thirdValue'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -753,7 +753,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleNot() {
-		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by NOT HALLO='500' AND !HELLO='LALA'");
+		final SelectQuery query = q("select timeseries from \"model\" in [03.03.2014,05.03.2014) filter by NOT HALLO='500' AND !HELLO='LALA'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -797,7 +797,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testLogicalComplexNot() {
-		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
+		final SelectQuery query = q("select timeseries from \"model\" in [03.03.2014,05.03.2014) filter by (!(CAKE='APPLE' OR NOT (CAKE='CHERRY')) AND !GREETINGS='HI')");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -867,7 +867,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testLogicalSimpleOptimization() {
-		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by first='1' AND second='2' AND third='3'");
+		final SelectQuery query = q("select timeseries from \"model\" in [03.03.2014,05.03.2014) filter by first='1' AND second='2' AND third='3'");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -880,7 +880,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testLogicalComplexOptimization() {
-		final SelectQuery query = q("select timeseries from model in [03.03.2014,05.03.2014) filter by (first='1' OR second='2') AND (third='3' OR firth='4') AND fifth='5' AND (sixth='6' OR (seventh='7' AND eight='8'))");
+		final SelectQuery query = q("select timeseries from \"model\" in [03.03.2014,05.03.2014) filter by (first='1' OR second='2') AND (third='3' OR firth='4') AND fifth='5' AND (sixth='6' OR (seventh='7' AND eight='8'))");
 		final DescriptorLogicTree tree = query.getFilter();
 
 		final List<ILogicalTreeElement> order = tree.getEvaluationOrder();
@@ -912,9 +912,9 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testConcatenatedSelectsException() {
 		thrown.expect(QueryParsingException.class);
-		thrown.expectMessage("syntax error was found at 1:56");
+		thrown.expectMessage("syntax error was found at 1:58");
 
-		q("select timeseries from model in [03.03.2014,05.03.2014) select timeseries from model in [03.03.2014,05.03.2014)");
+		q("select timeseries from \"model\" in [03.03.2014,05.03.2014) select timeseries from \"model\" in [03.03.2014,05.03.2014)");
 	}
 
 	/**
@@ -925,7 +925,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		thrown.expect(QueryParsingException.class);
 		thrown.expectMessage("syntax error was found at 1:23");
 
-		q("select timeseries from (select timeseries from model in [03.03.2014,05.03.2014)) in [03.03.2014,05.03.2014)");
+		q("select timeseries from (select timeseries from \"model\" in [03.03.2014,05.03.2014)) in [03.03.2014,05.03.2014)");
 	}
 
 	/**
@@ -1316,7 +1316,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testTimeSeriesDimensionalParsing() {
-		final SelectQuery query = q("SELECT TIMESERIES FROM ModelId IN (15.06.2014 , 15.06.2015 20:10:11] WHERE DIM.HIER.LEVEL = '5'");
+		final SelectQuery query = q("SELECT TIMESERIES from modelId IN (15.06.2014 , 15.06.2015 20:10:11] WHERE DIM.HIER.LEVEL = '5'");
 		assertEquals(SelectResultType.TIMESERIES, query.getResultType());
 
 		final DescriptorLogicTree tree = query.getFilter();
@@ -1339,7 +1339,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testRecordsDimensionalParsing() {
-		final SelectQuery query = q("SELECT RECORDS FROM ModelId WHERE DIM.HIER.LEVEL = '5' AND DIM2.HIER2.LEVEL2 = '6'");
+		final SelectQuery query = q("SELECT RECORDS from modelId WHERE DIM.HIER.LEVEL = '5' AND DIM2.HIER2.LEVEL2 = '6'");
 		assertEquals(SelectResultType.RECORDS, query.getResultType());
 
 		final DescriptorLogicTree tree = query.getFilter();
