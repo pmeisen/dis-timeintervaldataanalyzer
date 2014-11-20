@@ -17,9 +17,9 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.dissertation.model.dimensions.IDimension;
-import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorGraph;
 import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
-import net.meisen.dissertation.model.dimensions.graph.Level;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorGraphLevel;
 import net.meisen.dissertation.model.handler.TidaDimensionHandler;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
@@ -223,11 +223,11 @@ public class DimensionModel {
 		final String dimId = dimSelector.getDimensionId();
 
 		final IDimensionGraph d = getDimension(dimId);
-		if (d instanceof DescriptorDimensionGraph == false) {
+		if (d instanceof DescriptorGraph == false) {
 			exceptionRegistry.throwException(DimensionModelException.class,
 					1003, dimId);
 		}
-		final DescriptorDimensionGraph dim = (DescriptorDimensionGraph) d;
+		final DescriptorGraph dim = (DescriptorGraph) d;
 
 		// get the DescrptorModel used
 		final String modelId = dim.getDimension().getDescriptorModelId();
@@ -241,19 +241,19 @@ public class DimensionModel {
 		// get the level of the defined hierarchy
 		final String hierarchyId = dimSelector.getHierarchyId();
 		final String levelId = dimSelector.getLevelId();
-		final Level level = dim.getLevel(hierarchyId, levelId);
-		if (level == null) {
+		final DescriptorGraphLevel descriptorGraphLevel = dim.getLevel(hierarchyId, levelId);
+		if (descriptorGraphLevel == null) {
 			exceptionRegistry.throwException(DimensionModelException.class,
 					1005, dimId, hierarchyId, levelId);
 		}
 
 		// get all the members selected
-		final Set<DescriptorMember> members = level.getMembers(hierarchyId);
+		final Set<DescriptorMember> members = descriptorGraphLevel.getMembers(hierarchyId);
 		final Set<DescriptorMember> selectedMembers = new HashSet<DescriptorMember>();
 		for (final DescriptorMember member : members) {
 
 			if (filter == null || filter.accept(member)) {
-				final Set<DescriptorMember> leafMembers = level.getLeafMembers(
+				final Set<DescriptorMember> leafMembers = descriptorGraphLevel.getLeafMembers(
 						hierarchyId, member.getId());
 				selectedMembers.addAll(leafMembers);
 

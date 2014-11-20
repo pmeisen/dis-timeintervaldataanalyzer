@@ -11,23 +11,43 @@ import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Objects;
 
-public class Node {
+/**
+ * A node within the {@code DescriptorGraph} representing a
+ * {@code DescriptorMember}.
+ * 
+ * @author pmeisen
+ * 
+ */
+public class DescriptorGraphNode {
 
 	private final DescriptorMember member;
 
-	private final Set<Node> parents;
-	private final Set<Node> children;
+	private final Set<DescriptorGraphNode> parents;
+	private final Set<DescriptorGraphNode> children;
 
 	private int minDistanceToRoot = Integer.MIN_VALUE;
 	private int maxDistanceToRoot = Integer.MIN_VALUE;
 
-	public Node(final DescriptorMember member) {
+	/**
+	 * The default constructor specifying the {@code member} the
+	 * {@code DescriptorGraphNode} belongs to.
+	 * 
+	 * @param member
+	 *            the {@code member} the {@code DescriptorGraphNode} belongs to
+	 */
+	public DescriptorGraphNode(final DescriptorMember member) {
 		this.member = member;
 
-		this.parents = new HashSet<Node>();
-		this.children = new HashSet<Node>();
+		this.parents = new HashSet<DescriptorGraphNode>();
+		this.children = new HashSet<DescriptorGraphNode>();
 	}
 
+	/**
+	 * Gets or determines the minimal distance to root.
+	 * 
+	 * @return the minimal distance to the root of the graph, a negative value
+	 *         (i.e. -1) is returned if there is no path to the root
+	 */
 	public int getMinDistance() {
 		if (minDistanceToRoot == Integer.MIN_VALUE) {
 			calcDistances(null);
@@ -36,6 +56,12 @@ public class Node {
 		return minDistanceToRoot;
 	}
 
+	/**
+	 * Gets or determines the maximal distance to root.
+	 * 
+	 * @return the maximal distance to the root of the graph, a negative value
+	 *         (i.e. -1) is returned if there is no path to the root
+	 */
 	public int getMaxDistance() {
 		if (maxDistanceToRoot == Integer.MIN_VALUE) {
 			calcDistances(null);
@@ -44,7 +70,14 @@ public class Node {
 		return maxDistanceToRoot;
 	}
 
-	protected void calcDistances(Set<Node> visited) {
+	/**
+	 * Calculate the min- and max-distances between {@code this} and the root.
+	 * 
+	 * @param visited
+	 *            internally used when recursively calculating the distance,
+	 *            should normally called with {@code null}
+	 */
+	protected void calcDistances(Set<DescriptorGraphNode> visited) {
 
 		// make sure calculation is needed
 		if (minDistanceToRoot != Integer.MIN_VALUE
@@ -63,7 +96,7 @@ public class Node {
 			maxDistanceToRoot = 0;
 		} else {
 			if (visited == null) {
-				visited = new HashSet<Node>();
+				visited = new HashSet<DescriptorGraphNode>();
 			}
 
 			// add this one as visited node
@@ -74,7 +107,7 @@ public class Node {
 
 			int minDistToRoot = -1;
 			int maxDistToRoot = -1;
-			for (final Node parent : parents) {
+			for (final DescriptorGraphNode parent : parents) {
 
 				// make sure everything is calculated with the current path
 				parent.calcDistances(visited);
@@ -98,11 +131,23 @@ public class Node {
 		}
 	}
 
-	public void addParent(final Node parent) {
+	/**
+	 * Adds a parent to {@code this}.
+	 * 
+	 * @param parent
+	 *            the parent to be added
+	 */
+	public void addParent(final DescriptorGraphNode parent) {
 		parents.add(parent);
 	}
 
-	public void addChild(final Node child) {
+	/**
+	 * Adds a child to {@code this}.
+	 * 
+	 * @param child
+	 *            the child to be added
+	 */
+	public void addChild(final DescriptorGraphNode child) {
 		children.add(child);
 	}
 
@@ -115,25 +160,39 @@ public class Node {
 		return children.isEmpty();
 	}
 
+	/**
+	 * Checks if the node is a sink, i.e. is a root (has no parents).
+	 * 
+	 * @return {@code true} if the node is a root, otherwise {@code false}
+	 */
 	public boolean isSink() {
 		return parents.isEmpty();
 	}
 
+	/**
+	 * Gets all the leafs reachable from {@code this}. The {@code hierarchyId}
+	 * must be specified to ensure the correct finding across shared levels.
+	 * 
+	 * @param hierarchyId
+	 *            the identifier of the hierarchy to retrieve the leaf-members
+	 *            for
+	 * 
+	 * @return all the leaf-members reachable from {@code this}
+	 */
 	public Set<DescriptorMember> getReachableLeafs(final String hierarchyId) {
 		final Set<DescriptorMember> members = new HashSet<DescriptorMember>();
 
 		if (hierarchyId == null) {
-			return members;
+			// nothing to do
 		} else if (this.isSource()) {
 			final DescriptorMember member = getMember();
 			if (hierarchyId.equals(member.getHierachy().getId())) {
 				members.add(member);
 			}
-			
-			return members;
 		} else {
-			for (final Node node : getChildren()) {
-				members.addAll(node.getReachableLeafs(hierarchyId));
+			for (final DescriptorGraphNode descriptorGraphNode : getChildren()) {
+				members.addAll(descriptorGraphNode
+						.getReachableLeafs(hierarchyId));
 			}
 		}
 
@@ -152,26 +211,46 @@ public class Node {
 			return true;
 		} else if (obj == null) {
 			return false;
-		} else if (obj instanceof Node) {
-			final Node cmpNode = (Node) obj;
+		} else if (obj instanceof DescriptorGraphNode) {
+			final DescriptorGraphNode cmpNode = (DescriptorGraphNode) obj;
 			return Objects.equals(member, cmpNode.member);
 		} else {
 			return false;
 		}
 	}
 
-	public Set<Node> getChildren() {
+	/**
+	 * Gets the children of {@code this}.
+	 * 
+	 * @return the children of {@code this}
+	 */
+	public Set<DescriptorGraphNode> getChildren() {
 		return Collections.unmodifiableSet(children);
 	}
 
-	public Set<Node> getParents() {
+	/**
+	 * Gets the parents of {@code this}.
+	 * 
+	 * @return the parents of {@code this}.
+	 */
+	public Set<DescriptorGraphNode> getParents() {
 		return Collections.unmodifiableSet(parents);
 	}
 
+	/**
+	 * Gets the member {@code this} belongs to.
+	 * 
+	 * @return the member {@code this} belongs to
+	 */
 	public DescriptorMember getMember() {
 		return member;
 	}
 
+	/**
+	 * Gets the level {@code this} belongs to.
+	 * 
+	 * @return the level {@code this} belongs to
+	 */
 	public DescriptorLevel getLevel() {
 		return member.getLevel();
 	}
@@ -181,7 +260,15 @@ public class Node {
 		return member.toString();
 	}
 
-	public boolean canReach(final Node node) {
+	/**
+	 * Checks if the specified {@code node} is reachable from {@code this}.
+	 * 
+	 * @param node
+	 *            the node to be checked for reachability
+	 * 
+	 * @return {@code true} if the node is reachable, otherwise {@code false}
+	 */
+	public boolean canReach(final DescriptorGraphNode node) {
 
 		// the node can reach itself
 		if (equals(node)) {
@@ -193,7 +280,7 @@ public class Node {
 		}
 
 		// check if it can reach any parent
-		for (final Node parent : parents) {
+		for (final DescriptorGraphNode parent : parents) {
 			if (parent.canReach(node)) {
 				return true;
 			}

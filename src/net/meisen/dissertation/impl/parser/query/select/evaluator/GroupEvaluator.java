@@ -20,9 +20,9 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
-import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorGraph;
 import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
-import net.meisen.dissertation.model.dimensions.graph.Level;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorGraphLevel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -618,17 +618,17 @@ public class GroupEvaluator {
 		if (dimGraph == null) {
 			throw new ForwardedRuntimeException(GroupEvaluatorException.class,
 					1003, selector.getDimensionId());
-		} else if (dimGraph instanceof DescriptorDimensionGraph == false) {
+		} else if (dimGraph instanceof DescriptorGraph == false) {
 			throw new ForwardedRuntimeException(GroupEvaluatorException.class,
 					1004, selector.getDimensionId());
 		}
 
 		final List<Group> iterationResult = new ArrayList<Group>();
 
-		final DescriptorDimensionGraph descDimGraph = (DescriptorDimensionGraph) dimGraph;
-		final Level level = descDimGraph.getLevel(selector.getHierarchyId(),
+		final DescriptorGraph descDimGraph = (DescriptorGraph) dimGraph;
+		final DescriptorGraphLevel descriptorGraphLevel = descDimGraph.getLevel(selector.getHierarchyId(),
 				selector.getLevelId());
-		final Set<DescriptorMember> members = level.getMembers(selector
+		final Set<DescriptorMember> members = descriptorGraphLevel.getMembers(selector
 				.getHierarchyId());
 
 		if (result == null) {

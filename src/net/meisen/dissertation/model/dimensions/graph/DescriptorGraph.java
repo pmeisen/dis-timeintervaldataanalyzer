@@ -26,31 +26,31 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * @author pmeisen
  * 
  */
-public class DescriptorDimensionGraph implements IDimensionGraph {
+public class DescriptorGraph implements IDimensionGraph {
 
 	private DescriptorDimension dimension = null;
 
-	private final Map<String, Node> nodes;
-	private List<Node> sourceNodes;
-	private List<Node> sinkNode;
+	private final Map<String, DescriptorGraphNode> descriptorGraphNodes;
+	private List<DescriptorGraphNode> sourceNodes;
+	private List<DescriptorGraphNode> sinkNode;
 
-	private final Map<String, Level> levels;
-	private List<Level> levelLeafs;
-	private Level levelRoot;
+	private final Map<String, DescriptorGraphLevel> descriptorGraphLevels;
+	private List<DescriptorGraphLevel> levelLeafs;
+	private DescriptorGraphLevel levelRoot;
 
 	private boolean validated;
 
 	/**
 	 * The default constructor.
 	 */
-	public DescriptorDimensionGraph() {
-		this.nodes = new HashMap<String, Node>();
-		this.levels = new HashMap<String, Level>();
+	public DescriptorGraph() {
+		this.descriptorGraphNodes = new HashMap<String, DescriptorGraphNode>();
+		this.descriptorGraphLevels = new HashMap<String, DescriptorGraphLevel>();
 
-		this.sourceNodes = new ArrayList<Node>();
+		this.sourceNodes = new ArrayList<DescriptorGraphNode>();
 		this.sinkNode = null;
 
-		this.levelLeafs = new ArrayList<Level>();
+		this.levelLeafs = new ArrayList<DescriptorGraphLevel>();
 		this.levelRoot = null;
 
 		this.validated = false;
@@ -66,34 +66,34 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * @param memberId
 	 *            the identifier of the {@code DescriptorMember} to be retrieved
 	 * 
-	 * @return the {@code Node} of the member or {@code null} if no node for the
+	 * @return the {@code DescriptorGraphNode} of the member or {@code null} if no node for the
 	 *         specified information exist
 	 */
-	public Node getNode(final String hierarchyId, final String memberId) {
+	public DescriptorGraphNode getNode(final String hierarchyId, final String memberId) {
 		final String nodeId = createNodeId(hierarchyId, memberId);
-		return nodes.get(nodeId);
+		return descriptorGraphNodes.get(nodeId);
 	}
 
 	/**
-	 * Gets all the nodes of the {@code DescriptorDimensionGraph}.
+	 * Gets all the descriptorGraphNodes of the {@code DescriptorGraph}.
 	 * 
-	 * @return all the nodes of the {@code DescriptorDimensionGraph}
+	 * @return all the descriptorGraphNodes of the {@code DescriptorGraph}
 	 */
-	public Collection<Node> getNodes() {
-		return Collections.unmodifiableCollection(nodes.values());
+	public Collection<DescriptorGraphNode> getNodes() {
+		return Collections.unmodifiableCollection(descriptorGraphNodes.values());
 	}
 
 	/**
-	 * Gets all the levels of the {@code DescriptorDimensionGraph}.
+	 * Gets all the descriptorGraphLevels of the {@code DescriptorGraph}.
 	 * 
-	 * @return all the levels of the {@code DescriptorDimensionGraph}
+	 * @return all the descriptorGraphLevels of the {@code DescriptorGraph}
 	 */
-	public Collection<Level> getLevels() {
-		return Collections.unmodifiableCollection(levels.values());
+	public Collection<DescriptorGraphLevel> getLevels() {
+		return Collections.unmodifiableCollection(descriptorGraphLevels.values());
 	}
 
 	/**
-	 * Gets a specific {@code Level} of the graph. The level is uniquely defined
+	 * Gets a specific {@code DescriptorGraphLevel} of the graph. The level is uniquely defined
 	 * by the hierarchy it belongs to (which can be {@code null} if it's a
 	 * shared level) and it's identifier used within the {@code DescriptorLevel}
 	 * .
@@ -103,12 +103,12 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * @param descLevelId
 	 *            the identifier of the {@code DescriptorLevel}
 	 * 
-	 * @return the {@code Level} found or {@code null} if no {@code Level} for
+	 * @return the {@code DescriptorGraphLevel} found or {@code null} if no {@code DescriptorGraphLevel} for
 	 *         the specified values exists
 	 */
-	public Level getLevel(final String hierarchyId, final String descLevelId) {
+	public DescriptorGraphLevel getLevel(final String hierarchyId, final String descLevelId) {
 		final String levelId = createLevelId(hierarchyId, descLevelId);
-		return levels.get(levelId);
+		return descriptorGraphLevels.get(levelId);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * 
 	 * @return the sources, a.k.a. leafs, of the graph
 	 */
-	public List<Node> getSources() {
+	public List<DescriptorGraphNode> getSources() {
 		if (this.sourceNodes == null) {
 			validate();
 		}
@@ -129,7 +129,7 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * 
 	 * @return the sinks, a.k.a. roots, of the graph
 	 */
-	public List<Node> getSinks() {
+	public List<DescriptorGraphNode> getSinks() {
 		if (this.sinkNode == null) {
 			validate();
 		}
@@ -151,8 +151,8 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 
 		this.validated = false;
 
-		this.nodes.clear();
-		this.levels.clear();
+		this.descriptorGraphNodes.clear();
+		this.descriptorGraphLevels.clear();
 
 		this.sourceNodes.clear();
 		this.sinkNode = null;
@@ -172,35 +172,35 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 			for (final DescriptorMember member : members) {
 
 				// create a node
-				Node node = getOrCreateNode(hierarchyId, member);
+				DescriptorGraphNode descriptorGraphNode = getOrCreateNode(hierarchyId, member);
 
 				// get the level
-				final Level level = getOrCreateLevel(member.getLevel());
+				final DescriptorGraphLevel descriptorGraphLevel = getOrCreateLevel(member.getLevel());
 
 				// add the node to the level
-				level.add(node);
+				descriptorGraphLevel.add(descriptorGraphNode);
 
 				// add the parents and the children
 				for (final DescriptorMember parent : member.getRollUpTo()) {
 
 					/*
-					 * Do the nodes.
+					 * Do the descriptorGraphNodes.
 					 */
-					final Node parentNode = getOrCreateNode(hierarchyId, parent);
-					node.addParent(parentNode);
+					final DescriptorGraphNode parentNode = getOrCreateNode(hierarchyId, parent);
+					descriptorGraphNode.addParent(parentNode);
 
 					// register this as child
-					parentNode.addChild(node);
+					parentNode.addChild(descriptorGraphNode);
 
 					/*
-					 * Do the levels.
+					 * Do the descriptorGraphLevels.
 					 */
-					final Level parentLevel = getOrCreateLevel(parentNode
+					final DescriptorGraphLevel parentLevel = getOrCreateLevel(parentNode
 							.getLevel());
-					level.addParent(parentLevel);
+					descriptorGraphLevel.addParent(parentLevel);
 
 					// register this as child
-					parentLevel.addChild(level);
+					parentLevel.addChild(descriptorGraphLevel);
 				}
 			}
 		}
@@ -224,26 +224,26 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * Gets or creates the level for the specified {@code descLevel}.
 	 * 
 	 * @param descLevel
-	 *            the {@code DescriptorLevel} to create or get the {@code Level}
+	 *            the {@code DescriptorLevel} to create or get the {@code DescriptorGraphLevel}
 	 *            for
 	 * 
 	 * @return the {@code DescriptorLevel} created or retrieved
 	 */
-	protected Level getOrCreateLevel(final DescriptorLevel descLevel) {
+	protected DescriptorGraphLevel getOrCreateLevel(final DescriptorLevel descLevel) {
 		final String descLevelId = descLevel.getId();
 		final String levelId = createLevelId(descLevel.getHierachy().getId(),
 				descLevelId);
 
-		Level level = levels.get(levelId);
-		if (level == null) {
-			level = new Level(dimension.isSharedLevel(descLevelId));
-			levels.put(levelId, level);
+		DescriptorGraphLevel descriptorGraphLevel = descriptorGraphLevels.get(levelId);
+		if (descriptorGraphLevel == null) {
+			descriptorGraphLevel = new DescriptorGraphLevel(dimension.isSharedLevel(descLevelId));
+			descriptorGraphLevels.put(levelId, descriptorGraphLevel);
 		}
 
 		// bind the DescriptorLevel to it
-		level.bind(descLevel);
+		descriptorGraphLevel.bind(descLevel);
 
-		return level;
+		return descriptorGraphLevel;
 	}
 
 	/**
@@ -251,28 +251,28 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	 * {@code DescriptorMember}.
 	 * 
 	 * @param hierarchyId
-	 *            the identifier of the hierarchy the {@code Node} belongs to
+	 *            the identifier of the hierarchy the {@code DescriptorGraphNode} belongs to
 	 * @param member
-	 *            the {@code DescriptorMember} to get or create the {@code Node}
+	 *            the {@code DescriptorMember} to get or create the {@code DescriptorGraphNode}
 	 *            for
 	 * 
 	 * 
 	 * @return the {@code DescriptorLevel} created or retrieved
 	 */
-	protected Node getOrCreateNode(final String hierarchyId,
+	protected DescriptorGraphNode getOrCreateNode(final String hierarchyId,
 			final DescriptorMember member) {
 
 		final String nodeId = createNodeId(hierarchyId, member.getId());
-		Node node = nodes.get(nodeId);
+		DescriptorGraphNode descriptorGraphNode = descriptorGraphNodes.get(nodeId);
 
-		if (node == null) {
+		if (descriptorGraphNode == null) {
 
 			// create the node
-			node = new Node(member);
-			nodes.put(nodeId, node);
+			descriptorGraphNode = new DescriptorGraphNode(member);
+			descriptorGraphNodes.put(nodeId, descriptorGraphNode);
 		}
 
-		return node;
+		return descriptorGraphNode;
 	}
 
 	/**
@@ -334,7 +334,7 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	}
 
 	/**
-	 * Validates the nodes: There is only one sink (a.k.a. root), the sink is
+	 * Validates the descriptorGraphNodes: There is only one sink (a.k.a. root), the sink is
 	 * reachable from every node, and every source is a matcher (descriptor's
 	 * value).
 	 * 
@@ -344,8 +344,8 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	protected void validateNodes() throws ForwardedRuntimeException {
 
 		// find the sink and the sources
-		for (final Node node : nodes.values()) {
-			final DescriptorMember member = node.getMember();
+		for (final DescriptorGraphNode descriptorGraphNode : descriptorGraphNodes.values()) {
+			final DescriptorMember member = descriptorGraphNode.getMember();
 
 			// the member cannot be null
 			if (member == null) {
@@ -354,26 +354,26 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 			}
 
 			// check if we have a sink
-			if (node.isSink()) {
+			if (descriptorGraphNode.isSink()) {
 
-				if (node.getMinDistance() != 0) {
+				if (descriptorGraphNode.getMinDistance() != 0) {
 					throw new ForwardedRuntimeException(
 							DescriptorDimensionException.class, 1016,
-							dimension.getId(), node.getMinDistance());
+							dimension.getId(), descriptorGraphNode.getMinDistance());
 				} else if (this.sinkNode == null) {
-					this.sinkNode = new ArrayList<Node>();
+					this.sinkNode = new ArrayList<DescriptorGraphNode>();
 				}
-				this.sinkNode.add(node);
-			} else if (node.getMinDistance() < 0) {
+				this.sinkNode.add(descriptorGraphNode);
+			} else if (descriptorGraphNode.getMinDistance() < 0) {
 				throw new ForwardedRuntimeException(
-						DescriptorDimensionException.class, 1017, node
+						DescriptorDimensionException.class, 1017, descriptorGraphNode
 								.getMember().getId(), dimension.getId(),
-						node.getMinDistance());
+						descriptorGraphNode.getMinDistance());
 			}
 
 			// check if we have a pattern based, none source
-			if (node.isSource()) {
-				this.sourceNodes.add(node);
+			if (descriptorGraphNode.isSource()) {
+				this.sourceNodes.add(descriptorGraphNode);
 			} else if (member.isPatternBased()) {
 				throw new ForwardedRuntimeException(
 						DescriptorDimensionException.class, 1005,
@@ -392,8 +392,8 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 	}
 
 	/**
-	 * Validates the levels: The levels must provide a partial order over a
-	 * partition of all the nodes.
+	 * Validates the descriptorGraphLevels: The descriptorGraphLevels must provide a partial order over a
+	 * partition of all the descriptorGraphNodes.
 	 * 
 	 * @throws ForwardedRuntimeException
 	 *             if the validation fails
@@ -402,38 +402,38 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 
 		// find the root and the leafs
 		final Set<String> emptyLevels = new HashSet<String>();
-		for (final Entry<String, Level> entry : this.levels.entrySet()) {
+		for (final Entry<String, DescriptorGraphLevel> entry : this.descriptorGraphLevels.entrySet()) {
 
 			// get the level
-			final Level level = entry.getValue();
+			final DescriptorGraphLevel descriptorGraphLevel = entry.getValue();
 
 			// check if the level is empty, it will be removed afterwards
-			if (level.isEmpty()) {
+			if (descriptorGraphLevel.isEmpty()) {
 				emptyLevels.add(entry.getKey());
 			} else {
 
 				// check if we have a root level
-				if (level.isRoot()) {
+				if (descriptorGraphLevel.isRoot()) {
 					if (this.levelRoot != null) {
 						throw new ForwardedRuntimeException(
 								DescriptorDimensionException.class, 1011,
 								dimension.getId());
 					}
 
-					this.levelRoot = level;
+					this.levelRoot = descriptorGraphLevel;
 				}
 
 				// check leafs
-				if (level.isLeaf()) {
-					this.levelLeafs.add(level);
+				if (descriptorGraphLevel.isLeaf()) {
+					this.levelLeafs.add(descriptorGraphLevel);
 				}
 
 				/*
 				 * Check the parents, all parents are by definition in relation
 				 * to this: this < allParents
 				 */
-				final int levelMaxDistance = level.getMaxDistance();
-				for (final Level parent : level.getAllParents()) {
+				final int levelMaxDistance = descriptorGraphLevel.getMaxDistance();
+				for (final DescriptorGraphLevel parent : descriptorGraphLevel.getAllParents()) {
 
 					/*
 					 * Make sure we get closer, anyways only the max has to be
@@ -442,15 +442,15 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 					if (levelMaxDistance <= parent.getMinDistance()) {
 						throw new ForwardedRuntimeException(
 								DescriptorDimensionException.class, 1019,
-								level.getDescriptorLevelId(), levelMaxDistance,
+								descriptorGraphLevel.getDescriptorLevelId(), levelMaxDistance,
 								parent.getDescriptorLevelId(),
 								parent.getMinDistance());
 					}
 
 					boolean reachable = false;
-					for (final Node node : level.getNodes()) {
-						for (final Node parentNode : parent.getNodes()) {
-							if (node.canReach(parentNode)) {
+					for (final DescriptorGraphNode descriptorGraphNode : descriptorGraphLevel.getNodes()) {
+						for (final DescriptorGraphNode parentNode : parent.getNodes()) {
+							if (descriptorGraphNode.canReach(parentNode)) {
 								reachable = true;
 								break;
 							}
@@ -472,16 +472,16 @@ public class DescriptorDimensionGraph implements IDimensionGraph {
 					if (!reachable) {
 						throw new ForwardedRuntimeException(
 								DescriptorDimensionException.class, 1020,
-								level.getDescriptorLevelId(),
+								descriptorGraphLevel.getDescriptorLevelId(),
 								parent.getDescriptorLevelId());
 					}
 				}
 			}
 		}
 
-		// remove the empty levels
+		// remove the empty descriptorGraphLevels
 		for (final String key : emptyLevels) {
-			this.levels.remove(key);
+			this.descriptorGraphLevels.remove(key);
 		}
 
 		// make sure we found a root

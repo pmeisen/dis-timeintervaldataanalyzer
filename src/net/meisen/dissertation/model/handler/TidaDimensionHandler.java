@@ -12,7 +12,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaDimensionHandlerException;
 import net.meisen.dissertation.model.dimensions.DescriptorDimension;
 import net.meisen.dissertation.model.dimensions.IDimension;
-import net.meisen.dissertation.model.dimensions.graph.DescriptorDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.DescriptorGraph;
 import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
@@ -148,7 +148,7 @@ public class TidaDimensionHandler {
 
 		// factory to pick the correct type for the dimension
 		if (dimension instanceof DescriptorDimension) {
-			graph = new DescriptorDimensionGraph();
+			graph = new DescriptorGraph();
 		} else {
 			final String type = dimension == null ? null : dimension.getClass()
 					.getSimpleName();
