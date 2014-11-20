@@ -257,7 +257,7 @@ public class DescriptorGraphNode {
 
 	@Override
 	public String toString() {
-		return member.toString();
+		return member.toString() + " " + member.getRollUpTo().toString();
 	}
 
 	/**

@@ -7,11 +7,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
 import net.meisen.dissertation.model.dimensions.BaseDimensionTest;
 import net.meisen.dissertation.model.dimensions.DescriptorDimension;
+import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.dissertation.model.dimensions.graph.DescriptorGraph;
 import net.meisen.dissertation.model.dimensions.graph.DescriptorGraphLevel;
@@ -64,29 +66,37 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_LOCATION", "LAND_VAT");
 		assertNotNull(descriptorGraphNode);
-		assertTrue(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertTrue(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_LOCATION", "LAND_FR");
 		assertNotNull(descriptorGraphNode);
-		assertTrue(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertTrue(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_LOCATION", "LAND_DE");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_LOCATION", "USA");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
@@ -164,8 +174,10 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_STRUCTURE", "0");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
@@ -205,7 +217,8 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 		members = descriptorGraphLevel.getMembers("HIERARCHY_STRUCTURE");
 		assertEquals(2, members.size());
 
-		descriptorGraphLevel = graph.getLevel("HIERARCHY_STRUCTURE", "Preamble");
+		descriptorGraphLevel = graph
+				.getLevel("HIERARCHY_STRUCTURE", "Preamble");
 		members = descriptorGraphLevel.getMembers("HIERARCHY_STRUCTURE");
 		assertEquals(1, members.size());
 		assertEquals("0", members.iterator().next().getId());
@@ -229,17 +242,21 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 		graph.create(dim);
 
 		descriptorGraphLevel = graph.getLevel("HIERARCHY_STRUCTURE", "Content");
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE2", "NOTAVAILABLE");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE2",
+				"NOTAVAILABLE");
 		assertEquals(0, members.size());
 
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE", "NOTAVAILABLE");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE",
+				"NOTAVAILABLE");
 		assertEquals(0, members.size());
 
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE", "2");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE",
+				"2");
 		assertEquals(1, members.size());
 		assertEquals("2", members.iterator().next().getId());
 
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE", "1");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE",
+				"1");
 		assertEquals(3, members.size());
 		for (final DescriptorMember member : members) {
 			if (member.getId().equals("TOC")) {
@@ -253,13 +270,16 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 			}
 		}
 
-		descriptorGraphLevel = graph.getLevel("HIERARCHY_STRUCTURE", "Preamble");
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE", "0");
+		descriptorGraphLevel = graph
+				.getLevel("HIERARCHY_STRUCTURE", "Preamble");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE",
+				"0");
 		assertEquals(1, members.size());
 		assertEquals("TOC", members.iterator().next().getId());
 
 		descriptorGraphLevel = graph.getLevel("HIERARCHY_STRUCTURE", "*");
-		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE", "*");
+		members = descriptorGraphLevel.getLeafMembers("HIERARCHY_STRUCTURE",
+				"*");
 		assertEquals(5, members.size());
 	}
 
@@ -336,29 +356,37 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_STRUCTURE", "MEM_A_1");
 		assertNotNull(descriptorGraphNode);
-		assertTrue(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertTrue(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(2, descriptorGraphNode.getMinDistance());
 		assertEquals(3, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_STRUCTURE", "MEM_B2_1");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(1, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_STRUCTURE", "MEM_B2_2");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertFalse(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertFalse(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(1, descriptorGraphNode.getMinDistance());
 		assertEquals(2, descriptorGraphNode.getMaxDistance());
 
 		descriptorGraphNode = graph.getNode("HIERARCHY_STRUCTURE", "*");
 		assertNotNull(descriptorGraphNode);
-		assertFalse(descriptorGraphNode.getChildren().toString(), descriptorGraphNode.isSource());
-		assertTrue(descriptorGraphNode.getParents().toString(), descriptorGraphNode.isSink());
+		assertFalse(descriptorGraphNode.getChildren().toString(),
+				descriptorGraphNode.isSource());
+		assertTrue(descriptorGraphNode.getParents().toString(),
+				descriptorGraphNode.isSink());
 		assertEquals(0, descriptorGraphNode.getMinDistance());
 		assertEquals(0, descriptorGraphNode.getMaxDistance());
 
@@ -422,5 +450,48 @@ public class TestDescriptorGraph extends BaseDimensionTest {
 
 		final DescriptorGraph graph = new DescriptorGraph();
 		graph.create(dim);
+	}
+
+	/**
+	 * Tests a dimension with multiple hierarchies and a shared dimension.
+	 */
+	@Test
+	public void testMulitpleHierarchy() {
+		DescriptorHierarchy hierarchy;
+
+		final DescriptorDimension dim = new DescriptorDimension(
+				metaModel.getDescriptorModel("LOCATION"));
+
+		// add one COUNTRY -> *
+		hierarchy = dim.addHierarchy("H_COUNTRY_ONLY", null);
+		hierarchy.addPatternMember("GERMANY", ".*, Deutschland", false,
+				"COUNTRY", Arrays.asList("*"));
+		hierarchy.addPatternMember("USA", ".*, USA", false, "COUNTRY",
+				Arrays.asList("*"));
+
+		// add one COUNTRY -> CONTINENT -> *
+		hierarchy = dim.addHierarchy("H_CONTINENT", null);
+		hierarchy.addMember("EUROPE", "CONTINENT", Arrays.asList("*"));
+		hierarchy.addMember("AMERICA", "CONTINENT", Arrays.asList("*"));
+
+		hierarchy.addPatternMember("GERMANY", ".*, Deutschland", false,
+				"COUNTRY", Arrays.asList("EUROPE"));
+		hierarchy.addPatternMember("USA", ".*, USA", false, "COUNTRY",
+				Arrays.asList("AMERICA"));
+
+		// mark COUNTRY as shared
+		dim.addSharedLevel("COUNTRY");
+
+		// create the graph
+		final DescriptorGraph graph = new DescriptorGraph();
+		graph.create(dim);
+
+		// validate
+		assertEquals(4, graph.getLevel("H_CONTINENT", "COUNTRY").getNodes()
+				.size());
+		assertEquals(2, graph.getLevel("H_CONTINENT", "COUNTRY")
+				.getDescriptorLevels().size());
+		assertEquals(1, graph.getLevel("H_CONTINENT", "COUNTRY")
+				.getLeafMembers("H_CONTINENT", "GERMANY").size());
 	}
 }

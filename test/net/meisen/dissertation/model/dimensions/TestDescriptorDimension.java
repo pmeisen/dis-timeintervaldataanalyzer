@@ -9,10 +9,6 @@ import java.util.Collection;
 import java.util.UUID;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.model.dimensions.DescriptorDimension;
-import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
-import net.meisen.dissertation.model.dimensions.DescriptorLevel;
-import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 import org.junit.Test;

@@ -201,7 +201,7 @@ public class DescriptorMember {
 
 	@Override
 	public String toString() {
-		return name + " (" + id + ")";
+		return id + " (" + descriptorHierarchy.getId() + ")";
 	}
 
 	@Override
