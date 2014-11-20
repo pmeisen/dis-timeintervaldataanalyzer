@@ -230,7 +230,7 @@ public class DimensionModel {
 		final DescriptorDimensionGraph dim = (DescriptorDimensionGraph) d;
 
 		// get the DescrptorModel used
-		final String modelId = dim.getDimension().getDescriptorId();
+		final String modelId = dim.getDimension().getDescriptorModelId();
 		final DescriptorModel<?> descModel = metaDataModel
 				.getDescriptorModel(modelId);
 		if (descModel == null) {

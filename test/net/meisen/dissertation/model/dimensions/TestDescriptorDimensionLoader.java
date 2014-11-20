@@ -80,9 +80,8 @@ public class TestDescriptorDimensionLoader {
 		// check the dimensions attributes
 		final DescriptorDimension descDim = (DescriptorDimension) dim;
 		assertEquals("DIMLOC", descDim.getId());
-		assertEquals("LOC", descDim.getDescriptorId());
+		assertEquals("LOC", descDim.getDescriptorModelId());
 		assertEquals("DIMLOC", descDim.getName());
-		assertFalse(descDim.hasName());
 
 		// check the hierarchies
 		DescriptorHierarchy hierarchy;
