@@ -50,10 +50,15 @@ public class DescriptorMemberManager {
 	 *            the members to roll up to
 	 * 
 	 * @return the created and added, or found member
+	 * 
+	 * @throws ForwardedRuntimeException
+	 *             if the member could not be created, e.g. because the
+	 *             identifier is used by another member
 	 */
 	public DescriptorMember addMember(final String id, final String name,
 			final String pattern, final boolean includeNull,
-			final DescriptorLevel level, final Collection<String> rollUpTo) {
+			final DescriptorLevel level, final Collection<String> rollUpTo)
+			throws ForwardedRuntimeException {
 		DescriptorMember member = this.members.get(id);
 		if (member == null) {
 			member = new DescriptorMember(descriptorHierarchy, id, name,
