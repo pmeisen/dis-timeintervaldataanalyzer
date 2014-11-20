@@ -5,12 +5,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.meisen.dissertation.exceptions.DescriptorDimensionException;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.model.descriptors.DescriptorModel;
-import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 public class DescriptorHierarchyManager {
 	private final static Logger LOG = LoggerFactory
