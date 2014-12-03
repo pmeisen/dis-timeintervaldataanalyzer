@@ -13,9 +13,9 @@ public class Day implements ISecondBasedGranularity, IDateBasedGranularity {
 	}
 
 	/**
-	 * Gets the one and only instance of a {@code Day}.
+	 * Gets the one and only instance of a {@code Days}.
 	 * 
-	 * @return the one and only instance of a {@code Day}
+	 * @return the one and only instance of a {@code Days}
 	 */
 	public static Day instance() {
 		return instance;
@@ -58,5 +58,24 @@ public class Day implements ISecondBasedGranularity, IDateBasedGranularity {
 	@Override
 	public Date resolveRepresenter(final long value) {
 		return new Date(value * seconds() * 1000);
+	}
+
+	/**
+	 * Gets the instance of the {@code DateBasedHelper} to be used.
+	 * 
+	 * @return the instance of the {@code DateBasedHelper} to be used
+	 */
+	public DateBasedHelper helper() {
+		return helper;
+	}
+
+	@Override
+	public boolean isAssignableTo(char identifier) {
+		return helper().isAssignableTo(getIdentifier(), identifier);
+	}
+
+	@Override
+	public char getIdentifier() {
+		return 'd';
 	}
 }

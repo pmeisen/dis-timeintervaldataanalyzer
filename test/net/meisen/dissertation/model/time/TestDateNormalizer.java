@@ -4,10 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.text.ParseException;
+import java.util.Date;
+
 import net.meisen.dissertation.model.time.DateNormalizer;
+import net.meisen.dissertation.model.time.DateNormalizer.RoundType;
 import net.meisen.dissertation.model.time.granularity.Day;
 import net.meisen.dissertation.model.time.granularity.DeciSecond;
 import net.meisen.dissertation.model.time.granularity.FortNight;
+import net.meisen.dissertation.model.time.granularity.Hour;
+import net.meisen.dissertation.model.time.granularity.IDateBasedGranularity;
 import net.meisen.dissertation.model.time.granularity.ISecondBasedGranularity;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.granularity.MilliSecond;
@@ -17,6 +23,7 @@ import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.granularity.Week;
 import net.meisen.dissertation.model.time.granularity.YoctoSecond;
 import net.meisen.dissertation.model.time.granularity.ZeptoSecond;
+import net.meisen.general.genmisc.types.Dates;
 
 import org.junit.Test;
 
@@ -136,5 +143,50 @@ public class TestDateNormalizer {
 
 		m = n.getMultiplier(Week.instance(), YoctoSecond.instance());
 		assertEquals(6.048 * 100000000000000000000000000000.0, m, 0.0);
+	}
+
+	/**
+	 * Tests the normalization of dates.
+	 * 
+	 * @throws ParseException
+	 *             if a date is invalid
+	 */
+	@Test
+	public void testNormalize() throws ParseException {
+
+		// @formatter:off
+		
+		// test Day
+		assertDate("01.11.2014 00:00:00", "01.11.2014 00:00:00", Day.instance());
+		assertDate("01.11.2014 13:00:00", "01.11.2014 00:00:00", Day.instance());
+		assertDate("01.11.2014 00:00:00", "01.11.2014 00:00:00", Day.instance());
+		assertDate("01.11.2014 12:00:00", "01.11.2014 00:00:00", Day.instance());
+		assertDate("01.11.2014 00:00:00", "01.11.2014 00:00:00", Day.instance());
+		assertDate("01.11.2014 06:00:00", "01.11.2014 00:00:00", Day.instance());
+
+		// test Hour
+		assertDate("01.11.2014 06:00:00", "01.11.2014 06:00:00", Hour.instance());
+		assertDate("01.11.2014 06:12:00", "01.11.2014 06:00:00", Hour.instance());
+		
+		// test Minutes
+		assertDate("01.11.2014 06:00:00", "01.11.2014 06:00:00", Minute.instance());
+		assertDate("01.11.2014 06:12:12", "01.11.2014 06:12:00", Minute.instance());
+		assertDate("02.11.2014 02:12:33", "02.11.2014 02:12:00", Minute.instance());
+		assertDate("02.11.2014 03:12:56", "02.11.2014 03:12:00", Minute.instance());
+		// @formatter:on
+	}
+
+	private void assertDate(final String dateString,
+			final String resDateString, final IDateBasedGranularity granularity)
+			throws ParseException {
+		final DateNormalizer n = DateNormalizer.instance();
+		final Date date = Dates.parseDate(dateString, "dd.MM.yyyy HH:mm:ss",
+				Dates.GENERAL_TIMEZONE);
+		final long norm = n.normalize(date, granularity, RoundType.FLOOR);
+		final Date deDate = n.denormalize(norm, granularity);
+
+		final Date resDate = Dates.parseDate(resDateString,
+				"dd.MM.yyyy HH:mm:ss", Dates.GENERAL_TIMEZONE);
+		assertEquals(resDate, deDate);
 	}
 }

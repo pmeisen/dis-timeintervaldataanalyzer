@@ -624,6 +624,38 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the parsing of a measure using the selection of a level of a
+	 * dimension
+	 */
+	@Test
+	public void testDimAggregateMeasure() {
+		DescriptorMathTree measure;
+		List<IMathTreeElement> order;
+
+		SelectQuery query;
+		List<DescriptorMathTree> measures;
+
+		query = q("select timeseries of SUM(COSTS) / COUNT(MINUTES) AS SAMPLE1, MODE(COSTS) * (SUM(COSTS + MINUTES) / COUNT(MINUTES)) AS SAMPLE2, COUNT(MINUTES) AS SAMPLE3 ON TIME.HIERARCHY.LEVEL from testPersonModel");
+		measures = query.getMeasures();
+		assertEquals(3, measures.size());
+		assertEquals("TIME", query.getMeasureDimension().getDimensionId());
+		assertEquals("HIERARCHY", query.getMeasureDimension().getHierarchyId());
+		assertEquals("LEVEL", query.getMeasureDimension().getLevelId());
+
+		measure = measures.get(1);
+		assertEquals("SAMPLE2", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+		assertEquals(10, order.size());
+
+		measure = measures.get(2);
+		assertEquals("SAMPLE3", measure.getId());
+		assertTrue(measure.isSimple());
+		order = measure.getEvaluationOrder();
+		assertEquals(2, order.size());
+	}
+
+	/**
 	 * Tests the retrieval of a simple group.
 	 */
 	@Test
@@ -1586,6 +1618,92 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the implementation of a aggregated count-started.
+	 */
+	@Test
+	public void testAggregationCountStarted() {
+		String query;
+		TimeSeries ts;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// fire a first query
+		query = "select timeseries of countstarted(PERSON) AS CSTART from testPersonModel in [03.03.2014 16:19:00,03.03.2014 16:22:00]";
+		ts = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult().getSeries("CSTART");
+		int i1 = 0;
+		for (final double value : ts.getValues()) {
+			if (i1 == 1) {
+				assertEquals(1.0, value, 0.0);
+			} else {
+				assertEquals(0.0, value, 0.0);
+			}
+			i1++;
+		}
+
+		// fire a second query
+		query = "select timeseries of countstarted(PERSON) AS CSTART from testPersonModel in [03.03.2014 00:00:00,03.03.2014 16:20:00]";
+		ts = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult().getSeries("CSTART");
+		int i2 = 0;
+		for (final double value : ts.getValues()) {
+			if (i2 == 0) {
+				assertEquals(4.0, value, 0.0);
+			} else if (i2 == ts.getValues().length - 1) {
+				assertEquals(1.0, value, 0.0);
+			} else {
+				assertEquals(0.0, value, 0.0);
+			}
+			i2++;
+		}
+	}
+
+	/**
+	 * Tests the implementation of a aggregated count-finished.
+	 */
+	@Test
+	public void testAggregationCountFinished() {
+		String query;
+		TimeSeries ts;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+
+		// fire a first query
+		query = "select timeseries of countfinished(PERSON) AS CFINISHED from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:22:00]";
+		ts = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult().getSeries("CFINISHED");
+		int i1 = 0;
+		for (final double value : ts.getValues()) {
+			if (i1 == 1) {
+				assertEquals(1.0, value, 0.0);
+			} else {
+				assertEquals(0.0, value, 0.0);
+			}
+			i1++;
+		}
+
+		// fire a second query
+		query = "select timeseries of countfinished(PERSON) AS CFINISHED from testPersonModel in [03.03.2014 17:20:00,04.03.2014 23:59:00]";
+		ts = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult().getSeries("CFINISHED");
+		int i2 = 0;
+		for (final double value : ts.getValues()) {
+			if (i2 == 1) {
+				assertEquals(1.0, value, 0.0);
+			} else if (i2 == ts.getValues().length - 1) {
+				assertEquals(4.0, value, 0.0);
+			} else {
+				assertEquals(0.0, value, 0.0);
+			}
+			i2++;
+		}
+	}
+
+	/**
 	 * Tests the implementation of the {@link Min} aggregation-function.
 	 */
 	@Test
@@ -1765,6 +1883,76 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(ts.toString(), 1204.0, ts.getValue(2), 0.0);
 		assertEquals(ts.toString(), 1204.0, ts.getValue(3), 0.0);
 		assertEquals(ts.toString(), Double.NaN, ts.getValue(4), 0.0);
+	}
+
+	/**
+	 * Tests the aggregation across a dimension.
+	 */
+	@Test
+	public void testAggregationDim() {
+		String query;
+		TimeSeriesCollection tsRes;
+		TimeSeries ts;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		m(xml);
+
+		// fire the UTC query
+		query = "select timeseries of COUNT(PERSON) AS PERSON, SUM(SCREAMS) AS SCREAMS, SUM(SCREAMS) / COUNT(PERSON) AS COMPLEX , SUM(SCREAMS + PERSON) AS COMBINED ON TIME.UTC.DAY from testPersonModel";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+
+		ts = tsRes.getSeries("PERSON");
+		assertEquals(6.0, ts.getValue(0), 0.0);
+		assertEquals(4.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("SCREAMS");
+		assertEquals(15.0, ts.getValue(0), 0.0);
+		assertEquals(12.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMPLEX");
+		assertEquals(15.0 / 6.0, ts.getValue(0), 0.0);
+		assertEquals(12.0 / 4.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("COMBINED");
+		assertEquals(15.0 + 6.0, ts.getValue(0), 0.0);
+		assertEquals(12.0 + 4.0, ts.getValue(1), 0.0);
+
+		// test another hierarchy
+		query = "select timeseries of COUNT(PERSON) AS PERSON ON TIME.GER.MINUTE30 from testPersonModel";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("PERSON");
+		for (int i = 0; i < ts.size(); i++) {
+			if (i == 32 || i == 34) {
+				assertEquals(5.0, ts.getValue(i), 0.0);
+			} else {
+				assertEquals(4.0, ts.getValue(i), 0.0);
+			}
+		}
+
+		// test some filtering
+		query = "select timeseries of COUNT(PERSON) AS PERSON, SUM(SCREAMS) AS SCREAMS ON TIME.US.HOUR2 from testPersonModel where PERSON='Philipp'";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("PERSON");
+		for (int i = 0; i < ts.size(); i++) {
+			if (i == 8) {
+				assertEquals(3.0, ts.getValue(i), 0.0);
+			} else {
+				assertEquals(1.0, ts.getValue(i), 0.0);
+			}
+		}
+
+		ts = tsRes.getSeries("SCREAMS");
+		for (int i = 0; i < ts.size(); i++) {
+			if (i < 9) {
+				assertEquals(3.0, ts.getValue(i), 0.0);
+			} else {
+				assertEquals(0.0, ts.getValue(i), 0.0);
+			}
+		}
 	}
 
 	/**

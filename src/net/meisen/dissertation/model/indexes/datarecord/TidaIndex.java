@@ -414,6 +414,29 @@ public class TidaIndex implements IPersistable {
 	}
 
 	/**
+	 * Determines the bounds specified by the {@code Interval}.
+	 * 
+	 * @param start
+	 *            the start object to determine the start-bound for
+	 * @param end
+	 *            the end object to determine the end-bound for
+	 * @param startInclusive
+	 *            {@code true} if the start value is included, otherwise
+	 *            {@code false}
+	 * @param endInclusive
+	 *            {@code true} if the end value is included, otherwise
+	 *            {@code false}
+	 * 
+	 * 
+	 * @return the determined bounds
+	 */
+	public long[] getBounds(final Object start, final Object end,
+			final boolean startInclusive, final boolean endInclusive) {
+		return intervalIndex
+				.getBounds(start, end, startInclusive, endInclusive);
+	}
+
+	/**
 	 * Gets the time-point value for the specified {@code id}.
 	 * 
 	 * @param id

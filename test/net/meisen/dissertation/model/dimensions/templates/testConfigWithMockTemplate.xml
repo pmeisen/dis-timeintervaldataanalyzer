@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config xmlns="http://dev.meisen.net/xsd/dissertation/config" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        
+        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config        http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
+
+  <!-- Adds additional templates. By default the following are added (and 
+       cannot be overridden: 
+       
+       The following aggregation-functions are added by default:
+        + net.meisen.dissertation.model.dimensions.templates.All
+        + net.meisen.dissertation.model.dimensions.templates.Years
+        + net.meisen.dissertation.model.dimensions.templates.Months
+        + net.meisen.dissertation.model.dimensions.templates.Days
+        + net.meisen.dissertation.model.dimensions.templates.Hours
+        + net.meisen.dissertation.model.dimensions.templates.Minutes
+        + net.meisen.dissertation.model.dimensions.templates.Seconds
+    -->
+  <timetemplates>
+    <template implementation="net.meisen.dissertation.model.dimensions.templates.mock.MockTimeLevelTemplate" />
+  </timetemplates>
+
+</config>

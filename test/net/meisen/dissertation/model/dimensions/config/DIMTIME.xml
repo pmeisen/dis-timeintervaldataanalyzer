@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<dimensions xmlns="http://dev.meisen.net/xsd/dissertation/dimension"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            
+            xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd">
+  
+  <timedimension id="MyTimeDimensionId" name="My Time Dimension">
+    <hierarchy id="TIME" name="My Time" all="SimpleTime" timezone="Europe/Berlin">
+      <level id="DAY" template="DAYS" />
+      <level id="HOUR" name="Hours" template="HOURS" />
+      <level id="MINUTE" template="MINUTES" />
+    </hierarchy>
+  </timedimension>
+</dimensions>

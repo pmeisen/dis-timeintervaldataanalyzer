@@ -110,7 +110,7 @@ exprDelete    : STMT_DELETE selectorIntIdList OP_FROM selectorModelId;
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
 exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)?;
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
-exprMeasure         : compNamedMeasure (SEPARATOR compNamedMeasure)*;
+exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (((compNamedMathMeasure | compNamedDimMeasure) (SEPARATOR (compNamedMathMeasure | compNamedDimMeasure))*) OP_ON selectorMember));
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp            : compMemberEqual | compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
@@ -119,18 +119,34 @@ exprAggregate       : (selectorMember | selectorDescriptorId) (SEPARATOR (select
 /*
  * Define the different redudant definitions within the parts of the statement
  */
-compNamedMeasure         : compMeasure (OP_ALIAS selectorAlias)?;
-compMeasure              : compMeasure selectorSecondMathOperator compMeasureAtom | compMeasureAtom;
-compMeasureAtom          : compAggrFunction | compMeasureAtom selectorFirstMathOperator compMeasureAtom | BRACKET_ROUND_OPENED compMeasure BRACKET_ROUND_CLOSED;
+compNamedLowMeasure      : compLowMeasure (OP_ALIAS selectorAlias)?;
+compNamedMathMeasure     : compMathMeasure (OP_ALIAS selectorAlias)?;
+compNamedDimMeasure      : compDimMeasure (OP_ALIAS selectorAlias)?;
 compMemberEqual          : selectorMember CMP_EQUAL selectorValue;
 compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorValue;
 compDescValueTupel       : BRACKET_ROUND_OPENED selectorValue (SEPARATOR selectorValue)* BRACKET_ROUND_CLOSED;
 compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
-compAggrFunction         : selectorAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
-compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
-compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
 compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | selectorValue;
+
+/*
+ * Define the different measures
+ */
+compDimAggrFunction      : selectorDimAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
+compLowAggrFunction      : selectorLowAggrFunctionName BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
+compMathAggrFunction     : selectorMathAggrFunctionName BRACKET_ROUND_OPENED compLowMeasure BRACKET_ROUND_CLOSED;
+
+compLowMeasure           : compLowMeasure selectorSecondMathOperator compLowMeasureAtom | compLowMeasureAtom;
+compLowMeasureAtom       : compLowAggrFunction | compLowMeasureAtom selectorFirstMathOperator compLowMeasureAtom | BRACKET_ROUND_OPENED compLowMeasure BRACKET_ROUND_CLOSED;
+
+compMathMeasure          : compMathMeasure selectorSecondMathOperator compMathMeasureAtom | compMathMeasureAtom;
+compMathMeasureAtom      : compMathAggrFunction | compMathMeasureAtom selectorFirstMathOperator compMathMeasureAtom | BRACKET_ROUND_OPENED compMathMeasure BRACKET_ROUND_CLOSED;
+
+compDimMeasure           : compDimMeasure selectorSecondMathOperator compDimMeasureAtom | compDimMeasureAtom;
+compDimMeasureAtom       : compDimAggrFunction | compDimMeasureAtom selectorFirstMathOperator compDimMeasureAtom | BRACKET_ROUND_OPENED compDimMeasure BRACKET_ROUND_CLOSED;
+
+compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
+compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;
 
 /*
  * Define special selectors which make up a semantic based on specific tokens, 
@@ -151,7 +167,9 @@ selectorIntValueOrNull      : (INT | NULL_VALUE);
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
 selectorValue               : (VALUE | NULL_VALUE);
-selectorAggrFunctionName    : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
+selectorMathAggrFunctionName: (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
+selectorDimAggrFunctionName : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
+selectorLowAggrFunctionName : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | AGGR_COUNTSTARTED | AGGR_COUNTFINISHED | SIMPLE_ID);
 selectorFirstMathOperator   : MATH_MULTIPLY | MATH_DIVISION;
 selectorSecondMathOperator  : MATH_PLUS | MATH_MINUS;
 selectorIntervalDef         : (POS_START_INCL | POS_START_EXCL) | (POS_END_INCL | POS_END_EXCL);
@@ -218,6 +236,7 @@ TYPE_USER        : U S E R;
 // reserved words to define special positions in the statement
 OP_FROM     : F R O M;
 OP_OF       : O F;
+OP_ON       : O N;
 OP_TO       : T O;
 OP_IN       : I N;
 OP_INTO     : I N T O;
@@ -257,14 +276,16 @@ MATH_PLUS       : '+';
 MATH_MINUS      : '-';
 
 // reserved words used for aggregation functions
-AGGR_COUNT     : C O U N T;
-AGGR_SUM       : S U M;
-AGGR_MIN       : M I N;
-AGGR_MAX       : M A X;
-AGGR_AVERAGE   : A V E R A G E;
-AGGR_MODE      : M O D E;
-AGGR_MEAN      : M E A N;
-AGGR_MEDIAN    : M E D I A N;
+AGGR_COUNTSTARTED : C O U N T S T A R T E D;
+AGGR_COUNTFINISHED: C O U N T F I N I S H E D;
+AGGR_COUNT        : C O U N T;
+AGGR_SUM          : S U M;
+AGGR_MIN          : M I N;
+AGGR_MAX          : M A X;
+AGGR_AVERAGE      : A V E R A G E;
+AGGR_MODE         : M O D E;
+AGGR_MEAN         : M E A N;
+AGGR_MEDIAN       : M E D I A N;
 
 // reserved symbols used for comparison
 CMP_EQUAL       : '=';

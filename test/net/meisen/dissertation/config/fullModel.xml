@@ -121,13 +121,6 @@
           <map:mapper implementation="net.meisen.dissertation.impl.time.mapper.LongMapper" />
         </map:config>
       </mappers>
-      
-      <!-- Define the factory to be used to determine the granularity-factory.
-         
-           The following factories are available by default:
-            + net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory
-        -->
-      <granularities implementation="net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory" />
     </factories>
   </config>
   

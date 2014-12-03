@@ -142,6 +142,19 @@
           </xs:complexType>
 		</xs:element>
 		
+		<xs:element name="timetemplates" minOccurs="0">
+          <xs:complexType>
+
+            <xs:sequence>
+              <xs:element name="template" minOccurs="1" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+		</xs:element>
+		
 		<xs:element name="server" minOccurs="0">
           <xs:complexType>
 

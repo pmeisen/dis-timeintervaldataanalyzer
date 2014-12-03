@@ -129,7 +129,7 @@ public class TidaModelHandler {
 
 	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
 	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
-
+	
 	/**
 	 * The {@code TidaModel} instances held by {@code this}.
 	 * 

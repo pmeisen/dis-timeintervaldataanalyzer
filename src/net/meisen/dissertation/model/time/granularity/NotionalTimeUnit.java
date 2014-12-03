@@ -2,7 +2,7 @@ package net.meisen.dissertation.model.time.granularity;
 
 /**
  * A {@code NotionalTimeUnit} is a not further specified time-unit, i.e. can be
- * anything from a {@code MilliSecond} to a {@code Day}.
+ * anything from a {@code MilliSecond} to a {@code Days}.
  * 
  * @author pmeisen
  * 

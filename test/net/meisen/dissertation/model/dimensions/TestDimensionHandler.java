@@ -12,7 +12,6 @@ import java.util.Map;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
 import net.meisen.dissertation.model.handler.TidaDimensionHandler;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -33,7 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-public class TestDescriptorDimensionLoader {
+public class TestDimensionHandler {
 
 	@Autowired
 	@Qualifier(DefaultValues.DIMENSIONHANDLER_ID)
@@ -55,10 +54,10 @@ public class TestDescriptorDimensionLoader {
 		final InputStream stream = getClass()
 				.getResourceAsStream(
 						"/net/meisen/dissertation/model/dimensions/config/DIMEMPTY.xml");
-		final Map<String, IDimensionGraph> graphs = dimensionHandler
+		final Map<String, IDimension> dimensions = dimensionHandler
 				.loadDimensions(stream);
 
-		assertEquals(0, graphs.size());
+		assertEquals(0, dimensions.size());
 	}
 
 	/**
@@ -68,8 +67,8 @@ public class TestDescriptorDimensionLoader {
 	public void testSimpleDimension() {
 		final InputStream stream = getClass().getResourceAsStream(
 				"/net/meisen/dissertation/model/dimensions/config/DIMLOC.xml");
-		final Map<String, IDimension> dims = DimensionHelper
-				.getDimensions(dimensionHandler.loadDimensions(stream));
+		final Map<String, IDimension> dims = dimensionHandler
+				.loadDimensions(stream);
 
 		// make sure we have the right dimension
 		assertEquals(1, dims.size());

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<dimensions xmlns="http://dev.meisen.net/xsd/dissertation/dimension"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            
+            xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd">
+  
+  <timedimension id="MultipleHierarchies">
+    <hierarchy id="TIME1">
+      <level id="DAY" template="DAYS" />
+      <level id="HOUR" template="HOURS" />
+      <level id="MINUTE" template="MINUTES" />
+    </hierarchy>
+    <hierarchy id="TIME2" all="My Name is changed" timezone="America/Chicago">
+      <level id="YEAR" template="YEARS" />
+      <level id="MONTH" template="MONTHS" />
+      <level id="DAY" template="DAYS" />
+      <level id="HOUR" name="Hours" template="HOURS" />
+      <level id="MINUTE" template="MINUTES" />
+    </hierarchy>
+  </timedimension>
+</dimensions>

@@ -11,7 +11,11 @@
            xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
                                http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util-2.0.xsd">
                                
-                               
+      <!-- parse the time-dimension -->
+      <xsl:for-each select="dim:timedimension">
+        <xsl:apply-templates select="." />
+      </xsl:for-each>
+      
       <!-- Iterate over the dimensions -->
       <xsl:for-each select="dim:dimension">
         <xsl:apply-templates select="." />
@@ -19,6 +23,91 @@
     </beans>
   </xsl:template>
   
+  <!--
+    ++ Template for TimeDimension
+    -->
+  <xsl:template match="dim:timedimension">
+  
+    <!-- generate an id for the dimension -->
+    <xsl:variable name="dimensionId">timedimension-<xsl:value-of select="uuid:randomUUID()" /></xsl:variable>
+    
+    <bean id="{$dimensionId}" class="net.meisen.dissertation.model.dimensions.TimeDimension">
+      <constructor-arg type="java.lang.String"><value><xsl:value-of select="@id" /></value></constructor-arg>
+      <xsl:if test="@name">
+        <constructor-arg type="java.lang.String"><value><xsl:value-of select="@name" /></value></constructor-arg>
+      </xsl:if>
+    </bean>
+    
+    <xsl:for-each select="dim:hierarchy">
+      <xsl:variable name="hierarchyId">timehierarchy-<xsl:value-of select="uuid:randomUUID()" /></xsl:variable>
+
+      <bean id="{$hierarchyId}" factory-bean="{$dimensionId}" factory-method="addHierarchy">
+        <constructor-arg type="java.lang.String"><value><xsl:value-of select="@id" /></value></constructor-arg>
+        <constructor-arg type="java.lang.String">
+          <xsl:choose>
+            <xsl:when test="@name"><value><xsl:value-of select="@name" /></value></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </constructor-arg>
+        <constructor-arg type="java.lang.String">
+          <xsl:choose>
+            <xsl:when test="@timezone"><value><xsl:value-of select="@timezone" /></value></xsl:when>
+            <xsl:otherwise><null /></xsl:otherwise>
+          </xsl:choose>
+        </constructor-arg>
+      </bean>
+      
+      <!-- modify the all level if defined -->
+      <xsl:if test="@all">
+        <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+          <property name="targetMethod" value="modifyLevel" />
+          <property name="targetObject" ref="{$hierarchyId}" />
+          <property name="type" value="factory" />
+          <property name="arguments">
+            <list>
+              <value>*</value>
+              <value><xsl:value-of select="@all" /></value>
+            </list>
+          </property>
+        </bean>
+      </xsl:if>
+      
+      <xsl:for-each select="dim:level">
+        <xsl:variable name="levelId">timelevel-<xsl:value-of select="uuid:randomUUID()" /></xsl:variable>
+        <bean id="{$levelId}" factory-bean="{$hierarchyId}" factory-method="addLevel">
+          <xsl:variable name="lazy">
+            <xsl:choose>
+              <xsl:when test="@lazy"><xsl:value-of select="@lazy" /></xsl:when>
+              <xsl:otherwise>true</xsl:otherwise>
+            </xsl:choose>
+          </xsl:variable>
+        
+          <constructor-arg type="java.lang.String"><value><xsl:value-of select="@id" /></value></constructor-arg>
+          <constructor-arg type="java.lang.String"><value><xsl:value-of select="@template" /></value></constructor-arg>
+          <constructor-arg type="boolean" value="{$lazy}" />
+        </bean>
+        
+        <!-- modify the levels name, if one is defined -->
+        <xsl:if test="@name">
+          <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+            <property name="targetMethod" value="modifyLevel" />
+            <property name="targetObject" ref="{$hierarchyId}" />
+            <property name="type" value="factory" />
+            <property name="arguments">
+              <list>
+                <value><xsl:value-of select="@id" /></value>
+                <value><xsl:value-of select="@name" /></value>
+              </list>
+            </property>
+          </bean>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:for-each>
+  </xsl:template>
+  
+  <!--
+    ++ Template for DescriptorDimensions
+    -->
   <xsl:template match="dim:dimension">
   
     <!-- generate an id for the dimension -->

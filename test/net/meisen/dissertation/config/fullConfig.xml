@@ -148,6 +148,23 @@
     <function implementation="net.meisen.dissertation.impl.measures.Count" />
   </aggregations>
   
+  <!-- Adds additional templates. By default the following are added (and 
+       cannot be overridden: 
+       
+       The following aggregation-functions are added by default:
+        + net.meisen.dissertation.model.dimensions.templates.All
+        + net.meisen.dissertation.model.dimensions.templates.Years
+        + net.meisen.dissertation.model.dimensions.templates.Months
+        + net.meisen.dissertation.model.dimensions.templates.Days
+        + net.meisen.dissertation.model.dimensions.templates.Hours
+        + net.meisen.dissertation.model.dimensions.templates.Minutes
+        + net.meisen.dissertation.model.dimensions.templates.Seconds
+        + net.meisen.dissertation.model.dimensions.templates.Rasters
+    -->
+  <timetemplates>
+    <template implementation="net.meisen.dissertation.model.dimensions.templates.Minutes" />
+  </timetemplates>
+  
   <server>
   	<!-- the timeout is defined in minutes -->
     <http port="7000" timeout="30" enable="true" docroot="docroot" />

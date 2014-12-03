@@ -55,7 +55,7 @@ public class TimeSeries {
 	 * 
 	 * @param pos
 	 *            the position to get the value from, zero-based
-	 *            
+	 * 
 	 * @return the value of the position
 	 */
 	public double getValue(final int pos) {
@@ -80,6 +80,15 @@ public class TimeSeries {
 		}
 
 		return sb.toString();
+	}
+
+	/**
+	 * Gets all the values of the time-series.
+	 * 
+	 * @return all the values of the time-series.
+	 */
+	public double[] getValues() {
+		return values;
 	}
 
 	/**

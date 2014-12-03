@@ -4,7 +4,9 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 
 /**
  * Used to calculate the average value of the facts and the amount of records.
@@ -12,7 +14,8 @@ import net.meisen.dissertation.model.measures.IFactsHolder;
  * @author pmeisen
  * 
  */
-public class Mean extends BaseAggregationFunction {
+public class Mean extends BaseAggregationFunction implements
+		ILowAggregationFunction, IDimAggregationFunction {
 	private final static String name = "mean";
 
 	@Override
@@ -47,6 +50,18 @@ public class Mean extends BaseAggregationFunction {
 		} else {
 			return sum(facts) / setRecords;
 		}
+	}
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final FactDescriptorSet descriptors, final int timepoint) {
+		return aggregate(index, bitmap, descriptors);
+	}
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final IFactsHolder facts, final int timepoint) {
+		return aggregate(index, bitmap, facts);
 	}
 
 	@Override

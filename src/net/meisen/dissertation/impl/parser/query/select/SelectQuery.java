@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.SelectEvaluator;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
@@ -41,6 +42,7 @@ public class SelectQuery implements IQuery {
 	private boolean idsOnly;
 	private boolean count;
 	private IntervalRelation intervalRelation;
+	private DimensionSelector measureDimension;
 
 	/**
 	 * Default constructor initializing the query.
@@ -54,6 +56,7 @@ public class SelectQuery implements IQuery {
 		idsOnly = false;
 		count = false;
 		intervalRelation = null;
+		measureDimension = null;
 	}
 
 	/**
@@ -265,5 +268,24 @@ public class SelectQuery implements IQuery {
 		return new DefinedPermission[][] {
 				new DefinedPermission[] { Permission.query.create(modelId) },
 				new DefinedPermission[] { Permission.queryAll.create() } };
+	}
+
+	/**
+	 * Gets the dimension specified for the measures to be selected.
+	 * 
+	 * @return the dimension specified for the measures to be selected
+	 */
+	public DimensionSelector getMeasureDimension() {
+		return measureDimension;
+	}
+
+	/**
+	 * Sets the dimension for the measures to be selected.
+	 * 
+	 * @param measureDimension
+	 *            the dimension for the measures to be selected
+	 */
+	public void setMeasureDimension(final DimensionSelector measureDimension) {
+		this.measureDimension = measureDimension;
 	}
 }

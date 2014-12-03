@@ -488,7 +488,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	 */
 	@Test
 	public void testDefaultTimelineOfIntervalModel() {
-		final Date now = Dates.truncateDate(Dates.now());
+		final Date now = Dates.truncDate(Dates.now());
 		final IntervalModel model = getIntervalModel("/net/meisen/dissertation/config/simplestModel.xml");
 		final TimelineDefinition def = model.getTimelineDefinition();
 

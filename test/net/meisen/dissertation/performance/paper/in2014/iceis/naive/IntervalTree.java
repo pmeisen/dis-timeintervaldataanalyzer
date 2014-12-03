@@ -112,7 +112,7 @@ public class IntervalTree<O extends Object> {
 	}
 
 	/**
-	 * Range query
+	 * TimeLevelMembers query
 	 * 
 	 * @param start
 	 *            of range to query for.
@@ -238,7 +238,7 @@ public class IntervalTree<O extends Object> {
 		}
 
 		/**
-		 * Range query
+		 * TimeLevelMembers query
 		 * 
 		 * @param start
 		 *            of range to query for.

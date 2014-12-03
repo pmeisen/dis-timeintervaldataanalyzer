@@ -6,7 +6,9 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
@@ -15,7 +17,8 @@ import net.meisen.dissertation.model.util.IDoubleIterator;
  * @author pmeisen
  * 
  */
-public class Median extends BaseAggregationFunction {
+public class Median extends BaseAggregationFunction implements
+		ILowAggregationFunction, IDimAggregationFunction {
 	private final static String name = "median";
 
 	@Override
@@ -121,6 +124,18 @@ public class Median extends BaseAggregationFunction {
 		}
 
 		return median;
+	}
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final FactDescriptorSet descriptors, final int timepoint) {
+		return aggregate(index, bitmap, descriptors);
+	}
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final IFactsHolder facts, final int timepoint) {
+		return aggregate(index, bitmap, facts);
 	}
 
 	@Override

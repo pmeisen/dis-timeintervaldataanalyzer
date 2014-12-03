@@ -12,13 +12,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.dimensions.DescriptorDimension;
 import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
 import net.meisen.dissertation.model.dimensions.DescriptorLevel;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.dissertation.model.dimensions.IDimension;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -149,7 +147,7 @@ public class DescriptorGraph implements IDimensionGraph {
 		// make sure the dimension is correct
 		if (dimension instanceof DescriptorDimension == false) {
 			throw new ForwardedRuntimeException(
-					DescriptorDimensionException.class, 1016,
+					DescriptorDimensionException.class, 1022,
 					dimension == null ? null : dimension.getClass()
 							.getSimpleName());
 		}
@@ -214,18 +212,6 @@ public class DescriptorGraph implements IDimensionGraph {
 		}
 
 		validate();
-	}
-
-	@Override
-	public Bitmap createFilter(final String filterExpression,
-			final TidaModel model) {
-		return null;
-	}
-
-	@Override
-	public Map<String, Bitmap> createGroup(final String groupExpression,
-			final TidaModel model) {
-		return null;
 	}
 
 	/**

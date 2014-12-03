@@ -58,7 +58,7 @@ public class Year implements IDateBasedGranularity {
 			throw new IllegalStateException("Unreachable point of code");
 		}
 	}
-	
+
 	@Override
 	public DateFormat getFormat() {
 		return DateFormat.YEAR;
@@ -71,5 +71,15 @@ public class Year implements IDateBasedGranularity {
 	 */
 	public DateBasedHelper helper() {
 		return helper;
+	}
+
+	@Override
+	public boolean isAssignableTo(char identifier) {
+		return helper().isAssignableTo(getIdentifier(), identifier);
+	}
+
+	@Override
+	public char getIdentifier() {
+		return 'y';
 	}
 }

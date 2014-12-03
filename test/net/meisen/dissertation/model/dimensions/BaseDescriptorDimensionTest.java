@@ -18,7 +18,7 @@ import org.junit.Before;
  * @author pmeisen
  * 
  */
-public class BaseDimensionTest extends LoaderBasedTest {
+public class BaseDescriptorDimensionTest extends LoaderBasedTest {
 
 	/**
 	 * The loaded {@code MetaDataModel} used for testing.

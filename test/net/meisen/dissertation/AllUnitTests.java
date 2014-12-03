@@ -81,8 +81,13 @@ import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
 import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.dimensions.TestDescriptorDimension;
-import net.meisen.dissertation.model.dimensions.TestDescriptorDimensionLoader;
+import net.meisen.dissertation.model.dimensions.TestDimensionHandler;
 import net.meisen.dissertation.model.dimensions.graph.TestDescriptorGraph;
+import net.meisen.dissertation.model.dimensions.graph.TestTimeGraph;
+import net.meisen.dissertation.model.dimensions.graph.TestTimeGraphMemberIndex;
+import net.meisen.dissertation.model.dimensions.templates.TestDays;
+import net.meisen.dissertation.model.dimensions.templates.TestMinutes;
+import net.meisen.dissertation.model.dimensions.templates.TestTimeLevelTemplateManager;
 import net.meisen.dissertation.model.handler.TestTidaModelHandler;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
@@ -244,10 +249,16 @@ import org.junit.runners.Suite;
 		TestDescriptorValue.class, TestDescriptorComperator.class,
 		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
 		TestGroupEvaluator.class, TestAliveQueries.class,
-		TestLoadQueries.class, TestUnloadQueries.class,
-		TestSelectQueries.class, TestInsertQueries.class, TestAddQueries.class,
-		TestDropQueries.class, TestModifyQueries.class, TestGrantQueries.class,
-		TestRevokeQueries.class, TestAssignQueries.class,
+		TestLoadQueries.class,
+		TestUnloadQueries.class,
+		TestSelectQueries.class,
+		TestInsertQueries.class,
+		TestAddQueries.class,
+		TestDropQueries.class,
+		TestModifyQueries.class,
+		TestGrantQueries.class,
+		TestRevokeQueries.class,
+		TestAssignQueries.class,
 		TestRemoveQueries.class,
 		TestGetQueries.class,
 		TestDeleteQueries.class,
@@ -259,7 +270,10 @@ import org.junit.runners.Suite;
 
 		// Tests dimensions
 		TestDescriptorDimension.class, TestDescriptorGraph.class,
-		TestDescriptorDimensionLoader.class,
+		TestDays.class, TestMinutes.class,
+		TestTimeLevelTemplateManager.TestTimeLevelTemplateManagerSuite.class,
+		TestTimeGraph.class, TestTimeGraphMemberIndex.class,
+		TestDimensionHandler.class,
 
 		// Test the session management
 		TestSession.class,

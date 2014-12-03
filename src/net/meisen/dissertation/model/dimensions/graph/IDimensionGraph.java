@@ -1,10 +1,6 @@
 package net.meisen.dissertation.model.dimensions.graph;
 
-import java.util.Map;
-
-import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.dimensions.IDimension;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
@@ -35,32 +31,4 @@ public interface IDimensionGraph {
 	 * @return the dimension the graph belongs to
 	 */
 	public IDimension getDimension();
-
-	/**
-	 * Resolved the {@code filterExpression} and creates the resulting bitmap.
-	 * 
-	 * @param filterExpression
-	 *            the expression
-	 * @param model
-	 *            the {@code TidaModel} used
-	 * 
-	 * @return the bitmap
-	 */
-	public Bitmap createFilter(final String filterExpression,
-			final TidaModel model);
-
-	/**
-	 * Resolved the {@code groupExpression} and creates the resulting bitmaps
-	 * for each group.
-	 * 
-	 * @param groupExpression
-	 *            the expression
-	 * @param model
-	 *            the {@code TidaModel} used
-	 * 
-	 * @return the bitmap
-	 */
-	public Map<String, Bitmap> createGroup(final String groupExpression,
-			final TidaModel model);
-
 }

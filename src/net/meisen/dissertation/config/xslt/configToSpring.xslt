@@ -21,6 +21,7 @@
   <xsl:variable name="aggFuncId" select="cdef:getId('AGGREGATIONFUNCTIONHANDLER_ID')" />
   <xsl:variable name="authManagerId" select="cdef:getId('AUTHMANAGER_ID')" />
   <xsl:variable name="sessionManagerId" select="cdef:getId('SESSIONMANAGER_ID')" />
+  <xsl:variable name="timeTemplateManagerId" select="cdef:getId('TIMETEMPLATEMANAGER_ID')" />
 
   <xsl:template match="/cns:config">
     <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -275,6 +276,18 @@
       
       <!-- define loaders used to load tidaDimensions -->
       <bean id="{$dimensionHandlerId}" class="net.meisen.dissertation.model.handler.TidaDimensionHandler" />
+      
+      <!-- define the templateManager -->
+      <bean id="{$timeTemplateManagerId}" class="net.meisen.dissertation.model.dimensions.templates.TimeLevelTemplateManager" />
+      <xsl:for-each select="//cns:config/cns:timetemplates/cns:template">
+        <xsl:variable name="class" select="@implementation" />
+        <bean class="net.meisen.general.sbconfigurator.factories.MethodExecutorBean">
+          <property name="targetMethod" value="addTemplate" />
+          <property name="targetObject" ref="{$timeTemplateManagerId}" />
+          <property name="type" value="factory" />
+          <property name="arguments"><bean class="{$class}" /></property>
+        </bean>
+      </xsl:for-each>
 
       <!-- set the server properties, those are set prior to any further loading -->
       <xsl:if test="//cns:config/cns:server/node()">

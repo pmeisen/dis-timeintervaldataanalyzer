@@ -201,7 +201,7 @@ public class SelectResultTimeSeries extends SelectResult {
 		final TimeSeriesEvaluator timeSeriesEvaluator = new TimeSeriesEvaluator(
 				model);
 		this.timeSeriesCollection = timeSeriesEvaluator.evaluateInterval(
-				getQuery().getInterval(), getQuery().getMeasures(), this);
+				getQuery(), this);
 	}
 	
 	@Override

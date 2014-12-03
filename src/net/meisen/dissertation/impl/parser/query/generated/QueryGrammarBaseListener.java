@@ -110,6 +110,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterCompDimMeasure(@NotNull QueryGrammarParser.CompDimMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompDimMeasure(@NotNull QueryGrammarParser.CompDimMeasureContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -117,6 +130,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -227,13 +253,26 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompNamedMeasure(@NotNull QueryGrammarParser.CompNamedMeasureContext ctx) { }
+	@Override public void enterCompDimAggrFunction(@NotNull QueryGrammarParser.CompDimAggrFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompNamedMeasure(@NotNull QueryGrammarParser.CompNamedMeasureContext ctx) { }
+	@Override public void exitCompDimAggrFunction(@NotNull QueryGrammarParser.CompDimAggrFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -357,19 +396,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitSelectorAggrFunctionName(@NotNull QueryGrammarParser.SelectorAggrFunctionNameContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -377,6 +403,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMathAggrFunction(@NotNull QueryGrammarParser.CompMathAggrFunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMathAggrFunction(@NotNull QueryGrammarParser.CompMathAggrFunctionContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -396,13 +435,13 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompMeasureAtom(@NotNull QueryGrammarParser.CompMeasureAtomContext ctx) { }
+	@Override public void enterSelectorLowAggrFunctionName(@NotNull QueryGrammarParser.SelectorLowAggrFunctionNameContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompMeasureAtom(@NotNull QueryGrammarParser.CompMeasureAtomContext ctx) { }
+	@Override public void exitSelectorLowAggrFunctionName(@NotNull QueryGrammarParser.SelectorLowAggrFunctionNameContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -513,6 +552,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprSelectTimeSeries(@NotNull QueryGrammarParser.ExprSelectTimeSeriesContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -520,6 +572,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprSelectTimeSeries(@NotNull QueryGrammarParser.ExprSelectTimeSeriesContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompNamedLowMeasure(@NotNull QueryGrammarParser.CompNamedLowMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompNamedLowMeasure(@NotNull QueryGrammarParser.CompNamedLowMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -650,6 +715,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprRemove(@NotNull QueryGrammarParser.ExprRemoveContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorDimAggrFunctionName(@NotNull QueryGrammarParser.SelectorDimAggrFunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorDimAggrFunctionName(@NotNull QueryGrammarParser.SelectorDimAggrFunctionNameContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -799,13 +877,13 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompAggrFunction(@NotNull QueryGrammarParser.CompAggrFunctionContext ctx) { }
+	@Override public void enterCompDimMeasureAtom(@NotNull QueryGrammarParser.CompDimMeasureAtomContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompAggrFunction(@NotNull QueryGrammarParser.CompAggrFunctionContext ctx) { }
+	@Override public void exitCompDimMeasureAtom(@NotNull QueryGrammarParser.CompDimMeasureAtomContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -832,6 +910,45 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprAssignSingleRole(@NotNull QueryGrammarParser.ExprAssignSingleRoleContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompLowAggrFunction(@NotNull QueryGrammarParser.CompLowAggrFunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompLowAggrFunction(@NotNull QueryGrammarParser.CompLowAggrFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorMathAggrFunctionName(@NotNull QueryGrammarParser.SelectorMathAggrFunctionNameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorMathAggrFunctionName(@NotNull QueryGrammarParser.SelectorMathAggrFunctionNameContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMathMeasureAtom(@NotNull QueryGrammarParser.CompMathMeasureAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMathMeasureAtom(@NotNull QueryGrammarParser.CompMathMeasureAtomContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -877,13 +994,26 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
+	@Override public void enterCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompMeasure(@NotNull QueryGrammarParser.CompMeasureContext ctx) { }
+	@Override public void exitCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompLowMeasureAtom(@NotNull QueryGrammarParser.CompLowMeasureAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompLowMeasureAtom(@NotNull QueryGrammarParser.CompLowMeasureAtomContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

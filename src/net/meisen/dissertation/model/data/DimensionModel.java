@@ -12,19 +12,27 @@ import java.util.Set;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DimensionModelException;
+import net.meisen.dissertation.exceptions.TidaDimensionHandlerException;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
+import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
+import net.meisen.dissertation.model.dimensions.DescriptorDimension;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
 import net.meisen.dissertation.model.dimensions.IDimension;
+import net.meisen.dissertation.model.dimensions.TimeDimension;
+import net.meisen.dissertation.model.dimensions.TimeLevelMember;
 import net.meisen.dissertation.model.dimensions.graph.DescriptorGraph;
-import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
 import net.meisen.dissertation.model.dimensions.graph.DescriptorGraphLevel;
-import net.meisen.dissertation.model.handler.TidaDimensionHandler;
+import net.meisen.dissertation.model.dimensions.graph.IDimensionGraph;
+import net.meisen.dissertation.model.dimensions.graph.TimeGraph;
+import net.meisen.dissertation.model.dimensions.templates.ITimeLevelTemplate;
+import net.meisen.dissertation.model.dimensions.templates.TimeLevelTemplateManager;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,10 +80,6 @@ public class DimensionModel {
 	}
 
 	@Autowired
-	@Qualifier(DefaultValues.DIMENSIONHANDLER_ID)
-	private TidaDimensionHandler dimensionHandler;
-
-	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
@@ -84,8 +88,20 @@ public class DimensionModel {
 	private MetaDataModel metaDataModel;
 
 	@Autowired
+	@Qualifier(DefaultValues.INTERVALMODEL_ID)
+	private IntervalModel intervalModel;
+
+	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private BaseIndexFactory indexFactory;
+
+	@Autowired
+	@Qualifier(DefaultValues.TIMETEMPLATEMANAGER_ID)
+	private TimeLevelTemplateManager timeLevelTemplateManager;
+
+	@Autowired
+	@Qualifier(DefaultValues.GRANULARITYFACTORY_ID)
+	private TimeGranularityFactory granularityFactory;
 
 	private final Map<String, IDimensionGraph> dimensions;
 
@@ -115,9 +131,8 @@ public class DimensionModel {
 	}
 
 	/**
-	 * Adds the specified dimensions to the {@code DimensionModel}. This should
-	 * only be done before or during initialization. The map should be read only
-	 * after the initialization is performed.
+	 * Adds the specified dimensions to the {@code DimensionModel}. This can
+	 * only be done before or during initialization.
 	 * 
 	 * @param dimensions
 	 *            the dimensions to be added
@@ -129,7 +144,11 @@ public class DimensionModel {
 					1002);
 		}
 
-		addedDimensions = dimensions;
+		// adds the dimensions
+		if (addedDimensions == null) {
+			addedDimensions = new ArrayList<IDimension>();
+		}
+		addedDimensions.addAll(dimensions);
 	}
 
 	/**
@@ -145,8 +164,7 @@ public class DimensionModel {
 		}
 
 		// add the dimensions and make sure there aren't any duplicates
-		final Map<String, IDimensionGraph> dims = this.dimensionHandler
-				.createMap(addedDimensions);
+		final Map<String, IDimensionGraph> dims = createMap(addedDimensions);
 		for (final Entry<String, IDimensionGraph> e : dims.entrySet()) {
 			if (this.dimensions.put(e.getKey(), e.getValue()) != null) {
 				exceptionRegistry.throwException(DimensionModelException.class,
@@ -241,20 +259,22 @@ public class DimensionModel {
 		// get the level of the defined hierarchy
 		final String hierarchyId = dimSelector.getHierarchyId();
 		final String levelId = dimSelector.getLevelId();
-		final DescriptorGraphLevel descriptorGraphLevel = dim.getLevel(hierarchyId, levelId);
+		final DescriptorGraphLevel descriptorGraphLevel = dim.getLevel(
+				hierarchyId, levelId);
 		if (descriptorGraphLevel == null) {
 			exceptionRegistry.throwException(DimensionModelException.class,
 					1005, dimId, hierarchyId, levelId);
 		}
 
 		// get all the members selected
-		final Set<DescriptorMember> members = descriptorGraphLevel.getMembers(hierarchyId);
+		final Set<DescriptorMember> members = descriptorGraphLevel
+				.getMembers(hierarchyId);
 		final Set<DescriptorMember> selectedMembers = new HashSet<DescriptorMember>();
 		for (final DescriptorMember member : members) {
 
 			if (filter == null || filter.accept(member)) {
-				final Set<DescriptorMember> leafMembers = descriptorGraphLevel.getLeafMembers(
-						hierarchyId, member.getId());
+				final Set<DescriptorMember> leafMembers = descriptorGraphLevel
+						.getLeafMembers(hierarchyId, member.getId());
 				selectedMembers.addAll(leafMembers);
 
 				if (filter != null && filter.selectOnlyOne()) {
@@ -297,5 +317,110 @@ public class DimensionModel {
 		} else {
 			return Bitmap.or(indexFactory, bitmaps.toArray());
 		}
+	}
+
+	public Set<TimeLevelMember> getTimeMembers(
+			final DimensionSelector dimSelector, final long start,
+			final long end) {
+		final String dimId = dimSelector.getDimensionId();
+		final String hierarchyId = dimSelector.getHierarchyId();
+		final String levelId = dimSelector.getLevelId();
+		final IDimensionGraph graph = getDimension(dimId);
+
+		if (graph instanceof TimeGraph) {
+			return ((TimeGraph) graph).getMembers(hierarchyId, levelId, start,
+					end);
+		} else {
+			exceptionRegistry.throwException(DimensionModelException.class,
+					1007, dimId, TimeGraph.class.getSimpleName());
+			return null;
+		}
+	}
+
+	/**
+	 * Creates a map of {@code DimensionGraph} instances for the specified
+	 * {@code Collection}. The method looks for {@code Dimension} instances and
+	 * converts those, all others are ignored and skipped.
+	 * 
+	 * @param dims
+	 *            the collection to be transformed
+	 * 
+	 * @return the created map
+	 */
+	public Map<String, IDimensionGraph> createMap(final Collection<?> dims) {
+		final Map<String, IDimensionGraph> dimensions = new HashMap<String, IDimensionGraph>();
+		if (dims == null) {
+			return dimensions;
+		}
+
+		for (final Object dim : dims) {
+			if (dim instanceof IDimension) {
+				final IDimension dimension = (IDimension) dim;
+				final String id = dimension.getId();
+				final IDimensionGraph graph = createGraph(dimension);
+
+				if (dimensions.put(id, graph) != null) {
+					exceptionRegistry.throwException(
+							TidaDimensionHandlerException.class, 1002, id);
+				}
+			}
+		}
+
+		return dimensions;
+	}
+
+	/**
+	 * Factory method for {@code DimensionGraph} instances.
+	 * 
+	 * @param dimension
+	 *            the {@code Dimension} to create the {@code DimensionGraph} for
+	 * 
+	 * @return the created {@code DimensionGraph}
+	 * 
+	 * @throws TidaDimensionHandlerException
+	 *             if a {@code DimensionGraph} cannot be created, e.g. if no
+	 *             graph exists for the {@code Dimension}
+	 */
+	public IDimensionGraph createGraph(final IDimension dimension)
+			throws TidaDimensionHandlerException {
+
+		// factory to pick the correct type for the dimension
+		try {
+			final IDimensionGraph graph;
+
+			if (dimension instanceof DescriptorDimension) {
+				graph = new DescriptorGraph();
+			} else if (dimension instanceof TimeDimension) {
+				graph = new TimeGraph(intervalModel, granularityFactory,
+						timeLevelTemplateManager);
+			} else {
+				final String type = dimension == null ? null : dimension
+						.getClass().getSimpleName();
+				exceptionRegistry.throwException(DimensionModelException.class,
+						1006, type);
+				return null;
+			}
+
+			// create the graph and format exceptions
+			graph.create(dimension);
+
+			return graph;
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+			return null;
+		}
+	}
+
+	/**
+	 * Get the template for the specified identifier.
+	 * 
+	 * @param templateId
+	 *            the identifier of the {@code TimeLevelTemplate}
+	 * 
+	 * @return the found template or {@code null} if not template exists
+	 */
+	public ITimeLevelTemplate getTimeLevelTemplate(final String templateId) {
+		return timeLevelTemplateManager.getTemplate(granularityFactory,
+				templateId);
 	}
 }

@@ -21,6 +21,8 @@ import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.measures.Count;
+import net.meisen.dissertation.impl.measures.CountFinished;
+import net.meisen.dissertation.impl.measures.CountStarted;
 import net.meisen.dissertation.impl.measures.Max;
 import net.meisen.dissertation.impl.measures.Mean;
 import net.meisen.dissertation.impl.measures.Median;
@@ -198,6 +200,10 @@ public class DefaultValues {
 	 * Id of the {@code AuthManager} to be used.
 	 */
 	public static final String AUTHMANAGER_ID = "authManagerId";
+	/**
+	 * Id of the {@code TimeLevelTemplateManager} to be used.
+	 */
+	public static final String TIMETEMPLATEMANAGER_ID = "timeTemplateManagerId";
 	/**
 	 * The name of the module for the exceptionRegistry
 	 */
@@ -444,6 +450,8 @@ public class DefaultValues {
 		functions.add(Median.class);
 		functions.add(Mode.class);
 		functions.add(Sum.class);
+		functions.add(CountStarted.class);
+		functions.add(CountFinished.class);
 
 		return functions;
 	}

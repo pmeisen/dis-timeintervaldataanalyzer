@@ -52,7 +52,7 @@ public class TimelineDefinition {
 	/**
 	 * The default constructor defines a {@code Timeline} which starts today
 	 * (i.e. a truncated now) and ends in the next year using a granularity of
-	 * day.
+	 * day and the default timeZone ({@link Dates#GENERAL_TIMEZONE}).
 	 */
 	public TimelineDefinition() {
 		this((String) null, (String) null, DefaultValues
@@ -224,6 +224,25 @@ public class TimelineDefinition {
 	 */
 	public TimelineDefinition(final Date start, final Date end,
 			final ITimeGranularity granularity) {
+		this(start, end, granularity, null);
+	}
+
+	/**
+	 * Constructor to create a definition based on a start and end date.
+	 * 
+	 * @param start
+	 *            the start
+	 * @param end
+	 *            the end
+	 * @param granularity
+	 *            the granularity to be used between the dates
+	 * @param timeZone
+	 *            the timezone the date-values are specified in, needed when one
+	 *            of the values is {@code null} so that now can be determined
+	 *            correctly
+	 */
+	public TimelineDefinition(final Date start, final Date end,
+			final ITimeGranularity granularity, final String timeZone) {
 		this.start = start == null ? getDef(Position.START, end) : start;
 		this.end = end == null ? getDef(Position.END, start) : end;
 		this.type = Date.class;
@@ -318,7 +337,8 @@ public class TimelineDefinition {
 	public Date getDef(final Position position, final Date pit) {
 
 		if (pit == null) {
-			final Date defPit = Dates.truncateDate(Dates.now());
+			final Date defPit = Dates.truncDate(
+					Dates.now(Dates.GENERAL_TIMEZONE), Dates.GENERAL_TIMEZONE);
 
 			if (Position.START.equals(position)) {
 				return defPit;
@@ -540,6 +560,18 @@ public class TimelineDefinition {
 
 	@Override
 	public String toString() {
-		return "[" + start + ", " + end + "] : " + granularity;
+		final String fStart, fEnd;
+		if (Date.class.isAssignableFrom(getType())) {
+			fStart = Dates.formatDate((Date) start, "dd.MM.yyyy HH:mm:ss,SSS",
+					Dates.GENERAL_TIMEZONE);
+			fEnd = Dates.formatDate((Date) end, "dd.MM.yyyy HH:mm:ss,SSS",
+					Dates.GENERAL_TIMEZONE);
+		} else {
+			fStart = "" + start;
+			fEnd = "" + end;
+		}
+
+		return "[" + fStart + ", " + fEnd + "] : " + granularity + " : "
+				+ Dates.GENERAL_TIMEZONE;
 	}
 }

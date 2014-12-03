@@ -1,6 +1,8 @@
 package net.meisen.dissertation.model.time.granularity;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -50,5 +52,28 @@ public class TestDateBasedHelper {
 						Dates.parseDate("29.02.2008", "dd.MM.yyyy"));
 		assertEquals(2008, val[0]);
 		assertEquals(2, val[1]);
+	}
+
+	/**
+	 * Tests the implementation of
+	 * {@link DateBasedHelper#isAssignableTo(char, char)}.
+	 */
+	@Test
+	public void testAssignableTo() {
+		final DateBasedHelper helper = new DateBasedHelper();
+
+		final char[] identifiers = { 'y', 'm', 'd', 'h', 'n', 's', 'i' };
+		for (final char identifier : identifiers) {
+			assertTrue(helper.isAssignableTo(identifier, identifier));
+		}
+
+		assertTrue(helper.isAssignableTo('d', 'y'));
+		assertFalse(helper.isAssignableTo('y', 'd'));
+		assertTrue(helper.isAssignableTo('d', 'm'));
+		assertFalse(helper.isAssignableTo('m', 'd'));
+		assertTrue(helper.isAssignableTo('m', 'y'));
+		assertFalse(helper.isAssignableTo('y', 'm'));
+		assertTrue(helper.isAssignableTo('h', 'm'));
+		assertFalse(helper.isAssignableTo('m', 'h'));
 	}
 }

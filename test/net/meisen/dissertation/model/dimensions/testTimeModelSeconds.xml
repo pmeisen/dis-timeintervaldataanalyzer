@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model      http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
+       
+       id="testTimeModelSeconds">
+
+  <time>
+    <timeline start="01.01.2014 00:00:00" end="31.12.2014 23:59:59" granularity="SECOND" />
+  </time>
+  
+  <dim:dimensions>
+    <dim:timedimension id="DIM_TIME">
+      <dim:hierarchy id="TIME_DEFAULT" name="Default Hierarchy" all="Everytime" timezone="America/Chicago">
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR" name="Hours" template="HOURS" />
+        <dim:level id="MINUTE" template="MINUTES" />
+      </dim:hierarchy>
+      <dim:hierarchy id="TIME_RASTER" name="Raster Hierarchy" all="Everywhen" timezone="Europe/Berlin">
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_HOUR_8" />
+        <dim:level id="HOUR" name="Hours" template="HOURS" />
+        <dim:level id="MINUTE5" template="RASTER_DAY_5" />
+        <dim:level id="MINUTE" template="MINUTES" />
+      </dim:hierarchy>
+      <dim:hierarchy id="TIME_PURE_RASTER_QUARTER" name="Pure Raster Hierarchy (1)" all="Always" timezone="Europe/Berlin">
+        <dim:level id="QUARTER" template="RASTER_MONTH_DAY_3" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_DAY_480" />
+        <dim:level id="HOUR2" template="RASTER_DAY_120" />
+        <dim:level id="HOUR" template="RASTER_DAY_60" />
+        <dim:level id="MINUTE30" template="RASTER_DAY_30" />
+        <dim:level id="MINUTE10" template="RASTER_DAY_10" />
+        <dim:level id="MINUTE5" template="RASTER_DAY_5" />
+        <dim:level id="MINUTE" template="MINUTES" />
+      </dim:hierarchy>
+      <dim:hierarchy id="TIME_PURE_RASTER_WEEK" name="Pure Raster Hierarchy (2)" all="Always" timezone="America/Chicago">
+        <dim:level id="WEEK" template="RASTER_DAY_DAY_7" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_DAY_MINUTE_480" />
+        <dim:level id="HOUR2" template="RASTER_DAY_MINUTE_120" />
+        <dim:level id="HOUR" template="RASTER_DAY_MINUTE_60" />
+        <dim:level id="MINUTE30" template="RASTER_DAY_MINUTE_30" />
+        <dim:level id="MINUTE10" template="RASTER_DAY_MINUTE_10" />
+        <dim:level id="MINUTE5" template="RASTER_DAY_MINUTE_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+  </dim:dimensions>
+    
+  <data metahandling="create" />
+</model>

@@ -4,7 +4,9 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +17,23 @@ import org.slf4j.LoggerFactory;
  * @author pmeisen
  * 
  */
-public class Count extends BaseAggregationFunction {
+public class Count extends BaseAggregationFunction implements
+		ILowAggregationFunction, IDimAggregationFunction {
 	private final static Logger LOG = LoggerFactory.getLogger(Count.class);
 
 	private final static String name = "count";
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final FactDescriptorSet descriptors, final int timepoint) {
+		return aggregate(index, bitmap, descriptors);
+	}
+
+	@Override
+	public double aggregate(final TidaIndex index, final Bitmap bitmap,
+			final IFactsHolder facts, final int timepoint) {
+		return aggregate(index, bitmap, facts);
+	}
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testYoctoTemplate">
+  
+  <time>
+    <timeline start="100" duration="2100" granularity="YOCTOSECOND" />
+  </time>
+  
+  <data />
+</model>

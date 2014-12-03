@@ -12,8 +12,11 @@ import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNod
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
+import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 import net.meisen.dissertation.model.util.IIntIterator;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
@@ -27,9 +30,11 @@ public class MathExpressionEvaluator {
 	private final Bitmap resultBitmap;
 	private final TidaIndex index;
 	private final FactDescriptorModelSet facts;
+	private final int timepoint;
 
 	/**
-	 * Default constructor to create a {@code MathExpressionEvaluator}.
+	 * Default constructor to create a {@code MathExpressionEvaluator} for a
+	 * dimension-aggregation.
 	 * 
 	 * @param index
 	 *            the index to retrieve the data from
@@ -41,9 +46,30 @@ public class MathExpressionEvaluator {
 	 */
 	public MathExpressionEvaluator(final TidaIndex index,
 			final Bitmap resultBitmap, final FactDescriptorModelSet facts) {
+		this(index, resultBitmap, facts, -1);
+	}
+
+	/**
+	 * Default constructor to create a {@code MathExpressionEvaluator} for a low
+	 * granularity-aggregation.
+	 * 
+	 * @param index
+	 *            the index to retrieve the data from
+	 * @param resultBitmap
+	 *            the resulting bitmap defining which records are selected using
+	 *            filtering, grouping and time slicing
+	 * @param facts
+	 *            the facts associated to the time-slice
+	 * @param timepoint
+	 *            the normalized time-point of the time
+	 */
+	public MathExpressionEvaluator(final TidaIndex index,
+			final Bitmap resultBitmap, final FactDescriptorModelSet facts,
+			final int timepoint) {
 		this.index = index;
 		this.facts = facts;
 		this.resultBitmap = resultBitmap;
+		this.timepoint = timepoint;
 	}
 
 	/**
@@ -170,14 +196,11 @@ public class MathExpressionEvaluator {
 					return func.getDefaultValue();
 				} else if (childNode instanceof MathOperatorNode) {
 					final IFactsHolder facts = evaluateMathForNode((MathOperatorNode) childNode);
-
-					return func.aggregate(index, resultBitmap, facts);
+					return applyFunction(func, facts);
 				} else if (childNode instanceof DescriptorLeaf) {
 					final DescriptorLeaf descLeaf = (DescriptorLeaf) childNode;
-					final String descModelId = descLeaf.get();
-
-					return func.aggregate(index, resultBitmap,
-							facts.getDescriptors(descModelId));
+					return applyFunction(func,
+							facts.getDescriptors(descLeaf.get()));
 				} else {
 					throw new ForwardedRuntimeException(
 							QueryEvaluationException.class, 1009, node);
@@ -189,6 +212,41 @@ public class MathExpressionEvaluator {
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1010, op);
+		}
+	}
+
+	protected double applyFunction(final IAggregationFunction func,
+			final IFactsHolder facts) {
+		return applyFunction(func, null, facts);
+	}
+
+	protected double applyFunction(final IAggregationFunction func,
+			final FactDescriptorSet facts) {
+		return applyFunction(func, facts, null);
+	}
+
+	private double applyFunction(final IAggregationFunction func,
+			final FactDescriptorSet facts1, final IFactsHolder facts2) {
+		if (func instanceof ILowAggregationFunction && timepoint > -1) {
+			if (facts2 == null) {
+				return ((ILowAggregationFunction) func).aggregate(index,
+						resultBitmap, facts1, timepoint);
+			} else {
+				return ((ILowAggregationFunction) func).aggregate(index,
+						resultBitmap, facts2, timepoint);
+			}
+		} else if (func instanceof IDimAggregationFunction && timepoint < 0) {
+			if (facts2 == null) {
+				return ((IDimAggregationFunction) func).aggregate(index,
+						resultBitmap, facts1);
+			} else {
+				return ((IDimAggregationFunction) func).aggregate(index,
+						resultBitmap, facts2);
+			}
+		} else {
+			// TODO make it nice
+			throw new IllegalStateException("FUCK YOU ALL " + func + " "
+					+ func.getClass());
 		}
 	}
 

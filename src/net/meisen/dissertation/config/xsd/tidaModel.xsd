@@ -96,12 +96,6 @@
                         <xs:attribute name="implementation" type="types:javaClass" use="required" />
                       </xs:complexType>
                     </xs:element>
-                    
-                    <xs:element name="granularities" minOccurs="0">
-                      <xs:complexType>
-                        <xs:attribute name="implementation" type="types:javaClass" use="required" />
-                      </xs:complexType>
-                    </xs:element>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>

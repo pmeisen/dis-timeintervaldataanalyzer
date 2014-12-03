@@ -14,34 +14,46 @@ import net.meisen.general.genmisc.types.Dates;
  */
 public enum DateFormat {
 
-	/***
+	/**
 	 * a year
 	 */
-	YEAR("yyyy", Calendar.YEAR), /***
+	YEAR("yyyy", "yyyy", "yyyy", Calendar.YEAR),
+	/**
 	 * a month
 	 */
-	MONTH("MM", Calendar.MONTH), /***
+	MONTH("MM", "yyyyMM", "MM.yyyy", Calendar.MONTH),
+	/**
 	 * a day
 	 */
-	DAY("dd", Calendar.DATE), /***
+	DAY("dd", "yyyyMMdd", "dd.MM.yyyy", Calendar.DATE),
+	/**
 	 * a hour
 	 */
-	HOUR("HH", Calendar.HOUR), /***
+	HOUR("HH", "yyyyMMdd_HH", "dd.MM.yyyy HH", Calendar.HOUR),
+	/**
 	 * a minute
 	 */
-	MINUTE("mm", Calendar.MINUTE), /***
+	MINUTE("mm", "yyyyMMdd_HHmm", "dd.MM.yyyy HH:mm", Calendar.MINUTE),
+	/**
 	 * a second
 	 */
-	SECOND("ss", Calendar.SECOND), /***
+	SECOND("ss", "yyyyMMdd_HHmmss", "dd.MM.yyyy HH:mm:ss", Calendar.SECOND),
+	/**
 	 * a millisecond
 	 */
-	MILLISECOND("SSS", Calendar.MILLISECOND);
+	MILLISECOND("SSS", "yyyyMMdd_HHmmss_SSS", "dd.MM.yyyy HH:mm:ss,SSS",
+			Calendar.MILLISECOND);
 
 	private final String format;
+	private final String idFormat;
+	private final String printFormat;
 	private final int calendarValue;
 
-	private DateFormat(final String format, final int calendarValue) {
+	private DateFormat(final String format, final String idFormat,
+			final String printFormat, final int calendarValue) {
 		this.format = format;
+		this.idFormat = idFormat;
+		this.printFormat = printFormat;
 		this.calendarValue = calendarValue;
 	}
 
@@ -53,7 +65,7 @@ public enum DateFormat {
 	 * @return the value
 	 */
 	public int getValue(final Date date) {
-		return Integer.parseInt(Dates.createStringFromDate(date, format));
+		return Integer.parseInt(Dates.createStringFromDate(date, getFormat()));
 	}
 
 	/**
@@ -78,28 +90,64 @@ public enum DateFormat {
 		if (restMod > 0) {
 			while (restMod > 0) {
 				if (restMod <= Integer.MAX_VALUE) {
-					c.add(calendarValue, (int) restMod);
+					c.add(getCalendarIndicator(), (int) restMod);
 
 					restMod = 0;
 				} else {
-					c.add(calendarValue, Integer.MAX_VALUE);
+					c.add(getCalendarIndicator(), Integer.MAX_VALUE);
 					restMod -= Integer.MAX_VALUE;
 				}
 			}
 		} else if (restMod < 0) {
 			while (restMod < 0) {
 				if (restMod >= Integer.MIN_VALUE) {
-					c.add(calendarValue, (int) restMod);
+					c.add(getCalendarIndicator(), (int) restMod);
 
 					restMod = 0;
 				} else {
-					c.add(calendarValue, Integer.MIN_VALUE);
+					c.add(getCalendarIndicator(), Integer.MIN_VALUE);
 					restMod -= Integer.MIN_VALUE;
 				}
 			}
 		}
 
 		return c.getTime();
+	}
+
+	/**
+	 * Gets the indicator specified for the format.
+	 * 
+	 * @return the indicator specified for the format
+	 */
+	public int getCalendarIndicator() {
+		return calendarValue;
+	}
+
+	/**
+	 * A format usable to create a unique identifier.
+	 * 
+	 * @return format usable to create a unique identifier
+	 */
+	public String getIdFormat() {
+		return idFormat;
+	}
+
+	/**
+	 * Format usable for printing.
+	 * 
+	 * @return a format usable for printing
+	 */
+	public String getPrintFormat() {
+		return printFormat;
+	}
+
+	/**
+	 * Gets a short-format.
+	 * 
+	 * @return a short-format of the date
+	 */
+	public String getFormat() {
+		return format;
 	}
 
 }

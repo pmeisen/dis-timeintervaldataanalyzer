@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testDaysTemplate">
+  
+  <time>
+    <timeline start="01.01.1981" end="31.12.2020" granularity="YEAR" />
+  </time>
+  
+  <data />
+</model>

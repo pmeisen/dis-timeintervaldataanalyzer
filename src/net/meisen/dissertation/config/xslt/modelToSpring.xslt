@@ -34,7 +34,7 @@
   <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
   <xsl:variable name="recordsCacheId" select="mdef:getId('DATARECORDCACHE_ID')" />
   <xsl:variable name="factSetsCacheId" select="mdef:getId('FACTSETSCACHE_ID')" />
-  <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" />
+  <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" /> 
 
   <xsl:template match="/mns:model">
     <xsl:variable name="modelId">
@@ -433,6 +433,9 @@
       <xsl:choose>
         <xsl:when test="//dim:dimensions">
           <xsl:for-each select='//dim:dimensions/dim:dimension'>
+            <xsl:apply-imports />
+          </xsl:for-each>
+          <xsl:for-each select='//dim:dimensions/dim:timedimension'>
             <xsl:apply-imports />
           </xsl:for-each>
         </xsl:when>

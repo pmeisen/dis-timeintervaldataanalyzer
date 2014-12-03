@@ -20,6 +20,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * 
 	 */
 	public static class DateBasedHelper {
+		private final String timeDateIdentifiers = "ymdhnsi";
 
 		/**
 		 * Helper method to retrieve the formats (specified by the
@@ -48,6 +49,44 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 
 			return values;
 		}
+
+		/**
+		 * Helper method to determine if the {@code thisIdentifier} is
+		 * assignable to the {@code fitsIntoIdentifier}. The identifiers are one
+		 * of:
+		 * <ul>
+		 * <li>{@code y} - year</li>
+		 * <li>{@code m} - month</li>
+		 * <li>{@code d} - day</li>
+		 * <li>{@code h} - hour</li>
+		 * <li>{@code n} - minute</li>
+		 * <li>{@code s} - second</li>
+		 * <li>{@code i} - millisecond</li>
+		 * </ul>
+		 * 
+		 * @param thisIdentifier
+		 *            the identifier to be checked if it fits into the
+		 *            {@code fitsIntoIdentifier}
+		 * @param assignableToIdentifier
+		 *            the identifier to be checked if it fits into the
+		 *            {@code thisIdentifier}
+		 * 
+		 * @return {@code true} if {@code thisIdentifier} fits into the
+		 *         specified {@code fitsIntoIdentifier}, otherwise {@code false}
+		 */
+		public boolean isAssignableTo(final char thisIdentifier,
+				final char assignableToIdentifier) {
+			if (thisIdentifier == assignableToIdentifier) {
+				return true;
+			} else if (assignableToIdentifier == 'i') {
+				return false;
+			} else {
+				final int thisPos = timeDateIdentifiers.indexOf(thisIdentifier);
+				final int assignableToPos = timeDateIdentifiers
+						.indexOf(assignableToIdentifier);
+				return thisPos > assignableToPos;
+			}
+		}
 	}
 
 	/**
@@ -68,8 +107,8 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * Gets the format of the date which represents the
 	 * {@code DateBasedGranularity}.
 	 * 
-	 * @return the {@code DateFormat} which represents the {@code
-	 *         DateBasedGranularity}
+	 * @return the {@code DateFormat} which represents the
+	 *         {@code DateBasedGranularity}
 	 */
 	public DateFormat getFormat();
 
@@ -96,4 +135,45 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * @return the {@code Date} instance for the representer
 	 */
 	public Date resolveRepresenter(final long value);
+
+	/**
+	 * This method is used to determine if {@code this} is assignable to a
+	 * specific part of a date-value specified by the {@code identifier}. That
+	 * means, e.g. a day is assignable to a specific year, i.e.
+	 * {@code day.isAssignableTo('y')} returns {@code true}.
+	 * 
+	 * @param identifier
+	 *            one of the identifiers:
+	 *            <ul>
+	 *            <li>{@code y} - year</li>
+	 *            <li>{@code m} - month</li>
+	 *            <li>{@code d} - day</li>
+	 *            <li>{@code h} - hour</li>
+	 *            <li>{@code n} - minute</li>
+	 *            <li>{@code s} - second</li>
+	 *            <li>{@code i} - millisecond</li>
+	 *            </ul>
+	 * 
+	 * @return {@code true} if {@code this} fits into the specified
+	 *         {@code identifier}, otherwise {@code false}
+	 */
+	public boolean isAssignableTo(final char identifier);
+
+	/**
+	 * Gets the identifier of {@code this}. The identifier defines what level of granularity is used by {@code this}.
+	 * 
+	 * @return one of the identifiers:
+	 *            <ul>
+	 *            <li>{@code y} - year</li>
+	 *            <li>{@code m} - month</li>
+	 *            <li>{@code d} - day</li>
+	 *            <li>{@code h} - hour</li>
+	 *            <li>{@code n} - minute</li>
+	 *            <li>{@code s} - second</li>
+	 *            <li>{@code i} - millisecond</li>
+	 *            </ul>
+	 * 
+	 * @see #isAssignableTo(char)
+	 */
+	public char getIdentifier();
 }

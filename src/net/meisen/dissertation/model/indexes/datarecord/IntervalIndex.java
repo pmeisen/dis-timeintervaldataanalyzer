@@ -404,12 +404,53 @@ public class IntervalIndex implements IDataRecordIndex {
 	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
+		final long[] bounds = getBounds(start, end, startInclusive,
+				endInclusive);
+		return getSlicesByTimePoints(bounds);
+	}
 
+	/**
+	 * Gets the interval dimensions for the specified {@code start} and
+	 * {@code end} values.
+	 * 
+	 * @param bounds
+	 *            the bounds as retrieved by e.g.
+	 *            {@link #getBounds(Object, Object, boolean, boolean)}
+	 * 
+	 * @return the slices between the bounds
+	 */
+	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final long[] bounds) {
+		if (bounds == null) {
+			return new SliceWithDescriptors<?>[0];
+		} else {
+			return getSlices(bounds[0], bounds[1]);
+		}
+	}
+
+	/**
+	 * Determines the bounds specified by the passed values.
+	 * 
+	 * @param start
+	 *            the start object
+	 * @param end
+	 *            the end object
+	 * @param startInclusive
+	 *            {@code true} if the start value is included, otherwise
+	 *            {@code false}
+	 * @param endInclusive
+	 *            {@code true} if the end value is included, otherwise
+	 *            {@code false}
+	 * 
+	 * @return the determined bounds
+	 */
+	public long[] getBounds(final Object start, final Object end,
+			final boolean startInclusive, final boolean endInclusive) {
+		
 		// check if the values are out of bound
 		if (mapper.isLargerThanEnd(start)) {
-			return new SliceWithDescriptors<?>[0];
+			return null;
 		} else if (mapper.isSmallerThanStart(end)) {
-			return new SliceWithDescriptors<?>[0];
+			return null;
 		}
 
 		// get the mapped values
@@ -418,8 +459,7 @@ public class IntervalIndex implements IDataRecordIndex {
 		final long lEnd = endInclusive ? mapper.mapToLong(end) : mapper
 				.shiftToLong(end, 1, true);
 
-		// get the slices
-		return getSlices(lStart, lEnd);
+		return new long[] { lStart, lEnd };
 	}
 
 	@Override

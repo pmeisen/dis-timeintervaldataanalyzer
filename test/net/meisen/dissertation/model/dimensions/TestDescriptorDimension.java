@@ -19,7 +19,7 @@ import org.junit.Test;
  * @author pmeisen
  * 
  */
-public class TestDescriptorDimension extends BaseDimensionTest {
+public class TestDescriptorDimension extends BaseDescriptorDimensionTest {
 
 	/**
 	 * Tests the creation of a dimension.

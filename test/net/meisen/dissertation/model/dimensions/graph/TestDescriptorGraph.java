@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.DescriptorDimensionException;
-import net.meisen.dissertation.model.dimensions.BaseDimensionTest;
+import net.meisen.dissertation.model.dimensions.BaseDescriptorDimensionTest;
 import net.meisen.dissertation.model.dimensions.DescriptorDimension;
 import net.meisen.dissertation.model.dimensions.DescriptorHierarchy;
 import net.meisen.dissertation.model.dimensions.DescriptorMember;
@@ -28,7 +28,7 @@ import org.junit.Test;
  * @author pmeisen
  * 
  */
-public class TestDescriptorGraph extends BaseDimensionTest {
+public class TestDescriptorGraph extends BaseDescriptorDimensionTest {
 
 	/**
 	 * Tests the nodes and levels of a location-based dimension.

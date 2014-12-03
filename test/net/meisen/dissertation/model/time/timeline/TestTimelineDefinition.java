@@ -272,7 +272,7 @@ public class TestTimelineDefinition {
 	 */
 	@Test
 	public void testDefaultConstructor() {
-		final Date now = Dates.truncateDate(Dates.now());
+		final Date now = Dates.truncDate(Dates.now());
 		final TimelineDefinition def = new TimelineDefinition();
 
 		assertEquals(Date.class, def.getType());

@@ -91,18 +91,49 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		}
 
 		final String modelId = factDesc.getModelId();
+		final FactDescriptorSet set = getSet(modelId);
+		return addToSet(set, factDesc);
+	}
 
-		// get the set if we don't have one create it
+	/**
+	 * Gets the {@code FactDescriptorSet} for the specified {@code modelId}. The
+	 * set is created if non for the specified model exists.
+	 * 
+	 * @param modelId
+	 *            the identifier of the model to be created
+	 * 
+	 * @return the created or found {@code FactDescriptorSet}
+	 */
+	protected FactDescriptorSet getSet(final String modelId) {
 		FactDescriptorSet set = facts.get(modelId);
 		if (set == null) {
 			set = new FactDescriptorSet();
 			facts.put(modelId, set);
 		}
 
+		return set;
+	}
+
+	/**
+	 * Adds the specified {@code FactDescriptor} to the specified
+	 * {@code FactDescriptorSet}. The method does not validate if the
+	 * {@code factDesc} fits to the {@code set}.
+	 * 
+	 * @param set
+	 *            the {@code FactDescriptorSet} to add the
+	 *            {@code FactDescriptor} to
+	 * @param factDesc
+	 *            the {@code FactDescriptor} to be added
+	 * 
+	 * @return {@code true} if the entry was added, otherwise {@code false}
+	 */
+	protected boolean addToSet(final FactDescriptorSet set,
+			final FactDescriptor<?> factDesc) {
 		final FactDescriptor<?> cur = set.ceiling(factDesc);
 		if (cur == null || !cur.equals(factDesc)) {
 			return set.add(factDesc);
 		} else {
+
 			// the objects are equal but modified
 			if (!Objects.equals(cur.isRecordInvariant(),
 					factDesc.isRecordInvariant())
@@ -111,6 +142,30 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 				return set.add(factDesc);
 			} else {
 				return false;
+			}
+		}
+	}
+
+	/**
+	 * Combines {@code this} and the specified {@code factSet}.
+	 * 
+	 * @param factSet
+	 *            the {@code FactDescriptorModelSet} to be combined with
+	 *            {@code this}
+	 */
+	public void combine(final FactDescriptorModelSet factSet) {
+		if (factSet == null) {
+			return;
+		}
+		
+		for (final Entry<String, FactDescriptorSet> e : factSet.facts
+				.entrySet()) {
+			final String modelId = e.getKey();
+			final FactDescriptorSet set = getSet(modelId);
+
+			// get the factDescriptor instances of the model
+			for (final FactDescriptor<?> factDesc : e.getValue()) {
+				addToSet(set, factDesc);
 			}
 		}
 	}

@@ -33,6 +33,38 @@
   </meta>
   
   <dim:dimensions>
+    <dim:timedimension id="TIME">
+      <dim:hierarchy id="UTC" name="Default Hierarchy" all="Everytime">
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR" name="Hours" template="HOURS" />
+        <dim:level id="MINUTE" template="MINUTES" />
+      </dim:hierarchy>
+      <dim:hierarchy id="GER" all="Always" timezone="Europe/Berlin">
+        <dim:level id="QUARTER" template="RASTER_MONTH_DAY_3" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_DAY_480" />
+        <dim:level id="HOUR2" template="RASTER_DAY_120" />
+        <dim:level id="HOUR" template="RASTER_DAY_60" />
+        <dim:level id="MINUTE30" template="RASTER_DAY_30" />
+        <dim:level id="MINUTE10" template="RASTER_DAY_10" />
+        <dim:level id="MINUTE5" template="RASTER_DAY_5" lazy="false" />
+        <dim:level id="MINUTE" template="MINUTES" />
+      </dim:hierarchy>
+      <dim:hierarchy id="US" all="Always" timezone="America/Chicago">
+        <dim:level id="WEEK" template="RASTER_DAY_DAY_7" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_DAY_480" />
+        <dim:level id="HOUR2" template="RASTER_DAY_120" />
+        <dim:level id="HOUR" template="RASTER_DAY_60" />
+        <dim:level id="MINUTE30" template="RASTER_DAY_30" />
+        <dim:level id="MINUTE10" template="RASTER_DAY_10" />
+        <dim:level id="MINUTE5" template="RASTER_DAY_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+  
     <dim:dimension id="PERSON" descriptor="PERSON">
       <dim:hierarchy id="GENDER" all="All Persons">
         <dim:level id="GENDER">

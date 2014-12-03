@@ -21,7 +21,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	private Bitmap validRecords;
 	private DescriptorLogicResult filterResult;
 	private GroupResult groupResult;
-
+	
 	/**
 	 * Standard constructor which is used to specify the {@code query} this
 	 * result is valid for.
