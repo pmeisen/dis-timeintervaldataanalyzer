@@ -392,6 +392,7 @@ public class Db {
 		}
 
 		// enable it again
+		hSqlDb.setErrWriter(new PrintWriter(System.err));
 		assertTrue(exception == null ? null : exception.getMessage(),
 				Files.deleteDir(tmpFolder));
 	}
