@@ -7,6 +7,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 
 /**
  * {@code AggregationFunction} to calculate the sum.
@@ -15,7 +17,8 @@ import net.meisen.dissertation.model.measures.ILowAggregationFunction;
  * 
  */
 public class Sum extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static String name = "sum";
 
 	@Override
@@ -49,5 +52,10 @@ public class Sum extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+		return sum(results);
 	}
 }

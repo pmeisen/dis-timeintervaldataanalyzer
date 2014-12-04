@@ -17,13 +17,14 @@ import net.meisen.dissertation.model.data.DimensionModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.dimensions.TimeLevelMember;
 import net.meisen.dissertation.model.dimensions.TimeMemberRange;
-import net.meisen.dissertation.model.dimensions.graph.TimeGraph;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.IBitmapContainer;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 import net.meisen.general.genmisc.types.Numbers;
 
@@ -39,6 +40,25 @@ public class TimeSeriesEvaluator {
 	static {
 		defaultMeasure.attach(new Count());
 		defaultMeasure.attach("");
+	}
+
+	private static final class CombinedSlices {
+		private final Bitmap combinedBitmap;
+		private final FactDescriptorModelSet combinedFacts;
+
+		public CombinedSlices(final Bitmap combinedBitmap,
+				final FactDescriptorModelSet combinedFacts) {
+			this.combinedBitmap = combinedBitmap;
+			this.combinedFacts = combinedFacts;
+		}
+
+		public Bitmap getBitmap() {
+			return combinedBitmap;
+		}
+
+		public FactDescriptorModelSet getFacts() {
+			return combinedFacts;
+		}
 	}
 
 	private static final Iterable<GroupResultEntry> noGroupIterable = new Iterable<GroupResultEntry>() {
@@ -141,8 +161,12 @@ public class TimeSeriesEvaluator {
 		// depending on the dimensions we have to choose what to do
 		if (query.getMeasureDimension() == null) {
 			return evaluateLow(query, filteredValidRecords, groupResult);
-		} else {
+		} else if (!query.usesFunction(IMathAggregationFunction.class)) {
 			return evaluateDim(query, filteredValidRecords, groupResult);
+		} else if (!query.usesFunction(IDimAggregationFunction.class)) {
+			return evaluateMath(query, filteredValidRecords, groupResult);
+		} else {
+			return evaluateMixed(query, filteredValidRecords, groupResult);
 		}
 	}
 
@@ -161,6 +185,129 @@ public class TimeSeriesEvaluator {
 		} else {
 			return groupResult;
 		}
+	}
+
+	protected CombinedSlices createCombination(final TimeLevelMember member,
+			final long[] bounds) {
+
+		// iterate over the ranges and create combined bitmaps and facts
+		final FactDescriptorModelSet combinedFactSet = new FactDescriptorModelSet();
+		Bitmap combinedBitmap = null;
+		for (final TimeMemberRange range : member.getRanges()) {
+			final long start = Math.max(bounds[0], range.getStart());
+			final long end = Math.min(bounds[1], range.getEnd());
+
+			// get the slices for the range
+			final SliceWithDescriptors<?>[] slices = index
+					.getIntervalIndexSlices(start, end);
+
+			// combine the slices and facts
+			for (final SliceWithDescriptors<?> slice : slices) {
+				if (slice == null) {
+					continue;
+				}
+
+				final FactDescriptorModelSet factSet = slice.getFactsSet();
+				combinedFactSet.combine(factSet);
+				combinedBitmap = orCombine(slice, combinedBitmap);
+			}
+		}
+
+		return new CombinedSlices(combinedBitmap, combinedFactSet);
+	}
+
+	protected TimeSeriesCollection evaluateMixed(final SelectQuery query,
+			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+		
+		// get some stuff we need
+		final Interval<?> interval = query.getInterval();
+		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
+		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+
+		final DimensionSelector dim = query.getMeasureDimension();
+		final long[] bounds = getBounds(interval);
+
+		// get the members of the selected level
+		final Set<TimeLevelMember> members = dimModel.getTimeMembers(dim,
+				bounds[0], bounds[1]);
+
+		// create the timeSeries
+		final TimeSeriesCollection result = createTimeSeriesResult(members);
+
+		int timeSeriesPos = 0;
+		for (final TimeLevelMember member : members) {
+
+			// iterate over the ranges and create combined bitmaps and facts
+			final CombinedSlices combined = createCombination(member, bounds);
+
+			// now we have the bitmap for the specified range, apply the filter
+			final Bitmap filteredCombinedBitmap = combineBitmaps(
+					filteredValidRecords, combined.getBitmap());
+
+			for (final GroupResultEntry groupResultEntry : itGroup) {
+				final String groupId = groupResultEntry == null ? null
+						: groupResultEntry.getGroup();
+				final Bitmap groupedFilteredBitmap = combineBitmaps(
+						filteredValidRecords, groupResultEntry);
+				final Bitmap groupedFilteredCombinedBitmap = combineBitmaps(
+						filteredCombinedBitmap, groupResultEntry);
+
+				// create the evaluator
+				final ExpressionEvaluator evaluator = new MixedExpressionEvaluator(
+						index, bounds, member.getRanges(),
+						groupedFilteredBitmap, groupedFilteredCombinedBitmap,
+						combined.getFacts());
+
+				// calculate each measure
+				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures);
+			}
+
+			timeSeriesPos++;
+		}
+
+		return result;
+	}
+
+	protected TimeSeriesCollection evaluateMath(final SelectQuery query,
+			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+
+		// get some stuff we need
+		final Interval<?> interval = query.getInterval();
+		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
+		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+
+		final DimensionSelector dim = query.getMeasureDimension();
+		final long[] bounds = getBounds(interval);
+
+		// get the members of the selected level
+		final Set<TimeLevelMember> members = dimModel.getTimeMembers(dim,
+				bounds[0], bounds[1]);
+
+		// create the timeSeries
+		final TimeSeriesCollection result = createTimeSeriesResult(members);
+
+		int timeSeriesPos = 0;
+		for (final TimeLevelMember member : members) {
+			for (final GroupResultEntry groupResultEntry : itGroup) {
+				final String groupId = groupResultEntry == null ? null
+						: groupResultEntry.getGroup();
+				final Bitmap resultBitmap = combineBitmaps(
+						filteredValidRecords, groupResultEntry);
+
+				// create the evaluator
+				final ExpressionEvaluator evaluator = new MathExpressionEvaluator(
+						index, bounds, member.getRanges(), resultBitmap);
+
+				// calculate each measure
+				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures);
+			}
+
+			timeSeriesPos++;
+		}
+
+		return result;
 	}
 
 	protected TimeSeriesCollection evaluateDim(final SelectQuery query,
@@ -185,43 +332,24 @@ public class TimeSeriesEvaluator {
 		for (final TimeLevelMember member : members) {
 
 			// iterate over the ranges and create combined bitmaps and facts
-			final FactDescriptorModelSet combinedFactSet = new FactDescriptorModelSet();
-			Bitmap combinedBitmap = null;
-			for (final TimeMemberRange range : member.getRanges()) {
-				final long start = Math.max(bounds[0], range.getStart());
-				final long end = Math.min(bounds[1], range.getEnd());
-
-				// get the slices for the range
-				final SliceWithDescriptors<?>[] slices = index
-						.getIntervalIndexSlices(start, end);
-				
-				// combine the slices and facts
-				for (final SliceWithDescriptors<?> slice : slices) {
-					if (slice == null) {
-						continue;
-					}
-
-					final FactDescriptorModelSet factSet = slice.getFactsSet();
-					combinedFactSet.combine(factSet);
-					combinedBitmap = orCombine(slice, combinedBitmap);
-				}
-			}
+			final CombinedSlices combined = createCombination(member, bounds);
 
 			// now we have the bitmap for the specified range, apply the filter
-			combinedBitmap = combineBitmaps(filteredValidRecords,
-					combinedBitmap);
+			final Bitmap filteredCombinedBitmap = combineBitmaps(
+					filteredValidRecords, combined.getBitmap());
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = groupResultEntry == null ? null
 						: groupResultEntry.getGroup();
 
 				// combine the bitmaps: filter, member, valid with the group
-				final Bitmap resultBitmap = combineBitmaps(combinedBitmap,
-						groupResultEntry);
+				final Bitmap groupedFilteredCombinedBitmap = combineBitmaps(
+						filteredCombinedBitmap, groupResultEntry);
 
 				// create the evaluator
-				final MathExpressionEvaluator evaluator = new MathExpressionEvaluator(
-						index, resultBitmap, combinedFactSet);
+				final ExpressionEvaluator evaluator = new DimExpressionEvaluator(
+						index, groupedFilteredCombinedBitmap,
+						combined.getFacts());
 
 				// calculate each measure
 				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
@@ -268,7 +396,7 @@ public class TimeSeriesEvaluator {
 						filteredValidRecords, groupResultEntry);
 
 				// create the evaluator
-				final MathExpressionEvaluator evaluator = new MathExpressionEvaluator(
+				final ExpressionEvaluator evaluator = new LowExpressionEvaluator(
 						index, resultBitmap, factSet, offset + timeSeriesPos);
 
 				// calculate each measure
@@ -283,7 +411,7 @@ public class TimeSeriesEvaluator {
 	}
 
 	protected void fillTimeSeries(final String groupId,
-			final int timeSeriesPos, final MathExpressionEvaluator evaluator,
+			final int timeSeriesPos, final ExpressionEvaluator evaluator,
 			final TimeSeriesCollection result,
 			final Iterable<DescriptorMathTree> it) {
 

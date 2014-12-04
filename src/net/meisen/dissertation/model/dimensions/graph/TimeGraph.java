@@ -111,4 +111,20 @@ public class TimeGraph implements IDimensionGraph {
 	public TimeDimension getDimension() {
 		return dimension;
 	}
+
+	public boolean isValidSelection(final String hierarchyId) {
+		return isValidSelection(hierarchyId, null);
+	}
+
+	public boolean isValidSelection(final String hierarchyId,
+			final String levelId) {
+		final TimeGraphLevelIndex hierarchy = this.idx.get(hierarchyId);
+		if (hierarchy == null) {
+			return false;
+		} else if (levelId == null) {
+			return true;
+		} else {
+			return hierarchy.isValidLevel(levelId);
+		}
+	}
 }

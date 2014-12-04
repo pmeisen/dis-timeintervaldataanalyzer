@@ -9,6 +9,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
@@ -18,7 +20,8 @@ import net.meisen.dissertation.model.util.IDoubleIterator;
  * 
  */
 public class Mode extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static String name = "mode";
 
 	@Override
@@ -64,6 +67,19 @@ public class Mode extends BaseAggregationFunction implements
 			return getDefaultValue();
 		}
 
+		return calc(facts.sortedFactsIterator());
+	}
+
+	/**
+	 * Calculates the mode for a sorted iterator.
+	 * 
+	 * @param it
+	 *            the iterator running in sorted order
+	 * 
+	 * @return the mode
+	 */
+	protected double calc(final IDoubleIterator it) {
+
 		// get some helpers to keep track of the last state
 		double lastFact = Double.NaN;
 		int maxAmount = 0;
@@ -71,7 +87,6 @@ public class Mode extends BaseAggregationFunction implements
 		// iterate over the values
 		int counter = 0;
 		double mode = Double.NaN;
-		final IDoubleIterator it = facts.sortedFactsIterator();
 		while (it.hasNext()) {
 			final double fact = it.next();
 
@@ -116,5 +131,14 @@ public class Mode extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+		if (results == null || results.amountOfResults() == 0) {
+			return getDefaultValue();
+		}
+
+		return calc(results.sortedResultsIterator());
 	}
 }

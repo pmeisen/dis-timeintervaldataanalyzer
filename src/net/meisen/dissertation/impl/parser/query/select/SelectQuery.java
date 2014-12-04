@@ -16,6 +16,7 @@ import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IResourceResolver;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
@@ -151,6 +152,19 @@ public class SelectQuery implements IQuery {
 	 */
 	public List<DescriptorMathTree> getMeasures() {
 		return Collections.unmodifiableList(measures);
+	}
+
+	public boolean usesFunction(final Class<? extends IAggregationFunction> type) {
+		
+		// check the measures
+		for (final DescriptorMathTree measure : measures) {
+			if (measure.usesFunction(type)) {
+				return true;
+			}
+		}
+
+		// if not than return false
+		return false;
 	}
 
 	/**

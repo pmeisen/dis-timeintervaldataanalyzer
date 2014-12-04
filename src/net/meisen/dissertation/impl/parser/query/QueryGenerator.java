@@ -23,16 +23,20 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDescriptorFormulaContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimAggrFunctionContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMathMeasureAtomContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMathMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMathAggrFunctionContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMathMeasureAtomContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMathMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompMemberEqualContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedDimMeasureContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedDimMathMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedLowMeasureContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompNamedMathMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompStructureElementContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompValueElementContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprAddContext;
@@ -112,6 +116,7 @@ import net.meisen.dissertation.model.measures.AggregationFunctionHandler;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Dates;
@@ -706,24 +711,15 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
-	public void enterCompNamedDimMeasure(final CompNamedDimMeasureContext ctx) {
+	public void enterCompNamedDimMathMeasure(
+			final CompNamedDimMathMeasureContext ctx) {
 		final String id = getAlias(ctx.selectorAlias());
 		mathExpr = new DescriptorMathTree(id);
 	}
 
 	@Override
-	public void exitCompNamedDimMeasure(final CompNamedDimMeasureContext ctx) {
-		q(SelectQuery.class).addMeasure(mathExpr);
-	}
-
-	@Override
-	public void enterCompNamedMathMeasure(final CompNamedMathMeasureContext ctx) {
-		final String id = getAlias(ctx.selectorAlias());
-		mathExpr = new DescriptorMathTree(id);
-	}
-
-	@Override
-	public void exitCompNamedMathMeasure(final CompNamedMathMeasureContext ctx) {
+	public void exitCompNamedDimMathMeasure(
+			final CompNamedDimMathMeasureContext ctx) {
 		q(SelectQuery.class).addMeasure(mathExpr);
 	}
 
@@ -772,6 +768,44 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
+	public void enterCompDimMathMeasure(final CompDimMathMeasureContext ctx) {
+
+		// add the function to the tree
+		if (ctx.selectorSecondMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorSecondMathOperator());
+			mathExpr.attach(ao);
+		}
+	}
+
+	@Override
+	public void exitCompDimMathMeasure(final CompDimMathMeasureContext ctx) {
+
+		// check if we had an operator and we have to move up
+		if (ctx.selectorSecondMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
+	public void enterCompDimMathMeasureAtom(
+			final CompDimMathMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorFirstMathOperator());
+			mathExpr.attach(ao);
+		}
+	}
+
+	@Override
+	public void exitCompDimMathMeasureAtom(
+			final CompDimMathMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
 	public void enterCompDimMeasure(final CompDimMeasureContext ctx) {
 
 		// add the function to the tree
@@ -811,6 +845,50 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		if (ctx.selectorFirstMathOperator() != null) {
 			mathExpr.moveUp();
 		} else if (ctx.compDimAggrFunction() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
+	public void enterCompMathMeasure(final CompMathMeasureContext ctx) {
+
+		// add the function to the tree
+		if (ctx.selectorSecondMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorSecondMathOperator());
+			mathExpr.attach(ao);
+		}
+	}
+
+	@Override
+	public void exitCompMathMeasure(final CompMathMeasureContext ctx) {
+
+		// check if we had an operator and we have to move up
+		if (ctx.selectorSecondMathOperator() != null) {
+			mathExpr.moveUp();
+		}
+	}
+
+	@Override
+	public void enterCompMathMeasureAtom(final CompMathMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			final ArithmeticOperator ao = resolveArithmeticOperator(ctx
+					.selectorFirstMathOperator());
+			mathExpr.attach(ao);
+		} else if (ctx.compMathAggrFunction() != null) {
+			final CompMathAggrFunctionContext aggFuncCtx = ctx
+					.compMathAggrFunction();
+			mathExpr.attach(resolveAggregationFunction(
+					aggFuncCtx.selectorMathAggrFunctionName(),
+					IMathAggregationFunction.class));
+		}
+	}
+
+	@Override
+	public void exitCompMathMeasureAtom(final CompMathMeasureAtomContext ctx) {
+		if (ctx.selectorFirstMathOperator() != null) {
+			mathExpr.moveUp();
+		} else if (ctx.compMathAggrFunction() != null) {
 			mathExpr.moveUp();
 		}
 	}
@@ -1296,6 +1374,7 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 						QueryParsingException.class, 1024, funcName,
 						expected.getSimpleName());
 			} else {
+				func.setDefinedType(expected);
 				return (D) func;
 			}
 		} else {

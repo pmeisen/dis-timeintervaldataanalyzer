@@ -7,6 +7,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 
 /**
  * Used to calculate the average value of the facts and the amount of records.
@@ -15,7 +17,8 @@ import net.meisen.dissertation.model.measures.ILowAggregationFunction;
  * 
  */
 public class Mean extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static String name = "mean";
 
 	@Override
@@ -67,5 +70,21 @@ public class Mean extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+
+		// if there aren't any values the mean is not defined
+		if (results == null) {
+			return getDefaultValue();
+		}
+
+		final int amount = results.amountOfResults();
+		if (amount == 0) {
+			return getDefaultValue();
+		} else {
+			return sum(results) / amount;
+		}
 	}
 }

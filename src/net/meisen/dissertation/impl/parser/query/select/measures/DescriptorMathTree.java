@@ -217,4 +217,34 @@ public class DescriptorMathTree {
 			return root.getChild(0);
 		}
 	}
+
+	public boolean usesFunction(final Class<? extends IAggregationFunction> type) {
+		return usesFunction(type, root);
+	}
+
+	protected boolean usesFunction(
+			final Class<? extends IAggregationFunction> type,
+			final MathOperatorNode node) {
+		if (type == null) {
+			return false;
+		}
+
+		final List<IMathTreeElement> children = node.getChildren();
+		for (final IMathTreeElement child : children) {
+
+			if (child instanceof MathOperatorNode) {
+				final MathOperatorNode mon = (MathOperatorNode) child;
+				final MathOperator mo = mon.get();
+				final IAggregationFunction func = mo.getFunction();
+
+				if (func != null && type.equals(func.getDefinedType())) {
+					return true;
+				} else if (usesFunction(type, mon)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 }

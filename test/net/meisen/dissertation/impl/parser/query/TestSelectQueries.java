@@ -51,6 +51,9 @@ import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNod
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
+import net.meisen.dissertation.model.measures.IDimAggregationFunction;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Dates;
@@ -577,6 +580,10 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		final SelectQuery query = q("select timeseries of mean(A + B * C), max(LOCATION + PERSON - WHAT) * (mean(PERSON) + min(PERSON)) from testPersonModel");
 		final List<DescriptorMathTree> measures = query.getMeasures();
+		assertFalse(query.usesFunction(IDimAggregationFunction.class));
+		assertFalse(query.usesFunction(IMathAggregationFunction.class));
+		assertTrue(query.usesFunction(ILowAggregationFunction.class));
+
 		assertEquals(2, measures.size());
 
 		/*
@@ -603,21 +610,33 @@ public class TestSelectQueries extends LoaderBasedTest {
 		mo = ((MathOperatorNode) order.get(2)).get();
 		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
 		assertNull(mo.getFunction());
+
 		mo = ((MathOperatorNode) order.get(4)).get();
 		assertEquals(ArithmeticOperator.MINUS, mo.getOperator());
 		assertNull(mo.getFunction());
+
 		mo = ((MathOperatorNode) order.get(5)).get();
 		assertNull(mo.getOperator());
 		assertTrue(mo.getFunction() instanceof Max);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
 		mo = ((MathOperatorNode) order.get(7)).get();
 		assertNull(mo.getOperator());
 		assertTrue(mo.getFunction() instanceof Mean);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
 		mo = ((MathOperatorNode) order.get(9)).get();
 		assertNull(mo.getOperator());
 		assertTrue(mo.getFunction() instanceof Min);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
 		mo = ((MathOperatorNode) order.get(10)).get();
 		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
 		assertNull(mo.getFunction());
+
 		mo = ((MathOperatorNode) order.get(11)).get();
 		assertEquals(ArithmeticOperator.MULTIPLY, mo.getOperator());
 		assertNull(mo.getFunction());
@@ -631,16 +650,39 @@ public class TestSelectQueries extends LoaderBasedTest {
 	public void testDimAggregateMeasure() {
 		DescriptorMathTree measure;
 		List<IMathTreeElement> order;
+		MathOperator mo;
 
 		SelectQuery query;
 		List<DescriptorMathTree> measures;
 
 		query = q("select timeseries of SUM(COSTS) / COUNT(MINUTES) AS SAMPLE1, MODE(COSTS) * (SUM(COSTS + MINUTES) / COUNT(MINUTES)) AS SAMPLE2, COUNT(MINUTES) AS SAMPLE3 ON TIME.HIERARCHY.LEVEL from testPersonModel");
+		assertTrue(query.usesFunction(IDimAggregationFunction.class));
+		assertFalse(query.usesFunction(IMathAggregationFunction.class));
+		assertFalse(query.usesFunction(ILowAggregationFunction.class));
+
 		measures = query.getMeasures();
 		assertEquals(3, measures.size());
 		assertEquals("TIME", query.getMeasureDimension().getDimensionId());
 		assertEquals("HIERARCHY", query.getMeasureDimension().getHierarchyId());
 		assertEquals("LEVEL", query.getMeasureDimension().getLevelId());
+
+		measure = measures.get(0);
+		assertEquals("SAMPLE1", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+		assertEquals(5, order.size());
+
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Sum);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(3)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
 
 		measure = measures.get(1);
 		assertEquals("SAMPLE2", measure.getId());
@@ -648,11 +690,194 @@ public class TestSelectQueries extends LoaderBasedTest {
 		order = measure.getEvaluationOrder();
 		assertEquals(10, order.size());
 
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Mode);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(5)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Sum);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(7)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
 		measure = measures.get(2);
 		assertEquals("SAMPLE3", measure.getId());
 		assertTrue(measure.isSimple());
 		order = measure.getEvaluationOrder();
 		assertEquals(2, order.size());
+
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+	}
+
+	/**
+	 * Tests the parsing of a math-aggregate.
+	 */
+	@Test
+	public void testMathAggregateMeasure() {
+		DescriptorMathTree measure;
+		List<IMathTreeElement> order;
+		MathOperator mo;
+
+		SelectQuery query;
+		List<DescriptorMathTree> measures;
+
+		query = q("select timeseries of MAX(SUM(PERSON)) AS SAMPLE0, MAX(SUM(COSTS) / COUNT(MINUTES)) AS SAMPLE1, MIN(COUNT(MINUTES)) + MAX(SUM(COSTS) / MIN(MINUTES)) AS SAMPLE2 ON TIME.HIERARCHY.LEVEL from testPersonModel");
+		assertFalse(query.usesFunction(IDimAggregationFunction.class));
+		assertTrue(query.usesFunction(IMathAggregationFunction.class));
+		assertTrue(query.usesFunction(ILowAggregationFunction.class));
+
+		measures = query.getMeasures();
+		assertEquals(3, measures.size());
+		assertEquals("TIME", query.getMeasureDimension().getDimensionId());
+		assertEquals("HIERARCHY", query.getMeasureDimension().getHierarchyId());
+		assertEquals("LEVEL", query.getMeasureDimension().getLevelId());
+
+		measure = measures.get(0);
+		assertEquals("SAMPLE0", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Sum);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(2)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Max);
+		assertEquals(IMathAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		measure = measures.get(1);
+		assertEquals("SAMPLE1", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Sum);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(3)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertEquals(ArithmeticOperator.DIVIDE, mo.getOperator());
+		assertNull(mo.getFunction());
+
+		mo = ((MathOperatorNode) order.get(5)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Max);
+		assertEquals(IMathAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		measure = measures.get(2);
+		assertEquals("SAMPLE2", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(2)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Min);
+		assertEquals(IMathAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Sum);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(6)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Min);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(7)).get();
+		assertEquals(ArithmeticOperator.DIVIDE, mo.getOperator());
+		assertNull(mo.getFunction());
+
+		mo = ((MathOperatorNode) order.get(8)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Max);
+		assertEquals(IMathAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(9)).get();
+		assertEquals(ArithmeticOperator.ADD, mo.getOperator());
+		assertNull(mo.getFunction());
+	}
+
+	/**
+	 * Tests the usage of a mixed measure using math- and dim-aggregates.
+	 */
+	@Test
+	public void testMixedDimAndMath() {
+
+		DescriptorMathTree measure;
+		List<IMathTreeElement> order;
+		MathOperator mo;
+
+		SelectQuery query;
+		List<DescriptorMathTree> measures;
+
+		query = q("select timeseries of COUNT(PERSON) * MAX(MIN(PERSON)) AS SAMPLE0 ON TIME.HIERARCHY.LEVEL from testPersonModel");
+		measures = query.getMeasures();
+
+		assertTrue(query.usesFunction(IDimAggregationFunction.class));
+		assertTrue(query.usesFunction(IMathAggregationFunction.class));
+		assertTrue(query.usesFunction(ILowAggregationFunction.class));
+
+		assertEquals(1, measures.size());
+		assertEquals("TIME", query.getMeasureDimension().getDimensionId());
+		assertEquals("HIERARCHY", query.getMeasureDimension().getHierarchyId());
+		assertEquals("LEVEL", query.getMeasureDimension().getLevelId());
+
+		measure = measures.get(0);
+		assertEquals("SAMPLE0", measure.getId());
+		assertFalse(measure.isSimple());
+		order = measure.getEvaluationOrder();
+
+		mo = ((MathOperatorNode) order.get(1)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Count);
+		assertEquals(IDimAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(3)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Min);
+		assertEquals(ILowAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
+
+		mo = ((MathOperatorNode) order.get(4)).get();
+		assertNull(mo.getOperator());
+		assertTrue(mo.getFunction() instanceof Max);
+		assertEquals(IMathAggregationFunction.class, mo.getFunction()
+				.getDefinedType());
 	}
 
 	/**
@@ -1951,6 +2176,106 @@ public class TestSelectQueries extends LoaderBasedTest {
 				assertEquals(3.0, ts.getValue(i), 0.0);
 			} else {
 				assertEquals(0.0, ts.getValue(i), 0.0);
+			}
+		}
+	}
+
+	/**
+	 * Tests the math-aggregation.
+	 */
+	@Test
+	public void testAggregationMath() {
+		String query;
+		TimeSeriesCollection tsRes;
+		TimeSeries ts;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		m(xml);
+
+		// fire the UTC query
+		query = "select timeseries of MAX(SUM(SCREAMS)) AS RESNEED, MIN(SUM(SCREAMS)) AS MINRESNEED, MIN(COUNT(PERSON) * SUM(SCREAMS + LOCATION)) AS WEIRD ON TIME.UTC.DAY from testPersonModel";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("RESNEED");
+		assertEquals(2, ts.size());
+		assertEquals(15.0, ts.getValue(0), 0.0);
+		assertEquals(12.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("MINRESNEED");
+		assertEquals(2, ts.size());
+		assertEquals(12.0, ts.getValue(0), 0.0);
+		assertEquals(12.0, ts.getValue(1), 0.0);
+
+		ts = tsRes.getSeries("WEIRD");
+		assertEquals(2, ts.size());
+		assertEquals(60.0, ts.getValue(0), 0.0);
+		assertEquals(64.0, ts.getValue(1), 0.0);
+
+		query = "select timeseries of MAX(SUM(SCREAMS)) AS RESNEED ON TIME.UTC.DAY from testPersonModel in [03.03.2014, 04.03.2014)";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("RESNEED");
+		assertEquals(1, ts.size());
+		assertEquals(15.0, ts.getValue(0), 0.0);
+
+		query = "select timeseries of MAX(SUM(SCREAMS)) AS RESNEED ON TIME.UTC.DAY from testPersonModel in [03.03.2014 17:00:00, 04.03.2014)";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("RESNEED");
+		assertEquals(1, ts.size());
+		assertEquals(12.0, ts.getValue(0), 0.0);
+
+		query = "select timeseries of SUM(COUNTSTARTED(PERSON)) AS SAMPLE ON TIME.UTC.DAY from testPersonModel";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+		ts = tsRes.getSeries("SAMPLE");
+		assertEquals(2, ts.size());
+		assertEquals(6.0, ts.getValue(0), 0.0);
+		assertEquals(0.0, ts.getValue(1), 0.0);
+	}
+
+	/**
+	 * Tests the mixed usage of math- and dim-aggregations.
+	 */
+	@Test
+	public void testAggregationMathAndDim() {
+		String query;
+		TimeSeriesCollection tsRes;
+		TimeSeries ts;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		m(xml);
+
+		// fire the UTC query
+		query = "select timeseries of MAX(SUM(PERSON)) AS RESNEED, COUNT(PERSON) AS INVRESNEED, COUNT(PERSON) * MAX(COUNT(PERSON)) AS CALC ON TIME.UTC.HOUR8 from testPersonModel";
+		tsRes = ((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+
+		ts = tsRes.getSeries("RESNEED");
+		assertEquals(6, ts.size());
+		for (int i = 0; i < ts.size(); i++) {
+			assertEquals(4.0, ts.getValue(i), 0.0);
+		}
+
+		ts = tsRes.getSeries("INVRESNEED");
+		assertEquals(6, ts.size());
+		for (int i = 0; i < ts.size(); i++) {
+			if (i == 2) {
+				assertEquals(6.0, ts.getValue(i), 0.0);
+			} else {
+				assertEquals(4.0, ts.getValue(i), 0.0);
+			}
+		}
+
+		ts = tsRes.getSeries("CALC");
+		assertEquals(6, ts.size());
+		for (int i = 0; i < ts.size(); i++) {
+			if (i == 2) {
+				assertEquals(24.0, ts.getValue(i), 0.0);
+			} else {
+				assertEquals(16.0, ts.getValue(i), 0.0);
 			}
 		}
 	}

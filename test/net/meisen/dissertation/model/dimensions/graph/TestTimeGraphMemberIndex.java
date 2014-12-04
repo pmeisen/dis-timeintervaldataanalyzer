@@ -10,8 +10,19 @@ import net.meisen.dissertation.model.dimensions.TimeMemberRange;
 
 import org.junit.Test;
 
+/**
+ * Tests the implementation of the {@code TimeGraphMemberIndex}.
+ * 
+ * @author pmeisen
+ * 
+ * @see TimeGraphMemberIndex
+ * 
+ */
 public class TestTimeGraphMemberIndex {
 
+	/**
+	 * Tests the indexing of the complete axis.
+	 */
 	@Test
 	public void testCompleteAxis() {
 		final TimeGraphMemberIndex idx = new TimeGraphMemberIndex();
@@ -72,14 +83,17 @@ public class TestTimeGraphMemberIndex {
 		}
 	}
 
+	/**
+	 * Tests the indexing of an imcomplete axis.
+	 */
 	@Test
 	public void testIncompleteAxis() {
 		final TimeGraphMemberIndex idx = new TimeGraphMemberIndex();
 
-		idx.add(new TimeLevelMember("TEST1", new TimeMemberRange(10,
-				19), new TimeMemberRange(30, 39), new TimeMemberRange(50, 59)));
-		idx.add(new TimeLevelMember("TEST2", new TimeMemberRange(20,
-				29), new TimeMemberRange(40, 49), new TimeMemberRange(60, 69)));
+		idx.add(new TimeLevelMember("TEST1", new TimeMemberRange(10, 19),
+				new TimeMemberRange(30, 39), new TimeMemberRange(50, 59)));
+		idx.add(new TimeLevelMember("TEST2", new TimeMemberRange(20, 29),
+				new TimeMemberRange(40, 49), new TimeMemberRange(60, 69)));
 
 		idx.initialize();
 

@@ -136,13 +136,13 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
+	@Override public void enterCompDimMathMeasure(@NotNull QueryGrammarParser.CompDimMathMeasureContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
+	@Override public void exitCompDimMathMeasure(@NotNull QueryGrammarParser.CompDimMathMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -162,6 +162,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterCompNamedDimMathMeasure(@NotNull QueryGrammarParser.CompNamedDimMathMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompNamedDimMathMeasure(@NotNull QueryGrammarParser.CompNamedDimMathMeasureContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -169,6 +182,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -260,19 +286,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompDimAggrFunction(@NotNull QueryGrammarParser.CompDimAggrFunctionContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -513,6 +526,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterCompDimMathMeasureAtom(@NotNull QueryGrammarParser.CompDimMathMeasureAtomContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompDimMathMeasureAtom(@NotNull QueryGrammarParser.CompDimMathMeasureAtomContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterExprMeasure(@NotNull QueryGrammarParser.ExprMeasureContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -546,19 +572,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitSelectorIntervalRelation(@NotNull QueryGrammarParser.SelectorIntervalRelationContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void enterCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

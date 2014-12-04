@@ -110,15 +110,15 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprLoad(@NotNull QueryGrammarParser.ExprLoadContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compDimMathMeasure}.
 	 * @param ctx the parse tree
 	 */
-	void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
+	void enterCompDimMathMeasure(@NotNull QueryGrammarParser.CompDimMathMeasureContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compDimMathMeasure}.
 	 * @param ctx the parse tree
 	 */
-	void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
+	void exitCompDimMathMeasure(@NotNull QueryGrammarParser.CompDimMathMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAggregate}.
@@ -132,6 +132,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprAggregate(@NotNull QueryGrammarParser.ExprAggregateContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compNamedDimMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompNamedDimMathMeasure(@NotNull QueryGrammarParser.CompNamedDimMathMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compNamedDimMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompNamedDimMathMeasure(@NotNull QueryGrammarParser.CompNamedDimMathMeasureContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compGroupIgnore}.
 	 * @param ctx the parse tree
 	 */
@@ -141,6 +152,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateInterval}.
@@ -218,17 +240,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompDimAggrFunction(@NotNull QueryGrammarParser.CompDimAggrFunctionContext ctx);
-
-	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compNamedMathMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compNamedMathMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompNamedMathMeasure(@NotNull QueryGrammarParser.CompNamedMathMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDescValueTupel}.
@@ -429,6 +440,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorCloseInterval(@NotNull QueryGrammarParser.SelectorCloseIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compDimMathMeasureAtom}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompDimMathMeasureAtom(@NotNull QueryGrammarParser.CompDimMathMeasureAtomContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compDimMathMeasureAtom}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompDimMathMeasureAtom(@NotNull QueryGrammarParser.CompDimMathMeasureAtomContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprMeasure}.
 	 * @param ctx the parse tree
 	 */
@@ -460,17 +482,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorIntervalRelation(@NotNull QueryGrammarParser.SelectorIntervalRelationContext ctx);
-
-	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compNamedDimMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compNamedDimMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompNamedDimMeasure(@NotNull QueryGrammarParser.CompNamedDimMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSelectTimeSeries}.

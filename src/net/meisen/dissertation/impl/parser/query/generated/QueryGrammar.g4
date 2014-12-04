@@ -110,7 +110,7 @@ exprDelete    : STMT_DELETE selectorIntIdList OP_FROM selectorModelId;
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
 exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)?;
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
-exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (((compNamedMathMeasure | compNamedDimMeasure) (SEPARATOR (compNamedMathMeasure | compNamedDimMeasure))*) OP_ON selectorMember));
+exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (compNamedDimMathMeasure (SEPARATOR compNamedDimMathMeasure)* OP_ON selectorMember));
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp            : compMemberEqual | compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
 exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
@@ -120,8 +120,7 @@ exprAggregate       : (selectorMember | selectorDescriptorId) (SEPARATOR (select
  * Define the different redudant definitions within the parts of the statement
  */
 compNamedLowMeasure      : compLowMeasure (OP_ALIAS selectorAlias)?;
-compNamedMathMeasure     : compMathMeasure (OP_ALIAS selectorAlias)?;
-compNamedDimMeasure      : compDimMeasure (OP_ALIAS selectorAlias)?;
+compNamedDimMathMeasure  : compDimMathMeasure (OP_ALIAS selectorAlias)?;
 compMemberEqual          : selectorMember CMP_EQUAL selectorValue;
 compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorValue;
 compDescValueTupel       : BRACKET_ROUND_OPENED selectorValue (SEPARATOR selectorValue)* BRACKET_ROUND_CLOSED;
@@ -144,6 +143,9 @@ compMathMeasureAtom      : compMathAggrFunction | compMathMeasureAtom selectorFi
 
 compDimMeasure           : compDimMeasure selectorSecondMathOperator compDimMeasureAtom | compDimMeasureAtom;
 compDimMeasureAtom       : compDimAggrFunction | compDimMeasureAtom selectorFirstMathOperator compDimMeasureAtom | BRACKET_ROUND_OPENED compDimMeasure BRACKET_ROUND_CLOSED;
+
+compDimMathMeasure       : compDimMathMeasure selectorSecondMathOperator compDimMathMeasureAtom | compDimMathMeasureAtom;
+compDimMathMeasureAtom   : compMathMeasure | compDimMeasure | compDimMathMeasureAtom selectorFirstMathOperator compDimMathMeasureAtom | BRACKET_ROUND_OPENED compDimMathMeasureAtom BRACKET_ROUND_CLOSED;
 
 compDescriptorFormula    : compDescriptorFormula selectorSecondMathOperator compDescriptorFormulaAtom | compDescriptorFormulaAtom;
 compDescriptorFormulaAtom: selectorDescriptorId | compDescriptorFormulaAtom selectorFirstMathOperator compDescriptorFormulaAtom | BRACKET_ROUND_OPENED compDescriptorFormula BRACKET_ROUND_CLOSED;

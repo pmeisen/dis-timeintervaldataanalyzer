@@ -14,7 +14,8 @@ import net.meisen.dissertation.model.measures.ILowAggregationFunction;
  * @author pmeisen
  * 
  */
-public class CountStarted extends BaseAggregationFunction implements ILowAggregationFunction{
+public class CountStarted extends BaseAggregationFunction implements
+		ILowAggregationFunction {
 	private final static String name = "countstarted";
 
 	@Override

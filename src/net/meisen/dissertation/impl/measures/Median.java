@@ -9,6 +9,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
@@ -18,7 +20,8 @@ import net.meisen.dissertation.model.util.IDoubleIterator;
  * 
  */
 public class Median extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static String name = "median";
 
 	@Override
@@ -99,14 +102,27 @@ public class Median extends BaseAggregationFunction implements
 			return getDefaultValue();
 		}
 
+		return calc(facts.amountOfFacts(), facts.sortedFactsIterator());
+	}
+
+	/**
+	 * Helper method to calculate the median for the specified iterator.
+	 * 
+	 * @param amount
+	 *            the amount of elements to be iterated
+	 * @param it
+	 *            the sorted iterator
+	 * 
+	 * @return the median
+	 */
+	protected double calc(final int amount, final IDoubleIterator it) {
+
 		// get the middle position
-		final int amount = facts.amountOfFacts();
 		final boolean even = (amount & 1) == 0;
 		final int firstPos = (int) Math.floor(amount * 0.5) + (even ? -1 : 0);
 
 		// calculate the median
 		final double median;
-		final IDoubleIterator it = facts.sortedFactsIterator();
 		int curPos = 0;
 		while (it.hasNext()) {
 			if (curPos == firstPos) {
@@ -141,5 +157,14 @@ public class Median extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+		if (results == null || results.amountOfResults() == 0) {
+			return getDefaultValue();
+		}
+
+		return calc(results.amountOfResults(), results.sortedResultsIterator());
 	}
 }

@@ -38,6 +38,7 @@
         <dim:level id="YEAR" template="YEARS" />
         <dim:level id="MONTH" template="MONTHS" />
         <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR8" template="RASTER_DAY_480" />
         <dim:level id="HOUR" name="Hours" template="HOURS" />
         <dim:level id="MINUTE" template="MINUTES" />
       </dim:hierarchy>

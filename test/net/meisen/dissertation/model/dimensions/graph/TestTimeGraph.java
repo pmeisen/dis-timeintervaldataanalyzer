@@ -43,6 +43,16 @@ public class TestTimeGraph extends LoaderBasedTest {
 	@Qualifier(DefaultValues.DIMENSIONHANDLER_ID)
 	private TidaDimensionHandler dimHandler;
 
+	/**
+	 * Helper method to load a dimensional definition from xml.
+	 * 
+	 * @param name
+	 *            the name of the file to be loaded located at
+	 *            {@code /net/meisen/dissertation/model/dimensions/config/},
+	 *            without any {@code .xml}.
+	 * 
+	 * @return the loaded dimensions
+	 */
 	public Map<String, IDimension> loadXml(final String name) {
 
 		// get the resource
@@ -54,6 +64,16 @@ public class TestTimeGraph extends LoaderBasedTest {
 		return dimHandler.loadDimensions(is);
 	}
 
+	/**
+	 * Loads a specific dimension from the specified xml.
+	 * 
+	 * @param name
+	 *            the name of the file to be loaded located at
+	 *            {@code /net/meisen/dissertation/model/dimensions/config/},
+	 *            without any {@code .xml}.
+	 * 
+	 * @return the loaded dimension
+	 */
 	public TimeDimension loadDimension(final String name) {
 		final Map<String, IDimension> graphs = loadXml(name);
 		assertEquals(1, graphs.size());
@@ -64,6 +84,18 @@ public class TestTimeGraph extends LoaderBasedTest {
 		return (TimeDimension) dim;
 	}
 
+	/**
+	 * Loads a {@code TimeGraph} of a specific dimension.
+	 * 
+	 * @param name
+	 *            the name of the file to be loaded located at
+	 *            {@code /net/meisen/dissertation/model/dimensions/config/},
+	 *            without any {@code .xml}.
+	 * @param dimId
+	 *            the identifier of the dimension to retrieve the graph for
+	 * 
+	 * @return the graph
+	 */
 	public TimeGraph loadFromModel(final String name, final String dimId) {
 		final TidaModel model = m("/net/meisen/dissertation/model/dimensions/"
 				+ name + ".xml");

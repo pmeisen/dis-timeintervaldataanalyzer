@@ -116,4 +116,8 @@ public class TimeGraphLevelIndex {
 			return members;
 		}
 	}
+
+	public boolean isValidLevel(final String levelId) {
+		return lazyMap.containsKey(levelId);
+	}
 }

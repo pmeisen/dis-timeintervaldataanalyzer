@@ -55,8 +55,14 @@ public class AggregationFunctionHandler {
 		if (functionName == null) {
 			return null;
 		}
-
-		return functions.get(functionName.toLowerCase());
+		final IAggregationFunction func = functions.get(functionName
+				.toLowerCase());
+		
+		if (func == null) {
+			return null;
+		} else {
+			return func.create();
+		}
 	}
 
 	/**

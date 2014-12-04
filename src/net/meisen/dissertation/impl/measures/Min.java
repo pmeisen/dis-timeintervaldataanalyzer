@@ -11,6 +11,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
@@ -20,7 +22,8 @@ import net.meisen.dissertation.model.util.IDoubleIterator;
  * 
  */
 public class Min extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static String name = "min";
 
 	@Override
@@ -92,5 +95,14 @@ public class Min extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+		if (results == null || results.amountOfResults() == 0) {
+			return getDefaultValue();
+		} else {
+			return results.sortedResultsIterator().next();
+		}
 	}
 }

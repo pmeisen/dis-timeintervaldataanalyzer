@@ -7,6 +7,8 @@ import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.dissertation.model.measures.IResultsHolder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,8 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class Count extends BaseAggregationFunction implements
-		ILowAggregationFunction, IDimAggregationFunction {
+		ILowAggregationFunction, IDimAggregationFunction,
+		IMathAggregationFunction {
 	private final static Logger LOG = LoggerFactory.getLogger(Count.class);
 
 	private final static String name = "count";
@@ -67,5 +70,13 @@ public class Count extends BaseAggregationFunction implements
 	@Override
 	public double getDefaultValue() {
 		return 0.0;
+	}
+
+	@Override
+	public double aggregate(final IResultsHolder results) {
+		if (results == null || results.amountOfResults() == 0) {
+			return getDefaultValue();
+		}
+		return results.amountOfResults();
 	}
 }

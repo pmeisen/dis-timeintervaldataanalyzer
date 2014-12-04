@@ -319,6 +319,20 @@ public class DimensionModel {
 		}
 	}
 
+	/**
+	 * Get the {@code TimeLevelMember} for the specified {@code dimSelector}.
+	 * 
+	 * @param dimSelector
+	 *            the selector specifying which members to be retrieved
+	 * @param start
+	 *            the normalized start value of the members to be retrieved
+	 *            (inclusive)
+	 * @param end
+	 *            the normalized end value of the members to be retrieved
+	 *            (inclusive)
+	 * 
+	 * @return the {@code TimeLevelMember} instances
+	 */
 	public Set<TimeLevelMember> getTimeMembers(
 			final DimensionSelector dimSelector, final long start,
 			final long end) {
@@ -328,8 +342,15 @@ public class DimensionModel {
 		final IDimensionGraph graph = getDimension(dimId);
 
 		if (graph instanceof TimeGraph) {
-			return ((TimeGraph) graph).getMembers(hierarchyId, levelId, start,
-					end);
+			final TimeGraph timeGraph = (TimeGraph) graph;
+
+			if (timeGraph.isValidSelection(hierarchyId, levelId)) {
+				return timeGraph.getMembers(hierarchyId, levelId, start, end);
+			} else {
+				exceptionRegistry.throwException(DimensionModelException.class,
+						1008, dimSelector);
+				return null;
+			}
 		} else {
 			exceptionRegistry.throwException(DimensionModelException.class,
 					1007, dimId, TimeGraph.class.getSimpleName());
