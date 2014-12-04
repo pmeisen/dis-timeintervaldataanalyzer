@@ -363,16 +363,22 @@ public class Db {
 		Exception exception = null;
 
 		try {
+
+			// try to close it
 			hSqlDb.shutdown();
 		} catch (final Exception e1) {
 			exception = e1;
 
 			try {
+
+				// try to force the shutdown
 				hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
 			} catch (final Exception e2) {
 				// ignore any error as long as the files can be removed
 			} finally {
 				try {
+
+					// finally try to close it again after the force
 					hSqlDb.shutdown();
 				} catch (final Exception e3) {
 					// silent
