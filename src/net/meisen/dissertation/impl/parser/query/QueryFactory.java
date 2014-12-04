@@ -178,7 +178,6 @@ public class QueryFactory implements IQueryFactory {
 		try {
 			return (T) query.evaluate(authManager, handler, model, resolver);
 		} catch (final ForwardedRuntimeException e) {
-			e.printStackTrace();
 			exceptionRegistry
 					.throwRuntimeException((ForwardedRuntimeException) e);
 		} catch (final CancellationException e) {
