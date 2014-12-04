@@ -23,14 +23,43 @@ public class TimeLevelMember {
 	private final List<TimeMemberRange> ranges;
 	private String name;
 
+	/**
+	 * Constructor to create a {@code TimeLevelMember} with the specified
+	 * {@code id} and one range defined by {@code start} and {@code end}.
+	 * 
+	 * @param id
+	 *            the identifier of the instance
+	 * @param start
+	 *            the start of the one range
+	 * @param end
+	 *            the end of the one range
+	 */
 	public TimeLevelMember(final String id, final long start, final long end) {
 		this(id, new TimeMemberRange(start, end));
 	}
 
+	/**
+	 * Constructor to create a {@code TimeLevelMember} with the specified
+	 * {@code id} and {@code ranges}.
+	 * 
+	 * @param id
+	 *            the identifier of the instance
+	 * @param ranges
+	 *            the ranges defined for {@code this}
+	 */
 	public TimeLevelMember(final String id, final TimeMemberRange... ranges) {
 		this(id, ranges == null ? null : Arrays.asList(ranges));
 	}
 
+	/**
+	 * Constructor to create a {@code TimeLevelMember} with the specified
+	 * {@code id} and {@code ranges}.
+	 * 
+	 * @param id
+	 *            the identifier of the instance
+	 * @param ranges
+	 *            the ranges defined for {@code this}
+	 */
 	public TimeLevelMember(final String id,
 			final Collection<TimeMemberRange> ranges) {
 		this.ranges = new ArrayList<TimeMemberRange>();
@@ -41,15 +70,31 @@ public class TimeLevelMember {
 		}
 	}
 
+	/**
+	 * Gets the identifier of {@code this}.
+	 * 
+	 * @return the identifier of {@code this}
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * Gets the name of {@code this}.
+	 * 
+	 * @return the name of {@code this}
+	 */
 	public String getName() {
 		return name == null ? id : name;
 	}
 
-	public void setName(String name) {
+	/**
+	 * Sets the name of {@code this}.
+	 * 
+	 * @param name
+	 *            the name of {@code this}
+	 */
+	public void setName(final String name) {
 		this.name = name;
 	}
 
@@ -63,6 +108,13 @@ public class TimeLevelMember {
 		return this.ranges.iterator();
 	}
 
+	/**
+	 * Gets the ranges of the lowest granularity covered by the member of the
+	 * level.
+	 * 
+	 * @return the ranges of the lowest granularity covered by the member of the
+	 *         level
+	 */
 	public List<TimeMemberRange> getRanges() {
 		return Collections.unmodifiableList(this.ranges);
 	}
@@ -95,7 +147,15 @@ public class TimeLevelMember {
 	public String toString() {
 		return getId() + " (" + name + ") " + this.ranges.toString();
 	}
-	
+
+	/**
+	 * Gets the range specified at the {@code nr} position.
+	 * 
+	 * @param nr
+	 *            the position of the range to retrieve
+	 * 
+	 * @return the range at the specified position
+	 */
 	public TimeMemberRange getRange(final int nr) {
 		return this.ranges.get(nr);
 	}

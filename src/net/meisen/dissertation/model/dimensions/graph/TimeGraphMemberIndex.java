@@ -15,9 +15,18 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.meisen.dissertation.exceptions.DimensionModelException;
 import net.meisen.dissertation.model.dimensions.TimeLevelMember;
 import net.meisen.dissertation.model.dimensions.TimeMemberRange;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
+/**
+ * An index used to retrieve the members of a specific level of a
+ * time-dimension.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class TimeGraphMemberIndex {
 	private final Map<String, TimeLevelMember> members;
 
@@ -27,6 +36,9 @@ public class TimeGraphMemberIndex {
 	private long maxValue;
 	private boolean initialized;
 
+	/**
+	 * Default constructor.
+	 */
 	public TimeGraphMemberIndex() {
 		this.members = new HashMap<String, TimeLevelMember>();
 
@@ -36,21 +48,37 @@ public class TimeGraphMemberIndex {
 		this.initialized = false;
 	}
 
+	/**
+	 * Adds the member to the index and resets initialization, i.e.
+	 * {@link #initialize()} must be recalled.
+	 * 
+	 * @param member
+	 *            the member to be added
+	 */
 	public void add(final TimeLevelMember member) {
 		this.initialized = false;
 		this.members.put(member.getId(), member);
 	}
 
+	/**
+	 * Gets the members within the specified range.
+	 * 
+	 * @param start
+	 *            the start value of the range to retrieve the members for
+	 * @param end
+	 *            the end value of the range to retrieve the members for
+	 * 
+	 * @return the members within the range
+	 */
 	public Set<TimeLevelMember> getMembers(final long start, final long end) {
 		if (!isInitialized()) {
-			// TODO: throw new ForwardedRuntimeException(exceptionClazz, number)
-			throw new IllegalStateException();
+			throw new ForwardedRuntimeException(DimensionModelException.class,
+					1012);
 		} else if (end < start) {
 			return Collections.<TimeLevelMember> emptySet();
 		} else {
-			final int lastPos = list.size() - 1;
-			int posStart = getPosition(start, lastPos, true);
-			int posEnd = getPosition(end, lastPos, false);
+			int posStart = getPosition(start, true);
+			int posEnd = getPosition(end, false);
 
 			// if the start was not within, it's set to the start value
 			if (posStart < 0 && posEnd < 0) {
@@ -58,7 +86,7 @@ public class TimeGraphMemberIndex {
 			} else if (posStart < 0) {
 				posStart = posEnd;
 			} else if (posEnd < 0) {
-				posEnd = lastPos;
+				posEnd = list.size() - 1;
 			}
 
 			return new LinkedHashSet<TimeLevelMember>(
@@ -66,8 +94,18 @@ public class TimeGraphMemberIndex {
 		}
 	}
 
-	protected int getPosition(final long value, final int size,
-			final boolean start) {
+	/**
+	 * Gets the position of the value
+	 * 
+	 * @param value
+	 *            the value to be found
+	 * @param start
+	 *            {@code true} if the value is start-value, otherwise
+	 *            {@code false}
+	 * 
+	 * @return the position of the value
+	 */
+	protected int getPosition(final long value, final boolean start) {
 		if (value < minValue || value > maxValue) {
 			return -1;
 		}
@@ -84,10 +122,18 @@ public class TimeGraphMemberIndex {
 		return pos;
 	}
 
+	/**
+	 * Validates if the index is initialized.
+	 * 
+	 * @return {@code true} if the index is initialized, otherwise {@code false}
+	 */
 	public boolean isInitialized() {
 		return initialized;
 	}
 
+	/**
+	 * Initializes the index.
+	 */
 	public void initialize() {
 
 		// if we are initialized nothing to do

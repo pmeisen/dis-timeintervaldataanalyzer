@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.measures.MapFactsDescriptorBased;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
@@ -8,6 +9,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * Evaluator used to evaluate low-functions, i.e. instances of
@@ -51,9 +53,9 @@ public class LowExpressionEvaluator extends ExpressionEvaluator {
 			return ((ILowAggregationFunction) func).aggregate(getIndex(),
 					resultBitmap, facts, timepoint);
 		} else {
-			// TODO make it nice
-			throw new IllegalStateException("FUCK YOU ALL " + func + " "
-					+ func.getClass());
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1022, ILowAggregationFunction.class.getSimpleName(),
+					func == null ? null : func.getClass().getSimpleName(), func);
 		}
 	}
 
@@ -63,9 +65,9 @@ public class LowExpressionEvaluator extends ExpressionEvaluator {
 			return ((ILowAggregationFunction) func).aggregate(getIndex(),
 					resultBitmap, facts, timepoint);
 		} else {
-			// TODO make it nice
-			throw new IllegalStateException("FUCK YOU ALL " + func + " "
-					+ func.getClass());
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1022, ILowAggregationFunction.class.getSimpleName(),
+					func == null ? null : func.getClass().getSimpleName(), func);
 		}
 	}
 

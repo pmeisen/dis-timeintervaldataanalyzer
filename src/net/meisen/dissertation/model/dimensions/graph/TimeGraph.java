@@ -112,6 +112,22 @@ public class TimeGraph implements IDimensionGraph {
 		}
 	}
 
+	/**
+	 * Gets the members of the specified level, within the specified range.
+	 * 
+	 * @param hierarchyId
+	 *            the identifier of the hierarchy
+	 * @param levelId
+	 *            the identifier of the level to get the members for
+	 * @param start
+	 *            the temporal start value of the members of the level to be
+	 *            retrieved
+	 * @param end
+	 *            the temporal end value of the members of the level to be
+	 *            retrieved
+	 * 
+	 * @return the members
+	 */
 	public Set<TimeLevelMember> getMembers(final String hierarchyId,
 			final String levelId, final Date start, final Date end) {
 		final BaseMapper<?> mapper = this.intervalModel.getTimelineMapper();
@@ -122,6 +138,22 @@ public class TimeGraph implements IDimensionGraph {
 		return getMembers(hierarchyId, levelId, s, e);
 	}
 
+	/**
+	 * Gets the members of the specified level, within the specified range.
+	 * 
+	 * @param hierarchyId
+	 *            the identifier of the hierarchy
+	 * @param levelId
+	 *            the identifier of the level to get the members for
+	 * @param start
+	 *            the temporal start value of the members of the level to be
+	 *            retrieved
+	 * @param end
+	 *            the temporal end value of the members of the level to be
+	 *            retrieved
+	 * 
+	 * @return the members
+	 */
 	public Set<TimeLevelMember> getMembers(final String hierarchyId,
 			final String levelId, final long start, final long end) {
 		final TimeGraphLevelIndex hierarchyIdx = this.idx.get(hierarchyId);
