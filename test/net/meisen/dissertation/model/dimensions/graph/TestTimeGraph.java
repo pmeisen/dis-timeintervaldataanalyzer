@@ -174,7 +174,7 @@ public class TestTimeGraph extends LoaderBasedTest {
 		TimeHierarchy hierarchy = dim.getHierarchy("TIME1");
 		assertEquals("TIME1", hierarchy.getId());
 		assertEquals("TIME1", hierarchy.getName());
-		assertEquals("Europe/Berlin", hierarchy.getTimeZone());
+		assertEquals("UTC", hierarchy.getTimeZone());
 
 		hierarchy = dim.getHierarchy("TIME2");
 		assertEquals("TIME2", hierarchy.getId());
@@ -268,7 +268,7 @@ public class TestTimeGraph extends LoaderBasedTest {
 		members = graph.getMembers("TIME_PURE_RASTER_WEEK", "MINUTE5", start,
 				end);
 		assertEquals(276, members.size());
-		i = 96840;
+		i = 2786400;
 		for (final TimeLevelMember member : members) {
 			assertEquals(1, member.getRanges().size());
 			assertEquals(i, member.getRange(0).getStart());
