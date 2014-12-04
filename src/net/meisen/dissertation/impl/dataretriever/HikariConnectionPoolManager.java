@@ -38,7 +38,11 @@ public class HikariConnectionPoolManager implements IConnectionPoolManager {
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		return ds.getConnection();
+		try {
+			return ds.getConnection();
+		} catch (final RuntimeException e) {
+			throw new SQLException(e.getMessage(), e);
+		}
 	}
 
 	@Override

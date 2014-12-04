@@ -360,15 +360,27 @@ public class Db {
 	 * Shutdown the database.
 	 */
 	public void shutDownDb() {
+		Exception exception = null;
+
 		try {
-			hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
-		} catch (final Exception e) {
-			// ignore any error as long as the files can be removed
-			if (LOG.isErrorEnabled()) {
-				LOG.error("The shutdown of the database failed.", e);
+			hSqlDb.shutdown();
+		} catch (final Exception e1) {
+			exception = e1;
+
+			try {
+				hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
+			} catch (final Exception e2) {
+				// ignore any error as long as the files can be removed
+			} finally {
+				try {
+					hSqlDb.shutdown();
+				} catch (final Exception e3) {
+					// silent
+				}
 			}
 		}
-		assertTrue(Files.deleteDir(tmpFolder));
+		assertTrue(exception == null ? null : exception.getMessage(),
+				Files.deleteDir(tmpFolder));
 	}
 
 	/**
