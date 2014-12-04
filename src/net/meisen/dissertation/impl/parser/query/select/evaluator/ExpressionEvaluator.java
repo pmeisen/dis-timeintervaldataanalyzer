@@ -24,10 +24,21 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 public abstract class ExpressionEvaluator {
 	private final TidaIndex index;
 
+	/**
+	 * Default constructor specifying the index.
+	 * 
+	 * @param index
+	 *            the {@code TidaIndex} to be used
+	 */
 	public ExpressionEvaluator(final TidaIndex index) {
 		this.index = index;
 	}
 
+	/**
+	 * Gets the index.
+	 * 
+	 * @return the index to be used
+	 */
 	protected TidaIndex getIndex() {
 		return index;
 	}
@@ -53,6 +64,14 @@ public abstract class ExpressionEvaluator {
 		}
 	}
 
+	/**
+	 * Evaluates the aggregated result for the specified {@code measure}.
+	 * 
+	 * @param subTree
+	 *            the node, i.e. sub-tree, to evaluate the measure for
+	 * 
+	 * @return the result
+	 */
 	public double evaluateMeasure(final IMathTreeElement subTree) {
 		return evaluateAggregatedValueForNode(subTree);
 	}
@@ -155,7 +174,7 @@ public abstract class ExpressionEvaluator {
 			final int children = node.amountOfChildren();
 			if (children == 1) {
 				final IMathTreeElement childNode = node.getChild(0);
-				
+
 				if (useDefaultOfFunction()) {
 					return func.getDefaultValue();
 				} else if (childNode instanceof MathOperatorNode) {
@@ -178,15 +197,61 @@ public abstract class ExpressionEvaluator {
 		}
 	}
 
+	/**
+	 * Method used to check if the default value of the function should be used
+	 * instead of a further processing.
+	 * 
+	 * @return {@code true} if the default value should be used, otherwise
+	 *         {@code false}
+	 */
 	protected abstract boolean useDefaultOfFunction();
 
+	/**
+	 * Gets the {@code FactDescriptorSet} for the specified
+	 * {@code DescriptorModel} specified by the {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the {@code DescriptorModel} to get the
+	 *            {@code FactDescriptorSet} for
+	 * 
+	 * @return the {@code FactDescriptorSet}
+	 */
 	protected abstract FactDescriptorSet getFactsSet(final String modelId);
 
+	/**
+	 * Gets the {@code FactsHolder} for the specified {@code DescriptorModel}
+	 * specified by the {@code modelId}.
+	 * 
+	 * @param modelId
+	 *            the {@code DescriptorModel} to get the {@code FactsHolder} for
+	 * 
+	 * @return the {@code FactsHolder}
+	 */
 	protected abstract IFactsHolder getFactsHolder(final String modelId);
 
+	/**
+	 * Applies the function to the specified {@code facts}.
+	 * 
+	 * @param func
+	 *            the function to be applied
+	 * @param facts
+	 *            the facts
+	 * 
+	 * @return the result
+	 */
 	protected abstract double applyFunction(final IAggregationFunction func,
 			final IFactsHolder facts);
 
+	/**
+	 * Applies the function to the specified {@code facts}.
+	 * 
+	 * @param func
+	 *            the function to be applied
+	 * @param facts
+	 *            the facts
+	 * 
+	 * @return the result
+	 */
 	protected abstract double applyFunction(final IAggregationFunction func,
 			final FactDescriptorSet facts);
 

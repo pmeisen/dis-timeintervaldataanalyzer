@@ -218,10 +218,34 @@ public class DescriptorMathTree {
 		}
 	}
 
+	/**
+	 * Checks if a function of the tree uses the specified usage-type of
+	 * function.
+	 * 
+	 * @param type
+	 *            the type to be checked
+	 * 
+	 * @return {@code true} if a function uses the specified function (i.e.
+	 *         {@link IAggregationFunction#getDefinedType()} is equal to the
+	 *         specified {@code type}), otherwise {@code false}
+	 */
 	public boolean usesFunction(final Class<? extends IAggregationFunction> type) {
 		return usesFunction(type, root);
 	}
 
+	/**
+	 * Helper method to recursively check the tree (i.e. specified sub-tree) for
+	 * a function of the specified {@code type}.
+	 * 
+	 * @param type
+	 *            the type to be checked
+	 * @param node
+	 *            the node to start at
+	 * 
+	 * @return {@code true} if a function uses the specified function (i.e.
+	 *         {@link IAggregationFunction#getDefinedType()} is equal to the
+	 *         specified {@code type}), otherwise {@code false}
+	 */
 	protected boolean usesFunction(
 			final Class<? extends IAggregationFunction> type,
 			final MathOperatorNode node) {

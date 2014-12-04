@@ -9,14 +9,21 @@ import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 
+/**
+ * Evaluator used to evaluate low-functions, i.e. instances of
+ * {@code ILowAggregationFunction}.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class LowExpressionEvaluator extends ExpressionEvaluator {
 	private final Bitmap resultBitmap;
 	private final FactDescriptorModelSet facts;
 	private final int timepoint;
 
 	/**
-	 * Default constructor to create a {@code LowExpressionEvaluator} for a
-	 * low granularity-aggregation.
+	 * Default constructor to create a {@code LowExpressionEvaluator} for a low
+	 * granularity-aggregation.
 	 * 
 	 * @param index
 	 *            the index to retrieve the data from

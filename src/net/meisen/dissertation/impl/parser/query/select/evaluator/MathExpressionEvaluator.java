@@ -19,12 +19,33 @@ import net.meisen.dissertation.model.measures.IResultsHolder;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Numbers;
 
+/**
+ * Evaluator used to evaluate {@code IMathAggregationFunction} instances used
+ * within a query. The evaluator only works with such aggregation-functions.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class MathExpressionEvaluator extends ExpressionEvaluator {
 
 	private final Bitmap bitmap;
 	private final List<TimeMemberRange> ranges;
 	private final long[] bounds;
 
+	/**
+	 * Constructor specifying the ranges and the filter-bitmap (i.e. combination
+	 * of valid-records, filtering and group).
+	 * 
+	 * @param index
+	 *            the {@code TidaIndex}
+	 * @param bounds
+	 *            the bounds defined generally
+	 * @param ranges
+	 *            the ranges to evaluate
+	 * @param bitmap
+	 *            the filter results (i.e. the combination of valid-records,
+	 *            filtering and group)
+	 */
 	public MathExpressionEvaluator(final TidaIndex index, final long[] bounds,
 			final List<TimeMemberRange> ranges, final Bitmap bitmap) {
 		super(index);
@@ -78,22 +99,54 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 		return evaluateFunction(func, node);
 	}
 
+	/**
+	 * Method used to define how to evaluate a specific function. The method
+	 * evaluates {@code IMathAggregationFunction} instances only, otherwise the
+	 * {@link #evaluateFunctionNode(MathOperatorNode)} of the
+	 * base-implementation is called.
+	 * 
+	 * @param func
+	 *            the function to be evaluated
+	 * @param node
+	 *            the node the function belongs to
+	 * 
+	 * @return the result
+	 * 
+	 * @throws ForwardedRuntimeException
+	 *             if an error occurs
+	 */
 	protected double evaluateFunction(final IAggregationFunction func,
-			final MathOperatorNode node) {
+			final MathOperatorNode node) throws ForwardedRuntimeException {
 
 		if (func == null) {
 			return super.evaluateFunctionNode(node);
 		} else if (func.getDefinedType().equals(IMathAggregationFunction.class)) {
-			return evaluateLowFunctionNode((IMathAggregationFunction) func,
+			return evaluateMathFunction((IMathAggregationFunction) func,
 					node.getChild(0));
 		} else {
 			return super.evaluateFunctionNode(node);
 		}
 	}
 
-	protected double evaluateLowFunctionNode(
-			final IMathAggregationFunction func, final IMathTreeElement node)
-			throws ForwardedRuntimeException {
+	/**
+	 * Evaluates the {@code IMathAggregationFunction} for the specified
+	 * {@code node}. The node must represent a {@code ILowAggregationFunction},
+	 * otherwise the used {@code LowExpressionEvaluator} will throw an
+	 * exception.
+	 * 
+	 * @param func
+	 *            the {@code IMathAggregationFunction} to be evaluated
+	 * @param node
+	 *            the child of the function, specifying the
+	 *            {@code ILowAggregationFunction} to be used
+	 * 
+	 * @return the result of the application of the function
+	 * 
+	 * @throws ForwardedRuntimeException
+	 *             if the evaluation fails
+	 */
+	protected double evaluateMathFunction(final IMathAggregationFunction func,
+			final IMathTreeElement node) throws ForwardedRuntimeException {
 
 		final IResultsHolder holder = new ResultsArrayBased();
 		for (final TimeMemberRange range : ranges) {

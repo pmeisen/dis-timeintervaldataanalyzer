@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.meisen.dissertation.exceptions.DimensionModelException;
 import net.meisen.dissertation.exceptions.TimeDimensionException;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
 import net.meisen.dissertation.model.data.IntervalModel;
@@ -33,6 +34,18 @@ public class TimeGraph implements IDimensionGraph {
 
 	private TimeDimension dimension = null;
 
+	/**
+	 * Constructor creating a {@code TimeGraph} for the specified model using
+	 * the {@code granularityFactory} and the defined
+	 * {@code timeLevelTemplateManager}.
+	 * 
+	 * @param intervalModel
+	 *            the {@code IntervalModel} to be used for the graph
+	 * @param granularityFactory
+	 *            the factory to be used to create granularities
+	 * @param timeLevelTemplateManager
+	 *            the manager used to retrieve templates
+	 */
 	public TimeGraph(final IntervalModel intervalModel,
 			final TimeGranularityFactory granularityFactory,
 			final TimeLevelTemplateManager timeLevelTemplateManager) {
@@ -60,8 +73,8 @@ public class TimeGraph implements IDimensionGraph {
 			final TimeGraphLevelIndex idx = new TimeGraphLevelIndex(
 					intervalModel);
 			if (this.idx.containsKey(h.getId())) {
-				// TODO
-				throw new IllegalArgumentException();
+				throw new ForwardedRuntimeException(
+						DimensionModelException.class, 1009, h.getId());
 			}
 			this.idx.put(h.getId(), idx);
 
@@ -69,8 +82,9 @@ public class TimeGraph implements IDimensionGraph {
 				final ITimeLevelTemplate template = timeLevelTemplateManager
 						.getTemplate(granularityFactory, l.getTemplateId());
 				if (template == null) {
-					// TODO
-					throw new IllegalArgumentException();
+					throw new ForwardedRuntimeException(
+							DimensionModelException.class, 1010,
+							l.getTemplateId(), l.getId(), h.getId());
 				}
 
 				idx.add(l, template, h.getTimeZone());
@@ -78,6 +92,17 @@ public class TimeGraph implements IDimensionGraph {
 		}
 	}
 
+	/**
+	 * Checks if the specified level is defined to be lazy, i.e. the level
+	 * doesn't have any index instead the members are created when needed.
+	 * 
+	 * @param hierarchyId
+	 *            the identifier of the hierarchy
+	 * @param levelId
+	 *            the identifier of the level
+	 * 
+	 * @return {@code true} if the level is lazy, otherwise {@code false}
+	 */
 	public boolean isLazy(final String hierarchyId, final String levelId) {
 		final TimeGraphLevelIndex hierarchyIdx = this.idx.get(hierarchyId);
 		if (hierarchyIdx == null) {
@@ -112,10 +137,29 @@ public class TimeGraph implements IDimensionGraph {
 		return dimension;
 	}
 
+	/**
+	 * Checks if the graph has a hierarchy with the specified identifier.
+	 * 
+	 * @param hierarchyId
+	 *            the hierarchy to be checked
+	 * 
+	 * @return {@code true} if such a hierarchy exists, otherwise {@code false}
+	 */
 	public boolean isValidSelection(final String hierarchyId) {
 		return isValidSelection(hierarchyId, null);
 	}
 
+	/**
+	 * Checks if the graph has a level with the specified identifier within the
+	 * specified hierarchy.
+	 * 
+	 * @param hierarchyId
+	 *            the hierarchy's identifier
+	 * @param levelId
+	 *            the identifier of the level to be checked
+	 * 
+	 * @return {@code true} if such a level exists, otherwise {@code false}
+	 */
 	public boolean isValidSelection(final String hierarchyId,
 			final String levelId) {
 		final TimeGraphLevelIndex hierarchy = this.idx.get(hierarchyId);

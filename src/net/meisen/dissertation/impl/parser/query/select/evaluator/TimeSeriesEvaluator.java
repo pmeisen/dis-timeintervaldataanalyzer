@@ -170,6 +170,15 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Helper method to create a non-null iteratable used to iterate over the
+	 * measures.
+	 * 
+	 * @param measures
+	 *            the measures to iterate over
+	 * 
+	 * @return an iterator, which cannot be {@code null}
+	 */
 	protected final Iterable<DescriptorMathTree> it(
 			final Collection<DescriptorMathTree> measures) {
 		if (measures == null || measures.size() == 0) {
@@ -179,6 +188,15 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Helper method to create a non-null iteratable used to iterate over the
+	 * result of grouping.
+	 * 
+	 * @param groupResult
+	 *            the {@code GroupResult} to iterate over
+	 * 
+	 * @return an iterator, which cannot be {@code null}
+	 */
 	protected final Iterable<GroupResultEntry> it(final GroupResult groupResult) {
 		if (groupResult == null || groupResult.size() == 0) {
 			return noGroupIterable;
@@ -187,6 +205,17 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Creates a combination for the specified members, i.e. a combined
+	 * {@code FactDescriptorModelSet} and a combined bitmap.
+	 * 
+	 * @param member
+	 *            the members to be combined
+	 * @param bounds
+	 *            the range limiting the members
+	 *            
+	 * @return the combination
+	 */
 	protected CombinedSlices createCombination(final TimeLevelMember member,
 			final long[] bounds) {
 
@@ -216,9 +245,22 @@ public class TimeSeriesEvaluator {
 		return new CombinedSlices(combinedBitmap, combinedFactSet);
 	}
 
+	/**
+	 * Evaluates the query's measures if and only if there are mixed-functions
+	 * used.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * @param filteredValidRecords
+	 *            the bitmap of the filtered records
+	 * @param groupResult
+	 *            the group result
+	 * 
+	 * @return the created result
+	 */
 	protected TimeSeriesCollection evaluateMixed(final SelectQuery query,
 			final Bitmap filteredValidRecords, final GroupResult groupResult) {
-		
+
 		// get some stuff we need
 		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
@@ -269,6 +311,19 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Evaluates the query's measures if and only if there are only
+	 * math-functions.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * @param filteredValidRecords
+	 *            the bitmap of the filtered records
+	 * @param groupResult
+	 *            the group result
+	 * 
+	 * @return the created result
+	 */
 	protected TimeSeriesCollection evaluateMath(final SelectQuery query,
 			final Bitmap filteredValidRecords, final GroupResult groupResult) {
 
@@ -310,6 +365,19 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Evaluates the query's measures if and only if there are only
+	 * dim-functions.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * @param filteredValidRecords
+	 *            the bitmap of the filtered records
+	 * @param groupResult
+	 *            the group result
+	 * 
+	 * @return the created result
+	 */
 	protected TimeSeriesCollection evaluateDim(final SelectQuery query,
 			final Bitmap filteredValidRecords, final GroupResult groupResult) {
 
@@ -362,6 +430,19 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Evaluates the query's measures if and only if there are only
+	 * low-functions.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * @param filteredValidRecords
+	 *            the bitmap of the filtered records
+	 * @param groupResult
+	 *            the group result
+	 * 
+	 * @return the created result
+	 */
 	protected TimeSeriesCollection evaluateLow(final SelectQuery query,
 			final Bitmap filteredValidRecords, final GroupResult groupResult) {
 
@@ -410,9 +491,24 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Fills the passed {@code TimeSeriesCollection} with the values for the
+	 * different measures using the specified evaluator.
+	 * 
+	 * @param groupId
+	 *            the identifier of the current group
+	 * @param timeSeriesPos
+	 *            the position of the time-series to create the values for
+	 * @param evaluator
+	 *            the evaluator used to create the results
+	 * @param timeSeriesCollection
+	 *            the time-series to be filled
+	 * @param it
+	 *            the iterator used to iterate over the measures
+	 */
 	protected void fillTimeSeries(final String groupId,
 			final int timeSeriesPos, final ExpressionEvaluator evaluator,
-			final TimeSeriesCollection result,
+			final TimeSeriesCollection timeSeriesCollection,
 			final Iterable<DescriptorMathTree> it) {
 
 		// calculate each measure
@@ -421,9 +517,10 @@ public class TimeSeriesEvaluator {
 					: groupId + " (" + measure.getId() + ")";
 
 			// get or create the series
-			TimeSeries timeSeries = result.getSeries(timeSeriesId);
+			TimeSeries timeSeries = timeSeriesCollection
+					.getSeries(timeSeriesId);
 			if (timeSeries == null) {
-				timeSeries = result.createSeries(timeSeriesId);
+				timeSeries = timeSeriesCollection.createSeries(timeSeriesId);
 			}
 
 			// get the value of the series
@@ -496,6 +593,14 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	/**
+	 * Creates the result of the time-series for the specified {@code members}.
+	 * 
+	 * @param members
+	 *            the members to create the time-series result for
+	 * 
+	 * @return the created collection of time-series
+	 */
 	protected TimeSeriesCollection createTimeSeriesResult(
 			final Set<TimeLevelMember> members) {
 		final int amountOfGranules = members.size();
@@ -514,7 +619,9 @@ public class TimeSeriesEvaluator {
 
 	/**
 	 * Combines the valid records (see {@link TidaModel#getValidRecords()} with
-	 * the result of the filter.
+	 * the result of the filter. A {@code null} value is handled as a
+	 * full-bitmap, e.g. all values are set to one. If both bitmaps are
+	 * {@code null}, {@code null} is returned.
 	 * 
 	 * @param validRecords
 	 *            the valid records
@@ -534,6 +641,18 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Combines the two bitmaps with each-other using an and-operation. A
+	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
+	 * to one. If both bitmaps are {@code null}, {@code null} is returned.
+	 * 
+	 * @param bitmap1
+	 *            the first bitmap
+	 * @param bitmap2
+	 *            the second bitmap
+	 * 
+	 * @return the result of the combination
+	 */
 	protected Bitmap combineBitmaps(final Bitmap bitmap1, final Bitmap bitmap2) {
 		if (bitmap1 == null) {
 			return bitmap2;
@@ -544,6 +663,17 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Combines the container and the bitmap with each-other using an
+	 * or-operation.
+	 * 
+	 * @param container
+	 *            the {@code BitmapContainer}
+	 * @param bitmap
+	 *            the bitmap
+	 * 
+	 * @return the result of or-combination
+	 */
 	protected Bitmap orCombine(final IBitmapContainer container,
 			final Bitmap bitmap) {
 		if (container == null) {

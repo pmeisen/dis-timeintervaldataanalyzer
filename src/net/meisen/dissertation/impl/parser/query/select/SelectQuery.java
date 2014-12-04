@@ -154,8 +154,19 @@ public class SelectQuery implements IQuery {
 		return Collections.unmodifiableList(measures);
 	}
 
+	/**
+	 * Checks if the query has a measure using a function of the specified
+	 * usage-type.
+	 * 
+	 * @param type
+	 *            the type to be checked
+	 * 
+	 * @return {@code true} if a function uses the specified function (i.e.
+	 *         {@link IAggregationFunction#getDefinedType()} is equal to the
+	 *         specified {@code type}), otherwise {@code false}
+	 */
 	public boolean usesFunction(final Class<? extends IAggregationFunction> type) {
-		
+
 		// check the measures
 		for (final DescriptorMathTree measure : measures) {
 			if (measure.usesFunction(type)) {
