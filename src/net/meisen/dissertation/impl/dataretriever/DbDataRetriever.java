@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import net.meisen.dissertation.exceptions.DataRetrieverException;
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
+import net.meisen.dissertation.model.dataretriever.IConnectionPoolManager;
 import net.meisen.dissertation.model.dataretriever.IDataRetrieverConfig;
 import net.meisen.dissertation.model.dataretriever.IQueryConfiguration;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
@@ -11,8 +12,6 @@ import net.meisen.general.genmisc.types.Classes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.jolbox.bonecp.BoneCPDataSource;
 
 /**
  * {@code DataRetriever} to retrieve data from a database.
@@ -23,7 +22,7 @@ import com.jolbox.bonecp.BoneCPDataSource;
 public class DbDataRetriever extends BaseDataRetriever {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(DbDataRetriever.class);
-	private final BoneCPDataSource ds;
+	private final IConnectionPoolManager ds;
 
 	/**
 	 * Constructor with the {@code DataRetrieverConfiguration}, the
@@ -50,12 +49,10 @@ public class DbDataRetriever extends BaseDataRetriever {
 		}
 
 		// get the DataSource and set the properties
-		ds = new BoneCPDataSource();
+		ds = new HikariConnectionPoolManager();
 		ds.setJdbcUrl(c.getUrl());
 		ds.setUsername(c.getUsername());
 		ds.setPassword(c.getPassword());
-
-		// TODO add additional properties to the DbConnectionConfig
 	}
 
 	@Override

@@ -56,8 +56,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.google.common.primitives.Longs;
-
 /**
  * The performance tests used for the ITNG paper 2015: {@code Bitmap-Based
  * On-Line Analytical Processing of Time Interval Data}
@@ -435,7 +433,6 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		System.out.println("FINAL (AVG): " + (sum / RUNS));
 		System.out.println("FINAL (MIN): " + min);
 		System.out.println("FINAL (MAX): " + max);
-		System.out.println(Longs.asList(results));
 		System.out.println("--------------------");
 	}
 

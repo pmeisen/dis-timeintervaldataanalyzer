@@ -2,7 +2,7 @@ package net.meisen.dissertation.model.auth.permissions;
 
 import java.util.regex.Pattern;
 
-import com.google.common.base.Objects;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * A defined (i.e. if a model is needed, it's defined) {@code Permission}. Use
@@ -104,8 +104,8 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 		} else if (obj instanceof DefinedPermission) {
 			final DefinedPermission perm = (DefinedPermission) obj;
 
-			return Objects.equal(getModelId(), perm.getModelId())
-					&& Objects.equal(getPermission(), perm.getPermission());
+			return Objects.equals(getModelId(), perm.getModelId())
+					&& Objects.equals(getPermission(), perm.getPermission());
 		} else {
 			return false;
 		}
@@ -113,7 +113,7 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(getPermission(), getModelId());
+		return Objects.generateHashCode(7, 23, getPermission(), getModelId());
 	}
 
 	/**
