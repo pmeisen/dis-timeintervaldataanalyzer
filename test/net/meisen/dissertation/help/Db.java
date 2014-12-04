@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -362,29 +364,34 @@ public class Db {
 	public void shutDownDb() {
 		Exception exception = null;
 
+		// disable any error output from the hSqlDb
+		hSqlDb.setSilent(true);
+		hSqlDb.setErrWriter(new PrintWriter(new OutputStream() {
+			@Override
+			public void write(int arg0) throws IOException {
+				// keep empty
+			}
+		}));
+
 		try {
 
-			// try to close it
-			hSqlDb.shutdown();
+			// try to force the shutdown
+			hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
 		} catch (final Exception e1) {
-			exception = e1;
-
+			// ignore any error as long as the files can be removed
+			exception = exception == null ? null : e1;
+		} finally {
 			try {
 
-				// try to force the shutdown
-				hSqlDb.shutdownWithCatalogs(Database.CLOSEMODE_IMMEDIATELY);
+				// finally try to close it again after the force
+				hSqlDb.shutdown();
 			} catch (final Exception e2) {
-				// ignore any error as long as the files can be removed
-			} finally {
-				try {
-
-					// finally try to close it again after the force
-					hSqlDb.shutdown();
-				} catch (final Exception e3) {
-					// silent
-				}
+				// silent
+				exception = exception == null ? null : e2;
 			}
 		}
+
+		// enable it again
 		assertTrue(exception == null ? null : exception.getMessage(),
 				Files.deleteDir(tmpFolder));
 	}

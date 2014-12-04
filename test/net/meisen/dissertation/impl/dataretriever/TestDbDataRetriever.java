@@ -284,7 +284,6 @@ public class TestDbDataRetriever {
 		} finally {
 			db.release();
 		}
-
 		assertTrue("Expected exception not thrown", error);
 	}
 
