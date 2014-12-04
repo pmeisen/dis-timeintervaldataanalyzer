@@ -22,7 +22,8 @@ public class HikariConnectionPoolManager implements IConnectionPoolManager {
 	 * Default constructor.
 	 */
 	public HikariConnectionPoolManager() {
-		this.ds = new HikariDataSource();
+		ds = new HikariDataSource();
+		ds.setReadOnly(true);
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class HikariConnectionPoolManager implements IConnectionPoolManager {
 
 	@Override
 	public void setPassword(final String password) {
-		ds.setUsername(password);
+		ds.setPassword(password);
 	}
 
 	@Override
