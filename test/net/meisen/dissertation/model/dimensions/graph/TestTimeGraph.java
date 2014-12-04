@@ -268,7 +268,7 @@ public class TestTimeGraph extends LoaderBasedTest {
 		members = graph.getMembers("TIME_PURE_RASTER_WEEK", "MINUTE5", start,
 				end);
 		assertEquals(276, members.size());
-		i = 2786400;
+		i = 5810400;
 		for (final TimeLevelMember member : members) {
 			assertEquals(1, member.getRanges().size());
 			assertEquals(i, member.getRange(0).getStart());
