@@ -119,7 +119,7 @@ public class Db {
 		// get the zip-archive, the path to unzip to and a buffer
 		final ZipInputStream zis = new ZipInputStream(zipDb);
 		final byte[] buffer = new byte[1024];
-		final File dbFile = new File(tmpFolder, dbName);
+		final File dbFile = new File(getTmpFolder(), dbName);
 
 		try {
 			ZipEntry ze = zis.getNextEntry();
@@ -384,7 +384,7 @@ public class Db {
 
 		// enable it again
 		assertTrue(exception == null ? null : exception.getMessage(),
-				Files.deleteDir(tmpFolder));
+				Files.deleteDir(getTmpFolder()));
 	}
 
 	/**
@@ -488,6 +488,15 @@ public class Db {
 
 		// just call it for cleanUp
 		db.shutDownDb();
+	}
+
+	/**
+	 * Gets the created tmp-folder of the database if non was specified.
+	 * 
+	 * @return the created tmp-folder of the database if non was specified
+	 */
+	public File getTmpFolder() {
+		return tmpFolder;
 	}
 
 }

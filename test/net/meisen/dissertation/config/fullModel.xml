@@ -31,7 +31,7 @@
         -->
       <identifier implementation="net.meisen.dissertation.impl.cache.MemoryIdentifierCache" />
     
-      <!-- Define the cache to be used for metadata.
+      <!-- Define the cache to be used for meta-information (i.e. the descriptors).
 
            The following cache implementations are available:
             + net.meisen.dissertation.impl.cache.MemoryMetaDataCache
