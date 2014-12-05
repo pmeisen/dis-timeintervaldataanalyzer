@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -77,7 +75,9 @@ public class Db {
 
 		// disable any logging
 		hSqlDb.setLogWriter(null);
+		hSqlDb.setErrWriter(null);
 		hSqlDb.setTrace(false);
+		hSqlDb.setSilent(true);
 
 		// define the address
 		hSqlDb.setAddress("localhost");
@@ -364,15 +364,6 @@ public class Db {
 	public void shutDownDb() {
 		Exception exception = null;
 
-		// disable any error output from the hSqlDb
-		hSqlDb.setSilent(true);
-		hSqlDb.setErrWriter(new PrintWriter(new OutputStream() {
-			@Override
-			public void write(int arg0) throws IOException {
-				// keep empty
-			}
-		}));
-
 		try {
 
 			// try to force the shutdown
@@ -392,7 +383,6 @@ public class Db {
 		}
 
 		// enable it again
-		hSqlDb.setErrWriter(new PrintWriter(System.err));
 		assertTrue(exception == null ? null : exception.getMessage(),
 				Files.deleteDir(tmpFolder));
 	}

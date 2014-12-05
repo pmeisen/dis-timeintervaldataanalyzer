@@ -30,7 +30,7 @@ public class TimeHierarchy {
 	 *            the dimension the hierarchy belongs to
 	 * @param timeZone
 	 *            the time-zone of the hierarchy, if {@code null} the general
-	 *            time-zone (i.e. {@links Dates#GENERAL_TIMEZONE}) is used
+	 *            time-zone (i.e. {@link Dates#GENERAL_TIMEZONE}) is used
 	 * @param id
 	 *            the identifier of the hierarchy
 	 * @param name
