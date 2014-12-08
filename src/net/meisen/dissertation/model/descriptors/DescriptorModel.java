@@ -551,15 +551,23 @@ public class DescriptorModel<I extends Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptorByValue(final Object value) {
-		
+
 		if (supportsNullDescriptor() && value == null) {
 			return getNullDescriptor();
 		} else if (value == null) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1004, getId());
 			return null;
-		} else if (!getValueType().equals(Object.class)
-				&& getValueType().isAssignableFrom(value.getClass())) {
+		} else if (getValueType().equals(Object.class)) {
+			if (value instanceof String) {
+				return getDescriptorByString((String) value);
+			} else if (getValueType().isAssignableFrom(value.getClass())) {
+				return (Descriptor<?, ?, I>) getDescriptorIndex()
+						.getObjectByDefNr(1, value);
+			} else {
+				return null;
+			}
+		} else if (getValueType().isAssignableFrom(value.getClass())) {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
 					1, value);
 		} else if (value instanceof String) {

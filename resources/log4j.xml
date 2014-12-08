@@ -36,9 +36,6 @@
   <logger name="org.springframework">
     <level value="WARN"/>
   </logger>
-  <logger name="net.meisen.dissertation">
-    <level value="TRACE"/>
-  </logger>
   <logger name="net.meisen.dissertation.model.indexes.datarecord">
     <level value="DEBUG"/>
   </logger>
@@ -47,6 +44,9 @@
     <level value="TRACE"/>
   </logger>
   -->
+  <logger name="net.meisen.dissertation">
+    <level value="INFO"/>
+  </logger>
 
    <!-- ======================= --> 
    <!-- Setup the Root category -->
