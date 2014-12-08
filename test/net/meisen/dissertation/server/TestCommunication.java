@@ -132,6 +132,25 @@ public class TestCommunication {
 
 			stmt.close();
 		}
+
+		/**
+		 * Tests the adding of an advanced descriptor.
+		 * 
+		 * @throws SQLException
+		 *             if the query cannot be fired
+		 */
+		@Test
+		public void testAdvancedDescriptors() throws SQLException {
+			Statement stmt;
+
+			stmt = conn.createStatement();
+
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testAdvancedDescriptors'");
+			for (int i = 0; i < 1000; i++) {
+				stmt.executeUpdate("INSERT INTO testAdvancedDescriptors ([START], [END], LONG, INT, STRING, LIST) VALUES (01.01.2015 08:00:00, 01.01.2015 08:07:00, '5', '7', 'DIFF', 'Kuchen, Kaffee')");
+			}
+			stmt.close();
+		}
 	}
 
 	/**

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
+       
+       offlinemode="false" id="testAdvancedDescriptors">
+  
+  <time>
+    <timeline start="01.01.2015" end="01.01.2020" granularity="MINUTE" />
+  </time>
+  
+  <meta>
+    <descriptors>    
+      <string id="STRING" />
+      <integer id="INT" />
+      <long id="LONG" />
+      <advDes:list id="LIST" idfactory="net.meisen.dissertation.impl.idfactories.LongIdsFactory" />
+    </descriptors>
+
+    <entries />
+  </meta>
+  
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
+</model>

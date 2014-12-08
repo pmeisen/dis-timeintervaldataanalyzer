@@ -16,7 +16,6 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.config.placeholder.SpringPropertyHolder;
 import net.meisen.general.server.Server;
 import net.meisen.general.server.api.IControlMessagesManager;
-import net.meisen.general.server.control.DefaultControlMessagesManager;
 import net.meisen.general.server.settings.pojos.Connector;
 
 import org.slf4j.Logger;
