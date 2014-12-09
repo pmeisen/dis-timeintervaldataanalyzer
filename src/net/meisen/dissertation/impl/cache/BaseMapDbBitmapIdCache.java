@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.cache;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.mapdb.Serializer;
 
@@ -31,9 +32,18 @@ public abstract class BaseMapDbBitmapIdCache<T extends IBitmapIdCacheable>
 		}
 	}
 
-	@Override
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		return getIdentifiers();
+	}
+	
+	@Override
+	public Iterator<BitmapId<?>> iterator() {
+		return getBitmapIdentifiers().iterator();
 	}
 
 	@Override

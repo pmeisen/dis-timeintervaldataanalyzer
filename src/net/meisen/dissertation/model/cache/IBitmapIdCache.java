@@ -1,7 +1,5 @@
 package net.meisen.dissertation.model.cache;
 
-import java.util.Collection;
-
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 
 /**
@@ -12,7 +10,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
  * @param <T>
  *            the type of the instance stored by the cache
  */
-public interface IBitmapIdCache<T extends IBitmapIdCacheable> extends ICache {
+public interface IBitmapIdCache<T extends IBitmapIdCacheable> extends ICache, Iterable<BitmapId<?>> {
 
 	/**
 	 * Configures the concrete {@code Cache} implementation.
@@ -34,13 +32,6 @@ public interface IBitmapIdCache<T extends IBitmapIdCacheable> extends ICache {
 	 * @see BitmapId
 	 */
 	public void cache(final BitmapId<?> bitmapId, final T instance);
-
-	/**
-	 * Gets a collection of all the cached {@code BitmapId} instances.
-	 * 
-	 * @return a collection of all the cached {@code BitmapId} instances
-	 */
-	public Collection<BitmapId<?>> getBitmapIdentifiers();
 
 	/**
 	 * Checks if the cache contains an instance with the specified

@@ -88,7 +88,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		this.index = indexFactory.create(indexKeyDef);
 
 		// add the cached values
-		for (final BitmapId<?> bitmapId : cache.getBitmapIdentifiers()) {
+		for (final BitmapId<?> bitmapId : cache) {
 			if (MetaIndex.class.equals(bitmapId.getType())
 					&& model.getId().equals(bitmapId.getClassifier())) {
 				@SuppressWarnings("unchecked")

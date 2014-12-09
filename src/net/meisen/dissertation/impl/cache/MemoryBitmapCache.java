@@ -2,6 +2,7 @@ package net.meisen.dissertation.impl.cache;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.cache.IBitmapIdCache;
@@ -78,9 +79,18 @@ public class MemoryBitmapCache implements IBitmapIdCache<Bitmap>,
 		return false;
 	}
 
-	@Override
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		return Collections.emptyList();
+	}
+	
+	@Override
+	public Iterator<BitmapId<?>> iterator() {
+		return getBitmapIdentifiers().iterator();
 	}
 
 	@Override

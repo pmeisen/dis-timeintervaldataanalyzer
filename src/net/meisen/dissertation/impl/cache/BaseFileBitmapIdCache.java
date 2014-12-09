@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1405,7 +1406,11 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		return persistency;
 	}
 
-	@Override
+	/**
+	 * Gets a collection of all the cached {@code BitmapId} instances.
+	 * 
+	 * @return a collection of all the cached {@code BitmapId} instances
+	 */
 	public Collection<BitmapId<?>> getBitmapIdentifiers() {
 		final List<BitmapId<?>> keys;
 
@@ -1417,6 +1422,11 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			idxLock.readLock().unlock();
 		}
 		return keys;
+	}
+
+	@Override
+	public Iterator<BitmapId<?>> iterator() {
+		return getBitmapIdentifiers().iterator();
 	}
 
 	@Override
