@@ -23,7 +23,7 @@ public class MapDbFactDescriptorModelSetCache extends
 	}
 
 	@Override
-	protected MapDbFactDescriptorModelSerializer createValueSerializer() {
-		return new MapDbFactDescriptorModelSerializer();
+	protected MapDbFactDescriptorModelSetSerializer createValueSerializer() {
+		return new MapDbFactDescriptorModelSetSerializer();
 	}
 }

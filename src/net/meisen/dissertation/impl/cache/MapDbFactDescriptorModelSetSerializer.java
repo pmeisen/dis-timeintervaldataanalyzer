@@ -11,12 +11,12 @@ import org.mapdb.Serializer;
 
 /**
  * {@code Serializer} of a {@code mapDb} used to serialize and deserialize a
- * {@code FactDescriptorModel}.
+ * {@code FactDescriptorModelSet}.
  * 
  * @author pmeisen
  * 
  */
-public class MapDbFactDescriptorModelSerializer implements
+public class MapDbFactDescriptorModelSetSerializer implements
 		Serializer<FactDescriptorModelSet>, Serializable {
 	private static final long serialVersionUID = 1L;
 

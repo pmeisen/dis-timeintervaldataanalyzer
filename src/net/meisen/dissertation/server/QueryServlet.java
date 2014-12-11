@@ -243,10 +243,16 @@ public class QueryServlet extends BaseServlet {
 			// check if we have a res
 			final JsonValue resultValue;
 			final JsonValue resultType;
+			final JsonValue resultNames;
 			if (res instanceof IQueryResultSet) {
 
 				// iterate over the records and add those
 				final IQueryResultSet resSet = (IQueryResultSet) res;
+				final JsonArray names = new JsonArray();
+				for (final String name : resSet.getNames()) {
+					names.add(name);
+				}
+
 				final JsonArray array = new JsonArray();
 				final Iterator<Object[]> it = resSet.iterator();
 				while (it.hasNext()) {
@@ -282,17 +288,21 @@ public class QueryServlet extends BaseServlet {
 					array.add(row);
 				}
 				resultValue = array;
+				resultNames = names;
 				resultType = JsonValue.valueOf("set");
 			} else if (res instanceof IQueryResultSingleInteger) {
 				final IQueryResultSingleInteger resInt = (IQueryResultSingleInteger) res;
 				resultValue = JsonValue.valueOf(resInt.getResult());
 				resultType = JsonValue.valueOf("value");
+				resultNames = new JsonArray().add("value");
 			} else {
+				resultNames = JsonValue.NULL;
 				resultValue = JsonValue.NULL;
 				resultType = JsonValue.valueOf("empty");
 			}
 
 			final JsonObject resultObject = new JsonObject();
+			resultObject.add("names", resultNames);
 			resultObject.add("type", resultType);
 			resultObject.add("result", resultValue);
 			results.add(resultObject);
