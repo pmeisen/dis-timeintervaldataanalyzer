@@ -129,7 +129,7 @@ public class TidaModelHandler {
 
 	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
 	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
-	
+
 	/**
 	 * The {@code TidaModel} instances held by {@code this}.
 	 * 
@@ -614,7 +614,7 @@ public class TidaModelHandler {
 	 * @param createIfNotAvailable
 	 *            {@code true} if the location should be created if not
 	 *            available, otherwise {@code false}
-	 *            
+	 * 
 	 * @return the default location under which the models are stored
 	 */
 	public String getDefaultLocation(final boolean createIfNotAvailable) {
@@ -698,6 +698,21 @@ public class TidaModelHandler {
 		// load each model
 		for (final String modelId : modelIds) {
 			this.loadFromDefaultLocation(modelId);
+		}
+	}
+
+	/**
+	 * Gets all the identifiers loaded automatically.
+	 * 
+	 * @return the identifiers loaded automatically
+	 */
+	public Set<String> getAutoloadedModules() {
+		autoloadLock.readLock().lock();
+		try {
+			final Set<String> modelIds = _readAutoloads();
+			return modelIds;
+		} finally {
+			autoloadLock.readLock().unlock();
 		}
 	}
 

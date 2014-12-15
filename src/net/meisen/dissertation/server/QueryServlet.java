@@ -11,6 +11,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
@@ -40,6 +41,10 @@ public class QueryServlet extends BaseServlet {
 	@Autowired
 	@Qualifier(DefaultValues.QUERYFACTORY_ID)
 	private IQueryFactory queryFactory;
+
+	@Autowired
+	@Qualifier(DefaultValues.MODELHANDLER_ID)
+	private TidaModelHandler handler;
 
 	@Override
 	public void initialize(final Extension e) {
@@ -162,6 +167,51 @@ public class QueryServlet extends BaseServlet {
 				object.add("rolename", JsonValue.valueOf(rolename));
 
 				return object.toString();
+			} else if ("module".equals(o)) {
+
+				// check the permission to use this system retrieval
+				if (!authManager.hasPermission(Permission.load.create())) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000, Permission.load);
+				}
+
+				final Set<String> currentlyLoaded = handler.getTidaModels();
+				final Set<String> autoloaded = handler.getAutoloadedModules();
+				final JsonArray array = new JsonArray();
+				for (final String current : currentlyLoaded) {
+					final JsonObject object = new JsonObject();
+					object.add("model", current);
+					object.add("autoloaded", autoloaded.contains(current));
+
+					array.add(object);
+				}
+
+				return array.toString();
+			} else if ("timeout".equals(o)) {
+
+				// get the timeout
+				final String paramTimeout = parameters.get("timeout");
+				int timeout;
+				if (paramTimeout == null) {
+					timeout = 1000;
+				} else {
+					try {
+						timeout = Integer.parseInt(paramTimeout);
+					} catch (final NumberFormatException e) {
+						timeout = 1000;
+					}
+				}
+
+				// sleep
+				if (timeout > 0) {
+					Thread.sleep(timeout);
+				} else {
+					timeout = 0;
+				}
+
+				// return the time waited
+				final JsonValue value = JsonValue.valueOf(timeout);
+				return value.toString();
 			} else {
 				throw new IllegalStateException("Unsupported object '" + o
 						+ "' defined.");
