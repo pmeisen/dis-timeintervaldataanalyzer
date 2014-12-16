@@ -165,6 +165,7 @@
                   <xs:attribute name="timeout" type="xs:positiveInteger" use="optional" />
                   <xs:attribute name="enable" type="xs:boolean" use="optional" />
                   <xs:attribute name="docroot" type="xs:string" use="optional" />
+                  <xs:attribute name="tmproot" type="xs:string" use="optional" />
                 </xs:complexType>
               </xs:element>
               

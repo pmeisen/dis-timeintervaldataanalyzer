@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<config xmlns="http://dev.meisen.net/xsd/dissertation/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/config http://dev.meisen.net/xsd/dissertation/tidaConfig.xsd">
+  
+  <location folder="${tida.config.test.location}" />
+  
+  <server>
+    <http port="${tida.server.http.port}" timeout="30" enable="${tida.server.http.enabled}" tmproot="${java.io.tmpdir}/testSessionManagerSuite" />
+    <tsql port="${tida.server.tsql.port}" timeout="1800000" enable="${tida.server.tsql.enabled}" />
+  </server>
+</config>

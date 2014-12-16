@@ -110,6 +110,7 @@ import net.meisen.dissertation.server.TestAuthServlet;
 import net.meisen.dissertation.server.TestCommunication;
 import net.meisen.dissertation.server.TestTidaServer;
 import net.meisen.dissertation.server.session.TestSession;
+import net.meisen.dissertation.server.session.TestSessionManager;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -276,7 +277,7 @@ import org.junit.runners.Suite;
 		TestDimensionHandler.class,
 
 		// Test the session management
-		TestSession.class,
+		TestSession.class, TestSessionManager.TestSessionManagerSuite.class,
 
 		// Test the server
 		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,

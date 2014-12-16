@@ -333,6 +333,10 @@
           <xsl:variable name="timeOutInMin" select="//cns:config/cns:server/cns:http/@timeout" />
           <property name="timeOutInMin" value="{$timeOutInMin}" />
         </xsl:if>
+        <xsl:if test="//cns:config/cns:server/cns:http/@tmproot">
+          <xsl:variable name="tmproot" select="//cns:config/cns:server/cns:http/@tmproot" />
+          <property name="tmpDir" value="{$tmproot}" />
+        </xsl:if>
       </bean>
             
       <!-- define the tidaServer -->

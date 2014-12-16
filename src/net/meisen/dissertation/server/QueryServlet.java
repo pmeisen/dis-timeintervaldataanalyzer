@@ -167,7 +167,7 @@ public class QueryServlet extends BaseServlet {
 				object.add("rolename", JsonValue.valueOf(rolename));
 
 				return object.toString();
-			} else if ("module".equals(o)) {
+			} else if ("models".equals(o)) {
 
 				// check the permission to use this system retrieval
 				if (!authManager.hasPermission(Permission.load.create())) {
