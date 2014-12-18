@@ -1,7 +1,11 @@
 package net.meisen.dissertation.server.sessions;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,15 +19,22 @@ import java.util.concurrent.TimeUnit;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.SessionManagerException;
+import net.meisen.dissertation.model.parser.query.IResourceResolver;
+import net.meisen.dissertation.server.CancellationException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.types.Files;
+import net.meisen.general.genmisc.types.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-public class SessionManager {
+public class SessionManager implements IResourceResolver {
+	protected final static String RESOLVER_PROTOCOL = "uploaded";
+	protected final static String RESOLVER_SYNTAX = RESOLVER_PROTOCOL
+			+ "://[sessionId]/[file]";
+
 	private final static Logger LOG = LoggerFactory
 			.getLogger(SessionManager.class);
 	private final ScheduledExecutorService scheduler;
@@ -82,12 +93,6 @@ public class SessionManager {
 		// remove those that are expired
 		for (final String expiredId : expiredIds) {
 			removeSession(expiredId);
-		}
-
-		// remove the directory
-		final File tmpDir = getTempDir();
-		if (tmpDir != null && tmpDir.exists()) {
-			Files.deleteOnExitDir(tmpDir);
 		}
 	}
 
@@ -193,7 +198,7 @@ public class SessionManager {
 
 		if (tmpDir == null) {
 			return null;
-		} else if (!sessions.containsKey(sessionId)) {
+		} else if (getSession(sessionId, false) == null) {
 			return null;
 		}
 
@@ -242,10 +247,20 @@ public class SessionManager {
 				// ignore it
 			}
 		}
+
+		// remove the directory
+		final File tmpDir = getTempDir();
+		if (tmpDir != null && tmpDir.exists()) {
+			Files.deleteOnExitDir(tmpDir);
+		}
 	}
 
 	public File getTempDir() {
-		if (tmpDir != null && !tmpDir.exists() && !tmpDir.mkdirs()) {
+		if (tmpDir == null) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1004, tmpDir);
+			return null;
+		} else if (!tmpDir.exists() && !tmpDir.mkdirs()) {
 			exceptionRegistry.throwException(SessionManagerException.class,
 					1005, Files.getCanonicalPath(tmpDir));
 			return null;
@@ -308,5 +323,80 @@ public class SessionManager {
 
 	public void resetTempDir() {
 		setTempDir(new File(defTmpDir));
+	}
+
+	/**
+	 * Resolves the specified resource (using the syntax defined by
+	 * {@link #RESOLVER_SYNTAX}).
+	 * 
+	 * @param resource
+	 *            the identifier of the resource to be retrieved
+	 * 
+	 * @throws SessionManagerException
+	 *             if the syntax of the resource specified was invalid, if the
+	 *             resource cannot be resolved, or if the resource does not
+	 *             exist
+	 */
+	@Override
+	public InputStream resolve(final String resource)
+			throws CancellationException, SessionManagerException {
+
+		final URI uri;
+		if (resource == null || resource.isEmpty()) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1007, resource, RESOLVER_SYNTAX);
+			return null;
+		} else {
+
+			try {
+				uri = new URI(resource);
+			} catch (final URISyntaxException e) {
+				exceptionRegistry.throwException(SessionManagerException.class,
+						1007, e, resource, RESOLVER_SYNTAX);
+				return null;
+			}
+		}
+
+		// validate the uri
+		if (!Objects.equals(uri.getFragment(), null)
+				|| !Objects.equals(uri.getPort(), -1)
+				|| !Objects.equals(uri.getQuery(), null)
+				|| !Objects.equals(uri.getUserInfo(), null)) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1008, resource, uri, RESOLVER_SYNTAX);
+		} else if (!RESOLVER_PROTOCOL.equalsIgnoreCase(uri.getScheme())) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1009, resource, uri.getScheme(), RESOLVER_SYNTAX);
+		} else if (!Objects.equals(uri.getAuthority(), uri.getHost())) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1008, resource, uri, RESOLVER_SYNTAX);
+		} else if (!uri.getPath().matches("/[^/]+")) {
+			exceptionRegistry
+					.throwException(SessionManagerException.class, 1010,
+							resource, uri.getPath().substring(1),
+							RESOLVER_SYNTAX);
+		}
+
+		// get the needed values
+		final String sessionId = uri.getHost();
+		final String filename = uri.getPath().substring(1);
+		final File dir = this.getSessionDir(sessionId, false);
+		if (dir == null) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1012, resource, sessionId);
+		}
+		final File file = new File(dir, filename);
+
+		try {
+			return new FileInputStream(file);
+		} catch (final FileNotFoundException e) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1011, Files.getCanonicalPath(file));
+			return null;
+		}
+	}
+
+	public void setExceptionRegistry(final IExceptionRegistry exceptionRegistry) {
+		this.exceptionRegistry = exceptionRegistry;
 	}
 }

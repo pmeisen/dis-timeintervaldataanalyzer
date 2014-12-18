@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model/indexes   http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
+                           http://dev.meisen.net/xsd/dissertation/model           http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       id="testFailedModel1">
+  
+  <config>
+    <factories>
+      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
+        <idx:config bitmap="net.meisen.dissertation.model.handler.mock.FailingMockBitmap" />
+      </indexes>
+    </factories>
+  </config>
+  
+  <meta>
+    <descriptors>
+      <string id="SAMPLE" name="funFactor" failonduplicates="true" />
+    </descriptors>
+    
+    <entries>
+      <entry descriptor="SAMPLE" value="Philipp" />
+      <entry descriptor="SAMPLE" value="Debbie" />
+      <entry descriptor="SAMPLE" value="Edison" />
+    </entries>
+  </meta>
+  
+  <data />
+</model>

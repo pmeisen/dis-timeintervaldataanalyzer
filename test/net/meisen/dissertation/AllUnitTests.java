@@ -89,6 +89,7 @@ import net.meisen.dissertation.model.dimensions.templates.TestDays;
 import net.meisen.dissertation.model.dimensions.templates.TestMinutes;
 import net.meisen.dissertation.model.dimensions.templates.TestTimeLevelTemplateManager;
 import net.meisen.dissertation.model.handler.TestTidaModelHandler;
+import net.meisen.dissertation.model.handler.TestTidaModelHandlerPersistency;
 import net.meisen.dissertation.model.indexes.TestIndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TestIntervalIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
@@ -281,7 +282,10 @@ import org.junit.runners.Suite;
 
 		// Test the server
 		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,
-		TestAuthServlet.class })
+		TestAuthServlet.class,
+
+		// Tests re-running the server
+		TestTidaModelHandlerPersistency.class })
 public class AllUnitTests {
 
 }

@@ -14,6 +14,7 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.server.http.listener.api.IServlet;
 import net.meisen.general.server.http.listener.util.RequestHandlingUtilities;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -36,8 +37,24 @@ import com.eclipsesource.json.JsonValue;
  * 
  */
 public abstract class BaseServlet implements IServlet {
+	public final static String PARAM_SESSIONID = "sessionId";
+	
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseServlet.class);
+
+	protected static class HandleResult {
+		public String result;
+		public ContentType type;
+
+		public HandleResult() {
+			this(null, null);
+		}
+
+		public HandleResult(final String result, final ContentType type) {
+			this.result = result;
+			this.type = type;
+		}
+	}
 
 	/**
 	 * The used {@code AuthManager}.
@@ -119,72 +136,98 @@ public abstract class BaseServlet implements IServlet {
 		// be possible
 		response.setHeader("Access-Control-Allow-Origin", "*");
 
-		String result;
-		ContentType type;
-		try {
+		// check if we have an options call
+		if ("OPTIONS".equals(request.getRequestLine().getMethod())) {
 
-			// get the parameters
-			final Map<String, String> parameters = RequestHandlingUtilities
-					.parsePostParameter(request);
+			// reply with an empty text
+			final StringEntity entity = new StringEntity("",
+					ContentType.TEXT_PLAIN);
+			response.setEntity(entity);
+		} else {
 
-			// first of all the user has to be checked in
-			if (needValidSession()) {
-				final Session session = checkSession(parameters
-						.get("sessionId"));
-				session.markAsUsed();
-			}
-
-			// do a check first
-			if (doHttpPermissionCheck()) {
-				checkHttpPermission();
-			}
-
-			// now handle the request
-			final Object tmpResult = handleRequest(request, parameters);
-			type = getResponseContentType();
-
-			// determine the representation of the result
-			if (tmpResult == null) {
-				type = ContentType.APPLICATION_JSON;
-				result = JsonValue.NULL.toString();
-			} else if (tmpResult instanceof JsonObject) {
-				type = ContentType.APPLICATION_JSON;
-				result = tmpResult.toString();
-			} else if (tmpResult instanceof String) {
-				result = tmpResult.toString();
-			} else {
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Unsupported type '" + tmpResult
-							+ "' returned by request-handling.");
+			String result;
+			ContentType type;
+			try {
+				final HandleResult handleRes = _handle(request, response,
+						context);
+				result = handleRes.result;
+				type = handleRes.type;
+			} catch (final AuthException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.error("Invalid request considering permissions.", e);
 				}
+
+				response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+				result = wrapExceptionToJson(e);
 				type = ContentType.APPLICATION_JSON;
-				result = JsonValue.NULL.toString();
-			}
-		} catch (final AuthException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.error("Invalid request considering permissions.", e);
+			} catch (final Exception e) {
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Request failed because of a failure.", e);
+				}
+
+				response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				result = wrapExceptionToJson(e);
+				type = ContentType.APPLICATION_JSON;
+			} finally {
+
+				// make sure the current session is unbound from the current
+				// user
+				authManager.unbind();
 			}
 
-			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-			result = wrapExceptionToJson(e);
-			type = ContentType.APPLICATION_JSON;
-		} catch (final Exception e) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("Request failed because of a failure.", e);
-			}
+			// create the answer
+			final StringEntity entity = new StringEntity(result, type);
+			response.setEntity(entity);
+		}
+	}
 
-			response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-			result = wrapExceptionToJson(e);
-			type = ContentType.APPLICATION_JSON;
-		} finally {
+	protected HandleResult _handle(final HttpRequest request,
+			final HttpResponse response, final HttpContext context)
+			throws Exception {
 
-			// make sure the current session is unbound from the current user
-			authManager.unbind();
+		// get the parameters
+		final Map<String, String> parameters = RequestHandlingUtilities
+				.parsePostParameter(request);
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("Received parameters with request: " + parameters);
 		}
 
-		// create the answer
-		final StringEntity entity = new StringEntity(result, type);
-		response.setEntity(entity);
+		// first of all the user has to be checked in
+		if (needValidSession()) {
+			final Session session = checkSession(parameters.get(PARAM_SESSIONID));
+			session.markAsUsed();
+		}
+
+		// do a check first
+		if (doHttpPermissionCheck()) {
+			checkHttpPermission();
+		}
+
+		// now handle the request
+		final Object tmpResult = handleRequest(request, parameters);
+
+		// determine the representation of the result
+		String result;
+		ContentType type;
+		if (tmpResult == null) {
+			type = ContentType.APPLICATION_JSON;
+			result = JsonValue.NULL.toString();
+		} else if (tmpResult instanceof JsonObject) {
+			type = ContentType.APPLICATION_JSON;
+			result = tmpResult.toString();
+		} else if (tmpResult instanceof String) {
+			type = getResponseContentType();
+			result = tmpResult.toString();
+		} else {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Unsupported type '" + tmpResult
+						+ "' returned by request-handling.");
+			}
+			type = ContentType.APPLICATION_JSON;
+			result = JsonValue.NULL.toString();
+		}
+
+		return new HandleResult(result, type);
 	}
 
 	/**

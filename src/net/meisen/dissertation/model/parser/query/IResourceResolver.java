@@ -25,9 +25,11 @@ public interface IResourceResolver {
 	 * 
 	 * @throws CancellationException
 	 *             if the resolving was cancelled
+	 * @throws ForwardedRuntimeException
+	 *             if the resource cannot be resolved
 	 * 
 	 * @see ForwardedRuntimeException
 	 */
 	public InputStream resolve(final String resource)
-			throws CancellationException;
+			throws CancellationException, ForwardedRuntimeException;
 }

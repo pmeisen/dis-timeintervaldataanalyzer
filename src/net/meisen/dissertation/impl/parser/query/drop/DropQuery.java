@@ -69,7 +69,7 @@ public class DropQuery implements IQuery {
 
 	@Override
 	public boolean expectsModel() {
-		return DropType.MODEL.equals(getEntityType());
+		return false;
 	}
 
 	@Override
@@ -93,18 +93,7 @@ public class DropQuery implements IQuery {
 		} else if (DropType.ROLE.equals(getEntityType())) {
 			authManager.deleteRole(getEntityName());
 		} else if (DropType.MODEL.equals(getEntityType())) {
-			handler.disableAutoload(model.getId());
-			handler.unload(model.getId());
-
-			// delete the folder of the model
-			try {
-				model.release(true);
-			} catch (final TidaModelException e) {
-				// TODO: the directory might be not deletable, because of MapDB
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Could not clean-up correctly!", e);
-				}
-			}
+			handler.deleteModel(getModelId());
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1020, getEntityType());

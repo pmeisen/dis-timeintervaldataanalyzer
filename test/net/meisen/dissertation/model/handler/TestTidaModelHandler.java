@@ -325,7 +325,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		assertNull(loader.getTidaModel("testNumberModel"));
 
 		// now load everything
-		loader.autoloadModules();
+		loader.autoloadModels();
 		assertNotNull(loader.getTidaModel("testNumberModel"));
 
 		// unload everything loaded
@@ -334,7 +334,7 @@ public class TestTidaModelHandler extends DbBasedTest {
 		loader.disableAutoload("testNumberModel");
 
 		// now load it again
-		loader.autoloadModules();
+		loader.autoloadModels();
 		assertNull(loader.getTidaModel("testNumberModel"));
 	}
 

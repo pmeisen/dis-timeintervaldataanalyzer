@@ -270,7 +270,7 @@
       <bean id="{$queryFactoryId}" class="{$queryFactory}" />
     
       <!-- define loaders used to load tidaModels -->
-      <bean id="{$modelHandlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler">
+      <bean id="{$modelHandlerId}" class="net.meisen.dissertation.model.handler.TidaModelHandler" init-method="init">
         <property name="defaultLocation" ref="defaultLocation" /> 
       </bean>
       

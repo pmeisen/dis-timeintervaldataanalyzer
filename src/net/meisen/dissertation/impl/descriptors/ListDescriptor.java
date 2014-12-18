@@ -10,7 +10,7 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
- * Simple test-{@code Descriptor} to handle {@code List} instances.
+ * Simple {@code Descriptor} to handle {@code List} instances.
  * 
  * @author pmeisen
  * 

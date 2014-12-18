@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.exceptions.TidaModelHandlerException;
 import net.meisen.dissertation.impl.persistence.ZipPersistor;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -28,6 +30,7 @@ import net.meisen.dissertation.model.persistence.MetaData;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.resources.IByteBufferReader;
 import net.meisen.general.genmisc.resources.Xml;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.sbconfigurator.api.IModuleHolder;
@@ -131,12 +134,55 @@ public class TidaModelHandler {
 	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
 
 	/**
+	 * Initializes the handler.
+	 */
+	public void init() {
+		this.autoloadModels();
+	}
+
+	/**
 	 * The {@code TidaModel} instances held by {@code this}.
 	 * 
 	 * @return a set of loaded {@code TidaModel} instances
 	 */
 	public Set<String> getTidaModels() {
 		return Collections.unmodifiableSet(moduleHolders.keySet());
+	}
+
+	/**
+	 * Gets all the identifiers loaded automatically.
+	 * 
+	 * @return the identifiers loaded automatically
+	 */
+	public Set<String> getAutoloadedTidaModels() {
+		autoloadLock.readLock().lock();
+		try {
+			final Set<String> modelIds = _readAutoloads();
+			return modelIds;
+		} finally {
+			autoloadLock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Gets the models available by the handler.
+	 * 
+	 * @return the available (i.e. also not loaded models)
+	 */
+	public Set<String> getAvailableTidaModels() {
+		final Set<String> set = new HashSet<String>();
+
+		final File defLoc = new File(getDefaultLocation());
+		final List<File> modelDirs = Files.getCurrentSubDirectories(defLoc);
+
+		for (final File modelDir : modelDirs) {
+			final File modelFile = new File(modelDir, MODEL_FILENAME);
+			if (Files.checkFile(modelFile, false) != null) {
+				set.add(modelDir.getName());
+			}
+		}
+
+		return set;
 	}
 
 	/**
@@ -347,32 +393,57 @@ public class TidaModelHandler {
 		}
 
 		// initialize the model
-		model.initialize();
-
-		// define the file to store the model at
-		final String modelId = model.getId();
-		final File modelDir = getModelDir(model.getId());
-		final File modelFile = new File(modelDir, MODEL_FILENAME);
-		if (modelFile.exists()) {
-			if (modelFile.isDirectory()) {
-				exceptionRegistry.throwRuntimeException(
-						TidaModelHandlerException.class, 1006, modelFile);
-			} else if (!modelFile.delete()) {
-				exceptionRegistry.throwRuntimeException(
-						TidaModelHandlerException.class, 1007, modelFile);
-			}
-		} else {
-			modelDir.mkdirs();
-		}
-
-		// copy the file to the specified location
-		final byte[] config = configurations.get(modelId);
 		try {
-			Streams.copyStreamToFile(new ByteArrayInputStream(config),
-					modelFile);
-		} catch (final IOException e) {
-			exceptionRegistry.throwRuntimeException(
-					TidaModelHandlerException.class, 1008, e, modelFile);
+			model.initialize();
+
+			// define the file to store the model at
+			final String modelId = model.getId();
+			final File modelDir = getModelDir(model.getId());
+			final File modelFile = new File(modelDir, MODEL_FILENAME);
+			if (modelFile.exists()) {
+				if (modelFile.isDirectory()) {
+					exceptionRegistry.throwRuntimeException(
+							TidaModelHandlerException.class, 1006, modelFile);
+				} else if (!modelFile.delete()) {
+					exceptionRegistry.throwRuntimeException(
+							TidaModelHandlerException.class, 1007, modelFile);
+				}
+			} else {
+				modelDir.mkdirs();
+			}
+
+			// copy the file to the specified location
+			final byte[] config = configurations.get(modelId);
+			try {
+				Streams.copyStreamToFile(new ByteArrayInputStream(config),
+						modelFile);
+			} catch (final IOException e) {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1008, e, modelFile);
+			}
+		} catch (final Throwable t) {
+			if (model != null) {
+
+				/*
+				 * if an exception is thrown we have to remove the model, at
+				 * least try it
+				 */
+				try {
+					this.deleteModel(model.getId());
+				} catch (final RuntimeException ignore) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("Deleting the failed model '" + model.getId()
+								+ "' failed.", ignore);
+					}
+				}
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException) t;
+			} else {
+				exceptionRegistry.throwRuntimeException(
+						TidaModelHandlerException.class, 1016, t, model.getId(), t.getLocalizedMessage());
+			}
 		}
 
 		return model;
@@ -682,7 +753,7 @@ public class TidaModelHandler {
 	/**
 	 * Loads all the models defined for automatically loading.
 	 */
-	public void autoloadModules() {
+	public void autoloadModels() {
 		autoloadLock.readLock().lock();
 		final Collection<String> modelIds;
 		try {
@@ -698,21 +769,6 @@ public class TidaModelHandler {
 		// load each model
 		for (final String modelId : modelIds) {
 			this.loadFromDefaultLocation(modelId);
-		}
-	}
-
-	/**
-	 * Gets all the identifiers loaded automatically.
-	 * 
-	 * @return the identifiers loaded automatically
-	 */
-	public Set<String> getAutoloadedModules() {
-		autoloadLock.readLock().lock();
-		try {
-			final Set<String> modelIds = _readAutoloads();
-			return modelIds;
-		} finally {
-			autoloadLock.readLock().unlock();
 		}
 	}
 
@@ -847,5 +903,43 @@ public class TidaModelHandler {
 	 */
 	protected File getModelDir(final String modelId) {
 		return new File(getDefaultLocation(), modelId);
+	}
+
+	/**
+	 * Deletes the model with the specified id and removes it from the handler.
+	 * 
+	 * @param modelId
+	 *            the model to be deleted
+	 */
+	public void deleteModel(final String modelId) {
+
+		// we have to get the loaded model (if it exists)
+		final TidaModel model = getTidaModel(modelId);
+
+		disableAutoload(modelId);
+		unload(modelId);
+
+		// finally we have to delete the model's file
+		final File dir = getModelDir(modelId);
+		if (dir.exists() && !Files.deleteOnExitDir(dir)) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Unable to remove the model's directory at '"
+						+ Files.getCanonicalPath(dir) + "'.");
+			}
+		}
+
+		// delete the folder of the model if there is one
+		if (model != null) {
+			try {
+				model.release(true);
+			} catch (final TidaModelException e) {
+				/*
+				 * TODO: the directory might be not deletable, because of MapDB
+				 */
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Could not clean-up correctly!", e);
+				}
+			}
+		}
 	}
 }

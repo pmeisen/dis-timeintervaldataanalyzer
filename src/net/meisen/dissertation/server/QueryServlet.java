@@ -175,13 +175,15 @@ public class QueryServlet extends BaseServlet {
 							PermissionException.class, 1000, Permission.load);
 				}
 
-				final Set<String> currentlyLoaded = handler.getTidaModels();
-				final Set<String> autoloaded = handler.getAutoloadedModules();
+				final Set<String> loaded = handler.getTidaModels();
+				final Set<String> available = handler.getAvailableTidaModels();
+				final Set<String> autoloaded = handler.getAutoloadedTidaModels();
 				final JsonArray array = new JsonArray();
-				for (final String current : currentlyLoaded) {
+				for (final String model : available) {
 					final JsonObject object = new JsonObject();
-					object.add("model", current);
-					object.add("autoloaded", autoloaded.contains(current));
+					object.add("model", model);
+					object.add("loaded", loaded.contains(model));
+					object.add("autoloaded", autoloaded.contains(model));
 
 					array.add(object);
 				}
@@ -280,8 +282,7 @@ public class QueryServlet extends BaseServlet {
 			IQueryResult res;
 			try {
 				final IQuery parsedQuery = queryFactory.parseQuery(query);
-				// TODO we have to add the resolver
-				res = queryFactory.evaluateQuery(parsedQuery, null);
+				res = queryFactory.evaluateQuery(parsedQuery, sessionManager);
 			} catch (final Exception e) {
 				if (failOnFailure) {
 					throw e;

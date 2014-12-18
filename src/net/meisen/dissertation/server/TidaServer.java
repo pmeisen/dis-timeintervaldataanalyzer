@@ -4,10 +4,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.AuthException;
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.exceptions.QueryParsingException;
+import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.dissertation.model.parser.query.IQueryFactory;
+import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.server.messages.ShutdownMessage;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Files;
@@ -42,10 +50,30 @@ public class TidaServer {
 	@Qualifier("controlMessagesManager")
 	private IControlMessagesManager serverControlMessagesManager;
 
+	/**
+	 * Handler used to handle the different models.
+	 */
 	@Autowired
 	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	private TidaModelHandler handler;
 
+	/**
+	 * Instance used to fire queries
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.QUERYFACTORY_ID)
+	private IQueryFactory queryFactory;
+
+	/**
+	 * The used {@code AuthManager}.
+	 */
+	@Autowired
+	@Qualifier(DefaultValues.AUTHMANAGER_ID)
+	private IAuthManager authManager;
+
+	/**
+	 * The configuration instance of the server.
+	 */
 	@Autowired
 	@Qualifier(IConfiguration.coreConfigurationId)
 	private IConfiguration configuration;
@@ -174,6 +202,36 @@ public class TidaServer {
 				}
 			}
 		}
+	}
+
+	public void login(final String username, final String password)
+			throws AuthException {
+		authManager.login(username, password);
+	}
+
+	public void logout() {
+		authManager.logout();
+	}
+
+	public IQueryResult fireQuery(final String query)
+			throws QueryParsingException, QueryEvaluationException {
+		final IQuery parsedQuery = queryFactory.parseQuery(query);
+		final IQueryResult res = queryFactory.evaluateQuery(parsedQuery,
+				new ServerResourceResolver());
+
+		return res;
+	}
+
+	public Set<String> getTidaModels() {
+		return handler.getTidaModels();
+	}
+	
+	public Set<String> getAvailableTidaModels() {
+		return handler.getAvailableTidaModels();
+	}
+
+	public Set<String> getAutoloadedTidaModels() {
+		return handler.getAutoloadedTidaModels();
 	}
 
 	/**

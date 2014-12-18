@@ -73,10 +73,19 @@ public class LoadQuery implements IQuery {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1014, getPath());
 		} else {
-			final InputStream is = resolver.resolve(getPath());
 			final boolean force = getProperty("force", true);
-			final TidaModel loadedModel = handler.loadViaXslt(is, force);
-			Streams.closeIO(is);
+			final InputStream is = resolver.resolve(getPath());
+
+			final TidaModel loadedModel;
+			try {
+				loadedModel = handler.loadViaXslt(is, force);
+			} catch (final RuntimeException e) {
+				throw e;
+			} finally {
+
+				// make sure the resource is closed again
+				Streams.closeIO(is);
+			}
 
 			modelId = loadedModel.getId();
 		}
