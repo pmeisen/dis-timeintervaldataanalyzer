@@ -444,7 +444,7 @@ public class QueryServlet extends BaseServlet {
 					res.add(resInt.getResult());
 					res.add(intArrayToJson(resInt.getCollectedIds()));
 
-					resultValue = JsonValue.valueOf(resInt.getResult());
+					resultValue = res;
 					resultType = JsonValue.valueOf("array");
 					resultNames = new JsonArray().add("count").add(
 							"identifiers");
