@@ -126,7 +126,7 @@ compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorValue;
 compDescValueTupel       : BRACKET_ROUND_OPENED selectorValue (SEPARATOR selectorValue)* BRACKET_ROUND_CLOSED;
 compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
-compValueElement         : selectorDateValueOrNull | selectorIntValueOrNull | selectorValue;
+compValueElement         : selectorNullValue | selectorDateValue | selectorIntValue | selectorValue;
 
 /*
  * Define the different measures
@@ -164,11 +164,12 @@ selectorIntInterval         : INT SEPARATOR INT;
 selectorIntIdList           : INT (SEPARATOR INT)*;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
 selectorIntIntervalWithNull : (INT | NULL_VALUE) SEPARATOR (INT | NULL_VALUE);
-selectorDateValueOrNull     : (DATE | NULL_VALUE);
-selectorIntValueOrNull      : (INT | NULL_VALUE);
+selectorDateValue           : DATE;
+selectorIntValue            : INT;
+selectorNullValue           : NULL_VALUE;
+selectorValue               : VALUE | NULL_VALUE;
 selectorOpenInterval        : BRACKET_ROUND_OPENED | BRACKET_SQUARE_OPENED;
 selectorCloseInterval       : BRACKET_ROUND_CLOSED | BRACKET_SQUARE_CLOSED;
-selectorValue               : (VALUE | NULL_VALUE);
 selectorMathAggrFunctionName: (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorDimAggrFunctionName : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | SIMPLE_ID);
 selectorLowAggrFunctionName : (AGGR_COUNT | AGGR_SUM | AGGR_MIN | AGGR_MAX | AGGR_AVERAGE | AGGR_MEAN | AGGR_MODE | AGGR_MEDIAN | AGGR_COUNTSTARTED | AGGR_COUNTFINISHED | SIMPLE_ID);

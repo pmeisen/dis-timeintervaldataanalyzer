@@ -14,7 +14,6 @@ import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.server.http.listener.api.IServlet;
 import net.meisen.general.server.http.listener.util.RequestHandlingUtilities;
 
-import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

@@ -9,9 +9,13 @@ import java.util.Set;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PermissionException;
+import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
+import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
+import net.meisen.dissertation.model.indexes.datarecord.IDataRecordMeta;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
@@ -72,7 +76,7 @@ public class QueryServlet extends BaseServlet {
 
 	/**
 	 * Executes a so called system-query, to retrieve system specific
-	 * information not available via TSQL.
+	 * information or execute system specific queries not available via TSQL.
 	 * 
 	 * @param parameters
 	 *            the parameters passed with the request
@@ -177,7 +181,8 @@ public class QueryServlet extends BaseServlet {
 
 				final Set<String> loaded = handler.getTidaModels();
 				final Set<String> available = handler.getAvailableTidaModels();
-				final Set<String> autoloaded = handler.getAutoloadedTidaModels();
+				final Set<String> autoloaded = handler
+						.getAutoloadedTidaModels();
 				final JsonArray array = new JsonArray();
 				for (final String model : available) {
 					final JsonObject object = new JsonObject();
@@ -189,6 +194,87 @@ public class QueryServlet extends BaseServlet {
 				}
 
 				return array.toString();
+			} else if ("modelmeta".equals(o)) {
+				final String modelId = parameters.get("model");
+				final DefinedPermission[][] permSets = new DefinedPermission[][] {
+						new DefinedPermission[] { Permission.query
+								.create(modelId) },
+						new DefinedPermission[] { Permission.queryAll.create() } };
+
+				// check the permission to use this system retrieval
+				if (!DefinedPermission.checkPermission(authManager, permSets)) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000,
+							DefinedPermission.toString(permSets));
+				}
+
+				// get the meta-data of the model
+				final TidaModel model = handler.getTidaModel(modelId);
+				if (model == null) {
+					// TODO throw exception
+					throw new IllegalStateException("A model with identifier '"
+							+ modelId + "' is not loaded or available.");
+				}
+
+				// create the JSON instance of the meta information
+				final JsonArray res = new JsonArray();
+				final IDataRecordMeta meta = model.getDataRecordFactory()
+						.getMeta();
+				final String[] names = meta.getNames();
+				final DataType[] types = meta.getDataTypes();
+				final int len = names.length;
+				for (int i = 0; i < len; i++) {
+					final JsonObject entry = new JsonObject();
+
+					// determine the meta-type
+					final String metaType;
+					if (i == meta.getPosRecordId()) {
+						metaType = "ID";
+					} else if (i == meta.getPosStart()) {
+						metaType = "START";
+					} else if (i == meta.getPosEnd()) {
+						metaType = "END";
+					} else if (i >= meta.getFirstPosDescModelIds()
+							&& i <= meta.getLastPosDescModelIds()) {
+						metaType = "DESCRIPTOR";
+					} else {
+						metaType = "UNKNOWN";
+					}
+
+					entry.add("name", names[i]);
+					entry.add("datatype", types[i].name());
+					entry.add("metatype", metaType);
+					res.add(entry);
+				}
+
+				return res.toString();
+			} else if ("addmodelrecords".equals(o)) {
+				final String modelId = parameters.get("model");
+				final DefinedPermission[][] permSets = new DefinedPermission[][] {
+						new DefinedPermission[] { Permission.modify
+								.create(modelId) },
+						new DefinedPermission[] { Permission.modifyAll.create() } };
+
+				// check the permission to use this system retrieval
+				if (!DefinedPermission.checkPermission(authManager, permSets)) {
+					exceptionRegistry.throwRuntimeException(
+							PermissionException.class, 1000,
+							DefinedPermission.toString(permSets));
+				}
+
+				// execute the loading of the data
+				final TidaModel model = handler.getTidaModel(modelId);
+				if (model == null) {
+					// TODO throw exception
+					throw new IllegalStateException("A model with identifier '"
+							+ modelId + "' is not loaded or available.");
+				}
+
+				// execute the loading of the model's data
+				model.bulkLoadDataFromDataModel();
+
+				// just return a true, it is loaded
+				return JsonValue.TRUE.toString();
 			} else if ("timeout".equals(o)) {
 
 				// get the timeout
@@ -279,15 +365,23 @@ public class QueryServlet extends BaseServlet {
 		// fire the query
 		final JsonArray results = new JsonArray();
 		for (final String query : queries) {
-			IQueryResult res;
+			IQueryResult resQuery;
+			boolean isInsertQuery = false;
 			try {
 				final IQuery parsedQuery = queryFactory.parseQuery(query);
-				res = queryFactory.evaluateQuery(parsedQuery, sessionManager);
+
+				// we want to retrieve the inserted identifiers for inserts
+				isInsertQuery = parsedQuery instanceof InsertQuery;
+				if (isInsertQuery) {
+					parsedQuery.enableIdCollection(true);
+				}
+				resQuery = queryFactory.evaluateQuery(parsedQuery,
+						sessionManager);
 			} catch (final Exception e) {
 				if (failOnFailure) {
 					throw e;
 				} else {
-					res = null;
+					resQuery = null;
 				}
 			}
 
@@ -295,10 +389,10 @@ public class QueryServlet extends BaseServlet {
 			final JsonValue resultValue;
 			final JsonValue resultType;
 			final JsonValue resultNames;
-			if (res instanceof IQueryResultSet) {
+			if (resQuery instanceof IQueryResultSet) {
 
 				// iterate over the records and add those
-				final IQueryResultSet resSet = (IQueryResultSet) res;
+				final IQueryResultSet resSet = (IQueryResultSet) resQuery;
 				final JsonArray names = new JsonArray();
 				for (final String name : resSet.getNames()) {
 					names.add(name);
@@ -309,6 +403,7 @@ public class QueryServlet extends BaseServlet {
 				while (it.hasNext()) {
 					final Object[] objs = it.next();
 					final JsonArray row = new JsonArray();
+
 					for (final Object obj : objs) {
 						final JsonValue objValue;
 
@@ -341,11 +436,23 @@ public class QueryServlet extends BaseServlet {
 				resultValue = array;
 				resultNames = names;
 				resultType = JsonValue.valueOf("set");
-			} else if (res instanceof IQueryResultSingleInteger) {
-				final IQueryResultSingleInteger resInt = (IQueryResultSingleInteger) res;
-				resultValue = JsonValue.valueOf(resInt.getResult());
-				resultType = JsonValue.valueOf("value");
-				resultNames = new JsonArray().add("value");
+			} else if (resQuery instanceof IQueryResultSingleInteger) {
+				final IQueryResultSingleInteger resInt = (IQueryResultSingleInteger) resQuery;
+
+				if (isInsertQuery) {
+					final JsonArray res = new JsonArray();
+					res.add(resInt.getResult());
+					res.add(intArrayToJson(resInt.getCollectedIds()));
+
+					resultValue = JsonValue.valueOf(resInt.getResult());
+					resultType = JsonValue.valueOf("array");
+					resultNames = new JsonArray().add("count").add(
+							"identifiers");
+				} else {
+					resultValue = JsonValue.valueOf(resInt.getResult());
+					resultType = JsonValue.valueOf("value");
+					resultNames = new JsonArray().add("value");
+				}
 			} else {
 				resultNames = JsonValue.NULL;
 				resultValue = JsonValue.NULL;
@@ -363,6 +470,19 @@ public class QueryServlet extends BaseServlet {
 			return results.get(0).toString();
 		} else {
 			return results.toString();
+		}
+	}
+
+	protected JsonValue intArrayToJson(final int[] array) {
+		if (array == null) {
+			return JsonValue.NULL;
+		} else {
+			final JsonArray jsonArray = new JsonArray();
+			for (final int val : array) {
+				jsonArray.add(val);
+			}
+
+			return jsonArray;
 		}
 	}
 }

@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
@@ -142,7 +143,7 @@ public class TestInsertQueries extends LoaderBasedTest {
 	@Test
 	public void testInvalidDefinitionOfValues() {
 		thrown.expect(QueryParsingException.class);
-		thrown.expectMessage("defined values of the descriptors '[Philipp, Tobias]' do not fit with the defined models '[NAME]'");
+		thrown.expectMessage("invalid element 'Tobias' in value-definition");
 
 		// parsing should fail
 		q("INSERT INTO MyModel ([START], [END], NAME) VALUES (20.01.1981, NULL, 'Philipp', 'Tobias')");
@@ -203,6 +204,24 @@ public class TestInsertQueries extends LoaderBasedTest {
 		// check if the data was added
 		assertEquals(1, model.getAmountOfRecords());
 		assertEquals(1, model.getNextDataId());
+	}
+
+	/**
+	 * Tests the usage of several NULL values within the insert statement.
+	 */
+	@Test
+	public void testParsingOfSeveralNulls() {
+		final InsertQuery query = q("INSERT INTO MyModel ([START], [END], NAME) VALUES (NULL, NULL, NULL)");
+
+		assertEquals("MyModel", query.getModelId());
+		assertEquals(IntervalType.INCLUDE, query.getStartIntervalType());
+		assertEquals(IntervalType.INCLUDE, query.getEndIntervalType());
+		assertEquals(0, query.getStartPosition());
+		assertEquals(1, query.getEndPosition());
+		assertEquals(1, query.sizeOfRecords());
+		assertNull(query.getDescriptorValues(0).get(0));
+		assertNull(query.getInterval(0).getStart());
+		assertNull(query.getInterval(0).getEnd());
 	}
 
 	/**
@@ -408,5 +427,34 @@ public class TestInsertQueries extends LoaderBasedTest {
 		// -> second check the index, it should have been updated
 		assertNotNull(m.getIndex().getMetaIndexDimensionSlice("NUMBER",
 				desc.getId()));
+	}
+
+	/**
+	 * Tests the insertion of a record with an failure occuring during the
+	 * indexing.
+	 */
+	@Test
+	public void testFailedInsert() {
+		final TidaModel m = m("/net/meisen/dissertation/impl/parser/query/testPersonModel.xml");
+		final int currentRecords = m.getAmountOfRecords();
+
+		boolean foundError = false;
+		try {
+			final IQuery query = factory
+					.parseQuery("INSERT INTO testPersonModel ([START], [END], SCREAMS, LOCATION, PERSON) VALUES (2014-03-03, 2014-03-03 00:01:00, 'Test', 'Karlsruhe', 'Philipp')");
+			factory.evaluateQuery(query, null);
+		} catch (final Exception e) {
+			assertTrue(e instanceof DescriptorModelException);
+			assertTrue(e.getMessage().contains("Unable to create a descriptor"));
+			foundError = true;
+		}
+		assertTrue(foundError);
+
+		assertEquals(currentRecords, m.getAmountOfRecords());
+
+		final IQuery query = factory
+				.parseQuery("INSERT INTO testPersonModel ([START], [END], SCREAMS, LOCATION, PERSON) VALUES (2014-03-03, 2014-03-03 00:01:00, '12', 'Karlsruhe', 'Philipp')");
+		factory.evaluateQuery(query, null);
+		assertEquals(currentRecords + 1, m.getAmountOfRecords());
 	}
 }

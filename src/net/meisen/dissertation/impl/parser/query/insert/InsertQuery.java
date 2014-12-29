@@ -210,15 +210,6 @@ public class InsertQuery implements IQuery {
 	}
 
 	/**
-	 * Gets the amount of descriptors defined within a record.
-	 * 
-	 * @return the amount of descriptors defined within a record
-	 */
-	public int sizeOfDescriptors() {
-		return descIds.size();
-	}
-
-	/**
 	 * Adds a record to {@code this}.
 	 * 
 	 * @param interval
@@ -269,7 +260,7 @@ public class InsertQuery implements IQuery {
 	 *         the query
 	 */
 	public int sizeOfDescriptorModelIds() {
-		return descIds == null ? null : descIds.size();
+		return descIds.size();
 	}
 
 	/**

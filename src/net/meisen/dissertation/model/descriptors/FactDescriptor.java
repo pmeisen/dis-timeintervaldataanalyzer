@@ -3,7 +3,7 @@ package net.meisen.dissertation.model.descriptors;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * A {@code FactDescriptor} is a to facts compressed {@code Descriptor}.
+ * A {@code FactDescriptor} is a {@code Descriptor} which contains the fact information of a descriptor only.
  * 
  * @author pmeisen
  * 

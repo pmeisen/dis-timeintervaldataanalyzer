@@ -134,7 +134,7 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	/**
 	 * Gets a unique string representation for the descriptor. This
 	 * representation is necessary for queries, when filtering for the
-	 * descriptor.
+	 * descriptor or inserting values.
 	 * 
 	 * @return the string representing this value
 	 */

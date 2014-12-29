@@ -213,23 +213,26 @@ public class TidaIndex implements IPersistable {
 	 */
 	public void index(final DataStructure dataStructure,
 			final IDataRecord record) {
+		final int recordId = dataId;
 
 		// make sure values still fit
-		if (dataId > lastValidId || dataId < 0) {
+		if (recordId > lastValidId || recordId < 0) {
 			throw new ForwardedRuntimeException(TidaIndexException.class, 1001,
 					dataId, lastValidId);
+		} else {
+
+			// increase the identifier it should never be used again
+			dataId++;
 		}
 
 		// let's pre-process the record and map all the values
 		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
-				dataStructure, record, model, dataId);
+				dataStructure, record, model, recordId);
 
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
 			idx.index(processedRecord);
 		}
-
-		dataId++;
 	}
 
 	/**
@@ -574,5 +577,68 @@ public class TidaIndex implements IPersistable {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Gets the start- and end-value of the record (or better the mapped value).
+	 * 
+	 * @param recordId
+	 *            the identifier of the record to get the start- and end-value
+	 *            for
+	 * 
+	 * @return {@code null} if the record is invalid or could not be found,
+	 *         otherwise an array with two values, the first is the start- and
+	 *         the second the end-value
+	 */
+	public Object[] getTimePointValuesOfRecord(final int recordId) {
+
+		// make sure we have a valid record identifier
+		if (recordId < 0 || recordId > getLastRecordId()) {
+			return null;
+		}
+
+		// create a bitmap of the one record
+		final Bitmap recBmp = Bitmap.createBitmap(getIndexFactory(), recordId);
+
+		// check if the record is valid
+		if (!recBmp.and(model.getValidRecords()).isBitSet()) {
+			return null;
+		}
+
+		// check each value of the time-axis
+		boolean searchingStart = true;
+		final Object[] result = new Object[] { null, null };
+
+		final long start = intervalIndex.getNormStart();
+		final long end = intervalIndex.getNormEnd();
+		for (long i = start; i < end; i++) {
+			final SliceWithDescriptors<?> slice = intervalIndex.getSliceById(i);
+			if (slice == null) {
+				if (!searchingStart) {
+					return null;
+				}
+				continue;
+			}
+
+			final Bitmap bmp = slice.getBitmap();
+			if (searchingStart && recBmp.and(bmp).isBitSet()) {
+				result[0] = intervalIndex.getValue(i);
+				searchingStart = false;
+			} else if (!searchingStart && !recBmp.and(bmp).isBitSet()) {
+				result[1] = intervalIndex.getValue(i - 1);
+				return result;
+			}
+		}
+
+		/*
+		 * Check if we found a start, but no end. If no end was found, the end
+		 * is the end of the time-line.
+		 */
+		if (!searchingStart) {
+			result[1] = intervalIndex.getValue(end);
+			return result;
+		} else {
+			return null;
+		}
 	}
 }

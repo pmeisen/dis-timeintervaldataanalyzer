@@ -392,7 +392,10 @@ public class TidaModel implements IPersistable {
 		// persist the identifier as used
 		getIdentifierCache().markIdentifierAsUsed(id);
 
-		// now index the record
+		/*
+		 * Now index the record, if an error occurres the used id will never be
+		 * marked as valid.
+		 */
 		this.idx.index(dataStructure, record);
 
 		// set the bitmap for the specified identifier

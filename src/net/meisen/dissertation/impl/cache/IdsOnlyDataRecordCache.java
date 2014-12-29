@@ -49,23 +49,28 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 
 	@Override
 	public Object[] get(final int recordId) {
-		final TidaIndex index = model.getIndex();
+		final TidaIndex idx = model.getIndex();
 		final IDataRecordMeta meta = model.getDataRecordFactory().getMeta();
 
 		// make sure we have a valid record identifier
-		if (recordId < 0 || recordId > index.getLastRecordId()) {
+		if (recordId < 0 || recordId > idx.getLastRecordId()) {
 			return null;
 		}
 
 		// create the result
 		final Object[] res = new Object[meta.getTypes().length];
 		res[meta.getPosRecordId()] = recordId;
-		res[meta.getPosStart()] = null;
-		res[meta.getPosEnd()] = null;
+
+		// set the interval information
+		final Object[] interval = idx.getTimePointValuesOfRecord(recordId);
+		res[meta.getPosStart()] = interval == null ? null : interval[0];
+		res[meta.getPosEnd()] = interval == null ? null : interval[1];
+		
+		// set the meta-information
 		for (int pos = meta.getFirstPosDescModelIds(); pos <= meta
 				.getLastPosDescModelIds(); pos++) {
 			final String descModelId = meta.getDescriptorModelId(pos);
-			final Descriptor<?, ?, ?> desc = index.getDescriptorOfRecord(
+			final Descriptor<?, ?, ?> desc = idx.getDescriptorOfRecord(
 					descModelId, recordId);
 
 			if (desc == null) {

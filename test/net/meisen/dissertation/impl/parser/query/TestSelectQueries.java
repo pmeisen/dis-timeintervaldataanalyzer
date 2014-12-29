@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.text.ParseException;
@@ -3269,5 +3270,89 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// cleanUp as much as possible of this test
 		Files.deleteOnExitDir(new File(System.getProperty("java.io.tmpdir")),
 				"^tmpSelectQueriesRecordRetrieval\\-.*$");
+	}
+
+	/**
+	 * Tests the retrieval of records based on the identifiers.
+	 * 
+	 * @throws ParseException
+	 *             if a date could not be parsed
+	 */
+	@Test
+	public void testRecordsRetrievalFromIds() throws ParseException {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select RECORDS from testPersonModel within [01.03.2014, 05.03.2014 02:32:00]";
+
+		// load the model
+		m(xml);
+
+		// fire the query and get the result
+		final SelectResultRecords res = (SelectResultRecords) factory
+				.evaluateQuery(q(query), null);
+
+		Iterator<Object[]> it = res.iterator();
+		while (it.hasNext()) {
+			final Object[] rec = it.next();
+
+			switch ((Integer) rec[0]) {
+			case 0:
+				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(0, rec[3]);
+				assertEquals("Aachen", rec[4]);
+				assertEquals("Tobias", rec[5]);
+				break;
+			case 1:
+				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("03.03.2014 16:19:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(3, rec[3]);
+				assertEquals("Mönchengladbach", rec[4]);
+				assertEquals("Philipp", rec[5]);
+				break;
+			case 2:
+				assertEquals(Dates.parseDate("03.03.2014 16:20:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("03.03.2014 17:21:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(0, rec[3]);
+				assertEquals("Undefined", rec[4]);
+				assertEquals("Philipp", rec[5]);
+				break;
+			case 3:
+				assertEquals(Dates.parseDate("03.03.2014 17:22:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(0, rec[3]);
+				assertEquals("Aachen", rec[4]);
+				assertEquals("Philipp", rec[5]);
+				break;
+			case 4:
+				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(0, rec[3]);
+				assertEquals("Aachen", rec[4]);
+				assertEquals("Debbie", rec[5]);
+				break;
+			case 5:
+				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
+						"dd.MM.yyyy HH:m:ss"), rec[1]);
+				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
+						"dd.MM.yyyy HH:m:ss"), rec[2]);
+				assertEquals(12, rec[3]);
+				assertEquals("Aachen", rec[4]);
+				assertEquals("Edison", rec[5]);
+				break;
+			default:
+				fail("Invalid amount of records: " + Arrays.asList(rec));
+				break;
+			}
+		}
 	}
 }

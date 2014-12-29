@@ -76,19 +76,20 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorBooleanContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateIntervalWithNullContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueOrNullContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDateValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDescriptorIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorDimAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIdListContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntIntervalWithNullContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueOrNullContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorLowAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorMathAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorMemberContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorNullValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueListContext;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
@@ -590,28 +591,35 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 		final Object[] intervalValues = new Object[2];
 		final List<CompValueElementContext> values = ctx.compValueElement();
-		final List<String> data = new ArrayList<String>(q.sizeOfDescriptors());
+		final int descSize = q.sizeOfDescriptorModelIds();
+		final int expSize = descSize + 2;
+		final List<String> data = new ArrayList<String>(descSize);
 		for (int i = 0; i < values.size(); i++) {
 			final CompValueElementContext value = values.get(i);
+			final Object v = resolveValue(value);
 
-			if (value.selectorDateValueOrNull() != null
-					|| value.selectorIntValueOrNull() != null) {
-				final Object v = resolveValue(value);
-
-				if (i == q.getStartPosition()) {
-					intervalValues[0] = v;
-				} else if (i == q.getEndPosition()) {
-					intervalValues[1] = v;
-				} else {
-					throw new ForwardedRuntimeException(
-							QueryParsingException.class, 1016, v, i,
-							q.getStartPosition(), q.getEndPosition());
-				}
-			} else if (value.selectorValue() != null) {
-				data.add(getSelectorValue(value.selectorValue()));
-			} else {
+			if (i >= expSize) {
 				throw new ForwardedRuntimeException(
-						QueryParsingException.class, 1014, value.getText());
+						QueryParsingException.class, 1014,
+						Strings.trimSequence(value.getText(), "'"), i + 1);
+			} else if (i == q.getStartPosition()) {
+				if (value.selectorValue() != null) {
+					throw new ForwardedRuntimeException(
+							QueryParsingException.class, 1016, v,
+							q.getStartPosition() + 1);
+				}
+
+				intervalValues[0] = v;
+			} else if (i == q.getEndPosition()) {
+				if (value.selectorValue() != null) {
+					throw new ForwardedRuntimeException(
+							QueryParsingException.class, 1016, v,
+							q.getEndPosition() + 1);
+				}
+
+				intervalValues[1] = v;
+			} else {
+				data.add(v == null ? null : v.toString());
 			}
 		}
 
@@ -1662,8 +1670,8 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	/**
 	 * Resolves a value of a {@code CompValueElementContext}, a
-	 * {@code SelectorDateValueOrNullContext}, or a
-	 * {@code SelectorIntValueOrNullContext}.
+	 * {@code SelectorDateValueContext}, {@code SelectorIntValueContext},
+	 * {@code SelectorNullValueContext}, or a {@code SelectorValueContext}.
 	 * 
 	 * @param ctx
 	 *            the context to read the value from
@@ -1675,36 +1683,46 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		if (ctx instanceof CompValueElementContext) {
 			final CompValueElementContext c = (CompValueElementContext) ctx;
 
-			if (c.selectorDateValueOrNull() != null) {
-				return resolveValue(c.selectorDateValueOrNull());
-			} else if (c.selectorIntValueOrNull() != null) {
-				return resolveValue(c.selectorIntValueOrNull());
+			if (c.selectorDateValue() != null) {
+				return resolveValue(c.selectorDateValue());
+			} else if (c.selectorIntValue() != null) {
+				return resolveValue(c.selectorIntValue());
+			} else if (c.selectorNullValue() != null) {
+				return resolveValue(c.selectorNullValue());
+			} else if (c.selectorValue() != null) {
+				return resolveValue(c.selectorValue());
 			} else {
 				throw new ForwardedRuntimeException(
 						QueryParsingException.class, 1015, c.getText());
 			}
-		} else if (ctx instanceof SelectorDateValueOrNullContext) {
-			final SelectorDateValueOrNullContext c = (SelectorDateValueOrNullContext) ctx;
+		} else if (ctx instanceof SelectorDateValueContext) {
+			final SelectorDateValueContext c = (SelectorDateValueContext) ctx;
 			if (c.DATE() != null) {
 				return Dates.isDate(c.DATE().getText(), Dates.GENERAL_TIMEZONE);
-
-			} else if (c.NULL_VALUE() != null) {
-				return null;
 			} else {
 				throw new ForwardedRuntimeException(
 						QueryParsingException.class, 1015, c.getText());
 			}
-		} else if (ctx instanceof SelectorIntValueOrNullContext) {
-			final SelectorIntValueOrNullContext c = (SelectorIntValueOrNullContext) ctx;
+		} else if (ctx instanceof SelectorIntValueContext) {
+			final SelectorIntValueContext c = (SelectorIntValueContext) ctx;
 
 			if (c.INT() != null) {
 				return Long.parseLong(c.INT().getText());
-			} else if (c.NULL_VALUE() != null) {
+			} else {
+				throw new ForwardedRuntimeException(
+						QueryParsingException.class, 1015, c.getText());
+			}
+		} else if (ctx instanceof SelectorNullValueContext) {
+			final SelectorNullValueContext c = (SelectorNullValueContext) ctx;
+
+			if (c.NULL_VALUE() != null) {
 				return null;
 			} else {
 				throw new ForwardedRuntimeException(
 						QueryParsingException.class, 1015, c.getText());
 			}
+		} else if (ctx instanceof SelectorValueContext) {
+			return getSelectorValue((SelectorValueContext) ctx);
 		} else {
 			throw new ForwardedRuntimeException(QueryParsingException.class,
 					1015, ctx.getText());

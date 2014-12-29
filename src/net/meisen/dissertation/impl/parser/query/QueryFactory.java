@@ -213,36 +213,8 @@ public class QueryFactory implements IQueryFactory {
 	 */
 	protected void checkPermission(final IQuery query)
 			throws PermissionException {
-		boolean permissionGranted = false;
-
 		final DefinedPermission[][] permSets = query.getNeededPermissions();
-		if (permSets == null) {
-			permissionGranted = true;
-		} else if (permSets.length == 0) {
-			permissionGranted = true;
-		} else {
-			permissionGranted = false;
-
-			// iterate and check
-			for (final DefinedPermission[] permSet : permSets) {
-				permissionGranted = true;
-
-				// validate if the permission is really available
-				for (final DefinedPermission perm : permSet) {
-					if (!authManager.hasPermission(perm)) {
-						permissionGranted = false;
-						break;
-					}
-				}
-
-				// if one of the sets grants permission to process stop
-				if (permissionGranted) {
-					break;
-				}
-			}
-		}
-
-		if (!permissionGranted) {
+		if (!DefinedPermission.checkPermission(authManager, permSets)) {
 			exceptionRegistry.throwRuntimeException(PermissionException.class,
 					1000, DefinedPermission.toString(permSets));
 		}

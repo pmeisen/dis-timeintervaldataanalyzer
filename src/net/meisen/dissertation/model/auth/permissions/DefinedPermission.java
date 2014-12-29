@@ -2,6 +2,8 @@ package net.meisen.dissertation.model.auth.permissions;
 
 import java.util.regex.Pattern;
 
+import net.meisen.dissertation.exceptions.PermissionException;
+import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
@@ -114,6 +116,39 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 	@Override
 	public int hashCode() {
 		return Objects.generateHashCode(7, 23, getPermission(), getModelId());
+	}
+
+	public static boolean checkPermission(final IAuthManager authManager,
+			final DefinedPermission[][] permSets) {
+		boolean permissionGranted = false;
+
+		if (permSets == null) {
+			permissionGranted = true;
+		} else if (permSets.length == 0) {
+			permissionGranted = true;
+		} else {
+			permissionGranted = false;
+
+			// iterate and check
+			for (final DefinedPermission[] permSet : permSets) {
+				permissionGranted = true;
+
+				// validate if the permission is really available
+				for (final DefinedPermission perm : permSet) {
+					if (!authManager.hasPermission(perm)) {
+						permissionGranted = false;
+						break;
+					}
+				}
+
+				// if one of the sets grants permission to process stop
+				if (permissionGranted) {
+					break;
+				}
+			}
+		}
+		
+		return permissionGranted;
 	}
 
 	/**
