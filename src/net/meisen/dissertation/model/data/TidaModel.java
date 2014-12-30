@@ -571,6 +571,9 @@ public class TidaModel implements IPersistable {
 					((IClosableIterator<?>) it).close();
 				}
 			}
+			
+			// optimize the indexes after the loading
+			this.idx.optimize();
 		} finally {
 
 			// enable the persistence again, everything is loaded
@@ -591,9 +594,6 @@ public class TidaModel implements IPersistable {
 		if (!retrieveIdentifiers) {
 			res.add(amountOfData);
 		}
-
-		// optimize the indexes after the loading
-		this.idx.optimize();
 
 		// return the amount of data written
 		return res.toArray();

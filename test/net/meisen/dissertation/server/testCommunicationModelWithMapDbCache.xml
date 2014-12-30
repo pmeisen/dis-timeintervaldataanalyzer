@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+
+       offlinemode="false" folder="${tida.model.test.location}/testCommunicationModelWithMapDbCache"
+       
+       id="testCommunicationModelWithMapDbCache">
+ 
+  <config>
+    <caches>
+      <bitmap implementation="net.meisen.dissertation.impl.cache.MapDbBitmapCache" />
+      <factsets implementation="net.meisen.dissertation.impl.cache.MapDbFactDescriptorModelSetCache" />
+      <records implementation="net.meisen.dissertation.impl.cache.MapDbDataRecordCache" />
+    </caches>
+  </config>
+  
+  <time>
+    <timeline start="1" end="100" granularity="DAY" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="TASK" />
+      <string id="DEPARTMENT" />
+      <string id="WORKAREA" />
+      <integer id="MANPOWER" />
+    </descriptors>
+
+    <entries />
+  </meta>
+    
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
+</model>

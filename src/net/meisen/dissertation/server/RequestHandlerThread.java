@@ -4,6 +4,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.PermissionException;
@@ -380,13 +382,17 @@ public class RequestHandlerThread extends WorkerThread {
 	protected boolean writeIdentifiers(final Protocol p,
 			final int[] collectedIds) throws IOException {
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("Writing the collected identifiers.");
+			final List<Integer> ids = new ArrayList<Integer>();
+			for (final int id : collectedIds) {
+				ids.add(id);
+			}
+			LOG.trace("Writing the collected identifiers: " + ids + ".");
 		}
 
 		if (collectedIds == null) {
-			p.writeInts(collectedIds);
-		} else {
 			p.writeInts(new int[0]);
+		} else {
+			p.writeInts(collectedIds);
 		}
 
 		return false;

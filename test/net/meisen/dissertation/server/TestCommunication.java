@@ -3,10 +3,21 @@ package net.meisen.dissertation.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
+
+import net.meisen.dissertation.help.ThreadForTesting;
+import net.meisen.dissertation.jdbc.TidaConnection;
+import net.meisen.dissertation.jdbc.TidaStatement;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -150,6 +161,207 @@ public class TestCommunication {
 				stmt.executeUpdate("INSERT INTO testAdvancedDescriptors ([START], [END], LONG, INT, STRING, LIST) VALUES (01.01.2015 08:00:00, 01.01.2015 08:07:00, '5', '7', 'DIFF', 'Kuchen, Kaffee')");
 			}
 			stmt.close();
+		}
+
+		@Test
+		public void testMultiThreadedUsage() throws SQLException {
+			runMultiThreadUsage("testCommunicationModel", 100, 100);
+//			runMultiThreadUsage("testCommunicationModelWithFileCache", 10, 100);
+//			runMultiThreadUsage("testCommunicationModelWithMapDbCache", 10, 100);
+		}
+
+		protected void runMultiThreadUsage(final String model,
+				final int stmtInsertCount, final int threadCountPerJob)
+				throws SQLException {
+
+			// load the communicationModel
+			final Statement stmt = conn.createStatement();
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/"
+					+ model + ".xml'");
+
+			// generate a list to keep track of values added
+			final List<String> taskDescriptor = Collections
+					.synchronizedList(new ArrayList<String>());
+			final List<String> depDescriptor = Collections
+					.synchronizedList(new ArrayList<String>());
+			final List<String> waDescriptor = Collections
+					.synchronizedList(new ArrayList<String>());
+			final List<Integer> mpDescriptor = Collections
+					.synchronizedList(new ArrayList<Integer>());
+
+			// create some threads, each with an own connection
+			final List<ThreadForTesting> threads = new ArrayList<ThreadForTesting>();
+			for (int i = 0; i < threadCountPerJob; i++) {
+				threads.add(new ThreadForTesting("insert_" + i) {
+					private final Random rnd = new Random();
+					private final TidaConnection conn = (TidaConnection) DriverManager
+							.getConnection(getJdbc());
+
+					public void addValue(final int coll, final int nr) {
+						final String name = UUID.randomUUID().toString();
+
+						switch (coll) {
+						case 0:
+							taskDescriptor.add(name);
+							break;
+						case 1:
+							depDescriptor.add(name);
+							break;
+						case 2:
+							waDescriptor.add(name);
+							break;
+						case 3:
+							synchronized (mpDescriptor) {
+								if (!mpDescriptor.contains(nr)) {
+									mpDescriptor.add(nr);
+								}
+							}
+							break;
+						}
+					}
+
+					@Override
+					public void _run() throws Throwable {
+						TidaStatement threadStmt = conn.createStatement();
+						addValue(0, -1);
+						addValue(1, -1);
+						addValue(2, -1);
+						addValue(3, -1);
+
+						for (int i = 0; i < stmtInsertCount; i++) {
+							/*
+							 * generate a random integer telling what should be
+							 * added
+							 */
+							final int task = rnd.nextInt(10);
+
+							// task 0: reconnect
+							if (task == 0) {
+								threadStmt.close();
+								threadStmt = conn.createStatement();
+							}
+
+							// task 1 & 2: create a new value for a descriptor
+							if (task == 1 || task == 2 || task == 3
+									|| task == 4) {
+								final int coll = rnd.nextInt(4);
+								addValue(coll, i);
+							}
+
+							// create the query
+							final int v1 = rnd.nextInt(102);
+							final int v2 = rnd.nextInt(102);
+
+							final String tSql = "INSERT INTO \""
+									+ model
+									+ "\" ([START], [END], TASK, DEPARTMENT, WORKAREA, MANPOWER) VALUES ("
+									+ Math.min(v1, v2)
+									+ ", "
+									+ Math.max(v1, v2)
+									+ ", '"
+									+ taskDescriptor.get(rnd
+											.nextInt(taskDescriptor.size()))
+									+ "', '"
+									+ depDescriptor.get(rnd
+											.nextInt(depDescriptor.size()))
+									+ "', '"
+									+ waDescriptor.get(rnd.nextInt(waDescriptor
+											.size()))
+									+ "', '"
+									+ mpDescriptor.get(rnd.nextInt(mpDescriptor
+											.size())) + "')";
+
+							// task 5: invalid value, i.e. delayed exception
+							if (task == 5) {
+								try {
+									threadStmt.executeUpdate(tSql.replaceFirst(
+											"'\\d+'\\)", "'NOINT')"));
+								} catch (final Exception e) {
+									assertEquals(SQLException.class,
+											e.getClass());
+									assertTrue(e.getMessage().contains(
+											"Unable to create a descriptor"));
+								}
+							} else {
+								threadStmt.execute(tSql,
+										Statement.RETURN_GENERATED_KEYS);
+								final ResultSet idRes = threadStmt.getGeneratedKeys();
+								if (idRes.next()) {
+									System.out.println(idRes.getInt(1));
+								} else {
+									System.out.println("NO");
+								}
+							}
+						}
+
+						threadStmt.close();
+					}
+
+					@Override
+					protected void cleanUp() throws Throwable {
+						conn.close();
+					}
+				});
+				threads.add(new ThreadForTesting("delete_" + i) {
+					private final static int stmtCount = 500;
+					private final Random rnd = new Random();
+					private final TidaConnection conn = (TidaConnection) DriverManager
+							.getConnection(getJdbc());
+
+					@Override
+					public void _run() throws Throwable {
+						final TidaStatement threadStmt = conn.createStatement();
+
+						threadStmt.close();
+					}
+
+					@Override
+					protected void cleanUp() throws Throwable {
+						conn.close();
+					}
+				});
+				threads.add(new ThreadForTesting("select_" + i) {
+					private final static int stmtCount = 100;
+					private final Random rnd = new Random();
+					private final TidaConnection conn = (TidaConnection) DriverManager
+							.getConnection(getJdbc());
+
+					@Override
+					public void _run() throws Throwable {
+						final TidaStatement threadStmt = conn.createStatement();
+
+						threadStmt.close();
+					}
+
+					@Override
+					protected void cleanUp() throws Throwable {
+						conn.close();
+					}
+				});
+			}
+
+			// start the threads
+			for (final ThreadForTesting t : threads) {
+				t.start();
+			}
+
+			// wait for all threads
+			for (final ThreadForTesting t : threads) {
+				try {
+					t.join();
+					t.validate();
+				} catch (final InterruptedException e) {
+					fail(t.getName() + " (" + e.getMessage() + ")");
+				}
+			}
+
+			// close the connection
+			stmt.close();
+
+			System.out.println(waDescriptor.size());
+			System.out.println(taskDescriptor.size());
+			System.out.println(depDescriptor.size());
+			System.out.println(mpDescriptor.size());
 		}
 	}
 

@@ -1,6 +1,5 @@
 package net.meisen.dissertation.help;
 
-
 /**
  * A thread which can handle exceptions.
  * 
@@ -10,13 +9,48 @@ package net.meisen.dissertation.help;
 public abstract class ThreadForTesting extends Thread {
 	private Throwable ex = null;
 
+	/**
+	 * Default constructor.
+	 */
+	public ThreadForTesting() {
+		super();
+	}
+
+	/**
+	 * Constructor used to specify the name of the thread.
+	 * 
+	 * @param name
+	 *            the name of the thread
+	 */
+	public ThreadForTesting(final String name) {
+		super(name);
+	}
+
 	@Override
 	public void run() {
 		try {
 			_run();
 		} catch (final Throwable ex) {
 			this.ex = ex;
+		} finally {
+			try {
+				cleanUp();
+			} catch (final Throwable ex) {
+				this.ex = this.ex == null ? ex : this.ex;
+			}
 		}
+	}
+
+	/**
+	 * Method which is called prior to any exception and finalization. Can be
+	 * used to do thread dependent clean-up.
+	 * 
+	 * @throws Throwable
+	 *             if an exception is thrown during clean-up
+	 */
+	protected void cleanUp() throws Throwable {
+		// nothing to do
+
 	}
 
 	/**
@@ -36,9 +70,9 @@ public abstract class ThreadForTesting extends Thread {
 	public Throwable getException() {
 		return ex;
 	}
-	
+
 	/**
-	 * Checks if an exception was thrown and rethrows it. 
+	 * Checks if an exception was thrown and rethrows it.
 	 */
 	public void validate() {
 		if (getException() instanceof AssertionError) {
