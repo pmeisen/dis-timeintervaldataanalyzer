@@ -35,26 +35,26 @@ public class TestIdsOnlyDataRecordCache extends LoaderBasedTest {
 
 		rec = m.getIndex().getRecord(0);
 		assertEquals(0, rec.getValue(meta.getPosRecordId()));
-		assertNull(rec.getValue(meta.getPosStart()));
-		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(1l, rec.getValue(meta.getPosStart()));
+		assertEquals(2l, rec.getValue(meta.getPosEnd()));
 		assertEquals(100, rec.getValue(meta.getFirstPosDescModelIds()));
 
 		rec = m.getIndex().getRecord(1);
 		assertEquals(1, rec.getValue(meta.getPosRecordId()));
-		assertNull(rec.getValue(meta.getPosStart()));
-		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(5l, rec.getValue(meta.getPosStart()));
+		assertEquals(5l, rec.getValue(meta.getPosEnd()));
 		assertEquals(200, rec.getValue(meta.getFirstPosDescModelIds()));
 
 		rec = m.getIndex().getRecord(2);
 		assertEquals(2, rec.getValue(meta.getPosRecordId()));
-		assertNull(rec.getValue(meta.getPosStart()));
-		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(1l, rec.getValue(meta.getPosStart()));
+		assertEquals(4l, rec.getValue(meta.getPosEnd()));
 		assertEquals(300, rec.getValue(meta.getFirstPosDescModelIds()));
 
 		rec = m.getIndex().getRecord(3);
 		assertEquals(3, rec.getValue(meta.getPosRecordId()));
-		assertNull(rec.getValue(meta.getPosStart()));
-		assertNull(rec.getValue(meta.getPosEnd()));
+		assertEquals(2l, rec.getValue(meta.getPosStart()));
+		assertEquals(3l, rec.getValue(meta.getPosEnd()));
 		assertEquals(100, rec.getValue(meta.getFirstPosDescModelIds()));
 		
 		assertNull(m.getIndex().getRecord(4));

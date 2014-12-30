@@ -3,7 +3,6 @@ package net.meisen.dissertation.impl.cache;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import net.meisen.dissertation.model.cache.IDataRecordCache;
@@ -55,7 +54,6 @@ public class MemoryDataRecordCache implements IDataRecordCache {
 
 	@Override
 	public void cache(final int id, final Object[] record) {
-		System.out.println(Arrays.asList(record));
 		map.put(id, record);
 	}
 

@@ -611,7 +611,7 @@ public class TidaIndex implements IPersistable {
 
 		final long start = intervalIndex.getNormStart();
 		final long end = intervalIndex.getNormEnd();
-		for (long i = start; i < end; i++) {
+		for (long i = start; i <= end; i++) {
 			final SliceWithDescriptors<?> slice = intervalIndex.getSliceById(i);
 			if (slice == null) {
 				if (!searchingStart) {
