@@ -11,12 +11,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import net.meisen.dissertation.help.ThreadForTesting;
 import net.meisen.dissertation.jdbc.TidaConnection;
+import net.meisen.dissertation.jdbc.TidaResultSet;
 import net.meisen.dissertation.jdbc.TidaStatement;
 
 import org.junit.Test;
@@ -165,13 +168,20 @@ public class TestCommunication {
 
 		@Test
 		public void testMultiThreadedUsage() throws SQLException {
-			runMultiThreadUsage("testCommunicationModel", 100, 100);
-//			runMultiThreadUsage("testCommunicationModelWithFileCache", 10, 100);
-//			runMultiThreadUsage("testCommunicationModelWithMapDbCache", 10, 100);
+//			for (int i = 0; i < 100; i++) {
+//				System.out.println("--------> RUN " + i);
+//				runMultiThreadUsage("testCommunicationModel", 100, 0, 100, 50);
+//			}
+			// runMultiThreadUsage("testCommunicationModelWithFileCache", 100,
+			// 50,
+			// 0, 10);
+			// runMultiThreadUsage("testCommunicationModelWithMapDbCache", 100,
+			// 50, 0, 10);
 		}
 
 		protected void runMultiThreadUsage(final String model,
-				final int stmtInsertCount, final int threadCountPerJob)
+				final int stmtInsertCount, final int stmtDeleteCount,
+				final int stmtSelectCount, final int threadCountPerJob)
 				throws SQLException {
 
 			// load the communicationModel
@@ -188,6 +198,10 @@ public class TestCommunication {
 					.synchronizedList(new ArrayList<String>());
 			final List<Integer> mpDescriptor = Collections
 					.synchronizedList(new ArrayList<Integer>());
+			final List<Integer> addedIds = Collections
+					.synchronizedList(new ArrayList<Integer>());
+			final Set<Integer> deletedIds = Collections
+					.synchronizedSet(new HashSet<Integer>());
 
 			// create some threads, each with an own connection
 			final List<ThreadForTesting> threads = new ArrayList<ThreadForTesting>();
@@ -272,7 +286,8 @@ public class TestCommunication {
 											.size())) + "')";
 
 							// task 5: invalid value, i.e. delayed exception
-							if (task == 5) {
+							// TODO; change -5
+							if (task == -5) {
 								try {
 									threadStmt.executeUpdate(tSql.replaceFirst(
 											"'\\d+'\\)", "'NOINT')"));
@@ -285,11 +300,10 @@ public class TestCommunication {
 							} else {
 								threadStmt.execute(tSql,
 										Statement.RETURN_GENERATED_KEYS);
-								final ResultSet idRes = threadStmt.getGeneratedKeys();
+								final ResultSet idRes = threadStmt
+										.getGeneratedKeys();
 								if (idRes.next()) {
-									System.out.println(idRes.getInt(1));
-								} else {
-									System.out.println("NO");
+									addedIds.add(idRes.getInt(1));
 								}
 							}
 						}
@@ -303,7 +317,6 @@ public class TestCommunication {
 					}
 				});
 				threads.add(new ThreadForTesting("delete_" + i) {
-					private final static int stmtCount = 500;
 					private final Random rnd = new Random();
 					private final TidaConnection conn = (TidaConnection) DriverManager
 							.getConnection(getJdbc());
@@ -311,6 +324,27 @@ public class TestCommunication {
 					@Override
 					public void _run() throws Throwable {
 						final TidaStatement threadStmt = conn.createStatement();
+
+						for (int i = 0; i < stmtDeleteCount; i++) {
+							final Integer id;
+							synchronized (addedIds) {
+								final int size = addedIds.size();
+								id = size > 0 ? addedIds.get(rnd.nextInt(size))
+										: null;
+							}
+
+							// remove id from the database
+							if (id == null) {
+								int counter = 0;
+								while (addedIds.size() == 0 && counter < 10000) {
+									counter++;
+								}
+							} else {
+								threadStmt.executeUpdate("DELETE " + id
+										+ " FROM \"" + model + "\"");
+								deletedIds.add(id);
+							}
+						}
 
 						threadStmt.close();
 					}
@@ -321,7 +355,6 @@ public class TestCommunication {
 					}
 				});
 				threads.add(new ThreadForTesting("select_" + i) {
-					private final static int stmtCount = 100;
 					private final Random rnd = new Random();
 					private final TidaConnection conn = (TidaConnection) DriverManager
 							.getConnection(getJdbc());
@@ -330,6 +363,20 @@ public class TestCommunication {
 					public void _run() throws Throwable {
 						final TidaStatement threadStmt = conn.createStatement();
 
+						for (int i = 0; i < stmtSelectCount; i++) {
+
+							final int v1 = rnd.nextInt(102);
+							final int v2 = rnd.nextInt(102);
+
+							final TidaResultSet res = threadStmt
+									.executeQuery("SELECT RECORDS FROM \""
+											+ model + "\" WITHIN ["
+											+ Math.min(v1, v2) + ", "
+											+ Math.max(v1, v2) + "]");
+							res.close();
+						}
+						System.out.println("FINISHED "
+								+ Thread.currentThread().getName());
 						threadStmt.close();
 					}
 
@@ -349,19 +396,37 @@ public class TestCommunication {
 			for (final ThreadForTesting t : threads) {
 				try {
 					t.join();
-					t.validate();
 				} catch (final InterruptedException e) {
 					fail(t.getName() + " (" + e.getMessage() + ")");
 				}
 			}
 
+			// validate each thread
+			int foundExceptions = 0;
+			for (final ThreadForTesting t : threads) {
+				try {
+					t.validate();
+				} catch (final Throwable e) {
+					e.printStackTrace();
+					foundExceptions++;
+				}
+			}
+
+			// check if we found any exceptions
+			if (foundExceptions > 0) {
+				fail("Found " + foundExceptions + " exceptions.");
+			}
+
 			// close the connection
+			stmt.execute("DROP MODEL testCommunicationModel");
 			stmt.close();
 
 			System.out.println(waDescriptor.size());
 			System.out.println(taskDescriptor.size());
 			System.out.println(depDescriptor.size());
 			System.out.println(mpDescriptor.size());
+			System.out.println(addedIds.size());
+			System.out.println(deletedIds.size());
 		}
 	}
 
@@ -446,7 +511,6 @@ public class TestCommunication {
 		@Test
 		public void testInvalidReload() throws SQLException {
 			Statement stmt;
-			ResultSet res;
 
 			stmt = conn.createStatement();
 
@@ -454,7 +518,7 @@ public class TestCommunication {
 			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
 
 			// @formatter:off
-			res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
+			stmt.executeUpdate("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
 
 			// unload and load again
 			stmt.executeUpdate("UNLOAD testLoadAndUnload");
@@ -470,7 +534,6 @@ public class TestCommunication {
 			assertTrue(error);
 			// @formatter:on
 
-			res.close();
 			stmt.close();
 		}
 
@@ -493,9 +556,7 @@ public class TestCommunication {
 				stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testLoadAndUnload.xml'");
 
 				// validate the values
-				res = stmt
-						.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
-				res.close();
+				stmt.executeUpdate("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
 				res = stmt
 						.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
 				while (res.next()) {
@@ -534,8 +595,7 @@ public class TestCommunication {
 				stmt.executeUpdate("LOAD testLoadAndUnload");
 
 				// validate the values
-				res = stmt.executeQuery("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
-				res.close();
+				stmt.executeUpdate("INSERT INTO testLoadAndUnload ([START], [END], PERSON, TASKTYPE, WORKAREA) VALUES (01.01.2008 01:01:00, 01.01.2008 01:01:00, 'Philipp', 'Dev', 'Home')");
 				res = stmt.executeQuery("select TRANSPOSE(timeSeries) OF COUNT(TASKTYPE) AS \"COUNT\" from testLoadAndUnload in [01.01.2008 01:00:00,01.01.2008 01:02:00]");
 				while (res.next()) {
 					if (res.getString(3).equals("01.01.2008 01:01:00,000")) {

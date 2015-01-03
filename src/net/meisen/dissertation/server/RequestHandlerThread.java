@@ -88,7 +88,7 @@ public class RequestHandlerThread extends WorkerThread {
 			try {
 				p.writeException(e);
 			} catch (final IOException ioe) {
-
+				// ignore it the connection is not available anymore
 			}
 		} catch (final Exception e) {
 			lastException = e;
@@ -279,7 +279,7 @@ public class RequestHandlerThread extends WorkerThread {
 				} catch (final Exception e) {
 					if (LOG.isErrorEnabled()) {
 						LOG.error("Exception while handling '" + msg
-								+ "' sending '" + e.getMessage() + "'.");
+								+ "' sending '" + e.getMessage() + "'.", e);
 					}
 
 					p.writeException(e);
@@ -417,7 +417,7 @@ public class RequestHandlerThread extends WorkerThread {
 			return false;
 		} else if (peek) {
 			if (LOG.isTraceEnabled()) {
-				LOG.trace("Handling of '" + msg + "' canceled.");
+				LOG.trace("Handling canceled.");
 			}
 			p.writeEndOfResponse();
 			return true;

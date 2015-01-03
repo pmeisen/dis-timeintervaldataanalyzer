@@ -5,8 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -49,6 +49,8 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	private final IBitmapIdCache<Bitmap> cache;
 	private final IIndexedCollection index;
 
+	private final ReentrantReadWriteLock idxLock;
+
 	private Group persistentGroup = null;
 
 	/**
@@ -80,6 +82,7 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		// set the values
 		this.model = model;
 		this.cache = cache;
+		this.idxLock = new ReentrantReadWriteLock();
 
 		// create an index to handle the different values for a descriptor
 		final IndexKeyDefinition indexKeyDef = new IndexKeyDefinition(
@@ -147,9 +150,24 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 		final I id = desc.getId();
 
 		// create or get the slices
-		final Slice<I> slice = getSliceById(id);
+		Slice<I> slice = getSliceById(id);
 		if (slice == null) {
-			index.addObject(createSlice(id, rec.getId()));
+
+			// the slice might have been created by now
+			idxLock.writeLock().lock();
+			try {
+				@SuppressWarnings("unchecked")
+				final Slice<I> curSlice = (Slice<I>) index.getObject(id);
+				if (curSlice == null) {
+					slice = createSlice(id, rec.getId());
+					index.addObject(slice);
+				} else {
+					slice = curSlice;
+					slice.set(rec.getId());
+				}
+			} finally {
+				idxLock.writeLock().unlock();
+			}
 		} else {
 			slice.set(rec.getId());
 		}
@@ -169,7 +187,12 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	 */
 	@SuppressWarnings("unchecked")
 	public Slice<I> getSliceById(final I valueId) {
-		return (Slice<I>) index.getObject(valueId);
+		idxLock.readLock().lock();
+		try {
+			return (Slice<I>) index.getObject(valueId);
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -189,23 +212,17 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 	}
 
 	/**
-	 * Gets the slices of the {@code MetaIndexDimension}.
-	 * 
-	 * @return the slices of the {@code MetaIndexDimension}
-	 */
-	@SuppressWarnings("unchecked")
-	public Slice<I>[] getSlices() {
-		final Collection<?> all = index.getAll();
-		return (Slice<I>[]) index.getAll().toArray(new Slice<?>[all.size()]);
-	}
-
-	/**
 	 * Gets the amounts of slices, i.e. different values within the dimension.
 	 * 
 	 * @return the amounts of slices
 	 */
 	public int getAmountOfSlices() {
-		return index.size();
+		idxLock.readLock().lock();
+		try {
+			return index.size();
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -310,6 +327,21 @@ public class MetaIndexDimension<I> implements IDataRecordIndex {
 			} finally {
 				persistor.close(id);
 			}
+		}
+	}
+
+	/**
+	 * Gets the slices of the {@code MetaIndexDimension}.
+	 * 
+	 * @return the slices of the {@code MetaIndexDimension}
+	 */
+	@SuppressWarnings("unchecked")
+	public Slice<I>[] getSlices() {
+		idxLock.readLock().lock();
+		try {
+			return (Slice<I>[]) index.getAll().toArray(new Slice<?>[0]);
+		} finally {
+			idxLock.readLock().unlock();
 		}
 	}
 

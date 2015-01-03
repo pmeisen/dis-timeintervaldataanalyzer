@@ -2,7 +2,6 @@ package net.meisen.dissertation.model.auth.permissions;
 
 import java.util.regex.Pattern;
 
-import net.meisen.dissertation.exceptions.PermissionException;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.general.genmisc.types.Objects;
 
@@ -118,6 +117,20 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 		return Objects.generateHashCode(7, 23, getPermission(), getModelId());
 	}
 
+	/**
+	 * Check the specified set of permissions within the specified
+	 * {@code AuthManager}.
+	 * 
+	 * @param authManager
+	 *            the authentication manager used to verify the permissions
+	 * @param permSets
+	 *            the permissions to be verified
+	 * 
+	 * @return {@code true} if the authentication manager has the specified
+	 *         permissions for the current subject
+	 * 
+	 * @see IAuthManager
+	 */
 	public static boolean checkPermission(final IAuthManager authManager,
 			final DefinedPermission[][] permSets) {
 		boolean permissionGranted = false;
@@ -147,7 +160,7 @@ public class DefinedPermission implements Comparable<DefinedPermission> {
 				}
 			}
 		}
-		
+
 		return permissionGranted;
 	}
 
