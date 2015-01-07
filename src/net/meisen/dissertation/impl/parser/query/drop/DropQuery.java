@@ -1,10 +1,6 @@
 package net.meisen.dissertation.impl.parser.query.drop;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
-import net.meisen.dissertation.exceptions.TidaModelException;
 import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
@@ -23,8 +19,6 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class DropQuery implements IQuery {
-	private final static Logger LOG = LoggerFactory.getLogger(DropQuery.class);
-
 	private DropType entityType;
 	private String entityName;
 	private String modelId;
