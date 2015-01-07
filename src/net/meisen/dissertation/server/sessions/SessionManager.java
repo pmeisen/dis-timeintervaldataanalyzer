@@ -30,8 +30,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+/**
+ * The manager to handle the different sessions of the system.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class SessionManager implements IResourceResolver {
+	/**
+	 * The name of the protocol used to resolve resources of a session.
+	 */
 	protected final static String RESOLVER_PROTOCOL = "uploaded";
+	/**
+	 * The syntax of an {@code URI} of the protocol used to resolve resources of
+	 * a session.
+	 */
 	protected final static String RESOLVER_SYNTAX = RESOLVER_PROTOCOL
 			+ "://[sessionId]/[file]";
 
@@ -51,10 +64,22 @@ public class SessionManager implements IResourceResolver {
 			+ UUID.randomUUID().toString()));
 	private File tmpDir;
 
+	/**
+	 * Default constructor which creates a manager cleaning the invalid sessions
+	 * automatically.
+	 */
 	public SessionManager() {
 		this(true);
 	}
 
+	/**
+	 * Constructor used to specify if the sessions should be cleaned
+	 * automatically if invalid.
+	 * 
+	 * @param enableAutoCleanUp
+	 *            {@code true} if the sessions should be cleaned automatically,
+	 *            otherwise {@code false}
+	 */
 	public SessionManager(final boolean enableAutoCleanUp) {
 		sessions = new ConcurrentHashMap<String, Session>();
 		timeOutInMin = 30;
@@ -76,6 +101,9 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Cleans up the sessions of the manager.
+	 */
 	public void cleanUp() {
 		final int timeout = this.timeOutInMin;
 
@@ -96,10 +124,24 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Gets a list of currently available and active sessions.
+	 * 
+	 * @return a collection of currently available and active sessions
+	 */
 	public Collection<Session> getActiveSessions() {
 		return Collections.unmodifiableCollection(this.sessions.values());
 	}
 
+	/**
+	 * Creates a session for the specified user-name. The method doesn't check
+	 * if there is another session bound to the specified user-name.
+	 * 
+	 * @param username
+	 *            the name of the user the session belongs to
+	 * 
+	 * @return the created session
+	 */
 	public Session createSession(final String username) {
 		final Session session = new Session(username);
 
@@ -108,10 +150,36 @@ public class SessionManager implements IResourceResolver {
 		return session;
 	}
 
+	/**
+	 * Gets the session with the specified identifier.
+	 * 
+	 * @param sessionId
+	 *            the identifier of the session to be retrieved
+	 * 
+	 * @return the session with the specified identifier
+	 */
 	public Session getSession(final String sessionId) {
 		return getSession(sessionId, false);
 	}
 
+	/**
+	 * Gets the session with the specified identifier and can throw an exception
+	 * if the session to be retrieved is invalid.
+	 * 
+	 * @param sessionId
+	 *            the identifier of the session to be retrieved
+	 * @param throwException
+	 *            {@code true} if an exception should be thrown if the session
+	 *            is invalid, otherwise {@code false}; the latter means that
+	 *            {@code null} will be returned but no exception will be thrown
+	 * 
+	 * @return the valid session, {@code null} if a session for the specified
+	 *         identifier does not exist, or the session is invalid
+	 * 
+	 * @throws SessionManagerException
+	 *             if an exception should be thrown, when the session is invalid
+	 *             or does not exist
+	 */
 	public Session getSession(final String sessionId,
 			final boolean throwException) throws SessionManagerException {
 		if (sessionId == null) {
@@ -143,6 +211,12 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Removes the specified session from the manager.
+	 * 
+	 * @param sessionId
+	 *            the identifier of the session to be removed
+	 */
 	public void removeSession(final String sessionId) {
 		Session session;
 
@@ -223,10 +297,21 @@ public class SessionManager implements IResourceResolver {
 		return sessionDir;
 	}
 
+	/**
+	 * Gets the time-out specified for the invalidity of inactive sessions.
+	 * 
+	 * @return the time-out specified for the invalidity of inactive sessions
+	 */
 	public int getTimeOutInMin() {
 		return timeOutInMin;
 	}
 
+	/**
+	 * Sets the time-out specified for the invalidity of inactive sessions.
+	 * 
+	 * @param timeOutInMin
+	 *            the time-out to be used
+	 */
 	public void setTimeOutInMin(final int timeOutInMin) {
 		if (timeOutInMin <= 0) {
 			if (LOG.isWarnEnabled()) {
@@ -238,6 +323,10 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Releases the manager an all bound resources. After this method is called,
+	 * the manager has to be re-initialized prior to any further usage.
+	 */
 	public void release() {
 		if (scheduler != null) {
 			scheduler.shutdownNow();
@@ -255,6 +344,11 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Gets the temporary directory used by the manager.
+	 * 
+	 * @return the temporary directory used by the manager
+	 */
 	public File getTempDir() {
 		if (tmpDir == null) {
 			exceptionRegistry.throwException(SessionManagerException.class,
@@ -269,6 +363,12 @@ public class SessionManager implements IResourceResolver {
 		return tmpDir;
 	}
 
+	/**
+	 * Sets the temporary directory to be used by the manager.
+	 * 
+	 * @param tmpDir
+	 *            the temporary directory to be used by the manager
+	 */
 	public void setTempDir(final File tmpDir) {
 		if (this.tmpDir == null) {
 			// nothing to do
@@ -310,17 +410,27 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
-	public void setTmpDir(final String tmpdir) {
-		final String canPath = Files.getCanonicalPath(tmpdir);
+	/**
+	 * Sets the temporary directory to be used by the manager.
+	 * 
+	 * @param tmpDir
+	 *            the temporary directory to be used by the manager
+	 */
+	public void setTmpDir(final String tmpDir) {
+		final String canPath = Files.getCanonicalPath(tmpDir);
 
 		if (canPath == null) {
 			exceptionRegistry.throwException(SessionManagerException.class,
-					1004, tmpdir);
+					1004, tmpDir);
 		} else {
 			setTempDir(new File(canPath));
 		}
 	}
 
+	/**
+	 * Resets the temporary directory to the default one, i.e. a randomly
+	 * generated directory within the temporary directory of the system.
+	 */
 	public void resetTempDir() {
 		setTempDir(new File(defTmpDir));
 	}
@@ -396,6 +506,16 @@ public class SessionManager implements IResourceResolver {
 		}
 	}
 
+	/**
+	 * Sets the {@code ExceptionRegistry} for the manager. The registry is also
+	 * auto-wired.
+	 * 
+	 * @param exceptionRegistry
+	 *            the {@code ExceptionRegistry} for the manager, cannot be
+	 *            {@code null}
+	 * 
+	 * @see IExceptionRegistry
+	 */
 	public void setExceptionRegistry(final IExceptionRegistry exceptionRegistry) {
 		this.exceptionRegistry = exceptionRegistry;
 	}

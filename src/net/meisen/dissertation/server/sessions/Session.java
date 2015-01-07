@@ -79,15 +79,42 @@ public class Session {
 		this.lastAccessDate = this.creationDate;
 	}
 
+	/**
+	 * Binds the specified {@code object} to the current session, associated to
+	 * the specified {@code identifier}.
+	 * 
+	 * @param identifier
+	 *            the identifier used to refer to the object
+	 * @param object
+	 *            the object to be bound to the session
+	 */
 	public void bind(final String identifier, final Object object) {
 		boundObjects.put(identifier, object);
 	}
 
+	/**
+	 * Gets the object bound to the specified {@code identifier} within the
+	 * session.
+	 * 
+	 * @param identifier
+	 *            the identifier of the object to be retrieved
+	 * 
+	 * @return the object bound or {@code null} if not object was found
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> T get(final String identifier) {
 		return (T) boundObjects.get(identifier);
 	}
 
+	/**
+	 * Removes, i.e. unbinds, the object associated to the specified
+	 * {@code identifier} from the session.
+	 * 
+	 * @param identifier
+	 *            the identifier of the object to be unbound
+	 * 
+	 * @return the object that was bound or {@code null} if no object was bound
+	 */
 	public Object unbind(final String identifier) {
 		return boundObjects.remove(identifier);
 	}
@@ -145,11 +172,22 @@ public class Session {
 		// check the difference between now and the last usage
 		final int nowDiff = Dates
 				.getDateDiffInMinutes(now, this.lastAccessDate);
-		
+
 		return nowDiff >= timeoutInMin;
 	}
 
-	public int getLeftTimeoutInMin(int timeoutInMin) {
+	/**
+	 * Determines the amount of times left within the session, if a session has
+	 * the specified {@code timeout}.
+	 * 
+	 * @param timeoutInMin
+	 *            the timeout of the session in minutes
+	 * 
+	 * @return the amount of minutes left until the session should be invalid,
+	 *         if {@code 0} the session will be invalidated or is already by the
+	 *         {@code SessionManager}
+	 */
+	public int getLeftTimeoutInMin(final int timeoutInMin) {
 		if (isTimedOut(timeoutInMin)) {
 			return 0;
 		} else {
@@ -160,10 +198,22 @@ public class Session {
 		}
 	}
 
+	/**
+	 * Gets the date when the session was created.
+	 * 
+	 * @return the date the session was created
+	 */
 	public Date getCreationDate() {
 		return creationDate;
 	}
 
+	/**
+	 * Gets the date when the session was accessed last.
+	 * 
+	 * @return the date the session was accessed last
+	 * 
+	 * @see #markAsUsed()
+	 */
 	public Date getLastAccessTime() {
 		return lastAccessDate;
 	}

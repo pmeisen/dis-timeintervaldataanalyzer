@@ -205,15 +205,41 @@ public class TidaServer {
 		}
 	}
 
+	/**
+	 * Logs the specified subject in for the current thread.
+	 * 
+	 * @param username
+	 *            the name of the subject to be logged in
+	 * @param password
+	 *            the password of the subject
+	 * 
+	 * @throws AuthException
+	 *             if the authentication failed
+	 */
 	public void login(final String username, final String password)
 			throws AuthException {
 		authManager.login(username, password);
 	}
 
+	/**
+	 * Logs the current user (i.e. the subject bound to the current thread) out.
+	 */
 	public void logout() {
 		authManager.logout();
 	}
 
+	/**
+	 * Fires the specified {@code query}
+	 * 
+	 * @param query
+	 *            the query to be fired
+	 * @return the result of the query
+	 * 
+	 * @throws QueryParsingException
+	 *             if the query could not be parsed
+	 * @throws QueryEvaluationException
+	 *             if the query could not be evaluated
+	 */
 	public IQueryResult fireQuery(final String query)
 			throws QueryParsingException, QueryEvaluationException {
 		final IQuery parsedQuery = queryFactory.parseQuery(query);
@@ -223,18 +249,44 @@ public class TidaServer {
 		return res;
 	}
 
+	/**
+	 * The {@code TidaModel} instances held by the {@code TidaModelHandler}.
+	 * 
+	 * @return a set of identifiers of loaded {@code TidaModel} instances
+	 */
 	public Set<String> getTidaModels() {
 		return handler.getTidaModels();
 	}
 
+	/**
+	 * Gets the available models (i.e. loaded and available but unloaded models)
+	 * by the handler.
+	 * 
+	 * @return the available (i.e. also not loaded models)
+	 */
 	public Set<String> getAvailableTidaModels() {
 		return handler.getAvailableTidaModels();
 	}
 
+	/**
+	 * Gets all the identifiers of models loaded automatically on start-up.
+	 * 
+	 * @return the identifiers loaded automatically
+	 */
 	public Set<String> getAutoloadedTidaModels() {
 		return handler.getAutoloadedTidaModels();
 	}
 
+	/**
+	 * Gets the {@code TidaModel} loaded by the {@code TidaModelHandler} with
+	 * the specified id. If no {@code TidaModelHandler} with the specified id is
+	 * loaded, {@code null} is returned.
+	 * 
+	 * @param id
+	 *            the if to moduleHolder to get the {@code TidaModel} for
+	 * 
+	 * @return the {@code TidaModel} or {@code null} if the id is unknown
+	 */
 	public TidaModel getModel(final String id) {
 		return handler.getTidaModel(id);
 	}
