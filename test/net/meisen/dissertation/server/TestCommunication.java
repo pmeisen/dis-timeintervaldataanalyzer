@@ -2,6 +2,7 @@ package net.meisen.dissertation.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -12,15 +13,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.meisen.dissertation.help.ThreadForTesting;
+import net.meisen.dissertation.jdbc.DriverProperties;
 import net.meisen.dissertation.jdbc.TidaConnection;
 import net.meisen.dissertation.jdbc.TidaResultSet;
 import net.meisen.dissertation.jdbc.TidaStatement;
+import net.meisen.dissertation.model.cache.IDataRecordCache;
+import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -168,21 +178,23 @@ public class TestCommunication {
 
 		@Test
 		public void testMultiThreadedUsage() throws SQLException {
-//			for (int i = 0; i < 100; i++) {
-//				System.out.println("--------> RUN " + i);
-//				runMultiThreadUsage("testCommunicationModel", 100, 0, 100, 50);
-//			}
-			// runMultiThreadUsage("testCommunicationModelWithFileCache", 100,
-			// 50,
-			// 0, 10);
-			// runMultiThreadUsage("testCommunicationModelWithMapDbCache", 100,
-			// 50, 0, 10);
+			runMultiThreadUsage("testCommunicationModel", 100, 100, 100, 100);
+			runMultiThreadUsage("testCommunicationModelWithFileCache", 100, 50,
+					50, 10);
+			runMultiThreadUsage("testCommunicationModelWithMapDbCache", 70, 50,
+					30, 10);
 		}
 
 		protected void runMultiThreadUsage(final String model,
 				final int stmtInsertCount, final int stmtDeleteCount,
 				final int stmtSelectCount, final int threadCountPerJob)
 				throws SQLException {
+
+			// set the properties used within the connections of the threads
+			final Properties properties = new Properties();
+			properties.setProperty(DriverProperties.PROPERTY_TIMEOUT, "0");
+			properties.setProperty(DriverProperties.PROPERTY_DISABLELINGER,
+					"true");
 
 			// load the communicationModel
 			final Statement stmt = conn.createStatement();
@@ -209,9 +221,9 @@ public class TestCommunication {
 				threads.add(new ThreadForTesting("insert_" + i) {
 					private final Random rnd = new Random();
 					private final TidaConnection conn = (TidaConnection) DriverManager
-							.getConnection(getJdbc());
+							.getConnection(getJdbc(), properties);
 
-					public void addValue(final int coll, final int nr) {
+					public String addValue(final int coll, final int nr) {
 						final String name = UUID.randomUUID().toString();
 
 						switch (coll) {
@@ -232,6 +244,8 @@ public class TestCommunication {
 							}
 							break;
 						}
+
+						return name;
 					}
 
 					@Override
@@ -247,7 +261,7 @@ public class TestCommunication {
 							 * generate a random integer telling what should be
 							 * added
 							 */
-							final int task = rnd.nextInt(10);
+							final int task = rnd.nextInt(20);
 
 							// task 0: reconnect
 							if (task == 0) {
@@ -255,9 +269,8 @@ public class TestCommunication {
 								threadStmt = conn.createStatement();
 							}
 
-							// task 1 & 2: create a new value for a descriptor
-							if (task == 1 || task == 2 || task == 3
-									|| task == 4) {
+							// task 1-7: create a new value for a descriptor
+							if (task > 0 && task < 8) {
 								final int coll = rnd.nextInt(4);
 								addValue(coll, i);
 							}
@@ -266,7 +279,7 @@ public class TestCommunication {
 							final int v1 = rnd.nextInt(102);
 							final int v2 = rnd.nextInt(102);
 
-							final String tSql = "INSERT INTO \""
+							String tSql = "INSERT INTO \""
 									+ model
 									+ "\" ([START], [END], TASK, DEPARTMENT, WORKAREA, MANPOWER) VALUES ("
 									+ Math.min(v1, v2)
@@ -285,12 +298,12 @@ public class TestCommunication {
 									+ mpDescriptor.get(rnd.nextInt(mpDescriptor
 											.size())) + "')";
 
-							// task 5: invalid value, i.e. delayed exception
-							// TODO; change -5
-							if (task == -5) {
+							// task 8: invalid value, i.e. delayed exception
+							if (task == 8) {
+								tSql = tSql.replaceFirst("'\\-?\\d+'\\)",
+										"'NOINT')");
 								try {
-									threadStmt.executeUpdate(tSql.replaceFirst(
-											"'\\d+'\\)", "'NOINT')"));
+									executeUpdate(threadStmt, tSql);
 								} catch (final Exception e) {
 									assertEquals(SQLException.class,
 											e.getClass());
@@ -298,13 +311,15 @@ public class TestCommunication {
 											"Unable to create a descriptor"));
 								}
 							} else {
-								threadStmt.execute(tSql,
+								execute(threadStmt, tSql,
 										Statement.RETURN_GENERATED_KEYS);
+
 								final ResultSet idRes = threadStmt
 										.getGeneratedKeys();
 								if (idRes.next()) {
 									addedIds.add(idRes.getInt(1));
 								}
+								idRes.close();
 							}
 						}
 
@@ -319,7 +334,7 @@ public class TestCommunication {
 				threads.add(new ThreadForTesting("delete_" + i) {
 					private final Random rnd = new Random();
 					private final TidaConnection conn = (TidaConnection) DriverManager
-							.getConnection(getJdbc());
+							.getConnection(getJdbc(), properties);
 
 					@Override
 					public void _run() throws Throwable {
@@ -335,12 +350,9 @@ public class TestCommunication {
 
 							// remove id from the database
 							if (id == null) {
-								int counter = 0;
-								while (addedIds.size() == 0 && counter < 10000) {
-									counter++;
-								}
+								Thread.sleep(500);
 							} else {
-								threadStmt.executeUpdate("DELETE " + id
+								executeUpdate(threadStmt, "DELETE " + id
 										+ " FROM \"" + model + "\"");
 								deletedIds.add(id);
 							}
@@ -357,7 +369,7 @@ public class TestCommunication {
 				threads.add(new ThreadForTesting("select_" + i) {
 					private final Random rnd = new Random();
 					private final TidaConnection conn = (TidaConnection) DriverManager
-							.getConnection(getJdbc());
+							.getConnection(getJdbc(), properties);
 
 					@Override
 					public void _run() throws Throwable {
@@ -368,15 +380,21 @@ public class TestCommunication {
 							final int v1 = rnd.nextInt(102);
 							final int v2 = rnd.nextInt(102);
 
-							final TidaResultSet res = threadStmt
-									.executeQuery("SELECT RECORDS FROM \""
-											+ model + "\" WITHIN ["
-											+ Math.min(v1, v2) + ", "
-											+ Math.max(v1, v2) + "]");
+							final TidaResultSet res = executeQuery(threadStmt,
+									"SELECT RECORDS FROM \"" + model
+											+ "\" WITHIN [" + Math.min(v1, v2)
+											+ ", " + Math.max(v1, v2) + "]");
+
+							// every 2nd we read some results
+							if (rnd.nextInt(100) < 10) {
+								while (res.next()) {
+									// get the identifier
+									res.getInt(1);
+								}
+							}
+
 							res.close();
 						}
-						System.out.println("FINISHED "
-								+ Thread.currentThread().getName());
 						threadStmt.close();
 					}
 
@@ -407,7 +425,13 @@ public class TestCommunication {
 				try {
 					t.validate();
 				} catch (final Throwable e) {
-					e.printStackTrace();
+					System.out.println("Exception found in '" + t.getName()
+							+ "' with '" + e.getMessage() + "'.");
+
+					if (!e.getMessage().contains(
+							"Unable to establish a connection")) {
+						e.printStackTrace();
+					}
 					foundExceptions++;
 				}
 			}
@@ -417,17 +441,125 @@ public class TestCommunication {
 				fail("Found " + foundExceptions + " exceptions.");
 			}
 
-			// close the connection
-			stmt.execute("DROP MODEL testCommunicationModel");
-			stmt.close();
+			// get the model
+			final TidaModel m = server.getModel(model);
 
-			System.out.println(waDescriptor.size());
-			System.out.println(taskDescriptor.size());
-			System.out.println(depDescriptor.size());
-			System.out.println(mpDescriptor.size());
-			System.out.println(addedIds.size());
-			System.out.println(deletedIds.size());
+			// check the descriptors
+			final MetaDataModel mMeta = m.getMetaDataModel();
+			assertDescriptorModel(mMeta.getDescriptorModel("TASK"),
+					taskDescriptor);
+			assertDescriptorModel(mMeta.getDescriptorModel("DEPARTMENT"),
+					depDescriptor);
+			assertDescriptorModel(mMeta.getDescriptorModel("WORKAREA"),
+					waDescriptor);
+			assertDescriptorModel(mMeta.getDescriptorModel("MANPOWER"),
+					mpDescriptor);
+
+			// check the added and deleted ids
+			assertRecordIds(m, addedIds, deletedIds);
+
+			// close the connection
+			try {
+				stmt.execute("DROP MODEL testCommunicationModel");
+			} catch (final Exception e) {
+				// nothing that isn't of importance
+			}
+			stmt.close();
 		}
+
+		private void assertRecordIds(final TidaModel model,
+				List<Integer> addedIds, Set<Integer> deletedIds) {
+			final IDataRecordCache cache = model.getDataRecordCache();
+			final Set<Integer> currentIds = new HashSet<Integer>();
+			currentIds.addAll(addedIds);
+			currentIds.removeAll(deletedIds);
+
+			final Iterator<Integer> it = model.getValidRecords().iterator();
+			final Set<Integer> modelIds = new HashSet<Integer>();
+			while (it.hasNext()) {
+				final int id = it.next();
+				assertTrue(modelIds.add(id));
+				assertNotNull(cache.get(id));
+			}
+
+			assertEquals(model.getAmountOfRecords(), modelIds.size());
+			assertEquals(model.getAmountOfRecords(), currentIds.size());
+
+			for (final Integer id : currentIds) {
+				final Object[] rec = cache.get(id);
+				assertNotNull(rec);
+				assertEquals(id, rec[0]);
+			}
+
+		}
+
+		protected void assertDescriptorModel(final DescriptorModel<?> model,
+				final List<?> descriptors) {
+			assertTrue(descriptors.size() >= model.getAllDescriptors().size());
+			for (final Descriptor<?, ?, ?> desc : model.getAllDescriptors()) {
+				assertTrue(desc.getValue().toString(),
+						descriptors.contains(desc.getValue()));
+			}
+		}
+	}
+
+	protected static boolean handleException(final SQLException e,
+			final AtomicInteger counter) throws SQLException {
+		if (e.getMessage().contains("Unable to establish a connection")) {
+			if (counter.incrementAndGet() > 10) {
+				fail("Did not get a new connection after ten retries ("
+						+ counter.get() + ".");
+			}
+			return false;
+		} else {
+			throw e;
+		}
+	}
+
+	protected static void execute(final TidaStatement stmt, final String query,
+			final int returnGeneratedKeys) throws SQLException {
+		final AtomicInteger counter = new AtomicInteger(0);
+		boolean noException;
+		do {
+			noException = true;
+			try {
+				stmt.execute(query, returnGeneratedKeys);
+			} catch (final SQLException e) {
+				noException = handleException(e, counter);
+			}
+		} while (!noException);
+	}
+
+	protected static void executeUpdate(final TidaStatement stmt,
+			final String query) throws SQLException {
+		final AtomicInteger counter = new AtomicInteger(0);
+		boolean noException;
+		do {
+			noException = true;
+			try {
+				stmt.executeUpdate(query);
+			} catch (final SQLException e) {
+				noException = handleException(e, counter);
+			}
+		} while (!noException);
+	}
+
+	protected static TidaResultSet executeQuery(final TidaStatement stmt,
+			final String query) throws SQLException {
+		final AtomicInteger counter = new AtomicInteger(0);
+		TidaResultSet res = null;
+
+		boolean noException;
+		do {
+			noException = true;
+			try {
+				res = stmt.executeQuery(query);
+			} catch (final SQLException e) {
+				noException = handleException(e, counter);
+			}
+		} while (!noException);
+
+		return res;
 	}
 
 	/**

@@ -5,6 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
@@ -47,6 +48,8 @@ public class DescriptorModel<I extends Object> {
 	private NullDescriptor<I> nullDescriptor = null;
 	private boolean failOnDuplicates = true;
 	private boolean supportsNullDescriptor = false;
+
+	private final ReentrantReadWriteLock idxLock;
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -120,6 +123,8 @@ public class DescriptorModel<I extends Object> {
 	public DescriptorModel(final String id, final String name,
 			final Class<? extends Descriptor> descriptorClass,
 			final IIdsFactory<I> idsFactory, final BaseIndexFactory indexFactory) {
+		this.idxLock = new ReentrantReadWriteLock();
+
 		this.id = id;
 		this.name = name;
 		this.descriptorClass = descriptorClass;
@@ -344,7 +349,12 @@ public class DescriptorModel<I extends Object> {
 	 * @return the amount of descriptors
 	 */
 	public int size() {
-		return getDescriptorIndex().size();
+		idxLock.readLock().lock();
+		try {
+			return getDescriptorIndex().size();
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -488,7 +498,13 @@ public class DescriptorModel<I extends Object> {
 	 */
 	@SuppressWarnings("unchecked")
 	public Collection<Descriptor<?, ?, I>> getDescriptors() {
-		return (Collection<Descriptor<?, ?, I>>) getDescriptorIndex().getAll();
+		idxLock.readLock().lock();
+		try {
+			return (Collection<Descriptor<?, ?, I>>) getDescriptorIndex()
+					.getAll();
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -522,7 +538,6 @@ public class DescriptorModel<I extends Object> {
 	 *         {@code null} if no {@code Descriptor} with such an {@code id}
 	 *         exists
 	 */
-	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptor(final I id) {
 
 		if (id == null) {
@@ -533,8 +548,29 @@ public class DescriptorModel<I extends Object> {
 				&& id.equals(getNullDescriptorId())) {
 			return getNullDescriptor();
 		} else {
+			return getDescriptorByDefNr(0, id);
+		}
+	}
+
+	/**
+	 * Retrieves the specified descriptor.
+	 * 
+	 * @param keyDefNr
+	 *            the number of the key of the index, which defines the values
+	 * @param values
+	 *            the values to be mapped
+	 * 
+	 * @return the descriptor found or {@code null} if none was found
+	 */
+	@SuppressWarnings("unchecked")
+	protected Descriptor<?, ?, I> getDescriptorByDefNr(final int keyDefNr,
+			final Object... values) {
+		idxLock.readLock().lock();
+		try {
 			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
-					0, id);
+					keyDefNr, values);
+		} finally {
+			idxLock.readLock().unlock();
 		}
 	}
 
@@ -549,7 +585,6 @@ public class DescriptorModel<I extends Object> {
 	 *         {@code null} if no {@code Descriptor} with such an {@code value}
 	 *         exists
 	 */
-	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptorByValue(final Object value) {
 
 		if (supportsNullDescriptor() && value == null) {
@@ -562,14 +597,12 @@ public class DescriptorModel<I extends Object> {
 			if (value instanceof String) {
 				return getDescriptorByString((String) value);
 			} else if (getValueType().isAssignableFrom(value.getClass())) {
-				return (Descriptor<?, ?, I>) getDescriptorIndex()
-						.getObjectByDefNr(1, value);
+				return getDescriptorByDefNr(1, value);
 			} else {
 				return null;
 			}
 		} else if (getValueType().isAssignableFrom(value.getClass())) {
-			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
-					1, value);
+			return getDescriptorByDefNr(1, value);
 		} else if (value instanceof String) {
 			return getDescriptorByString((String) value);
 		} else {
@@ -623,7 +656,6 @@ public class DescriptorModel<I extends Object> {
 	 * 
 	 * @see Descriptor#getUniqueString()
 	 */
-	@SuppressWarnings("unchecked")
 	public Descriptor<?, ?, I> getDescriptorByString(final String value) {
 
 		if (value == null) {
@@ -633,8 +665,7 @@ public class DescriptorModel<I extends Object> {
 				return null;
 			}
 		} else {
-			return (Descriptor<?, ?, I>) getDescriptorIndex().getObjectByDefNr(
-					2, value);
+			return getDescriptorByDefNr(2, value);
 		}
 	}
 
@@ -686,21 +717,28 @@ public class DescriptorModel<I extends Object> {
 			throws DescriptorModelException {
 		boolean added = false;
 
+		idxLock.writeLock().lock();
 		try {
 			added = getDescriptorIndex().addObject(descriptor);
+
+			// mark the id as used if added
+			if (added) {
+
+				@SuppressWarnings("unchecked")
+				final I id = (I) descriptor.getId();
+				idsFactory.setIdAsUsed(id);
+			}
 		} catch (final Exception e) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1003, e, descriptor.getUniqueString(), getId());
+		} finally {
+			idxLock.writeLock().unlock();
 		}
 
-		// make sure it was added
+		// if it wasn't added, than we have a duplicate
 		if (!added && isFailOnDuplicates()) {
 			exceptionRegistry.throwException(DescriptorModelException.class,
 					1002, descriptor.getUniqueString(), getId());
-		} else if (added) {
-			@SuppressWarnings("unchecked")
-			final I id = (I) descriptor.getId();
-			idsFactory.setIdAsUsed(id);
 		}
 
 		return added;
@@ -851,6 +889,11 @@ public class DescriptorModel<I extends Object> {
 
 	@Override
 	public String toString() {
-		return descriptors.toString();
+		idxLock.readLock().lock();
+		try {
+			return getDescriptorIndex().toString();
+		} finally {
+			idxLock.readLock().unlock();
+		}
 	}
 }

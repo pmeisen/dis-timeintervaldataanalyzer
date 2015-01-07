@@ -67,18 +67,4 @@ public class Slice<I extends Object> extends BaseSlice<I> {
 	public void deserialize(final DataInputStream in) throws IOException {
 		super.deserializeBitmap(in);
 	}
-
-	/**
-	 * Marks the specified {@code recId} to be set, i.e. the value {@code this}
-	 * slice represents by id is assumed to be set for the specified record.
-	 * 
-	 * @param recId
-	 *            the identifiers of the record to be set
-	 */
-	public void set(final int recId) {
-		getBitmap().set(recId);
-
-		// inform the cache
-		updateBitmapCache();
-	}
 }

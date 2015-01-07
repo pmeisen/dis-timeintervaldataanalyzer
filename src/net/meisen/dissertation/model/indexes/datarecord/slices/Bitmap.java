@@ -84,6 +84,12 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 
 	/**
 	 * Sets the specified identifiers of the {@code Bitmap} to {@code true}.
+	 * Depending on the underlying implementation it has to be ensured, that the
+	 * bitmap itself is not manipulated. It is ensured by the framework, that
+	 * only one thread manipulates (e.g. calls set) on a bitmap, nevertheless
+	 * the bitmap could be in use by several reading instances (i.e. select).
+	 * Thereby, it might be wise to manipulate a clone and assign that to the
+	 * internal bitmap after the manipulation.
 	 * 
 	 * @param recordIds
 	 *            the identifiers to be set

@@ -12,6 +12,7 @@ import net.meisen.dissertation.exceptions.AuthException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.model.auth.IAuthManager;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
@@ -225,13 +226,17 @@ public class TidaServer {
 	public Set<String> getTidaModels() {
 		return handler.getTidaModels();
 	}
-	
+
 	public Set<String> getAvailableTidaModels() {
 		return handler.getAvailableTidaModels();
 	}
 
 	public Set<String> getAutoloadedTidaModels() {
 		return handler.getAutoloadedTidaModels();
+	}
+
+	public TidaModel getModel(final String id) {
+		return handler.getTidaModel(id);
 	}
 
 	/**

@@ -5,7 +5,6 @@ import java.net.SocketException;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.TidaServerListenerException;
-import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.general.server.api.impl.BaseListener;

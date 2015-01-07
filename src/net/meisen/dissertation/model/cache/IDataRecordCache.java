@@ -2,7 +2,7 @@ package net.meisen.dissertation.model.cache;
 
 import java.util.Iterator;
 
-import net.meisen.dissertation.impl.cache.BaseIdentifierCacheException;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.ProcessedDataRecord;
 import net.meisen.dissertation.model.util.IIntIterator;
 
@@ -44,12 +44,23 @@ public interface IDataRecordCache extends ICache, Iterable<Integer> {
 	public Object[] get(final int recordId);
 
 	/**
-	 * Gets an iterator used to iterate over the identifiers.
+	 * Gets an iterator used to iterate over the identifiers of the cache. The
+	 * cache might contain invalid, i.e. deleted records. The iterator might
+	 * contain such records. Use {@link TidaModel#getValidRecords()
+	 * #intIterator()} instead, if you are looking for the valid records.
 	 * 
 	 * @return an iterator used to iterate over the identifiers
 	 */
 	public IIntIterator intIterator();
 
+	/**
+	 * Gets an iterator used to iterate over the identifiers of the cache. The
+	 * cache might contain invalid, i.e. deleted records. The iterator might
+	 * contain such records. Use {@link TidaModel#getValidRecords() #iterator()}
+	 * instead, if you are looking for the valid records.
+	 * 
+	 * @return an iterator used to iterate over the identifiers
+	 */
 	@Override
 	public Iterator<Integer> iterator();
 
@@ -59,12 +70,8 @@ public interface IDataRecordCache extends ICache, Iterable<Integer> {
 	 * 
 	 * @param config
 	 *            the configuration to be used
-	 * 
-	 * @throws BaseIdentifierCacheException
-	 *             if the cache is initialized
 	 */
-	public void setConfig(final IDataRecordCacheConfig config)
-			throws BaseIdentifierCacheException;
+	public void setConfig(final IDataRecordCacheConfig config);
 
 	/**
 	 * Gets the amount of entries in the cache.

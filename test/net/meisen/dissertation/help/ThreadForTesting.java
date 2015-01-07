@@ -1,5 +1,6 @@
 package net.meisen.dissertation.help;
 
+
 /**
  * A thread which can handle exceptions.
  * 

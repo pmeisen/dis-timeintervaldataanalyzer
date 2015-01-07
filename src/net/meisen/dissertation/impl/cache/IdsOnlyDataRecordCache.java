@@ -91,18 +91,7 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 
 	@Override
 	public IIntIterator intIterator() {
-		return new IIntIterator() {
-
-			@Override
-			public boolean hasNext() {
-				return false;
-			}
-
-			@Override
-			public int next() {
-				throw new IllegalStateException("There is no next element.");
-			}
-		};
+		return model.getValidRecords().intIterator();
 	}
 
 	/**

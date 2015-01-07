@@ -68,9 +68,13 @@ public class RoaringBitmap extends Bitmap {
 
 	@Override
 	protected void set(final int... recordIds) {
+		final org.roaringbitmap.RoaringBitmap clone = bitmap.clone();
 		for (final int recordId : recordIds) {
-			bitmap.add(recordId);
+			clone.add(recordId);
 		}
+
+		// now set the bitmap in just one step
+		this.bitmap = clone;
 	}
 
 	@Override

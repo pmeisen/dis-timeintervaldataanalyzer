@@ -34,7 +34,7 @@ public class IndexFactory extends BaseIndexFactory {
 		// check if we have a configuration already
 		if (this.config != null) {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn("The configuration of the factory is already defined, but changed.");
+				LOG.warn("The configuration of the factory is already defined, and cannot be changed.");
 			}
 		}
 
