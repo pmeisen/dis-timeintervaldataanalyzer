@@ -176,6 +176,14 @@ public class TestCommunication {
 			stmt.close();
 		}
 
+		/**
+		 * Test used for multi-threading. The tests fires several queries over
+		 * several threads for different models using
+		 * {@link #runMultiThreadUsage(String, int, int, int, int)}.
+		 * 
+		 * @throws SQLException
+		 *             if the test fails
+		 */
 		@Test
 		public void testMultiThreadedUsage() throws SQLException {
 			runMultiThreadUsage("testCommunicationModel", 100, 100, 100, 100);
@@ -185,6 +193,22 @@ public class TestCommunication {
 					30, 10);
 		}
 
+		/**
+		 * The multi-threading test, performed for the specified {@code model}.
+		 * 
+		 * @param model
+		 *            the identifier of the model, which must be equal - in this
+		 *            specific case - with the filename
+		 * @param stmtInsertCount
+		 *            the amount of insert statements per thread
+		 * @param stmtDeleteCount
+		 *            the amount of delete statements per thread
+		 * @param stmtSelectCount
+		 *            the amount of select statements per thread
+		 * @param threadCountPerJob
+		 *            the amount of threads to run per statement-type
+		 * @throws SQLException
+		 */
 		protected void runMultiThreadUsage(final String model,
 				final int stmtInsertCount, final int stmtDeleteCount,
 				final int stmtSelectCount, final int threadCountPerJob)
@@ -493,6 +517,14 @@ public class TestCommunication {
 
 		}
 
+		/**
+		 * Assert to validate the specified {@code DescriptorModel}.
+		 * 
+		 * @param model
+		 *            the {@code DescriptorModel} to be validated
+		 * @param descriptors
+		 *            the created descriptors of the specified type
+		 */
 		protected void assertDescriptorModel(final DescriptorModel<?> model,
 				final List<?> descriptors) {
 			assertTrue(descriptors.size() >= model.getAllDescriptors().size());
@@ -503,10 +535,24 @@ public class TestCommunication {
 		}
 	}
 
+	/**
+	 * Method used to handle exceptions during test.
+	 * 
+	 * @param e
+	 *            the exception thrown
+	 * @param counter
+	 *            the actual counter, i.e. how often the exception was handled
+	 *            so far
+	 * @return {@code true} if the exception should be ignored, {@code false} if
+	 *         the amount of retries is exceeded
+	 * 
+	 * @throws SQLException
+	 *             if the exception should have been handled
+	 */
 	protected static boolean handleException(final SQLException e,
 			final AtomicInteger counter) throws SQLException {
 		if (e.getMessage().contains("Unable to establish a connection")) {
-			if (counter.incrementAndGet() > 10) {
+			if (counter.incrementAndGet() > 5) {
 				fail("Did not get a new connection after ten retries ("
 						+ counter.get() + ".");
 			}
@@ -516,6 +562,20 @@ public class TestCommunication {
 		}
 	}
 
+	/**
+	 * Executes the specified query.
+	 * 
+	 * @param stmt
+	 *            the statement used for execution
+	 * @param query
+	 *            the query the query to be fired
+	 * @param returnGeneratedKeys
+	 *            defines if the flag for return the generated keys should be
+	 *            set
+	 * 
+	 * @throws SQLException
+	 *             if an unexpected problem occures
+	 */
 	protected static void execute(final TidaStatement stmt, final String query,
 			final int returnGeneratedKeys) throws SQLException {
 		final AtomicInteger counter = new AtomicInteger(0);
@@ -530,6 +590,17 @@ public class TestCommunication {
 		} while (!noException);
 	}
 
+	/**
+	 * Executes the specified update query.
+	 * 
+	 * @param stmt
+	 *            the statement used for execution
+	 * @param query
+	 *            the query the query to be fired
+	 * 
+	 * @throws SQLException
+	 *             if an unexpected problem occures
+	 */
 	protected static void executeUpdate(final TidaStatement stmt,
 			final String query) throws SQLException {
 		final AtomicInteger counter = new AtomicInteger(0);
@@ -544,6 +615,18 @@ public class TestCommunication {
 		} while (!noException);
 	}
 
+	/**
+	 * Executes the specified select query.
+	 * 
+	 * @param stmt
+	 *            the statement used for execution
+	 * @param query
+	 *            the query the query to be fired
+	 * @return the created {@code TidaResultSet}
+	 * 
+	 * @throws SQLException
+	 *             if an unexpected problem occures
+	 */
 	protected static TidaResultSet executeQuery(final TidaStatement stmt,
 			final String query) throws SQLException {
 		final AtomicInteger counter = new AtomicInteger(0);
