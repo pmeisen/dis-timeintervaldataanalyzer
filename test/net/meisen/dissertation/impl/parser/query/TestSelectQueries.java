@@ -2282,6 +2282,23 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the retrieval of a time-series for an interval which is not part of
+	 * the defined time-line.
+	 */
+	@Test
+	public void testOutOfBoundInterval() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "SELECT TIMESERIES OF SUM(SCREAMS) AS SCREAMS FROM testPersonModel IN [03.01.2014, 04.01.2014)";
+
+		// load the model
+		m(xml);
+
+		final TimeSeriesCollection tsRes = ((SelectResultTimeSeries) factory
+				.evaluateQuery(q(query), null)).getTimeSeriesResult();
+		assertEquals(0, tsRes.size());
+	}
+
+	/**
 	 * Tests the exception expected if an invalid model is used.
 	 */
 	@Test

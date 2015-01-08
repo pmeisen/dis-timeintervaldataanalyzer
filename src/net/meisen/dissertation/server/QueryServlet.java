@@ -420,9 +420,19 @@ public class QueryServlet extends BaseServlet {
 						} else if (obj instanceof Long) {
 							objValue = JsonValue.valueOf((Long) obj);
 						} else if (obj instanceof Float) {
-							objValue = JsonValue.valueOf((Float) obj);
+							final Float f = (Float) obj;
+							if (Float.isNaN(f) || Float.isInfinite(f)) {
+								objValue = JsonValue.NULL;
+							} else {
+								objValue = JsonValue.valueOf((Float) obj);
+							}
 						} else if (obj instanceof Double) {
-							objValue = JsonValue.valueOf((Double) obj);
+							final Double d = (Double) obj;
+							if (Double.isNaN(d) || Double.isInfinite(d)) {
+								objValue = JsonValue.NULL;
+							} else {
+								objValue = JsonValue.valueOf((Double) obj);
+							}
 						} else if (obj instanceof Date) {
 							objValue = JsonValue.valueOf(Dates.formatDate(
 									(Date) obj, "dd.MM.yyyy HH:mm:ss"));

@@ -213,7 +213,7 @@ public class TimeSeriesEvaluator {
 	 *            the members to be combined
 	 * @param bounds
 	 *            the range limiting the members
-	 *            
+	 * 
 	 * @return the combination
 	 */
 	protected CombinedSlices createCombination(final TimeLevelMember member,
@@ -453,8 +453,12 @@ public class TimeSeriesEvaluator {
 
 		// determine the window and get the slices needed
 		final long[] bounds = getBounds(interval);
-		final SliceWithDescriptors<?>[] timeSlices = index
-				.getIntervalIndexSlices(bounds[0], bounds[1]);
+		final SliceWithDescriptors<?>[] timeSlices;
+		if (bounds == null) {
+			timeSlices = new SliceWithDescriptors<?>[0];
+		} else {
+			timeSlices = index.getIntervalIndexSlices(bounds[0], bounds[1]);
+		}
 
 		// create the result
 		final TimeSeriesCollection result = createTimeSeriesResult(interval,
@@ -463,7 +467,7 @@ public class TimeSeriesEvaluator {
 		/*
 		 * Iterate over the different slices and calculate each measure.
 		 */
-		int offset = Numbers.castToInt(bounds[0]);
+		int offset = bounds == null ? 0 : Numbers.castToInt(bounds[0]);
 		int timeSeriesPos = 0;
 		for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
 			final FactDescriptorModelSet factSet = timeSlice == null ? null
