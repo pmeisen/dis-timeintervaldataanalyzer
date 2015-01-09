@@ -12,7 +12,7 @@ public interface ICache {
 
 	/**
 	 * Method used to disable or enable (default) the persistency. During the
-	 * time the persistency is disable all changes are just done within the
+	 * time the persistency is disabled all changes are just done within the
 	 * memory. Whenever the persistency is enabled again, all data have to be
 	 * persisted if supported by the cache.
 	 * 

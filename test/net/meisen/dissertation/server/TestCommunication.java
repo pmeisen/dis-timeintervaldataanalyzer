@@ -491,7 +491,18 @@ public class TestCommunication {
 			stmt.close();
 		}
 
-		private void assertRecordIds(final TidaModel model,
+		/**
+		 * Validates the addedIds and deletedIds according to the data in the
+		 * model.
+		 * 
+		 * @param model
+		 *            the model
+		 * @param addedIds
+		 *            the added identifiers as collected in the test
+		 * @param deletedIds
+		 *            the deleted identifiers as collected in the test
+		 */
+		protected void assertRecordIds(final TidaModel model,
 				List<Integer> addedIds, Set<Integer> deletedIds) {
 			final IDataRecordCache cache = model.getDataRecordCache();
 			final Set<Integer> currentIds = new HashSet<Integer>();
@@ -532,6 +543,74 @@ public class TestCommunication {
 				assertTrue(desc.getValue().toString(),
 						descriptors.contains(desc.getValue()));
 			}
+		}
+
+		@Test
+		public void testBulkLoad() throws SQLException {
+			final Statement stmt = conn.createStatement();
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testCommunicationModel.xml'");
+
+			stmt.execute("SET BULKLOAD=true");
+
+			// same thread a problem
+			stmt.execute("SET BULKLOAD=true");
+
+			final ThreadForTesting setBulkLoad = new ThreadForTesting(
+					"setBulkLoad") {
+				private final TidaConnection innerConn = (TidaConnection) DriverManager
+						.getConnection(getJdbc());
+
+				@Override
+				public void _run() throws Throwable {
+					final TidaStatement innerStmt = innerConn.createStatement();
+					innerStmt.executeUpdate("SET BULKLOAD=true");
+					innerStmt.close();
+				}
+
+				@Override
+				protected void cleanUp() throws Throwable {
+					innerConn.close();
+				}
+			};
+			final ThreadForTesting unsetBulkLoad = new ThreadForTesting(
+					"setBulkLoad") {
+				private final TidaConnection innerConn = (TidaConnection) DriverManager
+						.getConnection(getJdbc());
+
+				@Override
+				public void _run() throws Throwable {
+					final TidaStatement innerStmt = innerConn.createStatement();
+					innerStmt.executeUpdate("SET BULKLOAD=false");
+					innerStmt.close();
+				}
+
+				@Override
+				protected void cleanUp() throws Throwable {
+					innerConn.close();
+				}
+			};
+			final ThreadForTesting insertData = new ThreadForTesting(
+					"insertData") {
+				private final TidaConnection innerConn = (TidaConnection) DriverManager
+						.getConnection(getJdbc());
+
+				@Override
+				public void _run() throws Throwable {
+					final TidaStatement innerStmt = innerConn.createStatement();
+					innerStmt.executeUpdate("");
+					innerStmt.close();
+				}
+
+				@Override
+				protected void cleanUp() throws Throwable {
+					innerConn.close();
+				}
+			};
+
+			// disable the load again
+			stmt.execute("SET BULKLOAD=false");
+
+			stmt.close();
 		}
 	}
 

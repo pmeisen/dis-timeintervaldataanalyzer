@@ -125,7 +125,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 
 		// add the data to the model, the interval-tree and the map is naive one
 		final List<IntervalData<Integer>> list = new ArrayList<IntervalData<Integer>>();
-		model.enableBulkLoad();
+		model.setBulkLoad(true);
 		try {
 			int i = 0;
 			for (final Map<String, Object> row : rows) {
@@ -141,7 +141,7 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 				i++;
 			}
 		} finally {
-			model.disableBulkLoad();
+			model.setBulkLoad(false);
 		}
 		final IntervalTree<Integer> iTree = new IntervalTree<Integer>(list);
 

@@ -10,7 +10,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -116,11 +119,11 @@ public class TidaModel implements IPersistable {
 	private MetaDataHandling metaDataHandling;
 	private IntervalDataHandling intervalDataHandling;
 	private OfflineMode offlineMode;
-
+	private boolean bulkLoadEnabled;
+	
 	private Group persistentGroup = null;
 
-	private ReentrantReadWriteLock loadLock = new ReentrantReadWriteLock();
-
+	private final ReentrantLock modificationLock;
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
 	 * instance must be wired prior to it's usage to ensure that an
@@ -171,6 +174,9 @@ public class TidaModel implements IPersistable {
 	 *            the working directory of the model
 	 */
 	public TidaModel(final String id, final String name, final File location) {
+		this.bulkLoadEnabled = false;
+		this.modificationLock = new ReentrantLock();
+
 		this.id = id == null ? UUID.randomUUID().toString() : id;
 		this.name = name == null ? id : name;
 		this.location = location == null ? new File(".", this.id) : location;
@@ -364,11 +370,11 @@ public class TidaModel implements IPersistable {
 					"loadData");
 		}
 
-		loadLock.writeLock().lock();
+		modificationLock.lock();
 		try {
 			_loadRecord(dataStructure, record);
 		} finally {
-			loadLock.writeLock().unlock();
+			modificationLock.unlock();
 		}
 	}
 
@@ -451,30 +457,43 @@ public class TidaModel implements IPersistable {
 		return bulkLoadData(dataStructure, it, true);
 	}
 
-	/**
-	 * Enables the bulk loading.
-	 */
-	public void enableBulkLoad() {
-		loadLock.writeLock().lock();
+	public void setBulkLoad(final boolean enable) {
 
-		getBitmapCache().setPersistency(false);
-		getFactsCache().setPersistency(false);
-		getIdentifierCache().setPersistency(false);
-		getDataRecordCache().setPersistency(false);
+		modificationLock.lock();
+		try {
+			if (enable == bulkLoadEnabled) {
+				throw new IllegalStateException("Bulkload already " + enable);
+			} else {
+				modifyBulkLoad(enable);
+			}
+		} finally {
+			modificationLock.unlock();
+		}
 	}
 
-	/**
-	 * Disables the bulk loading.
-	 */
-	public void disableBulkLoad() {
+	protected void modifyBulkLoad(final boolean enable) {
 
-		// enable the persistence again, everything is loaded
-		getBitmapCache().setPersistency(false);
-		getFactsCache().setPersistency(false);
-		getIdentifierCache().setPersistency(false);
-		getDataRecordCache().setPersistency(false);
+		// make sure nobody is currently modifying the data
+		modificationLock.lock();
 
-		loadLock.writeLock().unlock();
+		try {
+
+			// check if there is a change, otherwise just do nothing and return
+			if (enable != bulkLoadEnabled) {
+
+				// set persistence
+				getBitmapCache().setPersistency(!enable);
+				getFactsCache().setPersistency(!enable);
+				getIdentifierCache().setPersistency(!enable);
+				getDataRecordCache().setPersistency(!enable);
+				
+				bulkLoadEnabled = enable;
+			}
+		} finally {
+
+			// now modifications can be accepted again
+			modificationLock.unlock();
+		}
 	}
 
 	/**
@@ -487,18 +506,15 @@ public class TidaModel implements IPersistable {
 	 */
 	public int[] invalidateRecords(final int[] ids) {
 
-		loadLock.writeLock().lock();
+		modificationLock.lock();
 
 		final Bitmap priorBitmap = getIdentifierCache().getValidIdentifiers();
-		Bitmap afterBitmap;
-		boolean oldPersistencyId = true;
+		final Bitmap afterBitmap;
 		try {
-			oldPersistencyId = getIdentifierCache().setPersistency(false);
 			getIdentifierCache().markIdentifierAsInvalid(ids);
-		} finally {
 			afterBitmap = getIdentifierCache().getValidIdentifiers();
-			getIdentifierCache().setPersistency(oldPersistencyId);
-			loadLock.writeLock().unlock();
+		} finally {
+			modificationLock.unlock();
 		}
 
 		// get the records really delete
@@ -539,18 +555,11 @@ public class TidaModel implements IPersistable {
 		final TIntArrayList res = new TIntArrayList();
 
 		// inform the cache about bulk-loads
-		loadLock.writeLock().lock();
-		int amountOfData = 0;
-		boolean oldPersistencyBitmap = true;
-		boolean oldPersistencyFacts = true;
-		boolean oldPersistencyId = true;
-		boolean oldPersistencyRecord = true;
-		try {
-			oldPersistencyBitmap = getBitmapCache().setPersistency(false);
-			oldPersistencyFacts = getFactsCache().setPersistency(false);
-			oldPersistencyId = getIdentifierCache().setPersistency(false);
-			oldPersistencyRecord = getDataRecordCache().setPersistency(false);
+		modificationLock.lock();
+		modifyBulkLoad(true);
 
+		int amountOfData = 0;
+		try {
 			try {
 				while (it.hasNext()) {
 
@@ -571,18 +580,14 @@ public class TidaModel implements IPersistable {
 					((IClosableIterator<?>) it).close();
 				}
 			}
-			
+
 			// optimize the indexes after the loading
 			this.idx.optimize();
 		} finally {
 
 			// enable the persistence again, everything is loaded
-			getBitmapCache().setPersistency(oldPersistencyBitmap);
-			getFactsCache().setPersistency(oldPersistencyFacts);
-			getIdentifierCache().setPersistency(oldPersistencyId);
-			getDataRecordCache().setPersistency(oldPersistencyRecord);
-
-			loadLock.writeLock().unlock();
+			modifyBulkLoad(false);
+			modificationLock.unlock();
 		}
 
 		// log the finalization
