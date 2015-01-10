@@ -50,4 +50,9 @@ public class DbQueryConfig implements IQueryConfiguration {
 	public void setLanguage(final String language) {
 		this.language = language;
 	}
+
+	@Override
+	public String toString() {
+		return getLanguage() + ": " + getQuery();
+	}
 }

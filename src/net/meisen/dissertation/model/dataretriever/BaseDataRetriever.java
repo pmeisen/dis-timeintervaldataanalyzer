@@ -135,4 +135,15 @@ public abstract class BaseDataRetriever {
 	public String getId() {
 		return id;
 	}
+
+	/**
+	 * Sets the exception registry to be used. The registry is auto-wired, but
+	 * anyways sometimes thats not a solution.
+	 * 
+	 * @param exceptionRegistry
+	 *            the exception registry to be used
+	 */
+	public void setExceptionRegistry(final IExceptionRegistry exceptionRegistry) {
+		this.exceptionRegistry = exceptionRegistry;
+	}
 }

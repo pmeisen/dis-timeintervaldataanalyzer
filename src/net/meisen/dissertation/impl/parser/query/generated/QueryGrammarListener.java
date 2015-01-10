@@ -121,6 +121,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitCompDimMathMeasure(@NotNull QueryGrammarParser.CompDimMathMeasureContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAggregate}.
 	 * @param ctx the parse tree
 	 */
@@ -152,17 +163,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx);
-
-	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compMathMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompMathMeasure(@NotNull QueryGrammarParser.CompMathMeasureContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateInterval}.
@@ -592,6 +592,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorValue(@NotNull QueryGrammarParser.SelectorValueContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#exprSetBulkLoad}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprSetBulkLoad(@NotNull QueryGrammarParser.ExprSetBulkLoadContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#exprSetBulkLoad}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprSetBulkLoad(@NotNull QueryGrammarParser.ExprSetBulkLoadContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprGrant}.

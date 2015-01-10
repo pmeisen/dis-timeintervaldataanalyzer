@@ -43,8 +43,9 @@ exprDrop            : STMT_DROP (((TYPE_USER | TYPE_ROLE) VALUE) | TYPE_MODEL se
 /*
  * Define the expressions to modify a user's password.
  */
-exprModify          : STMT_MODIFY TYPE_USER VALUE exprSetPassword;
-exprSetPassword     : OP_SET PROP_PASSWORD OP_TO VALUE;
+exprModify          : STMT_MODIFY ((TYPE_USER VALUE exprSetPassword) | (TYPE_MODEL selectorModelId exprSetBulkLoad));
+exprSetPassword     : OP_SET PROP_PASSWORD CMP_EQUAL VALUE;
+exprSetBulkLoad     : OP_SET PROP_BULKLOAD CMP_EQUAL selectorBoolean;
 
 /*
  * Define the expressions to grant permissions to a user or a role.
@@ -222,6 +223,7 @@ STMT_REMOVE   : R E M O V E;
 PROP_AUTOLOAD : A U T O L O A D;
 PROP_FORCE    : F O R C E;
 PROP_PASSWORD : P A S S W O R D;
+PROP_BULKLOAD : B U L K L O A D;
 
 // reserved words to define the types of modifications
 TYPE_TIMESERIES  : T I M E S E R I E S;

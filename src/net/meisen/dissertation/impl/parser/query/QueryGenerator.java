@@ -64,6 +64,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Ex
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectRecordsContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSelectTimeSeriesContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSetBulkLoadContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprSetPasswordContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprStructureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.ExprUnloadContext;
@@ -99,6 +100,7 @@ import net.meisen.dissertation.impl.parser.query.grant.GrantType;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.impl.parser.query.load.LoadQuery;
 import net.meisen.dissertation.impl.parser.query.modify.ModifyQuery;
+import net.meisen.dissertation.impl.parser.query.modify.ModifyType;
 import net.meisen.dissertation.impl.parser.query.remove.RemoveQuery;
 import net.meisen.dissertation.impl.parser.query.revoke.RevokeQuery;
 import net.meisen.dissertation.impl.parser.query.revoke.RevokeType;
@@ -454,9 +456,18 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	public void exitExprModify(final ExprModifyContext ctx) {
 		final ModifyQuery q = q(ModifyQuery.class);
 
+		// set the type
+		if (ctx.TYPE_MODEL() != null) {
+			q.setType(ModifyType.MODEL);
+		} else if (ctx.TYPE_USER() != null) {
+			q.setType(ModifyType.USER);
+		}
+
 		// set the name
 		if (ctx.VALUE() != null) {
 			q.setEntityName(getValue(ctx.VALUE()));
+		} else if (ctx.selectorModelId() != null) {
+			q.setEntityName(getModelId(ctx.selectorModelId()));
 		}
 
 		finalized = true;
@@ -467,7 +478,16 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		final ModifyQuery q = q(ModifyQuery.class);
 
 		if (ctx.VALUE() != null) {
-			q.setEntityPassword(getValue(ctx.VALUE()));
+			q.setEntityValue(getValue(ctx.VALUE()));
+		}
+	}
+
+	@Override
+	public void exitExprSetBulkLoad(final ExprSetBulkLoadContext ctx) {
+		final ModifyQuery q = q(ModifyQuery.class);
+
+		if (ctx.selectorBoolean() != null) {
+			q.setEntityValue(ctx.selectorBoolean().getText());
 		}
 	}
 

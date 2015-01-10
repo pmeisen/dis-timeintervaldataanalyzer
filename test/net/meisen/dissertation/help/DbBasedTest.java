@@ -25,7 +25,7 @@ public class DbBasedTest extends ExceptionBasedTest {
 	 * @throws IOException
 	 *             if the path leads to an exception
 	 */
-	protected Db getDb(final String classpathDb) throws IOException {
+	public Db getDb(final String classpathDb) throws IOException {
 		return getDb(null, classpathDb);
 	}
 
@@ -44,7 +44,7 @@ public class DbBasedTest extends ExceptionBasedTest {
 	 * @throws IOException
 	 *             if the path leads to an exception
 	 */
-	protected Db getDb(final String name, final String classpathDb)
+	public Db getDb(final String name, final String classpathDb)
 			throws IOException {
 		if (db != null) {
 			db.shutDownDb();

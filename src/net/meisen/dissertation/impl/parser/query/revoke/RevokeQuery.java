@@ -21,7 +21,7 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  * @author pmeisen
  * 
- * @see RevokeType
+ * @see ModifyType
  * 
  */
 public class RevokeQuery implements IQuery {

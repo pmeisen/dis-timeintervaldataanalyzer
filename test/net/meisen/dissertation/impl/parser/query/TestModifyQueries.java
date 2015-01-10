@@ -1,7 +1,9 @@
 package net.meisen.dissertation.impl.parser.query;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -12,6 +14,7 @@ import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager;
 import net.meisen.dissertation.impl.parser.query.modify.ModifyQuery;
 import net.meisen.dissertation.impl.parser.query.modify.ModifyResult;
+import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Files;
@@ -89,20 +92,32 @@ public class TestModifyQueries extends LoaderBasedTest {
 	}
 
 	/**
-	 * Tests the parsing of a drop-user-statement.
+	 * Tests the parsing of a modify-user-statement.
 	 */
 	@Test
 	public void testModifyUserParsing() {
-		final ModifyQuery q = q("MODIFY USER 'philipp' SET PASSWORD TO 'newpassword'");
+		final ModifyQuery q = q("MODIFY USER 'philipp' SET PASSWORD = 'newpassword'");
+		assertNull(q.getModelId());
 		assertEquals("philipp", q.getEntityName());
-		assertEquals("newpassword", q.getEntityPassword());
+		assertEquals("newpassword", q.getEntityValue());
+	}
+
+	/**
+	 * Tests the parsing of a modify-model-statement.
+	 */
+	@Test
+	public void testModifyModelParsing() {
+		final ModifyQuery q = q("MODIFY MODEL myModel SET BULKLOAD = true");
+		assertEquals("myModel", q.getModelId());
+		assertEquals("myModel", q.getEntityName());
+		assertEquals("true", q.getEntityValue());
 	}
 
 	/**
 	 * Tests the evaluation of a {@code AddQuery}.
 	 */
 	@Test
-	public void testModifyQueryEvaluation() {
+	public void testModifyUserQueryEvaluation() {
 		boolean exception;
 
 		String query;
@@ -117,7 +132,7 @@ public class TestModifyQueries extends LoaderBasedTest {
 		authManager.login("philipp", "password");
 		authManager.logout();
 		authManager.login("admin", "password");
-		query = "MODIFY USER 'philipp' SET PASSWORD TO 'newpassword'";
+		query = "MODIFY USER 'philipp' SET PASSWORD = 'newpassword'";
 		assertNotNull((ModifyResult) factory.evaluateQuery(q(query), null));
 		authManager.logout();
 		try {
@@ -128,6 +143,31 @@ public class TestModifyQueries extends LoaderBasedTest {
 		}
 		assertTrue(exception);
 		authManager.login("philipp", "newpassword");
+
+		// cleanUp in the end
+		authManager.logout();
+		authManager.release();
+	}
+
+	/**
+	 * Tests the evaluation of the {@code ModifyQuery} to modify a model's
+	 * bulk-load property.
+	 */
+	@Test
+	public void testModifyModelQueryEvaluation() {
+		authManager.login("admin", "password");
+
+		// load the Model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testEmptyModel.xml";
+		TidaModel model = m(xml);
+
+		assertFalse(model.isBulkload());
+		factory.evaluateQuery(
+				q("MODIFY MODEL testEmptyModel SET BULKLOAD = true"), null);
+		assertTrue(model.isBulkload());
+		factory.evaluateQuery(
+				q("MODIFY MODEL testEmptyModel SET BULKLOAD = false"), null);
+		assertFalse(model.isBulkload());
 
 		// cleanUp in the end
 		authManager.logout();

@@ -6,14 +6,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PermissionException;
+import net.meisen.dissertation.impl.dataretriever.DbConnectionConfig;
+import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
+import net.meisen.dissertation.impl.dataretriever.DbQueryConfig;
+import net.meisen.dissertation.impl.datasets.DataRetrieverDataSet;
 import net.meisen.dissertation.impl.parser.query.insert.InsertQuery;
 import net.meisen.dissertation.jdbc.protocol.DataType;
+import net.meisen.dissertation.jdbc.protocol.QueryType;
 import net.meisen.dissertation.model.auth.permissions.DefinedPermission;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
+import net.meisen.dissertation.model.datastructure.StructureEntry;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.indexes.datarecord.IDataRecordMeta;
 import net.meisen.dissertation.model.parser.query.IQuery;
@@ -92,214 +102,21 @@ public class QueryServlet extends BaseServlet {
 		String o;
 		if ((o = parameters.get("object")) != null) {
 			if ("permissions".equals(o)) {
-
-				// check the permission to use this system retrieval
-				if (!authManager.hasPermission(Permission.manageUsers.create())) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000,
-							Permission.manageUsers);
-				}
-
-				// get the permissions
-				final JsonArray array = new JsonArray();
-				for (final String p : Permission.transform(Permission.values(),
-						"*", DefinedPermission.DEF_SEPARATOR)) {
-					array.add(p);
-				}
-
-				// return the permissions
-				return array.toString();
+				return getPermissions(parameters);
 			} else if ("user".equals(o)) {
-
-				// check the permission to use this system retrieval
-				if (!authManager.hasPermission(Permission.manageUsers.create())) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000,
-							Permission.manageUsers);
-				}
-
-				final String username = parameters.get("username");
-				final String includeRoleString = parameters.get("includeRole");
-				final boolean includeRole = includeRoleString != null
-						&& includeRoleString.equals("true");
-
-				// get the permissions
-				final Set<DefinedPermission> perms = includeRole ? authManager
-						.getUserPermissions(username) : authManager
-						.getAssignedUserPermissions(username);
-				final JsonArray permArray = new JsonArray();
-				for (final DefinedPermission p : perms) {
-					permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
-				}
-
-				// get the roles
-				final Set<String> roles = authManager.getUserRoles(username);
-				final JsonArray rolesArray = new JsonArray();
-				for (final String r : roles) {
-					rolesArray.add(r);
-				}
-
-				// create the response
-				final JsonObject object = new JsonObject();
-				object.add("permissions", permArray);
-				object.add("roles", rolesArray);
-				object.add("username", JsonValue.valueOf(username));
-
-				return object.toString();
+				return getUserPermission(parameters);
 			} else if ("role".equals(o)) {
-
-				// check the permission to use this system retrieval
-				if (!authManager.hasPermission(Permission.manageUsers.create())) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000,
-							Permission.manageUsers);
-				}
-
-				final String rolename = parameters.get("rolename");
-
-				// get the permissions
-				final Set<DefinedPermission> perms = authManager
-						.getRolePermissions(rolename);
-				final JsonArray permArray = new JsonArray();
-				for (final DefinedPermission p : perms) {
-					permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
-				}
-
-				// create the response
-				final JsonObject object = new JsonObject();
-				object.add("permissions", permArray);
-				object.add("rolename", JsonValue.valueOf(rolename));
-
-				return object.toString();
+				return getRolePermissions(parameters);
 			} else if ("models".equals(o)) {
-
-				// check the permission to use this system retrieval
-				if (!authManager.hasPermission(Permission.load.create())) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000, Permission.load);
-				}
-
-				final Set<String> loaded = handler.getTidaModels();
-				final Set<String> available = handler.getAvailableTidaModels();
-				final Set<String> autoloaded = handler
-						.getAutoloadedTidaModels();
-				final JsonArray array = new JsonArray();
-				for (final String model : available) {
-					final JsonObject object = new JsonObject();
-					object.add("model", model);
-					object.add("loaded", loaded.contains(model));
-					object.add("autoloaded", autoloaded.contains(model));
-
-					array.add(object);
-				}
-
-				return array.toString();
+				return getModels(parameters);
 			} else if ("modelmeta".equals(o)) {
-				final String modelId = parameters.get("model");
-				final DefinedPermission[][] permSets = new DefinedPermission[][] {
-						new DefinedPermission[] { Permission.query
-								.create(modelId) },
-						new DefinedPermission[] { Permission.queryAll.create() } };
-
-				// check the permission to use this system retrieval
-				if (!DefinedPermission.checkPermission(authManager, permSets)) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000,
-							DefinedPermission.toString(permSets));
-				}
-
-				// get the meta-data of the model
-				final TidaModel model = handler.getTidaModel(modelId);
-				if (model == null) {
-					// TODO throw exception
-					throw new IllegalStateException("A model with identifier '"
-							+ modelId + "' is not loaded or available.");
-				}
-
-				// create the JSON instance of the meta information
-				final JsonArray res = new JsonArray();
-				final IDataRecordMeta meta = model.getDataRecordFactory()
-						.getMeta();
-				final String[] names = meta.getNames();
-				final DataType[] types = meta.getDataTypes();
-				final int len = names.length;
-				for (int i = 0; i < len; i++) {
-					final JsonObject entry = new JsonObject();
-
-					// determine the meta-type
-					final String metaType;
-					if (i == meta.getPosRecordId()) {
-						metaType = "ID";
-					} else if (i == meta.getPosStart()) {
-						metaType = "START";
-					} else if (i == meta.getPosEnd()) {
-						metaType = "END";
-					} else if (i >= meta.getFirstPosDescModelIds()
-							&& i <= meta.getLastPosDescModelIds()) {
-						metaType = "DESCRIPTOR";
-					} else {
-						metaType = "UNKNOWN";
-					}
-
-					entry.add("name", names[i]);
-					entry.add("datatype", types[i].name());
-					entry.add("metatype", metaType);
-					res.add(entry);
-				}
-
-				return res.toString();
+				return getModelMetaData(parameters);
 			} else if ("addmodelrecords".equals(o)) {
-				final String modelId = parameters.get("model");
-				final DefinedPermission[][] permSets = new DefinedPermission[][] {
-						new DefinedPermission[] { Permission.modify
-								.create(modelId) },
-						new DefinedPermission[] { Permission.modifyAll.create() } };
-
-				// check the permission to use this system retrieval
-				if (!DefinedPermission.checkPermission(authManager, permSets)) {
-					exceptionRegistry.throwRuntimeException(
-							PermissionException.class, 1000,
-							DefinedPermission.toString(permSets));
-				}
-
-				// execute the loading of the data
-				final TidaModel model = handler.getTidaModel(modelId);
-				if (model == null) {
-					// TODO throw exception
-					throw new IllegalStateException("A model with identifier '"
-							+ modelId + "' is not loaded or available.");
-				}
-
-				// execute the loading of the model's data
-				model.bulkLoadDataFromDataModel();
-
-				// just return a true, it is loaded
-				return JsonValue.TRUE.toString();
+				return addRecordsFromModel(parameters);
+			} else if ("adddbrecords".equals(o)) {
+				return addRecordsFromDb(parameters);
 			} else if ("timeout".equals(o)) {
-
-				// get the timeout
-				final String paramTimeout = parameters.get("timeout");
-				int timeout;
-				if (paramTimeout == null) {
-					timeout = 1000;
-				} else {
-					try {
-						timeout = Integer.parseInt(paramTimeout);
-					} catch (final NumberFormatException e) {
-						timeout = 1000;
-					}
-				}
-
-				// sleep
-				if (timeout > 0) {
-					Thread.sleep(timeout);
-				} else {
-					timeout = 0;
-				}
-
-				// return the time waited
-				final JsonValue value = JsonValue.valueOf(timeout);
-				return value.toString();
+				return performTimeout(parameters);
 			} else {
 				throw new IllegalStateException("Unsupported object '" + o
 						+ "' defined.");
@@ -308,6 +125,332 @@ public class QueryServlet extends BaseServlet {
 			// TODO throw exception
 			throw new IllegalStateException("Object is not defined.");
 		}
+	}
+
+	protected String performTimeout(final Map<String, String> parameters) {
+
+		// get the timeout
+		final String paramTimeout = parameters.get("timeout");
+		int timeout;
+		if (paramTimeout == null) {
+			timeout = 1000;
+		} else {
+			try {
+				timeout = Integer.parseInt(paramTimeout);
+			} catch (final NumberFormatException e) {
+				timeout = 1000;
+			}
+		}
+
+		// sleep
+		if (timeout > 0) {
+			try {
+				Thread.sleep(timeout);
+			} catch (final InterruptedException e) {
+				throw new IllegalStateException();
+			}
+		} else {
+			timeout = 0;
+		}
+
+		// return the time waited
+		final JsonValue value = JsonValue.valueOf(timeout);
+		return value.toString();
+	}
+
+	protected String getPermissions(final Map<String, String> parameters) {
+
+		// check the permission to use this system retrieval
+		if (!authManager.hasPermission(Permission.manageUsers.create())) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, Permission.manageUsers);
+		}
+
+		// get the permissions
+		final JsonArray array = new JsonArray();
+		for (final String p : Permission.transform(Permission.values(), "*",
+				DefinedPermission.DEF_SEPARATOR)) {
+			array.add(p);
+		}
+
+		// return the permissions
+		return array.toString();
+	}
+
+	private String getUserPermission(final Map<String, String> parameters) {
+
+		// check the permission to use this system retrieval
+		if (!authManager.hasPermission(Permission.manageUsers.create())) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, Permission.manageUsers);
+		}
+
+		final String username = parameters.get("username");
+		final String includeRoleString = parameters.get("includeRole");
+		final boolean includeRole = includeRoleString != null
+				&& includeRoleString.equals("true");
+
+		// get the permissions
+		final Set<DefinedPermission> perms = includeRole ? authManager
+				.getUserPermissions(username) : authManager
+				.getAssignedUserPermissions(username);
+		final JsonArray permArray = new JsonArray();
+		for (final DefinedPermission p : perms) {
+			permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
+		}
+
+		// get the roles
+		final Set<String> roles = authManager.getUserRoles(username);
+		final JsonArray rolesArray = new JsonArray();
+		for (final String r : roles) {
+			rolesArray.add(r);
+		}
+
+		// create the response
+		final JsonObject object = new JsonObject();
+		object.add("permissions", permArray);
+		object.add("roles", rolesArray);
+		object.add("username", JsonValue.valueOf(username));
+
+		return object.toString();
+	}
+
+	protected String getRolePermissions(final Map<String, String> parameters) {
+
+		// check the permission to use this system retrieval
+		if (!authManager.hasPermission(Permission.manageUsers.create())) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, Permission.manageUsers);
+		}
+
+		final String rolename = parameters.get("rolename");
+
+		// get the permissions
+		final Set<DefinedPermission> perms = authManager
+				.getRolePermissions(rolename);
+		final JsonArray permArray = new JsonArray();
+		for (final DefinedPermission p : perms) {
+			permArray.add(p.toString(DefinedPermission.DEF_SEPARATOR));
+		}
+
+		// create the response
+		final JsonObject object = new JsonObject();
+		object.add("permissions", permArray);
+		object.add("rolename", JsonValue.valueOf(rolename));
+
+		return object.toString();
+	}
+
+	protected String getModels(final Map<String, String> parameters) {
+
+		// check the permission to use this system retrieval
+		if (!authManager.hasPermission(Permission.load.create())) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, Permission.load);
+		}
+
+		final Set<String> loaded = handler.getTidaModels();
+		final Set<String> available = handler.getAvailableTidaModels();
+		final Set<String> autoloaded = handler.getAutoloadedTidaModels();
+		final JsonArray array = new JsonArray();
+		for (final String model : available) {
+			final JsonObject object = new JsonObject();
+			object.add("model", model);
+			object.add("loaded", loaded.contains(model));
+			object.add("autoloaded", autoloaded.contains(model));
+
+			array.add(object);
+		}
+
+		return array.toString();
+	}
+
+	protected String getModelMetaData(final Map<String, String> parameters) {
+
+		// get the meta-data of the model
+		final TidaModel model = getModel(parameters, QueryType.QUERY);
+
+		// create the JSON instance of the meta information
+		final JsonArray res = new JsonArray();
+		final IDataRecordMeta meta = model.getDataRecordFactory().getMeta();
+		final String[] names = meta.getNames();
+		final DataType[] types = meta.getDataTypes();
+		final int len = names.length;
+		for (int i = 0; i < len; i++) {
+			final JsonObject entry = new JsonObject();
+
+			// determine the meta-type
+			final String metaType;
+			if (i == meta.getPosRecordId()) {
+				metaType = "ID";
+			} else if (i == meta.getPosStart()) {
+				metaType = "START";
+			} else if (i == meta.getPosEnd()) {
+				metaType = "END";
+			} else if (i >= meta.getFirstPosDescModelIds()
+					&& i <= meta.getLastPosDescModelIds()) {
+				metaType = "DESCRIPTOR";
+			} else {
+				metaType = "UNKNOWN";
+			}
+
+			entry.add("name", names[i]);
+			entry.add("datatype", types[i].name());
+			entry.add("metatype", metaType);
+			res.add(entry);
+		}
+
+		return res.toString();
+	}
+
+	protected String addRecordsFromDb(final Map<String, String> parameters) {
+		JsonValue value;
+
+		// get the model
+		final TidaModel model = getModel(parameters, QueryType.MANIPULATION);
+
+		// get the database connection and the query to be used
+		final DbConnectionConfig config = getDatabaseConfig(parameters);
+		final DbQueryConfig query = getDatabaseQuery(parameters);
+
+		// get the structure
+		value = JsonValue.readFrom(parameters.get("structure"));
+		if (!value.isArray()) {
+			// TODO make nice
+			throw new IllegalStateException();
+		}
+		final List<StructureEntry> entries = new ArrayList<StructureEntry>();
+		final JsonArray jsonStructure = (JsonArray) value;
+		for (final JsonValue v : jsonStructure) {
+			if (v.isObject()) {
+				final JsonObject jsonEntry = (JsonObject) v;
+				final StructureEntry entry;
+
+				if (jsonEntry.get("descriptor") != null) {
+					entry = new MetaStructureEntry(jsonEntry.get("descriptor")
+							.asString(), jsonEntry.get("dbname").asString());
+				} else if (jsonEntry.get("interval") != null) {
+					entry = new IntervalStructureEntry(jsonEntry
+							.get("interval").asString(), jsonEntry
+							.get("dbname").asString());
+				} else {
+					// TODO make nice
+					throw new IllegalStateException();
+				}
+
+				entries.add(entry);
+			} else {
+				// TODO make nice
+				throw new IllegalStateException();
+			}
+		}
+		final DataStructure structure = new DataStructure(entries);
+
+		// get the retriever
+		final DbDataRetriever retriever = new DbDataRetriever(UUID.randomUUID()
+				.toString(), config);
+		retriever.setExceptionRegistry(exceptionRegistry);
+
+		// get the data
+		try {
+			final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(
+					retriever, query);
+
+			// do the loading
+			model.bulkLoadData(structure, dataSet.iterator());
+		} finally {
+
+			// release all db resources
+			retriever.release();
+		}
+
+		// just return a true, it is loaded
+		return JsonValue.TRUE.toString();
+	}
+
+	protected String addRecordsFromModel(final Map<String, String> parameters) {
+
+		// execute the loading of the data
+		final TidaModel model = getModel(parameters, QueryType.MANIPULATION);
+
+		// execute the loading of the model's data
+		model.bulkLoadDataFromDataModel();
+
+		// just return a true, it is loaded
+		return JsonValue.TRUE.toString();
+	}
+
+	protected DbConnectionConfig getDatabaseConfig(
+			final Map<String, String> parameters) {
+
+		// get the database connection
+		final DbConnectionConfig config = new DbConnectionConfig();
+		final JsonValue value = JsonValue
+				.readFrom(parameters.get("connection"));
+		if (!value.isObject()) {
+			// TODO make nice
+			throw new IllegalStateException();
+		}
+		final JsonObject jsonConfig = (JsonObject) value;
+		config.setDriver(jsonConfig.get("driver").asString());
+		config.setUsername(jsonConfig.get("username").asString());
+		config.setPassword(jsonConfig.get("password").asString());
+		config.setUrl(jsonConfig.get("url").asString());
+
+		return config;
+	}
+
+	protected DbQueryConfig getDatabaseQuery(
+			final Map<String, String> parameters) {
+
+		final String query = parameters.get("query");
+		if (query == null || query.isEmpty()) {
+			// TODO make nice
+			throw new IllegalStateException();
+		}
+
+		// get the query to be used
+		final DbQueryConfig queryConfig = new DbQueryConfig();
+		queryConfig.setLanguage("SQL");
+		queryConfig.setQuery(query);
+
+		return queryConfig;
+	}
+
+	protected TidaModel getModel(final Map<String, String> parameters,
+			final QueryType type) {
+		final String modelId = parameters.get("model");
+
+		// define the type of permissions needed
+		final DefinedPermission[][] permSets;
+		if (QueryType.QUERY.equals(type)) {
+			permSets = new DefinedPermission[][] {
+					new DefinedPermission[] { Permission.query.create(modelId) },
+					new DefinedPermission[] { Permission.queryAll.create() } };
+		} else if (QueryType.MANIPULATION.equals(type)) {
+			permSets = new DefinedPermission[][] {
+					new DefinedPermission[] { Permission.modify.create(modelId) },
+					new DefinedPermission[] { Permission.modifyAll.create() } };
+		} else {
+			// TODO make it nice
+			throw new IllegalStateException();
+		}
+
+		// check the permission to use this system retrieval
+		if (!DefinedPermission.checkPermission(authManager, permSets)) {
+			exceptionRegistry.throwRuntimeException(PermissionException.class,
+					1000, DefinedPermission.toString(permSets));
+		}
+
+		// execute the loading of the data
+		final TidaModel model = handler.getTidaModel(modelId);
+		if (model == null) {
+			// TODO throw exception
+			throw new IllegalStateException("A model with identifier '"
+					+ modelId + "' is not loaded or available.");
+		}
+
+		return model;
 	}
 
 	/**

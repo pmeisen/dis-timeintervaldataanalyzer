@@ -10,10 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PersistorException;
@@ -120,10 +117,11 @@ public class TidaModel implements IPersistable {
 	private IntervalDataHandling intervalDataHandling;
 	private OfflineMode offlineMode;
 	private boolean bulkLoadEnabled;
-	
+
 	private Group persistentGroup = null;
 
 	private final ReentrantLock modificationLock;
+
 	/**
 	 * Creates a {@code TimeIntervalDataAnalyzerModel} with a random id, the
 	 * instance must be wired prior to it's usage to ensure that an
@@ -457,12 +455,25 @@ public class TidaModel implements IPersistable {
 		return bulkLoadData(dataStructure, it, true);
 	}
 
-	public void setBulkLoad(final boolean enable) {
+	/**
+	 * Enables or disables bulk-loading depending on the {@code enable}
+	 * parameter. If bulk-load is enabled, while already enabled an exception is
+	 * thrown.
+	 * 
+	 * @param enable
+	 *            {@code true} to enable bulk-load, or {@code false} to disable
+	 * 
+	 * @throws TidaModelException
+	 *             if bulk-loading should be enabled, while already being
+	 *             enabled
+	 */
+	public void setBulkLoad(final boolean enable) throws TidaModelException {
 
 		modificationLock.lock();
 		try {
 			if (enable == bulkLoadEnabled) {
-				throw new IllegalStateException("Bulkload already " + enable);
+				exceptionRegistry.throwException(TidaModelException.class,
+						1004, "loadData");
 			} else {
 				modifyBulkLoad(enable);
 			}
@@ -471,6 +482,14 @@ public class TidaModel implements IPersistable {
 		}
 	}
 
+	/**
+	 * Modifies the bulk-load option of the model. The modification is always
+	 * possible, i.e. bulk-load can be activated, while bulk-load is active
+	 * (compare with {@link #setBulkLoad(boolean)}.
+	 * 
+	 * @param enable
+	 *            {@code true} to enable bulk-load, or {@code false} to disable
+	 */
 	protected void modifyBulkLoad(final boolean enable) {
 
 		// make sure nobody is currently modifying the data
@@ -486,7 +505,7 @@ public class TidaModel implements IPersistable {
 				getFactsCache().setPersistency(!enable);
 				getIdentifierCache().setPersistency(!enable);
 				getDataRecordCache().setPersistency(!enable);
-				
+
 				bulkLoadEnabled = enable;
 			}
 		} finally {
@@ -957,5 +976,16 @@ public class TidaModel implements IPersistable {
 	 */
 	public IDataRecordFactory getDataRecordFactory() {
 		return dataRecordFactory;
+	}
+
+	/**
+	 * Returns the current state of the bulk-load, i.e. if bulk-load is running
+	 * or not. Because of the multi-threaded usage, the value might have changed
+	 * the next moment.
+	 * 
+	 * @return {@code true} if bulk-load is enabled, otherwise {@code false}
+	 */
+	public boolean isBulkload() {
+		return bulkLoadEnabled;
 	}
 }

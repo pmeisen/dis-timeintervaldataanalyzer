@@ -18,8 +18,10 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class ModifyQuery implements IQuery {
+	private String modelId;
 	private String entityName;
-	private String entityPassword;
+	private String entityValue;
+	private ModifyType type;
 
 	/**
 	 * Sets the name of the entity to be modified.
@@ -41,37 +43,37 @@ public class ModifyQuery implements IQuery {
 	}
 
 	/**
-	 * Gets the password specified for the entity to be modified.
+	 * Gets the value specified for the entity to be modified.
 	 * 
-	 * @return the password specified for the entity to be modified
+	 * @return the value specified for the entity to be modified
 	 */
-	public String getEntityPassword() {
-		return entityPassword;
+	public String getEntityValue() {
+		return entityValue;
 	}
 
 	/**
-	 * Sets the password for the entity to be modified.
+	 * Sets the value for the entity to be modified.
 	 * 
-	 * @param entityPassword
-	 *            the password for the entity to be modified
+	 * @param entityValue
+	 *            the new value of the entity
 	 */
-	public void setEntityPassword(final String entityPassword) {
-		this.entityPassword = entityPassword;
+	public void setEntityValue(final String entityValue) {
+		this.entityValue = entityValue;
 	}
 
 	@Override
 	public boolean expectsModel() {
-		return false;
+		return ModifyType.MODEL.equals(getType());
 	}
 
 	@Override
 	public String getModelId() {
-		return null;
+		return modelId;
 	}
 
 	@Override
 	public void setModelId(final String modelId) {
-		// ignore
+		this.modelId = modelId;
 	}
 
 	@Override
@@ -79,7 +81,12 @@ public class ModifyQuery implements IQuery {
 			final TidaModelHandler handler, final TidaModel model,
 			final IResourceResolver resolver) throws ForwardedRuntimeException,
 			CancellationException {
-		authManager.modifyPassword(getEntityName(), getEntityPassword());
+
+		if (ModifyType.MODEL.equals(getType())) {
+			model.setBulkLoad(getEntityValue().equalsIgnoreCase("true"));
+		} else {
+			authManager.modifyPassword(getEntityName(), getEntityValue());
+		}
 
 		return new ModifyResult();
 	}
@@ -96,12 +103,37 @@ public class ModifyQuery implements IQuery {
 
 	@Override
 	public DefinedPermission[][] getNeededPermissions() {
-		return new DefinedPermission[][] { new DefinedPermission[] { Permission.manageUsers
-				.create() } };
+		if (ModifyType.MODEL.equals(getType())) {
+			return new DefinedPermission[][] {
+					new DefinedPermission[] { Permission.modify.create(modelId) },
+					new DefinedPermission[] { Permission.modifyAll.create() } };
+		} else {
+			return new DefinedPermission[][] { new DefinedPermission[] { Permission.manageUsers
+					.create() } };
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "MODIFY " + entityName;
+		return "MODIFY " + type + " " + entityName + " VALUE " + entityValue;
+	}
+
+	/**
+	 * Gets the type of the modification.
+	 * 
+	 * @return the type of the modification
+	 */
+	public ModifyType getType() {
+		return type;
+	}
+
+	/**
+	 * Sets the type of the modification
+	 * 
+	 * @param type
+	 *            the type of the modification
+	 */
+	public void setType(final ModifyType type) {
+		this.type = type;
 	}
 }

@@ -545,15 +545,31 @@ public class TestCommunication {
 			}
 		}
 
+		/**
+		 * Tests the enabling and disabling of bulk-loading.
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected exception is thrown
+		 * @throws InterruptedException
+		 *             if an unexpected exception is thrown
+		 */
 		@Test
-		public void testBulkLoad() throws SQLException {
+		public void testBulkLoad() throws SQLException, InterruptedException {
 			final Statement stmt = conn.createStatement();
 			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testCommunicationModel.xml'");
 
-			stmt.execute("SET BULKLOAD=true");
+			// get the model and make sure there is no bulk-load
+			final TidaModel m = server.getModel("testCommunicationModel");
+			assertFalse(m.isBulkload());
 
-			// same thread a problem
-			stmt.execute("SET BULKLOAD=true");
+			// set the bulk-load
+			stmt.execute("MODIFY MODEL testCommunicationModel SET BULKLOAD=true");
+			stmt.close();
+			assertTrue(m.isBulkload());
+
+			// try to load again, should fail
+			assertSettingBulkLoadTwice(conn);
+			assertTrue(m.isBulkload());
 
 			final ThreadForTesting setBulkLoad = new ThreadForTesting(
 					"setBulkLoad") {
@@ -562,9 +578,7 @@ public class TestCommunication {
 
 				@Override
 				public void _run() throws Throwable {
-					final TidaStatement innerStmt = innerConn.createStatement();
-					innerStmt.executeUpdate("SET BULKLOAD=true");
-					innerStmt.close();
+					assertSettingBulkLoadTwice(innerConn);
 				}
 
 				@Override
@@ -572,6 +586,9 @@ public class TestCommunication {
 					innerConn.close();
 				}
 			};
+			setBulkLoad.run();
+			setBulkLoad.join();
+
 			final ThreadForTesting unsetBulkLoad = new ThreadForTesting(
 					"setBulkLoad") {
 				private final TidaConnection innerConn = (TidaConnection) DriverManager
@@ -580,8 +597,11 @@ public class TestCommunication {
 				@Override
 				public void _run() throws Throwable {
 					final TidaStatement innerStmt = innerConn.createStatement();
-					innerStmt.executeUpdate("SET BULKLOAD=false");
+					innerStmt
+							.executeUpdate("MODIFY MODEL testCommunicationModel SET BULKLOAD=false");
 					innerStmt.close();
+
+					assertFalse(m.isBulkload());
 				}
 
 				@Override
@@ -589,28 +609,40 @@ public class TestCommunication {
 					innerConn.close();
 				}
 			};
-			final ThreadForTesting insertData = new ThreadForTesting(
-					"insertData") {
-				private final TidaConnection innerConn = (TidaConnection) DriverManager
-						.getConnection(getJdbc());
+			unsetBulkLoad.run();
+			unsetBulkLoad.join();
+		}
 
-				@Override
-				public void _run() throws Throwable {
-					final TidaStatement innerStmt = innerConn.createStatement();
-					innerStmt.executeUpdate("");
-					innerStmt.close();
-				}
+		/**
+		 * Helper method to validate the exception to be thrown if a bulk-load
+		 * is set twice.
+		 * 
+		 * @param conn
+		 *            the connection used to fire the query on
+		 *            
+		 * @throws SQLException
+		 *             if an unexpected exception is thrown
+		 */
+		protected void assertSettingBulkLoadTwice(final TidaConnection conn)
+				throws SQLException {
+			boolean exception;
 
-				@Override
-				protected void cleanUp() throws Throwable {
-					innerConn.close();
-				}
-			};
+			final TidaStatement stmt = conn.createStatement();
 
-			// disable the load again
-			stmt.execute("SET BULKLOAD=false");
+			// test setting twice
+			try {
+				exception = false;
+				stmt.executeUpdate("MODIFY MODEL testCommunicationModel SET BULKLOAD=true");
+			} catch (final SQLException e) {
+				assertTrue(e.getMessage().contains("[TidaModelException]"));
+				assertTrue(e.getMessage().contains(
+						"Bulk-loading is already active"));
 
-			stmt.close();
+				exception = true;
+			} finally {
+				stmt.close();
+			}
+			assertTrue(exception);
 		}
 	}
 

@@ -34,7 +34,7 @@ public class ServerResourceResolver implements IResourceResolver {
 	 * Syntax to be used
 	 */
 	protected final static String RESOLVER_SYNTAX = "(" + RESOLVER_PROTOCOLS
-			+ ")" + "://[sessionId]/[file]";
+			+ ")" + "://[path]";
 
 	@Override
 	public InputStream resolve(final String resource)

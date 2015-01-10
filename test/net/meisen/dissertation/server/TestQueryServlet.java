@@ -1,13 +1,17 @@
 package net.meisen.dissertation.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.model.auth.permissions.Permission;
+import net.meisen.dissertation.model.data.TidaModel;
 
 import org.junit.Test;
 
@@ -189,5 +193,75 @@ public class TestQueryServlet extends BaseTestWithServerConnection {
 				Permission.values().length);
 		assertTrue(((JsonObject) result).get("roles").isArray());
 		assertEquals(((JsonArray) ((JsonObject) result).get("roles")).size(), 0);
+	}
+
+	/**
+	 * Tests the usage of the servlet to load data from a database.
+	 * 
+	 * @throws IOException
+	 *             if an unexpected exception is thrown
+	 */
+	@Test
+	public void testAddRecordsFromDb() throws IOException {
+
+		// load a database to be used
+		final DbBasedTest dbTest = new DbBasedTest();
+		dbTest.initLocale();
+		dbTest.getDb("tidaPioneerData",
+				"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
+
+		signIn();
+
+		// load a model
+		server.login("admin", "password");
+		server.fireQuery("LOAD FROM 'classpath://net/meisen/dissertation/server/testPioneerModel.xml'");
+		final TidaModel model = server.getModel("testPioneerModel");
+		assertNotNull(model);
+
+		final Map<String, String> params = new HashMap<String, String>();
+		params.put("object", "adddbrecords");
+		params.put("username", "admin");
+		params.put("model", "testPioneerModel");
+		params.put(
+				"connection",
+				// @formatter:off
+				new JsonObject()
+					.add("driver", "org.hsqldb.jdbcDriver")
+					.add("url", "jdbc:hsqldb:hsql://localhost:6666/tidaPioneerData")
+					.add("username", "SA")
+					.add("password", "")
+					.toString());
+				// @formatter:on
+		params.put(
+				"structure",
+				// @formatter:off
+				new JsonArray()
+					.add(new JsonObject()
+							.add("descriptor", "DESC_SYMBOL")
+							.add("dbname", "SYMBOL"))
+					.add(new JsonObject()
+							.add("interval", "START")
+							.add("dbname", "START_TIME"))
+					.add(new JsonObject()
+							.add("interval", "END")
+							.add("dbname", "END_TIME"))
+					.toString());
+				// @formatter:on
+		params.put("query",
+				"SELECT start_time, end_time, symbol FROM TB_INTERVALS");
+
+		// fire the system-query
+		final byte[] response = this.getResponse("/query/system", params);
+		final JsonValue result = JsonValue
+				.readFrom(new String(response, "UTF8"));
+		assertTrue(result.isBoolean());
+		assertTrue(result.asBoolean());
+
+		// check if the model was modified
+		assertEquals(4883, model.getAmountOfRecords());
+
+		// clean-up
+		dbTest.cleanUpDb();
+		dbTest.cleanUpLocale();
 	}
 }
