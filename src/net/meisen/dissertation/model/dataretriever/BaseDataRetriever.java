@@ -2,6 +2,7 @@ package net.meisen.dissertation.model.dataretriever;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DataRetrieverException;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +43,13 @@ public abstract class BaseDataRetriever {
 
 		final Class<? extends IDataRetrieverConfig> configClazz = supportedConfiguration();
 		if (config == null && needConfiguration()) {
-			exceptionRegistry.throwException(DataRetrieverException.class,
+			throw new ForwardedRuntimeException(DataRetrieverException.class,
 					1000, getClass().getName());
 		} else if (config == null) {
 			this.config = createDefaultConfig();
 		} else if (configClazz != null
 				&& !configClazz.isAssignableFrom(config.getClass())) {
-			exceptionRegistry.throwException(DataRetrieverException.class,
+			throw new ForwardedRuntimeException(DataRetrieverException.class,
 					1001, getClass().getName(), configClazz.getName(), config
 							.getClass().getName());
 		} else {

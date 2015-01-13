@@ -146,7 +146,6 @@ public class TestModifyQueries extends LoaderBasedTest {
 
 		// cleanUp in the end
 		authManager.logout();
-		authManager.release();
 	}
 
 	/**
@@ -171,6 +170,5 @@ public class TestModifyQueries extends LoaderBasedTest {
 
 		// cleanUp in the end
 		authManager.logout();
-		authManager.release();
 	}
 }

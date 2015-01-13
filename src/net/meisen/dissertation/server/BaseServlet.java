@@ -9,6 +9,8 @@ import net.meisen.dissertation.model.auth.IAuthManager;
 import net.meisen.dissertation.model.auth.permissions.Permission;
 import net.meisen.dissertation.server.sessions.Session;
 import net.meisen.dissertation.server.sessions.SessionManager;
+import net.meisen.general.genmisc.exceptions.ForwardedException;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.sbconfigurator.api.IConfiguration;
 import net.meisen.general.server.http.listener.api.IServlet;
@@ -37,7 +39,7 @@ import com.eclipsesource.json.JsonValue;
  */
 public abstract class BaseServlet implements IServlet {
 	public final static String PARAM_SESSIONID = "sessionId";
-	
+
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseServlet.class);
 
@@ -159,6 +161,30 @@ public abstract class BaseServlet implements IServlet {
 				response.setStatusCode(HttpStatus.SC_FORBIDDEN);
 				result = wrapExceptionToJson(e);
 				type = ContentType.APPLICATION_JSON;
+			} catch (final ForwardedException fwdE) {
+				type = ContentType.APPLICATION_JSON;
+				response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				try {
+					exceptionRegistry.throwException(fwdE);
+					result = wrapExceptionToJson(fwdE);
+				} catch (final Exception e) {
+					if (LOG.isErrorEnabled()) {
+						LOG.error("Request failed because of a failure.", e);
+					}
+					result = wrapExceptionToJson(e);
+				}
+			} catch (final ForwardedRuntimeException fwdE) {
+				type = ContentType.APPLICATION_JSON;
+				response.setStatusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR);
+				try {
+					exceptionRegistry.throwRuntimeException(fwdE);
+					result = wrapExceptionToJson(fwdE);
+				} catch (final Exception e) {
+					if (LOG.isErrorEnabled()) {
+						LOG.error("Request failed because of a failure.", e);
+					}
+					result = wrapExceptionToJson(e);
+				}
 			} catch (final Exception e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error("Request failed because of a failure.", e);
@@ -193,7 +219,8 @@ public abstract class BaseServlet implements IServlet {
 
 		// first of all the user has to be checked in
 		if (needValidSession()) {
-			final Session session = checkSession(parameters.get(PARAM_SESSIONID));
+			final Session session = checkSession(parameters
+					.get(PARAM_SESSIONID));
 			session.markAsUsed();
 		}
 

@@ -346,13 +346,16 @@ public class QueryServlet extends BaseServlet {
 		}
 		final DataStructure structure = new DataStructure(entries);
 
-		// get the retriever
-		final DbDataRetriever retriever = new DbDataRetriever(UUID.randomUUID()
-				.toString(), config);
-		retriever.setExceptionRegistry(exceptionRegistry);
-
 		// get the data
+		DbDataRetriever retriever = null;
 		try {
+			
+			// get the retriever
+			retriever = new DbDataRetriever(UUID.randomUUID().toString(),
+					config);
+			retriever.setExceptionRegistry(exceptionRegistry);
+			
+			// use it to load data
 			final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(
 					retriever, query);
 
@@ -361,7 +364,9 @@ public class QueryServlet extends BaseServlet {
 		} finally {
 
 			// release all db resources
-			retriever.release();
+			if (retriever != null) {
+				retriever.release();
+			}
 		}
 
 		// just return a true, it is loaded

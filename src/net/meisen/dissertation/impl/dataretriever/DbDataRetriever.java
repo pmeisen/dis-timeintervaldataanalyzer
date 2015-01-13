@@ -44,7 +44,7 @@ public class DbDataRetriever extends BaseDataRetriever {
 		// load the defined driver and make sure it exists
 		final Class<?> driver = Classes.getClass(c.getDriver());
 		if (driver == null) {
-			exceptionRegistry.throwRuntimeException(
+			throw new ForwardedRuntimeException(
 					DbDataRetrieverException.class, 1000, c.getDriver());
 		}
 

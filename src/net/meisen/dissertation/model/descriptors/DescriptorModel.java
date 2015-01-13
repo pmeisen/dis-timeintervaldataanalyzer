@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
+import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.OfflineMode;
 import net.meisen.dissertation.model.idfactories.IIdsFactory;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -58,6 +59,10 @@ public class DescriptorModel<I extends Object> {
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
 	private BaseIndexFactory indexFactory;
+
+	@Autowired
+	@Qualifier(DefaultValues.METADATACACHE_ID)
+	private IMetaDataCache metaDataCache;
 
 	private IMultipleKeySupport descriptors;
 	private OfflineMode offlineMode;
@@ -326,7 +331,7 @@ public class DescriptorModel<I extends Object> {
 			@SuppressWarnings("unchecked")
 			final Descriptor<D, ?, I> idxDescriptor = (Descriptor<D, ?, I>) getDescriptor(id);
 
-			// make sure the indexed and the descriptor are not equal
+			// make sure the indexed and the descriptor are equal
 			if (Objects.equals(idxDescriptor, descriptor)) {
 				descriptor = idxDescriptor;
 			} else {
@@ -336,6 +341,9 @@ public class DescriptorModel<I extends Object> {
 				return null;
 			}
 		}
+
+		// inform the cache about the new descriptor
+		metaDataCache.cacheDescriptor(descriptor);
 
 		return descriptor;
 	}
@@ -450,6 +458,7 @@ public class DescriptorModel<I extends Object> {
 		// make sure we have a nullDescriptor
 		if (!createdNullDescriptor()) {
 			nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
+			metaDataCache.cacheDescriptor(nullDescriptor);
 		}
 
 		return nullDescriptor;

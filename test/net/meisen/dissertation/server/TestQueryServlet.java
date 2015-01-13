@@ -209,7 +209,6 @@ public class TestQueryServlet extends BaseTestWithServerConnection {
 		dbTest.initLocale();
 		dbTest.getDb("tidaPioneerData",
 				"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
-
 		signIn();
 
 		// load a model

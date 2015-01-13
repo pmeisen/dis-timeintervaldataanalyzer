@@ -11,15 +11,15 @@ import net.meisen.dissertation.model.data.TidaModel;
 public interface ICache {
 
 	/**
-	 * Method used to disable or enable (default) the persistency. During the
-	 * time the persistency is disabled all changes are just done within the
-	 * memory. Whenever the persistency is enabled again, all data have to be
+	 * Method used to disable or enable (default) the persistence. During the
+	 * time the persistence is disabled all changes are just done within the
+	 * memory. Whenever the persistence is enabled again, all data have to be
 	 * persisted if supported by the cache.
 	 * 
 	 * @param enable
-	 *            {@code true} to enable persistency, otherwise {@code false}
+	 *            {@code true} to enable persistence, otherwise {@code false}
 	 * 
-	 * @return the old value of the persistency setting
+	 * @return the old value of the persistence setting
 	 */
 	public boolean setPersistency(final boolean enable);
 

@@ -7,12 +7,14 @@
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
        id="memoryMetaDataCache">
-  
+    
   <config>
     <caches>
       <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
     </caches>
   </config>
+  
+  <time><timeline start="0" duration="100" /></time>
   
   <meta>
     <descriptors>
@@ -26,6 +28,6 @@
       <entry descriptor="AIRLINE" value="AB" />
     </entries>
   </meta>
-    
+  
   <data />
 </model>

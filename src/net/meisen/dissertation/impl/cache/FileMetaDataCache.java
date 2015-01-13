@@ -1,24 +1,24 @@
 package net.meisen.dissertation.impl.cache;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.ReentrantLock;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.impl.data.metadata.DescriptorMetaDataCollection;
 import net.meisen.dissertation.impl.data.metadata.LoadedMetaData;
+import net.meisen.dissertation.impl.data.metadata.ReadOnlyMetaDataCollection;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.cache.IMetaDataCacheConfig;
-import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
 import net.meisen.dissertation.model.data.metadata.IMetaData;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
-import net.meisen.general.genmisc.resources.FileByteBufferReader;
+import net.meisen.general.genmisc.resources.IByteBufferReader;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.genmisc.types.Streams;
 
@@ -42,314 +42,249 @@ public class FileMetaDataCache implements IMetaDataCache {
 	 * The name of the file used to store the meta-data
 	 */
 	protected final static String metaDataFileName = "meta.data";
-	/**
-	 * The extension appended to a file-name if it's a backup
-	 */
-	protected final static String backupFileExtension = ".bak";
-
-	@Autowired
-	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
-	private MetaDataCollection metaDataCollection;
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
+	private DescriptorMetaDataCollection metaDataColl;
+
+	private final DescriptorMetaDataCollection unpersistedMetaDataColl = new DescriptorMetaDataCollection();
+	private final ReentrantLock cacheLock = new ReentrantLock();
+
 	private boolean init = false;
+	private boolean persistency = true;
 
 	private File location;
 	private File modelLocation;
 	private File metaDataFile;
+	private FileBasedDataOutputStream writer;
 
 	@Override
-	public void cacheMetaDataModel(final MetaDataModel model) {
-		if (!init) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1003);
-		}
+	public void initialize(final TidaModel model) {
 
-		// get the collection and write the file
-		final MetaDataCollection collection = UtilMetaDataCache
-				.createCollectionForModel(model);
-		write(metaDataFile, collection);
-
-		// keep the collection as the currently cached one
-		this.metaDataCollection = collection;
-	}
-
-	@Override
-	public MetaDataCollection createMetaDataCollection() {
-		if (!init) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1003);
-		}
-
-		if (metaDataFile.exists()) {
-			if (!metaDataFile.isFile()) {
-				exceptionRegistry.throwException(
-						FileMetaDataCacheException.class, 1004, metaDataFile);
-			} else if (LOG.isDebugEnabled()) {
-				LOG.debug("Reloading meta-data from '" + metaDataFile + "'.");
-			}
-
-			// load the collection from the file
-			return read(metaDataFile);
-		} else {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Using configured meta-data.");
-			}
-
-			// return the configuration, thats the best we have
-			return metaDataCollection;
-		}
-	}
-
-	/**
-	 * Reads the {@code MetaDataCollection} from the specified
-	 * {@code metaDataFile}.
-	 * 
-	 * @param metaDataFile
-	 *            the file to read the data from
-	 * 
-	 * @return the read {@code MetaDataCollection}
-	 * 
-	 * @throws FileMetaDataCacheException
-	 *             if the {@code metaDataFile} does not exist or isn't a file,
-	 *             if the {@code metaDataFile} cannot be read, or if the
-	 *             {@code metaDataFile} contains corrupted data
-	 */
-	protected MetaDataCollection read(final File metaDataFile)
-			throws FileMetaDataCacheException {
-		final MetaDataCollection collection = new MetaDataCollection();
-
-		// make sure we have a file
-		if (!metaDataFile.exists() || !metaDataFile.isFile()) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1004, metaDataFile);
-		}
-
-		// read the data
-		FileByteBufferReader fbbr = null;
-		try {
-			fbbr = new FileByteBufferReader(metaDataFile);
-
-			// make sure those values are valid
-			while (fbbr.hasRemaining()) {
-
-				// first we need the amount and the descId
-				final Object oSize = Streams.readNextObject(fbbr);
-				final Object oDescId = Streams.readNextObject(fbbr);
-
-				// make sure we found valid size and descId
-				if (oSize instanceof Integer && oDescId instanceof String) {
-					final int size = ((Integer) oSize).intValue();
-					final String descId = oDescId.toString();
-
-					final LoadedMetaData metaData = new LoadedMetaData(descId);
-					for (int i = 0; i < size; i++) {
-						final Object key = Streams.readNextObject(fbbr);
-						final Object val = Streams.readNextObject(fbbr);
-
-						metaData.addValue(key, val);
-					}
-
-					collection.addMetaData(metaData);
-				} else {
-					exceptionRegistry.throwException(
-							FileMetaDataCacheException.class, 1012,
-							metaDataFile, oSize, oDescId);
-				}
-			}
-		} catch (final IOException e) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1013, e, metaDataFile);
-		} catch (final IllegalArgumentException e) {
-
-			// check if a backup exists and try to load it
-			final File backup = getBackUpFile(metaDataFile);
-			if (backup.exists() && backup.isFile()) {
-				if (LOG.isInfoEnabled()) {
-					LOG.info("Loading backup file '" + backup + "', because '"
-							+ metaDataFile + "' seems to be corrupted.");
-				}
-
-				return read(backup);
-			} else {
-				exceptionRegistry
-						.throwException(FileMetaDataCacheException.class, 1014,
-								e, metaDataFile);
-			}
-		} catch (final Exception e) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1015, e, metaDataFile);
-		} finally {
-			Streams.closeIO(fbbr);
-		}
-
-		return collection;
-	}
-
-	/**
-	 * Writes the {@code collection} to the specified {@code metaDataFile}.
-	 * 
-	 * @param metaDataFile
-	 *            the file to write to
-	 * @param collection
-	 *            the {@code MetaDataCollection} to be written
-	 * 
-	 * @throws FileMetaDataCacheException
-	 *             if the defined {@code metaDataFile} location exists and isn't
-	 *             a directory, if an existing backup cannot be deleted, if a
-	 *             backup cannot be created, if the {@code metaDataFile} cannot
-	 *             be created, or if the data cannot be written
-	 * 
-	 * @see MetaDataCollection
-	 */
-	protected void write(final File metaDataFile,
-			final MetaDataCollection collection)
-			throws FileMetaDataCacheException {
-		final File backup;
-
-		if (metaDataFile.exists()) {
-			if (!metaDataFile.isFile()) {
-				exceptionRegistry.throwException(
-						FileMetaDataCacheException.class, 1004, metaDataFile);
-			}
-
-			backup = getBackUpFile(metaDataFile);
-
-			// remove any existing backup
-			if (backup.exists() && !backup.delete()) {
-				if (LOG.isTraceEnabled()) {
-					LOG.trace("Removing old backup-file at '" + backup + "'.");
-				}
-
-				exceptionRegistry.throwException(
-						FileMetaDataCacheException.class, 1016, backup,
-						metaDataFile);
-			}
-
-			// create a backup of the current file
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Creating a backup-file at '" + backup + "'.");
-			}
-			try {
-				Files.moveFile(metaDataFile, backup);
-			} catch (final IOException e) {
-				exceptionRegistry.throwException(
-						FileMetaDataCacheException.class, 1009, e, backup,
-						metaDataFile);
-			}
-		} else {
-			backup = null;
-		}
-
-		// create the new cache file and add the data
-		final File parentDir = metaDataFile.getParentFile();
-		if (!parentDir.exists() && !metaDataFile.getParentFile().mkdirs()) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1017, parentDir);
-		} else if (!parentDir.isDirectory()) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1018, parentDir);
-		}
-		try {
-			metaDataFile.createNewFile();
-		} catch (final IOException e) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1006, metaDataFile, e);
-		}
-
-		// create the outputStream
-		final OutputStream out;
-		try {
-			out = new BufferedOutputStream(new FileOutputStream(metaDataFile,
-					true));
-		} catch (final FileNotFoundException e) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1004, e, metaDataFile);
+		// if already initialized we are done
+		if (this.init) {
 			return;
 		}
 
-		boolean success = true;
+		// read the values needed
+		final String modelId = model.getId();
+		final File modelLocation = model.getLocation();
+
+		// determine the location of the model
+		if (this.location != null) {
+			this.modelLocation = new File(this.location, modelId);
+		} else if (modelLocation != null) {
+			this.modelLocation = modelLocation;
+			this.location = modelLocation.getParentFile();
+		} else {
+			this.location = getDefaultLocation();
+			this.modelLocation = new File(getDefaultLocation(), modelId);
+		}
+
+		// set the location of the metaDataFile
+		this.metaDataFile = new File(this.modelLocation, metaDataFileName);
 		try {
-			for (final IMetaData data : collection) {
-				if (data instanceof IIdentifiedMetaData) {
-					final IIdentifiedMetaData idData = (IIdentifiedMetaData) data;
-					out.write(Streams.objectToByte(idData.size()));
-					out.write(Streams.objectToByte(idData
-							.getDescriptorModelId()));
-
-					// write the data of the model
-					for (final Entry<Object, Object> entry : idData
-							.getIdentifiedValues().entrySet()) {
-						out.write(Streams.objectToByte(entry.getKey()));
-						out.write(Streams.objectToByte(entry.getValue()));
-					}
-				} else {
-					success = false;
-					exceptionRegistry.throwException(
-							FileMetaDataCacheException.class, 1007, data);
-				}
-			}
-
-			// make sure the data is written
-			out.flush();
+			metaDataFile.createNewFile();
+			writer = new FileBasedDataOutputStream(metaDataFile, true);
 		} catch (final IOException e) {
-			success = false;
 			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1008, metaDataFile);
-		} finally {
-			Streams.closeIO(out);
+					1005, Files.getCanonicalPath(metaDataFile));
+		}
 
-			// if the writing wasn't successful get the backup, delete the file
-			if (!success) {
-				if (!metaDataFile.delete()) {
-					exceptionRegistry.throwException(
-							FileMetaDataCacheException.class, 1010,
-							metaDataFile, backup);
-				}
-			} else {
-				if (backup != null) {
-					if (LOG.isTraceEnabled()) {
-						LOG.trace("Removing backup-file '" + backup + "'.");
-					}
+		// just create a new in memory collection and add the configured data
+		readCachedMetaDataCollection();
 
-					if (!backup.delete()) {
-						exceptionRegistry.throwException(
-								FileMetaDataCacheException.class, 1011, backup);
-					}
+		init = true;
+	}
+
+	@Override
+	public void cacheDescriptor(final Descriptor<?, ?, ?> desc) {
+		if (!init) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1003);
+		}
+
+		// modify the file if the information isn't available yet
+		cacheLock.lock();
+		try {
+			if (!metaDataColl.contains(desc)) {
+				if (persistency) {
+					metaDataColl.addDescriptor(desc);
+					writeDescriptor(desc);
+				} else {
+					unpersistedMetaDataColl.addDescriptor(desc);
 				}
 			}
-
+		} finally {
+			cacheLock.unlock();
 		}
 	}
 
 	/**
-	 * Gets the name of the backup-file for the {@code metaDataFile}.
-	 * 
-	 * @param metaDataFile
-	 *            the file to get the backup-file for
-	 * 
-	 * @return the backup-file
+	 * Writes the so far unpersisted values to the cache.
 	 */
-	protected File getBackUpFile(final File metaDataFile) {
-		final File parent = metaDataFile.getParentFile();
-		if (parent == null) {
-			return new File(metaDataFile.getName() + backupFileExtension);
-		} else {
-			return new File(parent, metaDataFile.getName()
-					+ backupFileExtension);
+	protected void writeUnpersisted() {
+		cacheLock.lock();
+
+		try {
+			final Iterator<IMetaData> it = unpersistedMetaDataColl.iterator();
+
+			while (it.hasNext()) {
+				final IMetaData md = it.next();
+				if (md instanceof IIdentifiedMetaData) {
+					final IIdentifiedMetaData imd = (IIdentifiedMetaData) md;
+					final String modelId = imd.getDescriptorModelId();
+					for (final Entry<Object, Object> e : imd
+							.getIdentifiedValues().entrySet()) {
+						metaDataColl.addMetaData(md);
+						write(modelId, e.getKey(), e.getValue());
+					}
+				}
+			}
+			unpersistedMetaDataColl.clear();
+		} finally {
+			cacheLock.unlock();
 		}
+	}
+
+	/**
+	 * Writes the specified {@code Descriptor} to the cache.
+	 * 
+	 * @param desc
+	 *            the {@code Descriptor} to be written
+	 */
+	protected void writeDescriptor(final Descriptor<?, ?, ?> desc) {
+		write(desc.getModelId(), desc.getId(), desc.getValue());
+	}
+
+	/**
+	 * Writes the specified meta-data to the cache.
+	 * 
+	 * @param modelId
+	 *            the identifier of the {@code DescriptorModel}
+	 * @param id
+	 *            the identifier of the meta-data
+	 * @param value
+	 *            the value of the meta-data
+	 */
+	protected void write(final String modelId, final Object id,
+			final Object value) {
+		try {
+			writer.write(Streams.writeAllObjects(modelId, id, value));
+			writer.flush();
+		} catch (final IOException e) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1006, e, modelId, id, value);
+		}
+	}
+
+	/**
+	 * Reads the cached meta-data.
+	 */
+	protected void readCachedMetaDataCollection() {
+
+		// cleanup the meta-collection
+		if (metaDataColl == null) {
+			metaDataColl = new DescriptorMetaDataCollection();
+		} else {
+			metaDataColl.clear();
+		}
+
+		// open a reader
+		final IByteBufferReader reader = Streams
+				.createByteBufferReader(this.metaDataFile);
+
+		int counter = 0;
+		String modelId = null;
+		Object id = null;
+		Object value = null;
+		while (reader.hasRemaining()) {
+			final Object object = Streams.readNextObject(reader);
+
+			// we have the modelId
+			final int pos = counter % 3;
+			if (pos == 0) {
+				modelId = object.toString();
+			}
+			// the identifier
+			else if (pos == 1) {
+				id = object;
+			}
+			// the value
+			else if (pos == 2) {
+				value = object;
+
+				final LoadedMetaData metaData = new LoadedMetaData(modelId);
+				metaData.addValue(id, value);
+				metaDataColl.addMetaData(metaData);
+
+				// reset everything
+				modelId = null;
+				id = null;
+				value = null;
+			}
+
+			counter++;
+		}
+
+		// release the reader again
+		reader.close();
+
+		// make sure we read valid values
+		if (counter % 3 != 0) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1002, Files.getCanonicalPath(metaDataFile));
+		}
+	}
+
+	@Override
+	public IMetaDataCollection createMetaDataCollection() {
+		if (!init) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1003);
+		}
+
+		final DescriptorMetaDataCollection collection = new DescriptorMetaDataCollection();
+		cacheLock.lock();
+		try {
+			collection.add(this.metaDataColl);
+			collection.add(this.unpersistedMetaDataColl);
+		} finally {
+			cacheLock.unlock();
+		}
+
+		return new ReadOnlyMetaDataCollection(collection);
+	}
+
+	/**
+	 * Gets the persisted values of the cache.
+	 * 
+	 * @return the persisted values
+	 */
+	protected IMetaDataCollection getPersistedMetaDataCollection() {
+		return new ReadOnlyMetaDataCollection(metaDataColl);
+	}
+
+	/**
+	 * Gets the unpersisted values.
+	 * 
+	 * @return the unpersisted values
+	 */
+	protected IMetaDataCollection getUnpersistedMetaDataCollection() {
+		return new ReadOnlyMetaDataCollection(unpersistedMetaDataColl);
 	}
 
 	@Override
 	public void release() {
-		if (metaDataCollection != null) {
-			metaDataCollection.clear();
-			metaDataCollection = null;
-		}
+		// make sure everything is written
+		writeUnpersisted();
 
+		// close the writer
+		Streams.closeIO(writer);
+
+		// we are done here
 		init = false;
 	}
 
@@ -369,38 +304,6 @@ public class FileMetaDataCache implements IMetaDataCache {
 			exceptionRegistry.throwException(FileMetaDataCacheException.class,
 					1001, config.getClass().getName());
 		}
-	}
-
-	@Override
-	public void initialize(final TidaModel model) {
-
-		// if already initialized we are done
-		if (this.init) {
-			return;
-		}
-
-		// read the values needed
-		final String modelId = model.getId();
-		final File modelLocation = model.getLocation();
-
-		// determine the location of the model
-		if (metaDataCollection == null) {
-			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1002);
-		} else if (this.location != null) {
-			this.modelLocation = new File(this.location, modelId);
-		} else if (modelLocation != null) {
-			this.modelLocation = modelLocation;
-			this.location = modelLocation.getParentFile();
-		} else {
-			this.location = getDefaultLocation();
-			this.modelLocation = new File(getDefaultLocation(), modelId);
-		}
-
-		// set the location of the metaDataFile
-		this.metaDataFile = new File(this.modelLocation, metaDataFileName);
-
-		init = true;
 	}
 
 	/**
@@ -435,19 +338,36 @@ public class FileMetaDataCache implements IMetaDataCache {
 
 	@Override
 	public boolean setPersistency(final boolean enable) {
-		return true;
+		final boolean oldPersistency = this.persistency;
+		this.persistency = enable;
+
+		// nothing to do, nothing was changed
+		if (oldPersistency == this.persistency) {
+			// nothing to do
+		}
+		// persistency was enabled
+		else if (oldPersistency) {
+			// nothing to do
+		}
+		// persistency was disabled, write the not persisted once now
+		else {
+			writeUnpersisted();
+		}
+
+		return oldPersistency;
 	}
 
 	@Override
 	public void remove() {
 		if (init) {
 			exceptionRegistry.throwException(FileMetaDataCacheException.class,
-					1019);
+					1004);
 		}
-		
+
 		if (getModelLocation() == null) {
 			// nothing to do
-		} else if (!Files.deleteOnExitDir(getModelLocation()) && LOG.isErrorEnabled()) {
+		} else if (!Files.deleteOnExitDir(getModelLocation())
+				&& LOG.isErrorEnabled()) {
 			LOG.error("Unabel to delete the files created for the cache '"
 					+ getClass().getSimpleName() + "' at '"
 					+ Files.getCanonicalPath(getModelLocation()) + "'");

@@ -1,6 +1,7 @@
 package net.meisen.dissertation.model.data.metadata;
 
 import net.meisen.dissertation.model.data.OfflineMode;
+import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 
 /**
  * A offline-aware {@code MetaData} is a {@code MetaData} instance which
@@ -23,4 +24,15 @@ public interface IOfflineModeAwareMetaData extends IMetaData {
 	 * @see OfflineMode
 	 */
 	public void setOfflineMode(final OfflineMode offlineMode);
+
+	/**
+	 * Sets the {@code OfflineMode}, i.e. how invalid data retrievers should be
+	 * handled.
+	 * 
+	 * @param mode
+	 *            the {@code OfflineMode} to be used
+	 * 
+	 * @see IntervalDataHandling
+	 */
+	public void setOfflineModeByString(String mode);
 }

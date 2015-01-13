@@ -21,8 +21,6 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  * @author pmeisen
  * 
- * @see ModifyType
- * 
  */
 public class RevokeQuery implements IQuery {
 	private final Set<DefinedPermission> permissions = new LinkedHashSet<DefinedPermission>();

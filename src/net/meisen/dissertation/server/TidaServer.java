@@ -184,10 +184,20 @@ public class TidaServer {
 	 *            {@code true} to delete all the files, otherwise {@code false}
 	 */
 	public void shutdown(final boolean cleanUp) {
-		final String location = handler.getDefaultLocation();
 
 		// shutdown the server
 		server.shutdown();
+
+		// delete the models
+		if (cleanUp) {
+			final List<String> loadedModels = new ArrayList<String>(
+					handler.getAvailableTidaModels());
+			for (final String id : loadedModels) {
+				handler.deleteModel(id);
+			}
+		} else {
+			handler.unloadAll();
+		}
 
 		// release the configuration
 		configuration.release();
@@ -197,9 +207,14 @@ public class TidaServer {
 		}
 
 		if (cleanUp) {
-			if (!Files.deleteDir(new File(location))) {
+			final File locFile = new File(handler.getDefaultLocation());
+			if (!Files.deleteDir(locFile)) {
 				if (LOG.isWarnEnabled()) {
-					LOG.warn("CleanUp of server failed.");
+					LOG.warn("CleanUp of server at '"
+							+ Files.getCanonicalPath(locFile) + "' failed.");
+
+					// try to delete on exit
+					Files.deleteOnExitDir(locFile);
 				}
 			}
 		}

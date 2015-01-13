@@ -9,8 +9,7 @@ import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
 import net.meisen.dissertation.model.data.metadata.IMetaData;
-import net.meisen.dissertation.model.data.metadata.IOfflineModeAwareMetaData;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -20,6 +19,8 @@ import net.meisen.dissertation.model.indexes.datarecord.IntervalDataHandling;
 import net.meisen.dissertation.model.indexes.datarecord.MetaDataHandling;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -32,6 +33,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class MetaDataModel {
+	private final static Logger LOG = LoggerFactory
+			.getLogger(MetaDataModel.class);
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -78,23 +81,17 @@ public class MetaDataModel {
 	 * @param metaData
 	 *            the meta-data to be added
 	 * 
-	 * @see MetaDataCollection
+	 * @see IMetaDataCollection
 	 */
 	@SuppressWarnings("unchecked")
-	public void addMetaData(final MetaDataCollection metaData) {
+	public void addMetaData(final IMetaDataCollection metaData) {
 
 		// iterate over the metadata and add it
 		for (final IMetaData md : metaData) {
 			final String modelId = md.getDescriptorModelId();
-			
+
 			@SuppressWarnings("rawtypes")
 			final DescriptorModel model = getDescriptorModel(modelId);
-
-			// set the OfflineMode to be used if it's offlineModeAware
-			if (md instanceof IOfflineModeAwareMetaData) {
-				((IOfflineModeAwareMetaData) md)
-						.setOfflineMode(getOfflineMode());
-			}
 
 			// check if the metaData provides identifier
 			if (md instanceof IIdentifiedMetaData) {
@@ -109,9 +106,17 @@ public class MetaDataModel {
 				}
 			} else {
 
-				// create a descriptor for each value
+				// create a descriptor for each value, if it doesn't exist
 				for (final Object value : md.getValues()) {
-					model.createDescriptor(value);
+					if (model.getDescriptorByValue(value) == null) {
+						model.createDescriptor(value);
+					} else {
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("Skipping to add '"
+									+ value
+									+ "' because a descriptor is already available.");
+						}
+					}
 				}
 			}
 		}

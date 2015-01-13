@@ -6,31 +6,28 @@
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
        
-       folder="${java.io.tmpdir}/testMetaDataCache"
-       id="fileMetaDataCache">
-    
+       id="testPersistedPioneerModel">
+  
   <config>
     <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
       <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
     </caches>
   </config>
   
-  <time><timeline start="0" duration="100" /></time>
-    
+  <time>
+    <timeline start="0" duration="10000" />
+  </time>
+  
   <meta>
     <descriptors>
-      <integer id="PAX" />
-      <integer id="CREW" null="true" />
-      <string id="AIRLINE" null="true" />
+      <string id="DESC_SYMBOL" />
     </descriptors>
 
-    <entries>
-      <entry descriptor="CREW" value="5" />
-              
-      <entry descriptor="AIRLINE" value="LH" />
-      <entry descriptor="AIRLINE" value="AB" />
-    </entries>
+    <entries />
   </meta>
     
-  <data />
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
 </model>

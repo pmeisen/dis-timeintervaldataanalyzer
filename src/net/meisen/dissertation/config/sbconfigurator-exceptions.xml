@@ -17,6 +17,8 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.MetaDataModelException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+       <entry key="net.meisen.dissertation.exceptions.MetaDataCollectionException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.DataRetrieverException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.TimeGranularityFactoryException" 

@@ -2,7 +2,7 @@ package net.meisen.dissertation.model.cache;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.model.data.MetaDataModel;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
@@ -20,23 +20,24 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 public interface IMetaDataCache extends ICache {
 
 	/**
-	 * Caches the specified {@code MetaDataModel}.
+	 * Caches the specified descriptor as part of the meta-data.
 	 * 
-	 * @param model
-	 *            the model to be cached
+	 * @param desc
+	 *            the descriptor to be cached
 	 */
-	public void cacheMetaDataModel(final MetaDataModel model);
+	public void cacheDescriptor(final Descriptor<?, ?, ?> desc);
 
 	/**
-	 * Creates a {@code MetaDataCollection} from the cached data, or if not
-	 * available from the configuration (use the
-	 * {@link DefaultValues#METADATACOLLECTION_ID} to retrieve the configured
-	 * collection).
+	 * Creates a {@code MetaDataCollection} from the cached data, and the
+	 * configuration (use the {@link DefaultValues#METADATACOLLECTION_ID} to
+	 * retrieve the configured collection).
 	 * 
 	 * @return the cached {@code MetaDataCollection} or the configured one, if
 	 *         none is cached
+	 * 
+	 * @see IMetaDataCollection
 	 */
-	public MetaDataCollection createMetaDataCollection();
+	public IMetaDataCollection createMetaDataCollection();
 
 	/**
 	 * Specifies the configuration to be used by the concrete implementation.

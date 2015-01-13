@@ -19,7 +19,7 @@ import net.meisen.dissertation.model.cache.IBitmapIdCache;
 import net.meisen.dissertation.model.cache.IDataRecordCache;
 import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -50,8 +50,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class TidaModel implements IPersistable {
-	private final static String EXTENSION = ".model";
 	private final static Logger LOG = LoggerFactory.getLogger(TidaModel.class);
+	private final static String EXTENSION = ".model";
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -104,6 +104,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.METADATACACHE_ID)
 	private IMetaDataCache metaDataCache;
+
+	@Autowired
+	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
+	private IMetaDataCollection configuredMetaDataCollection;
 
 	private final String id;
 	private final String name;
@@ -244,26 +248,22 @@ public class TidaModel implements IPersistable {
 		this.dataRecordFactory.initialize(this);
 
 		// initialize the caches
-		this.metaDataCache.initialize(this);
+		getMetaDataCache().initialize(this);
 		getIdentifierCache().initialize(this);
 		getBitmapCache().initialize(this);
 		getFactsCache().initialize(this);
 		getDataRecordCache().initialize(this);
 
 		/*
-		 * Get the cached metaData and use it. Afterwards the data is stored in
-		 * the MetaDataModel and not needed anymore, therefore release the
-		 * cache. Before releasing the cache is used to persist the currently
-		 * loaded metaData.
+		 * First add the cached meta-data and afterwards update with the
+		 * configured. The metaDataModel will ensure that no duplicates are
+		 * generated.
 		 */
-		try {
-			final MetaDataCollection metaData = this.metaDataCache
-					.createMetaDataCollection();
-			this.metaDataModel.addMetaData(metaData);
-			this.metaDataCache.cacheMetaDataModel(this.metaDataModel);
-		} finally {
-			this.metaDataCache.release();
-		}
+		getMetaDataCache().setPersistency(false);
+		this.metaDataModel.addMetaData(getMetaDataCache()
+				.createMetaDataCollection());
+		this.metaDataModel.addMetaData(configuredMetaDataCollection);
+		getMetaDataCache().setPersistency(true);
 
 		// create the index
 		this.idx = new TidaIndex(this, getIdentifierCache()
@@ -297,6 +297,7 @@ public class TidaModel implements IPersistable {
 		}
 
 		// release the cache
+		getMetaDataCache().release();
 		getBitmapCache().release();
 		getFactsCache().release();
 		getIdentifierCache().release();
@@ -305,6 +306,7 @@ public class TidaModel implements IPersistable {
 		// delete created files if necessary
 		boolean deleted = true;
 		if (deleteLocation) {
+			getMetaDataCache().remove();
 			getBitmapCache().remove();
 			getFactsCache().remove();
 			getIdentifierCache().remove();
@@ -501,6 +503,7 @@ public class TidaModel implements IPersistable {
 			if (enable != bulkLoadEnabled) {
 
 				// set persistence
+				getMetaDataCache().setPersistency(!enable);
 				getBitmapCache().setPersistency(!enable);
 				getFactsCache().setPersistency(!enable);
 				getIdentifierCache().setPersistency(!enable);
@@ -916,6 +919,15 @@ public class TidaModel implements IPersistable {
 	 */
 	public IIdentifierCache getIdentifierCache() {
 		return idCache;
+	}
+
+	/**
+	 * Gets the cache used for the meta-data.
+	 * 
+	 * @return the cache used for the meta-data
+	 */
+	public IMetaDataCache getMetaDataCache() {
+		return metaDataCache;
 	}
 
 	/**

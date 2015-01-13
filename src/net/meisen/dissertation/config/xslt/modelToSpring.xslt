@@ -360,7 +360,7 @@
       </xsl:for-each>
       
       <!-- create the metaDataCollection -->
-      <bean id="{$metaDataCollectionId}" class="net.meisen.dissertation.model.data.metadata.MetaDataCollection">
+      <bean id="{$metaDataCollectionId}" class="net.meisen.dissertation.model.data.metadata.ConfiguredMetaDataCollection">
         <property name="metaData">
           <list value-type="net.meisen.dissertation.model.data.metadata.IMetaData">
 
@@ -392,6 +392,8 @@
                     <xsl:otherwise><null /></xsl:otherwise>
                   </xsl:choose>
                 </constructor-arg>
+                
+                <property name="offlineModeByString" value="{$offlinemode}" />
               </bean>
             </xsl:for-each>
 

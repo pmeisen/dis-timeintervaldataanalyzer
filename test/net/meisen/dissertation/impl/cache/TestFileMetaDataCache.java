@@ -1,27 +1,21 @@
 package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import net.meisen.dissertation.config.TestConfig;
-import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.help.ModuleBasedTest;
-import net.meisen.dissertation.model.data.MetaDataModel;
+import net.meisen.dissertation.help.LoaderBasedTest;
+import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.model.data.DataStructure;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
-import net.meisen.general.genmisc.types.Files;
-import net.meisen.general.genmisc.types.Streams;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
+import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -32,227 +26,98 @@ import org.junit.Test;
  */
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
-public class TestFileMetaDataCache extends ModuleBasedTest {
-
-	private TidaModel model = null;
-	private File tmpFile = new File(System.getProperty("java.io.tmpdir"),
-			"testMetaCache");
+public class TestFileMetaDataCache extends LoaderBasedTest {
 
 	/**
-	 * Makes sure a temporary file is defined and not created yet.
-	 */
-	@Before
-	public void init() {
-		cleanUp();
-	}
-
-	/**
-	 * Tests the implementation of
-	 * {@link FileMetaDataCache#write(File, MetaDataCollection)} and
-	 * {@link FileMetaDataCache#read(File)} when an empty collection is written
-	 * and read.
-	 */
-	@Test
-	public void testWriteAndReadOfEmptyCollection() {
-
-		// create the collection to be written
-		final MetaDataCollection collection = new MetaDataCollection();
-
-		// check some pre-requirements
-		assertFalse(tmpFile.exists());
-
-		// create the file
-		final FileMetaDataCache mdc = new FileMetaDataCache();
-		mdc.write(tmpFile, collection);
-
-		final MetaDataCollection readCollection = mdc.read(tmpFile);
-		assertEquals(collection, readCollection);
-	}
-
-	/**
-	 * Tests the implementation of
-	 * {@link FileMetaDataCache#write(File, MetaDataCollection)} and
-	 * {@link FileMetaDataCache#read(File)}.
-	 */
-	@Test
-	public void testWriteAndReadOfMetaModelData() {
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
-
-		// get the model and make sure it's not initialized
-		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
-		assertFalse(model.isInitialized());
-
-		// create the collection to be written
-		final MetaDataCollection collection = UtilMetaDataCache
-				.createCollectionForModel(model.getMetaDataModel());
-
-		// check some pre-requirements
-		assertFalse(tmpFile.exists());
-
-		// create the file
-		final FileMetaDataCache mdc = new FileMetaDataCache();
-		mdc.write(tmpFile, collection);
-		assertTrue(tmpFile.exists());
-		assertTrue(tmpFile.canWrite());
-
-		final MetaDataCollection readCollection = mdc.read(tmpFile);
-		assertEquals(collection, readCollection);
-	}
-
-	/**
-	 * Tests the usage of the {@code FileMetaDataCache} within a
-	 * {@code TidaModel}, i.e. if the data is correctly reloaded from the file.
-	 */
-	@Test
-	public void testReloadingCapabilities() {
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
-
-		// get the model and make sure it's not initialized
-		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
-
-		// get the NULL-Descriptor now, so that it gets the first id
-		final MetaDataModel metaModel = model.getMetaDataModel();
-		metaModel.getDescriptorModel("AIRLINE").getNullDescriptor();
-
-		// initialize and release the model, but don't delete anything from it
-		model.initialize();
-
-		// check the sizes
-		assertEquals(3, metaModel.getDescriptorModel("AIRLINE").sizeAll());
-		assertEquals(0, metaModel.getDescriptorModel("PAX").sizeAll());
-		assertEquals(2, metaModel.getDescriptorModel("CREW").sizeAll());
-
-		// make sure we have some mixed up identifiers
-		assertEquals(1, metaModel.getDescriptorModel("AIRLINE")
-				.getNullDescriptor().getId());
-		assertEquals(2, metaModel.getDescriptorModel("CREW")
-				.getNullDescriptor().getId());
-
-		// release the model
-		model.release();
-
-		// load the model again
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
-		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
-		final MetaDataModel reloadedMetaModel = model.getMetaDataModel();
-
-		// initialize the model
-		model.initialize();
-
-		// check the sizes
-		assertEquals(3, reloadedMetaModel.getDescriptorModel("AIRLINE")
-				.sizeAll());
-		assertEquals(0, reloadedMetaModel.getDescriptorModel("PAX").sizeAll());
-		assertEquals(2, reloadedMetaModel.getDescriptorModel("CREW").sizeAll());
-
-		// check if the identifiers are also mixed
-		assertEquals(1, reloadedMetaModel.getDescriptorModel("AIRLINE")
-				.getNullDescriptor().getId());
-		assertEquals(2, reloadedMetaModel.getDescriptorModel("CREW")
-				.getNullDescriptor().getId());
-	}
-
-	/**
-	 * Helper method to create an empty or corrupted metaDataFile.
+	 * Loads the {@code fileMetaDataCache}-model.
 	 * 
-	 * @param file
-	 *            the file to be created
-	 * @param corrupt
-	 *            {@code true} if the file should be corrupted, otherwise
-	 *            {@code false} which creates an empty file
-	 * 
-	 * @throws IOException
-	 *             if the file cannot be created
+	 * @return the loaded model
 	 */
-	protected void createFile(final File file, final boolean corrupt)
-			throws IOException {
+	protected TidaModel load() {
+		final TidaModel m = m("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
+		assertTrue(m.getMetaDataCache() instanceof FileMetaDataCache);
 
-		// create a corrupted backup
-		file.getParentFile().mkdirs();
-		file.delete();
-		assertFalse(file.exists());
-		file.createNewFile();
-		assertTrue(file.exists());
-
-		if (corrupt) {
-			final FileOutputStream fis = new FileOutputStream(file);
-			fis.getChannel().write(ByteBuffer.wrap(new byte[] { 0, 1, 2 }));
-
-			// release the file
-			Streams.closeIO(fis);
-		}
+		return m;
 	}
 
 	/**
-	 * Tests the exception to be thrown if a corrupted file is read
+	 * Creates the {@code DataStructure} needed to add data to the
+	 * {@code fileMetaDataCache}-model.
 	 * 
-	 * @throws IOException
-	 *             if a test-file cannot be created
+	 * @return the created {@code DataStructure}
+	 */
+	protected DataStructure create() {
+		return new DataStructure(new IntervalStructureEntry("START", 1),
+				new IntervalStructureEntry("END", 2), new MetaStructureEntry(
+						"AIRLINE", 3), new MetaStructureEntry("PAX", 4),
+				new MetaStructureEntry("CREW", 5));
+	}
+
+	/**
+	 * Tests the caching of the {@code FileMetaDataCache}.
 	 */
 	@Test
-	public void testExceptionCorruption() throws IOException {
-		thrown.expect(FileMetaDataCacheException.class);
-		thrown.expectMessage("is corrupted");
+	public void testReloading() {
+		TidaModel m;
+		IMetaDataCollection mdc;
+		Collection<Object> vals;
 
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
+		// load the defined model
+		m = load();
+		mdc = m.getMetaDataCache().createMetaDataCollection();
+		assertEquals(1, mdc.get("AIRLINE").size());
+		vals = mdc.get("AIRLINE").iterator().next().getValues();
+		assertEquals(2, vals.size());
+		assertTrue(vals.contains("LH"));
+		assertTrue(vals.contains("AB"));
 
-		// get the model and make sure it's not initialized
-		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+		// let's add an LX airline
+		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "LX", 5, 10));
+		mdc = m.getMetaDataCache().createMetaDataCollection();
+		assertEquals(1, mdc.get("AIRLINE").size());
+		vals = mdc.get("AIRLINE").iterator().next().getValues();
+		assertEquals(3, vals.size());
+		assertTrue(vals.contains("LH"));
+		assertTrue(vals.contains("AB"));
+		assertTrue(vals.contains("LX"));
 
-		// create a corrupt file
-		final File file = new File(model.getLocation(),
-				FileMetaDataCache.metaDataFileName);
-		createFile(file, true);
+		this.loader.unloadAll();
 
-		// initialize the model
-		model.initialize();
+		// now load the model again, the data (LX) should be available
+		m = load();
+		mdc = m.getMetaDataCache().createMetaDataCollection();
+		assertEquals(1, mdc.get("AIRLINE").size());
+		vals = mdc.get("AIRLINE").iterator().next().getValues();
+		assertEquals(3, vals.size());
+		assertTrue(vals.contains("LH"));
+		assertTrue(vals.contains("AB"));
+		assertTrue(vals.contains("LX"));
 	}
 
 	/**
-	 * Tests the fallback to a backup.
-	 * 
-	 * @throws IOException
-	 *             if the testfiles cannot be created
+	 * Tests the persistence of the {@code FileMetaDataCache}.
 	 */
 	@Test
-	public void testFallback() throws IOException {
-		setModulesHolder("/net/meisen/dissertation/impl/cache/fileMetaDataCache.xml");
+	public void testPersistence() {
 
-		// get the model and make sure it's not initialized
-		model = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
+		// load the defined model
+		final TidaModel m = load();
+		final FileMetaDataCache c = ((FileMetaDataCache) m.getMetaDataCache());
+		assertEquals(0, c.getUnpersistedMetaDataCollection().size());
 
-		// create an empty file
-		final File backupFile = new File(model.getLocation(),
-				FileMetaDataCache.metaDataFileName
-						+ FileMetaDataCache.backupFileExtension);
-		createFile(backupFile, false);
+		// enable persistence
+		m.setBulkLoad(true);
+		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "LX", 5, 10));
+		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "WK", 5, 10));
+		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "DL", 5, 10));
+		assertEquals(2, c.getPersistedMetaDataCollection().get("AIRLINE"));
+		assertEquals(3, c.getUnpersistedMetaDataCollection().get("AIRLINE")
+				.size());
 
-		// create a corrupt file
-		final File file = new File(model.getLocation(),
-				FileMetaDataCache.metaDataFileName);
-		createFile(file, true);
-
-		// initialize the model
-		model.initialize();
-
-		// read the metaModel
-		final MetaDataModel metaModel = model.getMetaDataModel();
-		assertEquals(3, metaModel.getDescriptorModels().size());
-		assertEquals(0, metaModel.getDescriptorModel("AIRLINE").size());
-		assertEquals(0, metaModel.getDescriptorModel("CREW").size());
-		assertEquals(0, metaModel.getDescriptorModel("PAX").size());
-	}
-
-	/**
-	 * If a module was loaded any created folder is deleted.
-	 */
-	@After
-	public void cleanUp() {
-		if (model != null) {
-			model.release(true);
-		}
-		if (tmpFile.exists()) {
-			assertTrue(Files.deleteDir(tmpFile));
-		}
+		// disable persistence
+		m.setBulkLoad(false);
+		assertEquals(5, c.getPersistedMetaDataCollection().get("AIRLINE"));
+		assertEquals(0, c.getUnpersistedMetaDataCollection().get("AIRLINE")
+				.size());
 	}
 }

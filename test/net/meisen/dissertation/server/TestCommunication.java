@@ -3,24 +3,29 @@ package net.meisen.dissertation.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import net.meisen.dissertation.help.DbBasedTest;
 import net.meisen.dissertation.help.ThreadForTesting;
 import net.meisen.dissertation.jdbc.DriverProperties;
 import net.meisen.dissertation.jdbc.TidaConnection;
@@ -32,9 +37,16 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 
 /**
  * Test to test some communication between a client and a server via TSQL.
@@ -69,7 +81,6 @@ public class TestCommunication {
 				throws SQLException {
 			Statement stmt;
 			ResultSet res;
-
 			stmt = conn.createStatement();
 
 			// load the communicationModel
@@ -546,6 +557,117 @@ public class TestCommunication {
 		}
 
 		/**
+		 * Method used to handle exceptions during test.
+		 * 
+		 * @param e
+		 *            the exception thrown
+		 * @param counter
+		 *            the actual counter, i.e. how often the exception was
+		 *            handled so far
+		 * @return {@code true} if the exception should be ignored,
+		 *         {@code false} if the amount of retries is exceeded
+		 * 
+		 * @throws SQLException
+		 *             if the exception should have been handled
+		 */
+		protected static boolean handleException(final SQLException e,
+				final AtomicInteger counter) throws SQLException {
+			if (e.getMessage().contains("Unable to establish a connection")) {
+				if (counter.incrementAndGet() > 5) {
+					fail("Did not get a new connection after ten retries ("
+							+ counter.get() + ".");
+				}
+				return false;
+			} else {
+				throw e;
+			}
+		}
+
+		/**
+		 * Executes the specified query.
+		 * 
+		 * @param stmt
+		 *            the statement used for execution
+		 * @param query
+		 *            the query the query to be fired
+		 * @param returnGeneratedKeys
+		 *            defines if the flag for return the generated keys should
+		 *            be set
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected problem occures
+		 */
+		protected static void execute(final TidaStatement stmt,
+				final String query, final int returnGeneratedKeys)
+				throws SQLException {
+			final AtomicInteger counter = new AtomicInteger(0);
+			boolean noException;
+			do {
+				noException = true;
+				try {
+					stmt.execute(query, returnGeneratedKeys);
+				} catch (final SQLException e) {
+					noException = handleException(e, counter);
+				}
+			} while (!noException);
+		}
+
+		/**
+		 * Executes the specified update query.
+		 * 
+		 * @param stmt
+		 *            the statement used for execution
+		 * @param query
+		 *            the query the query to be fired
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected problem occures
+		 */
+		protected static void executeUpdate(final TidaStatement stmt,
+				final String query) throws SQLException {
+			final AtomicInteger counter = new AtomicInteger(0);
+			boolean noException;
+			do {
+				noException = true;
+				try {
+					stmt.executeUpdate(query);
+				} catch (final SQLException e) {
+					noException = handleException(e, counter);
+				}
+			} while (!noException);
+		}
+
+		/**
+		 * Executes the specified select query.
+		 * 
+		 * @param stmt
+		 *            the statement used for execution
+		 * @param query
+		 *            the query the query to be fired
+		 * @return the created {@code TidaResultSet}
+		 * 
+		 * @throws SQLException
+		 *             if an unexpected problem occures
+		 */
+		protected static TidaResultSet executeQuery(final TidaStatement stmt,
+				final String query) throws SQLException {
+			final AtomicInteger counter = new AtomicInteger(0);
+			TidaResultSet res = null;
+
+			boolean noException;
+			do {
+				noException = true;
+				try {
+					res = stmt.executeQuery(query);
+				} catch (final SQLException e) {
+					noException = handleException(e, counter);
+				}
+			} while (!noException);
+
+			return res;
+		}
+
+		/**
 		 * Tests the enabling and disabling of bulk-loading.
 		 * 
 		 * @throws SQLException
@@ -619,7 +741,7 @@ public class TestCommunication {
 		 * 
 		 * @param conn
 		 *            the connection used to fire the query on
-		 *            
+		 * 
 		 * @throws SQLException
 		 *             if an unexpected exception is thrown
 		 */
@@ -646,114 +768,119 @@ public class TestCommunication {
 		}
 	}
 
-	/**
-	 * Method used to handle exceptions during test.
-	 * 
-	 * @param e
-	 *            the exception thrown
-	 * @param counter
-	 *            the actual counter, i.e. how often the exception was handled
-	 *            so far
-	 * @return {@code true} if the exception should be ignored, {@code false} if
-	 *         the amount of retries is exceeded
-	 * 
-	 * @throws SQLException
-	 *             if the exception should have been handled
-	 */
-	protected static boolean handleException(final SQLException e,
-			final AtomicInteger counter) throws SQLException {
-		if (e.getMessage().contains("Unable to establish a connection")) {
-			if (counter.incrementAndGet() > 5) {
-				fail("Did not get a new connection after ten retries ("
-						+ counter.get() + ".");
-			}
-			return false;
-		} else {
-			throw e;
+	public static class TestWithDatabase extends BaseTestWithServerConnection {
+		private DbBasedTest dbTest = null;
+
+		@Before
+		public void setup() throws IOException {
+
+			// load a database to be used
+			dbTest = new DbBasedTest();
+			dbTest.initLocale();
+			dbTest.getDb("tidaPioneerData",
+					"/net/meisen/dissertation/impl/hsqldbs/tidaPioneerData.zip");
 		}
-	}
 
-	/**
-	 * Executes the specified query.
-	 * 
-	 * @param stmt
-	 *            the statement used for execution
-	 * @param query
-	 *            the query the query to be fired
-	 * @param returnGeneratedKeys
-	 *            defines if the flag for return the generated keys should be
-	 *            set
-	 * 
-	 * @throws SQLException
-	 *             if an unexpected problem occures
-	 */
-	protected static void execute(final TidaStatement stmt, final String query,
-			final int returnGeneratedKeys) throws SQLException {
-		final AtomicInteger counter = new AtomicInteger(0);
-		boolean noException;
-		do {
-			noException = true;
-			try {
-				stmt.execute(query, returnGeneratedKeys);
-			} catch (final SQLException e) {
-				noException = handleException(e, counter);
+		@Override
+		public int getHttpPort() {
+			return 6668;
+		}
+
+		@Override
+		public int getTsqlPort() {
+			return 6669;
+		};
+
+		@Override
+		public boolean isTSQL() {
+			return true;
+		}
+
+		@Override
+		public boolean isHttp() {
+			return true;
+		}
+
+		@Test
+		public void testDescriptorModelReload() throws IOException,
+				SQLException {
+			signIn();
+
+			final TidaStatement stmt = this.conn.createStatement();
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testCommunicationModel.xml'");
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testPioneerModel.xml'");
+			stmt.executeUpdate("UNLOAD testPioneerModel");
+			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testPersistedPioneerModel.xml'");
+
+			// load the data
+			final Map<String, String> params = new HashMap<String, String>();
+			params.put("object", "adddbrecords");
+			params.put("model", "testPersistedPioneerModel");
+			params.put(
+					"connection",
+					// @formatter:off
+					new JsonObject()
+						.add("driver", "org.hsqldb.jdbcDriver")
+						.add("url", "jdbc:hsqldb:hsql://localhost:6666/tidaPioneerData")
+						.add("username", "SA")
+						.add("password", "")
+						.toString());
+					// @formatter:on
+			params.put(
+					"structure",
+					// @formatter:off
+					new JsonArray()
+						.add(new JsonObject()
+								.add("descriptor", "DESC_SYMBOL")
+								.add("dbname", "SYMBOL"))
+						.add(new JsonObject()
+								.add("interval", "START")
+								.add("dbname", "START_TIME"))
+						.add(new JsonObject()
+								.add("interval", "END")
+								.add("dbname", "END_TIME"))
+						.toString());
+					// @formatter:on
+			params.put("query",
+					"SELECT start_time, end_time, symbol FROM TB_INTERVALS");
+
+			// fire the system-query
+			final byte[] response = this.getResponse("/query/system", params);
+			final JsonValue result = JsonValue.readFrom(new String(response,
+					"UTF8"));
+			assertTrue(result.isBoolean());
+			assertTrue(result.asBoolean());
+
+			// check the model
+			TidaModel model;
+			model = server.getModel("testPersistedPioneerModel");
+
+			System.out.println(model.getAmountOfRecords());
+			System.out.println(model.getMetaDataModel().getDescriptors().size());
+			System.out.println(model.getMetaDataModel().getDescriptorModels().size());
+			
+			// unload the model
+			stmt.executeUpdate("UNLOAD testPersistedPioneerModel");
+			assertNull(server.getModel("testPersistedPioneerModel"));
+
+			// reload it and validate again
+			stmt.executeUpdate("LOAD testPersistedPioneerModel");
+			model = server.getModel("testPersistedPioneerModel");
+
+			System.out.println(model.getAmountOfRecords());
+			System.out.println(model.getMetaDataModel().getDescriptors().size());
+			System.out.println(model.getMetaDataModel().getDescriptorModels().size());
+			
+			stmt.close();
+		}
+
+		@After
+		public void cleanUp() {
+			if (dbTest != null) {
+				dbTest.cleanUpDb();
+				dbTest.cleanUpLocale();
 			}
-		} while (!noException);
-	}
-
-	/**
-	 * Executes the specified update query.
-	 * 
-	 * @param stmt
-	 *            the statement used for execution
-	 * @param query
-	 *            the query the query to be fired
-	 * 
-	 * @throws SQLException
-	 *             if an unexpected problem occures
-	 */
-	protected static void executeUpdate(final TidaStatement stmt,
-			final String query) throws SQLException {
-		final AtomicInteger counter = new AtomicInteger(0);
-		boolean noException;
-		do {
-			noException = true;
-			try {
-				stmt.executeUpdate(query);
-			} catch (final SQLException e) {
-				noException = handleException(e, counter);
-			}
-		} while (!noException);
-	}
-
-	/**
-	 * Executes the specified select query.
-	 * 
-	 * @param stmt
-	 *            the statement used for execution
-	 * @param query
-	 *            the query the query to be fired
-	 * @return the created {@code TidaResultSet}
-	 * 
-	 * @throws SQLException
-	 *             if an unexpected problem occures
-	 */
-	protected static TidaResultSet executeQuery(final TidaStatement stmt,
-			final String query) throws SQLException {
-		final AtomicInteger counter = new AtomicInteger(0);
-		TidaResultSet res = null;
-
-		boolean noException;
-		do {
-			noException = true;
-			try {
-				res = stmt.executeQuery(query);
-			} catch (final SQLException e) {
-				noException = handleException(e, counter);
-			}
-		} while (!noException);
-
-		return res;
+		}
 	}
 
 	/**
@@ -945,8 +1072,8 @@ public class TestCommunication {
 	 * 
 	 */
 	@RunWith(Suite.class)
-	@Suite.SuiteClasses({ TestSimple.class, TestWithAuthentication.class,
-			TestLoadAndUnload.class })
+	@Suite.SuiteClasses({ TestSimple.class, TestWithDatabase.class,
+			TestWithAuthentication.class, TestLoadAndUnload.class })
 	public static class TestCommunicationSuite {
 		// all tests are defined within the suite's annotation
 	}

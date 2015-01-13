@@ -1,11 +1,13 @@
 package net.meisen.dissertation.impl.cache;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.impl.data.metadata.DescriptorMetaDataCollection;
+import net.meisen.dissertation.impl.data.metadata.ReadOnlyMetaDataCollection;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.cache.IMetaDataCacheConfig;
-import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.data.metadata.MetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
+import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 public class MemoryMetaDataCache implements IMetaDataCache {
-
-	@Autowired
-	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
-	private MetaDataCollection metaDataCollection;
+	private DescriptorMetaDataCollection metaDataCollection;
 
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
@@ -30,25 +29,29 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 	private boolean init = false;
 
 	@Override
-	public void cacheMetaDataModel(final MetaDataModel model) {
-		if (!init) {
-			exceptionRegistry.throwException(
-					MemoryMetaDataCacheException.class, 1001);
-		}
-
-		// create the collection and cache it in memory
-		this.metaDataCollection = UtilMetaDataCache
-				.createCollectionForModel(model);
+	public void initialize(final TidaModel model) {
+		this.metaDataCollection = new DescriptorMetaDataCollection();
+		init = true;
 	}
 
 	@Override
-	public MetaDataCollection createMetaDataCollection() {
+	public void cacheDescriptor(final Descriptor<?, ?, ?> desc) {
 		if (!init) {
 			exceptionRegistry.throwException(
-					MemoryMetaDataCacheException.class, 1001);
+					MemoryMetaDataCacheException.class, 1000);
 		}
 
-		return metaDataCollection;
+		metaDataCollection.addDescriptor(desc);
+	}
+
+	@Override
+	public IMetaDataCollection createMetaDataCollection() {
+		if (!init) {
+			exceptionRegistry.throwException(
+					MemoryMetaDataCacheException.class, 1000);
+		}
+
+		return new ReadOnlyMetaDataCollection(metaDataCollection);
 	}
 
 	@Override
@@ -66,16 +69,6 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 		// nothing can be configured
 	}
 
-	@Override
-	public void initialize(final TidaModel model) {
-		if (metaDataCollection == null) {
-			exceptionRegistry.throwException(
-					MemoryMetaDataCacheException.class, 1000);
-		}
-
-		init = true;
-	}
-
 	/**
 	 * Checks if the {@code MemoryMetaDataCache} is initialized.
 	 * 
@@ -87,9 +80,9 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 
 	@Override
 	public boolean setPersistency(final boolean enable) {
-		return true;
+		return false;
 	}
-	
+
 	@Override
 	public void remove() {
 		// nothing to do

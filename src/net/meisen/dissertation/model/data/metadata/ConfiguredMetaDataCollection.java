@@ -3,7 +3,9 @@ package net.meisen.dissertation.model.data.metadata;
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.meisen.dissertation.exceptions.MetaDataCollectionException;
 import net.meisen.general.genmisc.collections.MultiMap;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A collection of different {@code MetaData} instances. The collection units
@@ -12,23 +14,19 @@ import net.meisen.general.genmisc.collections.MultiMap;
  * @author pmeisen
  * 
  */
-public class MetaDataCollection implements Iterable<IMetaData> {
+public class ConfiguredMetaDataCollection implements IMetaDataCollection {
 	private final MultiMap<String, IMetaData> metaData;
 
 	/**
 	 * Default constructor.
 	 */
-	public MetaDataCollection() {
+	public ConfiguredMetaDataCollection() {
 		this.metaData = new MultiMap<String, IMetaData>();
 	}
 
-	/**
-	 * Adds all the {@code MetaData} to {@code this}.
-	 * 
-	 * @param metaData
-	 *            the collection of {@code MetaData} to be added
-	 */
-	public void addMetaData(final Collection<IMetaData> metaData) {
+	@Override
+	public void addMetaData(final Collection<IMetaData> metaData)
+			throws MetaDataCollectionException {
 		if (metaData == null) {
 			return;
 		}
@@ -39,40 +37,37 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 		}
 	}
 
-	/**
-	 * Adds the {@code MetaData} to {@code this}.
-	 * 
-	 * @param metaData
-	 *            the {@code MetaData} to be added
-	 */
-	public void addMetaData(final IMetaData metaData) {
+	@Override
+	public void addMetaData(final IMetaData metaData)
+			throws ForwardedRuntimeException {
+		if (metaData == null) {
+			throw new ForwardedRuntimeException(
+					MetaDataCollectionException.class, 1002);
+		} else if (metaData instanceof IIdentifiedMetaData) {
+			throw new ForwardedRuntimeException(
+					MetaDataCollectionException.class, 1001,
+					IIdentifiedMetaData.class.getSimpleName(), metaData);
+		}
+
 		this.metaData.put(metaData.getDescriptorModelId(), metaData);
 	}
 
-	/**
-	 * Sets the {@code MetaData} to be collected.
-	 * 
-	 * @param metaData
-	 *            the {@code MetaData} to be collected
-	 */
+	@Override
 	public void setMetaData(final Collection<IMetaData> metaData) {
 		clear();
 		addMetaData(metaData);
 	}
 
-	/**
-	 * Adds the {@code MetaData} of the passed {@code collection} to
-	 * {@code this}.
-	 * 
-	 * @param collection
-	 *            the {@code MetaDataCollection} to add the {@code MetaData}
-	 *            from
-	 */
-	public void add(final MetaDataCollection collection) {
-		if (collection == null || collection.metaData == null) {
+	@Override
+	public void add(final IMetaDataCollection collection) {
+		if (collection == null) {
 			return;
 		}
-		addMetaData(collection.metaData.values());
+
+		final Iterator<IMetaData> it = collection.iterator();
+		while (it.hasNext()) {
+			addMetaData(it.next());
+		}
 	}
 
 	@Override
@@ -84,8 +79,8 @@ public class MetaDataCollection implements Iterable<IMetaData> {
 	public boolean equals(final Object obj) {
 		if (obj == this) {
 			return true;
-		} else if (obj instanceof MetaDataCollection) {
-			final MetaDataCollection col = (MetaDataCollection) obj;
+		} else if (obj instanceof ConfiguredMetaDataCollection) {
+			final ConfiguredMetaDataCollection col = (ConfiguredMetaDataCollection) obj;
 			return metaData.equals(col.metaData);
 		} else {
 			return false;

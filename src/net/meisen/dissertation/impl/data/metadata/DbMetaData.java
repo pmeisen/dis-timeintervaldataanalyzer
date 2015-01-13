@@ -69,6 +69,11 @@ public class DbMetaData implements IOfflineModeAwareMetaData {
 	}
 
 	@Override
+	public void setOfflineModeByString(final String mode) {
+		setOfflineMode(OfflineMode.find(mode));
+	}
+
+	@Override
 	public Collection<Object> getValues() {
 		Collection<Object> loadedValues;
 
