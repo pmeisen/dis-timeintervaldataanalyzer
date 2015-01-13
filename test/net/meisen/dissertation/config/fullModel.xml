@@ -37,7 +37,7 @@
             + net.meisen.dissertation.impl.cache.MemoryMetaDataCache
             + net.meisen.dissertation.impl.cache.FileMetaDataCache
         -->
-      <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+      <metadata implementation="net.meisen.dissertation.model.descriptors.mock.MockMetaDataCache" />
       
       <!-- Define the cache to be used for bitmaps.
 

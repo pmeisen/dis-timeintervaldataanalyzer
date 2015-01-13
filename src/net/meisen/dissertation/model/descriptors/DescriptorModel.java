@@ -343,7 +343,7 @@ public class DescriptorModel<I extends Object> {
 		}
 
 		// inform the cache about the new descriptor
-		metaDataCache.cacheDescriptor(descriptor);
+		cacheDescriptor(descriptor);
 
 		return descriptor;
 	}
@@ -458,10 +458,22 @@ public class DescriptorModel<I extends Object> {
 		// make sure we have a nullDescriptor
 		if (!createdNullDescriptor()) {
 			nullDescriptor = new NullDescriptor<I>(this, idsFactory.getId());
-			metaDataCache.cacheDescriptor(nullDescriptor);
+			cacheDescriptor(nullDescriptor);
 		}
 
 		return nullDescriptor;
+	}
+
+	/**
+	 * Caches the {@code Descriptor} if a cache is available.
+	 * 
+	 * @param desc
+	 *            the {@code Descriptor} to be cached
+	 */
+	protected void cacheDescriptor(final Descriptor<?, ?, ?> desc) {
+		if (metaDataCache != null) {
+			metaDataCache.cacheDescriptor(desc);
+		}
 	}
 
 	/**

@@ -8,6 +8,12 @@
        
        id="testModel">
 
+  <config>
+    <caches>
+  	  <metadata implementation="net.meisen.dissertation.model.descriptors.mock.MockMetaDataCache" />
+  	</caches>
+  </config>
+
   <meta>
     <descriptors>
       <string id="D1" />

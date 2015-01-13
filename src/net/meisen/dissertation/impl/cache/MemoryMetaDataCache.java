@@ -30,6 +30,10 @@ public class MemoryMetaDataCache implements IMetaDataCache {
 
 	@Override
 	public void initialize(final TidaModel model) {
+		if (init) {
+			return;
+		}
+		
 		this.metaDataCollection = new DescriptorMetaDataCollection();
 		init = true;
 	}

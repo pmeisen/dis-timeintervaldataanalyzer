@@ -8,6 +8,12 @@
                            http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
        
        id="testModel">
+       
+  <config>
+    <caches>
+  	  <metadata implementation="net.meisen.dissertation.model.descriptors.mock.MockMetaDataCache" />
+  	</caches>
+  </config>
 
   <meta>
     <descriptors>
