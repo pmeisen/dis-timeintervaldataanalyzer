@@ -85,6 +85,14 @@ public class FileMetaDataCache implements IMetaDataCache {
 
 		// set the location of the metaDataFile
 		this.metaDataFile = new File(this.modelLocation, metaDataFileName);
+
+		// create the directories
+		final File dir = metaDataFile.getParentFile();
+		if (!dir.exists() && !dir.mkdirs()) {
+			exceptionRegistry.throwException(FileMetaDataCacheException.class,
+					1007, Files.getCanonicalPath(dir));
+		}
+
 		try {
 			metaDataFile.createNewFile();
 			writer = new FileBasedDataOutputStream(metaDataFile, true);
