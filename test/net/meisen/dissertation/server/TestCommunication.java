@@ -39,7 +39,6 @@ import net.meisen.dissertation.model.descriptors.DescriptorModel;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -768,9 +767,21 @@ public class TestCommunication {
 		}
 	}
 
+	/**
+	 * Tests dealing with communication involving a database.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	public static class TestWithDatabase extends BaseTestWithServerConnection {
 		private DbBasedTest dbTest = null;
 
+		/**
+		 * Setup the database.
+		 * 
+		 * @throws IOException
+		 *             if the defined database file cannot be accessed.
+		 */
 		@Before
 		public void setup() throws IOException {
 
@@ -801,6 +812,14 @@ public class TestCommunication {
 			return true;
 		}
 
+		/**
+		 * Test the reloading of the descriptors of a model.
+		 * 
+		 * @throws IOException
+		 *             if a file cannot be accessed
+		 * @throws SQLException
+		 *             if the query cannot be parsed or loaded
+		 */
 		@Test
 		public void testDescriptorModelReload() throws IOException,
 				SQLException {
@@ -855,10 +874,12 @@ public class TestCommunication {
 			TidaModel model;
 			model = server.getModel("testPersistedPioneerModel");
 
-			System.out.println(model.getAmountOfRecords());
-			System.out.println(model.getMetaDataModel().getDescriptors().size());
-			System.out.println(model.getMetaDataModel().getDescriptorModels().size());
-			
+			final int loadedRecords = model.getAmountOfRecords();
+			final int loadedDescs = model.getMetaDataModel().getDescriptors()
+					.size();
+			final int loadedDescModels = model.getMetaDataModel()
+					.getDescriptorModels().size();
+
 			// unload the model
 			stmt.executeUpdate("UNLOAD testPersistedPioneerModel");
 			assertNull(server.getModel("testPersistedPioneerModel"));
@@ -867,13 +888,19 @@ public class TestCommunication {
 			stmt.executeUpdate("LOAD testPersistedPioneerModel");
 			model = server.getModel("testPersistedPioneerModel");
 
-			System.out.println(model.getAmountOfRecords());
-			System.out.println(model.getMetaDataModel().getDescriptors().size());
-			System.out.println(model.getMetaDataModel().getDescriptorModels().size());
-			
+			// make sure everything is loaded correctly
+			assertEquals(loadedRecords, model.getAmountOfRecords());
+			assertEquals(loadedDescs, model.getMetaDataModel().getDescriptors()
+					.size());
+			assertEquals(loadedDescModels, model.getMetaDataModel()
+					.getDescriptorModels().size());
+
 			stmt.close();
 		}
 
+		/**
+		 * Cleans up after the test.
+		 */
 		@After
 		public void cleanUp() {
 			if (dbTest != null) {

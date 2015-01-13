@@ -245,7 +245,7 @@ public class FileIdentifierCache extends BaseIdentifierCache {
 			// nothing to do
 		} else if (!Files.deleteOnExitDir(getModelLocation())
 				&& LOG.isErrorEnabled()) {
-			LOG.error("Unabel to delete the files created for the cache '"
+			LOG.error("Unable to delete the files created for the cache '"
 					+ getClass().getSimpleName() + "' at '"
 					+ Files.getCanonicalPath(getModelLocation()) + "'");
 		}
