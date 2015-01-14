@@ -302,6 +302,8 @@ public class TestTidaModelHandler extends DbBasedTest {
 			assertNotNull(metaModel.getDescriptorModel("SYMBOL"));
 			assertEquals(size, model.getAmountOfRecords());
 		} finally {
+			db.shutDownDb();
+			
 			if (model != null) {
 				model.release(true);
 			}

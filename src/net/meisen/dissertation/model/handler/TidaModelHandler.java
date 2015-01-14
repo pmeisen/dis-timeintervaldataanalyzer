@@ -461,7 +461,7 @@ public class TidaModelHandler {
 	public synchronized TidaModel loadFromDefaultLocation(final String modelId) {
 		final File modelDir = new File(getDefaultLocation(), modelId);
 		final File modelFile = new File(modelDir, MODEL_FILENAME);
-
+		
 		// check if the file does not exist or if it's a directory
 		if (!modelFile.exists() || modelFile.isDirectory()) {
 			exceptionRegistry.throwRuntimeException(
