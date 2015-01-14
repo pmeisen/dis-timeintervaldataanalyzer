@@ -756,6 +756,7 @@ public class TidaModel implements IPersistable {
 		final MetaDataModel metaDataModel = getMetaDataModel();
 		if (metaDataModel != null) {
 			metaDataModel.setOfflineMode(this.offlineMode);
+
 		}
 		if (dataModel != null) {
 			dataModel.setOfflineMode(this.offlineMode);

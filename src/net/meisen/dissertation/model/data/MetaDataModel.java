@@ -10,6 +10,7 @@ import net.meisen.dissertation.exceptions.MetaDataModelException;
 import net.meisen.dissertation.model.data.metadata.IIdentifiedMetaData;
 import net.meisen.dissertation.model.data.metadata.IMetaData;
 import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
+import net.meisen.dissertation.model.data.metadata.IOfflineModeAwareMetaData;
 import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -105,6 +106,12 @@ public class MetaDataModel {
 					model.addDescriptor(model.castId(key), value);
 				}
 			} else {
+
+				// set the offline mode if it's aware of one
+				if (md instanceof IOfflineModeAwareMetaData) {
+					((IOfflineModeAwareMetaData) md)
+							.setOfflineMode(getOfflineMode());
+				}
 
 				// create a descriptor for each value, if it doesn't exist
 				for (final Object value : md.getValues()) {
