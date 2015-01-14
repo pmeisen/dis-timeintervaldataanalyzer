@@ -110,14 +110,16 @@ public class TestFileMetaDataCache extends LoaderBasedTest {
 		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "LX", 5, 10));
 		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "WK", 5, 10));
 		m.loadRecord(create(), new SingleStaticDataSet(0, 5, "DL", 5, 10));
-		assertEquals(2, c.getPersistedMetaDataCollection().get("AIRLINE"));
-		assertEquals(3, c.getUnpersistedMetaDataCollection().get("AIRLINE")
-				.size());
+		assertEquals(2,
+				c.getPersistedMetaDataCollection().sizeOfValues("AIRLINE"));
+		assertEquals(3,
+				c.getUnpersistedMetaDataCollection().sizeOfValues("AIRLINE"));
 
 		// disable persistence
 		m.setBulkLoad(false);
-		assertEquals(5, c.getPersistedMetaDataCollection().get("AIRLINE"));
-		assertEquals(0, c.getUnpersistedMetaDataCollection().get("AIRLINE")
-				.size());
+		assertEquals(5,
+				c.getPersistedMetaDataCollection().sizeOfValues("AIRLINE"));
+		assertEquals(0,
+				c.getUnpersistedMetaDataCollection().sizeOfValues("AIRLINE"));
 	}
 }

@@ -7,6 +7,8 @@
   
   <bean id="metaDataModelId" class="net.meisen.dissertation.model.data.MetaDataModel" />
   
+  <bean id="metaDataCacheId" class="net.meisen.dissertation.model.descriptors.mock.MockMetaDataCache" />
+  
   <bean id="descriptorModels" class="java.util.ArrayList">
     <constructor-arg>
       <list value-type="net.meisen.dissertation.model.descriptors.DescriptorModel">
