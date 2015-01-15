@@ -293,7 +293,11 @@ public class DescriptorMetaDataCollection implements IMetaDataCollection {
 
 		lock.readLock().lock();
 		try {
-			data.add(this.metaData.get(descriptorModelId));
+			final LoadedMetaData metaData = this.metaData
+					.get(descriptorModelId);
+			if (metaData != null) {
+				data.add(metaData);
+			}
 			return data;
 		} finally {
 			lock.readLock().unlock();
