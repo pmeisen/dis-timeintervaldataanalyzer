@@ -311,7 +311,6 @@ public class TidaModel implements IPersistable {
 			getFactsCache().remove();
 			getIdentifierCache().remove();
 			getDataRecordCache().remove();
-			this.metaDataCache.remove();
 
 			if (getLocation().exists()) {
 				if (LOG.isDebugEnabled()) {
