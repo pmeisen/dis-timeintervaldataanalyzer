@@ -114,7 +114,7 @@ exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_
 exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (compNamedDimMathMeasure (SEPARATOR compNamedDimMathMeasure)* OP_ON selectorMember));
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
 exprComp            : compMemberEqual | compDescriptorEqual | BRACKET_ROUND_OPENED exprComp BRACKET_ROUND_CLOSED | LOGICAL_NOT exprComp | exprComp (LOGICAL_OR | LOGICAL_AND) exprComp;
-exprGroup           : exprAggregate (LOGICAL_IGNORE compGroupIgnore)?;
+exprGroup           : exprAggregate (compGroupInclude)? (compGroupExclude)?;
 exprAggregate       : (selectorMember | selectorDescriptorId) (SEPARATOR (selectorMember | selectorDescriptorId))*;
 
 /*
@@ -125,7 +125,9 @@ compNamedDimMathMeasure  : compDimMathMeasure (OP_ALIAS selectorAlias)?;
 compMemberEqual          : selectorMember CMP_EQUAL selectorValue;
 compDescriptorEqual      : selectorDescriptorId CMP_EQUAL selectorValue;
 compDescValueTupel       : BRACKET_ROUND_OPENED selectorValue (SEPARATOR selectorValue)* BRACKET_ROUND_CLOSED;
-compGroupIgnore          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
+compGroupInclude         : LOGICAL_INCLUDE compGroupFilter;
+compGroupExclude         : LOGICAL_EXCLUDE compGroupFilter;
+compGroupFilter          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
 compValueElement         : selectorNullValue | selectorDateValue | selectorIntValue | selectorValue;
 
@@ -270,7 +272,8 @@ IR_FINISHINGWITH : F I N I S H I N G W I T H;
 LOGICAL_OR      : O R | '||';
 LOGICAL_AND     : A N D | '&&';
 LOGICAL_NOT     : N O T | '!';
-LOGICAL_IGNORE  : I G N O R E;
+LOGICAL_INCLUDE : I N C L U D E;
+LOGICAL_EXCLUDE : E X C L U D E;
 LOGICAL_TRUE    : T R U E;
 LOGICAL_FALSE   : F A L S E;
 

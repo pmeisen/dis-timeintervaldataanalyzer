@@ -18,7 +18,8 @@ import net.meisen.general.genmisc.types.Strings;
  */
 public class GroupExpression {
 	private final Set<Object> selectors = new LinkedHashSet<Object>();
-	private final List<GroupExclusion> exclusions = new ArrayList<GroupExclusion>();
+	private final List<GroupFilter> inclusions = new ArrayList<GroupFilter>();
+	private final List<GroupFilter> exclusions = new ArrayList<GroupFilter>();
 
 	/**
 	 * Constructor to create a group expression.
@@ -143,6 +144,64 @@ public class GroupExpression {
 	}
 
 	/**
+	 * Adds an inclusion definition for the group.
+	 * 
+	 * @param values
+	 *            the values to be included
+	 */
+	public void addInclusion(final String... values) {
+		if (values == null) {
+			return;
+		}
+
+		addInclusion(Arrays.asList(values));
+	}
+
+	/**
+	 * Adds an inclusion definition for the group.
+	 * 
+	 * @param values
+	 *            the values to be included
+	 */
+	public void addInclusion(final Collection<String> values) {
+
+		// create a dedicated list for the exclusion
+		final GroupFilter inclusion = new GroupFilter();
+		inclusion.setValues(values);
+
+		// add the exclusion
+		addInclusion(inclusion);
+	}
+
+	/**
+	 * Adds an exclusion definition for the group.
+	 * 
+	 * @param inclusion
+	 *            the inclusion to be added
+	 */
+	public void addInclusion(final GroupFilter inclusion) {
+		if (inclusion != null) {
+			inclusions.add(inclusion);
+		}
+	}
+
+	/**
+	 * Removes all the defined inclusions.
+	 */
+	public void removeInclusions() {
+		inclusions.clear();
+	}
+
+	/**
+	 * Gets the defined inclusions.
+	 * 
+	 * @return the inclusions
+	 */
+	public List<GroupFilter> getInclusions() {
+		return Collections.unmodifiableList(inclusions);
+	}
+
+	/**
 	 * Adds an exclusion definition for the group.
 	 * 
 	 * @param values
@@ -165,7 +224,7 @@ public class GroupExpression {
 	public void addExclusion(final Collection<String> values) {
 
 		// create a dedicated list for the exclusion
-		final GroupExclusion exclusion = new GroupExclusion();
+		final GroupFilter exclusion = new GroupFilter();
 		exclusion.setValues(values);
 
 		// add the exclusion
@@ -178,7 +237,7 @@ public class GroupExpression {
 	 * @param exclusion
 	 *            the exclusion to be added
 	 */
-	public void addExclusion(final GroupExclusion exclusion) {
+	public void addExclusion(final GroupFilter exclusion) {
 		if (exclusion != null) {
 			exclusions.add(exclusion);
 		}
@@ -196,7 +255,7 @@ public class GroupExpression {
 	 * 
 	 * @return the exclusions
 	 */
-	public List<GroupExclusion> getExclusions() {
+	public List<GroupFilter> getExclusions() {
 		return Collections.unmodifiableList(exclusions);
 	}
 
@@ -210,7 +269,13 @@ public class GroupExpression {
 	public boolean isValid() {
 		final int expectedSize = selectors.size();
 
-		for (final GroupExclusion exclusion : exclusions) {
+		for (final GroupFilter inclusion : inclusions) {
+			if (expectedSize < inclusion.getAmountOfValues()) {
+				return false;
+			}
+		}
+
+		for (final GroupFilter exclusion : exclusions) {
 			if (expectedSize < exclusion.getAmountOfValues()) {
 				return false;
 			}

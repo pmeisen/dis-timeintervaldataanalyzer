@@ -11,8 +11,8 @@ import java.util.Set;
 import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.group.GroupExclusion;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupFilter;
 import net.meisen.dissertation.model.data.DimensionModel;
 import net.meisen.dissertation.model.data.DimensionModel.IMemberFilter;
 import net.meisen.dissertation.model.data.MetaDataModel;
@@ -506,7 +506,8 @@ public class GroupEvaluator {
 	 * @see Group
 	 */
 	protected List<Group> generateGroups(final GroupExpression groupExpression) {
-		final List<GroupExclusion> exclusions = groupExpression.getExclusions();
+		final List<GroupFilter> inclusions = groupExpression.getInclusions();
+		final List<GroupFilter> exclusions = groupExpression.getExclusions();
 
 		// combine the groups
 		List<Group> result = null;
@@ -514,10 +515,10 @@ public class GroupEvaluator {
 
 			if (selector instanceof String) {
 				result = appendDescriptorIdSelector((String) selector,
-						exclusions, result);
+						inclusions, exclusions, result);
 			} else if (selector instanceof DimensionSelector) {
 				result = appendDimensionSelector((DimensionSelector) selector,
-						exclusions, result);
+						inclusions, exclusions, result);
 			} else {
 				throw new ForwardedRuntimeException(
 						GroupEvaluatorException.class, 1001, selector,
@@ -542,6 +543,8 @@ public class GroupEvaluator {
 	 * @param descModelId
 	 *            the identifier of the {@code DescriptorModel} to append the
 	 *            descriptors for
+	 * @param inclusions
+	 *            the definitions of groups to be included
 	 * @param exclusions
 	 *            the definitions of groups to be excluded
 	 * @param result
@@ -550,7 +553,8 @@ public class GroupEvaluator {
 	 * @return the new result containing the new groups
 	 */
 	protected List<Group> appendDescriptorIdSelector(final String descModelId,
-			final List<GroupExclusion> exclusions, final List<Group> result) {
+			final List<GroupFilter> inclusions,
+			final List<GroupFilter> exclusions, final List<Group> result) {
 		final List<Group> iterationResult = new ArrayList<Group>();
 
 		// get the DescriptorModel
@@ -568,7 +572,7 @@ public class GroupEvaluator {
 				final GroupEntry<Descriptor<?, ?, ?>> entry = new GroupEntry<Descriptor<?, ?, ?>>(
 						desc.getUniqueString(), desc);
 				final Group group = new Group(entry);
-				if (!excludes(group, exclusions)) {
+				if (includes(group, inclusions) && !excludes(group, exclusions)) {
 					iterationResult.add(new Group(entry));
 				}
 			}
@@ -586,7 +590,8 @@ public class GroupEvaluator {
 					 * append the new descriptor and check only the new value
 					 * for exclusion
 					 */
-					if (!excludes(copiedGroup, exclusions)) {
+					if (includes(copiedGroup, inclusions)
+							&& !excludes(copiedGroup, exclusions)) {
 						iterationResult.add(copiedGroup);
 					}
 				}
@@ -602,6 +607,8 @@ public class GroupEvaluator {
 	 * 
 	 * @param selector
 	 *            the {@code DimensionSelector} to append the members for
+	 * @param inclusions
+	 *            the definitions of groups to be included
 	 * @param exclusions
 	 *            the definitions of groups to be excluded
 	 * @param result
@@ -611,7 +618,8 @@ public class GroupEvaluator {
 	 */
 	protected List<Group> appendDimensionSelector(
 			final DimensionSelector selector,
-			final List<GroupExclusion> exclusions, final List<Group> result) {
+			final List<GroupFilter> inclusions,
+			final List<GroupFilter> exclusions, final List<Group> result) {
 
 		final IDimensionGraph dimGraph = dimensionModel.getDimension(selector
 				.getDimensionId());
@@ -636,7 +644,7 @@ public class GroupEvaluator {
 				final GroupEntry<DimensionSelector> entry = new GroupEntry<DimensionSelector>(
 						member.getId(), member.getName(), selector);
 				final Group group = new Group(entry);
-				if (!excludes(group, exclusions)) {
+				if (includes(group, inclusions) && !excludes(group, exclusions)) {
 					iterationResult.add(new Group(entry));
 				}
 			}
@@ -653,7 +661,8 @@ public class GroupEvaluator {
 					 * append the new descriptor and check only the new value
 					 * for exclusion
 					 */
-					if (!excludes(copiedGroup, exclusions)) {
+					if (includes(copiedGroup, inclusions)
+							&& !excludes(copiedGroup, exclusions)) {
 						iterationResult.add(copiedGroup);
 					}
 				}
@@ -661,6 +670,35 @@ public class GroupEvaluator {
 		}
 
 		return iterationResult;
+	}
+
+	/**
+	 * Validates if the specified group should be included using the specified
+	 * {@code inclusions}.
+	 * 
+	 * @param group
+	 *            the group to be checked
+	 * @param inclusions
+	 *            the defined inclusions
+	 * 
+	 * @return {@code true} if it should be included, otherwise {@code false}
+	 */
+	protected boolean includes(final Group group,
+			final List<GroupFilter> inclusions) {
+
+		// no inclusion means include
+		if (inclusions == null || inclusions.size() == 0) {
+			return true;
+		}
+
+		// check each defined inclusion
+		for (final GroupFilter inclusion : inclusions) {
+			if (isSelected(inclusion, group)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -673,45 +711,65 @@ public class GroupEvaluator {
 	 * 
 	 * @return {@code true} if it has to be excluded, otherwise {@code false}
 	 * 
-	 * @see GroupExclusion
+	 * @see GroupFilter
 	 */
 	protected boolean excludes(final Group group,
-			final List<GroupExclusion> exclusions) {
-		int groupSize = group.size();
+			final List<GroupFilter> exclusions) {
 
 		// check each defined exclusion
-		for (final GroupExclusion exclusion : exclusions) {
+		for (final GroupFilter exclusion : exclusions) {
+			if (isSelected(exclusion, group)) {
+				return true;
+			}
+		}
 
-			for (int i = 0; i < groupSize; i++) {
-				/*
-				 * check if the exclusion can be fulfilled by the group,
-				 * otherwise we can skip it directly
-				 */
-				if (exclusion.getAmountOfValues() > groupSize) {
-					continue;
-				}
+		return false;
+	}
 
-				// get the descriptor and the string of it
-				final GroupEntry<?> entry = group.getEntry(i);
-				final String uniqueString = entry.getId();
+	/**
+	 * Checks if the specified filter selects the specified {@code group}.
+	 * 
+	 * @param filter
+	 *            the filter to be checked
+	 * @param group
+	 *            the group to check
+	 *            
+	 * @return {@code true} if the filter selects the group, otherwise
+	 *         {@code false}
+	 */
+	protected boolean isSelected(final GroupFilter filter, final Group group) {
+		final int groupSize = group.size();
 
-				/*
-				 * if we don't match the exclusion we can stop here
-				 */
-				if (!exclusion.getValue(i).matches(uniqueString)) {
-					break;
-				}
-				/*
-				 * check if we reached the end of the exclusion, if so we
-				 * reached the end:
-				 * 
-				 * Example: group = ("Apple", "Philipp") and exclusion = ("A*")
-				 * the exclusion matches and there are not more values defined,
-				 * therefore it has to excluded.
-				 */
-				else if (exclusion.getAmountOfValues() == i + 1) {
-					return true;
-				}
+		for (int i = 0; i < groupSize; i++) {
+
+			/*
+			 * check if the exclusion can be fulfilled by the group, otherwise
+			 * we can skip it directly
+			 */
+			if (filter.getAmountOfValues() > groupSize) {
+				continue;
+			}
+
+			// get the descriptor and the string of it
+			final GroupEntry<?> entry = group.getEntry(i);
+			final String uniqueString = entry.getId();
+
+			/*
+			 * if we don't match the exclusion we can stop here
+			 */
+			if (!filter.getValue(i).matches(uniqueString)) {
+				break;
+			}
+			/*
+			 * check if we reached the end of the exclusion, if so we reached
+			 * the end:
+			 * 
+			 * Example: group = ("Apple", "Philipp") and exclusion = ("A*") the
+			 * exclusion matches and there are not more values defined,
+			 * therefore it has to excluded.
+			 */
+			else if (filter.getAmountOfValues() == i + 1) {
+				return true;
 			}
 		}
 

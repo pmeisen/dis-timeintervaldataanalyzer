@@ -9,7 +9,7 @@ import java.util.Iterator;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.help.ModuleBasedTest;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
-import net.meisen.dissertation.impl.parser.query.select.group.GroupExclusion;
+import net.meisen.dissertation.impl.parser.query.select.group.GroupFilter;
 import net.meisen.dissertation.impl.parser.query.select.group.GroupExpression;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
@@ -85,7 +85,7 @@ public class TestGroupExpression extends ModuleBasedTest {
 	 */
 	@Test
 	public void testExclusions() {
-		GroupExclusion excl;
+		GroupFilter excl;
 
 		// check it empty
 		final GroupExpression expr = new GroupExpression();

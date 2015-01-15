@@ -27,7 +27,8 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMathMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMeasureContext;
-import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIgnoreContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupExcludeContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIncludeContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureContext;
@@ -1025,6 +1026,28 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	}
 
 	@Override
+	public void exitCompGroupInclude(final CompGroupIncludeContext ctx) {
+		final GroupExpression groupExpr = q(SelectQuery.class).getGroup();
+		for (final CompDescValueTupelContext descValueCtx : ctx
+				.compGroupFilter().compDescValueTupel()) {
+
+			// add an exclusion
+			groupExpr.addInclusion(getDescriptorValueList(descValueCtx));
+		}
+	}
+
+	@Override
+	public void exitCompGroupExclude(final CompGroupExcludeContext ctx) {
+		final GroupExpression groupExpr = q(SelectQuery.class).getGroup();
+		for (final CompDescValueTupelContext descValueCtx : ctx
+				.compGroupFilter().compDescValueTupel()) {
+
+			// add an exclusion
+			groupExpr.addExclusion(getDescriptorValueList(descValueCtx));
+		}
+	}
+
+	@Override
 	public void exitExprInterval(final ExprIntervalContext ctx) {
 
 		// determine the types of the interval
@@ -1119,24 +1142,6 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		q(SelectQuery.class).getGroup().setSelectors(selectors);
 	}
 
-	@Override
-	public void exitCompGroupIgnore(final CompGroupIgnoreContext ctx) {
-		final GroupExpression groupExpr = q(SelectQuery.class).getGroup();
-		for (final CompDescValueTupelContext descValueCtx : ctx
-				.compDescValueTupel()) {
-
-			// determine the values
-			final List<String> values = new ArrayList<String>();
-			for (final SelectorValueContext selectorDesc : descValueCtx
-					.selectorValue()) {
-				values.add(getSelectorValue(selectorDesc));
-			}
-
-			// add an exclusion
-			groupExpr.addExclusion(values);
-		}
-	}
-
 	/**
 	 * Gets the {@code query} casted to the needed return type.
 	 * 
@@ -1188,6 +1193,26 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	 */
 	public boolean isOptimize() {
 		return optimize;
+	}
+
+	/**
+	 * Gets the list of defined descriptor-value-pairs.
+	 * 
+	 * @param descValueCtx
+	 *            the context to retrieve the pairs from
+	 * 
+	 * @return the retrieved pairs
+	 */
+	protected List<String> getDescriptorValueList(
+			final CompDescValueTupelContext descValueCtx) {
+
+		final List<String> values = new ArrayList<String>();
+		for (final SelectorValueContext selectorDesc : descValueCtx
+				.selectorValue()) {
+			values.add(getSelectorValue(selectorDesc));
+		}
+
+		return values;
 	}
 
 	/**

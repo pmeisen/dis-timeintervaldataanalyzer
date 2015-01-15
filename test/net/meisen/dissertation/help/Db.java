@@ -445,12 +445,43 @@ public class Db {
 
 		final String[] dbs;
 
+		boolean load = false;
 		if (args == null || args.length == 0) {
 			final Scanner scanner = new Scanner(System.in);
 			final List<String> dbList = new ArrayList<String>();
 
 			System.out
-					.println("You didn't specify any databases, please do it now by entering a database (empty line will stop input):");
+					.println("You didn't specify any new databases, please do it now by entering a database (empty line will stop input):");
+
+			while (true) {
+				final String eingabe = scanner.nextLine();
+
+				if (eingabe.equals("-load")) {
+					System.out
+							.println("Switched to loading mode, all databases will be loaded from the classpath.");
+					load = true;
+				} else if (dbList.contains(eingabe)) {
+					System.out.println("Skipped '" + eingabe
+							+ "' because it is already added.");
+				} else if (eingabe.trim().equals("")) {
+					break;
+				} else if (!eingabe.matches("^[a-zA-Z0-9\\-_]+")) {
+					System.out
+							.println("Invalid name for a database, please use only alphanumeric characters and _ or -");
+				} else {
+					dbList.add(eingabe);
+				}
+			}
+
+			dbs = dbList.toArray(new String[] {});
+		} else if (args != null && args.length == 1 && args[0].equals("-load")) {
+			load = true;
+
+			final Scanner scanner = new Scanner(System.in);
+			final List<String> dbList = new ArrayList<String>();
+
+			System.out
+					.println("Specify any database to be loaded, please do it now by entering a database (empty line will stop input):");
 
 			while (true) {
 				final String eingabe = scanner.nextLine();
@@ -463,6 +494,7 @@ public class Db {
 				} else if (!eingabe.matches("^[a-zA-Z0-9\\-_]+")) {
 					System.out
 							.println("Invalid name for a database, please use only alphanumeric characters and _ or -");
+					System.out.println(eingabe);
 				} else {
 					dbList.add(eingabe);
 				}
@@ -484,7 +516,15 @@ public class Db {
 		System.out.println("- " + Files.getCanonicalPath(dbLoc));
 
 		// so open them now
-		db.openNewDbs(dbs, dbLoc, true);
+		if (load) {
+			for (final String dbName : dbs) {
+				db.addDb(dbName, "/net/meisen/dissertation/impl/hsqldbs/"
+						+ dbName + ".zip");
+			}
+			db.setUpDb(true);
+		} else {
+			db.openNewDbs(dbs, dbLoc, true);
+		}
 
 		// just call it for cleanUp
 		db.shutDownDb();

@@ -914,7 +914,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	 */
 	@Test
 	public void testParsingOfGroupByWithExclusion() {
-		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third ignore {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third exclude {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
 		final GroupExpression group = query.getGroup();
 
 		final Set<Object> descriptors = group.getSelectors();
@@ -924,6 +924,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals("second", itDesc.next());
 		assertEquals("third", itDesc.next());
 
+		assertEquals(0, group.getInclusions().size());
+
 		assertEquals(1, group.getExclusions().size());
 		final List<DescriptorValue> excls = group.getExclusions().iterator()
 				.next().getValues();
@@ -931,6 +933,49 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals("\\hallo\\", excls.get(0).getValue());
 		assertEquals("pleasematch.*", excls.get(1).getValue());
 		assertEquals("formula is a * b", excls.get(2).getValue());
+	}
+
+	/**
+	 * Tests the retrieval of a group with defined inclusions.
+	 */
+	@Test
+	public void testParsingOfGroupByWithInclusion() {
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third include {('\\\\hallo\\\\','pleasematch*','formula is a \\* b')}");
+		final GroupExpression group = query.getGroup();
+
+		assertEquals(0, group.getExclusions().size());
+
+		assertEquals(1, group.getInclusions().size());
+		final List<DescriptorValue> excls = group.getInclusions().iterator()
+				.next().getValues();
+		assertEquals(3, excls.size());
+		assertEquals("\\hallo\\", excls.get(0).getValue());
+		assertEquals("pleasematch.*", excls.get(1).getValue());
+		assertEquals("formula is a * b", excls.get(2).getValue());
+	}
+
+	/**
+	 * Tests the usage of inclusions and exclusions
+	 */
+	@Test
+	public void testParsingOfGroupByWithExAndInclusion() {
+		final SelectQuery query = q("select timeSeries from \"model\" in [03.03.2014,05.03.2014) group by first, second, third include {('W*','matcher*s','*')} exclude {('A*', 'B')}");
+		final GroupExpression group = query.getGroup();
+
+		assertEquals(1, group.getExclusions().size());
+		assertEquals(1, group.getInclusions().size());
+
+		List<DescriptorValue> vals;
+		vals = group.getInclusions().iterator().next().getValues();
+		assertEquals(3, vals.size());
+		assertEquals("W.*", vals.get(0).getValue());
+		assertEquals("matcher.*s", vals.get(1).getValue());
+		assertEquals(".*", vals.get(2).getValue());
+
+		vals = group.getExclusions().iterator().next().getValues();
+		assertEquals(2, vals.size());
+		assertEquals("A.*", vals.get(0).getValue());
+		assertEquals("B", vals.get(1).getValue());
 	}
 
 	/**
@@ -1489,7 +1534,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testGroupByWithExclusion() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON ignore {('Philipp'), ('Tobias')}";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON exclude {('Philipp'), ('Tobias')}";
 
 		// load the model
 		m(xml);
@@ -1507,12 +1552,58 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests a simple {@code group by} expression with some included values.
+	 */
+	@Test
+	public void testGroupByWithInclusion() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON include {('Philipp'), ('Tobias')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				null);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(2, gRes.size());
+		assertNotNull(gRes.getEntry("Philipp"));
+		assertNotNull(gRes.getEntry("Tobias"));
+	}
+
+	/**
+	 * Tests the combination of includes and excludes.
+	 */
+	@Test
+	public void testGroupByWithInAndExclusion() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON include {('*i*')} exclude {('Philipp'), ('Tobias')}";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+				null);
+
+		// check the result's filter
+		final GroupResult gRes = res.getGroupResult();
+		assertNotNull(gRes);
+		assertEquals(2, gRes.size());
+		assertNotNull(gRes.getEntry("Edison"));
+		assertNotNull(gRes.getEntry("Debbie"));
+	}
+
+	/**
 	 * Group-By of a dimensional expression with exclusion.
 	 */
 	@Test
 	public void testGroupByWithDimensionsAndExclusion() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON.GENDER.GENDER, LOCATION.GEO.CONTINENT ignore {('*', 'UNKNOWN')}";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON.GENDER.GENDER, LOCATION.GEO.CONTINENT exclude {('*', 'UNKNOWN')}";
 
 		// load the model
 		m(xml);
@@ -1549,7 +1640,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// 1. fire and check the query (excluding null)
-		String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION ignore {(NULL)}";
+		String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION exclude {(NULL)}";
 		SelectResult res = (SelectResult) factory.evaluateQuery(q(query), null);
 		GroupResult gRes = res.getGroupResult();
 		assertNotNull(gRes);
@@ -1700,7 +1791,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testGroupByFactsCalculationWithSeveralGroups() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries of max(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] group by LOCATION, PERSON IGNORE {('*', 'D*'), ('*', 'P*'), ('*', 'T*')}";
+		final String query = "select timeseries of max(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] group by LOCATION, PERSON EXCLUDE {('*', 'D*'), ('*', 'P*'), ('*', 'T*')}";
 
 		// load the model
 		m(xml);
@@ -1738,7 +1829,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testGroupByFactsCalculationWithFilter() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries of sum(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] filter by !LOCATION='Aachen' group by LOCATION ignore {('Undefined')}";
+		final String query = "select timeseries of sum(SCREAMS) AS SCREAMS from testPersonModel in [03.03.2014 16:18:00,03.03.2014 16:21:00] filter by !LOCATION='Aachen' group by LOCATION EXCLUDE {('Undefined')}";
 
 		// load the model
 		m(xml);

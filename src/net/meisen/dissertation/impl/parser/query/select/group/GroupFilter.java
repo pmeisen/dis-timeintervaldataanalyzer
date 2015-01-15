@@ -10,38 +10,38 @@ import net.meisen.dissertation.impl.parser.query.select.DescriptorValue;
 import net.meisen.general.genmisc.types.Strings;
 
 /**
- * An exclusion defined for a group.
+ * An filter defined for a group.
  * 
  * @author pmeisen
  * 
  */
-public class GroupExclusion {
-	private final List<DescriptorValue> exclusion = new ArrayList<DescriptorValue>();
+public class GroupFilter {
+	private final List<DescriptorValue> filter = new ArrayList<DescriptorValue>();
 
 	/**
-	 * Default constructor defines no exclusion at all.
+	 * Default constructor defines no filter at all.
 	 */
-	public GroupExclusion() {
+	public GroupFilter() {
 		// nothing to do
 	}
 
 	/**
-	 * Constructor to define the values of the exclusion via {@code array}.
+	 * Constructor to define the values of the filter via {@code array}.
 	 * 
 	 * @param values
-	 *            the values of the exclusion
+	 *            the values of the filter
 	 */
-	public GroupExclusion(final String... values) {
+	public GroupFilter(final String... values) {
 		setValues(values);
 	}
 
 	/**
-	 * Constructor to define the values of the exclusion via {@code Collection}.
+	 * Constructor to define the values of the filter via {@code Collection}.
 	 * 
 	 * @param values
-	 *            the values of the exclusion
+	 *            the values of the filter
 	 */
-	public GroupExclusion(final Collection<String> values) {
+	public GroupFilter(final Collection<String> values) {
 		setValues(values);
 	}
 
@@ -49,7 +49,7 @@ public class GroupExclusion {
 	 * Remove all the values and add the once specified.
 	 * 
 	 * @param values
-	 *            the values to be set as exclusion.
+	 *            the values to be set as filter.
 	 */
 	public void setValues(final String[] values) {
 		if (values == null) {
@@ -63,36 +63,36 @@ public class GroupExclusion {
 	 * Remove all the values and add the once specified.
 	 * 
 	 * @param values
-	 *            the values to be set as exclusion.
+	 *            the values to be set as filter.
 	 */
 	public void setValues(final Collection<String> values) {
-		exclusion.clear();
+		filter.clear();
 		for (final String val : values) {
-			exclusion.add(new DescriptorValue(val));
+			filter.add(new DescriptorValue(val));
 		}
 	}
 
 	/**
-	 * Gets the values defined for the exclusion.
+	 * Gets the values defined for the filter.
 	 * 
-	 * @return the values of the exclusion
+	 * @return the values of the filter
 	 */
 	public List<DescriptorValue> getValues() {
-		return Collections.unmodifiableList(exclusion);
+		return Collections.unmodifiableList(filter);
 	}
 
 	/**
-	 * Gets the amount of defined values for the exclusion.
+	 * Gets the amount of defined values for the filter.
 	 * 
-	 * @return the amount of defined values for the exclusion
+	 * @return the amount of defined values for the filter
 	 */
 	public int getAmountOfValues() {
-		return exclusion.size();
+		return filter.size();
 	}
 
 	@Override
 	public String toString() {
-		return Strings.join(",", exclusion);
+		return Strings.join(",", filter);
 	}
 
 	/**
@@ -107,6 +107,6 @@ public class GroupExclusion {
 	 */
 	public DescriptorValue getValue(final int position)
 			throws IndexOutOfBoundsException {
-		return exclusion.get(position);
+		return filter.get(position);
 	}
 }

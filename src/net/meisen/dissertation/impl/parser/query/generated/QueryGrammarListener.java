@@ -154,17 +154,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitCompNamedDimMathMeasure(@NotNull QueryGrammarParser.CompNamedDimMathMeasureContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compGroupIgnore}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compGroupIgnore}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompGroupIgnore(@NotNull QueryGrammarParser.CompGroupIgnoreContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorDateInterval}.
 	 * @param ctx the parse tree
 	 */
@@ -583,6 +572,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprInterval(@NotNull QueryGrammarParser.ExprIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compGroupFilter}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompGroupFilter(@NotNull QueryGrammarParser.CompGroupFilterContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compGroupFilter}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompGroupFilter(@NotNull QueryGrammarParser.CompGroupFilterContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorValue}.
 	 * @param ctx the parse tree
 	 */
@@ -660,6 +660,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprRemoveSingleRole(@NotNull QueryGrammarParser.ExprRemoveSingleRoleContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compGroupInclude}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompGroupInclude(@NotNull QueryGrammarParser.CompGroupIncludeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compGroupInclude}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompGroupInclude(@NotNull QueryGrammarParser.CompGroupIncludeContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprAdd}.
 	 * @param ctx the parse tree
 	 */
@@ -713,6 +724,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectorMember(@NotNull QueryGrammarParser.SelectorMemberContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compGroupExclude}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompGroupExclude(@NotNull QueryGrammarParser.CompGroupExcludeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compGroupExclude}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompGroupExclude(@NotNull QueryGrammarParser.CompGroupExcludeContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprComp}.
@@ -869,17 +891,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprSelect(@NotNull QueryGrammarParser.ExprSelectContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compLowMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compLowMeasure}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compLowMeasureAtom}.
 	 * @param ctx the parse tree
 	 */
@@ -889,4 +900,15 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompLowMeasureAtom(@NotNull QueryGrammarParser.CompLowMeasureAtomContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compLowMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compLowMeasure}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompLowMeasure(@NotNull QueryGrammarParser.CompLowMeasureContext ctx);
 }
