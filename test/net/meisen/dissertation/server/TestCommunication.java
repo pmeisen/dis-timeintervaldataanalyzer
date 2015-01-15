@@ -136,7 +136,7 @@ public class TestCommunication {
 			res.close();
 
 			res = stmt
-					.executeQuery("SELECT TIMESERIES OF SUM(MANPOWER) AS \"SUM\", COUNT(MANPOWER) AS \"COUNT\" FROM testCommunicationModel IN [4, 5] GROUP BY TASK, DEPARTMENT IGNORE {('MAINTENANCE','C*'), ('ROOMSERVICE','IT')}");
+					.executeQuery("SELECT TIMESERIES OF SUM(MANPOWER) AS \"SUM\", COUNT(MANPOWER) AS \"COUNT\" FROM testCommunicationModel IN [4, 5] GROUP BY TASK, DEPARTMENT exclude {('MAINTENANCE','C*'), ('ROOMSERVICE','IT')}");
 			assertTrue(res.next());
 			assertEquals("ROOMSERVICE, CLEANING (COUNT)", res.getString(1));
 			assertEquals(1.0, res.getDouble(2), 0.0);
