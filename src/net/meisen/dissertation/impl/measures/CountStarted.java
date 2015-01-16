@@ -64,14 +64,18 @@ public class CountStarted extends BaseAggregationFunction implements
 		} else {
 			final SliceWithDescriptors<?>[] slices = index
 					.getIntervalIndexSlices(timepoint - 1, timepoint - 1);
-			if (slices == null || slices.length != 1 || slices[0] == null) {
+			if (slices == null || slices.length != 1) {
 				return getDefaultValue();
 			} else {
 				final SliceWithDescriptors<?> slice = slices[0];
-				final Bitmap prevBitmap = slice.getBitmap();
+				if (slice == null) {
+					return bitmap.determineCardinality();
+				} else {
+					final Bitmap prevBitmap = slice.getBitmap();
 
-				return prevBitmap.xor(bitmap).and(bitmap)
-						.determineCardinality();
+					return prevBitmap.xor(bitmap).and(bitmap)
+							.determineCardinality();
+				}
 			}
 		}
 	}

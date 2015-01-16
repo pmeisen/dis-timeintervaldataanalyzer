@@ -57,6 +57,12 @@ public class TestIdsOnlyDataRecordCache extends LoaderBasedTest {
 		assertEquals(3l, rec.getValue(meta.getPosEnd()));
 		assertEquals(100, rec.getValue(meta.getFirstPosDescModelIds()));
 		
-		assertNull(m.getIndex().getRecord(4));
+		rec = m.getIndex().getRecord(4);
+		assertEquals(4, rec.getValue(meta.getPosRecordId()));
+		assertEquals(0l, rec.getValue(meta.getPosStart()));
+		assertEquals(10l, rec.getValue(meta.getPosEnd()));
+		assertEquals(250, rec.getValue(meta.getFirstPosDescModelIds()));
+		
+		assertNull(m.getIndex().getRecord(5));
 	}
 }

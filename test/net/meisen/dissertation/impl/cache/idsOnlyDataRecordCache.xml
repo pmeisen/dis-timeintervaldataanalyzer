@@ -13,7 +13,7 @@
   </config>
   
   <time>
-    <timeline start="1" end="5" granularity="DAY" />
+    <timeline start="0" end="10" granularity="DAY" />
   </time>
   
   <meta>
@@ -54,6 +54,12 @@
       <entry class="java.lang.Byte"    value="2" />
       <entry class="java.lang.Byte"    value="3" />
       <entry class="java.lang.Integer" value="100" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.lang.Byte"    />
+      <entry class="java.lang.Byte"    />
+      <entry class="java.lang.Integer" value="250" />
     </dataset>
   </data>
 </model>

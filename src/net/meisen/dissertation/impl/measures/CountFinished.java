@@ -14,7 +14,8 @@ import net.meisen.dissertation.model.measures.ILowAggregationFunction;
  * @author pmeisen
  * 
  */
-public class CountFinished extends BaseAggregationFunction implements ILowAggregationFunction{
+public class CountFinished extends BaseAggregationFunction implements
+		ILowAggregationFunction {
 	private final static String name = "countfinished";
 
 	@Override
@@ -63,14 +64,19 @@ public class CountFinished extends BaseAggregationFunction implements ILowAggreg
 		} else {
 			final SliceWithDescriptors<?>[] slices = index
 					.getIntervalIndexSlices(timepoint + 1, timepoint + 1);
-			if (slices == null || slices.length != 1 || slices[0] == null) {
+			if (slices == null || slices.length != 1) {
 				return getDefaultValue();
 			} else {
 				final SliceWithDescriptors<?> slice = slices[0];
-				final Bitmap follBitmap = slice.getBitmap();
 
-				return bitmap.xor(follBitmap).and(bitmap)
-						.determineCardinality();
+				if (slice == null) {
+					return bitmap.determineCardinality();
+				} else {
+					final Bitmap follBitmap = slice.getBitmap();
+
+					return bitmap.xor(follBitmap).and(bitmap)
+							.determineCardinality();
+				}
 			}
 		}
 	}

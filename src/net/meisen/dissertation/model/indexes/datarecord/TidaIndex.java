@@ -613,20 +613,23 @@ public class TidaIndex implements IPersistable {
 		final long end = intervalIndex.getNormEnd();
 		for (long i = start; i <= end; i++) {
 			final SliceWithDescriptors<?> slice = intervalIndex.getSliceById(i);
-			if (slice == null) {
-				if (!searchingStart) {
-					return null;
-				}
-				continue;
-			}
 
-			final Bitmap bmp = slice.getBitmap();
-			if (searchingStart && recBmp.and(bmp).isBitSet()) {
-				result[0] = intervalIndex.getValue(i);
-				searchingStart = false;
-			} else if (!searchingStart && !recBmp.and(bmp).isBitSet()) {
-				result[1] = intervalIndex.getValue(i - 1);
-				return result;
+			if (slice == null) {
+				if (searchingStart) {
+					continue;
+				} else {
+					result[1] = intervalIndex.getValue(i - 1);
+					return result;
+				}
+			} else {
+				final Bitmap bmp = slice.getBitmap();
+				if (searchingStart && recBmp.and(bmp).isBitSet()) {
+					result[0] = intervalIndex.getValue(i);
+					searchingStart = false;
+				} else if (!searchingStart && !recBmp.and(bmp).isBitSet()) {
+					result[1] = intervalIndex.getValue(i - 1);
+					return result;
+				}
 			}
 		}
 

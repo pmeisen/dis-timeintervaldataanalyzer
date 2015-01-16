@@ -75,7 +75,7 @@ public class GroupEvaluator {
 		 * @param label
 		 *            the label
 		 * @param meta
-		 *            the meta-inforamtion
+		 *            the meta-information
 		 */
 		public GroupEntry(final String id, final String label, final T meta) {
 			this.id = id;
@@ -644,6 +644,7 @@ public class GroupEvaluator {
 				final GroupEntry<DimensionSelector> entry = new GroupEntry<DimensionSelector>(
 						member.getId(), member.getName(), selector);
 				final Group group = new Group(entry);
+
 				if (includes(group, inclusions) && !excludes(group, exclusions)) {
 					iterationResult.add(new Group(entry));
 				}
@@ -733,7 +734,7 @@ public class GroupEvaluator {
 	 *            the filter to be checked
 	 * @param group
 	 *            the group to check
-	 *            
+	 * 
 	 * @return {@code true} if the filter selects the group, otherwise
 	 *         {@code false}
 	 */

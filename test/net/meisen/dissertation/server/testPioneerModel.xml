@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
-       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
-       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model      http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/dimension  http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
        
        id="testPioneerModel">
   
@@ -19,6 +20,36 @@
 
     <entries />
   </meta>
+  
+  <dim:dimensions>
+    <dim:timedimension id="DIM_TIME">
+      <dim:hierarchy id="TIME_DEFAULT" all="Everytime">
+        <dim:level id="MINUTE10" template="RASTER_10" />
+        <dim:level id="MINUTE5" template="RASTER_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+    
+    <dim:dimension id="SYMBOL" descriptor="DESC_SYMBOL">
+      <dim:hierarchy id="TYPE">      
+        <dim:level id="BASETYPE">
+          <dim:member id="BATTERY" reg="BATTERY .*" rollUpTo="*" />
+          <dim:member id="GRIP" reg="GRIP\-.*" rollUpTo="*" />
+          <dim:member id="HEADING" reg="HEADING .*" rollUpTo="*" />
+          <dim:member id="SONAR" reg="SONAR.*" rollUpTo="*" />
+          <dim:member id="STALL" reg=".*\-STALL .*" rollUpTo="*" />
+          <dim:member id="VELOCITY" reg=".*\-VEL .*" rollUpTo="*" />
+          <dim:member id="VIS" reg="VIS\-.*" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+      <dim:hierarchy id="LEVEL">
+        <dim:level id="BASELEVEL">
+          <dim:member id="HIGH" reg=".* high" rollUpTo="*" />
+          <dim:member id="MEDIUM" reg=".* medium" rollUpTo="*" />
+          <dim:member id="LOW" reg=".* low" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+  </dim:dimensions>
 
   <data metahandling="create" intervalhandling="boundariesWhenNull" />
 </model>
