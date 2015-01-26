@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.time.series;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
@@ -245,5 +246,52 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 	 */
 	public Class<?> getLabelValueType() {
 		return labels.getType();
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) {
+			return true;
+		} else if (o instanceof TimeSeriesCollection) {
+			final TimeSeriesCollection tsco = (TimeSeriesCollection) o;
+
+			// check the size
+			if (size != tsco.size) {
+				return false;
+			}
+
+			// check the type
+			if (!getLabelValueType().equals(tsco.getLabelValueType())) {
+				return false;
+			}
+
+			// check the labels
+			final String[] l1 = getLabels();
+			final String[] l2 = tsco.getLabels();
+			if (l1 == null && l2 == null) {
+				// keep going
+			} else if (l1 == null || l2 == null) {
+				return false;
+			} else if (!Arrays.equals(tsco.getLabels(), getLabels())) {
+				return false;
+			}
+
+			// check the timeseries
+			if (getSeries().size() != tsco.getSeries().size()) {
+				return false;
+			}
+			for (final TimeSeries ts : getSeries()) {
+				final TimeSeries tscoTs = tsco.getSeries(ts.getId());
+				if (tscoTs == null) {
+					return false;
+				} else if (!tscoTs.equals(ts)) {
+					return false;
+				}
+			}
+
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

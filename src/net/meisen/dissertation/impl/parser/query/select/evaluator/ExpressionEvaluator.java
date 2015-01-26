@@ -386,24 +386,6 @@ public abstract class ExpressionEvaluator {
 		}
 
 		// handle known values
-		switch (operator) {
-		case ADD:
-			return res1 + res2;
-		case MINUS:
-			return res1 - res2;
-		case MULTIPLY:
-			return res1 * res2;
-		case DIVIDE:
-			if (res2 == 0.0) {
-				return 0.0;
-			} else {
-				return res1 / res2;
-			}
-		}
-
-		// if we reached that point throw an exception
-		throw new IllegalStateException(
-				"A ArithmeticOperator is undefined, please specifiy '" + this
-						+ "'.");
+		return operator.apply(res1, res2);
 	}
 }

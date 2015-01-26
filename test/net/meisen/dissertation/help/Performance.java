@@ -126,11 +126,25 @@ public class Performance {
 	}
 
 	/**
-	 * Start the measuring
+	 * Starts the measuring.
 	 */
 	public void start() {
-		System.out.println("Performance measuring started at: "
-				+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
+		start(true);
+	}
+
+	/**
+	 * Starts the measuring.
+	 * 
+	 * @param output
+	 *            {@code true} if output should be written, otherwise
+	 *            {@code false}
+	 */
+	public void start(final boolean output) {
+		if (output) {
+			System.out.println("Performance measuring started at: "
+					+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
+		}
+
 		this.startUser = getUserTime();
 		this.startSystem = getCpuTime();
 	}
@@ -149,6 +163,19 @@ public class Performance {
 	 * @return the runtime of user and system cpu time
 	 */
 	public long[] stop() {
+		return stop(false);
+	}
+
+	/**
+	 * Stop the measuring and get the user and system difference, i.e. runtime.
+	 * 
+	 * @param output
+	 *            {@code true} if output should be written, otherwise
+	 *            {@code false}
+	 * 
+	 * @return the runtime of user and system cpu time
+	 */
+	public long[] stop(final boolean output) {
 		final long endUser = getUserTime();
 		final long endSystem = getCpuTime();
 		final long diffUser = endUser - this.startUser;
@@ -156,8 +183,10 @@ public class Performance {
 
 		reset();
 
-		System.out.println("Performance measuring stopped at: "
-				+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
+		if (output) {
+			System.out.println("Performance measuring stopped at: "
+					+ Dates.formatDate(new Date(), "dd.MM.yyyy HH:mm:ss,SSS"));
+		}
 
 		return new long[] { diffUser, diffSystem };
 	}

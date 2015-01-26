@@ -1,5 +1,8 @@
 package net.meisen.dissertation.performance.paper.in2014.iceis;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -7,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -20,34 +21,44 @@ import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.help.ModuleAndDbBasedTest;
 import net.meisen.dissertation.help.Performance;
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
+import net.meisen.dissertation.impl.measures.Count;
+import net.meisen.dissertation.impl.measures.Max;
+import net.meisen.dissertation.impl.measures.Min;
+import net.meisen.dissertation.impl.measures.Sum;
+import net.meisen.dissertation.impl.parser.query.DimensionSelector;
+import net.meisen.dissertation.impl.parser.query.select.DescriptorComperator;
+import net.meisen.dissertation.impl.parser.query.select.DimensionComperator;
+import net.meisen.dissertation.impl.parser.query.select.IComperator;
+import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
+import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultTimeSeries;
+import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
+import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLeaf;
+import net.meisen.dissertation.impl.parser.query.select.logical.DescriptorLogicTree;
+import net.meisen.dissertation.impl.parser.query.select.logical.ILogicalTreeElement;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperator;
+import net.meisen.dissertation.impl.parser.query.select.logical.LogicalOperatorNode;
+import net.meisen.dissertation.impl.parser.query.select.measures.ArithmeticOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathTree;
+import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElement;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
+import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
+import net.meisen.dissertation.impl.time.series.TimeSeries;
+import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
+import net.meisen.dissertation.model.data.DimensionModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.dimensions.TimeLevelMember;
+import net.meisen.dissertation.model.dimensions.TimeMemberRange;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
-import net.meisen.dissertation.model.parser.query.IQuery;
+import net.meisen.dissertation.model.indexes.BaseIndexFactory;
+import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.paper.in2014.iceis.naive.IntervalTree;
 import net.meisen.dissertation.performance.paper.in2014.iceis.naive.IntervalTree.IntervalData;
-import net.meisen.general.genmisc.raster.configuration.IRasterConfiguration;
-import net.meisen.general.genmisc.raster.configuration.impl.BaseRasterConfiguration;
-import net.meisen.general.genmisc.raster.data.impl.BaseModelData;
-import net.meisen.general.genmisc.raster.definition.IRaster;
-import net.meisen.general.genmisc.raster.definition.IRasterLogic;
-import net.meisen.general.genmisc.raster.definition.IRasterModel;
-import net.meisen.general.genmisc.raster.definition.RasterModelEntryType;
-import net.meisen.general.genmisc.raster.definition.impl.BaseRaster;
-import net.meisen.general.genmisc.raster.definition.impl.BaseRasterModel;
-import net.meisen.general.genmisc.raster.definition.impl.BaseRasterModelEntry;
-import net.meisen.general.genmisc.raster.definition.impl.date.DateGranularity;
-import net.meisen.general.genmisc.raster.definition.impl.date.DateRasterGranularity;
-import net.meisen.general.genmisc.raster.definition.impl.date.DateRasterLogic;
-import net.meisen.general.genmisc.raster.function.IRasterFunction;
-import net.meisen.general.genmisc.raster.function.impl.Count;
-import net.meisen.general.genmisc.raster.function.impl.IntervalSum;
-import net.meisen.general.genmisc.raster.function.impl.Value;
-import net.meisen.general.genmisc.types.Dates;
-import net.meisen.general.genmisc.types.Objects;
+import net.meisen.general.genmisc.types.Numbers;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -66,7 +77,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @ContextClass(TidaConfig.class)
 @ContextFile("sbconfigurator-core.xml")
 public class TestPerformance extends ModuleAndDbBasedTest {
-	private final static int RUNS = 100;
+	private static int RUNS = 100;
+	private static int INITRUNS = 5;
 
 	@Autowired
 	private TidaModelHandler loader;
@@ -112,255 +124,462 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 
 		final Db db = getDb("tida",
 				"/net/meisen/dissertation/performance/paper/in2014/iceis/data/ghdataHsql.zip");
+
+		// Sleep a little
+		/*
+		 * System.out.println("SLEEP"); try { Thread.sleep(1000000); } catch
+		 * (final InterruptedException e) { }
+		 */
+
 		final TidaModel model = loader
 				.loadViaXslt("/net/meisen/dissertation/performance/paper/in2014/iceis/model/tida-model-minute.xml");
 		final BaseMapper<?> mapper = model.getIntervalModel()
 				.getTimelineMapper();
 
 		// get the data
-		final List<Map<String, Object>> rows = db
-				.query("tida",
-						"SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA LIMIT "
-								+ limit);
+		final String query = "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA ORDER BY RAND()";
+		// final String query =
+		// "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA";
+		final List<Map<String, Object>> rows = db.query("tida", query
+				+ " LIMIT " + limit);
+		// Print the retrieved records
+		// for (final Map<String, Object> rec : rows) {
+		// System.out.println(rec);
+		// }
 
 		// add the data to the model, the interval-tree and the map is naive one
 		final List<IntervalData<Integer>> list = new ArrayList<IntervalData<Integer>>();
 		model.setBulkLoad(true);
 		try {
 			int i = 0;
-			for (final Map<String, Object> row : rows) {
+			final Iterator<Map<String, Object>> it = rows.iterator();
+			while (it.hasNext()) {
+				final Map<String, Object> row = it.next();
+				final Object rStart = row.get("INTERVAL_START");
+				final Object rEnd = row.get("INTERVAL_END");
 
-				// create the stuff for the interval-tree
-				final long start = mapper.mapToLong(row.get("INTERVAL_START"));
-				final long end = mapper.mapToLong(row.get("INTERVAL_END"));
-				list.add(new IntervalData<Integer>(start, end, i));
+				if (mapper.isSmallerThanStart(rEnd)
+						|| mapper.isLargerThanEnd(rStart)) {
+					it.remove();
+					continue;
+				} else {
+					final long start = mapper.mapToLong(rStart);
+					final long end = mapper.mapToLong(rEnd);
 
-				final SingleStaticDataSet dataSet = new SingleStaticDataSet(row);
-				model.loadRecord(dataSet);
+					list.add(new IntervalData<Integer>(start, end, i));
 
-				i++;
+					final SingleStaticDataSet dataSet = new SingleStaticDataSet(
+							row);
+					model.loadRecord(dataSet);
+
+					i++;
+				}
 			}
 		} finally {
 			model.setBulkLoad(false);
 		}
 		final IntervalTree<Integer> iTree = new IntervalTree<Integer>(list);
-
-		String start, end, aggr;
-		Map<String, Object> filter = new HashMap<String, Object>();
-		filter.put("WORKAREA", "SEN.W10");
-		filter.put("WORKAREA", "SEN.W11");
-		filter.put("WORKAREA", "SEN.W12");
-		filter.put("WORKAREA", "SEN.W13");
-		filter.put("WORKAREA", "SEN.W14");
-		filter.put("WORKAREA", "SEN.W15");
-		filter.put("WORKAREA", "SEN.W16");
-		filter.put("WORKAREA", "SEN.W17");
-		filter.put("WORKAREA", "SEN.W18");
-		filter.put("WORKAREA", "SEN.W19");
-		filter.put("WORKAREA", "SEN.W20");
-		filter.put("WORKAREA", "SEN.W21");
-		filter.put("WORKAREA", "SEN.W22");
-		filter.put("WORKAREA", "SEN.W27");
-		filter.put("WORKAREA", "SEN.W28");
-		filter.put("WORKAREA", "SEN.W31");
-
-		/*
-		 * 1. Test: OF COUNT() IN [01.JAN, 02.JAN) WHERE WA.LOC.TYPE="Gate"
-		 */
-		start = "01.01.2008 00:00:00";
-		end = "01.01.2008 23:59:00";
-		aggr = "COUNT";
-		filter.clear();
-
-		measureNaive(rows, mapper, start, end, aggr, filter);
-		measureIntervalTree(iTree, rows, mapper, start, end, aggr, filter);
-		measureTidaModel(model, mapper, start, end, aggr, filter);
-		getCount(model, mapper, start, end, aggr, filter);
-
-		/*
-		 * 2. Test: OF MAX ON TIME.5ToY.DAY OF SUM(PERSON) IN [01.JAN, 08.JAN)
-		 * WHERE WORKA-REA="SEN.W14"
-		 */
-		start = "01.01.2008 00:00:00";
-		end = "07.01.2008 23:59:00";
-		aggr = "SUM";
-		filter.clear();
-		filter.put("WORKAREA", "SEN.W14");
-
-		measureNaive(rows, mapper, start, end, aggr, filter);
-		measureIntervalTree(iTree, rows, mapper, start, end, aggr, filter);
-		measureTidaModel(model, mapper, start, end, aggr, filter);
-		getCount(model, mapper, start, end, aggr, filter);
-
-		/*
-		 * 3. Test: OF MAX ON TIME.5ToY.YEAR OF SUM(PERSON) IN [01.JAN, 15.JAN)
-		 * WHERE TASKTYPE="short" GROUP BY PER.QUAL.DEG
-		 */
-		start = "01.01.2008 00:00:00";
-		end = "14.01.2008 23:59:00";
-		aggr = "SUM";
-		filter.clear();
-		filter.put("TASKTYPE", "short");
-
-		measureNaive(rows, mapper, start, end, aggr, filter);
-		measureIntervalTree(iTree, rows, mapper, start, end, aggr, filter);
-		measureTidaModel(model, mapper, start, end, aggr, filter);
-		getCount(model, mapper, start, end, aggr, filter);
+		doFirstQuery(model, iTree, rows);
+		doSecondQuery(model, iTree, rows);
+		doThirdQuery(model, iTree, rows);
+		doFourthQuery(model, iTree, rows);
+		doFifthQuery(model, iTree, rows);
 
 		// cleanUp
 		loader.unloadAll();
 		db.shutDownDb();
 	}
 
+	private void doFirstQuery(TidaModel model, IntervalTree<Integer> iTree,
+			List<Map<String, Object>> rows) {
+
+		/*
+		 * 1. Test: OF COUNT(TASKTYPE) IN [01.JAN, 01.FEB) WHERE
+		 * WA.LOC.TYPE='Gate'
+		 */
+		final String statement = "SELECT TIMESERIES OF COUNT(TASKTYPE) FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WA.LOC.TYPE='Gate'";
+
+		doQuery(model, iTree, rows, statement);
+	}
+
+	private void doSecondQuery(final TidaModel model,
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> rows) {
+
+		/*
+		 * 2. Test: OF SUM(TASKTYPE) ON TIME.DEF.DAY IN [01.JAN, 01.FEB) WHERE
+		 * WORKAREA='SEN.W14'
+		 */
+		final String statement = "SELECT TIMESERIES OF SUM(TASKTYPE) ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WORKAREA='SEN.W14'";
+
+		doQuery(model, iTree, rows, statement);
+	}
+
+	private void doThirdQuery(final TidaModel model,
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> rows) {
+
+		/*
+		 * 3. Test: OF AVG(COUNT(WORKAREA)) ON TIME.DEF.DAY IN [01.JAN, 01.FEB)
+		 * WHERE TASKTYPE='short'
+		 */
+		final String statement = "SELECT TIMESERIES OF MAX(COUNT(WORKAREA)) ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE TASKTYPE='short'";
+
+		doQuery(model, iTree, rows, statement);
+	}
+
+	private void doFourthQuery(final TidaModel model,
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> rows) {
+
+		/*
+		 * 4. Test: OF MAX(SUM(PERSON) / COUNT(PERSON)) ON TIME.DEF.MIN5DAY IN
+		 * [01.JAN, 01.FEB) WHERE TASKTYPE='long'
+		 */
+		final String statement = "SELECT TIMESERIES OF MAX(SUM(PERSON) / COUNT(PERSON)) ON TIME.DEF.MIN5DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE TASKTYPE='long'";
+
+		doQuery(model, iTree, rows, statement);
+	}
+
+	private void doFifthQuery(final TidaModel model,
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> rows) {
+
+		/*
+		 * 5. Test: OF MIN(TASKTYPE) ON TIME.DEF.MIN5DAY IN [01.JAN 00:00,
+		 * 31.JAN 23:59] WHERE WA.LOC.TYPE='RAMP' OR PERSON='*9'
+		 */
+		final String statement = "SELECT TIMESERIES OF MIN(TASKTYPE) ON TIME.DEF.MIN5DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WA.LOC.TYPE='Ramp' OR PERSON='*9'";
+
+		doQuery(model, iTree, rows, statement);
+	}
+
+	private void doQuery(final TidaModel model,
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> rows, final String statement) {
+		System.out.println("QUERY: " + statement);
+
+		final DimensionModel dimModel = model.getDimensionModel();
+		final BaseMapper<?> mapper = model.getIntervalModel()
+				.getTimelineMapper();
+		final BaseIndexFactory factory = model.getIndexFactory();
+
+		// parsing
+		final SelectQuery query = queryFactory.parseQuery(statement);
+
+		final TimeSeriesCollection naiveRes = measureNaive(rows, dimModel,
+				mapper, factory, query);
+		final TimeSeriesCollection intTreeARes = measureIntTreeA(iTree, rows,
+				dimModel, mapper, factory, query);
+		final TimeSeriesCollection intTreeBRes = measureIntTreeB(iTree, rows,
+				dimModel, mapper, factory, query);
+		final TimeSeriesCollection tidaRes = measureTidaModel(model, query);
+		getCount(model, query);
+
+		// make sure everything is equal
+		assertEquals(tidaRes, naiveRes);
+		assertEquals(tidaRes, intTreeARes);
+		assertEquals(tidaRes, intTreeBRes);
+	}
+
 	/**
-	 * Test the performance of a naive implemenation.
+	 * Test the performance of a naive implementation.
 	 * 
 	 * @param data
 	 *            the data
+	 * @param dimModel
+	 *            the defined {@code DimensionModel}
 	 * @param mapper
 	 *            the mapper to be used
-	 * @param startDate
-	 *            the start date
-	 * @param endDate
-	 *            the end date
-	 * @param aggregation
-	 *            the aggregation to be used
-	 * @param filter
-	 *            the filter defined
-	 * @throws ParseException
-	 *             if an error occurres
+	 * @param factory
+	 *            the index-factory
+	 * @param query
+	 *            the parsed query
+	 * 
+	 * @return the result of the naive algorithm
 	 */
-	protected void measureNaive(final List<Map<String, Object>> data,
-			final BaseMapper<?> mapper, final String startDate,
-			final String endDate, final String aggregation,
-			final Map<String, Object> filter) throws ParseException {
+	protected TimeSeriesCollection measureNaive(
+			final List<Map<String, Object>> data,
+			final DimensionModel dimModel, final BaseMapper<?> mapper,
+			final BaseIndexFactory factory, final SelectQuery query) {
 		final long[] results = new long[RUNS];
 
-		final Map<Date, IRaster<Date>> rasters = createRasters(startDate,
-				endDate);
-
+		// do some parsing
 		Performance performance;
 
 		// iteration
-		for (int i = 0; i < RUNS; i++) {
+		TimeSeriesCollection tsc = null;
+		for (int i = 0; i < RUNS + INITRUNS; i++) {
 			performance = new Performance();
-			performance.start();
+			if (i >= INITRUNS) {
+				performance.start(false);
+			}
 
-			for (final Map<String, Object> row : data) {
-
-				// check the filter
-				boolean valid = filter.size() == 0;
-				for (final Entry<String, Object> entry : filter.entrySet()) {
-					if (Objects.equals(row.get(entry.getKey()),
-							entry.getValue())) {
-						valid = true;
-						break;
-					}
-				}
-				if (!valid) {
+			final List<Map<String, Object>> filteredRecords = new ArrayList<Map<String, Object>>();
+			for (final Map<String, Object> record : data) {
+				if (!checkDate(mapper, (Date) query.getInterval().getStart(),
+						(Date) query.getInterval().getEnd(), record)) {
 					continue;
-				}
-
-				final BaseModelData d = new BaseModelData();
-				d.setValues(row);
-
-				// find the raster
-				final Date day = Dates.truncateDate((Date) row
-						.get("INTERVAL_START"));
-				final IRaster<Date> raster = rasters.get(day);
-				if (raster == null) {
-					// System.out.println("SKIP: " + row);
+				} else if (!checkFilter(query.getFilter(), record, null)) {
+					continue;
 				} else {
-					raster.addModelData(d);
+					filteredRecords.add(record);
 				}
 			}
 
-			results[i] = performance.stop()[0];
+			final IRecordsFilter filter = new IRecordsFilter() {
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end) {
+					return apply(start, end, filteredRecords);
+				}
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end, final List<Map<String, Object>> records) {
+
+					final List<Map<String, Object>> tpRecords = new ArrayList<Map<String, Object>>();
+					for (final Map<String, Object> record : records) {
+						final long rStart = mapper.mapToLong(record
+								.get("INTERVAL_START"));
+						final long rEnd = mapper.mapToLong(record
+								.get("INTERVAL_END"));
+						if (start <= rEnd && end >= rStart) {
+							tpRecords.add(record);
+						}
+					}
+
+					return tpRecords;
+				}
+
+				@Override
+				public boolean incSupport() {
+					return true;
+				}
+			};
+			tsc = calculateMeasures(query, dimModel, filter, mapper, factory);
+
+			if (i >= INITRUNS) {
+				results[i - INITRUNS] = performance.stop(false)[0];
+			}
 		}
 
 		// result
 		printResult("Naive", results);
+		System.gc();
+
+		return tsc;
 	}
 
 	/**
-	 * Measure the performance of the interval-tree.
+	 * Measure the performance of the interval-tree (A).
 	 * 
 	 * @param iTree
 	 *            the interval tree
 	 * @param data
 	 *            the data
+	 * @param dimModel
+	 *            the defined {@code DimensionModel}
 	 * @param mapper
 	 *            the mapper to be used
-	 * @param startDate
-	 *            the start date
-	 * @param endDate
-	 *            the end date
-	 * @param aggregation
-	 *            the aggregation to be used
-	 * @param filter
-	 *            the filter defined
+	 * @param factory
+	 *            the index-factory
+	 * @param query
+	 *            the parsed query
 	 * 
-	 * @throws ParseException
-	 *             if an error occures
+	 * @return the result of the IntervalTree algorithm (A)
 	 */
-	protected void measureIntervalTree(final IntervalTree<Integer> iTree,
-			final List<Map<String, Object>> data, final BaseMapper<?> mapper,
-			final String startDate, final String endDate,
-			final String aggregation, final Map<String, Object> filter)
-			throws ParseException {
+	protected TimeSeriesCollection measureIntTreeA(
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> data,
+			final DimensionModel dimModel, final BaseMapper<?> mapper,
+			final BaseIndexFactory factory, final SelectQuery query) {
 		final long[] results = new long[RUNS];
-		final Map<Date, IRaster<Date>> rasters = createRasters(startDate,
-				endDate);
 
+		// do some parsing
 		Performance performance;
 
 		// iteration
-		for (int i = 0; i < RUNS; i++) {
+		TimeSeriesCollection tsc = null;
+		for (int i = 0; i < RUNS + INITRUNS; i++) {
 			performance = new Performance();
-			performance.start();
+			if (i >= INITRUNS) {
+				performance.start(false);
+			}
 
-			final IntervalData<Integer> res = iTree.query(mapper
-					.mapToLong(Dates.createDateFromString(startDate,
-							"dd.MM.yyyy HH:mm:ss")), mapper.mapToLong(Dates
-					.createDateFromString(endDate, "dd.MM.yyyy HH:mm:ss")));
+			final IntervalData<Integer> res = iTree.query(
+					mapper.mapToLong(query.getInterval().getStart()),
+					mapper.mapToLong(query.getInterval().getEnd()));
 			final Collection<Integer> positions = res == null ? Collections
 					.<Integer> emptyList() : res.getData();
 
-			for (final Integer pos : positions) {
-				final Map<String, Object> row = data.get(pos);
+			final List<Map<String, Object>> filteredRecords = new ArrayList<Map<String, Object>>();
+			for (final Integer position : positions) {
+				final Map<String, Object> record = data.get(position);
 
-				// check the filter
-				boolean valid = filter.size() == 0;
-				for (final Entry<String, Object> entry : filter.entrySet()) {
-					if (Objects.equals(row.get(entry.getKey()),
-							entry.getValue())) {
-						valid = true;
-						break;
-					}
-				}
-				if (!valid) {
+				if (!checkFilter(query.getFilter(), record, null)) {
 					continue;
-				}
-
-				final BaseModelData d = new BaseModelData();
-				d.setValues(row);
-
-				// find the raster
-				final Date day = Dates.truncateDate((Date) row
-						.get("INTERVAL_START"));
-				final IRaster<Date> raster = rasters.get(day);
-				if (raster == null) {
-					// System.out.println("SKIP: " + row);
 				} else {
-					raster.addModelData(d);
+					filteredRecords.add(record);
 				}
 			}
 
-			results[i] = performance.stop()[0];
+			final IRecordsFilter filter = new IRecordsFilter() {
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end) {
+					return apply(start, end, filteredRecords);
+				}
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end, final List<Map<String, Object>> records) {
+
+					final List<Map<String, Object>> tpRecords = new ArrayList<Map<String, Object>>();
+					for (final Map<String, Object> record : records) {
+						final long rStart = mapper.mapToLong(record
+								.get("INTERVAL_START"));
+						final long rEnd = mapper.mapToLong(record
+								.get("INTERVAL_END"));
+						if (start <= rEnd && end >= rStart) {
+							tpRecords.add(record);
+						}
+					}
+
+					return tpRecords;
+				}
+
+				@Override
+				public boolean incSupport() {
+					return true;
+				}
+			};
+			tsc = calculateMeasures(query, dimModel, filter, mapper, factory);
+
+			if (i >= INITRUNS) {
+				results[i - INITRUNS] = performance.stop(false)[0];
+			}
 		}
 
 		// result
-		printResult("IntervalTree", results);
+		printResult("IntervalTree (A)", results);
+		System.gc();
+
+		return tsc;
+	}
+
+	/**
+	 * Measure the performance of the interval-tree (A).
+	 * 
+	 * @param iTree
+	 *            the interval tree
+	 * @param data
+	 *            the data
+	 * @param dimModel
+	 *            the defined {@code DimensionModel}
+	 * @param mapper
+	 *            the mapper to be used
+	 * @param factory
+	 *            the index-factory
+	 * @param query
+	 *            the parsed query
+	 * 
+	 * @return the result of the IntervalTree algorithm (B)
+	 */
+	protected TimeSeriesCollection measureIntTreeB(
+			final IntervalTree<Integer> iTree,
+			final List<Map<String, Object>> data,
+			final DimensionModel dimModel, final BaseMapper<?> mapper,
+			final BaseIndexFactory factory, final SelectQuery query) {
+		final long[] results = new long[RUNS];
+
+		// do some parsing
+		Performance performance;
+
+		// iteration
+		TimeSeriesCollection tsc = null;
+		for (int i = 0; i < RUNS + INITRUNS; i++) {
+			performance = new Performance();
+			if (i >= INITRUNS) {
+				performance.start(false);
+			}
+
+			final IntervalData<Integer> res = iTree.query(
+					mapper.mapToLong(query.getInterval().getStart()),
+					mapper.mapToLong(query.getInterval().getEnd()));
+			final Collection<Integer> positions = res == null ? Collections
+					.<Integer> emptyList() : res.getData();
+
+			final List<Map<String, Object>> filteredRecords = new ArrayList<Map<String, Object>>();
+			for (final Integer position : positions) {
+				final Map<String, Object> record = data.get(position);
+
+				if (!checkFilter(query.getFilter(), record, null)) {
+					continue;
+				} else {
+					filteredRecords.add(record);
+				}
+			}
+
+			// create the new IntervalTree for the filtered values
+			final List<IntervalData<Integer>> filteredList = new ArrayList<IntervalData<Integer>>();
+			int counter = 0;
+			for (final Map<String, Object> filteredRecord : filteredRecords) {
+
+				// create the stuff for the interval-tree
+				final long start = mapper.mapToLong(filteredRecord
+						.get("INTERVAL_START"));
+				final long end = mapper.mapToLong(filteredRecord
+						.get("INTERVAL_END"));
+				filteredList
+						.add(new IntervalData<Integer>(start, end, counter));
+
+				counter++;
+			}
+			final IntervalTree<Integer> filteredITree = filteredList.size() == 0 ? null
+					: new IntervalTree<Integer>(filteredList);
+
+			final IRecordsFilter filter = new IRecordsFilter() {
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end) {
+					if (filteredITree == null) {
+						return Collections.<Map<String, Object>> emptyList();
+					} else {
+						return filteredITree.query(start, end, filteredRecords);
+					}
+				}
+
+				@Override
+				public List<Map<String, Object>> apply(final long start,
+						final long end, final List<Map<String, Object>> records) {
+					if (records == null) {
+						return apply(start, end);
+					} else {
+						throw new UnsupportedOperationException();
+					}
+				}
+
+				@Override
+				public boolean incSupport() {
+					return false;
+				}
+			};
+			tsc = calculateMeasures(query, dimModel, filter, mapper, factory);
+
+			if (i >= INITRUNS) {
+				results[i - INITRUNS] = performance.stop(false)[0];
+			}
+		}
+
+		// result
+		printResult("IntervalTree (B)", results);
+		System.gc();
+
+		return tsc;
 	}
 
 	/**
@@ -368,47 +587,38 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 	 * 
 	 * @param model
 	 *            the model to be tested
-	 * @param mapper
-	 *            the mapper to be used
-	 * @param startDate
-	 *            the start date
-	 * @param endDate
-	 *            the end date
-	 * @param aggregation
-	 *            the aggregation to be used
-	 * @param filter
-	 *            the filter defined
+	 * @param query
+	 *            the query to be fired
+	 * 
+	 * @return the result of the bitmap-based implementation
 	 */
-	protected void measureTidaModel(final TidaModel model,
-			final BaseMapper<?> mapper, final String startDate,
-			final String endDate, final String aggregation,
-			final Map<String, Object> filter) {
+	protected TimeSeriesCollection measureTidaModel(final TidaModel model,
+			final SelectQuery query) {
 		final long[] results = new long[RUNS];
-
 		Performance performance;
 
-		// parsing
-		String filterQuery = "";
-		for (Entry<String, Object> e : filter.entrySet()) {
-			filterQuery += (filterQuery.isEmpty() ? " WHERE " : " OR ")
-					+ e.getKey() + "='" + e.getValue() + "'";
-		}
-		final IQuery query = queryFactory.parseQuery("select timeseries of "
-				+ aggregation + "(PERSON) from tidaModel in [" + startDate
-				+ "," + endDate + "]" + filterQuery);
-
 		// iteration
-		for (int i = 0; i < RUNS; i++) {
+		TimeSeriesCollection tsc = null;
+		for (int i = 0; i < RUNS + INITRUNS; i++) {
 			performance = new Performance();
-			performance.start();
+			if (i >= INITRUNS) {
+				performance.start(false);
+			}
 
-			queryFactory.evaluateQuery(query, null);
+			final SelectResultTimeSeries resTsc = queryFactory.evaluateQuery(
+					query, null);
+			tsc = resTsc.getTimeSeriesResult();
 
-			results[i] = performance.stop()[0];
+			if (i >= INITRUNS) {
+				results[i - INITRUNS] = performance.stop(false)[0];
+			}
 		}
 
 		// result
 		printResult("TidaModel", results);
+		System.gc();
+
+		return tsc;
 	}
 
 	/**
@@ -441,29 +651,21 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 	 * 
 	 * @param model
 	 *            the model
-	 * @param mapper
-	 *            the mapper
-	 * @param startDate
-	 *            the start date
-	 * @param endDate
-	 *            the end date
-	 * @param aggregation
-	 *            the aggregation function to be used
-	 * @param filter
-	 *            the filter defined
+	 * @param orgQuery
+	 *            the query fired
 	 */
-	protected void getCount(final TidaModel model, final BaseMapper<?> mapper,
-			final String startDate, final String endDate,
-			final String aggregation, final Map<String, Object> filter) {
-		String filterQuery = "";
-		for (Entry<String, Object> e : filter.entrySet()) {
-			filterQuery += (filterQuery.isEmpty() ? " WHERE " : " OR ")
-					+ e.getKey() + "='" + e.getValue() + "'";
+	protected void getCount(final TidaModel model, final SelectQuery orgQuery) {
+		final SelectQuery query = new SelectQuery();
+		query.setInterval(orgQuery.getInterval());
+		query.setCount(true);
+		query.setResultType(SelectResultType.RECORDS);
+		query.setModelId(orgQuery.getModelId());
+		query.setIntervalRelation(IntervalRelation.WITHIN);
+		query.setFilter(orgQuery.getFilter());
+		for (final DescriptorMathTree measure : orgQuery.getMeasures()) {
+			query.addMeasure(measure);
 		}
-		final String queryString = "select COUNT(RECORDS) from tidaModel WITHIN ["
-				+ startDate + "," + endDate + "]" + filterQuery;
 
-		final IQuery query = queryFactory.parseQuery(queryString);
 		final IQueryResult res = queryFactory.evaluateQuery(query, null);
 		if (res instanceof SelectResultRecords) {
 			System.out.println("COUNT: "
@@ -472,6 +674,341 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		} else {
 			System.out.println("COUNT: INVALID RESULT!");
 		}
+
+		// show the records
+		// query.setCount(false);
+		// final SelectResultRecords recRes = queryFactory.evaluateQuery(query,
+		// null);
+		// final java.util.Iterator<Object[]> it = recRes.iterator();
+		// while (it.hasNext()) {
+		// System.out.println(java.util.Arrays.asList(it.next()));
+		// }
+
+	}
+
+	private boolean checkFilter(final DescriptorLogicTree filter,
+			final Map<String, Object> record, LogicalOperatorNode node) {
+		if (node == null) {
+			node = filter.getRoot();
+		}
+
+		final List<Boolean> values = new ArrayList<Boolean>();
+		final List<ILogicalTreeElement> children = node.getChildren();
+		for (int i = children.size(); i > 0; i--) {
+			final ILogicalTreeElement child = children.get(i - 1);
+
+			if (child instanceof LogicalOperatorNode) {
+				values.add(checkFilter(filter, record,
+						(LogicalOperatorNode) child));
+			} else if (child instanceof DescriptorLeaf) {
+				final DescriptorLeaf leaf = (DescriptorLeaf) child;
+				final IComperator cmp = leaf.get();
+
+				if (cmp instanceof DescriptorComperator) {
+					final DescriptorComperator dCmp = (DescriptorComperator) cmp;
+
+					// get the value of the record
+					Object value = record.get(dCmp.getId());
+
+					// check the value
+					if (value == null) {
+						values.add(false);
+					} else if (dCmp.containsWildchar()) {
+						values.add(value.toString().matches(dCmp.getValue()));
+					} else {
+						values.add(value.toString().equals(dCmp.getValue()));
+					}
+				} else if (cmp instanceof DimensionComperator) {
+					final DimensionComperator dCmp = (DimensionComperator) cmp;
+					final DimensionSelector dSel = dCmp.getDimension();
+
+					if (dSel.toString().equals("WA.LOC.TYPE")
+							&& dCmp.getRawValue().equals("Gate")) {
+						final Object value = record.get("WORKAREA");
+						values.add(value.toString().matches("BIE\\..*"));
+					} else if (dSel.toString().equals("WA.LOC.TYPE")
+							&& dCmp.getRawValue().equals("Ramp")) {
+						final Object value = record.get("WORKAREA");
+						values.add(value.toString().matches("EDI\\..*"));
+					} else {
+						fail("Not avialable currently '" + dSel + "', '"
+								+ dCmp.getRawValue() + "'");
+					}
+				} else {
+					fail("Invalid compeartor");
+				}
+			} else {
+				fail("Invalid node '" + child + "'");
+			}
+		}
+
+		final LogicalOperator lo = node.get();
+		if (LogicalOperator.NOT.equals(lo)) {
+			if (values.size() != 1) {
+				fail("Invalid size for not '" + values + "'");
+			}
+
+			// apply the not
+			return !values.get(0);
+		} else {
+			final int size = values.size();
+
+			if (size < 1) {
+				fail("Invalid formular");
+			} else if (size > 1) {
+				if (LogicalOperator.AND.equals(lo)) {
+					for (final Boolean val : values) {
+						if (!val) {
+							return false;
+						}
+					}
+					return true;
+				} else if (LogicalOperator.OR.equals(lo)) {
+					for (final Boolean val : values) {
+						if (val) {
+							return val;
+						}
+					}
+					return false;
+				} else {
+					fail("Invalid operator '" + lo + "'");
+				}
+			} else {
+				return values.get(0);
+			}
+		}
+
+		return false;
+	}
+
+	private boolean checkDate(final BaseMapper<?> m, final Date sDate,
+			final Date eDate, final Map<String, Object> record) {
+
+		final Object sIntervalDate = record.get("INTERVAL_START");
+		final Object eIntervalDate = record.get("INTERVAL_END");
+
+		final long sTw = m.mapToLong(sDate);
+		final long eTw = m.mapToLong(eDate);
+		final long sInterval = m.mapToLong(sIntervalDate);
+		final long eInterval = m.mapToLong(eIntervalDate);
+
+		return sTw <= eInterval && eTw >= sInterval;
+	}
+
+	private TimeSeriesCollection calculateMeasures(final SelectQuery query,
+			final DimensionModel dimModel, final IRecordsFilter filter,
+			final BaseMapper<?> mapper, final BaseIndexFactory factory) {
+		final long s = mapper.mapToLong(query.getInterval().getStart());
+		final long e = mapper.mapToLong(query.getInterval().getEnd());
+
+		final TimeSeriesCollection tsc;
+		if (query.getMeasureDimension() == null) {
+			tsc = new TimeSeriesCollection(Numbers.castToInt(e - s + 1), query
+					.getInterval().getStart().getClass(), factory);
+
+			for (long i = s; i <= e; i++) {
+				final List<Map<String, Object>> tpRecords = filter.apply(i, i);
+
+				// set the label
+				final Object labelValue = mapper.resolve(i);
+				tsc.setLabel(Numbers.castToInt(i - s),
+						mapper.format(labelValue), labelValue);
+
+				for (final DescriptorMathTree measure : query.getMeasures()) {
+					final IMathTreeElement node = ((MathOperatorNode) measure
+							.getRoot()).getChild(0);
+					final List<Double> res = calculateMeasure(tpRecords, node);
+					assert 1 == res.size();
+
+					// set the value within the series
+					final TimeSeries ts = getTimeSeries(tsc, measure.getId());
+					ts.setValue(Numbers.castToInt(i), res.get(0).doubleValue());
+				}
+			}
+		} else {
+			final Set<TimeLevelMember> members = dimModel.getTimeMembers(
+					query.getMeasureDimension(), s, e);
+			tsc = new TimeSeriesCollection(members.size(), String.class,
+					factory);
+
+			int i = 0;
+			for (final TimeLevelMember member : members) {
+				assert 1 == member.getRanges().size();
+				final TimeMemberRange range = member.getRange(0);
+
+				// set the label
+				tsc.setLabel(i, member.getName(), member.getId());
+
+				for (final DescriptorMathTree measure : query.getMeasures()) {
+					final IMathTreeElement node = ((MathOperatorNode) measure
+							.getRoot()).getChild(0);
+
+					if (measure.isSimple()) {
+						final List<Map<String, Object>> tpRecords = filter
+								.apply(range.getStart(), range.getEnd());
+						final List<Double> res = calculateMeasure(tpRecords,
+								node);
+						assert 1 == res.size();
+
+						// set the value within the series
+						final TimeSeries ts = getTimeSeries(tsc,
+								measure.getId());
+						ts.setValue(i, res.get(0).doubleValue());
+					} else {
+						final IMathTreeElement iNode = ((MathOperatorNode) node)
+								.getChild(0);
+						final List<Double> values = new ArrayList<Double>();
+
+						final List<Map<String, Object>> tpRecords;
+						if (filter.incSupport()) {
+							tpRecords = filter.apply(range.getStart(),
+									range.getEnd());
+						} else {
+							tpRecords = null;
+						}
+
+						// get the inner values
+						for (long r = range.getStart(); r <= range.getEnd(); r++) {
+							final List<Map<String, Object>> rangeRecords;
+							rangeRecords = filter.apply(r, r, tpRecords);
+							final List<Double> res = calculateMeasure(
+									rangeRecords, iNode);
+							assert 1 == res.size();
+
+							values.add(res.get(0));
+						}
+
+						final TimeSeries ts = getTimeSeries(tsc,
+								measure.getId());
+						if (values.size() < 1) {
+							ts.setValue(i, Double.NaN);
+						} else {
+							final MathOperator mo = ((MathOperatorNode) node)
+									.get();
+							assert mo.isFunction();
+
+							final IAggregationFunction func = mo.getFunction();
+							ts.setValue(i, applyFunction(func, values));
+						}
+					}
+				}
+
+				i++;
+			}
+		}
+
+		return tsc;
+	}
+
+	private TimeSeries getTimeSeries(final TimeSeriesCollection tsc,
+			final String id) {
+		TimeSeries ts = tsc.getSeries(id);
+		if (ts == null) {
+			ts = tsc.createSeries(id);
+		}
+
+		return ts;
+	}
+
+	private List<Double> calculateMeasure(
+			final List<Map<String, Object>> records, final IMathTreeElement node) {
+
+		final List<Double> result = new ArrayList<Double>();
+		if (node instanceof net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf) {
+			final net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf dLeaf = (net.meisen.dissertation.impl.parser.query.select.measures.DescriptorLeaf) node;
+
+			for (final Map<String, Object> record : records) {
+
+				final Object value = record.get(dLeaf.get());
+
+				if (value instanceof Number) {
+					result.add(((Number) value).doubleValue());
+				} else if (value == null) {
+					result.add(Double.NaN);
+				} else {
+					result.add(1.0);
+				}
+			}
+		} else if (node instanceof MathOperatorNode) {
+			final MathOperatorNode math = (MathOperatorNode) node;
+
+			final List<List<Double>> childrenRes = new ArrayList<List<Double>>();
+			for (final IMathTreeElement child : math.getChildren()) {
+				childrenRes.add(calculateMeasure(records, child));
+			}
+
+			// handle known values
+			final MathOperator mo = ((MathOperatorNode) node).get();
+			if (mo.isFunction()) {
+				if (childrenRes.size() != 1) {
+					fail("Invalid definition '" + node + "'");
+				}
+				final List<Double> childRes = childrenRes.get(0);
+				final IAggregationFunction func = mo.getFunction();
+				result.add(applyFunction(func, childRes));
+			} else {
+				final ArithmeticOperator op = mo.getOperator();
+				final List<Double> firstRes = childrenRes.get(0);
+				final int valueSize = firstRes.size();
+
+				for (int i = 0; i < valueSize; i++) {
+					double curResult = firstRes.get(i);
+					for (int k = 1; k < childrenRes.size(); k++) {
+						curResult = op.apply(curResult,
+								childrenRes.get(k).get(i));
+					}
+
+					result.add(curResult);
+				}
+			}
+		} else {
+			fail("Invalid node '" + node + "' (" + node.getClass().getName()
+					+ ")");
+		}
+
+		return result;
+	}
+
+	private double applyFunction(final IAggregationFunction func,
+			final List<Double> values) {
+		double tmpRes = Double.NaN;
+		if (func instanceof Sum) {
+			for (final double res : values) {
+				if (Double.isNaN(res)) {
+					tmpRes = Double.NaN;
+					break;
+				} else {
+					tmpRes = Double.isNaN(tmpRes) ? res : tmpRes + res;
+				}
+			}
+		} else if (func instanceof Count) {
+			tmpRes = values.size();
+		} else if (func instanceof Min) {
+			for (final double res : values) {
+				if (Double.isNaN(res)) {
+					tmpRes = Double.NaN;
+					break;
+				} else {
+					tmpRes = Double.isNaN(tmpRes) ? res : (res < tmpRes ? res
+							: tmpRes);
+				}
+			}
+		} else if (func instanceof Max) {
+			for (final double res : values) {
+				if (Double.isNaN(res)) {
+					tmpRes = Double.NaN;
+					break;
+				} else {
+					tmpRes = Double.isNaN(tmpRes) ? res : (res > tmpRes ? res
+							: tmpRes);
+				}
+			}
+		} else {
+			fail("Unsupported aggregation '" + func.getClass().getSimpleName()
+					+ "'");
+		}
+
+		return tmpRes;
 	}
 
 	/**
@@ -482,113 +1019,4 @@ public class TestPerformance extends ModuleAndDbBasedTest {
 		loader.unloadAll();
 	}
 
-	private Map<Date, IRaster<Date>> createRasters(final String startDate,
-			final String endDate) throws ParseException {
-		final Date startDay = Dates.truncateDate(Dates.createDateFromString(
-				startDate, "dd.MM.yyyy HH:mm:ss"));
-		final Date endDay = Dates.truncateDate(Dates.createDateFromString(
-				endDate, "dd.MM.yyyy HH:mm:ss"));
-
-		// create a raster
-		Map<Date, IRaster<Date>> rasters = new HashMap<Date, IRaster<Date>>();
-		final long diff = TimeUnit.DAYS.convert(
-				endDay.getTime() - startDay.getTime(), TimeUnit.MILLISECONDS);
-		for (long i = 0; i <= diff; i++) {
-			final IRaster<Date> raster = createRasterWithModel(
-					DateGranularity.MINUTES, 1, Locale.US);
-			final Date day = new Date(startDay.getTime() + i * 86400000);
-			rasters.put(day, raster);
-		}
-
-		return rasters;
-	}
-
-	private IRaster<Date> createRasterWithModel(
-			final DateGranularity granularity, final int bucketSize,
-			final Locale locale) {
-
-		// create the models
-		final Map<String, IRasterModel> models = new HashMap<String, IRasterModel>();
-		final Object[] paramStart = { "INTERVAL_START" };
-		final Object[] paramEnd = { "INTERVAL_END" };
-
-		final BaseRasterModel model = (BaseRasterModel) createRasterModel(
-				"INTERVAL_START", "INTERVAL_END", new Value(), new Value(),
-				paramStart, paramEnd);
-		model.addEntry(new BaseRasterModelEntry("COUNT",
-				RasterModelEntryType.VALUE, new Count()));
-		model.addEntry(new BaseRasterModelEntry("SUM",
-				RasterModelEntryType.VALUE, new IntervalSum()));
-		models.put("TESTMODEL", model);
-
-		// create the raster
-		final IRaster<Date> raster = createDateRaster(granularity, bucketSize,
-				locale, models);
-
-		return raster;
-	}
-
-	private IRasterModel createRasterModel(final String nameStart,
-			final String nameEnd, final IRasterFunction functionStart,
-			final IRasterFunction functionEnd, final Object[] parametersStart,
-			final Object[] parametersEnd) {
-
-		// create the interval boundaries
-		final BaseRasterModelEntry entryStart = new BaseRasterModelEntry(
-				nameStart, RasterModelEntryType.INTERVALSTART, functionStart,
-				parametersStart);
-		final BaseRasterModelEntry entryEnd = new BaseRasterModelEntry(nameEnd,
-				RasterModelEntryType.INTERVALEND, functionEnd, parametersEnd);
-
-		// create the model
-		final BaseRasterModel model = new BaseRasterModel(entryStart, entryEnd);
-
-		return model;
-	}
-
-	private IRaster<Date> createDateRaster(final DateGranularity granularity,
-			final Integer bucketSize, final Locale locale,
-			final Map<String, IRasterModel> models) {
-		final IRasterConfiguration<Date> configuration = createDateRasterConfiguration(
-				granularity, bucketSize, locale);
-
-		// add some models to the configuration
-		final BaseRasterConfiguration<Date> dateConfiguration = (BaseRasterConfiguration<Date>) configuration;
-
-		// add the models
-		if (models != null) {
-			for (final Entry<String, IRasterModel> entry : models.entrySet()) {
-				dateConfiguration.addModel(entry.getKey(), entry.getValue());
-			}
-		}
-
-		// create the raster
-		final IRaster<Date> raster = new BaseRaster<Date>(configuration);
-
-		return raster;
-	}
-
-	private IRasterConfiguration<Date> createDateRasterConfiguration(
-			final DateGranularity granularity, final Integer bucketSize,
-			final Locale locale) {
-
-		final IRasterLogic<Date> dateRasterLogic = createDateRasterLogic(
-				granularity, bucketSize);
-		final BaseRasterConfiguration<Date> configuration = new BaseRasterConfiguration<Date>(
-				dateRasterLogic);
-		configuration.setLocale(locale);
-
-		return configuration;
-	}
-
-	private IRasterLogic<Date> createDateRasterLogic(
-			final DateGranularity granularity, final Integer bucketSize) {
-
-		final DateRasterGranularity dateRasterGranularity = new DateRasterGranularity(
-				granularity, bucketSize);
-		final DateRasterLogic dateRasterLogic = new DateRasterLogic(
-				dateRasterGranularity);
-
-		return dateRasterLogic;
-	}
 }

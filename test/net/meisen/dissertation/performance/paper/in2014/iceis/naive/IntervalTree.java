@@ -6,8 +6,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * An interval tree is an ordered tree data structure to hold intervals.
@@ -122,6 +125,24 @@ public class IntervalTree<O extends Object> {
 	 */
 	public IntervalData<O> query(long start, long end) {
 		return root.query(start, end);
+	}
+
+	public final List<Map<String, Object>> query(long start, long end,
+			final List<Map<String, Object>> data) {
+		final IntervalData<O> res = query(start, end);
+		final Collection<O> positions = res == null ? Collections
+				.<O> emptyList() : res.getData();
+
+		final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+		for (final O pos : positions) {
+			if (pos instanceof Number) {
+				final Map<String, Object> record = data.get(Numbers
+						.castToInt((Number) pos));
+				result.add(record);
+			}
+		}
+
+		return result;
 	}
 
 	/**

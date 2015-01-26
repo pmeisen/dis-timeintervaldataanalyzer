@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.jdbc.protocol.DataType;
 import net.meisen.dissertation.model.data.DataStructure;
@@ -23,6 +20,9 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A processed {@code DataRecord} is a record which is processed by a

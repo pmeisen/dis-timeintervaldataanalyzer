@@ -76,6 +76,11 @@ public class DescriptorLogicEvaluator {
 	 * @return a bitmap representing the selected records
 	 */
 	public DescriptorLogicResult evaluateTree(final DescriptorLogicTree tree) {
+		if (tree == null) {
+			return null;
+		}
+
+		// get the root
 		final LogicalOperatorNode root = tree.getRoot();
 
 		if (LOG.isDebugEnabled()) {

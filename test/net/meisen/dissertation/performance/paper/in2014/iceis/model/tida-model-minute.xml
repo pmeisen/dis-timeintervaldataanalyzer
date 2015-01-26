@@ -8,37 +8,17 @@
   -->
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
-       xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     	http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-       					   http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd"
+       					   http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
+       					   http://dev.meisen.net/xsd/dissertation/dimension     http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
 
        offlinemode="false"
        
        id="tidaModel" name="Model used for performance test ICEIS 2015">
- 
-  <config>
-
-    <factories>
-      <!-- Define the factory to be used to determine which IndexFactory
-           to be used.
-           
-           The following factories are available by default:
-            + net.meisen.dissertation.impl.indexes.IndexFactory
-        -->
-      <indexes implementation="net.meisen.dissertation.impl.indexes.IndexFactory">
-        <!-- Define the different indexes to be used.
-      
-             The following bitmap-indexes are available by default:
-              + net.meisen.dissertation.impl.indexes.datarecord.slices.EWAHBitmap
-              + net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap
-          -->
-        <idx:config bitmap="net.meisen.dissertation.impl.indexes.datarecord.slices.RoaringBitmap" />
-      </indexes>
-    </factories>
-  </config>
- 
+  
   <time>
     <timeline start="01.01.2008 00:00:00" end="30.12.2008 23:59:00" granularity="MINUTE" />
   </time>
@@ -62,6 +42,27 @@
     
     <entries />
   </meta>
+  
+  <dim:dimensions>
+    <dim:timedimension id="TIME">
+      <dim:hierarchy id="DEF" all="Everytime">
+        <dim:level id="DAY" template="RASTER_DAY_DAY_1" />
+        <dim:level id="MIN5DAY" template="RASTER_DAY_MINUTE_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+    
+    <dim:dimension id="WA" descriptor="WORKAREA">
+      <dim:hierarchy id="LOC">      
+        <dim:level id="TYPE">
+          <dim:member id="Gate" reg="BIE\..*" rollUpTo="*" />
+          <dim:member id="Terminal" reg="MEI\..*" rollUpTo="*" />
+          <dim:member id="Ground" reg="DEB\..*" rollUpTo="*" />
+          <dim:member id="Ramp" reg="EDI\..*" rollUpTo="*" />
+          <dim:member id="Other" reg="(SEN|SON)\..*" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+  </dim:dimensions>
     
   <structure>
     <meta name="PERSON" descriptor="PERSON" />

@@ -32,9 +32,10 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  */
 public class SelectQuery implements IQuery {
 
-	private final DescriptorLogicTree filter;
 	private final GroupExpression group;
 	private final List<DescriptorMathTree> measures;
+
+	private DescriptorLogicTree filter;
 
 	private String modelId;
 	private SelectResultType type;
@@ -49,13 +50,13 @@ public class SelectQuery implements IQuery {
 	 * Default constructor initializing the query.
 	 */
 	public SelectQuery() {
-		filter = new DescriptorLogicTree();
 		group = new GroupExpression();
 		measures = new ArrayList<DescriptorMathTree>();
 
 		transposed = false;
 		idsOnly = false;
 		count = false;
+		filter = null;
 		intervalRelation = null;
 		measureDimension = null;
 	}
@@ -108,7 +109,21 @@ public class SelectQuery implements IQuery {
 	 * @return the filter defined for the select statement
 	 */
 	public DescriptorLogicTree getFilter() {
+		if (filter == null) {
+			filter = new DescriptorLogicTree();
+		}
+
 		return filter;
+	}
+
+	/**
+	 * Sets the filter to be used.
+	 * 
+	 * @param filter
+	 *            the filter to be used
+	 */
+	public void setFilter(final DescriptorLogicTree filter) {
+		this.filter = filter;
 	}
 
 	/**

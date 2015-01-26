@@ -85,7 +85,8 @@ public class SelectEvaluator {
 			return new SelectResultRecords(query);
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					1018, selectResultType == null ? null : selectResultType.toString());
+					1018, selectResultType == null ? null
+							: selectResultType.toString());
 		}
 	}
 }

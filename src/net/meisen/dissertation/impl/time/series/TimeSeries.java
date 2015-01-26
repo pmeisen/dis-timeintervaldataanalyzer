@@ -99,4 +99,16 @@ public class TimeSeries {
 	public int size() {
 		return values.length;
 	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) {
+			return true;
+		} else if (o instanceof TimeSeries) {
+			final TimeSeries ts = (TimeSeries) o;
+			return Arrays.equals(getValues(), ts.getValues());
+		} else {
+			return false;
+		}
+	}
 }

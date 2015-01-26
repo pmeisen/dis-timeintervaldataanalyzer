@@ -141,7 +141,11 @@ public class Rasters extends BaseTimeLevelTemplate implements
 				groupEnd = appendDst(addGroupDSTMarker, groupEnd, groupEndDate,
 						timezone, true);
 
-				return "[" + groupStart + ", " + groupEnd + "]";
+				if (groupStart.equals(groupEnd)) {
+					return "[" + groupStart + "]";
+				} else {
+					return "[" + groupStart + ", " + groupEnd + "]";
+				}
 			}
 		}
 
@@ -192,8 +196,8 @@ public class Rasters extends BaseTimeLevelTemplate implements
 	 * @param bucketSize
 	 *            the size of the buckets
 	 * @param levelGranularity
-	 *            the granularity of the level (must be smaller than the
-	 *            grouping granularity), can be {@code null}
+	 *            the granularity of the level (must be smaller than or equal to
+	 *            the grouping granularity), can be {@code null}
 	 * @param groupGranularity
 	 *            the granularity of the group
 	 * 

@@ -29,7 +29,7 @@ public class DescriptorLogicTree {
 		this.root = new RootNode();
 		this.currentNode = root;
 	}
-
+	
 	/**
 	 * Gets the root of the tree.
 	 * 
