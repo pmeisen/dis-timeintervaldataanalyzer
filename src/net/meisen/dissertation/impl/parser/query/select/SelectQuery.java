@@ -130,7 +130,9 @@ public class SelectQuery implements IQuery {
 	 * Optimizes the select query.
 	 */
 	public void optimize() {
-		filter.optimize();
+		if (filter != null) {
+			filter.optimize();
+		}
 	}
 
 	@Override
