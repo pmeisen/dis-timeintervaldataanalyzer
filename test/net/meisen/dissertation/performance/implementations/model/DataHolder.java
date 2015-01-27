@@ -10,10 +10,23 @@ import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 
+/**
+ * Helper class to load data from the database.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class DataHolder {
 	private final Db db;
 	private final List<Map<String, Object>> records;
 
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 */
 	public DataHolder(final TidaModel model) {
 
 		// open the database
@@ -58,10 +71,24 @@ public class DataHolder {
 		db.shutDownDb();
 	}
 
+	/**
+	 * Gets an amount of records from the database as specified by the
+	 * {@code limit}.
+	 * 
+	 * @param limit
+	 *            the amount of records to retrieve
+	 * 
+	 * @return the records retrieved
+	 */
 	public List<Map<String, Object>> getRecords(final int limit) {
 		return records.subList(0, limit);
 	}
 
+	/**
+	 * Gets all the records retrieved.
+	 * 
+	 * @return all the records retrieved
+	 */
 	public List<Map<String, Object>> getRecords() {
 		return records;
 	}

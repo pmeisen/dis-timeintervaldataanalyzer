@@ -1,5 +1,6 @@
 package net.meisen.dissertation.impl.measures;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -30,7 +31,10 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 
 		public DoubleIterator(final FactDescriptorSet descriptors,
 				final boolean ascOrder) {
-			if (ascOrder) {
+
+			if (descriptors == null) {
+				it = Collections.<FactDescriptor<?>> emptyList().iterator();
+			} else if (ascOrder) {
 				it = descriptors.iterator();
 			} else {
 				it = descriptors.descendingIterator();
@@ -104,7 +108,9 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 		this.bitmap = bitmap;
 		this.descriptors = descriptors;
 
-		if (this.descriptors.containsVariantRecords()) {
+		if (this.descriptors == null) {
+			array = null;
+		} else if (this.descriptors.containsVariantRecords()) {
 			array = new MapFactsArrayBased(index.getLastRecordId());
 
 			// set all the invariant once
@@ -153,7 +159,9 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 
 	@Override
 	public double getFactOfRecord(final int recordId) {
-		if (array == null) {
+		if (descriptors == null) {
+			return Double.NaN;
+		} else if (array == null) {
 			final Bitmap recordBitmap = Bitmap.createBitmap(
 					index.getIndexFactory(), recordId);
 

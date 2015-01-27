@@ -2,7 +2,6 @@ package net.meisen.dissertation.impl.measures;
 
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
@@ -21,16 +20,6 @@ public class CountStarted extends BaseAggregationFunction implements
 	@Override
 	public String getName() {
 		return name;
-	}
-
-	@Override
-	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final FactDescriptorSet descriptors, final int timepoint) {
-		if (bitmap == null || descriptors == null) {
-			return getDefaultValue();
-		} else {
-			return aggregate(index, bitmap, timepoint);
-		}
 	}
 
 	@Override
@@ -59,7 +48,9 @@ public class CountStarted extends BaseAggregationFunction implements
 	protected double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final int timepoint) {
 
-		if (index.getNormalizedTimeStart() == timepoint) {
+		if (bitmap == null) {
+			return getDefaultValue();
+		} else if (index.getNormalizedTimeStart() == timepoint) {
 			return bitmap.determineCardinality();
 		} else {
 			final SliceWithDescriptors<?>[] slices = index

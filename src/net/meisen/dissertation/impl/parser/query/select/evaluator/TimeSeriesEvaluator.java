@@ -281,10 +281,11 @@ public class TimeSeriesEvaluator {
 
 			// iterate over the ranges and create combined bitmaps and facts
 			final CombinedSlices combined = createCombination(member, bounds);
+			final Bitmap timeBitmap = combined.getBitmap();
 
 			// now we have the bitmap for the specified range, apply the filter
 			final Bitmap filteredCombinedBitmap = combineBitmaps(
-					filteredValidRecords, combined.getBitmap());
+					filteredValidRecords, timeBitmap);
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = groupResultEntry == null ? null
@@ -401,10 +402,11 @@ public class TimeSeriesEvaluator {
 
 			// iterate over the ranges and create combined bitmaps and facts
 			final CombinedSlices combined = createCombination(member, bounds);
+			final Bitmap timeBitmap = combined.getBitmap();
 
 			// now we have the bitmap for the specified range, apply the filter
 			final Bitmap filteredCombinedBitmap = combineBitmaps(
-					filteredValidRecords, combined.getBitmap());
+					filteredValidRecords, timeBitmap);
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = groupResultEntry == null ? null
@@ -415,7 +417,7 @@ public class TimeSeriesEvaluator {
 						filteredCombinedBitmap, groupResultEntry);
 
 				// create the evaluator
-				final ExpressionEvaluator evaluator = new DimExpressionEvaluator(
+				final DimExpressionEvaluator evaluator = new DimExpressionEvaluator(
 						index, groupedFilteredCombinedBitmap,
 						combined.getFacts());
 
@@ -622,7 +624,7 @@ public class TimeSeriesEvaluator {
 	}
 
 	/**
-	 * Combines the valid records (see {@link TidaModel#getValidRecords()} with
+	 * Combines the valid records (see {@link TidaModel#getValidRecords()}) with
 	 * the result of the filter. A {@code null} value is handled as a
 	 * full-bitmap, e.g. all values are set to one. If both bitmaps are
 	 * {@code null}, {@code null} is returned.
@@ -648,22 +650,25 @@ public class TimeSeriesEvaluator {
 	/**
 	 * Combines the two bitmaps with each-other using an and-operation. A
 	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
-	 * to one. If both bitmaps are {@code null}, {@code null} is returned.
+	 * to one.
 	 * 
-	 * @param bitmap1
-	 *            the first bitmap
-	 * @param bitmap2
-	 *            the second bitmap
+	 * @param filterBitmap
+	 *            the bitmap, specifying the filtered values, {@code null} is
+	 *            handled as full bitmap
+	 * @param timeBitmap
+	 *            the bitmap, specifying the selected values within the
+	 *            time-dimension, {@code null} is handled as empty bitmap
 	 * 
 	 * @return the result of the combination
 	 */
-	protected Bitmap combineBitmaps(final Bitmap bitmap1, final Bitmap bitmap2) {
-		if (bitmap1 == null) {
-			return bitmap2;
-		} else if (bitmap2 == null) {
-			return bitmap1;
+	protected Bitmap combineBitmaps(final Bitmap filterBitmap,
+			final Bitmap timeBitmap) {
+		if (timeBitmap == null) {
+			return indexFactory.createBitmap();
+		} else if (filterBitmap == null) {
+			return timeBitmap;
 		} else {
-			return bitmap1.and(bitmap2);
+			return filterBitmap.and(timeBitmap);
 		}
 	}
 

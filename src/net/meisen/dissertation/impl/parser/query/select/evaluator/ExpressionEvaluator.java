@@ -9,7 +9,6 @@ import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElemen
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.util.IIntIterator;
@@ -182,7 +181,7 @@ public abstract class ExpressionEvaluator {
 					return applyFunction(func, facts);
 				} else if (childNode instanceof DescriptorLeaf) {
 					final DescriptorLeaf descLeaf = (DescriptorLeaf) childNode;
-					return applyFunction(func, getFactsSet(descLeaf.get()));
+					return applyFunction(func, getFactsHolder(descLeaf.get()));
 				} else {
 					throw new ForwardedRuntimeException(
 							QueryEvaluationException.class, 1009, node);
@@ -207,18 +206,6 @@ public abstract class ExpressionEvaluator {
 	protected abstract boolean useDefaultOfFunction();
 
 	/**
-	 * Gets the {@code FactDescriptorSet} for the specified
-	 * {@code DescriptorModel} specified by the {@code modelId}.
-	 * 
-	 * @param modelId
-	 *            the {@code DescriptorModel} to get the
-	 *            {@code FactDescriptorSet} for
-	 * 
-	 * @return the {@code FactDescriptorSet}
-	 */
-	protected abstract FactDescriptorSet getFactsSet(final String modelId);
-
-	/**
 	 * Gets the {@code FactsHolder} for the specified {@code DescriptorModel}
 	 * specified by the {@code modelId}.
 	 * 
@@ -241,19 +228,6 @@ public abstract class ExpressionEvaluator {
 	 */
 	protected abstract double applyFunction(final IAggregationFunction func,
 			final IFactsHolder facts);
-
-	/**
-	 * Applies the function to the specified {@code facts}.
-	 * 
-	 * @param func
-	 *            the function to be applied
-	 * @param facts
-	 *            the facts
-	 * 
-	 * @return the result
-	 */
-	protected abstract double applyFunction(final IAggregationFunction func,
-			final FactDescriptorSet facts);
 
 	/**
 	 * Evaluates the mathematical result for the specified

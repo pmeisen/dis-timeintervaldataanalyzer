@@ -2,7 +2,6 @@ package net.meisen.dissertation.impl.measures;
 
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.measures.BaseAggregationFunction;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
@@ -23,27 +22,10 @@ public class Mean extends BaseAggregationFunction implements
 
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final FactDescriptorSet descriptors) {
-		if (bitmap == null || descriptors == null) {
-			return getDefaultValue();
-		}
-
-		final int setRecords = bitmap.determineCardinality();
-
-		// if there aren't any values 0.0 is the result
-		if (setRecords == 0) {
-			return getDefaultValue();
-		} else {
-			return sum(index, bitmap, descriptors) / setRecords;
-		}
-	}
-
-	@Override
-	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
 
 		// if there aren't any values the mean is not defined
-		if (facts == null) {
+		if (facts == null || bitmap == null) {
 			return getDefaultValue();
 		}
 
@@ -53,12 +35,6 @@ public class Mean extends BaseAggregationFunction implements
 		} else {
 			return sum(facts) / setRecords;
 		}
-	}
-
-	@Override
-	public double aggregate(final TidaIndex index, final Bitmap bitmap,
-			final FactDescriptorSet descriptors, final int timepoint) {
-		return aggregate(index, bitmap, descriptors);
 	}
 
 	@Override

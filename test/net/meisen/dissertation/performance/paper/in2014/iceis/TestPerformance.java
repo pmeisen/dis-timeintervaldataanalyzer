@@ -62,6 +62,9 @@ public class TestPerformance {
 	private int[] limits;
 	private Class<? extends IImplementation>[] impls;
 
+	/**
+	 * Initializes the test and the queries, limits and types to run.
+	 */
 	@SuppressWarnings("unchecked")
 	@Before
 	public void initialize() {
@@ -100,6 +103,13 @@ public class TestPerformance {
 		loader.unloadAll();
 	}
 
+	/**
+	 * The test running several performance tests with the different
+	 * implementations.
+	 * 
+	 * @throws Exception
+	 *             if something unexpected happens
+	 */
 	@Test
 	public void testPerformance() throws Exception {
 

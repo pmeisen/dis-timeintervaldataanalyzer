@@ -10,7 +10,6 @@ import net.meisen.dissertation.model.dimensions.TimeMemberRange;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
@@ -61,11 +60,6 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	protected FactDescriptorSet getFactsSet(final String modelId) {
-		throw new IllegalStateException("Should never be used.");
-	}
-
-	@Override
 	protected IFactsHolder getFactsHolder(final String modelId) {
 		throw new IllegalStateException("Should never be used.");
 	}
@@ -73,12 +67,6 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	protected double applyFunction(final IAggregationFunction func,
 			final IFactsHolder facts) {
-		throw new IllegalStateException("Should never be used.");
-	}
-
-	@Override
-	protected double applyFunction(final IAggregationFunction func,
-			final FactDescriptorSet facts) {
 		throw new IllegalStateException("Should never be used.");
 	}
 
