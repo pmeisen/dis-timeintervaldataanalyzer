@@ -1,4 +1,4 @@
-package net.meisen.dissertation.performance.paper.in2014.iceis.naive;
+package net.meisen.dissertation.performance.implementations.helper;
 
 import java.util.ArrayList;
 import java.util.Collection;
