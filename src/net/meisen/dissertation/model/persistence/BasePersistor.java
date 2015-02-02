@@ -451,6 +451,23 @@ public abstract class BasePersistor {
 	}
 
 	/**
+	 * Write the specified {@code double} to the {@code stream}.
+	 * 
+	 * @param stream
+	 *            the stream to write to
+	 * @param value
+	 *            the value to be written
+	 * 
+	 * @throws IOException
+	 *             if the writing fails
+	 */
+	public void writeDouble(final OutputStream stream, final double value)
+			throws IOException {
+		final DataOutputStream dos = new DataOutputStream(stream);
+		dos.writeDouble(value);
+	}
+
+	/**
 	 * Write the specified {@code String} to the {@code stream}.
 	 * 
 	 * @param stream
@@ -503,7 +520,7 @@ public abstract class BasePersistor {
 	}
 
 	/**
-	 * Reads an {@code long} from the {@code stream}.
+	 * Reads a {@code long} from the {@code stream}.
 	 * 
 	 * @param stream
 	 *            the stream to read from
@@ -516,6 +533,22 @@ public abstract class BasePersistor {
 	public long readLong(final InputStream stream) throws IOException {
 		final DataInputStream dis = new DataInputStream(stream);
 		return dis.readLong();
+	}
+
+	/**
+	 * Reads a {@code double} from the {@code stream}.
+	 * 
+	 * @param stream
+	 *            the stream to read from
+	 * 
+	 * @return the {@code double} read
+	 * 
+	 * @throws IOException
+	 *             if the reading fails
+	 */
+	public double readDouble(final InputStream stream) throws IOException {
+		final DataInputStream dis = new DataInputStream(stream);
+		return dis.readDouble();
 	}
 
 	/**

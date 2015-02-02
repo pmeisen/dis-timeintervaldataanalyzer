@@ -17,6 +17,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.descriptors.Descriptor;
+import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IRangeQueryOptimized;
@@ -496,10 +497,17 @@ public class IntervalIndex implements IDataRecordIndex {
 
 					for (final FactDescriptor<?> factDesc : slice
 							.facts(modelId)) {
-						final Descriptor<?, ?, ?> desc = metaDataModel
-								.getDescriptor(factDesc.getModelId(),
-										factDesc.getId());
-						persistor.writeObject(out, desc.getValue());
+
+						if (factDesc.isValueInvariant()) {
+							persistor.writeByte(out, (byte) 0);
+							persistor.writeDouble(out, factDesc.getFact());
+						} else {
+							final Descriptor<?, ?, ?> desc = metaDataModel
+									.getDescriptor(factDesc.getModelId(),
+											factDesc.getId());
+							persistor.writeByte(out, (byte) 1);
+							persistor.writeString(out, desc.getUniqueString());
+						}
 					}
 				}
 
@@ -544,13 +552,25 @@ public class IntervalIndex implements IDataRecordIndex {
 				final String modelId = persistor.readString(inputStream);
 				final int nrOfFacts = persistor.readInt(inputStream);
 
-				for (int k = 0; k < nrOfFacts; k++) {
-					final Object descValue = persistor.readObject(inputStream);
-					final Descriptor<?, ?, ?> desc = metaDataModel
-							.getDescriptorByValue(modelId, descValue,
-									MetaDataHandling.CREATEDESCRIPTOR);
+				final DescriptorModel<?> model = metaDataModel
+						.getDescriptorModel(modelId);
 
-					descriptors.add(desc.getFactDescriptor());
+				for (int k = 0; k < nrOfFacts; k++) {
+					final byte flag = persistor.readByte(inputStream);
+
+					if (flag == 0) {
+						final double fact = persistor.readDouble(inputStream);
+
+						@SuppressWarnings("rawtypes")
+						final FactDescriptor<?> factDesc = new FactDescriptor(
+								modelId, fact);
+						descriptors.add(factDesc);
+					} else {
+						final String value = persistor.readString(inputStream);
+						final Descriptor<?, ?, ?> desc = model
+								.getDescriptorByString(value);
+						descriptors.add(desc.getFactDescriptor());
+					}
 				}
 			}
 		} catch (final Exception e) {

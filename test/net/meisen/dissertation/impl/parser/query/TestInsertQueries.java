@@ -300,7 +300,7 @@ public class TestInsertQueries extends LoaderBasedTest {
 
 		for (final SliceWithDescriptors<?> s : slices) {
 			assertNotNull(s);
-			assertEquals(3, s.getDescriptors("NAME").size());
+			assertEquals(1, s.getDescriptors("NAME").size());
 			assertEquals(1, s.getDescriptors("PRIORITY").size());
 			assertEquals(2, s.getDescriptors("POSITION").size());
 		}
@@ -391,7 +391,7 @@ public class TestInsertQueries extends LoaderBasedTest {
 
 		for (final SliceWithDescriptors<?> s : slices) {
 			assertNotNull(s);
-			assertEquals(3, s.getDescriptors("NAME").size());
+			assertEquals(1, s.getDescriptors("NAME").size());
 			assertEquals(1, s.getDescriptors("PRIORITY").size());
 			assertEquals(2, s.getDescriptors("POSITION").size());
 		}

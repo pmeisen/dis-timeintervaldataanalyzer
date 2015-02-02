@@ -1,7 +1,9 @@
 package net.meisen.dissertation.model.descriptors;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -651,7 +653,42 @@ public class DescriptorModel<I extends Object> {
 		// get the descriptor just by value
 		Descriptor<?, ?, I> desc = getDescriptorByValue(value);
 
-		// if not find handle it according to the defined handling
+		// if not found handle it according to the defined handling
+		if (desc == null) {
+			if (MetaDataHandling.CREATEDESCRIPTOR.equals(handling)) {
+				desc = createDescriptor(value);
+			} else if (MetaDataHandling.FAILONERROR.equals(handling)) {
+				exceptionRegistry.throwException(
+						DescriptorModelException.class, 1006, value);
+			} else if (MetaDataHandling.HANDLEASNULL.equals(handling)) {
+				desc = getNullDescriptor();
+			}
+		}
+
+		return desc;
+	}
+
+	/**
+	 * Gets the descriptor for the specified value. If the descriptor is not
+	 * found, a strategy based on the passed {@code MetaDataHandling} is
+	 * applied.
+	 * 
+	 * @param value
+	 *            the unique string of the {@code Descriptor} to be returned
+	 * @param handling
+	 *            the handling strategy
+	 * 
+	 * @return the {@code Descriptor} with the specified {@code value}
+	 * 
+	 * @see MetaDataHandling
+	 */
+	public Descriptor<?, ?, I> getDescriptorByString(final String value,
+			final MetaDataHandling handling) {
+
+		// get the descriptor just by value
+		Descriptor<?, ?, I> desc = getDescriptorByString(value);
+
+		// if not found handle it according to the defined handling
 		if (desc == null) {
 			if (MetaDataHandling.CREATEDESCRIPTOR.equals(handling)) {
 				desc = createDescriptor(value);
@@ -809,12 +846,27 @@ public class DescriptorModel<I extends Object> {
 		// determine the class if not known
 		if (descriptorValueClass == null) {
 			try {
-				descriptorValueClass = (Class<?>) ((ParameterizedType) descriptorClass
+				final Type valueClass = ((ParameterizedType) descriptorClass
 						.getGenericSuperclass()).getActualTypeArguments()[0];
+
+				if (valueClass instanceof Class) {
+					descriptorValueClass = (Class<?>) valueClass;
+				} else if (valueClass instanceof GenericArrayType) {
+					descriptorValueClass = Object.class;
+				} else {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Cannot determine the value-type of descriptor-class '"
+								+ descriptorClass.getName() + "'.");
+					}
+
+					descriptorValueClass = Object.class;
+				}
 			} catch (final Exception e) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn("Cannot determine the value-type of descriptor-class '"
-							+ descriptorClass.getName() + "'.");
+							+ descriptorClass.getName()
+							+ "' ("
+							+ e.getMessage() + ").");
 				}
 
 				descriptorValueClass = Object.class;
