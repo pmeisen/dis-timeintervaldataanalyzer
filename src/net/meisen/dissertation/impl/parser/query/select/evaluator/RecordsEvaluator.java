@@ -2,6 +2,7 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
+import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
 import net.meisen.dissertation.model.data.IntervalModel;
@@ -60,24 +61,29 @@ public class RecordsEvaluator {
 		// the result bitmap
 		Bitmap bitmap = null;
 
-		// combine the valid once with it
-		final Bitmap validBitmap = queryResult.getValidRecords();
-		bitmap = combine(bitmap, validBitmap);
+		// check if there is a limit
+		final SelectQuery query = queryResult.getQuery();
+		if (!query.hasLimit() || query.getLimit() != 0) {
 
-		// combine the time with it
-		if (bitmap == null || bitmap.isBitSet()) {
-			final Bitmap timeBitmap = intervalRelation.determine(intervalModel,
-					index, interval);
-			bitmap = combine(bitmap, timeBitmap);
-		}
+			// combine the valid once with it
+			final Bitmap validBitmap = queryResult.getValidRecords();
+			bitmap = combine(bitmap, validBitmap);
 
-		// combine the filter with it
-		if (bitmap == null || bitmap.isBitSet()) {
-			final DescriptorLogicResult filterResult = queryResult
-					.getFilterResult();
-			final Bitmap filterBitmap = filterResult == null ? null
-					: filterResult.getBitmap();
-			bitmap = combine(bitmap, filterBitmap);
+			// combine the time with it
+			if (bitmap == null || bitmap.isBitSet()) {
+				final Bitmap timeBitmap = intervalRelation.determine(
+						intervalModel, index, interval);
+				bitmap = combine(bitmap, timeBitmap);
+			}
+
+			// combine the filter with it
+			if (bitmap == null || bitmap.isBitSet()) {
+				final DescriptorLogicResult filterResult = queryResult
+						.getFilterResult();
+				final Bitmap filterBitmap = filterResult == null ? null
+						: filterResult.getBitmap();
+				bitmap = combine(bitmap, filterBitmap);
+			}
 		}
 
 		// if we don't have any result return null

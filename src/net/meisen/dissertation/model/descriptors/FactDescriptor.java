@@ -3,7 +3,8 @@ package net.meisen.dissertation.model.descriptors;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * A {@code FactDescriptor} is a {@code Descriptor} which contains the fact information of a descriptor only.
+ * A {@code FactDescriptor} is a {@code Descriptor} which contains the fact
+ * information of a descriptor only.
  * 
  * @author pmeisen
  * 
@@ -13,6 +14,7 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 	private final String descModelId;
 	private final I descId;
 	private final boolean recordInvariant;
+	private final boolean valueInvariant;
 	private final double fact;
 
 	/**
@@ -28,6 +30,7 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 		this.descId = descId;
 		this.fact = -1;
 		this.recordInvariant = false;
+		this.valueInvariant = false;
 	}
 
 	/**
@@ -46,6 +49,23 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 		this.descId = descId;
 		this.fact = fact;
 		this.recordInvariant = true;
+		this.valueInvariant = false;
+	}
+
+	/**
+	 * Constructor to create a value invariant record.
+	 * 
+	 * @param descModelId
+	 *            the identifier of the {@code DescriptorModel}
+	 * @param fact
+	 *            the fact value
+	 */
+	public FactDescriptor(final String descModelId, final double fact) {
+		this.descModelId = descModelId;
+		this.descId = null;
+		this.fact = fact;
+		this.recordInvariant = true;
+		this.valueInvariant = true;
 	}
 
 	/**
@@ -67,13 +87,23 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 	}
 
 	/**
-	 * {@code true} if the fact is record invariant, otherwise {@code true}.
+	 * {@code true} if the fact is record invariant, otherwise {@code false}.
 	 * 
 	 * @return {@code true} if the fact is record invariant, otherwise
-	 *         {@code true}
+	 *         {@code false}
 	 */
 	public boolean isRecordInvariant() {
 		return recordInvariant;
+	}
+
+	/**
+	 * {@code true} if the fact is value invariant, otherwise {@code false}.
+	 * 
+	 * @return {@code true} if the fact is value invariant, otherwise
+	 *         {@code false}
+	 */
+	public boolean isValueInvariant() {
+		return valueInvariant;
 	}
 
 	/**

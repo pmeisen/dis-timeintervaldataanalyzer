@@ -87,11 +87,13 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Se
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalDefContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorIntervalRelationContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorLimitContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorLowAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorMathAggrFunctionNameContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorMemberContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorModelIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorNullValueContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorOffsetContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.SelectorValueListContext;
 import net.meisen.dissertation.impl.parser.query.get.GetQuery;
@@ -1083,6 +1085,16 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 		q(SelectQuery.class).setResultType(type);
 		q(SelectQuery.class).setIdsOnly(idsOnly);
 		q(SelectQuery.class).setCount(count);
+	}
+
+	@Override
+	public void exitSelectorLimit(final SelectorLimitContext ctx) {
+		q(SelectQuery.class).setLimit(Integer.parseInt(ctx.INT().getText()));
+	}
+
+	@Override
+	public void exitSelectorOffset(final SelectorOffsetContext ctx) {
+		q(SelectQuery.class).setOffset(Integer.parseInt(ctx.INT().getText()));
 	}
 
 	@Override

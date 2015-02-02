@@ -111,6 +111,17 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	public abstract boolean isRecordInvariant();
 
 	/**
+	 * Defines if the {@code Descriptor} is value invariant. If this method
+	 * returns {@code true}, the value of the fact is equal for each
+	 * {@code Descriptor} of the {@code DescriptorModel}.
+	 * 
+	 * @return {@code true} if the {@link #getFactValue(IDataRecord)} method
+	 *         returns the same value for each {@code Descriptor} of the model,
+	 *         otherwise {@code false}
+	 */
+	public abstract boolean isValueInvariant();
+
+	/**
 	 * Gets the {@code FactDescriptor} for {@code this}.
 	 * 
 	 * @return the {@code FactDescriptor} for {@code this}
@@ -119,7 +130,10 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 
 		// create a new FactDescriptor if we don't have one
 		if (factDescriptor == null) {
-			if (isRecordInvariant()) {
+			if (isValueInvariant()) {
+				factDescriptor = new FactDescriptor<I>(getModelId(),
+						getFactValue(null));
+			} else if (isRecordInvariant()) {
 				factDescriptor = new FactDescriptor<I>(getModelId(), getId(),
 						getFactValue(null));
 			} else {

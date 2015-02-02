@@ -37,8 +37,8 @@ public class SelectResultRecords extends SelectResult {
 
 		if (!SelectResultType.RECORDS.equals(query.getResultType())) {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
-					1019, SelectResultType.RECORDS.toString(), query.getResultType()
-							.toString());
+					1019, SelectResultType.RECORDS.toString(), query
+							.getResultType().toString());
 		}
 	}
 
@@ -78,97 +78,184 @@ public class SelectResultRecords extends SelectResult {
 	public Iterator<Object[]> iterator() {
 
 		if (getQuery().isCount()) {
-
-			return new Iterator<Object[]>() {
-				private final int count = recordsBitmap.determineCardinality();
-
-				private boolean next = true;
-
-				@Override
-				public boolean hasNext() {
-					if (next) {
-						next = false;
-						return true;
-					} else {
-						return false;
-					}
-				}
-
-				@Override
-				public Object[] next() {
-					next = false;
-					return new Object[] { count };
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException(
-							"Remove is not supported.");
-				}
-			};
+			return createCountIterator();
 		} else if (getQuery().isIdsOnly()) {
-
-			return new Iterator<Object[]>() {
-				private final IIntIterator it = recordsBitmap.intIterator();
-
-				@Override
-				public boolean hasNext() {
-					return it.hasNext();
-				}
-
-				@Override
-				public Object[] next() {
-					return new Object[] { it.next() };
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException(
-							"Remove is not supported.");
-				}
-			};
+			return createIdIterator();
 		} else {
-
-			return new Iterator<Object[]>() {
-				private final IIntIterator it = recordsBitmap.intIterator();
-
-				@Override
-				public boolean hasNext() {
-					return it.hasNext();
-				}
-
-				@Override
-				public Object[] next() {
-					return idx.getRecordAsArray(it.next());
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException(
-							"Remove is not supported.");
-				}
-			};
+			return createRecordIterator();
 		}
+	}
+
+	/**
+	 * Applies the defined limit (i.e. forwarding to the specified offset) to
+	 * the iterator.
+	 * 
+	 * @param it
+	 *            the iterator to apply the limit to
+	 *            
+	 * @return the passed iterator
+	 */
+	protected IIntIterator applyLimit(final IIntIterator it) {
+		final int offset = getQuery().getOffset();
+		for (int i = 0; i < offset && it.hasNext(); i++) {
+			it.next();
+		}
+
+		return it;
+	}
+
+	/**
+	 * Creates an iterator used to iterate over the records retrieved by the
+	 * statement.
+	 * 
+	 * @return an iterator returned when the records are requested
+	 */
+	protected Iterator<Object[]> createRecordIterator() {
+
+		return new Iterator<Object[]>() {
+			private final IIntIterator it = applyLimit(recordsBitmap
+					.intIterator());
+			private final int limit = getQuery().getLimit();
+
+			private int counter = 0;
+
+			@Override
+			public boolean hasNext() {
+				return (limit < 0 || counter < limit) && it.hasNext();
+			}
+
+			@Override
+			public Object[] next() {
+				counter++;
+				return idx.getRecordAsArray(it.next());
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
+			}
+		};
+	}
+
+	/**
+	 * Creates an iterator used to iterate over the identifiers retrieved by the
+	 * statement.
+	 * 
+	 * @return an iterator returned when the identifiers are requested
+	 */
+	protected Iterator<Object[]> createIdIterator() {
+		return new Iterator<Object[]>() {
+			private final IIntIterator it = recordsBitmap.intIterator();
+			private final int limit = getQuery().getLimit();
+
+			private int counter = 0;
+
+			@Override
+			public boolean hasNext() {
+				return (limit < 0 || counter < limit) && it.hasNext();
+			}
+
+			@Override
+			public Object[] next() {
+				counter++;
+				return new Object[] { it.next() };
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
+			}
+		};
+	}
+
+	/**
+	 * Method used to create an iterator providing count informations.
+	 * 
+	 * @return the iterator used as reply to a count statement
+	 */
+	protected Iterator<Object[]> createCountIterator() {
+		return new Iterator<Object[]>() {
+			private final int count = count();
+
+			private boolean next = true;
+
+			@Override
+			public boolean hasNext() {
+				if (next) {
+					next = false;
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			@Override
+			public Object[] next() {
+				next = false;
+				return new Object[] { count };
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException(
+						"Remove is not supported.");
+			}
+		};
 	}
 
 	@Override
 	public void determineResult(final TidaModel model) {
 		final RecordsEvaluator recordsEvaluator = new RecordsEvaluator(model);
 
+		final SelectQuery query = getQuery();
+
 		// get the records
-		this.recordsBitmap = recordsEvaluator.evaluateInterval(getQuery()
-				.getInterval(), getQuery().getIntervalRelation(), this);
+		this.recordsBitmap = recordsEvaluator.evaluateInterval(
+				query.getInterval(), getQuery().getIntervalRelation(), this);
 
 		// get the types and names
 		this.idx = model.getIndex();
 	}
 
 	/**
-	 * Gets the bitmap with the selected records.
+	 * Gets the bitmap with the selected records. The returned bitmap does not
+	 * have any limit applied.
 	 * 
 	 * @return the bitmap with the selected records
 	 */
 	public Bitmap getSelectedRecords() {
 		return recordsBitmap;
+	}
+
+	/**
+	 * The amount of records retrieved, including any defined limit.
+	 * 
+	 * @return the amount of records retrieved
+	 */
+	public int count() {
+		final SelectQuery query = this.getQuery();
+		if (query.hasLimit()) {
+			final int limit = query.getLimit();
+			final int offset = query.getOffset();
+
+			if (limit == 0) {
+				return 0;
+			} else {
+				final int recordCount = recordsBitmap.determineCardinality();
+				final int availableCount = recordCount - offset;
+
+				if (availableCount < 0) {
+					return 0;
+				} else if (limit < 0 || limit > availableCount) {
+					return availableCount;
+				} else {
+					return limit;
+				}
+			}
+		} else {
+			return recordsBitmap.determineCardinality();
+		}
 	}
 }

@@ -135,8 +135,10 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		} else {
 
 			// the objects are equal but modified
-			if (!Objects.equals(cur.isRecordInvariant(),
-					factDesc.isRecordInvariant())
+			if (!Objects.equals(cur.isValueInvariant(),
+					factDesc.isValueInvariant())
+					|| !Objects.equals(cur.isRecordInvariant(),
+							factDesc.isRecordInvariant())
 					|| !Objects.equals(cur.getFact(), factDesc.getFact())) {
 				set.remove(cur);
 				return set.add(factDesc);
@@ -157,7 +159,7 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 		if (factSet == null) {
 			return;
 		}
-		
+
 		for (final Entry<String, FactDescriptorSet> e : factSet.facts
 				.entrySet()) {
 			final String modelId = e.getKey();

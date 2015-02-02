@@ -84,4 +84,9 @@ public class MockDescriptorPrimitiveDataType<D>
 	public boolean isRecordInvariant() {
 		return true;
 	}
+
+	@Override
+	public boolean isValueInvariant() {
+		return true;
+	}
 }

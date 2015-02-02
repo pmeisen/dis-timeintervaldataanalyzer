@@ -51,6 +51,7 @@
     <descriptors>
       <string id="PERSON" failonduplicates="true" null="true" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
       <string id="TASK" failonduplicates="true" null="true" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <integer id="VALUE" failonduplicates="true" null="false" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
     </descriptors>
     
     <entries>
@@ -65,12 +66,18 @@
       <entry descriptor="TASK" value="working" />
       <entry descriptor="TASK" value="playing" />
       <entry descriptor="TASK" value="mothering" />
+      
+      <entry descriptor="VALUE" value="7" />
+      <entry descriptor="VALUE" value="6" />
+      <entry descriptor="VALUE" value="5" />
+      <entry descriptor="VALUE" value="4" />
     </entries>
   </meta>
     
   <structure>
     <meta position="3"  descriptor="PERSON" />
     <meta position="4"  descriptor="TASK" />
+    <meta position="5"  descriptor="VALUE" />
     
     <interval position="1"  type="start" />
     <interval position="2"  type="end" />
@@ -82,6 +89,7 @@
       <entry class="int" value="10000" />
       <entry class="java.lang.String" value="Philipp" />
       <entry class="java.lang.String" value="working" />
+      <entry class="int" value="7" />
     </dataset>
     
     <dataset>
@@ -89,6 +97,7 @@
       <entry class="int" value="20000" />
       <entry class="java.lang.String" value="Debbie" />
       <entry class="java.lang.String" value="mothering" />
+      <entry class="int" value="6" />
     </dataset>
     
     <dataset>
@@ -96,6 +105,7 @@
       <entry class="int" value="30000" />
       <entry class="java.lang.String" value="Uschi" />
       <entry class="java.lang.String" value="playing computer games" />
+      <entry class="int" value="5" />
     </dataset>
     
     <dataset>
@@ -103,6 +113,7 @@
       <entry class="int" value="40000" />
       <entry class="java.lang.String" value="Hajo" />
       <entry class="java.lang.String" value="sleeping" />
+      <entry class="int" value="4" />
     </dataset>
     
     <dataset>
@@ -110,6 +121,23 @@
       <entry class="int" value="50000" />
       <entry class="java.lang.String" value="Edison" />
       <entry class="java.lang.String" value="playing" />
+      <entry class="int" value="6" />
+    </dataset>
+
+    <dataset>
+      <entry class="int" value="40001" />
+      <entry class="int" value="50000" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="mothering" />
+      <entry class="int" value="7" />
+    </dataset>
+    
+    <dataset>
+      <entry class="int" value="40001" />
+      <entry class="int" value="50000" />
+      <entry class="java.lang.String" value="Debbie" />
+      <entry class="java.lang.String" value="mothering" />
+      <entry class="int" value="6" />
     </dataset>
   </data>
 </model>

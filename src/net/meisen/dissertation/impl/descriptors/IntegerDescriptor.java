@@ -131,4 +131,9 @@ public class IntegerDescriptor<I extends Object> extends
 	public boolean isRecordInvariant() {
 		return true;
 	}
+	
+	@Override
+	public boolean isValueInvariant() {
+		return false;
+	}
 }

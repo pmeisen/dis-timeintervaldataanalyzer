@@ -109,7 +109,7 @@ exprDelete    : STMT_DELETE selectorIntIdList OP_FROM selectorModelId;
  * Define the different expressions/parts of the select statement
  */
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
-exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)?;
+exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)? (OP_LIMIT selectorOffset (SEPARATOR selectorLimit)?)?;
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
 exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (compNamedDimMathMeasure (SEPARATOR compNamedDimMathMeasure)* OP_ON selectorMember));
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
@@ -163,6 +163,8 @@ selectorModelId             : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDescriptorId        : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorAlias               : MARKED_ID | SIMPLE_ID | ENHANCED_ID;
 selectorDateInterval        : DATE SEPARATOR DATE;
+selectorOffset              : INT;
+selectorLimit               : INT;
 selectorIntInterval         : INT SEPARATOR INT;
 selectorIntIdList           : INT (SEPARATOR INT)*;
 selectorDateIntervalWithNull: (DATE | NULL_VALUE) SEPARATOR (DATE | NULL_VALUE);
@@ -252,6 +254,7 @@ OP_VALUES   : V A L U E S;
 OP_ALIAS    : A S;
 OP_GROUPBY  : G R O U P ' ' B Y;
 OP_FILTERBY : F I L T E R ' ' B Y | W H E R E;
+OP_LIMIT    : L I M I T;
 OP_TRANSPOSE: T R A N S P O S E;
 OP_IDONLY   : I D S;
 OP_WITH     : W I T H;

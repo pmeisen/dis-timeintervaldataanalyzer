@@ -1,12 +1,6 @@
 package net.meisen.dissertation.model.measures;
 
 import net.meisen.dissertation.exceptions.GeneralException;
-import net.meisen.dissertation.impl.measures.MapFactsDescriptorBased;
-import net.meisen.dissertation.model.descriptors.FactDescriptor;
-import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
-import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorSet;
-import net.meisen.dissertation.model.indexes.datarecord.slices.Slice;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Objects;
@@ -102,47 +96,6 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 			}
 
 			return res;
-		}
-	}
-
-	/**
-	 * Helper method to calculate the sum of the specified {@code facts}.
-	 * 
-	 * @param index
-	 *            the {@code TidaIndex} to retrieve the meta-slices from
-	 * @param bitmap
-	 *            the defined bitmap of the filter and group
-	 * @param descriptors
-	 *            the descriptors of the fact
-	 * 
-	 * @return the sum of the facts
-	 */
-	public double sum(final TidaIndex index, final Bitmap bitmap,
-			final FactDescriptorSet descriptors) {
-		if (bitmap == null || descriptors == null) {
-			return getDefaultValue();
-		} else if (bitmap.determineCardinality() == 0) {
-			return getDefaultValue();
-		}
-
-		if (descriptors.containsVariantRecords()) {
-
-			// use the implementation of the factHolders to handle this
-			return sum(new MapFactsDescriptorBased(descriptors, index, bitmap));
-		} else {
-			double sum = 0.0;
-			for (final FactDescriptor<?> desc : descriptors) {
-
-				// get the slice
-				final Slice<?> metaSlice = index.getMetaIndexDimensionSlice(
-						desc.getModelId(), desc.getId());
-
-				// get the bitmap
-				final Bitmap bmp = bitmap.and(metaSlice.getBitmap());
-				sum += bmp.determineCardinality() * desc.getFact();
-			}
-
-			return sum;
 		}
 	}
 

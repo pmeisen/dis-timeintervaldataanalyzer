@@ -28,7 +28,7 @@ public class VariantDescriptor extends
 	public VariantDescriptor(final DescriptorModel<Integer> model,
 			final Integer id, final String value) {
 		super(model, id);
-		
+
 		this.value = value;
 	}
 
@@ -39,11 +39,16 @@ public class VariantDescriptor extends
 
 	@Override
 	public double getFactValue(final IDataRecord record) {
-		return 1.0;
+		return Math.random();
 	}
 
 	@Override
 	public boolean isRecordInvariant() {
+		return false;
+	}
+	
+	@Override
+	public boolean isValueInvariant() {
 		return false;
 	}
 

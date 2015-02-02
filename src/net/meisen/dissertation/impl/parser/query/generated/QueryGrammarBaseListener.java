@@ -266,6 +266,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSelectorLimit(@NotNull QueryGrammarParser.SelectorLimitContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorLimit(@NotNull QueryGrammarParser.SelectorLimitContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterCompDimAggrFunction(@NotNull QueryGrammarParser.CompDimAggrFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -806,6 +819,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExprAdd(@NotNull QueryGrammarParser.ExprAddContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSelectorOffset(@NotNull QueryGrammarParser.SelectorOffsetContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSelectorOffset(@NotNull QueryGrammarParser.SelectorOffsetContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

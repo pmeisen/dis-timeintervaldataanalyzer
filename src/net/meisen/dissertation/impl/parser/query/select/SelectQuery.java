@@ -45,6 +45,8 @@ public class SelectQuery implements IQuery {
 	private boolean count;
 	private IntervalRelation intervalRelation;
 	private DimensionSelector measureDimension;
+	private int limit;
+	private int offset;
 
 	/**
 	 * Default constructor initializing the query.
@@ -53,6 +55,8 @@ public class SelectQuery implements IQuery {
 		group = new GroupExpression();
 		measures = new ArrayList<DescriptorMathTree>();
 
+		limit = -1;
+		offset = 0;
 		transposed = false;
 		idsOnly = false;
 		count = false;
@@ -329,5 +333,64 @@ public class SelectQuery implements IQuery {
 	 */
 	public void setMeasureDimension(final DimensionSelector measureDimension) {
 		this.measureDimension = measureDimension;
+	}
+
+	/**
+	 * Gets the defined limit. The limit is {@code -1} if all records should be
+	 * returned, i.e. no limit is defined.
+	 * 
+	 * @return the defined limit
+	 */
+	public int getLimit() {
+		return limit;
+	}
+
+	/**
+	 * Gets the defined offset. The offset defines the position before the first
+	 * record, i.e. an offset of {@code 0} returns the first record and
+	 * following.
+	 * 
+	 * @return the defined offset
+	 */
+	public int getOffset() {
+		return offset;
+	}
+
+	/**
+	 * Sets the limit of the query, i.e. the amount of records maximal returned.
+	 * 
+	 * @param limit
+	 *            the limit
+	 */
+	public void setLimit(final int limit) {
+		if (limit < 0) {
+			this.limit = -1;
+		} else {
+			this.limit = limit;
+		}
+	}
+
+	/**
+	 * Defines the offset of the query, i.e. the position on which the retrieval
+	 * should start.
+	 * 
+	 * @param offset
+	 *            the offset of the query
+	 */
+	public void setOffset(final int offset) {
+		if (offset < 0) {
+			this.offset = 0;
+		} else {
+			this.offset = offset;
+		}
+	}
+
+	/**
+	 * Checks if a limit is defined for {@code this}.
+	 * 
+	 * @return {@code true} if a limit is defined, otherwise {@code false}
+	 */
+	public boolean hasLimit() {
+		return this.offset > 0 || this.limit > -1;
 	}
 }

@@ -46,8 +46,8 @@ public class TestPerformance {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(TestPerformance.class);
 
-	private final int INIT_RUNS = 5;
-	private final int RUNS = 100;
+	private int INIT_RUNS = 5;
+	private int RUNS = 100;
 
 	@Autowired
 	private TidaModelHandler loader;
@@ -73,6 +73,9 @@ public class TestPerformance {
 		holder = new DataHolder(model);
 
 		// @formatter:off
+		INIT_RUNS = 1; // = 5;
+		RUNS = 10; // = 100;
+
 		queries = new String[] {
 				"SELECT TIMESERIES OF COUNT(TASKTYPE) AS C FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WA.LOC.TYPE='Gate'",
 				"SELECT TIMESERIES OF SUM(TASKTYPE) AS S ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WORKAREA='SEN.W14'",

@@ -118,7 +118,7 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 				final Bitmap bmp = getBitmap(factDesc);
 
 				// the invariant version can be done easier
-				if (factDesc.isRecordInvariant()) {
+				if (factDesc.isValueInvariant() || factDesc.isRecordInvariant()) {
 					array.setAll(bmp.intIterator(), factDesc.getFact());
 				}
 				// the variant once have to be done one by one
@@ -150,11 +150,44 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 	 * @return the bitmap
 	 */
 	protected Bitmap getBitmap(final FactDescriptor<?> desc) {
-		final Slice<?> slice = index.getMetaIndexDimensionSlice(
-				desc.getModelId(), desc.getId());
 
-		return bitmap == null ? slice.getBitmap() : bitmap.and(slice
-				.getBitmap());
+		if (desc == null) {
+
+			/*
+			 * That's not allowed and not expected.
+			 */
+			throw new NullPointerException(
+					"The descriptor should never be null at this point.");
+		} else if (desc.isValueInvariant()) {
+
+			/*
+			 * Just get all the values, because they all have the same value, we
+			 * don't have to filter by descriptor.
+			 */
+			return bitmap;
+		} else if (desc.isRecordInvariant()) {
+			final Slice<?> slice = index.getMetaIndexDimensionSlice(
+					desc.getModelId(), desc.getId());
+
+			/*
+			 * Determine the combined bitmap of the slice and the filtering
+			 * bitmap.
+			 */
+			if (slice == null) {
+				return bitmap;
+			} else if (bitmap == null) {
+				return slice.getBitmap();
+			} else {
+				return bitmap.and(slice.getBitmap());
+			}
+		} else {
+
+			/*
+			 * We have a variant record, that must have been handled before.
+			 */
+			throw new IllegalStateException(
+					"Variant records should have been handled as array.");
+		}
 	}
 
 	@Override

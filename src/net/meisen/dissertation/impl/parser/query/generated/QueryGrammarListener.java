@@ -220,6 +220,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitSelectorOpenInterval(@NotNull QueryGrammarParser.SelectorOpenIntervalContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorLimit}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorLimit(@NotNull QueryGrammarParser.SelectorLimitContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorLimit}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorLimit(@NotNull QueryGrammarParser.SelectorLimitContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compDimAggrFunction}.
 	 * @param ctx the parse tree
 	 */
@@ -680,6 +691,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprAdd(@NotNull QueryGrammarParser.ExprAddContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorOffset}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectorOffset(@NotNull QueryGrammarParser.SelectorOffsetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#selectorOffset}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectorOffset(@NotNull QueryGrammarParser.SelectorOffsetContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#exprUnload}.

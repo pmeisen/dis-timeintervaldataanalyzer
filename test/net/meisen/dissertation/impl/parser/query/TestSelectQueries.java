@@ -59,6 +59,7 @@ import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.collections.Collections;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.genmisc.types.Files;
+import net.meisen.general.genmisc.types.Numbers;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1717,6 +1718,49 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the parsing of the limit operator.
+	 */
+	@Test
+	public void testRecordsLimitOperator() {
+		SelectQuery query;
+
+		query = q("SELECT RECORDS from modelId WHERE VALUE='5' LIMIT 5, 6");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 5);
+		assertEquals(query.getLimit(), 6);
+
+		query = q("SELECT RECORDS from modelId LIMIT 50, 60");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 50);
+		assertEquals(query.getLimit(), 60);
+		assertTrue(query.hasLimit());
+
+		query = q("SELECT RECORDS from modelId LIMIT 0, 100");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 0);
+		assertEquals(query.getLimit(), 100);
+		assertTrue(query.hasLimit());
+
+		query = q("SELECT RECORDS from modelId LIMIT 0, 100");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 0);
+		assertEquals(query.getLimit(), 100);
+		assertTrue(query.hasLimit());
+
+		query = q("SELECT RECORDS from modelId limit 100");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 100);
+		assertEquals(query.getLimit(), -1);
+		assertTrue(query.hasLimit());
+
+		query = q("SELECT RECORDS from modelId");
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertEquals(query.getOffset(), 0);
+		assertEquals(query.getLimit(), -1);
+		assertFalse(query.hasLimit());
+	}
+
+	/**
 	 * Tests the implementation of the {@link Count} aggregation-function.
 	 */
 	@Test
@@ -2301,7 +2345,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		ts = tsRes.getSeries("WEIRD");
 		assertEquals(2, ts.size());
-		assertEquals(60.0, ts.getValue(0), 0.0);
+		assertEquals(64.0, ts.getValue(0), 0.0);
 		assertEquals(64.0, ts.getValue(1), 0.0);
 
 		query = "select timeseries of MAX(SUM(SCREAMS)) AS RESNEED ON TIME.UTC.DAY from testPersonModel in [03.03.2014, 04.03.2014)";
@@ -3140,6 +3184,108 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the result
 		assertEquals(records.toString(), 1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+	}
+
+	/**
+	 * Checks the usage of the limit operator.
+	 */
+	@Test
+	public void testRecordSelectionWithLimits() {
+		String query;
+		SelectResultRecords res;
+
+		// model with 6 records
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+
+		// load the model
+		m(xml);
+
+		// use a filter and see if it's applied, there are 3 philipp records
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2, 5";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(1, res.count());
+		assertRecords(res.iterator(), new int[] { 3 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 1, 2";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(2, res.count());
+		assertRecords(res.iterator(), new int[] { 2, 3 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2, 5";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(1, res.count());
+		assertRecords(res.iterator(), new int[] { 3 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 4,1";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(0, res.count());
+		assertRecords(res.iterator(), new int[] {});
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 3, 1";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(0, res.count());
+		assertRecords(res.iterator(), new int[] {});
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 1, 1";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(1, res.count());
+		assertRecords(res.iterator(), new int[] { 2 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 0";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(3, res.count());
+		assertRecords(res.iterator(), new int[] { 1, 2, 3 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(1, res.count());
+		assertRecords(res.iterator(), new int[] { 3 });
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 3";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(0, res.count());
+		assertRecords(res.iterator(), new int[] {});
+
+		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 4";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(0, res.count());
+		assertRecords(res.iterator(), new int[] {});
+
+		query = "select RECORDS from testPersonModel where LOCATION='Aachen' limit 0, 2";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(2, res.count());
+		assertRecords(res.iterator(), new int[] { 0, 3 });
+
+		query = "select RECORDS from testPersonModel where LOCATION='Aachen' limit 3, 2";
+		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		assertEquals(1, res.count());
+		assertRecords(res.iterator(), new int[] { 5 });
+	}
+
+	/**
+	 * Helper method to validate the records respecting the {@code expected}
+	 * identifiers.
+	 * 
+	 * @param it
+	 *            the iterator to check
+	 * @param expected
+	 *            the expected identifiers
+	 */
+	protected void assertRecords(final Iterator<Object[]> it,
+			final int[] expected) {
+
+		int counter = 0;
+		while (it.hasNext()) {
+			final Object[] rec = it.next();
+			assertTrue(rec[0] instanceof Integer);
+
+			final int id = Numbers.castToInt((Number) rec[0]);
+			assertTrue("Not found " + id + " in (" + Arrays.toString(expected)
+					+ ")", Arrays.binarySearch(expected, id) > -1);
+
+			counter++;
+		}
+		assertEquals(expected.length, counter);
 	}
 
 	/**
