@@ -16,6 +16,7 @@ import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
+import net.meisen.dissertation.impl.dataretriever.CsvDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.FixedStructureDataRetriever;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
@@ -412,6 +413,7 @@ public class DefaultValues {
 
 		d.put("db", DbDataRetriever.class.getName());
 		d.put("fxd", FixedStructureDataRetriever.class.getName());
+		d.put("csv", CsvDataRetriever.class.getName());
 
 		return d;
 	}

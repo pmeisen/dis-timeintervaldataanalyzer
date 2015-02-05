@@ -19,6 +19,7 @@ import net.meisen.dissertation.impl.cache.TestMapDbBitmapCache;
 import net.meisen.dissertation.impl.cache.TestMapDbDataRecordCache;
 import net.meisen.dissertation.impl.cache.TestMemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.TestMemoryMetaDataCache;
+import net.meisen.dissertation.impl.dataretriever.TestCsvDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.TestDbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.TestFixedStructureDataRetriever;
 import net.meisen.dissertation.impl.datasets.TestDataRetrieverDataSet;
@@ -189,6 +190,7 @@ import org.junit.runners.Suite;
 		TestDataCollection.class,
 		TestDataRecord.class,
 		TestDbDataRetriever.class,
+		TestCsvDataRetriever.class,
 		TestFixedStructureDataRetriever.class,
 
 		// Test the dataSets

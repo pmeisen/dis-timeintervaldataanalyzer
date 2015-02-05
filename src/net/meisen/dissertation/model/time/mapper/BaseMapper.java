@@ -290,6 +290,8 @@ public abstract class BaseMapper<T> {
 			throw new NullPointerException("The null-value cannot be mapped.");
 		} else if (getMappedType().isAssignableFrom(o.getClass())) {
 			return (T) o;
+		} else if (String.class.equals(o.getClass())) {
+			return resolve((String) o);
 		} else {
 			throw new IllegalArgumentException("The class '"
 					+ getMappedType().getName() + "' is not assignable from '"
@@ -308,6 +310,20 @@ public abstract class BaseMapper<T> {
 	 * @return the mapped value
 	 */
 	protected abstract long map(final T from);
+
+	/**
+	 * Method used to resolve a string to a value of the mapper's type.
+	 * 
+	 * @param value
+	 *            the value to be parsed
+	 * 
+	 * @return the resolved value
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the value cannot be parsed
+	 */
+	protected abstract T resolve(final String value)
+			throws IllegalArgumentException;
 
 	/**
 	 * Internally used to normalize the mapped result to an internal

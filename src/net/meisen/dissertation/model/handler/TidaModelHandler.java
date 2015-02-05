@@ -27,6 +27,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.persistence.ILocation;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.dissertation.model.persistence.MetaData;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.exceptions.registry.IExceptionRegistry;
 import net.meisen.general.genmisc.resources.IByteBufferReader;
 import net.meisen.general.genmisc.resources.Xml;
@@ -37,6 +38,7 @@ import net.meisen.general.sbconfigurator.api.IModuleHolder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Document;
@@ -240,8 +242,21 @@ public class TidaModelHandler {
 
 		// load the configuration
 		final InputStream bais = new ByteArrayInputStream(config);
-		final IModuleHolder moduleHolder = configuration.loadDelayed(
-				"tidaXsltModelLoader", bais);
+		IModuleHolder moduleHolder = null;
+		try {
+			moduleHolder = configuration.loadDelayed("tidaXsltModelLoader",
+					bais);
+		} catch (final BeanCreationException e) {
+			final Throwable cause = e.getMostSpecificCause();
+			if (cause != null && cause instanceof ForwardedRuntimeException) {
+				exceptionRegistry
+						.throwRuntimeException((ForwardedRuntimeException) cause);
+			} else {
+				throw e;
+			}
+		} catch (final ForwardedRuntimeException e) {
+			exceptionRegistry.throwRuntimeException(e);
+		}
 
 		// close the streams silently
 		Streams.closeIO(bais);
@@ -442,7 +457,8 @@ public class TidaModelHandler {
 				throw (RuntimeException) t;
 			} else {
 				exceptionRegistry.throwRuntimeException(
-						TidaModelHandlerException.class, 1016, t, model.getId(), t.getLocalizedMessage());
+						TidaModelHandlerException.class, 1016, t,
+						model.getId(), t.getLocalizedMessage());
 			}
 		}
 
@@ -461,7 +477,7 @@ public class TidaModelHandler {
 	public synchronized TidaModel loadFromDefaultLocation(final String modelId) {
 		final File modelDir = new File(getDefaultLocation(), modelId);
 		final File modelFile = new File(modelDir, MODEL_FILENAME);
-		
+
 		// check if the file does not exist or if it's a directory
 		if (!modelFile.exists() || modelFile.isDirectory()) {
 			exceptionRegistry.throwRuntimeException(

@@ -43,4 +43,10 @@ public class MockMapper1 extends BaseMapper<Integer> {
 	public Integer demap(final long value) {
 		return (int) value;
 	}
+
+	@Override
+	protected Integer resolve(final String value)
+			throws IllegalArgumentException {
+		return Integer.parseInt(value);
+	}
 }

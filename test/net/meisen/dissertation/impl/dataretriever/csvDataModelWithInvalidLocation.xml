@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:csv="http://dev.meisen.net/xsd/dissertation/model/csv"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model      http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/csv  http://dev.meisen.net/xsd/dissertation/tidaCsvExtension.xsd"
+
+       offlinemode="false"
+
+       id="csvDataModelWithInvalidLocation">
+
+  <config> 
+    
+    <dataretrievers>
+      <dataretriever id="csv_test">
+        <csv:config file="/net/meisen/dissertation/impl/csvdbs/thisfileshouldneverexist.csv" classpath="false" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+  
+  <time>
+    <timeline start="05.09.2013" end="30.06.2014" granularity="MINUTE" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="CALLER"      name="Caller"      failonduplicates="false" null="false" />
+      <string id="RECIPIENT"   name="Recipient"   failonduplicates="false" null="false" />
+      <string id="ORIGIN"      name="Origin"      failonduplicates="false" null="false" />
+      <string id="DESTINATION" name="Destination" failonduplicates="false" null="false" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="CALLER" dataretriever="csv_test">
+        <csv:selector column="caller" />
+      </entry>
+    </entries>
+  </meta>
+  
+  <structure>
+    <meta position="1" descriptor="CALLER" />
+    <meta position="5" descriptor="RECIPIENT" />
+    <meta position="6" descriptor="ORIGIN" />
+    <meta position="7" descriptor="DESTINATION" />
+    
+    <interval position="2" type="start" />
+    <interval position="3" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="boundariesWhenNull">
+    <dataset dataretriever="csv_test" />
+  </data>
+</model>

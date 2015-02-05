@@ -7,9 +7,9 @@ import net.meisen.dissertation.model.descriptors.FactDescriptor;
 /**
  * A {@code SortedSet} of {@code FactDescriptors}. The sorting is done using the
  * value of the {@code fact}, whereby all record variant {@code FactDescriptors}
- * are smaller than invariant once - sorted by their identifier. The record
- * invariant {@code FactDescriptor} instances are sorted by their invariant
- * value.
+ * are smaller than invariant once - sorted by their identifier. The value and
+ * record invariant {@code FactDescriptor} instances are sorted by their
+ * invariant value.
  * 
  * @author pmeisen
  * 

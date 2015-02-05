@@ -17,7 +17,7 @@
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.MetaDataModelException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
-       <entry key="net.meisen.dissertation.exceptions.MetaDataCollectionException" 
+        <entry key="net.meisen.dissertation.exceptions.MetaDataCollectionException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.exceptions.DataRetrieverException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
@@ -80,6 +80,8 @@
         <entry key="net.meisen.dissertation.impl.cache.BaseMapDbCacheException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
         <entry key="net.meisen.dissertation.impl.dataretriever.DbDataRetrieverException" 
+               value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
+        <entry key="net.meisen.dissertation.impl.dataretriever.CsvDataRetrieverException" 
                value="net.meisen.general.genmisc.exceptions.catalog.DefaultLocalizedExceptionCatalog" />
       </map>
     </property>

@@ -64,4 +64,19 @@ public class LongMapper extends BaseMapper<Long> {
 				+ getGranularity() + "' - '" + demap(getEnd()) + " "
 				+ getGranularity() + "'";
 	}
+
+	@Override
+	protected Long resolve(final String value) {
+		if (value == null) {
+			return null;
+		} else {
+			try {
+				return Long.parseLong(value);
+			} catch (final NumberFormatException e) {
+				throw new IllegalArgumentException("Value '" + value
+						+ "' cannot be used as date.");
+			}
+
+		}
+	}
 }

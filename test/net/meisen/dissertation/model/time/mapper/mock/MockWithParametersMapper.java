@@ -4,6 +4,7 @@ import java.util.Date;
 
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
+import net.meisen.general.genmisc.types.Dates;
 
 /**
  * A mock for a {@code Mapper}.
@@ -53,5 +54,10 @@ public class MockWithParametersMapper extends BaseMapper<Date> {
 	@Override
 	public Date demap(final long value) {
 		return null;
+	}
+
+	@Override
+	protected Date resolve(final String value) throws IllegalArgumentException {
+		return Dates.isDate(value);
 	}
 }

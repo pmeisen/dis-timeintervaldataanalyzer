@@ -40,4 +40,10 @@ public class MockJustStartEndMapper extends BaseMapper<Integer> {
 	public Integer demap(final long value) {
 		return 0;
 	}
+
+	@Override
+	protected Integer resolve(final String value)
+			throws IllegalArgumentException {
+		return Integer.parseInt(value);
+	}
 }

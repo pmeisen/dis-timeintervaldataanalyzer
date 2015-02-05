@@ -70,4 +70,19 @@ public class DateMapper extends BaseMapper<Date> {
 	public String formatValue(final Date value) {
 		return Dates.formatDate((Date) value, "dd.MM.yyyy HH:mm:ss,SSS");
 	}
+
+	@Override
+	protected Date resolve(String value) {
+		if (value == null) {
+			return null;
+		} else {
+			final Date parsed = Dates.isDate(value, Dates.GENERAL_TIMEZONE);
+			if (parsed == null) {
+				throw new IllegalArgumentException("Value '" + value
+						+ "' cannot be used as date.");
+			} else {
+				return parsed;
+			}
+		}
+	}
 }

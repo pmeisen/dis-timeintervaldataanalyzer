@@ -93,4 +93,10 @@ public class MockSeveralConstructorsMapper extends BaseMapper<Object> {
 	public Object demap(final long value) {
 		return null;
 	}
+
+	@Override
+	protected Object resolve(final String value)
+			throws IllegalArgumentException {
+		return value;
+	}
 }
