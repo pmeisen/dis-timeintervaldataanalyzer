@@ -14,15 +14,19 @@ import net.meisen.general.server.settings.pojos.Extension;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 
+/**
+ * A servlet used to load files within the current session.
+ * 
+ * @author pmeisen
+ * 
+ */
 public class LoaderServlet extends BaseServlet {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(LoaderServlet.class);
@@ -48,7 +52,17 @@ public class LoaderServlet extends BaseServlet {
 		return false;
 	}
 
-	protected Map<String, String> validateAuth(final Iterator<FileItem> it) {
+	/**
+	 * Gets the parameters and validates the authentication, reading the data
+	 * from the specified iterator.
+	 * 
+	 * @param it
+	 *            the iterator containing all the parameters specified
+	 * 
+	 * @return the read parameters
+	 */
+	protected Map<String, String> getParametersAndValidateAuth(
+			final Iterator<FileItem> it) {
 		final Map<String, String> parameters = new HashMap<String, String>();
 
 		while (it.hasNext()) {
@@ -79,16 +93,15 @@ public class LoaderServlet extends BaseServlet {
 	}
 
 	@Override
-	protected HandleResult _handle(final HttpRequest request,
-			final HttpResponse response, final HttpContext context)
-			throws Exception {
+	protected HandleResult _handle(final HttpRequest request) throws Exception {
 
 		// parse the request and get the stored file items
 		final List<FileItem> fileItems = RequestFileHandlingUtilities
 				.handleFileUpload(request, factory);
 
 		// validate everything
-		final Map<String, String> params = validateAuth(fileItems.iterator());
+		final Map<String, String> params = getParametersAndValidateAuth(fileItems
+				.iterator());
 
 		// process the uploaded file items
 		final Iterator<FileItem> i = fileItems.iterator();

@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.meisen.dissertation.exceptions.DataRetrieverException;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
+
 /**
  * A {@code DataRecord} is one array of data of a {@code DataCollection}. Each
  * data of the {@code DataRecord} has a specific names defined by the
@@ -46,10 +49,8 @@ public class DataRecord<D> {
 		} else if (data == null) {
 			// nothing to do
 		} else if (collection.getRecordSize() < data.length) {
-			throw new IllegalArgumentException(
-					"The specified data must be valid according to the collection specification ("
-							+ data.length + " > " + collection.getRecordSize()
-							+ ".");
+			throw new ForwardedRuntimeException(DataRetrieverException.class,
+					1004, data.length, collection.getRecordSize());
 		} else {
 
 			// add all the specified values
@@ -72,8 +73,8 @@ public class DataRecord<D> {
 	public void setData(final D name, final Object data) {
 		final int pos = collection.getPosOfName(name);
 		if (pos == -1) {
-			throw new IllegalArgumentException("The specified name '" + name
-					+ "' is not defined within the collection.");
+			throw new ForwardedRuntimeException(DataRetrieverException.class,
+					1003, name);
 		}
 
 		setDataByPos(pos, data);
@@ -90,8 +91,8 @@ public class DataRecord<D> {
 	public Object getData(final D name) {
 		final int pos = collection.getPosOfName(name);
 		if (pos == -1) {
-			throw new IllegalArgumentException("The specified name '" + name
-					+ "' is not defined within the collection.");
+			throw new ForwardedRuntimeException(DataRetrieverException.class,
+					1003, name);
 		}
 
 		return getDataByPos(pos);

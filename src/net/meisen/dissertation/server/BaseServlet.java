@@ -38,19 +38,39 @@ import com.eclipsesource.json.JsonValue;
  * 
  */
 public abstract class BaseServlet implements IServlet {
+
+	/**
+	 * The parameter used to specify the session's identifier
+	 */
 	public final static String PARAM_SESSIONID = "sessionId";
 
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseServlet.class);
 
+	/**
+	 * The result of a handle, see {@link BaseServlet#_handle(HttpRequest)}.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
 	protected static class HandleResult {
-		public String result;
-		public ContentType type;
+		/**
+		 * the result
+		 */
+		public final String result;
+		/**
+		 * the type
+		 */
+		public final ContentType type;
 
-		public HandleResult() {
-			this(null, null);
-		}
-
+		/**
+		 * Constructor specifying the result and the type.
+		 * 
+		 * @param result
+		 *            the result
+		 * @param type
+		 *            the type of the result
+		 */
 		public HandleResult(final String result, final ContentType type) {
 			this.result = result;
 			this.type = type;
@@ -129,12 +149,17 @@ public abstract class BaseServlet implements IServlet {
 		return session;
 	}
 
+	/**
+	 * @see #_handle(HttpRequest)
+	 */
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) {
 
-		// TODO: we should make this one configurable... otherwise attacks may
-		// be possible
+		/*
+		 * TODO: we should make this one configurable... otherwise attacks may
+		 * be possible
+		 */
 		response.setHeader("Access-Control-Allow-Origin", "*");
 
 		// check if we have an options call
@@ -149,8 +174,7 @@ public abstract class BaseServlet implements IServlet {
 			String result;
 			ContentType type;
 			try {
-				final HandleResult handleRes = _handle(request, response,
-						context);
+				final HandleResult handleRes = _handle(request);
 				result = handleRes.result;
 				type = handleRes.type;
 			} catch (final AuthException e) {
@@ -206,9 +230,30 @@ public abstract class BaseServlet implements IServlet {
 		}
 	}
 
-	protected HandleResult _handle(final HttpRequest request,
-			final HttpResponse response, final HttpContext context)
-			throws Exception {
+	/**
+	 * Method called to handle the request. When this method is called, the
+	 * base-implementation already validated if an {@code OPTIONS} request was
+	 * sent (i.e. {@code OPTIONS} method are not handled here, those are already
+	 * handled in {@link #handle(HttpRequest, HttpResponse, HttpContext)}) <br/>
+	 * <br/>
+	 * <b>OPTIONS methods</b><br/>
+	 * The OPTIONS method represents a request for information about the
+	 * communication options available on the request/response chain identified
+	 * by the Request-URI. This method allows the client to determine the
+	 * options and/or requirements associated with a resource, or the
+	 * capabilities of a server, without implying a resource action or
+	 * initiating a resource retrieval.
+	 * 
+	 * @param request
+	 *            the request
+	 * 
+	 * 
+	 * @return the result of the handling
+	 * 
+	 * @throws Exception
+	 *             if the request could not be handled
+	 */
+	protected HandleResult _handle(final HttpRequest request) throws Exception {
 
 		// get the parameters
 		final Map<String, String> parameters = RequestHandlingUtilities

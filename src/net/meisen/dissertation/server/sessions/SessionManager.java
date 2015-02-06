@@ -490,12 +490,7 @@ public class SessionManager implements IResourceResolver {
 		// get the needed values
 		final String sessionId = uri.getHost();
 		final String filename = uri.getPath().substring(1);
-		final File dir = this.getSessionDir(sessionId, false);
-		if (dir == null) {
-			exceptionRegistry.throwException(SessionManagerException.class,
-					1012, resource, sessionId);
-		}
-		final File file = new File(dir, filename);
+		final File file = getFile(sessionId, filename);
 
 		try {
 			return new FileInputStream(file);
@@ -504,6 +499,35 @@ public class SessionManager implements IResourceResolver {
 					1011, Files.getCanonicalPath(file));
 			return null;
 		}
+	}
+
+	/**
+	 * Gets the specified file of the
+	 * 
+	 * @param sessionId
+	 *            the session's identifier to look for the file
+	 * @param filename
+	 *            the name of the file to be read
+	 * @return the file instance
+	 * 
+	 * @throws SessionManagerException
+	 *             if the file does not exist, cannot be read, is not a file, or
+	 *             if the session's directory is unavailble
+	 */
+	public File getFile(final String sessionId, final String filename)
+			throws SessionManagerException {
+
+		final File dir = this.getSessionDir(sessionId, false);
+		if (dir == null) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1012, filename, sessionId);
+		}
+		final File file = new File(dir, filename);
+		if (file == null || !file.exists() || !file.isFile() || !file.canRead()) {
+			exceptionRegistry.throwException(SessionManagerException.class,
+					1011, Files.getCanonicalPath(file));
+		}
+		return file;
 	}
 
 	/**

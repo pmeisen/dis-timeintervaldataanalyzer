@@ -1,5 +1,6 @@
 package net.meisen.dissertation.server;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -10,6 +11,9 @@ import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.PermissionException;
+import net.meisen.dissertation.exceptions.QueryServletException;
+import net.meisen.dissertation.impl.dataretriever.CsvDataConfig;
+import net.meisen.dissertation.impl.dataretriever.CsvDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.DbConnectionConfig;
 import net.meisen.dissertation.impl.dataretriever.DbDataRetriever;
 import net.meisen.dissertation.impl.dataretriever.DbQueryConfig;
@@ -31,7 +35,9 @@ import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
 import net.meisen.dissertation.model.parser.query.IQueryResultSingleInteger;
+import net.meisen.dissertation.server.sessions.SessionManager;
 import net.meisen.general.genmisc.types.Dates;
+import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.server.http.listener.util.RequestHandlingUtilities;
 import net.meisen.general.server.settings.pojos.Extension;
 
@@ -78,9 +84,9 @@ public class QueryServlet extends BaseServlet {
 		} else if ("system".equals(method)) {
 			return execSystemQuery(parameters);
 		} else {
-			// TODO throw exception
-			throw new IllegalStateException("Unsupported method '" + method
-					+ "' called.");
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1000, method);
+			return null;
 		}
 	}
 
@@ -115,18 +121,31 @@ public class QueryServlet extends BaseServlet {
 				return addRecordsFromModel(parameters);
 			} else if ("adddbrecords".equals(o)) {
 				return addRecordsFromDb(parameters);
+			} else if ("addcsvfile".equals(o)) {
+				return addRecordsFromCsv(parameters);
 			} else if ("timeout".equals(o)) {
 				return performTimeout(parameters);
 			} else {
-				throw new IllegalStateException("Unsupported object '" + o
-						+ "' defined.");
+				exceptionRegistry.throwRuntimeException(
+						QueryServletException.class, 1001, o);
+				return null;
 			}
 		} else {
-			// TODO throw exception
-			throw new IllegalStateException("Object is not defined.");
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1002);
+			return null;
 		}
 	}
 
+	/**
+	 * Helper method used for testing purposes only. The method waits until a
+	 * response is sent.
+	 * 
+	 * @param parameters
+	 *            the parameters specifying the <i>timeout</i>
+	 * 
+	 * @return the timeout as JSON-value (stringified)
+	 */
 	protected String performTimeout(final Map<String, String> parameters) {
 
 		// get the timeout
@@ -158,6 +177,14 @@ public class QueryServlet extends BaseServlet {
 		return value.toString();
 	}
 
+	/**
+	 * Gets the permissions available on server-side.
+	 * 
+	 * @param parameters
+	 *            the parameters specifying details of the request
+	 * 
+	 * @return a JSON-array (stringified) containing all permissions
+	 */
 	protected String getPermissions(final Map<String, String> parameters) {
 
 		// check the permission to use this system retrieval
@@ -177,6 +204,18 @@ public class QueryServlet extends BaseServlet {
 		return array.toString();
 	}
 
+	/**
+	 * Gets the permissions of the current user. The parameters must contain a
+	 * <i>username</i> and may contain a boolean named by <i>includeRole</i>,
+	 * specifying if roles should be contained in the reply
+	 * 
+	 * @param parameters
+	 *            the parameters specifying the data to be retrieved
+	 * 
+	 * @return an JSON-object (stringified) containing the <i>permissions</i>
+	 *         and <i>roles</i> of the current user, as well as it's
+	 *         <i>username</i>
+	 */
 	private String getUserPermission(final Map<String, String> parameters) {
 
 		// check the permission to use this system retrieval
@@ -215,6 +254,17 @@ public class QueryServlet extends BaseServlet {
 		return object.toString();
 	}
 
+	/**
+	 * Gets the permissions of a specific role available on the server.
+	 * 
+	 * @param parameters
+	 *            the parameters specifying what to response, must contain a
+	 *            <i>rolename</i> information, specifying the role to retrieve
+	 *            the permissions for
+	 * 
+	 * @return an JSON-object (stringified) with the requested information, i.e.
+	 *         an array of <i>permissions</i> and the rolename
+	 */
 	protected String getRolePermissions(final Map<String, String> parameters) {
 
 		// check the permission to use this system retrieval
@@ -241,6 +291,14 @@ public class QueryServlet extends BaseServlet {
 		return object.toString();
 	}
 
+	/**
+	 * Method to retrieve the models of the server.
+	 * 
+	 * @param parameters
+	 *            the parameters of the request
+	 * 
+	 * @return an JSON-array (stringified) specifying the models of the server
+	 */
 	protected String getModels(final Map<String, String> parameters) {
 
 		// check the permission to use this system retrieval
@@ -265,6 +323,14 @@ public class QueryServlet extends BaseServlet {
 		return array.toString();
 	}
 
+	/**
+	 * Gets the meta-data of the model.
+	 * 
+	 * @param parameters
+	 *            the parameters specifying the data to be retrieved
+	 * 
+	 * @return a JSON string specifying the requested meta-data
+	 */
 	protected String getModelMetaData(final Map<String, String> parameters) {
 
 		// get the meta-data of the model
@@ -303,8 +369,90 @@ public class QueryServlet extends BaseServlet {
 		return res.toString();
 	}
 
+	/**
+	 * Adds the records of the specified CSV-file to the specified model. The
+	 * parameters must contain:
+	 * <ul>
+	 * <li><b>sessionId</b> - the identifier of the session</li>
+	 * <li><b>model</b> - a string specifying the model's identifier</li>
+	 * <li><b>file</b> - the name of the CSV-file as defined within the session
+	 * (see {@link SessionManager#getFile(String, String)}).</li>
+	 * <li><b>separator</b> - the separator used within the CSV-file
+	 * <li><b>structure</b> - a JSON string, specifying an array of
+	 * <i>descriptor</i>, <i>column</i> or <i>interval</i>, <i>column</i> pairs</li>
+	 * </ul>
+	 * 
+	 * @param parameters
+	 *            the parameters to determine the CSV-file and model from
+	 * 
+	 * @return a {@code TRUE} JSON-string specifying that the adding was
+	 *         successful
+	 */
+	protected String addRecordsFromCsv(final Map<String, String> parameters) {
+
+		// get the model
+		final TidaModel model = getModel(parameters, QueryType.MANIPULATION);
+
+		// get the database connection and the query to be used
+		final CsvDataConfig config = new CsvDataConfig();
+
+		final String sessionId = parameters.get(PARAM_SESSIONID);
+		final File file = sessionManager.getFile(sessionId,
+				parameters.get("file"));
+		config.setFile(Files.getCanonicalPath(file));
+		config.setSeparator(parameters.get("separator"));
+
+		// get the structure
+		final DataStructure structure = getStructure("column", parameters);
+
+		// get the data
+		CsvDataRetriever retriever = null;
+		try {
+
+			// get the retriever
+			retriever = new CsvDataRetriever(UUID.randomUUID().toString(),
+					config);
+			retriever.setExceptionRegistry(exceptionRegistry);
+
+			// use it to load data
+			final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(
+					retriever, null);
+
+			// do the loading
+			model.bulkLoadData(structure, dataSet.iterator());
+		} finally {
+
+			// release all db resources
+			if (retriever != null) {
+				retriever.release();
+			}
+		}
+
+		// just return a true, it is loaded
+		return JsonValue.TRUE.toString();
+	}
+
+	/**
+	 * Adds the records of the specified database to the specified model. The
+	 * parameters must contain:
+	 * <ul>
+	 * <li><b>model</b> - a strign specifying the model's identifier</li>
+	 * <li><b>connection</b> - a JSON string specifying an object with
+	 * attributes <i>driver</i>, <i>username</i>, <i>password</i>, and
+	 * <i>url</i></li>
+	 * <li><b>query</b> - the query to be fired against the database
+	 * <li><b>structure</b> - a JSON string, specifying an array of
+	 * <i>descriptor</i>, <i>dbname</i> or <i>interval</i>, <i>dbname</i> pairs</li>
+	 * </ul>
+	 * 
+	 * @param parameters
+	 *            the parameters to determine the data of the database and model
+	 *            from
+	 * 
+	 * @return a {@code TRUE} JSON-string specifying that the adding was
+	 *         successful
+	 */
 	protected String addRecordsFromDb(final Map<String, String> parameters) {
-		JsonValue value;
 
 		// get the model
 		final TidaModel model = getModel(parameters, QueryType.MANIPULATION);
@@ -314,47 +462,17 @@ public class QueryServlet extends BaseServlet {
 		final DbQueryConfig query = getDatabaseQuery(parameters);
 
 		// get the structure
-		value = JsonValue.readFrom(parameters.get("structure"));
-		if (!value.isArray()) {
-			// TODO make nice
-			throw new IllegalStateException();
-		}
-		final List<StructureEntry> entries = new ArrayList<StructureEntry>();
-		final JsonArray jsonStructure = (JsonArray) value;
-		for (final JsonValue v : jsonStructure) {
-			if (v.isObject()) {
-				final JsonObject jsonEntry = (JsonObject) v;
-				final StructureEntry entry;
-
-				if (jsonEntry.get("descriptor") != null) {
-					entry = new MetaStructureEntry(jsonEntry.get("descriptor")
-							.asString(), jsonEntry.get("dbname").asString());
-				} else if (jsonEntry.get("interval") != null) {
-					entry = new IntervalStructureEntry(jsonEntry
-							.get("interval").asString(), jsonEntry
-							.get("dbname").asString());
-				} else {
-					// TODO make nice
-					throw new IllegalStateException();
-				}
-
-				entries.add(entry);
-			} else {
-				// TODO make nice
-				throw new IllegalStateException();
-			}
-		}
-		final DataStructure structure = new DataStructure(entries);
+		final DataStructure structure = getStructure("dbname", parameters);
 
 		// get the data
 		DbDataRetriever retriever = null;
 		try {
-			
+
 			// get the retriever
 			retriever = new DbDataRetriever(UUID.randomUUID().toString(),
 					config);
 			retriever.setExceptionRegistry(exceptionRegistry);
-			
+
 			// use it to load data
 			final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(
 					retriever, query);
@@ -373,6 +491,15 @@ public class QueryServlet extends BaseServlet {
 		return JsonValue.TRUE.toString();
 	}
 
+	/**
+	 * Method used to add the data specified within the {@code TidaModel}.
+	 * 
+	 * @param parameters
+	 *            the parameters used to get the model
+	 * 
+	 * @return a {@code TRUE} JSON-string specifying that the adding was
+	 *         successful
+	 */
 	protected String addRecordsFromModel(final Map<String, String> parameters) {
 
 		// execute the loading of the data
@@ -385,6 +512,136 @@ public class QueryServlet extends BaseServlet {
 		return JsonValue.TRUE.toString();
 	}
 
+	/**
+	 * Helper method used to retrieve the specified structure (<i>structure</i>
+	 * JSON-object) from the parameters.
+	 * 
+	 * @param fieldName
+	 *            the name of the attribute within the JSON-object to read the
+	 *            value from
+	 * @param parameters
+	 *            the parameters to read the structure from
+	 * 
+	 * @return the read structure
+	 */
+	protected DataStructure getStructure(final String fieldName,
+			final Map<String, String> parameters) {
+
+		// get the structure
+		final JsonValue parameter = JsonValue.readFrom(parameters
+				.get("structure"));
+		if (parameter == null || !parameter.isArray()) {
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1003, "structure", parameter);
+			return null;
+		}
+		final JsonArray values = (JsonArray) parameter;
+
+		final List<StructureEntry> entries = new ArrayList<StructureEntry>();
+		for (final JsonValue v : values) {
+			if (v.isObject()) {
+				final JsonObject jsonEntry = (JsonObject) v;
+				final StructureEntry entry;
+
+				// get the values
+				final String value = get(jsonEntry, fieldName);
+				final String descriptor = get(jsonEntry, "descriptor", true);
+				final String interval = get(jsonEntry, "interval", true);
+
+				// evaluate the values
+				if (descriptor == null && interval == null) {
+					exceptionRegistry.throwRuntimeException(
+							QueryServletException.class, 1003,
+							"descriptor/interval", null);
+					return null;
+				} else if (descriptor != null) {
+					entry = new MetaStructureEntry(descriptor, value);
+				} else if (interval != null) {
+					entry = new IntervalStructureEntry(interval, value);
+				} else {
+					// impossible
+					throw new IllegalStateException("Dead code reached");
+				}
+
+				entries.add(entry);
+			} else {
+				exceptionRegistry.throwRuntimeException(
+						QueryServletException.class, 1003, "structure",
+						parameter);
+				return null;
+			}
+		}
+		return new DataStructure(entries);
+	}
+
+	/**
+	 * Helper method to get the string-value of the specified attribute (by
+	 * {@code name}) from the specified {@code JsonObject}.
+	 * 
+	 * @param obj
+	 *            the object to read the value from
+	 * @param name
+	 *            the name of the attribute to be read
+	 * 
+	 * @return the string value of the attribute specified
+	 */
+	protected String get(final JsonObject obj, final String name) {
+		return get(obj, name, false);
+	}
+
+	/**
+	 * Helper method to get the string-value of the specified attribute (by
+	 * {@code name}) from the specified {@code JsonObject}.
+	 * 
+	 * @param obj
+	 *            the object to read the value from
+	 * @param name
+	 *            the name of the attribute to be read
+	 * @param optional
+	 *            {@code true} if the value is optional, i.e. {@code null} may
+	 *            be returned; otherwise {@code false}
+	 * 
+	 * @return the string value of the attribute specified, may be {@code null}
+	 *         if and only if the attribute does not exist
+	 */
+	protected String get(final JsonObject obj, final String name,
+			final boolean optional) {
+		final JsonValue val = obj.get(name);
+		if (val == null) {
+			if (optional) {
+				return null;
+			} else {
+				exceptionRegistry.throwRuntimeException(
+						QueryServletException.class, 1004, name, obj);
+				return null;
+			}
+		} else {
+			try {
+				return val.asString();
+			} catch (final UnsupportedOperationException e) {
+				exceptionRegistry.throwRuntimeException(
+						QueryServletException.class, 1005, name, val);
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * Reads a database configuration, specified by the <i>connection</i>
+	 * parameter, from the passed {@code parameters}. The connection must be
+	 * specified as a stringified JSON-object containing the attributes:
+	 * <ul>
+	 * <li><i>driver</i> - driver class</li>,
+	 * <li><i>username</i> - the name of the user</li>,
+	 * <li><i>password</i> - the user's password</li>, and
+	 * <li><i>url</i> - the JDBC-url</li>
+	 * </ul>
+	 * 
+	 * @param parameters
+	 *            the parameters to read from
+	 * 
+	 * @return the read connection
+	 */
 	protected DbConnectionConfig getDatabaseConfig(
 			final Map<String, String> parameters) {
 
@@ -393,25 +650,36 @@ public class QueryServlet extends BaseServlet {
 		final JsonValue value = JsonValue
 				.readFrom(parameters.get("connection"));
 		if (!value.isObject()) {
-			// TODO make nice
-			throw new IllegalStateException();
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1006, "connection", value);
+			return null;
 		}
 		final JsonObject jsonConfig = (JsonObject) value;
-		config.setDriver(jsonConfig.get("driver").asString());
-		config.setUsername(jsonConfig.get("username").asString());
-		config.setPassword(jsonConfig.get("password").asString());
-		config.setUrl(jsonConfig.get("url").asString());
+		config.setDriver(get(jsonConfig, "driver"));
+		config.setUsername(get(jsonConfig, "username"));
+		config.setPassword(get(jsonConfig, "password"));
+		config.setUrl(get(jsonConfig, "url"));
 
 		return config;
 	}
 
+	/**
+	 * Reads a query, specified by the <i>query</i> parameter, from the passed
+	 * {@code parameters}. The query must be specified as string.
+	 * 
+	 * @param parameters
+	 *            the parameters to read from
+	 * 
+	 * @return the read query
+	 */
 	protected DbQueryConfig getDatabaseQuery(
 			final Map<String, String> parameters) {
 
 		final String query = parameters.get("query");
 		if (query == null || query.isEmpty()) {
-			// TODO make nice
-			throw new IllegalStateException();
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1004, "query", parameters);
+			return null;
 		}
 
 		// get the query to be used
@@ -422,6 +690,17 @@ public class QueryServlet extends BaseServlet {
 		return queryConfig;
 	}
 
+	/**
+	 * Reads the model and checks the permissions based on the specified
+	 * {@code type}.
+	 * 
+	 * @param parameters
+	 *            the parameters to determine the model from
+	 * @param type
+	 *            the type to check the permissions for
+	 * 
+	 * @return the read model
+	 */
 	protected TidaModel getModel(final Map<String, String> parameters,
 			final QueryType type) {
 		final String modelId = parameters.get("model");
@@ -437,8 +716,9 @@ public class QueryServlet extends BaseServlet {
 					new DefinedPermission[] { Permission.modify.create(modelId) },
 					new DefinedPermission[] { Permission.modifyAll.create() } };
 		} else {
-			// TODO make it nice
-			throw new IllegalStateException();
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1007, type);
+			return null;
 		}
 
 		// check the permission to use this system retrieval
@@ -450,9 +730,9 @@ public class QueryServlet extends BaseServlet {
 		// execute the loading of the data
 		final TidaModel model = handler.getTidaModel(modelId);
 		if (model == null) {
-			// TODO throw exception
-			throw new IllegalStateException("A model with identifier '"
-					+ modelId + "' is not loaded or available.");
+			exceptionRegistry.throwRuntimeException(
+					QueryServletException.class, 1006, modelId);
+			return null;
 		}
 
 		return model;
@@ -631,6 +911,14 @@ public class QueryServlet extends BaseServlet {
 		}
 	}
 
+	/**
+	 * Transforms an int-array to a JSON-array.
+	 * 
+	 * @param array
+	 *            the array to be transformed
+	 * 
+	 * @return the JSON-array
+	 */
 	protected JsonValue intArrayToJson(final int[] array) {
 		if (array == null) {
 			return JsonValue.NULL;
