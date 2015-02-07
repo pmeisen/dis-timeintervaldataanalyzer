@@ -64,7 +64,7 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 			int i = 0;
 			for (final Entry<String, Object> entry : map.entrySet()) {
 				if (entry != null) {
-					this.entries[i] = new SingleStaticDataSetEntry(i,
+					this.entries[i] = new SingleStaticDataSetEntry(i + 1,
 							entry.getKey(), entry.getValue());
 				}
 				i++;
@@ -190,7 +190,7 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 
 	@Override
 	public boolean isValidPosition(final int position) {
-		return !(position < 1 || position > getSize());
+		return !(position < 1 || position > entries.length);
 	}
 
 	/**
@@ -215,11 +215,6 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 	}
 
 	@Override
-	public int getSize() {
-		return entries.length;
-	}
-
-	@Override
 	public boolean isOfflineAvailable() {
 		return true;
 	}
@@ -227,5 +222,30 @@ public class SingleStaticDataSet implements IDataSet, IDataRecord {
 	@Override
 	public String toString() {
 		return Arrays.asList(entries).toString();
+	}
+
+	@Override
+	public String getName(final int pos) {
+		if (!isValidPosition(pos)) {
+			throw new IllegalArgumentException("The position '" + pos
+					+ "' is invalid.");
+		}
+
+		return entries[pos - 1].getName();
+	}
+
+	@Override
+	public int getPosition(final String name) {
+
+		int pos = 0;
+		for (final SingleStaticDataSetEntry entry : entries) {
+			pos++;
+
+			if (entry.getName().equals(name)) {
+				return pos;
+			}
+		}
+
+		return 0;
 	}
 }

@@ -29,7 +29,9 @@ public class TestSingleStaticDataSet {
 	public void testEmptyCreation() {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet();
 
-		assertEquals(0, dataSet.getSize());
+		assertFalse(dataSet.isValidPosition(0));
+		assertFalse(dataSet.isValidPosition(1));
+		assertFalse(dataSet.isValidPosition(2));
 	}
 
 	/**
@@ -41,7 +43,11 @@ public class TestSingleStaticDataSet {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet(
 				new SingleStaticDataSetEntry(2, "A VALUE"));
 
-		assertEquals(2, dataSet.getSize());
+		assertFalse(dataSet.isValidPosition(0));
+		assertTrue(dataSet.isValidPosition(1));
+		assertTrue(dataSet.isValidPosition(2));
+		assertFalse(dataSet.isValidPosition(3));
+
 		assertNull(dataSet.getValue(1));
 		assertEquals("A VALUE", dataSet.getValue(2));
 	}
@@ -56,7 +62,14 @@ public class TestSingleStaticDataSet {
 				new SingleStaticDataSetEntry(1, 1), null, null,
 				new SingleStaticDataSetEntry(2, 2));
 
-		assertEquals(5, dataSet.getSize());
+		assertFalse(dataSet.isValidPosition(0));
+		assertTrue(dataSet.isValidPosition(1));
+		assertTrue(dataSet.isValidPosition(2));
+		assertTrue(dataSet.isValidPosition(3));
+		assertTrue(dataSet.isValidPosition(4));
+		assertTrue(dataSet.isValidPosition(5));
+		assertFalse(dataSet.isValidPosition(6));
+		
 		assertEquals(1, dataSet.getValue(1));
 		assertEquals(2, dataSet.getValue(2));
 		assertNull(dataSet.getValue(3));
@@ -75,7 +88,14 @@ public class TestSingleStaticDataSet {
 				new SingleStaticDataSetEntry(4), new SingleStaticDataSetEntry(
 						3, "anotherName", 3));
 
-		assertEquals(5, dataSet.getSize());
+		assertFalse(dataSet.isValidPosition(0));
+		assertTrue(dataSet.isValidPosition(1));
+		assertTrue(dataSet.isValidPosition(2));
+		assertTrue(dataSet.isValidPosition(3));
+		assertTrue(dataSet.isValidPosition(4));
+		assertTrue(dataSet.isValidPosition(5));
+		assertFalse(dataSet.isValidPosition(6));
+		
 		assertEquals(1, dataSet.getValue(1));
 		assertNull(dataSet.getValue(2));
 		assertEquals(3, dataSet.getValue(3));
@@ -92,7 +112,14 @@ public class TestSingleStaticDataSet {
 		final SingleStaticDataSet dataSet = new SingleStaticDataSet("value", 1,
 				125l, null, 500.0);
 
-		assertEquals(5, dataSet.getSize());
+		assertFalse(dataSet.isValidPosition(0));
+		assertTrue(dataSet.isValidPosition(1));
+		assertTrue(dataSet.isValidPosition(2));
+		assertTrue(dataSet.isValidPosition(3));
+		assertTrue(dataSet.isValidPosition(4));
+		assertTrue(dataSet.isValidPosition(5));
+		assertFalse(dataSet.isValidPosition(6));
+		
 		assertEquals("value", dataSet.getValue(1));
 		assertEquals(1, dataSet.getValue(2));
 		assertEquals(125l, dataSet.getValue(3));

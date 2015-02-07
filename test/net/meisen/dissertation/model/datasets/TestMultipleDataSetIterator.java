@@ -63,8 +63,7 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 			assertTrue(iterator.hasNext());
 		}
 
-		final IDataRecord record = iterator.next();
-		assertEquals(0, record.getSize());
+		iterator.next();
 
 		// make sure the call to next failes
 		try {
@@ -89,7 +88,6 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 		}
 
 		final IDataRecord record = iterator.next();
-		assertEquals(1, record.getSize());
 		assertEquals("myValue", record.getValue(1));
 
 		// make sure the call to next failes
@@ -118,7 +116,6 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 			assertTrue(iterator.hasNext());
 		}
 		final IDataRecord record1 = iterator.next();
-		assertEquals(3, record1.getSize());
 		assertEquals("myValue", record1.getValue(1));
 		assertEquals("anotherValue", record1.getValue(2));
 		assertEquals(5, record1.getValue(3));
@@ -128,7 +125,6 @@ public class TestMultipleDataSetIterator extends DbBasedTest {
 			assertTrue(iterator.hasNext());
 		}
 		final IDataRecord record2 = iterator.next();
-		assertEquals(3, record2.getSize());
 		assertEquals("THE VALUE IS 1", record2.getValue(1));
 		assertEquals("THE VALUE IS 1", record2.getValue("#1"));
 		assertEquals("THE VALUE IS 2", record2.getValue(2));

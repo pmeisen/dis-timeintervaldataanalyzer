@@ -39,27 +39,37 @@ public class IndexedDataRecord implements IDataRecord {
 					+ "' is invalid.");
 		}
 
-		return values[position];
+		return values[position - 1];
 	}
 
 	@Override
 	public Object getValue(final String name) throws RuntimeException {
 		final int pos = meta.getPosition(name, true);
-		if (!isValidPosition(pos)) {
+		if (!isValidPosition(pos + 1)) {
 			throw new IllegalArgumentException("The name '" + name
 					+ "' cannot be found wthin the record.");
 		}
 
-		return getValue(pos);
+		return getValue(pos + 1);
 	}
 
 	@Override
 	public boolean isValidPosition(final int position) {
-		return position > -1 && position < meta.getTypes().length;
+		return position > 0 && position <= meta.getTypes().length;
 	}
 
 	@Override
-	public int getSize() {
-		return meta.getTypes().length;
+	public String getName(final int position) {
+		if (!isValidPosition(position)) {
+			throw new IllegalArgumentException("The position '" + position
+					+ "' is invalid.");
+		}
+
+		return meta.getNames()[position - 1];
+	}
+
+	@Override
+	public int getPosition(final String name) {
+		return meta.getPosition(name) + 1;
 	}
 }

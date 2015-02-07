@@ -206,6 +206,10 @@ public class DefaultValues {
 	 */
 	public static final String TIMETEMPLATEMANAGER_ID = "timeTemplateManagerId";
 	/**
+	 * Id of the {@code PreProcessor} to be used.
+	 */
+	public static final String PREPROCESSOR_ID = "preProcessorId";
+	/**
 	 * The name of the module for the exceptionRegistry
 	 */
 	public static final String EXCEPTIONREGISTRY_ID = IConfiguration.coreExceptionRegistryId;

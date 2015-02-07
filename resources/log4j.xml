@@ -42,11 +42,11 @@
   <logger name="net.meisen.dissertation">
     <level value="INFO"/>
   </logger>
-  
+
   <logger name="net.meisen.general.sbconfigurator.config.DefaultConfiguration">
     <level value="TRACE"/>
   </logger>
-  -->
+    -->
 
 
    <!-- ======================= --> 

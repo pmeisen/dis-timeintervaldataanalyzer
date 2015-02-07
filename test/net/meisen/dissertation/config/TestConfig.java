@@ -2,6 +2,7 @@ package net.meisen.dissertation.config;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -23,6 +24,7 @@ import net.meisen.dissertation.impl.cache.MemoryBitmapCache;
 import net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache;
 import net.meisen.dissertation.impl.cache.MemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.MemoryMetaDataCache;
+import net.meisen.dissertation.impl.dataintegration.ScriptPreProcessor;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.parser.query.QueryFactory;
 import net.meisen.dissertation.impl.time.granularity.TimeGranularityFactory;
@@ -137,6 +139,9 @@ public class TestConfig {
 			assertTrue(o.getClass().getName(),
 					o instanceof IdsOnlyDataRecordCache);
 
+			o = modulesHolder.getModule(DefaultValues.PREPROCESSOR_ID);
+			assertNull(o);
+
 			// check folder configuration
 			o = modulesHolder.getModule(DefaultValues.TIDAMODEL_ID);
 			assertNotNull(o);
@@ -231,9 +236,14 @@ public class TestConfig {
 			assertNotNull(model);
 			assertEquals("fullModel", model.getId());
 
+			// check the pre-processor
+			assertNotNull(model.getPreProcessor());
+			assertEquals(ScriptPreProcessor.class, model.getPreProcessor()
+					.getClass());
+
 			// initialize the model
 			model.initialize();
-			
+
 			// check the dimensions of the model
 			assertEquals(2, model.getDimensionModel().getDimensions().size());
 		}

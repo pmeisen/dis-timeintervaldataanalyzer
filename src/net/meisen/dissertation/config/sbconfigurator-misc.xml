@@ -10,4 +10,5 @@
   <bean class="net.meisen.dissertation.config.xslt.MapperFactoryXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.CacheXsltResolver" />
   <bean class="net.meisen.dissertation.config.xslt.AuthManagerXsltResolver" />
+  <bean class="net.meisen.dissertation.config.xslt.PreProcessorXsltResolver" />
 </beans>

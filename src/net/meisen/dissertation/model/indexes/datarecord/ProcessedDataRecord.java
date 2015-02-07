@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.IntervalModel.MappingResult;
 import net.meisen.dissertation.model.data.MetaDataModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.dataintegration.IPreProcessor;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.MetaStructureEntry;
@@ -36,6 +37,7 @@ public class ProcessedDataRecord {
 			.getLogger(ProcessedDataRecord.class);
 
 	private final IDataRecord raw;
+	private final IDataRecord preProcessedRaw;
 	private final Map<String, Descriptor<?, ?, ?>> processedMeta;
 	private final int id;
 
@@ -74,8 +76,11 @@ public class ProcessedDataRecord {
 	 */
 	public ProcessedDataRecord(final DataStructure dataStructure,
 			final IDataRecord raw, final TidaModel model, final int id) {
+		final IPreProcessor preProc = model.getPreProcessor();
+
 		this.id = id;
 		this.raw = raw;
+		this.preProcessedRaw = preProc == null ? raw : preProc.process(raw);
 		this.processedMeta = new HashMap<String, Descriptor<?, ?, ?>>();
 
 		// handle the IntervalStructureEntries
@@ -187,7 +192,7 @@ public class ProcessedDataRecord {
 	}
 
 	/**
-	 * Get the raw record used to determine the values from.
+	 * Gets the raw record used to determine the values from.
 	 * 
 	 * @return the raw record used to determine the values from
 	 */
@@ -195,10 +200,20 @@ public class ProcessedDataRecord {
 		return raw;
 	}
 
+	/**
+	 * Gets the pre-processed raw record used to determine the values from.
+	 * 
+	 * @return the pre-processed raw record used to determine the values from
+	 */
+	public IDataRecord getPreProcessedRaw() {
+		return preProcessedRaw;
+	}
+
 	@Override
 	public String toString() {
 		return id + " : [" + start + ", " + end + "] : " + processedMeta
-				+ " : " + " (record: " + raw + ")";
+				+ " : " + " (record: " + raw + ", pre-processed record: "
+				+ preProcessedRaw + ")";
 	}
 
 	/**
@@ -218,7 +233,7 @@ public class ProcessedDataRecord {
 			return;
 		}
 
-		final Object value = getValue(raw, metaEntry);
+		final Object value = getValue(preProcessedRaw, metaEntry);
 
 		// get the DescriptorModel
 		final DescriptorModel<?> descModel = metaDataModel
@@ -258,8 +273,8 @@ public class ProcessedDataRecord {
 			// map the values
 			final boolean startInclusive = startEntry.isInclusive();
 			final boolean endInclusive = endEntry.isInclusive();
-			final Object start = getValue(raw, startEntry);
-			final Object end = getValue(raw, endEntry);
+			final Object start = getValue(preProcessedRaw, startEntry);
+			final Object end = getValue(preProcessedRaw, endEntry);
 			final IntervalDataHandling handling = model
 					.getIntervalDataHandling();
 

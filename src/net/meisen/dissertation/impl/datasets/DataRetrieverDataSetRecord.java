@@ -1,5 +1,7 @@
 package net.meisen.dissertation.impl.datasets;
 
+import java.util.Collection;
+
 import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
 import net.meisen.dissertation.model.dataretriever.DataRecord;
 import net.meisen.dissertation.model.datasets.IDataRecord;
@@ -44,11 +46,6 @@ public class DataRetrieverDataSetRecord implements IDataRecord {
 	}
 
 	@Override
-	public int getSize() {
-		return record.getSize();
-	}
-
-	@Override
 	public String toString() {
 		return record == null ? null : record.toString();
 	}
@@ -56,5 +53,25 @@ public class DataRetrieverDataSetRecord implements IDataRecord {
 	@Override
 	public boolean isValidPosition(int position) {
 		return position > 0 && position <= record.getSize();
+	}
+
+	@Override
+	public String getName(final int pos) {
+		return record.getNameOfPos(pos - 1);
+	}
+
+	@Override
+	public int getPosition(final String name) {
+		final Collection<String> names = record.getNames();
+		int pos = 0;
+		for (final String n : names) {
+			pos++;
+
+			if (n.equals(name)) {
+				return pos;
+			}
+		}
+		
+		return 0;
 	}
 }

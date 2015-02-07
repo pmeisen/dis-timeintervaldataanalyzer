@@ -11,12 +11,14 @@
        xmlns:idx="http://dev.meisen.net/xsd/dissertation/model/indexes"
        xmlns:map="http://dev.meisen.net/xsd/dissertation/model/mapper"
        xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
+       xmlns:spp="http://dev.meisen.net/xsd/dissertation/preprocessor/script" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        
        xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
                            http://dev.meisen.net/xsd/dissertation/model/indexes             http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
                            http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd
                            http://dev.meisen.net/xsd/dissertation/model/mapper              http://dev.meisen.net/xsd/dissertation/tidaMapperFactory.xsd
+                           http://dev.meisen.net/xsd/dissertation/preprocessor/script       http://dev.meisen.net/xsd/dissertation/tidaScriptPreProcessor.xsd
                            http://dev.meisen.net/xsd/dissertation/dimension                 http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
        
        offlinemode="false" folder="_data/fullModel" id="fullModel" name="My wonderful Model">
@@ -122,6 +124,24 @@
         </map:config>
       </mappers>
     </factories>
+    
+    <!-- Define the pre-processer used to modify the incoming record.
+      
+         The following implementations are available by default:
+          + net.meisen.dissertation.impl.dataintegration.IdentityPreProcessor
+          + net.meisen.dissertation.impl.dataintegration.ScriptPreProcssor
+      -->
+    <preprocessor implementation="net.meisen.dissertation.impl.dataintegration.ScriptPreProcessor">
+      <spp:script language="javascript">
+         /*
+          * Here is my script:
+          * - the script gets the raw-record injected as raw
+          * - the script must set a result with an IDataRecord instance
+          * - the script should not modify the raw record
+          */
+         var result = raw;
+      </spp:script>
+    </preprocessor>
   </config>
   
   <time>

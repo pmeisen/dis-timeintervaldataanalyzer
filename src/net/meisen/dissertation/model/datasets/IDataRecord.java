@@ -60,10 +60,25 @@ public interface IDataRecord {
 	public boolean isValidPosition(final int position);
 
 	/**
-	 * Gets the amount of data (i.e. positions)
+	 * Gets the name of the specified position (1-based). The method might throw
+	 * an exception if the position is invalid.
 	 * 
-	 * @return the amount of data (i.e. positions)
+	 * @param position
+	 *            the position to get the name for
+	 * @return the name of the position
+	 * 
+	 * @see #isValidPosition(int)
 	 */
-	public int getSize();
+	public String getName(final int position);
 
+	/**
+	 * Gets the position of the specified name.
+	 * 
+	 * @param name
+	 *            the name to get the position for
+	 * 
+	 * @return the position (1-based), or a value smaller than 1 if the name
+	 *         could not be found
+	 */
+	public int getPosition(final String name);
 }

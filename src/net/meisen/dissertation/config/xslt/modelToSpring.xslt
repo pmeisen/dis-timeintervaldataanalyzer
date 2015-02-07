@@ -15,6 +15,7 @@
   <xsl:import href="indexFactory://includeXslts" />
   <xsl:import href="mapperFactory://includeXslts" />
   <xsl:import href="cache://includeXslts" />
+  <xsl:import href="preprocessor://includeXslts" />
 
   <xsl:output method="xml" indent="yes" />
   
@@ -34,6 +35,7 @@
   <xsl:variable name="bitmapCacheId" select="mdef:getId('BITMAPCACHE_ID')" />
   <xsl:variable name="recordsCacheId" select="mdef:getId('DATARECORDCACHE_ID')" />
   <xsl:variable name="factSetsCacheId" select="mdef:getId('FACTSETSCACHE_ID')" />
+  <xsl:variable name="preProcessorId" select="mdef:getId('PREPROCESSOR_ID')" />
   <xsl:variable name="tidaModelId" select="mdef:getId('TIDAMODEL_ID')" /> 
 
   <xsl:template match="/mns:model">
@@ -279,6 +281,20 @@
           </bean>
         </xsl:otherwise>
       </xsl:choose>
+      
+      <!-- create the pre-processor to be used -->
+      <xsl:if test="//mns:config/mns:preprocessor/@implementation">
+        <xsl:variable name="preProcessor" select="//mns:config/mns:preprocessor/@implementation" />
+        <bean id="{$preProcessorId}" class="{$preProcessor}">
+          <xsl:if test="node()">
+            <property name="config">
+              <xsl:for-each select="mns:config/mns:preprocessor">
+                <xsl:apply-templates />
+              </xsl:for-each>
+            </property>
+          </xsl:if>
+        </bean>
+      </xsl:if>      
                   
       <!-- create all the defined dataRetrievers -->
       <xsl:for-each select="mns:config/mns:dataretrievers/mns:dataretriever">

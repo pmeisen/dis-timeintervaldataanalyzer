@@ -1,17 +1,15 @@
-package net.meisen.dissertation.impl.dataretriever;
-
-import net.meisen.dissertation.model.dataretriever.BaseDataRetriever;
+package net.meisen.dissertation.impl.dataintegration;
 
 /**
- * General exceptions thrown within a {@code CsvDataRetriever}.
+ * General exceptions thrown within a {@code ScriptPreProcessor}.
  * 
  * @author pmeisen
  * 
- * @see BaseDataRetriever
+ * @see ScriptPreProcessor
  * 
  */
-public class CsvDataRetrieverException extends RuntimeException {
-	private static final long serialVersionUID = -7499900599875169852L;
+public class ScriptPreProcessorException extends RuntimeException {
+	private static final long serialVersionUID = -5712132524861270648L;
 
 	/**
 	 * Creates an exception which should been thrown whenever there is no other
@@ -20,7 +18,7 @@ public class CsvDataRetrieverException extends RuntimeException {
 	 * @param message
 	 *            the message of the exception
 	 */
-	public CsvDataRetrieverException(final String message) {
+	public ScriptPreProcessorException(final String message) {
 		super(message);
 	}
 
@@ -33,7 +31,7 @@ public class CsvDataRetrieverException extends RuntimeException {
 	 * @param t
 	 *            the reason for the exception
 	 */
-	public CsvDataRetrieverException(final String message, final Throwable t) {
+	public ScriptPreProcessorException(final String message, final Throwable t) {
 		super(message, t);
 	}
 }

@@ -99,6 +99,16 @@
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
+              
+              <xs:element name="preprocessor" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:any namespace="##any" processContents="strict" minOccurs="0" maxOccurs="1" />
+                  </xs:sequence>
+
+                  <xs:attribute name="implementation" type="types:javaClass" use="required" />
+                </xs:complexType>
+              </xs:element>
 
               <xs:element name="dataretrievers" minOccurs="0">
                 <xs:complexType>

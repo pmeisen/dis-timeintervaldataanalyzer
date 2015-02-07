@@ -3,14 +3,13 @@ package net.meisen.dissertation.model.dataretriever;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import net.meisen.dissertation.model.dataretriever.DataCollection;
-import net.meisen.dissertation.model.dataretriever.DataRecord;
+import net.meisen.dissertation.exceptions.DataRetrieverException;
+import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.model.dataretriever.mock.MockDataCollection;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
-import org.junit.rules.ExpectedException;
 
 /**
  * Tests the implementation of a {@code DataRecord}.
@@ -18,13 +17,7 @@ import org.junit.rules.ExpectedException;
  * @author pmeisen
  * 
  */
-public class TestDataRecord {
-
-	/**
-	 * Rule to evaluate exceptions
-	 */
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+public class TestDataRecord extends ExceptionBasedTest {
 
 	/**
 	 * Tests valid constructors.
@@ -106,9 +99,9 @@ public class TestDataRecord {
 	 */
 	@Test
 	public void testExceptionInvalidLengths() {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("specified data must be valid according to the collection specification"));
+		thrown.expect(ForwardedRuntimeException.class);
+		thrown.expect(new ForwardExceptionMatcher(DataRetrieverException.class,
+				1004));
 
 		final DataCollection<String> dc = new MockDataCollection<String>(
 				new String[] { "A", "B", "C" });

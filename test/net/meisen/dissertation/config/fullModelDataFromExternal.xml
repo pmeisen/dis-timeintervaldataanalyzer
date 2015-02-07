@@ -73,6 +73,14 @@
         -->
       <mappers implementation="net.meisen.dissertation.impl.time.mapper.MapperFactory" />
     </factories>
+   
+    <!-- Define the pre-processer used to modify the incoming record.
+      
+         The following implementations are available by default:
+          + net.meisen.dissertation.impl.dataintegration.IdentityPreProcessor
+          + net.meisen.dissertation.impl.dataintegration.ScriptPreProcssor
+      -->
+    <preprocessor implementation="net.meisen.dissertation.impl.dataintegration.IdentityPreProcessor" />
     
     <!-- Define additional data retriever, i.e. possibilities to load data from external sources, 
          by default the following id-prefixes are mapped to the specified implementation:

@@ -20,6 +20,7 @@ import net.meisen.dissertation.model.cache.IDataRecordCache;
 import net.meisen.dissertation.model.cache.IIdentifierCache;
 import net.meisen.dissertation.model.cache.IMetaDataCache;
 import net.meisen.dissertation.model.data.metadata.IMetaDataCollection;
+import net.meisen.dissertation.model.dataintegration.IPreProcessor;
 import net.meisen.dissertation.model.datasets.IClosableIterator;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
@@ -108,6 +109,10 @@ public class TidaModel implements IPersistable {
 	@Autowired
 	@Qualifier(DefaultValues.METADATACOLLECTION_ID)
 	private IMetaDataCollection configuredMetaDataCollection;
+
+	@Autowired(required = false)
+	@Qualifier(DefaultValues.PREPROCESSOR_ID)
+	private IPreProcessor preProcessor;
 
 	private final String id;
 	private final String name;
@@ -998,5 +1003,15 @@ public class TidaModel implements IPersistable {
 	 */
 	public boolean isBulkload() {
 		return bulkLoadEnabled;
+	}
+
+	/**
+	 * The defined pre-processor.
+	 * 
+	 * @return the pre-processor used by the model, can be {@code null} if non
+	 *         is-defined
+	 */
+	public IPreProcessor getPreProcessor() {
+		return preProcessor;
 	}
 }
