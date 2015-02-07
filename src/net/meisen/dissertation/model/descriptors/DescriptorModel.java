@@ -46,6 +46,7 @@ public class DescriptorModel<I extends Object> {
 	private final String name;
 	private final Class<? extends Descriptor> descriptorClass;
 	private final IIdsFactory<I> idsFactory;
+	private final IDescriptorFactory factory;
 
 	private Class<?> descriptorValueClass = null;
 	private NullDescriptor<I> nullDescriptor = null;
@@ -137,6 +138,29 @@ public class DescriptorModel<I extends Object> {
 		this.descriptorClass = descriptorClass;
 		this.idsFactory = idsFactory;
 		this.indexFactory = indexFactory;
+
+		// check the special factories
+		IDescriptorFactory factory = null;
+		for (final Class<?> clazz : descriptorClass.getClasses()) {
+			if (IDescriptorFactory.class.isAssignableFrom(clazz)) {
+				if (factory != null) {
+					exceptionRegistry.throwException(
+							DescriptorModelException.class, 1010,
+							descriptorClass.getSimpleName());
+				}
+
+				try {
+					factory = (IDescriptorFactory) clazz.newInstance();
+				} catch (final Exception e) {
+					exceptionRegistry.throwException(
+							DescriptorModelException.class, 1009, e,
+							clazz.getSimpleName(),
+							descriptorClass.getSimpleName());
+				}
+
+			}
+		}
+		this.factory = factory;
 
 		// set default offline mode
 		setOfflineMode(null);
@@ -273,7 +297,7 @@ public class DescriptorModel<I extends Object> {
 	 * @see NullDescriptor
 	 */
 	@SuppressWarnings("unchecked")
-	public <D> Descriptor<D, ?, I> createDescriptor(final D value) {
+	public <D> Descriptor<D, ?, I> createDescriptor(final Object value) {
 		Descriptor<D, ?, I> descriptor;
 
 		if (value == null) {
@@ -306,8 +330,8 @@ public class DescriptorModel<I extends Object> {
 	 *             if the descriptor cannot be created or if a different
 	 *             descriptor (with the id or value) already exists
 	 */
-	protected <D> Descriptor<D, ?, I> createDescriptor(final I id, final D value)
-			throws DescriptorModelException {
+	protected <D> Descriptor<D, ?, I> createDescriptor(final I id,
+			final Object value) throws DescriptorModelException {
 		final Class<?> valueType = value.getClass();
 
 		// get the constructor
@@ -722,8 +746,10 @@ public class DescriptorModel<I extends Object> {
 			} else {
 				return null;
 			}
-		} else {
+		} else if (factory == null) {
 			return getDescriptorByDefNr(2, value);
+		} else {
+			return getDescriptorByDefNr(2, factory.format(value));
 		}
 	}
 

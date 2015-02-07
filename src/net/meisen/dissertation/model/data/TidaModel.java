@@ -588,11 +588,12 @@ public class TidaModel implements IPersistable {
 		try {
 			try {
 				while (it.hasNext()) {
+					final IDataRecord rec = it.next();
 
 					if (retrieveIdentifiers) {
-						res.add(_loadRecord(dataStructure, it.next()));
+						res.add(_loadRecord(dataStructure, rec));
 					} else {
-						_loadRecord(dataStructure, it.next());
+						_loadRecord(dataStructure, rec);
 					}
 
 					if (++amountOfData % 10000 == 0 && LOG.isDebugEnabled()) {

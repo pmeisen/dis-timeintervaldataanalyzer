@@ -36,7 +36,6 @@ import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
-import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
@@ -637,7 +636,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertEquals(21, des.size());
 		des = m.getDescriptorsByClass(Object.class);
 		assertEquals(21, des.size());
-		des = m.getDescriptorsByClass(ResourceDescriptor.class);
+		des = m.getDescriptorsByClass(IntegerDescriptor.class);
 		assertEquals(7, des.size());
 
 		// check all the created identifiers of the resources
@@ -699,15 +698,6 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertNotNull(m.getDescriptorByValue("D2", 2));
 		assertNotNull(m.getDescriptorByValue("D3", "Some Value"));
 		assertNotNull(m.getDescriptorByValue("D4", 1.0));
-
-		// check the resources
-		assertEquals(10002, m.getDescriptorsByClass(ResourceDescriptor.class)
-				.size());
-		for (int i = 1; i <= 10000; i++) {
-			assertNotNull(m.getDescriptorByValue("R2", "" + i));
-		}
-		assertNotNull(m.getDescriptorByValue("R1", "Edison"));
-		assertNotNull(m.getDescriptorByValue("R3", "NoValue"));
 	}
 
 	/**

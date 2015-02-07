@@ -4,9 +4,12 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
+import net.meisen.dissertation.model.descriptors.IDescriptorFactory;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A {@code Descriptor} defined by a {@code Long} value.
@@ -19,13 +22,38 @@ import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
  */
 public class LongDescriptor<I extends Object> extends
 		DescriptorPrimitiveDataType<Long, LongDescriptor<I>, I> {
+
+	/**
+	 * Factory used to ensure the creation of unique identifiers.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	public static class Factory implements IDescriptorFactory {
+
+		@Override
+		public String format(final String value)
+				throws ForwardedRuntimeException {
+			final long lValue;
+
+			try {
+				lValue = Long.parseLong(value);
+			} catch (final NumberFormatException e) {
+				throw new ForwardedRuntimeException(
+						DescriptorModelException.class, 1011, value);
+			}
+
+			return LongDescriptor.formatter.format(lValue);
+		}
+	}
+
 	/**
 	 * Formatter used to create the unique string for the double
 	 */
 	protected final static DecimalFormat formatter = new DecimalFormat("0");
 
 	static {
-		
+
 		// make sure the . and , are used correctly, i.e. US-Format
 		final DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
 		symbols.setDecimalSeparator('.');
@@ -34,7 +62,7 @@ public class LongDescriptor<I extends Object> extends
 		// define the symbols used by the formatter
 		formatter.setDecimalFormatSymbols(symbols);
 	}
-	
+
 	private long value;
 
 	/**
@@ -135,7 +163,7 @@ public class LongDescriptor<I extends Object> extends
 	public String getUniqueString() {
 		return formatter.format(value);
 	}
-	
+
 	@Override
 	public double getFactValue(final IDataRecord record) {
 		return value;
@@ -145,7 +173,7 @@ public class LongDescriptor<I extends Object> extends
 	public boolean isRecordInvariant() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean isValueInvariant() {
 		return false;

@@ -393,7 +393,7 @@ public class QueryServlet extends BaseServlet {
 		// get the model
 		final TidaModel model = getModel(parameters, QueryType.MANIPULATION);
 
-		// get the database connection and the query to be used
+		// get the csv settings
 		final CsvDataConfig config = new CsvDataConfig();
 
 		final String sessionId = parameters.get(PARAM_SESSIONID);
@@ -422,7 +422,7 @@ public class QueryServlet extends BaseServlet {
 			model.bulkLoadData(structure, dataSet.iterator());
 		} finally {
 
-			// release all db resources
+			// release all resources
 			if (retriever != null) {
 				retriever.release();
 			}

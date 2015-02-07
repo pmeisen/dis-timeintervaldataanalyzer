@@ -5,7 +5,13 @@ import net.meisen.general.genmisc.types.Objects;
 
 /**
  * A descriptor is used to describe {@code Resource} instances within an
- * {@code RawTimeInterval}.
+ * {@code RawTimeInterval}.<br/>
+ * A Descriptor might define a nested static class of the type
+ * {@link IDescriptorFactory}. The {@code DescriptorModel} will check
+ * for such a public class and instantiate it once for each
+ * {@code Descriptor-Class}. The factory is used to modify general descriptor
+ * specific aspects, e.g. formatting of values. The class must be static and
+ * public.
  * 
  * @author pmeisen
  * 

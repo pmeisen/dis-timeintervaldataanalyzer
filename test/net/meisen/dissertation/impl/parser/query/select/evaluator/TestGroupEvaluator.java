@@ -13,8 +13,8 @@ import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.help.ModuleBasedTest;
+import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
-import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.Group;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupEvaluator.GroupEntry;
@@ -170,7 +170,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		for (final Group g : res) {
 			assertEquals(2, g.size());
 			assertTrue(g.getEntry(0).getMeta() instanceof IntegerDescriptor);
-			assertTrue(g.getEntry(1).getMeta() instanceof ResourceDescriptor);
+			assertTrue(g.getEntry(1).getMeta() instanceof GeneralDescriptor);
 		}
 
 		// generate a group for three descriptors
@@ -186,7 +186,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 			 * GeneralDescriptor, therefore we don't test it here
 			 */
 			assertTrue(g.getEntry(1).getMeta() instanceof IntegerDescriptor);
-			assertTrue(g.getEntry(2).getMeta() instanceof ResourceDescriptor);
+			assertTrue(g.getEntry(2).getMeta() instanceof GeneralDescriptor);
 		}
 
 		// test the exclusion of values

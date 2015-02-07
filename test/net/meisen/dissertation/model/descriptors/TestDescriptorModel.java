@@ -10,10 +10,10 @@ import java.util.UUID;
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.help.ExceptionBasedTest;
+import net.meisen.dissertation.impl.descriptors.DoubleDescriptor;
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
-import net.meisen.dissertation.impl.descriptors.ResourceDescriptor;
 import net.meisen.dissertation.impl.idfactories.IntegerIdsFactory;
 import net.meisen.dissertation.impl.idfactories.LongIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
@@ -224,6 +224,16 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 			assertEquals(new Long(100 - i), desc.getId());
 			assertEquals(new Long(i), desc.getValue());
 		}
+
+		// check the retrieval by string
+		DescriptorModel<Long> modelDoubleDesc = new DescriptorModel<Long>(
+				"ModelId", "ModelName", DoubleDescriptor.class,
+				new LongIdsFactory(), new IndexFactory());
+
+		final Descriptor<Double, ?, Long> oneDesc = modelDoubleDesc
+				.addDescriptor(1000l, 1.00);
+		assertEquals(oneDesc, modelDoubleDesc.getDescriptorByValue("1"));
+		assertEquals(oneDesc, modelDoubleDesc.getDescriptorByValue("1.00"));
 	}
 
 	/**
@@ -271,7 +281,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 
 		// create the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
-				"ModelId", "ModelName", ResourceDescriptor.class,
+				"ModelId", "ModelName", GeneralDescriptor.class,
 				new IntegerIdsFactory(), new IndexFactory());
 		model.setSupportsNullDescriptor(true);
 

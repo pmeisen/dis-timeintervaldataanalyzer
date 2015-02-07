@@ -4,9 +4,12 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import net.meisen.dissertation.exceptions.DescriptorModelException;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
+import net.meisen.dissertation.model.descriptors.IDescriptorFactory;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
 /**
  * A {@code Descriptor} defined by a {@code Double} value, with at most 5
@@ -20,6 +23,31 @@ import net.meisen.dissertation.model.descriptors.DescriptorPrimitiveDataType;
  */
 public class DoubleDescriptor<I extends Object> extends
 		DescriptorPrimitiveDataType<Double, DoubleDescriptor<I>, I> {
+
+	/**
+	 * Factory used to ensure the creation of unique identifiers.
+	 * 
+	 * @author pmeisen
+	 * 
+	 */
+	public static class Factory implements IDescriptorFactory {
+
+		@Override
+		public String format(final String value)
+				throws ForwardedRuntimeException {
+			final double dValue;
+
+			try {
+				dValue = Double.parseDouble(value);
+			} catch (final NumberFormatException e) {
+				throw new ForwardedRuntimeException(
+						DescriptorModelException.class, 1011, value);
+			}
+
+			return DoubleDescriptor.formatter.format(dValue);
+		}
+	}
+
 	/**
 	 * Formatter used to create the unique string for the double
 	 */
@@ -162,7 +190,7 @@ public class DoubleDescriptor<I extends Object> extends
 	public boolean isRecordInvariant() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean isValueInvariant() {
 		return false;

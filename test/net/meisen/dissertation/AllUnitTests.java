@@ -81,7 +81,6 @@ import net.meisen.dissertation.model.dataretriever.TestDataRecord;
 import net.meisen.dissertation.model.datasets.TestMultipleDataSetIterator;
 import net.meisen.dissertation.model.descriptors.TestDescriptorModel;
 import net.meisen.dissertation.model.descriptors.TestDescriptorPrimitiveDataType;
-import net.meisen.dissertation.model.descriptors.TestResourceDescriptor;
 import net.meisen.dissertation.model.dimensions.TestDescriptorDimension;
 import net.meisen.dissertation.model.dimensions.TestDimensionHandler;
 import net.meisen.dissertation.model.dimensions.graph.TestDescriptorGraph;
@@ -168,7 +167,6 @@ import org.junit.runners.Suite;
 		TestIntegerDescriptor.class,
 		TestLongDescriptor.class,
 		TestGeneralDescriptor.class,
-		TestResourceDescriptor.class,
 
 		// Test the descriptorModel
 		TestDescriptorModel.class,

@@ -691,10 +691,4 @@
       <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.IntegerDescriptor</xsl:with-param>
     </xsl:call-template>
   </xsl:template>
-  
-  <xsl:template match="mns:resource">
-    <xsl:call-template name="beanDescriptorModel">
-      <xsl:with-param name="class">net.meisen.dissertation.impl.descriptors.ResourceDescriptor</xsl:with-param>
-    </xsl:call-template>
-  </xsl:template>
 </xsl:stylesheet>
