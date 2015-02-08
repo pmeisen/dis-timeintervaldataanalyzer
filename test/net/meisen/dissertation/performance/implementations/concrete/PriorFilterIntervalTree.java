@@ -17,6 +17,7 @@ import net.meisen.dissertation.performance.implementations.IRecordsFilter;
 import net.meisen.dissertation.performance.implementations.IntervalTreeBasedImplementation;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
 
+@SuppressWarnings("javadoc")
 public class PriorFilterIntervalTree extends IntervalTreeBasedImplementation {
 
 	public PriorFilterIntervalTree(final TidaModel model,

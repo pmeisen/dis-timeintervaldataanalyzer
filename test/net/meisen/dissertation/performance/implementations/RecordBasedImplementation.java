@@ -39,6 +39,7 @@ import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Numbers;
 
+@SuppressWarnings("javadoc")
 public abstract class RecordBasedImplementation extends
 		BaseImplementation<List<Map<String, Object>>> {
 

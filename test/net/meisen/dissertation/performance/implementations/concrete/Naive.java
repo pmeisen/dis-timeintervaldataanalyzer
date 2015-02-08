@@ -15,6 +15,7 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.IRecordsFilter;
 import net.meisen.dissertation.performance.implementations.RecordBasedImplementation;
 
+@SuppressWarnings("javadoc")
 public class Naive extends RecordBasedImplementation {
 
 	public Naive(final TidaModel model,

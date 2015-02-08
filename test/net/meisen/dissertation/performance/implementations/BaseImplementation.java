@@ -13,6 +13,7 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("javadoc")
 public abstract class BaseImplementation<T> implements IImplementation {
 	private final static Logger LOG = LoggerFactory
 			.getLogger(BaseImplementation.class);

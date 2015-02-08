@@ -12,6 +12,7 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
 
+@SuppressWarnings("javadoc")
 public abstract class IntervalTreeBasedImplementation extends
 		RecordBasedImplementation {
 	protected final IntervalTree<Integer> iTree;
@@ -33,6 +34,7 @@ public abstract class IntervalTreeBasedImplementation extends
 
 		int i = 0;
 		final List<IntervalData<Integer>> list = new ArrayList<IntervalData<Integer>>();
+		
 		for (final Map<String, Object> record : records) {
 			final Object rStart = record.get("INTERVAL_START");
 			final Object rEnd = record.get("INTERVAL_END");

@@ -18,6 +18,7 @@ import net.meisen.dissertation.performance.implementations.IntervalTreeBasedImpl
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
 
+@SuppressWarnings("javadoc")
 public class FilterCreatedIntervalTree extends IntervalTreeBasedImplementation {
 
 	public FilterCreatedIntervalTree(final TidaModel model,

@@ -19,6 +19,7 @@ import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.performance.implementations.BaseImplementation;
 
+@SuppressWarnings("javadoc")
 public class Tida extends BaseImplementation<TidaModel> {
 	private final static Logger LOG = LoggerFactory.getLogger(Tida.class);
 
