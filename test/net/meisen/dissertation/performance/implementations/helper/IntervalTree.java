@@ -60,13 +60,30 @@ public class IntervalTree<O extends Object> {
 		}
 	};
 
+	public IntervalTree() {
+		root = null;
+	}
+
 	/**
 	 * Create interval tree from list of IntervalData objects;
 	 * 
 	 * @param intervals
 	 *            is a list of IntervalData objects
 	 */
-	public IntervalTree(List<IntervalData<O>> intervals) {
+	public IntervalTree(final List<IntervalData<O>> intervals) {
+		fillTree(intervals);
+	}
+
+	/**
+	 * Fills the tree with the specified values, all other values (i.e. once
+	 * that might be added prior to the call) are removed.
+	 * 
+	 * @param intervals
+	 *            the intervals to be added
+	 */
+	public void fillTree(final List<IntervalData<O>> intervals) {
+		root = null;
+
 		if (intervals.size() <= 0)
 			return;
 

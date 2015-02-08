@@ -46,7 +46,11 @@
   <dim:dimensions>
     <dim:timedimension id="TIME">
       <dim:hierarchy id="DEF" all="Everytime">
-        <dim:level id="DAY" template="RASTER_DAY_DAY_1" />
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR" template="RASTER_DAY_MINUTE_60" />
+        <dim:level id="HALFHOUR" template="RASTER_DAY_MINUTE_30" />
         <dim:level id="MIN5DAY" template="RASTER_DAY_MINUTE_5" />
       </dim:hierarchy>
     </dim:timedimension>

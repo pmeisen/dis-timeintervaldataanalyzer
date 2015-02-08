@@ -93,8 +93,8 @@ public abstract class BaseTimeLevelTemplate implements ITimeLevelTemplate {
 
 		/*
 		 * Check if the granularity of the time-axis is less than day. If so, we
-		 * have the chance to rely apply the time-zone. Otherwise, we have to
-		 * work with UTC.
+		 * have the chance to apply the time-zone. Otherwise, we have to work
+		 * with UTC.
 		 */
 		final String tz;
 		if (((IDateBasedGranularity) granularity).isAssignableTo('h')) {

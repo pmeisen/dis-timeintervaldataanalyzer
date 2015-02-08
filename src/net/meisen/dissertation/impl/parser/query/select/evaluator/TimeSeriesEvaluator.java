@@ -14,6 +14,7 @@ import net.meisen.dissertation.impl.parser.query.select.measures.DescriptorMathT
 import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.DimensionModel;
+import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.dimensions.TimeLevelMember;
 import net.meisen.dissertation.model.dimensions.TimeMemberRange;
@@ -25,7 +26,6 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.IBitmapContainer;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
-import net.meisen.dissertation.model.time.timeline.TimelineDefinition;
 import net.meisen.general.genmisc.types.Numbers;
 
 /**
@@ -115,7 +115,7 @@ public class TimeSeriesEvaluator {
 
 	private final TidaIndex index;
 	private final BaseIndexFactory indexFactory;
-	private final TimelineDefinition timeline;
+	private final IntervalModel intervalModel;
 	private final DimensionModel dimModel;
 
 	/**
@@ -126,10 +126,11 @@ public class TimeSeriesEvaluator {
 	 *            the model the evaluator is used with
 	 */
 	public TimeSeriesEvaluator(final TidaModel model) {
+
 		this.dimModel = model.getDimensionModel();
 		this.index = model.getIndex();
 		this.indexFactory = model.getIndexFactory();
-		this.timeline = model.getIntervalModel().getTimelineDefinition();
+		this.intervalModel = model.getIntervalModel();
 	}
 
 	/**
@@ -548,9 +549,7 @@ public class TimeSeriesEvaluator {
 			return new long[] { index.getNormalizedTimeStart(),
 					index.getNormalizedTimeEnd() };
 		} else {
-			return index.getBounds(interval.getStart(), interval.getEnd(),
-					interval.getOpenType().isInclusive(), interval
-							.getCloseType().isInclusive());
+			return intervalModel.getTimelineMapper().getBounds(interval);
 		}
 	}
 
@@ -575,7 +574,7 @@ public class TimeSeriesEvaluator {
 		final boolean startInclusive;
 		if (interval == null) {
 			startInclusive = true;
-			startPoint = timeline.getStart();
+			startPoint = intervalModel.getTimelineDefinition().getStart();
 		} else {
 			startInclusive = interval.getOpenType().isInclusive();
 			startPoint = interval.getStart();

@@ -1,5 +1,6 @@
 package net.meisen.dissertation.model.time.mapper;
 
+import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.general.genmisc.types.Numbers;
 
@@ -674,5 +675,74 @@ public abstract class BaseMapper<T> {
 	 */
 	public ITimeGranularity getGranularity() {
 		return granularity;
+	}
+
+	/**
+	 * Determines the bounds specified by the passed values, i.e.
+	 * {@code [start, end]}.
+	 * 
+	 * @param start
+	 *            the start object
+	 * @param end
+	 *            the end object
+	 * 
+	 * @return the determined bounds
+	 */
+	public long[] getBounds(final Object start, final Object end) {
+		return getBounds(start, end, true, true);
+	}
+
+	/**
+	 * Determines the bounds specified by the passed values.
+	 * 
+	 * @param start
+	 *            the start object
+	 * @param end
+	 *            the end object
+	 * @param startInclusive
+	 *            {@code true} if the start value is included, otherwise
+	 *            {@code false}
+	 * @param endInclusive
+	 *            {@code true} if the end value is included, otherwise
+	 *            {@code false}
+	 * 
+	 * @return the determined bounds
+	 */
+	public long[] getBounds(final Object start, final Object end,
+			final boolean startInclusive, final boolean endInclusive) {
+
+		// check if the values are out of bound
+		if (isLargerThanEnd(start)) {
+			return null;
+		} else if (isSmallerThanStart(end)) {
+			return null;
+		}
+
+		// get the mapped values
+		final long lStart = startInclusive ? mapToLong(start) : shiftToLong(
+				start, 1, false);
+		final long lEnd = endInclusive ? mapToLong(end) : shiftToLong(end, 1,
+				true);
+
+		return new long[] { lStart, lEnd };
+	}
+
+	/**
+	 * Determines the bounds specified by the {@code Interval}.
+	 * 
+	 * @param interval
+	 *            the interval to determine the bound for
+	 * 
+	 * @return the determined bounds, or {@code null} if the interval is
+	 *         {@code null}
+	 */
+	public long[] getBounds(final Interval<?> interval) {
+		if (interval == null) {
+			return null;
+		} else {
+			return getBounds(interval.getStart(), interval.getEnd(), interval
+					.getOpenType().isInclusive(), interval.getCloseType()
+					.isInclusive());
+		}
 	}
 }

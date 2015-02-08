@@ -5,7 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.text.ParseException;
 import java.util.Date;
 
-import net.meisen.dissertation.impl.time.mapper.DateMapper;
+import net.meisen.dissertation.impl.parser.query.DateIntervalValue;
+import net.meisen.dissertation.impl.parser.query.Interval;
+import net.meisen.dissertation.impl.parser.query.IntervalType;
 import net.meisen.dissertation.model.time.granularity.Day;
 import net.meisen.dissertation.model.time.granularity.FortNight;
 import net.meisen.dissertation.model.time.granularity.Hour;
@@ -19,6 +21,7 @@ import net.meisen.dissertation.model.time.granularity.NotionalTimeUnit;
 import net.meisen.dissertation.model.time.granularity.Second;
 import net.meisen.dissertation.model.time.granularity.Week;
 import net.meisen.dissertation.model.time.granularity.Year;
+import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.general.genmisc.types.Dates;
 
 import org.junit.Test;
@@ -332,6 +335,48 @@ public class TestDateMapper {
 				10, false);
 		assertEquals(Dates.parseDate("31.12.2000", "dd.MM.yyyy"),
 				mapper.resolve(res));
+	}
+
+	/**
+	 * Tests the implementation of the base-implementation
+	 * {@link BaseMapper#getBounds(Interval)}).
+	 */
+	@Test
+	public void testBounds() {
+		final DateMapper mapper = new DateMapper(Dates.isDate("20.01.1981"),
+				Dates.isDate("20.01.1981 23:59:00", Dates.GENERAL_TIMEZONE),
+				Minute.instance());
+
+		final DateIntervalValue val1 = new DateIntervalValue(Dates.isDate(
+				"20.01.1981 08:00:00", Dates.GENERAL_TIMEZONE));
+		final DateIntervalValue val2 = new DateIntervalValue(Dates.isDate(
+				"20.01.1981 08:07:00", Dates.GENERAL_TIMEZONE));
+
+		final IntervalType in = IntervalType.INCLUDE;
+		final IntervalType ex = IntervalType.EXCLUDE;
+
+		Interval<?> interval;
+		long[] bounds;
+
+		interval = new Interval<Date>(val1, ex, val2, in);
+		bounds = mapper.getBounds(interval);
+		assertEquals(541, bounds[0]);
+		assertEquals(547, bounds[1]);
+
+		interval = new Interval<Date>(val1, ex, val2, ex);
+		bounds = mapper.getBounds(interval);
+		assertEquals(541, bounds[0]);
+		assertEquals(546, bounds[1]);
+
+		interval = new Interval<Date>(val1, in, val2, in);
+		bounds = mapper.getBounds(interval);
+		assertEquals(540, bounds[0]);
+		assertEquals(547, bounds[1]);
+
+		interval = new Interval<Date>(val1, in, val2, ex);
+		bounds = mapper.getBounds(interval);
+		assertEquals(540, bounds[0]);
+		assertEquals(546, bounds[1]);
 	}
 
 	private void assertResult(final Date start, final Date end,

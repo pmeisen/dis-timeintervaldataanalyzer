@@ -405,8 +405,9 @@ public class IntervalIndex implements IDataRecordIndex {
 	public SliceWithDescriptors<?>[] getSlicesByTimePoints(final Object start,
 			final Object end, final boolean startInclusive,
 			final boolean endInclusive) {
-		final long[] bounds = getBounds(start, end, startInclusive,
+		final long[] bounds = mapper.getBounds(start, end, startInclusive,
 				endInclusive);
+
 		return getSlicesByTimePoints(bounds);
 	}
 
@@ -416,7 +417,7 @@ public class IntervalIndex implements IDataRecordIndex {
 	 * 
 	 * @param bounds
 	 *            the bounds as retrieved by e.g.
-	 *            {@link #getBounds(Object, Object, boolean, boolean)}
+	 *            {@link BaseMapper#getBounds(Object, Object, boolean, boolean)}
 	 * 
 	 * @return the slices between the bounds
 	 */
@@ -426,41 +427,6 @@ public class IntervalIndex implements IDataRecordIndex {
 		} else {
 			return getSlices(bounds[0], bounds[1]);
 		}
-	}
-
-	/**
-	 * Determines the bounds specified by the passed values.
-	 * 
-	 * @param start
-	 *            the start object
-	 * @param end
-	 *            the end object
-	 * @param startInclusive
-	 *            {@code true} if the start value is included, otherwise
-	 *            {@code false}
-	 * @param endInclusive
-	 *            {@code true} if the end value is included, otherwise
-	 *            {@code false}
-	 * 
-	 * @return the determined bounds
-	 */
-	public long[] getBounds(final Object start, final Object end,
-			final boolean startInclusive, final boolean endInclusive) {
-
-		// check if the values are out of bound
-		if (mapper.isLargerThanEnd(start)) {
-			return null;
-		} else if (mapper.isSmallerThanStart(end)) {
-			return null;
-		}
-
-		// get the mapped values
-		final long lStart = startInclusive ? mapper.mapToLong(start) : mapper
-				.shiftToLong(start, 1, false);
-		final long lEnd = endInclusive ? mapper.mapToLong(end) : mapper
-				.shiftToLong(end, 1, true);
-
-		return new long[] { lStart, lEnd };
 	}
 
 	@Override
