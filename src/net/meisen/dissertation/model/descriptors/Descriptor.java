@@ -4,14 +4,13 @@ import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.general.genmisc.types.Objects;
 
 /**
- * A descriptor is used to describe {@code Resource} instances within an
+ * A descriptor is used to describe descriptive values within an
  * {@code RawTimeInterval}.<br/>
  * A Descriptor might define a nested static class of the type
- * {@link IDescriptorFactory}. The {@code DescriptorModel} will check
- * for such a public class and instantiate it once for each
- * {@code Descriptor-Class}. The factory is used to modify general descriptor
- * specific aspects, e.g. formatting of values. The class must be static and
- * public.
+ * {@link IDescriptorFactory}. The {@code DescriptorModel} will check for such a
+ * public class and instantiate it once for each {@code Descriptor-Class}. The
+ * factory is used to modify general descriptor specific aspects, e.g.
+ * formatting of values. The class must be static and public.
  * 
  * @author pmeisen
  * 
@@ -70,9 +69,9 @@ public abstract class Descriptor<D extends Object, T extends Descriptor<D, T, I>
 	}
 
 	/**
-	 * Gets the identifier of the {@code ResourceModel}.
+	 * Gets the identifier of the {@code DescriptorModel}.
 	 * 
-	 * @return the identifier of the {@code ResourceModel}
+	 * @return the identifier of the {@code DescriptorModel}
 	 */
 	public String getModelId() {
 		return getModel().getId();

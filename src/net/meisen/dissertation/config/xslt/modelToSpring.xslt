@@ -286,7 +286,7 @@
       <xsl:if test="//mns:config/mns:preprocessor/@implementation">
         <xsl:variable name="preProcessor" select="//mns:config/mns:preprocessor/@implementation" />
         <bean id="{$preProcessorId}" class="{$preProcessor}">
-          <xsl:if test="node()">
+          <xsl:if test="//mns:config/mns:preprocessor/node()">
             <property name="config">
               <xsl:for-each select="mns:config/mns:preprocessor">
                 <xsl:apply-templates />

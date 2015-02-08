@@ -49,7 +49,7 @@
          just ignored or if an exception is thrown.
       -->
     <descriptors>
-      <resource id="PERSON" failonduplicates="true" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="PERSON" failonduplicates="true" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
       <string id="TASKTYPE" failonduplicates="true" null="false" name="tasktype" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
       <string id="WORKAREA" failonduplicates="true" null="false" name="workarea" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
     </descriptors>

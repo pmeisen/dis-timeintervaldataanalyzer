@@ -23,7 +23,7 @@
 
   <meta>
     <descriptors>
-      <resource id="PER" name="person" null="true" />
+      <string id="PER" name="person" null="true" />
       <string id="LOC" name="location" null="true" />
       <string id="TYP" name="tasktype" null="true" failonduplicates="false" />
     </descriptors>

@@ -2,13 +2,12 @@ package net.meisen.dissertation.impl.cache;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
-import org.junit.Test;
-
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.datasets.IDataRecord;
 import net.meisen.dissertation.model.indexes.datarecord.IDataRecordMeta;
+
+import org.junit.Test;
 
 /**
  * Tests the implementation of {@code IdsOnlyDataRecordCache}.
@@ -34,6 +33,7 @@ public class TestIdsOnlyDataRecordCache extends LoaderBasedTest {
 		IDataRecord rec;
 
 		rec = m.getIndex().getRecord(0);
+		
 		assertEquals(0, rec.getValue(meta.getPosRecordId()));
 		assertEquals(1l, rec.getValue(meta.getPosStart()));
 		assertEquals(2l, rec.getValue(meta.getPosEnd()));

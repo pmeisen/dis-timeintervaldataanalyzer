@@ -341,8 +341,10 @@ public class TestCommunication {
 								} catch (final Exception e) {
 									assertEquals(SQLException.class,
 											e.getClass());
-									assertTrue(e.getMessage().contains(
-											"Unable to create a descriptor"));
+									assertTrue(e
+											.getMessage()
+											.contains(
+													"string 'NOINT' does not represent any valid descriptor value"));
 								}
 							} else {
 								execute(threadStmt, tSql,

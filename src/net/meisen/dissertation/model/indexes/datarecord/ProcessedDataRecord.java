@@ -319,7 +319,11 @@ public class ProcessedDataRecord {
 	}
 
 	/**
-	 * The mapper used to resolve the start and end values of the record.
+	 * Creates an object-array of the processed record. The array fulfills the
+	 * positions defined by the {@code DataRecordMeta} information provided.
+	 * Nevertheless, the data is positioned by an offset of 1, i.e. the position
+	 * within the {@code DataRecordMeta} is 1-based, whereby the array is
+	 * 0-based.
 	 * 
 	 * @param meta
 	 *            the {@code DataRecordMeta} used to create the object-array
@@ -336,13 +340,15 @@ public class ProcessedDataRecord {
 		final Object[] res = new Object[dataTypes.length];
 
 		// get the values
-		res[0] = getId();
-		res[1] = mapper == null ? null : mapper.resolve(getStart());
-		res[2] = mapper == null ? null : mapper.resolve(getEnd());
+		res[meta.getPosRecordId() - 1] = getId();
+		res[meta.getPosStart() - 1] = mapper == null ? null : mapper
+				.resolve(getStart());
+		res[meta.getPosEnd() - 1] = mapper == null ? null : mapper
+				.resolve(getEnd());
 
-		for (int pos = meta.getFirstPosDescModelIds(); pos <= meta
+		for (int pos = meta.getFirstPosDescModelIds() - 1; pos < meta
 				.getLastPosDescModelIds(); pos++) {
-			final String descModelId = meta.getDescriptorModelId(pos);
+			final String descModelId = meta.getDescriptorModelId(pos + 1);
 			final Descriptor<?, ?, ?> desc = getDescriptor(descModelId);
 
 			// if we have a string use the uniqueString

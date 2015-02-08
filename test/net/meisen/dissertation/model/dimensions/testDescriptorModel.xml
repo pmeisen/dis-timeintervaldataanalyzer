@@ -10,7 +10,7 @@
 
   <meta>
     <descriptors>
-      <resource id="PERSON" name="Persons" />
+      <string id="PERSON" name="Persons" />
       <string id="LOCATION" />
       <string id="BOOK" />
       <integer id="SCREAMS" />

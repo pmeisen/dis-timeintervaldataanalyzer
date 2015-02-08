@@ -23,7 +23,7 @@
   
   <meta>
     <descriptors>
-      <resource id="PERSON" />
+      <string id="PERSON" />
       <string id="LOCATION" />
       <integer id="SCREAMS" />
     </descriptors>

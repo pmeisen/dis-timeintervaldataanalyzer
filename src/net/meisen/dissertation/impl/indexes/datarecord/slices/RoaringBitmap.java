@@ -63,7 +63,7 @@ public class RoaringBitmap extends Bitmap {
 
 	@Override
 	public void optimize() {
-		// nothing to be optimized
+		bitmap.trim();
 	}
 
 	@Override

@@ -1310,7 +1310,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testExecutionWithUnusedValueFilterOr() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) filter by SCREAMS='Undefined' OR PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) filter by SCREAMS='-1' OR PERSON='Philipp'";
 
 		// load the model
 		m(xml);
@@ -1337,7 +1337,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 	@Test
 	public void testExecutionWithUnusedValueFilterAnd() {
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
-		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) filter by SCREAMS='Undefined' AND PERSON='Philipp'";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) filter by SCREAMS='-1' AND PERSON='Philipp'";
 
 		// load the model
 		m(xml);

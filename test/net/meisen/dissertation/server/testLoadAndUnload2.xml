@@ -33,7 +33,7 @@
 
   <meta>
     <descriptors>
-      <resource id="PERSON" failonduplicates="false" null="false" name="person" />
+      <string id="PERSON" failonduplicates="false" null="false" name="person" />
     </descriptors>
     
     <entries />

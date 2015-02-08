@@ -36,6 +36,7 @@ import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
 import net.meisen.dissertation.impl.descriptors.ListDescriptor;
 import net.meisen.dissertation.impl.descriptors.LongDescriptor;
+import net.meisen.dissertation.impl.idfactories.UuIdsFactory;
 import net.meisen.dissertation.impl.indexes.IndexFactory;
 import net.meisen.dissertation.impl.time.mapper.MapperFactory;
 import net.meisen.dissertation.model.data.DataModel;
@@ -637,11 +638,18 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		des = m.getDescriptorsByClass(Object.class);
 		assertEquals(21, des.size());
 		des = m.getDescriptorsByClass(IntegerDescriptor.class);
-		assertEquals(7, des.size());
+		assertEquals(5, des.size());
+		des = m.getDescriptorsByClass(GeneralDescriptor.class);
+		assertEquals(13, des.size());
 
-		// check all the created identifiers of the resources
+		// check all the created identifiers of the integers
 		final Set<UUID> uuids = new HashSet<UUID>();
 		for (final Descriptor<?, ?, ?> r : des) {
+			if (!m.getDescriptorModel(r.getModelId()).getIdClass()
+					.equals(UuIdsFactory.class)) {
+				continue;
+			}
+
 			assertTrue(r.getId().getClass().getName(),
 					r.getId() instanceof UUID);
 			assertTrue(uuids.add((UUID) r.getId()));
@@ -690,10 +698,9 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 
 		// check the descriptors
 		assertEquals(
-				4,
-				m.getDescriptorsByClass(GeneralDescriptor.class,
-						IntegerDescriptor.class, LongDescriptor.class,
-						DoubleDescriptor.class).size());
+				1,
+				m.getDescriptorsByClass(IntegerDescriptor.class,
+						LongDescriptor.class, DoubleDescriptor.class).size());
 		assertNotNull(m.getDescriptorByValue("D1", "FIXED VALUE"));
 		assertNotNull(m.getDescriptorByValue("D2", 2));
 		assertNotNull(m.getDescriptorByValue("D3", "Some Value"));

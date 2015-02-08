@@ -52,7 +52,7 @@ public interface IDataRecordMeta {
 
 	/**
 	 * Gets the position within a record containing the identifier of the
-	 * record.
+	 * record. The position is 1-based.
 	 * 
 	 * @return the position within a record containing the identifier of the
 	 *         record
@@ -61,7 +61,7 @@ public interface IDataRecordMeta {
 
 	/**
 	 * Gets the position within a record containing the start value of the
-	 * record.
+	 * record. The position is 1-based.
 	 * 
 	 * @return the position within a record containing the start value of the
 	 *         record
@@ -70,6 +70,7 @@ public interface IDataRecordMeta {
 
 	/**
 	 * Gets the position within a record containing the end value of the record.
+	 * The position is 1-based.
 	 * 
 	 * @return the position within a record containing the end value of the
 	 *         record
@@ -78,6 +79,7 @@ public interface IDataRecordMeta {
 
 	/**
 	 * Gets the first position (including) of a {@code DescriptorModel's} value.
+	 * The position is 1-based.
 	 * 
 	 * @return the first position of a {@code DescriptorModel's} value
 	 */
@@ -85,6 +87,7 @@ public interface IDataRecordMeta {
 
 	/**
 	 * Gets the last position (including) of a {@code DescriptorModel's} value.
+	 * The position is 1-based.
 	 * 
 	 * @return the last position of a {@code DescriptorModel's} value
 	 */

@@ -1,5 +1,7 @@
 package net.meisen.dissertation.impl.indexes.datarecord;
 
+import java.util.Arrays;
+
 import net.meisen.dissertation.model.datasets.IDataRecord;
 
 /**
@@ -45,12 +47,12 @@ public class IndexedDataRecord implements IDataRecord {
 	@Override
 	public Object getValue(final String name) throws RuntimeException {
 		final int pos = meta.getPosition(name, true);
-		if (!isValidPosition(pos + 1)) {
+		if (!isValidPosition(pos)) {
 			throw new IllegalArgumentException("The name '" + name
 					+ "' cannot be found wthin the record.");
 		}
 
-		return getValue(pos + 1);
+		return getValue(pos);
 	}
 
 	@Override
@@ -71,5 +73,11 @@ public class IndexedDataRecord implements IDataRecord {
 	@Override
 	public int getPosition(final String name) {
 		return meta.getPosition(name) + 1;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.asList(values).toString() + " ("
+				+ Arrays.asList(meta.getNames()).toString() + ")";
 	}
 }

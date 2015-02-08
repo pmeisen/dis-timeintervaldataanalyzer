@@ -59,13 +59,13 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 
 		// create the result
 		final Object[] res = new Object[meta.getTypes().length];
-		res[meta.getPosRecordId()] = recordId;
+		res[meta.getPosRecordId() - 1] = recordId;
 
 		// set the interval information
 		final Object[] interval = idx.getTimePointValuesOfRecord(recordId);
-		res[meta.getPosStart()] = interval == null ? null : interval[0];
-		res[meta.getPosEnd()] = interval == null ? null : interval[1];
-		
+		res[meta.getPosStart() - 1] = interval == null ? null : interval[0];
+		res[meta.getPosEnd() - 1] = interval == null ? null : interval[1];
+
 		// set the meta-information
 		for (int pos = meta.getFirstPosDescModelIds(); pos <= meta
 				.getLastPosDescModelIds(); pos++) {
@@ -74,9 +74,9 @@ public class IdsOnlyDataRecordCache implements IDataRecordCache {
 					descModelId, recordId);
 
 			if (desc == null) {
-				res[pos] = null;
+				res[pos - 1] = null;
 			} else {
-				res[pos] = desc.getValue();
+				res[pos - 1] = desc.getValue();
 			}
 		}
 

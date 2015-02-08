@@ -445,7 +445,8 @@ public class TestInsertQueries extends LoaderBasedTest {
 			factory.evaluateQuery(query, null);
 		} catch (final Exception e) {
 			assertTrue(e instanceof DescriptorModelException);
-			assertTrue(e.getMessage().contains("Unable to create a descriptor"));
+			assertTrue(e.getMessage().contains(
+					"'Test' does not represent any valid descriptor"));
 			foundError = true;
 		}
 		assertTrue(foundError);

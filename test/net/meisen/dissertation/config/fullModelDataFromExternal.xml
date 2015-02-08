@@ -131,9 +131,9 @@
          just ignored or if an exception is thrown.
       -->
     <descriptors>
-      <resource id="R1" name="person" failonduplicates="true" null="false" idfactory="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" />
-      <resource id="R2" name="toy" />
-      <resource id="R3" />
+      <string id="R1" name="person" failonduplicates="true" null="false" idfactory="net.meisen.dissertation.impl.idfactories.IntegerIdsFactory" />
+      <string id="R2" name="toy" />
+      <string id="R3" />
     
       <string id="D1" name="funFactor" />
       <integer id="D2" name="smiles" />

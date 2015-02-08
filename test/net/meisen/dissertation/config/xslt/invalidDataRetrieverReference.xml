@@ -25,7 +25,7 @@
   
   <meta>
     <descriptors>
-      <resource id="RES" />
+      <string id="RES" />
     </descriptors>
 
     <entries>

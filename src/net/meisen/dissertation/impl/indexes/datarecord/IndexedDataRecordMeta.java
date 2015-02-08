@@ -61,27 +61,27 @@ public class IndexedDataRecordMeta implements IDataRecordMeta {
 		names[currentPos] = fg.getIdFieldName();
 		dataTypes[currentPos] = DataType.find(int.class);
 		types[currentPos] = dataTypes[currentPos].getRepresentorClass();
-		posRecordId = currentPos;
+		posRecordId = currentPos + 1;
 		currentPos++;
 
 		names[currentPos] = fg.getIntervalStartFieldName();
 		dataTypes[currentPos] = DataType.find(intervalType);
 		types[currentPos] = dataTypes[currentPos].getRepresentorClass();
-		posStart = currentPos;
+		posStart = currentPos + 1;
 		currentPos++;
 
 		names[currentPos] = fg.getIntervalEndFieldName();
 		dataTypes[currentPos] = DataType.find(intervalType);
 		types[currentPos] = dataTypes[currentPos].getRepresentorClass();
-		posEnd = currentPos;
+		posEnd = currentPos + 1;
 		currentPos++;
 
 		/*
 		 * Next come the descriptors
 		 */
-		posOffsetDescModelIds = currentPos;
+		posOffsetDescModelIds = currentPos + 1;
 		for (final DescriptorModel<?> descModel : descModels) {
-			descModelIds[currentPos - posOffsetDescModelIds] = descModel
+			descModelIds[currentPos - (posOffsetDescModelIds - 1)] = descModel
 					.getId();
 
 			names[currentPos] = descModel.getName();
@@ -149,15 +149,15 @@ public class IndexedDataRecordMeta implements IDataRecordMeta {
 	}
 
 	/**
-	 * Gets the position (zero-based) of the field with the specified
-	 * {@code name}. The name is the real used named of the field (i.e. not the
+	 * Gets the position (1-based) of the field with the specified {@code name}.
+	 * The name is the real used named of the field (i.e. not the
 	 * descriptorModel's identifier).
 	 * 
 	 * @param name
 	 *            the name of the field to retrieve the position for
 	 * 
-	 * @return the position (zero-based) or {@code -1} if the position could not
-	 *         be found
+	 * @return the position (1-based) or {@code -1} if the position could not be
+	 *         found
 	 * 
 	 * @see #getPosition(String, boolean)
 	 */
@@ -166,10 +166,10 @@ public class IndexedDataRecordMeta implements IDataRecordMeta {
 	}
 
 	/**
-	 * Gets the position (zero-based) of the field with the specified
-	 * {@code name}. The position of a field representing a descriptor's value
-	 * can be retrieved by the real name or the descriptorModel's identifier
-	 * (see {@code useDescriptorIdAsName}).
+	 * Gets the position (1-based) of the field with the specified {@code name}.
+	 * The position of a field representing a descriptor's value can be
+	 * retrieved by the real name or the descriptorModel's identifier (see
+	 * {@code useDescriptorIdAsName}).
 	 * 
 	 * @param name
 	 *            the name of the field to retrieve the position for
@@ -178,8 +178,8 @@ public class IndexedDataRecordMeta implements IDataRecordMeta {
 	 *            descriptorModel's identifier, or {@code false} if the name
 	 *            should be matched against the real name
 	 * 
-	 * @return the position (zero-based) or {@code -1} if the position could not
-	 *         be found
+	 * @return the position (1-based) or {@code -1} if the position could not be
+	 *         found
 	 * 
 	 * @see #getPosition(String, boolean)
 	 */
@@ -195,16 +195,16 @@ public class IndexedDataRecordMeta implements IDataRecordMeta {
 				final String descModelId = descModelIds[i];
 
 				if (name.equals(descModelId)) {
-					return i;
+					return getFirstPosDescModelIds() + i;
 				}
 			}
 
 			// determine the names of recId and interval
-			if (names[getPosRecordId()].equals(name)) {
+			if (names[getPosRecordId() - 1].equals(name)) {
 				return getPosRecordId();
-			} else if (names[getPosStart()].equals(name)) {
+			} else if (names[getPosStart() - 1].equals(name)) {
 				return getPosStart();
-			} else if (names[getPosEnd()].equals(name)) {
+			} else if (names[getPosEnd() - 1].equals(name)) {
 				return getPosEnd();
 			} else {
 				return -1;
