@@ -30,7 +30,8 @@ public class Naive extends RecordBasedImplementation {
 			final int runs, final IQueryFactory queryFactory,
 			final DimensionModel dimModel, final BaseIndexFactory factory,
 			final BaseMapper<?> mapper) {
-		super(records, initRuns, runs, queryFactory, dimModel, factory, mapper);
+		super(records, "INTERVAL_START", "INTERVAL_END", initRuns, runs,
+				queryFactory, dimModel, factory, mapper);
 	}
 
 	@Override

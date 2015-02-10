@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,9 +33,9 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  */
 public class SelectQuery implements IQuery {
 
-	private final GroupExpression group;
 	private final List<DescriptorMathTree> measures;
 
+	private GroupExpression group;
 	private DescriptorLogicTree filter;
 
 	private String modelId;
@@ -52,7 +53,6 @@ public class SelectQuery implements IQuery {
 	 * Default constructor initializing the query.
 	 */
 	public SelectQuery() {
-		group = new GroupExpression();
 		measures = new ArrayList<DescriptorMathTree>();
 
 		limit = -1;
@@ -60,6 +60,7 @@ public class SelectQuery implements IQuery {
 		transposed = false;
 		idsOnly = false;
 		count = false;
+		group = null;
 		filter = null;
 		intervalRelation = null;
 		measureDimension = null;
@@ -131,6 +132,16 @@ public class SelectQuery implements IQuery {
 	}
 
 	/**
+	 * Sets the group-expression to the one specified.
+	 * 
+	 * @param group
+	 *            the group to be used
+	 */
+	public void setGroup(final GroupExpression group) {
+		this.group = group;
+	}
+
+	/**
 	 * Optimizes the select query.
 	 */
 	public void optimize() {
@@ -163,6 +174,10 @@ public class SelectQuery implements IQuery {
 	 * @return the defined {@code GroupExpresion}
 	 */
 	public GroupExpression getGroup() {
+		if (group == null) {
+			group = new GroupExpression();
+		}
+
 		return group;
 	}
 
@@ -173,6 +188,17 @@ public class SelectQuery implements IQuery {
 	 */
 	public List<DescriptorMathTree> getMeasures() {
 		return Collections.unmodifiableList(measures);
+	}
+
+	/**
+	 * Sets the specified measures, i.e. all other measures are removed.
+	 * 
+	 * @param measures
+	 *            the measures to be set
+	 */
+	public void setMeasures(final Collection<DescriptorMathTree> measures) {
+		this.measures.clear();
+		this.addMeasures(measures);
 	}
 
 	/**
@@ -206,7 +232,17 @@ public class SelectQuery implements IQuery {
 	 *            the measure to be added
 	 */
 	public void addMeasure(final DescriptorMathTree mathTree) {
-		measures.add(mathTree);
+		this.measures.add(mathTree);
+	}
+
+	/**
+	 * Add all the specified measures to {@code this}.
+	 * 
+	 * @param measures
+	 *            the measures to be added
+	 */
+	public void addMeasures(Collection<DescriptorMathTree> measures) {
+		this.measures.addAll(measures);
 	}
 
 	@Override

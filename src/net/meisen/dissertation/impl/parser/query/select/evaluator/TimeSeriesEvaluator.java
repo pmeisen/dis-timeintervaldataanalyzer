@@ -1,7 +1,9 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import net.meisen.dissertation.impl.measures.Count;
@@ -159,15 +161,28 @@ public class TimeSeriesEvaluator {
 		final Bitmap filteredValidRecords = combineBitmaps(validRecords,
 				filterResult);
 
+		// combine the group and the filteredValid
+		final GroupResult filteredGroupResult = new GroupResult();
+		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+		for (final GroupResultEntry groupResultEntry : itGroup) {
+			final List<String> group = groupResultEntry == null ? Collections
+					.<String> emptyList() : groupResultEntry.getGroupAsList();
+
+			final Bitmap bmp = combineBitmaps(filteredValidRecords,
+					groupResultEntry);
+			filteredGroupResult.add(group, bmp);
+		}
+		queryResult.setFilteredGroupResult(filteredGroupResult);
+
 		// depending on the dimensions we have to choose what to do
 		if (query.getMeasureDimension() == null) {
-			return evaluateLow(query, filteredValidRecords, groupResult);
+			return evaluateLow(query, filteredGroupResult);
 		} else if (!query.usesFunction(IMathAggregationFunction.class)) {
-			return evaluateDim(query, filteredValidRecords, groupResult);
+			return evaluateDim(query, filteredGroupResult);
 		} else if (!query.usesFunction(IDimAggregationFunction.class)) {
-			return evaluateMath(query, filteredValidRecords, groupResult);
+			return evaluateMath(query, filteredGroupResult);
 		} else {
-			return evaluateMixed(query, filteredValidRecords, groupResult);
+			return evaluateMixed(query, filteredGroupResult);
 		}
 	}
 
@@ -252,20 +267,18 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
-	 * @param filteredValidRecords
-	 *            the bitmap of the filtered records
-	 * @param groupResult
-	 *            the group result
+	 * @param filteredGroupResult
+	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateMixed(final SelectQuery query,
-			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+			final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
 		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
-		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
 
 		final DimensionSelector dim = query.getMeasureDimension();
 		final long[] bounds = getBounds(interval);
@@ -284,22 +297,15 @@ public class TimeSeriesEvaluator {
 			final CombinedSlices combined = createCombination(member, bounds);
 			final Bitmap timeBitmap = combined.getBitmap();
 
-			// now we have the bitmap for the specified range, apply the filter
-			final Bitmap filteredCombinedBitmap = combineBitmaps(
-					filteredValidRecords, timeBitmap);
-
 			for (final GroupResultEntry groupResultEntry : itGroup) {
-				final String groupId = groupResultEntry == null ? null
-						: groupResultEntry.getGroup();
-				final Bitmap groupedFilteredBitmap = combineBitmaps(
-						filteredValidRecords, groupResultEntry);
-				final Bitmap groupedFilteredCombinedBitmap = combineBitmaps(
-						filteredCombinedBitmap, groupResultEntry);
+				final String groupId = createGroupId(groupResultEntry);
+				final Bitmap groupedFilteredBitmap = combineBitmaps(timeBitmap,
+						groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MixedExpressionEvaluator(
 						index, bounds, member.getRanges(),
-						groupedFilteredBitmap, groupedFilteredCombinedBitmap,
+						groupResultEntry.getBitmap(), groupedFilteredBitmap,
 						combined.getFacts());
 
 				// calculate each measure
@@ -319,20 +325,18 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
-	 * @param filteredValidRecords
-	 *            the bitmap of the filtered records
-	 * @param groupResult
-	 *            the group result
+	 * @param filteredGroupResult
+	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateMath(final SelectQuery query,
-			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+			final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
 		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
-		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
 
 		final DimensionSelector dim = query.getMeasureDimension();
 		final long[] bounds = getBounds(interval);
@@ -347,14 +351,12 @@ public class TimeSeriesEvaluator {
 		int timeSeriesPos = 0;
 		for (final TimeLevelMember member : members) {
 			for (final GroupResultEntry groupResultEntry : itGroup) {
-				final String groupId = groupResultEntry == null ? null
-						: groupResultEntry.getGroup();
-				final Bitmap resultBitmap = combineBitmaps(
-						filteredValidRecords, groupResultEntry);
+				final String groupId = createGroupId(groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MathExpressionEvaluator(
-						index, bounds, member.getRanges(), resultBitmap);
+						index, bounds, member.getRanges(),
+						groupResultEntry.getBitmap());
 
 				// calculate each measure
 				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
@@ -373,20 +375,18 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
-	 * @param filteredValidRecords
-	 *            the bitmap of the filtered records
-	 * @param groupResult
-	 *            the group result
+	 * @param filteredGroupResult
+	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateDim(final SelectQuery query,
-			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+			final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
 		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
-		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
 
 		final DimensionSelector dim = query.getMeasureDimension();
 		final long[] bounds = getBounds(interval);
@@ -405,17 +405,12 @@ public class TimeSeriesEvaluator {
 			final CombinedSlices combined = createCombination(member, bounds);
 			final Bitmap timeBitmap = combined.getBitmap();
 
-			// now we have the bitmap for the specified range, apply the filter
-			final Bitmap filteredCombinedBitmap = combineBitmaps(
-					filteredValidRecords, timeBitmap);
-
 			for (final GroupResultEntry groupResultEntry : itGroup) {
-				final String groupId = groupResultEntry == null ? null
-						: groupResultEntry.getGroup();
+				final String groupId = createGroupId(groupResultEntry);
 
 				// combine the bitmaps: filter, member, valid with the group
 				final Bitmap groupedFilteredCombinedBitmap = combineBitmaps(
-						filteredCombinedBitmap, groupResultEntry);
+						timeBitmap, groupResultEntry);
 
 				// create the evaluator
 				final DimExpressionEvaluator evaluator = new DimExpressionEvaluator(
@@ -433,26 +428,34 @@ public class TimeSeriesEvaluator {
 		return result;
 	}
 
+	private String createGroupId(final GroupResultEntry groupResultEntry) {
+		if (groupResultEntry == null) {
+			return null;
+		} else if (groupResultEntry.isGroup()) {
+			return groupResultEntry.getGroup();
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Evaluates the query's measures if and only if there are only
 	 * low-functions.
 	 * 
 	 * @param query
 	 *            the query to be evaluated
-	 * @param filteredValidRecords
-	 *            the bitmap of the filtered records
-	 * @param groupResult
-	 *            the group result
+	 * @param filteredGroupResult
+	 *            the filtered result for each group
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateLow(final SelectQuery query,
-			final Bitmap filteredValidRecords, final GroupResult groupResult) {
+			final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
 		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
-		final Iterable<GroupResultEntry> itGroup = it(groupResult);
+		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
 
 		// determine the window and get the slices needed
 		final long[] bounds = getBounds(interval);
@@ -473,15 +476,22 @@ public class TimeSeriesEvaluator {
 		int offset = bounds == null ? 0 : Numbers.castToInt(bounds[0]);
 		int timeSeriesPos = 0;
 		for (final SliceWithDescriptors<?> timeSlice : timeSlices) {
-			final FactDescriptorModelSet factSet = timeSlice == null ? null
-					: timeSlice.getFactsSet();
+			final Bitmap timeBitmap;
+			final FactDescriptorModelSet factSet;
+
+			if (timeSlice == null) {
+				timeBitmap = null;
+				factSet = null;
+			} else {
+				timeBitmap = timeSlice.getBitmap();
+				factSet = timeSlice.getFactsSet();
+			}
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
-				final String groupId = groupResultEntry == null ? null
-						: groupResultEntry.getGroup();
+				final String groupId = createGroupId(groupResultEntry);
 
-				final Bitmap resultBitmap = combineBitmaps(timeSlice,
-						filteredValidRecords, groupResultEntry);
+				final Bitmap resultBitmap = combineBitmaps(timeBitmap,
+						groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new LowExpressionEvaluator(
@@ -623,26 +633,25 @@ public class TimeSeriesEvaluator {
 	}
 
 	/**
-	 * Combines the valid records (see {@link TidaModel#getValidRecords()}) with
-	 * the result of the filter. A {@code null} value is handled as a
-	 * full-bitmap, e.g. all values are set to one. If both bitmaps are
-	 * {@code null}, {@code null} is returned.
+	 * Combines the bitmap with the result of the filter. A {@code null} value
+	 * is handled as a full-bitmap, e.g. all values are set to one. If both
+	 * bitmaps are {@code null}, {@code null} is returned.
 	 * 
-	 * @param validRecords
-	 *            the valid records
+	 * @param bitmap
+	 *            the bitmap used to combine with the filter
 	 * @param filter
 	 *            the filter
 	 * 
 	 * @return the result of the combination of both
 	 */
-	protected Bitmap combineBitmaps(final Bitmap validRecords,
+	protected Bitmap combineBitmaps(final Bitmap bitmap,
 			final IBitmapResult filter) {
 		if (filter == null) {
-			return validRecords;
-		} else if (validRecords == null) {
+			return bitmap;
+		} else if (bitmap == null) {
 			return filter.getBitmap();
 		} else {
-			return validRecords.and(filter.getBitmap());
+			return bitmap.and(filter.getBitmap());
 		}
 	}
 

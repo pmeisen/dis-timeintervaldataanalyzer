@@ -1,4 +1,4 @@
-package net.meisen.dissertation.performance.implementations.similarity;
+package net.meisen.dissertation.performance.implementations.similarity.ibsm;
 
 import java.util.Iterator;
 

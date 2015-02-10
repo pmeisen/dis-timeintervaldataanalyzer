@@ -42,27 +42,34 @@ import net.meisen.general.genmisc.types.Numbers;
 @SuppressWarnings("javadoc")
 public abstract class RecordBasedImplementation extends
 		BaseImplementation<List<Map<String, Object>>> {
+	protected final String start;
+	protected final String end;
 
 	public RecordBasedImplementation(final TidaModel model,
-			final List<Map<String, Object>> records, final int initRuns,
-			final int runs, final IQueryFactory queryFactory) {
-		this(records, initRuns, runs, queryFactory, model.getDimensionModel(),
-				model.getIndexFactory(), model.getIntervalModel()
-						.getTimelineMapper());
+			final List<Map<String, Object>> records, final String start,
+			final String end, final int initRuns, final int runs,
+			final IQueryFactory queryFactory) {
+		this(records, start, end, initRuns, runs, queryFactory, model
+				.getDimensionModel(), model.getIndexFactory(), model
+				.getIntervalModel().getTimelineMapper());
 	}
 
 	public RecordBasedImplementation(final List<Map<String, Object>> records,
-			final int initRuns, final int runs,
-			final IQueryFactory queryFactory, final DimensionModel dimModel,
-			final BaseIndexFactory factory, final BaseMapper<?> mapper) {
+			final String start, final String end, final int initRuns,
+			final int runs, final IQueryFactory queryFactory,
+			final DimensionModel dimModel, final BaseIndexFactory factory,
+			final BaseMapper<?> mapper) {
 		super(records, initRuns, runs, queryFactory, dimModel, factory, mapper);
+
+		this.start = start;
+		this.end = end;
 	}
 
 	protected boolean checkDate(final BaseMapper<?> m, final Date sDate,
 			final Date eDate, final Map<String, Object> record) {
 
-		final Object sIntervalDate = record.get("INTERVAL_START");
-		final Object eIntervalDate = record.get("INTERVAL_END");
+		final Object sIntervalDate = record.get(start);
+		final Object eIntervalDate = record.get(end);
 
 		final long sTw = m.mapToLong(sDate);
 		final long eTw = m.mapToLong(eDate);
@@ -169,8 +176,9 @@ public abstract class RecordBasedImplementation extends
 
 	protected TimeSeriesCollection calculateMeasures(final SelectQuery query,
 			final IRecordsFilter filter) {
-		final long s = mapper.mapToLong(query.getInterval().getStart());
-		final long e = mapper.mapToLong(query.getInterval().getEnd());
+		final long[] bounds = mapper.getBounds(query.getInterval());
+		final long s = bounds[0];
+		final long e = bounds[1];
 
 		final TimeSeriesCollection tsc;
 		if (query.getMeasureDimension() == null) {
@@ -193,7 +201,8 @@ public abstract class RecordBasedImplementation extends
 
 					// set the value within the series
 					final TimeSeries ts = getTimeSeries(tsc, measure.getId());
-					ts.setValue(Numbers.castToInt(i), res.get(0).doubleValue());
+					ts.setValue(Numbers.castToInt(i - s), res.get(0)
+							.doubleValue());
 				}
 			}
 		} else {

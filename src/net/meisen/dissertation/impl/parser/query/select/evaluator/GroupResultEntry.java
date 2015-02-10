@@ -61,4 +61,16 @@ public class GroupResultEntry implements IBitmapResult {
 		return group.toString() + " (" + bitmap.determineCardinality() + ", "
 				+ bitmap + ")";
 	}
+
+	/**
+	 * Checks if the define is group is really a group or just a place-holder. A
+	 * group must have at least one value defined that makes up the group,
+	 * otherwise it is not assumed to be one.
+	 * 
+	 * @return {@code true} if the group is defined, i.e if at least one value
+	 *         exists, otherwise {@code false}
+	 */
+	public boolean isGroup() {
+		return group.size() > 0;
+	}
 }

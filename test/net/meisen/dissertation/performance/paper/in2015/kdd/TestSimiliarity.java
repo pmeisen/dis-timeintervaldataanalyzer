@@ -8,7 +8,7 @@ import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.performance.implementations.model.DataHolder;
-import net.meisen.dissertation.performance.implementations.similarity.IBSM;
+import net.meisen.dissertation.performance.implementations.similarity.ibsm.IBSM;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;

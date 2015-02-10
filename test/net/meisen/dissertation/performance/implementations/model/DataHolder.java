@@ -2,13 +2,16 @@ package net.meisen.dissertation.performance.implementations.model;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import net.meisen.dissertation.help.Db;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
+import net.meisen.general.genmisc.types.Dates;
 
 /**
  * Helper class to load data from the database.
@@ -28,12 +31,26 @@ public class DataHolder {
 	 *            (invalid considering the UTC and the other implementations)
 	 */
 	public DataHolder(final TidaModel model) {
+		this(model,
+				"/net/meisen/dissertation/performance/implementations/model/ghdataHsql.zip");
+	}
+
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 * @param dbPath
+	 *            the path to the database to be used; must be valid according
+	 *            to the test-scenario
+	 */
+	public DataHolder(final TidaModel model, final String dbPath) {
 
 		// open the database
 		db = new Db();
 		try {
-			db.addDb("tida",
-					"/net/meisen/dissertation/performance/implementations/model/ghdataHsql.zip");
+			db.addDb("tida", dbPath);
 			db.setUpDb();
 		} catch (final IOException e) {
 			db.shutDownDb();
@@ -56,8 +73,15 @@ public class DataHolder {
 		final Iterator<Map<String, Object>> it = records.iterator();
 		while (it.hasNext()) {
 			final Map<String, Object> row = it.next();
-			final Object rStart = row.get("INTERVAL_START");
-			final Object rEnd = row.get("INTERVAL_END");
+			final Object rStart = Dates.mapToTimezone((Date) row
+					.get("INTERVAL_START"), TimeZone.getDefault().getID(),
+					Dates.GENERAL_TIMEZONE);
+			row.put("INTERVAL_START", rStart);
+			
+			final Object rEnd = Dates.mapToTimezone((Date) row
+					.get("INTERVAL_END"), TimeZone.getDefault().getID(),
+					Dates.GENERAL_TIMEZONE);
+			row.put("INTERVAL_END", rEnd);
 
 			if (mapper.isSmallerThanStart(rEnd)
 					|| mapper.isLargerThanEnd(rStart)) {
@@ -81,7 +105,7 @@ public class DataHolder {
 	 * @return the records retrieved
 	 */
 	public List<Map<String, Object>> getRecords(final int limit) {
-		return records.subList(0, limit);
+		return records.subList(0, Math.min(records.size(), limit));
 	}
 
 	/**

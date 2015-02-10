@@ -21,6 +21,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	private Bitmap validRecords;
 	private DescriptorLogicResult filterResult;
 	private GroupResult groupResult;
+	private GroupResult filteredGroupResult;
 	
 	/**
 	 * Standard constructor which is used to specify the {@code query} this
@@ -78,6 +79,25 @@ public abstract class SelectResult implements IQueryResultSet,
 	 */
 	public void setGroupResult(final GroupResult groupResult) {
 		this.groupResult = groupResult;
+	}
+	
+	/**
+	 * Gets the filtered result of the group defined by the query.
+	 * 
+	 * @return the filtered result of the group
+	 */
+	public GroupResult getFilteredGroupResult() {
+		return filteredGroupResult;
+	}
+
+	/**
+	 * Sets the result of the filtered group.
+	 * 
+	 * @param filteredGroupResult
+	 *            the filtered grouping result
+	 */
+	public void setFilteredGroupResult(final GroupResult filteredGroupResult) {
+		this.filteredGroupResult = filteredGroupResult;
 	}
 
 	/**

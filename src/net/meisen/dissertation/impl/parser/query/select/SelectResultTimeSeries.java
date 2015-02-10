@@ -18,7 +18,6 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * 
  */
 public class SelectResultTimeSeries extends SelectResult {
-
 	private TimeSeriesCollection timeSeriesCollection;
 
 	/**

@@ -1,4 +1,4 @@
-package net.meisen.dissertation.performance.implementations.similarity;
+package net.meisen.dissertation.performance.implementations.similarity.ibsm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,19 +12,22 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
+import net.meisen.dissertation.performance.implementations.similarity.EventTable;
 import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * An implementation of the {@code Interval-Based Sequence Matching} algorithm.
  * The implementation supports dynamic creation of e-sequences, i.e. the
  * database does not contain e-sequences directly, instead the sequences are
- * defined based on a {@code SelectQuery}.
+ * defined based on a {@code SelectQuery}.<br/>
+ * <br/>
+ * The implementation is based (without reductions) from Kotsifakos et al.,
+ * 2013, <i>IBSM: Interval-Based Sequence Matching</i>.
  * 
  * @author pmeisen
  * 
  */
 public class IBSM {
-
 	private final IntervalTree<Integer> iTree;
 
 	private final TidaModel model;
@@ -117,7 +120,6 @@ public class IBSM {
 	public List<EventTable> createEventTables(final SelectQuery query) {
 		final List<EventTable> eventTables = new ArrayList<EventTable>();
 		final IntervalModel intervalModel = model.getIntervalModel();
-		final BaseMapper<?> mapper = intervalModel.getTimelineMapper();
 
 		/*
 		 * TODO: we have to decide how the filter, filter-value, group,
@@ -144,34 +146,69 @@ public class IBSM {
 				continue;
 			}
 
-			// create an empty eventTable
-			final EventTable eventTable = new EventTable(wnd[1] - wnd[0] + 1);
-			eventTables.add(eventTable);
-
-			// get the records
-			final IntervalData<Integer> res = this.iTree.query(wnd[0], wnd[1]);
-			for (final Integer i : res.getData()) {
-				final Map<String, Object> record = records.get(i);
-
-				// get the needed values from the record
-				long start = mapper.mapToLong(record.get(this.start));
-				long end = mapper.mapToLong(record.get(this.end));
-				List<Object> vals = new ArrayList<Object>(this.labels.size());
-				for (final String label : this.labels) {
-					final Object value = record.get(label);
-					vals.add(value);
-				}
-
-				// make sure we don't move out of the window
-				start = Math.max(start, wnd[0]);
-				end = Math.min(end, wnd[1]);
-
-				// add the record and normalize the start and end
-				eventTable.addEvent(Numbers.castToInt(start - wnd[0]),
-						Numbers.castToInt(end - wnd[0]), vals);
-			}
+			eventTables.add(createEventTable(wnd));
 		}
 
 		return eventTables;
+	}
+
+	/**
+	 * Creates the event-table for the specified bound.
+	 * 
+	 * @param wnd
+	 *            the bound (i.e. window)
+	 * 
+	 * @return the create table
+	 */
+	protected EventTable createEventTable(final long[] wnd) {
+
+		// create an empty eventTable
+		final EventTable eventTable = new EventTable(wnd[1] - wnd[0] + 1);
+
+		// get the records
+		final IntervalData<Integer> res = this.iTree.query(wnd[0], wnd[1]);
+		if (res != null) {
+			for (final Integer i : res.getData()) {
+				final Map<String, Object> record = records.get(i);
+
+				addEventFromRecord(record, wnd, eventTable);
+			}
+		}
+
+		return eventTable;
+	}
+
+	/**
+	 * Adds the event specified by the {@code record} for the specified
+	 * {@code window} into the specified {@code EventTable}.
+	 * 
+	 * @param record
+	 *            the record to be added
+	 * @param wnd
+	 *            the window
+	 * @param eventTable
+	 *            the table to add to
+	 */
+	protected void addEventFromRecord(final Map<String, Object> record,
+			final long[] wnd, final EventTable eventTable) {
+		final IntervalModel intervalModel = model.getIntervalModel();
+		final BaseMapper<?> mapper = intervalModel.getTimelineMapper();
+
+		// get the needed values from the record
+		long start = mapper.mapToLong(record.get(this.start));
+		long end = mapper.mapToLong(record.get(this.end));
+		List<Object> vals = new ArrayList<Object>(this.labels.size());
+		for (final String label : this.labels) {
+			final Object value = record.get(label);
+			vals.add(value);
+		}
+
+		// make sure we don't move out of the window
+		start = Math.max(start, wnd[0]);
+		end = Math.min(end, wnd[1]);
+
+		// add the record and normalize the start and end
+		eventTable.addEvent(record, Numbers.castToInt(start - wnd[0]),
+				Numbers.castToInt(end - wnd[0]), vals);
 	}
 }

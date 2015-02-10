@@ -1,30 +1,36 @@
-package net.meisen.dissertation.performance.implementations.similarity;
+package net.meisen.dissertation.performance.implementations.similarity.ibsm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import net.meisen.dissertation.config.TidaConfig;
+import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.impl.parser.query.DateIntervalValue;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.IntervalType;
+import net.meisen.dissertation.impl.parser.query.QueryFactory;
+import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.model.DataHolder;
+import net.meisen.dissertation.performance.implementations.similarity.DistanceType;
+import net.meisen.dissertation.performance.implementations.similarity.EventTable;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * Tests the implementation of the IBSM, adapted considering the dynamic
@@ -42,14 +48,20 @@ public class TestIBSM {
 	@Autowired
 	private TidaModelHandler loader;
 
+	@Autowired
+	@Qualifier(DefaultValues.QUERYFACTORY_ID)
+	private QueryFactory queryFactory;
+
 	private TidaModel model;
 
+	/**
+	 * Initialize the model to be used
+	 */
 	@Before
 	public void initialize() {
 		loader.unloadAll();
 
-		model = loader
-				.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-minute.xml");
+		model = loader.loadViaXslt(modelPath);
 	}
 
 	/**
@@ -204,6 +216,9 @@ public class TestIBSM {
 		assertTrue(foundEnd);
 	}
 
+	/**
+	 * Tests the creation of the {@code EventTable}.
+	 */
 	@Test
 	public void testEventTableCreation() {
 		final EventTable eventTable = new EventTable(100);
@@ -211,32 +226,54 @@ public class TestIBSM {
 		final Object[] label1 = new Object[] { "A", "B", 5 };
 		final Object[] label2 = new Object[] { "A", "B", 6 };
 
-		eventTable.addEvent(0, 50, label1);
-		eventTable.addEvent(25, 50, label1);
-		eventTable.addEvent(25, 50, label2);
-		eventTable.addEvent(90, 105, label2);
+		eventTable.addEvent(null, 0, 50, label1);
+		eventTable.addEvent(null, 25, 50, label1);
+		eventTable.addEvent(null, 25, 50, label2);
+		eventTable.addEvent(null, 90, 105, label2);
 
 		// check some border values
-		assertEquals(0, eventTable.get(51, label1));
-		assertEquals(1, eventTable.get(0, label1));
-		assertEquals(1, eventTable.get(24, label1));
-		assertEquals(2, eventTable.get(25, label1));
-		assertEquals(2, eventTable.get(50, label1));
-		assertEquals(0, eventTable.get(90, label1));
-		assertEquals(0, eventTable.get(99, label1));
-		assertEquals(1, eventTable.get(99, label2));
-		assertEquals(1, eventTable.get(25, label2));
-		assertEquals(1, eventTable.get(90, label2));
-		assertEquals(0, eventTable.get(89, label2));
+		assertEquals(0, eventTable.get(51, label1), 0.0);
+		assertEquals(1, eventTable.get(0, label1), 0.0);
+		assertEquals(1, eventTable.get(24, label1), 0.0);
+		assertEquals(2, eventTable.get(25, label1), 0.0);
+		assertEquals(2, eventTable.get(50, label1), 0.0);
+		assertEquals(0, eventTable.get(90, label1), 0.0);
+		assertEquals(0, eventTable.get(99, label1), 0.0);
+		assertEquals(1, eventTable.get(99, label2), 0.0);
+		assertEquals(1, eventTable.get(25, label2), 0.0);
+		assertEquals(1, eventTable.get(90, label2), 0.0);
+		assertEquals(0, eventTable.get(89, label2), 0.0);
 	}
 
-	@Ignore
+	/**
+	 * Tests the distance measurement.
+	 */
 	@Test
-	public void testIbsm() {
-		final DataHolder holder = new DataHolder(model);
+	public void testDistance() {
+		final DataHolder holder = new DataHolder(
+				model,
+				"/net/meisen/dissertation/performance/implementations/model/ghdataHsqlSmallFaked.zip");
 
-		final IBSM ibsm = new IBSM(model, holder.getRecords(100),
+		// get the query parsed for the usage
+		SelectQuery query = queryFactory
+				.parseQuery("SELECT TIMESERIES OF COUNT(PERSON) AS CP FROM tidaModel IN [02.01.2008, 03.01.2008) WHERE PERSON='Paul'");
+
+		final IBSM ibsm = new IBSM(model, holder.getRecords(10),
 				"INTERVAL_START", "INTERVAL_END", "PERSON", "TASKTYPE");
 
+		// add the data
+		ibsm.fillIntervalTree();
+
+		// create the event-table
+		final List<EventTable> ets = ibsm.createEventTables(query);
+
+		// compare
+		final DistanceType m = DistanceType.MANHATTAN;
+		final DistanceType e = DistanceType.EUCLID;
+		assertEquals(0.0, ets.get(0).distance(ets.get(1), e), 0.0);
+		assertEquals(0.0, ets.get(0).distance(ets.get(1), m), 0.0);
+		assertEquals(Math.sqrt(61.0), ets.get(0).distance(ets.get(2), e), 0.0);
+		assertEquals(Math.sqrt(209.0), ets.get(0).distance(ets.get(3), e), 0.0);
+		assertEquals(Math.sqrt(209.0), ets.get(0).distance(ets.get(4), e), 0.0);
 	}
 }

@@ -30,11 +30,12 @@ public abstract class IntervalTreeBasedImplementation extends
 			final int runs, final IQueryFactory queryFactory,
 			final DimensionModel dimModel, final BaseIndexFactory factory,
 			final BaseMapper<?> mapper) {
-		super(records, initRuns, runs, queryFactory, dimModel, factory, mapper);
+		super(records, "INTERVAL_START", "INTERVAL_END", initRuns, runs,
+				queryFactory, dimModel, factory, mapper);
 
 		int i = 0;
 		final List<IntervalData<Integer>> list = new ArrayList<IntervalData<Integer>>();
-		
+
 		for (final Map<String, Object> record : records) {
 			final Object rStart = record.get("INTERVAL_START");
 			final Object rEnd = record.get("INTERVAL_END");
