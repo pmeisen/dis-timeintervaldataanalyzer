@@ -33,8 +33,6 @@ public class FileBitmapCache extends BaseFileBitmapIdCache<Bitmap> implements
 	/**
 	 * The name of the file used to store the bitmaps.
 	 */
-	protected final static String bitmapFileName = "bitmap_"
-			+ BaseFileBitmapIdCache.NR_MARKER + ".data";
 
 	@Autowired
 	@Qualifier(DefaultValues.INDEXFACTORY_ID)
@@ -61,8 +59,8 @@ public class FileBitmapCache extends BaseFileBitmapIdCache<Bitmap> implements
 	}
 
 	@Override
-	protected String getFileNamePattern() {
-		return bitmapFileName;
+	protected String getFileName(final int nr) {
+		return "bitmap_" + nr + ".data";
 	}
 
 	@Override

@@ -64,18 +64,13 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			+ IndexEntry.idxEntrySizeInBytes;
 
 	/**
-	 * The marker used to mark the number within a file-name.
-	 */
-	protected static final String NR_MARKER = "{nr}";
-
-	/**
 	 * The {@code ExceptionRegistry}.
 	 */
 	@Autowired
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	protected IExceptionRegistry exceptionRegistry;
 
-	private final CachingStrategy strategy;
+	private final ICachingStrategy strategy;
 
 	private final Map<BitmapId<?>, IBitmapIdOwner> owners;
 	private final Map<BitmapId<?>, T> cache;
@@ -109,11 +104,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	 * Default constructor.
 	 */
 	public BaseFileBitmapIdCache() {
-		this.strategy = new CachingStrategy();
-
-		this.owners = new HashMap<BitmapId<?>, IBitmapIdOwner>();
-		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
-		this.cache = new HashMap<BitmapId<?>, T>();
+		this.strategy = new RandomCachingStrategy();
 
 		this.notPersisted = new HashSet<BitmapId<?>>();
 
@@ -125,6 +116,10 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		this.location = null;
 		this.cacheSize = getDefaultCacheSize();
 		this.cacheCleaningFactor = getDefaultCacheCleaningFactor();
+
+		this.owners = new HashMap<BitmapId<?>, IBitmapIdOwner>();
+		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
+		this.cache = new HashMap<BitmapId<?>, T>(this.cacheSize);
 
 		this.fileReaders = new ArrayList<RandomAccessFile>();
 		this.fileWriters = new ArrayList<FileBasedDataOutputStream>();
@@ -405,8 +400,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	 * @return the file to be used
 	 */
 	protected File createFileName(final int nr) {
-		final String fileName = getFileNamePattern()
-				.replace(NR_MARKER, "" + nr);
+		final String fileName = getFileName(nr);
 		return new File(getModelLocation(), fileName);
 	}
 
@@ -585,12 +579,14 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	protected abstract String getIndexFileName();
 
 	/**
-	 * Gets the pattern of the file-name used for the data. The file-name must
-	 * contain the pattern defined by {@link #NR_MARKER}.
+	 * Gets the file-name used for the file with the specified {@code nr}.
 	 * 
-	 * @return he pattern of the file-name used for the data
+	 * @param nr
+	 *            the number of the file
+	 * 
+	 * @return the file-name used for the data
 	 */
-	protected abstract String getFileNamePattern();
+	protected abstract String getFileName(final int nr);
 
 	/**
 	 * Gets the {@code Cacheable} with the specified {@code bitmapId} from the
@@ -623,12 +619,24 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			if (cacheable == null) {
 				cacheable = _getFromIndex(idx.get(bitmapId));
 				doCache = true;
+			} else {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Get " + bitmapId + " from cache.");
+				}
 			}
 
 			// if we still don't have a bitmap create an empty one
 			if (cacheable == null) {
 				cacheable = createNewInstance();
 				doCache = true;
+
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Created new instance for " + bitmapId + ".");
+				}
+			} else {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Loaded instance for " + bitmapId + " from disk.");
+				}
 			}
 		} finally {
 			this.idxLock.readLock().unlock();
@@ -732,7 +740,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 
 		// determine which bitmaps to be released
 		final List<BitmapId<?>> removedIds = getStrategy()
-				.determineLessUsedList(cacheCleaningSize, true);
+				.determineRemovables(cache.keySet(), cacheCleaningSize, true);
 
 		// log what is removed
 		if (LOG.isTraceEnabled()) {
@@ -1071,7 +1079,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	 * 
 	 * @return the {@code CachingStrategy} to be used.
 	 */
-	protected CachingStrategy getStrategy() {
+	protected ICachingStrategy getStrategy() {
 		return strategy;
 	}
 

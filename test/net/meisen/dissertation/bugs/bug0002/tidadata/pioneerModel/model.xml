@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="pioneerModel">
+  
+  <config>
+    <caches>
+      <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
+      <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
+    </caches>
+  </config>
+  
+  <time>
+    <timeline start="0" duration="10000" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="DESC_SYMBOL" />
+    </descriptors>
+
+    <entries />
+  </meta>
+    
+  <data metahandling="create" intervalhandling="boundariesWhenNull" />
+</model>

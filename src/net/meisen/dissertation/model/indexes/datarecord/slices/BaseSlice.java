@@ -176,7 +176,7 @@ public abstract class BaseSlice<I extends Object> implements
 
 	@Override
 	public void release(final IBitmapIdCacheable instance) {
-		if (instance != null && instance.getClass().equals(Bitmap.class)) {
+		if (instance instanceof Bitmap) {
 			bitmap = null;
 			refBitmap = null;
 		}

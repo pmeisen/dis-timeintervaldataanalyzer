@@ -24,11 +24,6 @@ public class FileFactDescriptorModelSetCache extends
 	 * The name of the file used as index-table.
 	 */
 	protected final static String idxTableFileName = "fact.idx";
-	/**
-	 * The name of the file used to store the {@code FactDescriptorModelSet}.
-	 */
-	protected final static String fdmsFileName = "fact_"
-			+ BaseFileBitmapIdCache.NR_MARKER + ".data";
 
 	@Override
 	protected void writeToOutput(final FactDescriptorModelSet set,
@@ -53,8 +48,8 @@ public class FileFactDescriptorModelSetCache extends
 	}
 
 	@Override
-	protected String getFileNamePattern() {
-		return fdmsFileName;
+	protected String getFileName(final int nr) {
+		return "fact_" + nr + ".data";
 	}
 
 	@Override

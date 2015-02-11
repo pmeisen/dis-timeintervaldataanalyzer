@@ -167,7 +167,8 @@ public class BitmapId<I> implements Comparable<BitmapId<I>> {
 		} else if (obj instanceof BitmapId) {
 			final BitmapId<?> bId = (BitmapId<?>) obj;
 
-			return Objects.equals(bId.getId(), getId())
+			return bId.hashCode() == hashCode()
+					&& Objects.equals(bId.getId(), getId())
 					&& Objects.equals(bId.getType(), getType())
 					&& Objects.equals(bId.getClassifier(), getClassifier());
 		} else {

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:advDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="personModel">
+  
+  <time>
+    <timeline start="03.03.2014" end="04.03.2014 23:59:00" granularity="MINUTE" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="PERSON" />
+      <string id="LOCATION" />
+      <integer id="SCREAMS" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="PERSON" value="Tobias" />
+      <entry descriptor="PERSON" value="Philipp" />
+      <entry descriptor="PERSON" value="Edison" />
+      <entry descriptor="PERSON" value="Debbie" />
+
+      <entry descriptor="LOCATION" value="Aachen" />
+      <entry descriptor="LOCATION" value="Mönchengladbach" />
+      <entry descriptor="LOCATION" value="Undefined" />
+    </entries>
+  </meta>
+  
+  <structure>   
+    <meta position="3" descriptor="PERSON" />
+    <meta position="4" descriptor="LOCATION" />
+    <meta position="5" descriptor="SCREAMS" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create">
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Tobias" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="03.03.2014 16:19:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Mönchengladbach" />
+      <entry class="java.lang.Integer" value="3" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 16:20:00" />
+      <entry class="java.util.Date" value="03.03.2014 17:21:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Undefined" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 17:22:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Debbie" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Edison" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="12" />
+    </dataset>
+  </data>
+</model>

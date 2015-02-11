@@ -86,7 +86,7 @@ public class IndexEntry {
 
 	/**
 	 * Gets the position (in bytes) of the entry within the data-file (see
-	 * {@link BaseFileBitmapIdCache#getFileNamePattern()}).
+	 * {@link BaseFileBitmapIdCache#getFileName(int)}).
 	 * 
 	 * @return the position (in bytes) of the entry within the data-file
 	 */

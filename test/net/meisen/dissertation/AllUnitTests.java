@@ -7,7 +7,7 @@ import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.auth.shiro.TestMapDbAuthorizingRealm;
 import net.meisen.dissertation.impl.auth.shiro.TestShiroAuthManager;
-import net.meisen.dissertation.impl.cache.TestCachingStrategy;
+import net.meisen.dissertation.impl.cache.TestRecentlyUsedCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
 import net.meisen.dissertation.impl.cache.TestFileBitmapIdCacheConfig;
 import net.meisen.dissertation.impl.cache.TestFileCaches;
@@ -228,7 +228,7 @@ import org.junit.runners.Suite;
 		TestMemoryIdentifierCache.class,
 		TestFileIdentifierCache.class,
 		TestFileBitmapIdCacheConfig.class,
-		TestCachingStrategy.class,
+		TestRecentlyUsedCachingStrategy.class,
 		TestFileBitmapCache.class,
 		TestFileFactDescriptorModelSetCache.class,
 		TestFileCaches.TestFileCachesSuite.class,
