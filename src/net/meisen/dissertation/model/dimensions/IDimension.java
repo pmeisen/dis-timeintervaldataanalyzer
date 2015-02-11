@@ -15,4 +15,13 @@ public interface IDimension {
 	 */
 	public String getId();
 
+	/**
+	 * Validates if the dimension has the specified hierarchy.
+	 * 
+	 * @param hierarchyId
+	 *            the identifier of the hierarchy
+	 *            
+	 * @return {@code true} if such an hierarchy exists, otherwise {@code false}
+	 */
+	public boolean hasHierarchy(final String hierarchyId);
 }

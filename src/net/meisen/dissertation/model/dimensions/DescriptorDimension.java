@@ -259,4 +259,9 @@ public class DescriptorDimension implements IDimension {
 		return getId() + (name != null ? " [" + getName() + "] " : "") + " ("
 				+ getDescriptorModelId() + ")";
 	}
+
+	@Override
+	public boolean hasHierarchy(final String hierarchyId) {
+		return getHierarchy(hierarchyId) != null;
+	}
 }

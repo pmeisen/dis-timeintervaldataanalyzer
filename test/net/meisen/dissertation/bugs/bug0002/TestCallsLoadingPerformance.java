@@ -93,7 +93,7 @@ public class TestCallsLoadingPerformance extends LoaderBasedTest {
 	private QueryFactory queryFactory;
 
 	/**
-	 * The test printing the performances. 
+	 * The test printing the performances.
 	 */
 	@Test
 	public void testPerformance() {
@@ -103,17 +103,34 @@ public class TestCallsLoadingPerformance extends LoaderBasedTest {
 		}
 		assertEquals(63824, model.getAmountOfRecords());
 
+		IQuery query;
+		SelectResultTimeSeries res;
+
 		Performance p = new Performance();
 		p.start(true);
-		IQuery query = queryFactory
+		query = queryFactory
 				.parseQuery("SELECT TIMESERIES OF MAX(COUNT(recipient)) AS C ON TIME.RASTER.DAY FROM callsModel IN [01.11.2013, 01.12.2013)");
-		SelectResultTimeSeries res = queryFactory.evaluateQuery(query, null);
+		res = queryFactory.evaluateQuery(query, null);
 		System.out.println(p.printSecs(p.stop(true)));
 		System.out.println(res);
 
 		p.start(true);
 		query = queryFactory
 				.parseQuery("SELECT TIMESERIES OF MAX(COUNT(recipient)) AS C ON TIME.RASTER.DAY FROM callsModel IN [01.11.2013, 01.12.2013)");
+		res = queryFactory.evaluateQuery(query, null);
+		System.out.println(p.printSecs(p.stop(true)));
+		System.out.println(res);
+
+		p.start(true);
+		query = queryFactory
+				.parseQuery("SELECT TIMESERIES OF COUNT(recipient) AS C ON TIME.RASTER.DAY FROM callsModel IN [01.06.2014, 30.06.2014]");
+		res = queryFactory.evaluateQuery(query, null);
+		System.out.println(p.printSecs(p.stop(true)));
+		System.out.println(res);
+
+		p.start(true);
+		query = queryFactory
+				.parseQuery("SELECT TIMESERIES OF SUM(recipient) AS C ON TIME.RASTER.DAY FROM callsModel IN [01.06.2014, 30.06.2014]");
 		res = queryFactory.evaluateQuery(query, null);
 		System.out.println(p.printSecs(p.stop(true)));
 		System.out.println(res);

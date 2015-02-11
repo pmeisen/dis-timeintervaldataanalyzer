@@ -38,7 +38,7 @@ public class DescriptorGraph implements IDimensionGraph {
 	private DescriptorGraphLevel levelRoot;
 
 	private boolean validated;
-
+	
 	/**
 	 * The default constructor.
 	 */

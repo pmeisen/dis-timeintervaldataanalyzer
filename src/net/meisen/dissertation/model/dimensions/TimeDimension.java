@@ -118,4 +118,9 @@ public class TimeDimension implements IDimension {
 	public TimeHierarchy getHierarchy(final String hierarchyId) {
 		return this.hierarchies.get(hierarchyId);
 	}
+
+	@Override
+	public boolean hasHierarchy(String hierarchyId) {
+		return getHierarchy(hierarchyId) != null;
+	}
 }

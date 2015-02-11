@@ -49,7 +49,7 @@ public class FactDescriptor<I> implements Comparable<FactDescriptor<I>> {
 		this.descId = descId;
 		this.fact = fact;
 		this.recordInvariant = true;
-		this.valueInvariant = false;
+		this.valueInvariant = descId == null;
 	}
 
 	/**

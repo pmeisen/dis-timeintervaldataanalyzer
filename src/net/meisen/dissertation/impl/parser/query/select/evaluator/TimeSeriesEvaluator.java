@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.measures.Count;
 import net.meisen.dissertation.impl.parser.query.DimensionSelector;
 import net.meisen.dissertation.impl.parser.query.Interval;
@@ -28,6 +29,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.IBitmapContainer;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
+import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Numbers;
 
 /**
@@ -299,13 +301,13 @@ public class TimeSeriesEvaluator {
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = createGroupId(groupResultEntry);
-				final Bitmap groupedFilteredBitmap = combineBitmaps(timeBitmap,
+				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
 						groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MixedExpressionEvaluator(
 						index, bounds, member.getRanges(),
-						groupResultEntry.getBitmap(), groupedFilteredBitmap,
+						groupResultEntry.getBitmap(), resultBitmap,
 						combined.getFacts());
 
 				// calculate each measure
@@ -409,13 +411,12 @@ public class TimeSeriesEvaluator {
 				final String groupId = createGroupId(groupResultEntry);
 
 				// combine the bitmaps: filter, member, valid with the group
-				final Bitmap groupedFilteredCombinedBitmap = combineBitmaps(
-						timeBitmap, groupResultEntry);
+				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
+						groupResultEntry);
 
 				// create the evaluator
 				final DimExpressionEvaluator evaluator = new DimExpressionEvaluator(
-						index, groupedFilteredCombinedBitmap,
-						combined.getFacts());
+						index, resultBitmap, combined.getFacts());
 
 				// calculate each measure
 				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
@@ -490,7 +491,7 @@ public class TimeSeriesEvaluator {
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = createGroupId(groupResultEntry);
 
-				final Bitmap resultBitmap = combineBitmaps(timeBitmap,
+				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
 						groupResultEntry);
 
 				// create the evaluator
@@ -555,12 +556,22 @@ public class TimeSeriesEvaluator {
 	 * @return the determined bounds
 	 */
 	protected long[] getBounds(final Interval<?> interval) {
+		long[] res;
+
 		if (interval == null) {
-			return new long[] { index.getNormalizedTimeStart(),
+			res = new long[] { index.getNormalizedTimeStart(),
 					index.getNormalizedTimeEnd() };
 		} else {
-			return intervalModel.getTimelineMapper().getBounds(interval);
+			res = intervalModel.getTimelineMapper().getBounds(interval);
+
+			if (res == null) {
+				throw new ForwardedRuntimeException(
+						QueryEvaluationException.class, 1027, interval,
+						intervalModel.getTimelineDefinition());
+			}
 		}
+
+		return res;
 	}
 
 	/**
@@ -660,23 +671,23 @@ public class TimeSeriesEvaluator {
 	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
 	 * to one.
 	 * 
-	 * @param filterBitmap
-	 *            the bitmap, specifying the filtered values, {@code null} is
-	 *            handled as full bitmap
 	 * @param timeBitmap
 	 *            the bitmap, specifying the selected values within the
 	 *            time-dimension, {@code null} is handled as empty bitmap
+	 * @param filter
+	 *            specifying the filtered values, {@code null} is handled as
+	 *            full bitmap
 	 * 
 	 * @return the result of the combination
 	 */
-	protected Bitmap combineBitmaps(final Bitmap filterBitmap,
-			final Bitmap timeBitmap) {
+	protected Bitmap combineTimeAndFilter(final Bitmap timeBitmap,
+			final IBitmapResult filter) {
 		if (timeBitmap == null) {
 			return indexFactory.createBitmap();
-		} else if (filterBitmap == null) {
+		} else if (filter == null || filter.getBitmap() == null) {
 			return timeBitmap;
 		} else {
-			return filterBitmap.and(timeBitmap);
+			return filter.getBitmap().and(timeBitmap);
 		}
 	}
 

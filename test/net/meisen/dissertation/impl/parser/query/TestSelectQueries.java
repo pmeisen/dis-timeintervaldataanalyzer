@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
+import net.meisen.dissertation.exceptions.GroupEvaluatorException;
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.exceptions.QueryParsingException;
 import net.meisen.dissertation.help.LoaderBasedTest;
@@ -1631,6 +1632,57 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the selection of an invalid dimension.
+	 */
+	@Test
+	public void testInvalidDimensionInGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by UNKNOWNDIM.GENDER.GENDER";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		thrown.expect(GroupEvaluatorException.class);
+		thrown.expectMessage("The dimension 'UNKNOWNDIM' is not defined");
+		factory.evaluateQuery(q(query), null);
+	}
+
+	/**
+	 * Tests the selection of an invalid hierarchy.
+	 */
+	@Test
+	public void testInvalidHierarchyInGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON.UNKNOWNHIERARCHY.GENDER";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		thrown.expect(GroupEvaluatorException.class);
+		thrown.expectMessage("The hierarchy 'UNKNOWNHIERARCHY' is not defined");
+		factory.evaluateQuery(q(query), null);
+	}
+
+	/**
+	 * Tests the selection of an invalid level.
+	 */
+	@Test
+	public void testInvalidLevelInGroupBy() {
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		final String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by PERSON.GENDER.UNKNOWNLEVEL";
+
+		// load the model
+		m(xml);
+
+		// fire the query
+		thrown.expect(GroupEvaluatorException.class);
+		thrown.expectMessage("The level 'UNKNOWNLEVEL' is not defined");
+		factory.evaluateQuery(q(query), null);
+	}
+
+	/**
 	 * Group-By of a dimensional expression with exclusion.
 	 */
 	@Test
@@ -2417,6 +2469,27 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the exception to be thrown if an invalid time-interval is selected
+	 * for the query.
+	 */
+	@Test
+	public void testOutOfBoundIntervalWithDimension() {
+		String query;
+
+		// load the model
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModelWithDim.xml";
+		m(xml);
+
+		// fire the UTC query
+		query = "select timeseries of MAX(SUM(PERSON)) AS RESNEED, COUNT(PERSON) AS INVRESNEED, COUNT(PERSON) * MAX(COUNT(PERSON)) AS CALC ON TIME.UTC.HOUR8 from testPersonModel IN [01.07.2013, 31.08.2013]";
+
+		thrown.expect(QueryEvaluationException.class);
+		thrown.expectMessage("is outside of the defined time-axis");
+		((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
+	}
+
+	/**
 	 * Tests the retrieval of a time-series for an interval which is not part of
 	 * the defined time-line.
 	 */
@@ -2428,9 +2501,10 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// load the model
 		m(xml);
 
-		final TimeSeriesCollection tsRes = ((SelectResultTimeSeries) factory
-				.evaluateQuery(q(query), null)).getTimeSeriesResult();
-		assertEquals(0, tsRes.size());
+		thrown.expect(QueryEvaluationException.class);
+		thrown.expectMessage("is outside of the defined time-axis");
+		((SelectResultTimeSeries) factory.evaluateQuery(q(query), null))
+				.getTimeSeriesResult();
 	}
 
 	/**

@@ -706,7 +706,9 @@ public abstract class BaseMapper<T> {
 	 *            {@code true} if the end value is included, otherwise
 	 *            {@code false}
 	 * 
-	 * @return the determined bounds
+	 * @return the determined bounds or {@code null} if the specified
+	 *         {@code start} is outside the {@code timeline's end} or
+	 *         {@code the end} is outside the {@code timeline's start}
 	 */
 	public long[] getBounds(final Object start, final Object end,
 			final boolean startInclusive, final boolean endInclusive) {
@@ -734,7 +736,9 @@ public abstract class BaseMapper<T> {
 	 *            the interval to determine the bound for
 	 * 
 	 * @return the determined bounds, or {@code null} if the interval is
-	 *         {@code null}
+	 *         {@code null}, the specified {@code start} is outside the
+	 *         {@code timeline's end} or {@code the end} is outside the
+	 *         {@code timeline's start}
 	 */
 	public long[] getBounds(final Interval<?> interval) {
 		if (interval == null) {

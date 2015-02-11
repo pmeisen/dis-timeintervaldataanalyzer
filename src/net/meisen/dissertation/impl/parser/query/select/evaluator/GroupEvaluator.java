@@ -636,6 +636,17 @@ public class GroupEvaluator {
 		final DescriptorGraph descDimGraph = (DescriptorGraph) dimGraph;
 		final DescriptorGraphLevel descriptorGraphLevel = descDimGraph
 				.getLevel(selector.getHierarchyId(), selector.getLevelId());
+		if (descriptorGraphLevel == null) {
+			if (dimGraph.getDimension().hasHierarchy(selector.getHierarchyId())) {
+				throw new ForwardedRuntimeException(
+						GroupEvaluatorException.class, 1006,
+						selector.getLevelId());
+			} else {
+				throw new ForwardedRuntimeException(
+						GroupEvaluatorException.class, 1005,
+						selector.getHierarchyId());
+			}
+		}
 		final Set<DescriptorMember> members = descriptorGraphLevel
 				.getMembers(selector.getHierarchyId());
 
