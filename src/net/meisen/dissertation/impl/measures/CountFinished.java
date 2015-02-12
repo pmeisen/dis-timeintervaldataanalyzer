@@ -26,7 +26,7 @@ public class CountFinished extends BaseAggregationFunction implements
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts, final int timepoint) {
 
-		if (bitmap == null || facts == null || facts.amountOfFacts() == 0) {
+		if (bitmap == null || facts == null || facts.amount() == 0) {
 			return getDefaultValue();
 		} else {
 			return aggregate(index, bitmap, timepoint);

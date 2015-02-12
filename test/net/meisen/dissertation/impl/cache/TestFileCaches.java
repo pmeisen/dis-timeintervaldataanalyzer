@@ -244,11 +244,14 @@ public class TestFileCaches {
 					final FactDescriptorSet valueSet = slice
 							.getDescriptors("VALUE");
 
-					final FactDescriptor<?> personFactDesc = personSet.first();
+					final FactDescriptor<?> personFactDesc = personSet
+							.iterator().next();
 					assertNull(personFactDesc.getId());
-					final FactDescriptor<?> taskFactDesc = taskSet.first();
+					final FactDescriptor<?> taskFactDesc = taskSet.iterator()
+							.next();
 					assertNull(taskFactDesc.getId());
-					final FactDescriptor<?> valueFactDesc = valueSet.first();
+					final FactDescriptor<?> valueFactDesc = valueSet.iterator()
+							.next();
 					assertNotNull(valueFactDesc.getId());
 					final Descriptor<?, ?, ?> valueDesc = reloadedModel
 							.getMetaDataModel().getDescriptor("VALUE",
@@ -323,12 +326,12 @@ public class TestFileCaches {
 
 			d = metaModel.getDescriptorByValue("PERSON", "Uschi");
 			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
-			assertEquals(Bitmap.createBitmap(f,2,9,16,23,30),
+			assertEquals(Bitmap.createBitmap(f, 2, 9, 16, 23, 30),
 					s.getBitmap());
 
 			d = metaModel.getDescriptorByValue("PERSON", "Hajo");
 			s = index.getMetaIndexDimensionSlice("PERSON", d.getId());
-			assertEquals(Bitmap.createBitmap(f, 3,10,17,24,31),
+			assertEquals(Bitmap.createBitmap(f, 3, 10, 17, 24, 31),
 					s.getBitmap());
 
 			d = metaModel.getDescriptorByValue("PERSON", "Edison");

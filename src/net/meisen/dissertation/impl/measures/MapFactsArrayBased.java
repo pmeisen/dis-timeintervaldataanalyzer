@@ -1,11 +1,12 @@
 package net.meisen.dissertation.impl.measures;
 
-import java.util.Arrays;
-
 import gnu.trove.impl.Constants;
 import gnu.trove.iterator.TDoubleIterator;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+
+import java.util.Arrays;
+
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.util.IDoubleIterator;
 import net.meisen.dissertation.model.util.IIntIterator;
@@ -18,24 +19,33 @@ import net.meisen.dissertation.model.util.IIntIterator;
  */
 public class MapFactsArrayBased implements IFactsHolder {
 	private final TIntDoubleHashMap map;
+	private final TIntDoubleHashMap nanMap;
 
 	/**
 	 * Default constructor.
 	 */
 	public MapFactsArrayBased() {
-		this(-1);
+		this(-1, -1);
 	}
 
 	/**
 	 * Constructor defining an initial capacity.
 	 * 
-	 * @param capacity
-	 *            the initiali capacity, might be {@code -1} if unknown
+	 * @param nonNaNcapacity
+	 *            the initial capacity of non NaN values, might be {@code -1} if
+	 *            unknown
+	 * @param naNcapacity
+	 *            the initial capacity of NaN values, might be {@code -1} if
+	 *            unknown
 	 */
-	public MapFactsArrayBased(final int capacity) {
+	public MapFactsArrayBased(final int nonNaNcapacity, final int naNcapacity) {
 		this.map = new TIntDoubleHashMap(
-				capacity < 0 ? Constants.DEFAULT_CAPACITY : capacity,
-				Constants.DEFAULT_LOAD_FACTOR, -1, Double.NaN);
+				nonNaNcapacity < 0 ? Constants.DEFAULT_CAPACITY
+						: nonNaNcapacity, Constants.DEFAULT_LOAD_FACTOR, -1,
+				Double.NaN);
+		this.nanMap = new TIntDoubleHashMap(
+				naNcapacity < 0 ? Constants.DEFAULT_CAPACITY : naNcapacity,
+				Constants.DEFAULT_LOAD_FACTOR, -1, 0.00);
 	}
 
 	/**
@@ -73,19 +83,36 @@ public class MapFactsArrayBased implements IFactsHolder {
 					"The record cannot have an identifier smaller than 0.");
 		}
 
-		map.put(recordId, factValue);
+		if (Double.isNaN(factValue)) {
+			nanMap.put(recordId, factValue);
+		} else {
+			map.put(recordId, factValue);
+		}
 	}
 
 	@Override
-	public int amountOfFacts() {
+	public int amount() {
+		return map.size() + nanMap.size();
+	}
+
+	@Override
+	public int amountOfNonNaN() {
 		return map.size();
 	}
 
 	@Override
-	public double getFactOfRecord(final int recordId) {
+	public int amountOfNaN() {
+		return nanMap.size();
+	}
 
-		// get the value stored in the map
-		return map.get(recordId);
+	@Override
+	public double getFactOfRecord(final int recordId) {
+		double val = nanMap.get(recordId);
+		if (val == 0.00) {
+			val = map.get(recordId);
+		}
+
+		return val;
 	}
 
 	@Override
@@ -93,79 +120,129 @@ public class MapFactsArrayBased implements IFactsHolder {
 
 		return new IIntIterator() {
 			final TIntIterator it = map.keySet().iterator();
+			final TIntIterator nanIt = nanMap.keySet().iterator();
 
 			@Override
 			public boolean hasNext() {
-				return it.hasNext();
+				return it.hasNext() || nanIt.hasNext();
 			}
 
 			@Override
 			public int next() {
-				return it.next();
+				if (it.hasNext()) {
+					return it.next();
+				} else if (nanIt.hasNext()) {
+					return nanIt.next();
+				} else {
+					throw new IllegalStateException("No next value available.");
+				}
 			}
 		};
 	}
 
 	@Override
-	public IDoubleIterator factsIterator() {
+	public IDoubleIterator iterator(final boolean excludeNaN) {
 
-		return new IDoubleIterator() {
-			final TDoubleIterator it = map.valueCollection().iterator();
+		if (excludeNaN) {
+			return new IDoubleIterator() {
+				final TDoubleIterator it = map.valueCollection().iterator();
 
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
 
-			@Override
-			public double next() {
-				return it.next();
-			}
-		};
+				@Override
+				public double next() {
+					return it.next();
+				}
+			};
+		} else {
+
+			return new IDoubleIterator() {
+				final TDoubleIterator it = map.valueCollection().iterator();
+				final TDoubleIterator nanIt = nanMap.valueCollection()
+						.iterator();
+
+				@Override
+				public boolean hasNext() {
+					return it.hasNext() || nanIt.hasNext();
+				}
+
+				@Override
+				public double next() {
+					if (it.hasNext()) {
+						return it.next();
+					} else if (nanIt.hasNext()) {
+						return nanIt.next();
+					} else {
+						throw new IllegalStateException(
+								"No next value available.");
+					}
+				}
+			};
+		}
 	}
 
 	@Override
-	public IDoubleIterator sortedFactsIterator() {
+	public IDoubleIterator sortedIterator() {
 		final double[] facts = map.values();
 		Arrays.sort(facts);
 
 		return new IDoubleIterator() {
+			final TDoubleIterator nanIt = nanMap.valueCollection().iterator();
+
 			int pos = 0;
 
 			@Override
 			public boolean hasNext() {
-				return pos < facts.length;
+				return pos < facts.length || nanIt.hasNext();
 			}
 
 			@Override
 			public double next() {
-				final int lastPos = pos;
-				pos++;
 
-				return facts[lastPos];
+				if (pos < facts.length) {
+					final int lastPos = pos;
+					pos++;
+					return facts[lastPos];
+				} else if (nanIt.hasNext()) {
+					return nanIt.next();
+				} else {
+					throw new IllegalStateException("No next value available.");
+				}
 			}
 		};
 	}
 
 	@Override
-	public IDoubleIterator descSortedFactsIterator() {
+	public IDoubleIterator descSortedIterator() {
 		final double[] facts = map.values();
 		Arrays.sort(facts);
 
 		return new IDoubleIterator() {
+			final TDoubleIterator nanIt = nanMap.valueCollection().iterator();
+
 			int pos = facts.length - 1;
 
 			@Override
 			public boolean hasNext() {
-				return pos > -1;
+				return pos > -1 || nanIt.hasNext();
 			}
 
 			@Override
 			public double next() {
-				final int lastPos = pos;
-				pos--;
 
-				return facts[lastPos];
+				if (pos > -1) {
+					final int lastPos = pos;
+					pos--;
+					return facts[lastPos];
+				} else if (nanIt.hasNext()) {
+					return nanIt.next();
+				} else {
+					throw new IllegalStateException("No next value available.");
+				}
+
 			}
 		};
 	}

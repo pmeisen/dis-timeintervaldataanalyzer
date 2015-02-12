@@ -319,11 +319,10 @@ public abstract class ExpressionEvaluator {
 	 */
 	protected IFactsHolder calculate(final ArithmeticOperator operator,
 			final IFactsHolder res1, final IFactsHolder res2) {
-		assert res1.amountOfFacts() == res2.amountOfFacts();
+		assert res1.amount() == res2.amount();
 
 		// create the result, res1 and res2 are both of the same size
-		final MapFactsArrayBased res = new MapFactsArrayBased(
-				res1.amountOfFacts());
+		final MapFactsArrayBased res = new MapFactsArrayBased();
 
 		// set the values within the map
 		final IIntIterator it = res1.recordIdsIterator();

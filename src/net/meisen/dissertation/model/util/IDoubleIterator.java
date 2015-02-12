@@ -1,7 +1,8 @@
 package net.meisen.dissertation.model.util;
 
 /**
- * Iterator used to iterate over doubles.
+ * Iterator used to iterate over doubles. {@code Double.NaN} values have to be
+ * appended last in any sorted version of the iterator.
  * 
  * @author pmeisen
  * 

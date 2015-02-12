@@ -8,7 +8,6 @@ import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.dissertation.model.measures.IResultsHolder;
-import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * {@code AggregationFunction} to get the maximum value.
@@ -24,17 +23,11 @@ public class Max extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (facts == null || bitmap == null || facts.amountOfFacts() == 0) {
+		if (facts == null || bitmap == null) {
 			return getDefaultValue();
 		}
 
-		double max = Double.MIN_VALUE;
-		final IDoubleIterator it = facts.descSortedFactsIterator();
-		if (it.hasNext()) {
-			max = it.next();
-		}
-
-		return max;
+		return findFirstNotNaN(facts.descSortedIterator());
 	}
 
 	@Override
@@ -44,16 +37,26 @@ public class Max extends BaseAggregationFunction implements
 	}
 
 	@Override
+	public double getDefaultValue() {
+		return Double.NaN;
+	}
+
+	@Override
+	public double getNaNValue() {
+		return Double.NaN;
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
 
 	@Override
 	public double aggregate(final IResultsHolder results) {
-		if (results == null || results.amountOfResults() == 0) {
+		if (results == null) {
 			return getDefaultValue();
 		} else {
-			return results.descSortedResultsIterator().next();
+			return findFirstNotNaN(results.descSortedIterator());
 		}
 	}
 }

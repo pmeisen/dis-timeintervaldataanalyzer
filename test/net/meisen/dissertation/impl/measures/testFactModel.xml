@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:nanDes="http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors"
+
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                      http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/advancedDescriptors  http://dev.meisen.net/xsd/dissertation/tidaAdvancedDescriptors.xsd"
+
+       id="testFactModel">
+
+  <time>
+    <timeline start="1" end="6" granularity="DAY" />
+  </time>
+
+  <meta>
+    <descriptors>
+      <integer id="NUMBER" />
+      <nanDes:nan id="NAN" />
+    </descriptors>
+
+    <entries />
+  </meta>
+
+  <structure>   
+    <meta position="1" descriptor="NUMBER" />
+    <meta position="2" descriptor="NAN" />
+    <interval position="3" type="start" />
+    <interval position="4" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="boundariesWhenNull">
+    <dataset>
+      <entry class="int" value="110" />
+      <entry class="java.lang.String" value="NAN" />
+      <entry class="int" value="1" />
+      <entry class="int" value="2" />
+    </dataset>
+    <dataset>
+      <entry class="int" value="100" />
+      <entry class="java.lang.String" value="A VALUE" />
+      <entry class="int" value="1" />
+      <entry class="int" value="2" />
+    </dataset>
+    <dataset>
+      <entry class="int" value="130" />
+      <entry class="java.lang.String" value="NAN" />
+      <entry class="int" value="2" />
+      <entry class="int" value="4" />
+    </dataset>
+    <dataset>
+      <entry class="int" value="110" />
+      <entry class="java.lang.String" value="ANOTHER VALUE" />
+      <entry class="int" value="3" />
+      <entry class="int" value="5" />
+    </dataset>
+    <dataset>
+      <entry class="int" value="110" />
+      <entry class="java.lang.String" value="NAN" />
+      <entry class="int" value="3" />
+      <entry class="int" value="5" />
+    </dataset>
+  </data>
+</model>

@@ -8,7 +8,6 @@ import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.dissertation.model.measures.IResultsHolder;
-import net.meisen.dissertation.model.util.IDoubleIterator;
 
 /**
  * Used to determine the minimum value of the facts and the amount of records.
@@ -24,17 +23,21 @@ public class Min extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (facts == null || bitmap == null || facts.amountOfFacts() == 0) {
+		if (facts == null || bitmap == null) {
 			return getDefaultValue();
 		}
 
-		double min = Double.MAX_VALUE;
-		final IDoubleIterator it = facts.sortedFactsIterator();
-		if (it.hasNext()) {
-			min = it.next();
-		}
+		return findFirstNotNaN(facts.sortedIterator());
+	}
 
-		return min;
+	@Override
+	public double getDefaultValue() {
+		return Double.NaN;
+	}
+
+	@Override
+	public double getNaNValue() {
+		return Double.NaN;
 	}
 
 	@Override
@@ -50,10 +53,10 @@ public class Min extends BaseAggregationFunction implements
 
 	@Override
 	public double aggregate(final IResultsHolder results) {
-		if (results == null || results.amountOfResults() == 0) {
+		if (results == null) {
 			return getDefaultValue();
 		} else {
-			return results.sortedResultsIterator().next();
+			return findFirstNotNaN(results.sortedIterator());
 		}
 	}
 }

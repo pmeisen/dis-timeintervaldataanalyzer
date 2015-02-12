@@ -1865,8 +1865,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
-		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
-		assertEquals(Double.NaN, tsMg.getValue(3), 0.0);
+		assertEquals(0.0, tsMg.getValue(2), 0.0);
+		assertEquals(0.0, tsMg.getValue(3), 0.0);
 
 		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
 		assertEquals(12.0, tsAc.getValue(0), 0.0);
@@ -1875,8 +1875,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(12.0, tsAc.getValue(3), 0.0);
 
 		final TimeSeries tsUn = tsRes.getSeries("Undefined (SCREAMS)");
-		assertEquals(Double.NaN, tsUn.getValue(0), 0.0);
-		assertEquals(Double.NaN, tsUn.getValue(1), 0.0);
+		assertEquals(0.0, tsUn.getValue(0), 0.0);
+		assertEquals(0.0, tsUn.getValue(1), 0.0);
 		assertEquals(0.0, tsUn.getValue(2), 0.0);
 		assertEquals(0.0, tsUn.getValue(3), 0.0);
 	}
@@ -1938,14 +1938,14 @@ public class TestSelectQueries extends LoaderBasedTest {
 		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
-		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
-		assertEquals(Double.NaN, tsMg.getValue(3), 0.0);
+		assertEquals(0.0, tsMg.getValue(2), 0.0);
+		assertEquals(0.0, tsMg.getValue(3), 0.0);
 
 		final TimeSeries tsAc = tsRes.getSeries("Aachen (SCREAMS)");
-		assertEquals(Double.NaN, tsAc.getValue(0), 0.0);
-		assertEquals(Double.NaN, tsAc.getValue(1), 0.0);
-		assertEquals(Double.NaN, tsAc.getValue(2), 0.0);
-		assertEquals(Double.NaN, tsAc.getValue(3), 0.0);
+		assertEquals(0.0, tsAc.getValue(0), 0.0);
+		assertEquals(0.0, tsAc.getValue(1), 0.0);
+		assertEquals(0.0, tsAc.getValue(2), 0.0);
+		assertEquals(0.0, tsAc.getValue(3), 0.0);
 
 		assertNull(tsRes.getSeries("Undefined (SCREAMS)"));
 	}
@@ -1977,7 +1977,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		ts = tsRes.getSeries("PAX");
 		assertNotNull(ts);
 		ts.size();
-		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 996.0, ts.getValue(1), 0.0);
 		assertEquals(ts.toString(), 1200.0, ts.getValue(2), 0.0);
 		assertEquals(ts.toString(), 1200.0, ts.getValue(3), 0.0);
@@ -1985,7 +1985,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		ts = tsRes.getSeries("COMPLEX_MEAN");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
 		assertEquals(ts.toString(), 2400.0, ts.getValue(2), 0.0);
 		assertEquals(ts.toString(), 2400.0, ts.getValue(3), 0.0);
@@ -2178,17 +2178,17 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the results
 		ts = tsRes.getSeries("PAX");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 1992.0, ts.getValue(1), 0.0);
 
 		ts = tsRes.getSeries("COMPLEX_SUM");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
 
 		ts = tsRes.getSeries("COMBINED_SUM");
 		assertNotNull(ts);
-		assertEquals(ts.toString(), Double.NaN, ts.getValue(0), 0.0);
+		assertEquals(ts.toString(), 0.0, ts.getValue(0), 0.0);
 		assertEquals(ts.toString(), 2000.0, ts.getValue(1), 0.0);
 	}
 

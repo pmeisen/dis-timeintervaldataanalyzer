@@ -16,73 +16,136 @@ import net.meisen.dissertation.model.util.IDoubleIterator;
  * 
  */
 public class ResultsArrayBased implements IResultsHolder {
-	final TDoubleArrayList list = new TDoubleArrayList();
+	private final TDoubleArrayList list = new TDoubleArrayList();
+	private final TDoubleArrayList nan = new TDoubleArrayList();
+
+	private boolean sorted = false;
 
 	@Override
-	public int amountOfResults() {
+	public int amount() {
+		return amountOfNonNaN() + amountOfNaN();
+	}
+
+	@Override
+	public int amountOfNonNaN() {
 		return list.size();
 	}
 
 	@Override
-	public IDoubleIterator resultsIterator() {
-		return new IDoubleIterator() {
-			final TDoubleIterator it = list.iterator();
-
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
-
-			@Override
-			public double next() {
-				return it.next();
-			}
-		};
+	public int amountOfNaN() {
+		return nan.size();
 	}
 
 	@Override
-	public IDoubleIterator sortedResultsIterator() {
-		list.sort();
+	public IDoubleIterator iterator(final boolean excludeNaN) {
 
-		return new IDoubleIterator() {
-			final TDoubleIterator it = list.iterator();
+		if (excludeNaN) {
+			return new IDoubleIterator() {
+				final TDoubleIterator it = list.iterator();
 
-			@Override
-			public boolean hasNext() {
-				return it.hasNext();
-			}
+				@Override
+				public boolean hasNext() {
+					return it.hasNext();
+				}
 
-			@Override
-			public double next() {
-				return it.next();
-			}
-		};
+				@Override
+				public double next() {
+					return it.next();
+				}
+			};
+		} else {
+			return createIterator();
+		}
 	}
 
 	@Override
-	public IDoubleIterator descSortedResultsIterator() {
-		list.sort();
+	public IDoubleIterator sortedIterator() {
+		sort();
+		return createIterator();
+	}
+
+	@Override
+	public IDoubleIterator descSortedIterator() {
+		sort();
 
 		return new IDoubleIterator() {
+			final TDoubleIterator nanIt = nan.iterator();
+
 			int pos = list.size() - 1;
 
 			@Override
 			public boolean hasNext() {
-				return pos > -1;
+				return pos > -1 || nanIt.hasNext();
 			}
 
 			@Override
 			public double next() {
-				final double value = list.get(pos);
-				pos--;
-				return value;
+				if (pos > -1) {
+					final double value = list.get(pos);
+					pos--;
+					return value;
+				} else if (nanIt.hasNext()) {
+					return nanIt.next();
+				} else {
+					throw new IllegalStateException("No next value available.");
+				}
 			}
 		};
 	}
 
 	@Override
 	public void add(final double result) {
-		list.add(result);
+		sorted = false;
+
+		if (Double.isNaN(result)) {
+			nan.add(result);
+		} else {
+			list.add(result);
+		}
 	}
 
+	/**
+	 * Sorts the list of values if not sorted yet.
+	 */
+	protected void sort() {
+		if (!sorted) {
+			list.sort();
+			sorted = true;
+		}
+	}
+
+	/**
+	 * Helper method to create an iterator to iterate over the full list,
+	 * appending the NaN values last.
+	 * 
+	 * @return the iterator
+	 */
+	protected IDoubleIterator createIterator() {
+
+		return new IDoubleIterator() {
+			final TDoubleIterator it = list.iterator();
+			final TDoubleIterator nanIt = nan.iterator();
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext() || nanIt.hasNext();
+			}
+
+			@Override
+			public double next() {
+				if (it.hasNext()) {
+					return it.next();
+				} else if (nanIt.hasNext()) {
+					return nanIt.next();
+				} else {
+					throw new IllegalStateException("No next value available.");
+				}
+			}
+		};
+	}
+
+	@Override
+	public String toString() {
+		return list.toString();
+	}
 }

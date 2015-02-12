@@ -50,23 +50,28 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 	}
 
 	/**
-	 * Helper method to calculate the sum of the specified {@code facts}.
+	 * Helper method to calculate the sum of the specified {@code facts}. The
+	 * {@link #getDefaultValue()} is returned, if no facts are defined.
+	 * Generally, {@code Double.NaN} facts are ignored when summing up and
+	 * {@link #getNaNValue()} is returned if the amount of non-NaN facts is 0.
 	 * 
 	 * @param facts
 	 *            the facts to calculate the sum for
 	 * 
 	 * @return the sum of the facts
 	 */
-	public double sum(final IFactsHolder facts) {
+	protected double sum(final IDoubleHolder facts) {
 
 		// make sure we have values
-		if (facts == null || facts.amountOfFacts() == 0) {
+		if (facts == null || facts.amount() == 0) {
 			return getDefaultValue();
+		} else if (facts.amountOfNonNaN() == 0) {
+			return getNaNValue();
 		} else {
 
 			// otherwise get the sum and calculate the average
 			double sum = 0.0;
-			final IDoubleIterator it = facts.factsIterator();
+			final IDoubleIterator it = facts.iterator(true);
 			while (it.hasNext()) {
 				sum += it.next();
 			}
@@ -76,26 +81,29 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 	}
 
 	/**
-	 * Helper method to calculate the sum of the specified {@code results}.
+	 * Finds the first non {@code Double#NaN} in the iterator.
 	 * 
-	 * @param results
-	 *            the results to calculate the sum for
+	 * @param it
+	 *            the iterator to search in
 	 * 
-	 * @return the sum of the results
+	 * @return the first none {@code Double#NaN} value, {@link #getNaNValue()}
+	 *         if only NaN-values are in there, or the default value if there
+	 *         was no value within the iterator
 	 */
-	public double sum(final IResultsHolder results) {
-
-		if (results == null || results.amountOfResults() == 0) {
-			return getDefaultValue();
-		} else {
-			final IDoubleIterator it = results.resultsIterator();
-
-			double res = 0.0;
-			while (it.hasNext()) {
-				res += it.next();
+	public double findFirstNotNaN(final IDoubleIterator it) {
+		if (it.hasNext()) {
+			/*
+			 * According to the definition of the DoubleIterator, a NaN value
+			 * has to be last in the line, independent of the sorting order.
+			 */
+			final double val = it.next();
+			if (Double.isNaN(val)) {
+				return getNaNValue();
+			} else {
+				return val;
 			}
-
-			return res;
+		} else {
+			return getDefaultValue();
 		}
 	}
 
@@ -111,6 +119,11 @@ public abstract class BaseAggregationFunction implements IAggregationFunction {
 
 	@Override
 	public double getDefaultValue() {
+		return Double.NaN;
+	}
+
+	@Override
+	public double getNaNValue() {
 		return Double.NaN;
 	}
 }

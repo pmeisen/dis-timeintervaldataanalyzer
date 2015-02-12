@@ -55,6 +55,13 @@ public interface IAggregationFunction {
 	public double getDefaultValue();
 
 	/**
+	 * Gets the default value used if the result is NaN.
+	 * 
+	 * @return the NaN value
+	 */
+	public double getNaNValue();
+
+	/**
 	 * Creates a new instance of the function.
 	 * 
 	 * @return a new instance of {@code this}

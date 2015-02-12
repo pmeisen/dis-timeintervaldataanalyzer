@@ -8,4 +8,5 @@
   <xs:import namespace="http://dev.meisen.net/xsd/dissertation/model" />
 
   <xs:element name="list" type="base:descriptor" />
+  <xs:element name="nan" type="base:descriptor" />
 </xs:schema>

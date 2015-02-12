@@ -23,11 +23,17 @@ public class Sum extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (facts == null) {
-			return getDefaultValue();
-		} else {
-			return sum(facts);
-		}
+		return sum(facts);
+	}
+
+	@Override
+	public double getDefaultValue() {
+		return 0.0;
+	}
+
+	@Override
+	public double getNaNValue() {
+		return Double.NaN;
 	}
 
 	@Override

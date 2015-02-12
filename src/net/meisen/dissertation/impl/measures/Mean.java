@@ -25,15 +25,14 @@ public class Mean extends BaseAggregationFunction implements
 			final IFactsHolder facts) {
 
 		// if there aren't any values the mean is not defined
-		if (facts == null || bitmap == null) {
+		if (facts == null || facts.amount() == 0) {
 			return getDefaultValue();
 		}
 
-		final int setRecords = facts.amountOfFacts();
-		if (setRecords == 0) {
-			return getDefaultValue();
+		if (facts.amountOfNaN() > 0) {
+			return getNaNValue();
 		} else {
-			return sum(facts) / setRecords;
+			return sum(facts) / facts.amountOfNonNaN();
 		}
 	}
 
@@ -52,15 +51,24 @@ public class Mean extends BaseAggregationFunction implements
 	public double aggregate(final IResultsHolder results) {
 
 		// if there aren't any values the mean is not defined
-		if (results == null) {
+		if (results == null || results.amount() == 0) {
 			return getDefaultValue();
 		}
 
-		final int amount = results.amountOfResults();
-		if (amount == 0) {
-			return getDefaultValue();
+		if (results.amountOfNonNaN() == 0) {
+			return getNaNValue();
 		} else {
-			return sum(results) / amount;
+			return sum(results) / results.amountOfNonNaN();
 		}
+	}
+
+	@Override
+	public double getDefaultValue() {
+		return 0.0;
+	}
+
+	@Override
+	public double getNaNValue() {
+		return Double.NaN;
 	}
 }

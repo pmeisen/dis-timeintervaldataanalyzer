@@ -18,7 +18,6 @@ import net.meisen.dissertation.model.descriptors.Descriptor;
 import net.meisen.dissertation.model.descriptors.DescriptorModel;
 import net.meisen.dissertation.model.descriptors.FactDescriptor;
 import net.meisen.general.genmisc.resources.IByteBufferReader;
-import net.meisen.general.genmisc.types.Objects;
 import net.meisen.general.genmisc.types.Streams;
 
 /**
@@ -129,23 +128,7 @@ public class FactDescriptorModelSet implements IBitmapIdCacheable,
 	 */
 	protected boolean addToSet(final FactDescriptorSet set,
 			final FactDescriptor<?> factDesc) {
-		final FactDescriptor<?> cur = set.ceiling(factDesc);
-		if (cur == null || !cur.equals(factDesc)) {
-			return set.add(factDesc);
-		} else {
-
-			// the objects are equal but modified
-			if (!Objects.equals(cur.isValueInvariant(),
-					factDesc.isValueInvariant())
-					|| !Objects.equals(cur.isRecordInvariant(),
-							factDesc.isRecordInvariant())
-					|| !Objects.equals(cur.getFact(), factDesc.getFact())) {
-				set.remove(cur);
-				return set.add(factDesc);
-			} else {
-				return false;
-			}
-		}
+		return set.add(factDesc);
 	}
 
 	/**

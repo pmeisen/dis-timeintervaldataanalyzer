@@ -24,11 +24,11 @@ public class Mode extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (bitmap == null || facts == null || facts.amountOfFacts() == 0) {
+		if (bitmap == null || facts == null || facts.amount() == 0) {
 			return getDefaultValue();
 		}
 
-		return calc(facts.sortedFactsIterator());
+		return calc(facts.sortedIterator());
 	}
 
 	/**
@@ -42,12 +42,12 @@ public class Mode extends BaseAggregationFunction implements
 	protected double calc(final IDoubleIterator it) {
 
 		// get some helpers to keep track of the last state
-		double lastFact = Double.NaN;
+		double lastFact = getNaNValue();
 		int maxAmount = 0;
 
 		// iterate over the values
 		int counter = 0;
-		double mode = Double.NaN;
+		double mode = getNaNValue();
 		while (it.hasNext()) {
 			final double fact = it.next();
 
@@ -58,7 +58,7 @@ public class Mode extends BaseAggregationFunction implements
 				mode = lastFact;
 				counter = 1;
 			} else if (counter == maxAmount) {
-				mode = Double.NaN;
+				mode = getNaNValue();
 				counter = 1;
 			} else {
 				counter = 1;
@@ -71,7 +71,7 @@ public class Mode extends BaseAggregationFunction implements
 		if (counter > maxAmount) {
 			mode = lastFact;
 		} else if (counter == maxAmount) {
-			mode = Double.NaN;
+			mode = getNaNValue();
 		}
 
 		return mode;
@@ -90,10 +90,10 @@ public class Mode extends BaseAggregationFunction implements
 
 	@Override
 	public double aggregate(final IResultsHolder results) {
-		if (results == null || results.amountOfResults() == 0) {
+		if (results == null || results.amount() == 0) {
 			return getDefaultValue();
 		}
 
-		return calc(results.sortedResultsIterator());
+		return calc(results.sortedIterator());
 	}
 }

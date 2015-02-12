@@ -33,6 +33,13 @@ public class Count extends BaseAggregationFunction implements
 			return getDefaultValue();
 		}
 
+		/*
+		 * This is the result along the time-axis. It might be calculated when
+		 * the time-dimension aggregates, or a time-slice is used. In all of
+		 * these cases, we are interested in the number of intervals. Thus, we
+		 * just count the cardinality (ignoring any fact-value, i.e. also
+		 * Double.NaN values set for some intervals).
+		 */
 		return bitmap.determineCardinality();
 	}
 
@@ -48,9 +55,15 @@ public class Count extends BaseAggregationFunction implements
 
 	@Override
 	public double aggregate(final IResultsHolder results) {
-		if (results == null || results.amountOfResults() == 0) {
+		if (results == null || results.amount() == 0) {
 			return getDefaultValue();
 		}
-		return results.amountOfResults();
+
+		/*
+		 * This is the aggregation of values according to a
+		 * descriptor-dimension. NaN values are the results of the
+		 * time-combinations. In that case we want to ignore all the NaN values.
+		 */
+		return results.amountOfNonNaN();
 	}
 }

@@ -24,11 +24,13 @@ public class Median extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (facts == null || facts.amountOfFacts() == 0) {
+		if (facts == null || facts.amount() == 0) {
 			return getDefaultValue();
+		} else if (facts.amountOfNonNaN() == 0) {
+			return getNaNValue();
 		}
 
-		return calc(facts.amountOfFacts(), facts.sortedFactsIterator());
+		return calc(facts.amountOfNonNaN(), facts.sortedIterator());
 	}
 
 	/**
@@ -81,10 +83,12 @@ public class Median extends BaseAggregationFunction implements
 
 	@Override
 	public double aggregate(final IResultsHolder results) {
-		if (results == null || results.amountOfResults() == 0) {
+		if (results == null || results.amount() == 0) {
 			return getDefaultValue();
+		} else if (results.amountOfNonNaN() == 0) {
+			return getNaNValue();
 		}
 
-		return calc(results.amountOfResults(), results.sortedResultsIterator());
+		return calc(results.amountOfNonNaN(), results.sortedIterator());
 	}
 }

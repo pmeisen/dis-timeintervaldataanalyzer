@@ -117,7 +117,7 @@ public class TestCommunication {
 			assertEquals(1.0, res.getDouble(3), 0.0);
 			assertTrue(res.next());
 			assertEquals("MAINTENANCE (MEAN)", res.getString(1));
-			assertEquals(Double.NaN, res.getDouble(2), 0.0);
+			assertEquals(0.0, res.getDouble(2), 0.0);
 			assertEquals(1.0, res.getDouble(3), 0.0);
 			assertTrue(res.next());
 			assertEquals("ROOMSERVICE (MEAN)", res.getString(1));
@@ -147,11 +147,11 @@ public class TestCommunication {
 			assertEquals(1.0, res.getDouble(3), 0.0);
 			assertTrue(res.next());
 			assertEquals("ROOMSERVICE, CATERING (SUM)", res.getString(1));
-			assertEquals(Double.NaN, res.getDouble(2), 0.0);
+			assertEquals(0.0, res.getDouble(2), 0.0);
 			assertEquals(2.0, res.getDouble(3), 0.0);
 			assertTrue(res.next());
 			assertEquals("MAINTENANCE, IT (SUM)", res.getString(1));
-			assertEquals(Double.NaN, res.getDouble(2), 0.0);
+			assertEquals(0.0, res.getDouble(2), 0.0);
 			assertEquals(1.0, res.getDouble(3), 0.0);
 			assertTrue(res.next());
 			assertEquals("ROOMSERVICE, CLEANING (SUM)", res.getString(1));

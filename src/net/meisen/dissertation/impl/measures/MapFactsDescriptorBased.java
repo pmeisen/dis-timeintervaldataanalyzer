@@ -30,14 +30,16 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 		private int nextPos = 0;
 
 		public DoubleIterator(final FactDescriptorSet descriptors,
-				final boolean ascOrder) {
+				final boolean ascOrder, final boolean containNan) {
 
 			if (descriptors == null) {
 				it = Collections.<FactDescriptor<?>> emptyList().iterator();
 			} else if (ascOrder) {
-				it = descriptors.iterator();
+				it = containNan ? descriptors.iterator() : descriptors
+						.nonNanIterator();
 			} else {
-				it = descriptors.descendingIterator();
+				it = containNan ? descriptors.descendingIterator()
+						: descriptors.descendingNonNanIterator();
 			}
 		}
 
@@ -89,6 +91,8 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 
 	private final MapFactsArrayBased array;
 
+	private Bitmap nonNaNBitmap = null;
+
 	/**
 	 * Constructor to create a {@code MapFactsDescriptorBased} for the specified
 	 * {@code FactDescriptorSet}.
@@ -105,34 +109,43 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 			final TidaIndex index, final Bitmap bitmap) {
 
 		this.index = index;
-		this.bitmap = bitmap;
-		this.descriptors = descriptors;
+		
+		// might be null, normally that should be covered in advance 
+		this.bitmap = bitmap == null ? index.getIndexFactory().createBitmap()
+				: bitmap;
+		this.descriptors = descriptors == null ? new FactDescriptorSet()
+				: descriptors;
 
 		if (this.descriptors == null) {
 			array = null;
 		} else if (this.descriptors.containsVariantRecords()) {
-			array = new MapFactsArrayBased(index.getLastRecordId());
+			array = new MapFactsArrayBased();
 
 			// set all the invariant once
-			for (final FactDescriptor<?> factDesc : descriptors) {
+			final Iterator<FactDescriptor<?>> itInvariants = descriptors
+					.variantIterator();
+			while (itInvariants.hasNext()) {
+				final FactDescriptor<?> factDesc = itInvariants.next();
 				final Bitmap bmp = getBitmap(factDesc);
 
-				// the invariant version can be done easier
-				if (factDesc.isValueInvariant() || factDesc.isRecordInvariant()) {
-					array.setAll(bmp.intIterator(), factDesc.getFact());
-				}
-				// the variant once have to be done one by one
-				else {
-					final Descriptor<?, ?, ?> desc = index
-							.getDescriptor(factDesc);
+				array.setAll(bmp.intIterator(), factDesc.getFact());
+			}
 
-					final IIntIterator it = bmp.intIterator();
-					while (it.hasNext()) {
-						final int recId = it.next();
+			// set the variant once
+			final Iterator<FactDescriptor<?>> itVariants = descriptors
+					.variantIterator();
+			while (itVariants.hasNext()) {
+				final FactDescriptor<?> factDesc = itVariants.next();
+				final Bitmap bmp = getBitmap(factDesc);
+				final Descriptor<?, ?, ?> desc = index.getDescriptor(factDesc);
 
-						final IDataRecord rec = index.getRecord(recId);
-						array.set(recId, desc.getFactValue(rec));
-					}
+				// add each variant one by one
+				final IIntIterator it = bmp.intIterator();
+				while (it.hasNext()) {
+					final int recId = it.next();
+
+					final IDataRecord rec = index.getRecord(recId);
+					array.set(recId, desc.getFactValue(rec));
 				}
 			}
 		} else {
@@ -221,34 +234,34 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 	}
 
 	@Override
-	public IDoubleIterator factsIterator() {
+	public IDoubleIterator iterator(final boolean excludeNaN) {
 		if (array == null) {
-			return new DoubleIterator(descriptors, true);
+			return new DoubleIterator(descriptors, true, !excludeNaN);
 		} else {
-			return array.factsIterator();
+			return array.iterator(excludeNaN);
 		}
 	}
 
 	@Override
-	public IDoubleIterator descSortedFactsIterator() {
+	public IDoubleIterator descSortedIterator() {
 		if (array == null) {
-			return new DoubleIterator(descriptors, false);
+			return new DoubleIterator(descriptors, false, true);
 		} else {
-			return array.descSortedFactsIterator();
+			return array.descSortedIterator();
 		}
 	}
 
 	@Override
-	public IDoubleIterator sortedFactsIterator() {
+	public IDoubleIterator sortedIterator() {
 		if (array == null) {
-			return factsIterator();
+			return iterator(false);
 		} else {
-			return array.sortedFactsIterator();
+			return array.sortedIterator();
 		}
 	}
 
 	@Override
-	public int amountOfFacts() {
+	public int amount() {
 		return bitmap.determineCardinality();
 	}
 
@@ -263,5 +276,68 @@ public class MapFactsDescriptorBased implements IFactsHolder {
 	 */
 	public boolean usesArrayImplementation() {
 		return array != null;
+	}
+
+	@Override
+	public int amountOfNonNaN() {
+		if (array == null) {
+			return getNonNaNBitmap().determineCardinality();
+		} else {
+			return array.amountOfNonNaN();
+		}
+	}
+
+	@Override
+	public int amountOfNaN() {
+		if (array == null) {
+			return amount() - amountOfNonNaN();
+		} else {
+			return array.amountOfNaN();
+		}
+	}
+
+	/**
+	 * Creates a bitmap containing only the non-NaN values of {@code this}.
+	 * 
+	 * @return the created bitmap
+	 */
+	protected Bitmap getNonNaNBitmap() {
+		if (nonNaNBitmap == null) {
+			final Iterator<FactDescriptor<?>> it = descriptors.nanIterator();
+
+			Bitmap nanBitmap = null;
+			while (it.hasNext()) {
+				final FactDescriptor<?> desc = it.next();
+
+				if (desc.isValueInvariant()) {
+					/*
+					 * All values of the DescriptorModel represented by this are
+					 * NaN values, so there aren't any nonNaN-values.
+					 */
+					nonNaNBitmap = index.getIndexFactory().createBitmap();
+					return nonNaNBitmap;
+				} else {
+					final Slice<?> slice = index.getMetaIndexDimensionSlice(
+							desc.getModelId(), desc.getId());
+
+					if (slice != null && slice.getBitmap() != null) {
+						if (nanBitmap == null) {
+							nanBitmap = slice.getBitmap();
+						} else {
+							nanBitmap = slice.getBitmap().or(nanBitmap);
+						}
+					}
+				}
+			}
+
+			// get the NaNBitmap
+			if (nanBitmap == null) {
+				nonNaNBitmap = bitmap;
+			} else {
+				nonNaNBitmap = bitmap.and(bitmap.xor(nanBitmap));
+			}
+		}
+
+		return nonNaNBitmap;
 	}
 }

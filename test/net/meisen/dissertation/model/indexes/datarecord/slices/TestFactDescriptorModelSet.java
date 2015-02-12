@@ -10,7 +10,6 @@ import static org.junit.Assert.fail;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.SortedSet;
 
 import net.meisen.dissertation.impl.descriptors.GeneralDescriptor;
 import net.meisen.dissertation.impl.descriptors.IntegerDescriptor;
@@ -154,7 +153,7 @@ public class TestFactDescriptorModelSet {
 			assertFalse(set.addDescriptor(model3Desc));
 		}
 
-		SortedSet<FactDescriptor<?>> descriptors;
+		FactDescriptorSet descriptors;
 		descriptors = set.getDescriptors(model1);
 		assertEquals(nrOfDescPerModel, descriptors.size());
 		int intNr = 0;
