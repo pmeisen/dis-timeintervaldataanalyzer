@@ -692,21 +692,6 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 			// there should never be more than 10 elements cached
 			assertTrue(fc.getCacheSize() <= 10);
-
-			// check the cache after the cache was cleaned
-			if (i >= 10 && fc.getCacheSize() == 6) {
-				final int v = i % 2 == 0 ? i : i - 1;
-
-				assertTrue(fc.isCached(createBitmapId(i)));
-				assertTrue(fc.isCached(createBitmapId(v)));
-				assertTrue(fc.isCached(createBitmapId(v - 2)));
-				assertTrue(fc.isCached(createBitmapId(v - 4)));
-				assertTrue(fc.isCached(createBitmapId(v - 6)));
-				assertTrue(fc.isCached(createBitmapId(v - 8)));
-				if (i == v) {
-					assertTrue(fc.isCached(createBitmapId(v - 10)));
-				}
-			}
 		}
 	}
 
