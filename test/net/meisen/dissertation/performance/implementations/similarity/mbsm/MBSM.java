@@ -109,8 +109,10 @@ public class MBSM extends RecordBasedImplementation {
 			wndQuery.setMeasureDimension(query.getMeasureDimension());
 
 			// create the interval
-			final BaseIntervalValue<?> start = createVal(mapper.resolve(wnd[0]));
-			final BaseIntervalValue<?> end = createVal(mapper.resolve(wnd[1]));
+			final BaseIntervalValue<?> start = BaseIntervalValue
+					.createVal(mapper.resolve(wnd[0]));
+			final BaseIntervalValue<?> end = BaseIntervalValue.createVal(mapper
+					.resolve(wnd[1]));
 			@SuppressWarnings({ "rawtypes", "unchecked" })
 			Interval<?> interval = new Interval(start, end);
 			wndQuery.setInterval(interval);
@@ -122,45 +124,30 @@ public class MBSM extends RecordBasedImplementation {
 								+ tsc.sizeOfLabels() + " vs. "
 								+ def.getWindowSize() + ").");
 			}
-			eventTables.addAll(createEventTables(tsc));
+			eventTables.addAll(createEventTables(interval, tsc));
 		}
 
 		return eventTables;
 	}
 
 	/**
-	 * Create the {@code IntervalValue} for the specified val.
-	 * 
-	 * @param val
-	 *            the value to create the {@code IntervalValue} for
-	 *            
-	 * @return the create {@code IntervalValue} representing the specified
-	 *         {@code val}
-	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected BaseIntervalValue<?> createVal(final Object val) {
-		return new BaseIntervalValue(val) {
-
-			@Override
-			public Class getType() {
-				return val.getClass();
-			}
-		};
-	}
-
-	/**
 	 * Create the {@code EventTable} for the specified
 	 * {@code TimeSeriesCollection}.
 	 * 
+	 * @param interval
+	 *            the interval the tsc was created for
 	 * @param tsc
 	 *            the collection to create the table for
 	 * @return the created {@code EventTable}
 	 */
-	protected List<EventTable> createEventTables(final TimeSeriesCollection tsc) {
+	protected List<EventTable> createEventTables(final Interval<?> interval,
+			final TimeSeriesCollection tsc) {
 		final List<EventTable> eventTables = new ArrayList<EventTable>();
+		final String name = interval.toString() + " ";
 
 		for (final TimeSeries ts : tsc) {
-			final EventTable eventTable = new EventTable(ts.size());
+			final EventTable eventTable = new EventTable(name + ts.getId(),
+					ts.size());
 
 			// create the label
 			final List<Object> values = new ArrayList<Object>();

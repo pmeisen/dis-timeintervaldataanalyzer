@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.meisen.general.genmisc.types.Numbers;
 
@@ -21,16 +22,19 @@ import net.meisen.general.genmisc.types.Numbers;
 public class EventTable {
 	private final Map<List<Object>, double[]> eventTable;
 	private final int size;
+	private final String label;
 	private final IValueCalculator calculator;
 
 	/**
 	 * Constructor using the default count-calculator.
 	 * 
+	 * @param label
+	 *            a label for the table
 	 * @param size
 	 *            the size of the e-sequence to be represented
 	 */
-	public EventTable(final long size) {
-		this(size, new IValueCalculator() {
+	public EventTable(final String label, final long size) {
+		this(label, size, new IValueCalculator() {
 
 			@Override
 			public double getDefaultValue() {
@@ -48,13 +52,17 @@ public class EventTable {
 	/**
 	 * Creates a new {@code EventTable} for the specified time-points.
 	 * 
+	 * @param label
+	 *            a label for the table
 	 * @param size
 	 *            the size of the e-sequence to be represented
 	 * @param calculator
 	 *            a calculator used to determine the value
 	 */
-	public EventTable(final long size, final IValueCalculator calculator) {
+	public EventTable(final String label, final long size,
+			final IValueCalculator calculator) {
 		this.size = Numbers.castToInt(size);
+		this.label = label;
 
 		this.calculator = calculator;
 		this.eventTable = new HashMap<List<Object>, double[]>();
@@ -252,5 +260,36 @@ public class EventTable {
 	 */
 	public boolean isEmpty() {
 		return eventTable.size() == 0;
+	}
+
+	/**
+	 * Gets the label specified.
+	 * 
+	 * @return the label specified
+	 */
+	public String getLabel() {
+		return label;
+	}
+
+	/**
+	 * Creates a sorted map of the best fitting values
+	 * 
+	 * @param eventTables
+	 *            the list of tables to be compared
+	 * @param dt
+	 *            the distance type to use
+	 * 
+	 * @return the sorted map
+	 */
+	public TreeMap<Double, EventTable> createCompareList(
+			final List<EventTable> eventTables, final DistanceType dt) {
+
+		final TreeMap<Double, EventTable> sorted = new TreeMap<Double, EventTable>();
+		for (final EventTable et : eventTables) {
+			final double val = this.distance(et, dt);
+			sorted.put(val, et);
+		}
+
+		return sorted;
 	}
 }

@@ -129,7 +129,7 @@ public class Performance {
 	 * Starts the measuring.
 	 */
 	public void start() {
-		start(true);
+		start(false);
 	}
 
 	/**

@@ -343,18 +343,19 @@ public class QueryServlet extends BaseServlet {
 		final DataType[] types = meta.getDataTypes();
 		final int len = names.length;
 		for (int i = 0; i < len; i++) {
+			final int pos = i + 1;
 			final JsonObject entry = new JsonObject();
 
 			// determine the meta-type
 			final String metaType;
-			if (i == meta.getPosRecordId()) {
+			if (pos == meta.getPosRecordId()) {
 				metaType = "ID";
-			} else if (i == meta.getPosStart()) {
+			} else if (pos == meta.getPosStart()) {
 				metaType = "START";
-			} else if (i == meta.getPosEnd()) {
+			} else if (pos == meta.getPosEnd()) {
 				metaType = "END";
-			} else if (i >= meta.getFirstPosDescModelIds()
-					&& i <= meta.getLastPosDescModelIds()) {
+			} else if (pos >= meta.getFirstPosDescModelIds()
+					&& pos <= meta.getLastPosDescModelIds()) {
 				metaType = "DESCRIPTOR";
 			} else {
 				metaType = "UNKNOWN";

@@ -43,4 +43,24 @@ public abstract class BaseIntervalValue<T> {
 	public String toString() {
 		return getValue() == null ? null : getValue().toString();
 	}
+
+	/**
+	 * Create the {@code IntervalValue} for the specified val.
+	 * 
+	 * @param val
+	 *            the value to create the {@code IntervalValue} for
+	 * 
+	 * @return the create {@code IntervalValue} representing the specified
+	 *         {@code val}
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static BaseIntervalValue<?> createVal(final Object val) {
+		return new BaseIntervalValue(val) {
+
+			@Override
+			public Class getType() {
+				return val.getClass();
+			}
+		};
+	}
 }

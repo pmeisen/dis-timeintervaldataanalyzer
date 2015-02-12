@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.meisen.dissertation.impl.parser.query.BaseIntervalValue;
+import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -161,9 +163,20 @@ public class IBSM {
 	 * @return the create table
 	 */
 	protected EventTable createEventTable(final long[] wnd) {
+		final BaseMapper<?> mapper = model.getIntervalModel()
+				.getTimelineMapper();
+
+		// create the interval
+		final BaseIntervalValue<?> start = BaseIntervalValue.createVal(mapper
+				.resolve(wnd[0]));
+		final BaseIntervalValue<?> end = BaseIntervalValue.createVal(mapper
+				.resolve(wnd[1]));
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		final Interval<?> interval = new Interval(start, end);
 
 		// create an empty eventTable
-		final EventTable eventTable = new EventTable(wnd[1] - wnd[0] + 1);
+		final EventTable eventTable = new EventTable(interval.toString(),
+				wnd[1] - wnd[0] + 1);
 
 		// get the records
 		final IntervalData<Integer> res = this.iTree.query(wnd[0], wnd[1]);

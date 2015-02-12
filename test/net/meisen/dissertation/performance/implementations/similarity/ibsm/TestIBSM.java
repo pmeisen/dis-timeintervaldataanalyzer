@@ -221,7 +221,7 @@ public class TestIBSM {
 	 */
 	@Test
 	public void testEventTableCreation() {
-		final EventTable eventTable = new EventTable(100);
+		final EventTable eventTable = new EventTable("TEST", 100);
 
 		final Object[] label1 = new Object[] { "A", "B", 5 };
 		final Object[] label2 = new Object[] { "A", "B", 6 };
