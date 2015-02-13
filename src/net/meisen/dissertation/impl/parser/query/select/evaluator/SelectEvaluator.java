@@ -1,5 +1,8 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
+import java.util.Collections;
+import java.util.List;
+
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultType;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
@@ -42,6 +45,10 @@ public class SelectEvaluator {
 		// the result holder
 		final SelectResult queryResult = createSelectResult(query);
 
+		// set the valid records
+		final Bitmap validRecords = model.getValidRecords();
+		queryResult.setValidRecords(validRecords);
+
 		// determine the filter results
 		final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
 				model);
@@ -55,9 +62,45 @@ public class SelectEvaluator {
 				.evaluateGroupExpression(query.getGroup());
 		queryResult.setGroupResult(groupResult);
 
-		// set the valid records
-		final Bitmap validRecords = model.getValidRecords();
-		queryResult.setValidRecords(validRecords);
+		// combine the filter with the valid records
+		if (filterResult != null && groupResult != null) {
+			final Bitmap filteredValidRecords = Bitmap.combineBitmaps(
+					validRecords, filterResult);
+
+			// combine the group and the filteredValid
+			final GroupResult filteredGroupResult = new GroupResult();
+			for (final GroupResultEntry groupResultEntry : groupResult) {
+				final List<String> group = groupResultEntry == null ? Collections
+						.<String> emptyList() : groupResultEntry
+						.getGroupAsList();
+
+				final Bitmap bmp = Bitmap.combineBitmaps(filteredValidRecords,
+						groupResultEntry);
+				filteredGroupResult.add(group, bmp);
+			}
+
+			queryResult.setFilteredGroupResult(filteredGroupResult);
+		} else if (groupResult != null) {
+			queryResult.setFilteredGroupResult(groupResult);
+		} else if (filterResult != null) {
+			final Bitmap filteredValidRecords = Bitmap.combineBitmaps(
+					validRecords, filterResult);
+
+			// create a single group
+			final GroupResult res = new GroupResult();
+			res.add(Collections.<String> emptyList(), filteredValidRecords);
+
+			// set the result as the group-filtered result
+			queryResult.setFilteredGroupResult(res);
+		} else {
+
+			// create a single group
+			final GroupResult res = new GroupResult();
+			res.add(Collections.<String> emptyList(), validRecords);
+
+			// set the result as the group-filtered result
+			queryResult.setFilteredGroupResult(res);
+		}
 
 		// determine the result
 		queryResult.determineResult(model);

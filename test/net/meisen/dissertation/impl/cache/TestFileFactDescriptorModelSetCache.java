@@ -81,7 +81,7 @@ public class TestFileFactDescriptorModelSetCache {
 		// the data should still be available
 		cache.clearCache();
 		assertEquals(set, cache.getCacheable(bitmapId));
-		
+
 		// release the cache
 		cache.release();
 	}
@@ -123,6 +123,6 @@ public class TestFileFactDescriptorModelSetCache {
 	@After
 	public void cleanUp() {
 		model.release(true);
-		assertTrue(Files.deleteDir(dir));
+		assertTrue(dir.toString(), Files.deleteDir(dir));
 	}
 }

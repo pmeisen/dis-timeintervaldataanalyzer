@@ -185,8 +185,19 @@ public abstract class RecordBasedImplementation extends
 			tsc = new TimeSeriesCollection(Numbers.castToInt(e - s + 1), query
 					.getInterval().getStart().getClass(), factory);
 
+			final List<Map<String, Object>> allRecords;
+			if (filter.incSupport()) {
+				allRecords = filter.apply(s, e);
+			} else {
+				allRecords = null;
+			}
 			for (long i = s; i <= e; i++) {
-				final List<Map<String, Object>> tpRecords = filter.apply(i, i);
+				final List<Map<String, Object>> tpRecords;
+				if (filter.incSupport()) {
+					tpRecords = filter.apply(i, i, allRecords);
+				} else {
+					tpRecords = filter.apply(i, i);
+				}
 
 				// set the label
 				final Object labelValue = mapper.resolve(i);
@@ -379,5 +390,13 @@ public abstract class RecordBasedImplementation extends
 		}
 
 		return tmpRes;
+	}
+	
+	public String getStartField() {
+		return start;
+	}
+	
+	public String getEndField() {
+		return end;
 	}
 }

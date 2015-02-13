@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.meisen.dissertation.impl.parser.query.select.evaluator.IBitmapResult;
 import net.meisen.dissertation.model.cache.IBitmapIdCacheable;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.util.IIntIterator;
@@ -426,6 +427,80 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 			}
 
 			return res.toArray(new Bitmap[0]);
+		}
+	}
+
+	/**
+	 * Combines the two bitmaps with each-other using an and-operation. A
+	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
+	 * to one.
+	 * 
+	 * @param factory
+	 *            the {@code IndexFactory} used if a new {@code Bitmap} has to
+	 *            be created
+	 * @param timeBitmap
+	 *            the bitmap, specifying the selected values within the
+	 *            time-dimension, {@code null} is handled as empty bitmap
+	 * @param filter
+	 *            specifying the filtered values, {@code null} is handled as
+	 *            full bitmap
+	 * 
+	 * 
+	 * @return the result of the combination
+	 */
+	public static Bitmap combineTimeAndFilter(final BaseIndexFactory factory,
+			final Bitmap timeBitmap, final IBitmapResult filter) {
+		if (timeBitmap == null) {
+			return factory.createBitmap();
+		} else if (filter == null || filter.getBitmap() == null) {
+			return timeBitmap;
+		} else {
+			return filter.getBitmap().and(timeBitmap);
+		}
+	}
+
+	/**
+	 * Combines the bitmap with the result of the filter. A {@code null} value
+	 * is handled as a full-bitmap, e.g. all values are set to one. If both
+	 * bitmaps are {@code null}, {@code null} is returned.
+	 * 
+	 * @param bitmap
+	 *            the bitmap used to combine with the filter
+	 * @param filter
+	 *            the filter
+	 * 
+	 * @return the result of the combination of both
+	 */
+	public static Bitmap combineBitmaps(final Bitmap bitmap,
+			final IBitmapResult filter) {
+		if (filter == null) {
+			return bitmap;
+		} else if (bitmap == null) {
+			return filter.getBitmap();
+		} else {
+			return bitmap.and(filter.getBitmap());
+		}
+	}
+
+	/**
+	 * Combines the container and the bitmap with each-other using an
+	 * or-operation.
+	 * 
+	 * @param bitmap
+	 *            the bitmap
+	 * @param container
+	 *            the {@code BitmapContainer}
+	 * 
+	 * @return the result of or-combination
+	 */
+	public static Bitmap combineBitmaps(final Bitmap bitmap,
+			final IBitmapContainer container) {
+		if (container == null) {
+			return bitmap;
+		} else if (bitmap == null) {
+			return container.getBitmap();
+		} else {
+			return bitmap.or(container.getBitmap());
 		}
 	}
 }

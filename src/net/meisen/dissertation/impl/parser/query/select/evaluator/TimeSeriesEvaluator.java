@@ -1,9 +1,7 @@
 package net.meisen.dissertation.impl.parser.query.select.evaluator;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
@@ -25,7 +23,6 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
-import net.meisen.dissertation.model.indexes.datarecord.slices.IBitmapContainer;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
@@ -154,27 +151,9 @@ public class TimeSeriesEvaluator {
 	public TimeSeriesCollection evaluateInterval(final SelectQuery query,
 			final SelectResult queryResult) {
 
-		final Bitmap validRecords = queryResult.getValidRecords();
-		final DescriptorLogicResult filterResult = queryResult
-				.getFilterResult();
-		final GroupResult groupResult = queryResult.getGroupResult();
-
-		// combine the filter with the valid records
-		final Bitmap filteredValidRecords = combineBitmaps(validRecords,
-				filterResult);
-
-		// combine the group and the filteredValid
-		final GroupResult filteredGroupResult = new GroupResult();
-		final Iterable<GroupResultEntry> itGroup = it(groupResult);
-		for (final GroupResultEntry groupResultEntry : itGroup) {
-			final List<String> group = groupResultEntry == null ? Collections
-					.<String> emptyList() : groupResultEntry.getGroupAsList();
-
-			final Bitmap bmp = combineBitmaps(filteredValidRecords,
-					groupResultEntry);
-			filteredGroupResult.add(group, bmp);
-		}
-		queryResult.setFilteredGroupResult(filteredGroupResult);
+		// get the result for each group
+		final GroupResult filteredGroupResult = queryResult
+				.getFilteredGroupResult();
 
 		// depending on the dimensions we have to choose what to do
 		if (query.getMeasureDimension() == null) {
@@ -256,7 +235,7 @@ public class TimeSeriesEvaluator {
 
 				final FactDescriptorModelSet factSet = slice.getFactsSet();
 				combinedFactSet.combine(factSet);
-				combinedBitmap = orCombine(slice, combinedBitmap);
+				combinedBitmap = Bitmap.combineBitmaps(combinedBitmap, slice);
 			}
 		}
 
@@ -301,8 +280,8 @@ public class TimeSeriesEvaluator {
 
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = createGroupId(groupResultEntry);
-				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
-						groupResultEntry);
+				final Bitmap resultBitmap = Bitmap.combineTimeAndFilter(
+						indexFactory, timeBitmap, groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MixedExpressionEvaluator(
@@ -411,8 +390,8 @@ public class TimeSeriesEvaluator {
 				final String groupId = createGroupId(groupResultEntry);
 
 				// combine the bitmaps: filter, member, valid with the group
-				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
-						groupResultEntry);
+				final Bitmap resultBitmap = Bitmap.combineTimeAndFilter(
+						indexFactory, timeBitmap, groupResultEntry);
 
 				// create the evaluator
 				final DimExpressionEvaluator evaluator = new DimExpressionEvaluator(
@@ -491,8 +470,8 @@ public class TimeSeriesEvaluator {
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = createGroupId(groupResultEntry);
 
-				final Bitmap resultBitmap = combineTimeAndFilter(timeBitmap,
-						groupResultEntry);
+				final Bitmap resultBitmap = Bitmap.combineTimeAndFilter(
+						indexFactory, timeBitmap, groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new LowExpressionEvaluator(
@@ -644,76 +623,6 @@ public class TimeSeriesEvaluator {
 	}
 
 	/**
-	 * Combines the bitmap with the result of the filter. A {@code null} value
-	 * is handled as a full-bitmap, e.g. all values are set to one. If both
-	 * bitmaps are {@code null}, {@code null} is returned.
-	 * 
-	 * @param bitmap
-	 *            the bitmap used to combine with the filter
-	 * @param filter
-	 *            the filter
-	 * 
-	 * @return the result of the combination of both
-	 */
-	protected Bitmap combineBitmaps(final Bitmap bitmap,
-			final IBitmapResult filter) {
-		if (filter == null) {
-			return bitmap;
-		} else if (bitmap == null) {
-			return filter.getBitmap();
-		} else {
-			return bitmap.and(filter.getBitmap());
-		}
-	}
-
-	/**
-	 * Combines the two bitmaps with each-other using an and-operation. A
-	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
-	 * to one.
-	 * 
-	 * @param timeBitmap
-	 *            the bitmap, specifying the selected values within the
-	 *            time-dimension, {@code null} is handled as empty bitmap
-	 * @param filter
-	 *            specifying the filtered values, {@code null} is handled as
-	 *            full bitmap
-	 * 
-	 * @return the result of the combination
-	 */
-	protected Bitmap combineTimeAndFilter(final Bitmap timeBitmap,
-			final IBitmapResult filter) {
-		if (timeBitmap == null) {
-			return indexFactory.createBitmap();
-		} else if (filter == null || filter.getBitmap() == null) {
-			return timeBitmap;
-		} else {
-			return filter.getBitmap().and(timeBitmap);
-		}
-	}
-
-	/**
-	 * Combines the container and the bitmap with each-other using an
-	 * or-operation.
-	 * 
-	 * @param container
-	 *            the {@code BitmapContainer}
-	 * @param bitmap
-	 *            the bitmap
-	 * 
-	 * @return the result of or-combination
-	 */
-	protected Bitmap orCombine(final IBitmapContainer container,
-			final Bitmap bitmap) {
-		if (container == null) {
-			return bitmap;
-		} else if (bitmap == null) {
-			return container.getBitmap();
-		} else {
-			return bitmap.or(container.getBitmap());
-		}
-	}
-
-	/**
 	 * Combines the bitmaps of the {@code timeSlice}, the {@code filter} and the
 	 * specified {@code group}. The method returns {@code null} if the
 	 * {@code timeSlice} or it's bitmap is {@code null}.
@@ -722,7 +631,7 @@ public class TimeSeriesEvaluator {
 	 *            the {@code Slice}
 	 * @param filteredValidRecords
 	 *            the result of the combination of valid records and the filter
-	 *            (see {@link #combineBitmaps(Bitmap, IBitmapResult)}.
+	 *            (see {@link Bitmap#combineBitmaps(Bitmap, IBitmapResult)}.
 	 * @param group
 	 *            the result of the group
 	 * 

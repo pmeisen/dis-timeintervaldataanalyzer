@@ -347,4 +347,19 @@ public class FactDescriptorSet implements Collection<FactDescriptor<?>> {
 		this.nonNanSet.clear();
 		this.variantSet.clear();
 	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj == this) {
+			return true;
+		} else if (obj instanceof FactDescriptorSet) {
+			final FactDescriptorSet set = (FactDescriptorSet) obj;
+
+			return set.variantSet.equals(variantSet)
+					&& set.nanSet.equals(nanSet)
+					&& set.nonNanSet.equals(nonNanSet);
+		} else {
+			return false;
+		}
+	}
 }

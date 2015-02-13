@@ -3,7 +3,6 @@ package net.meisen.dissertation.impl.parser.query.select.evaluator;
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
-import net.meisen.dissertation.impl.parser.query.select.SelectResult;
 import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -39,59 +38,48 @@ public class RecordsEvaluator {
 	/**
 	 * Evaluates the result for the specified {@code interval}.
 	 * 
-	 * @param interval
-	 *            the interval to evaluate the records for
-	 * @param relation
-	 *            the {@code IntervalRelation} to determine the result for
-	 * @param queryResult
-	 *            the result of the parsing and interpretation of the select
-	 *            statement
+	 * @param query
+	 *            the {@code SelectQuery} to evaluate
+	 * @param filteredBitmap
+	 *            the bitmap defining all the filtered bitmaps
 	 * 
 	 * @return the selected records
 	 * 
 	 * @see SelectResultRecords
 	 */
-	public Bitmap evaluateInterval(final Interval<?> interval,
-			final IntervalRelation relation, final SelectResult queryResult) {
+	public Bitmap evaluateInterval(final SelectQuery query,
+			final Bitmap filteredBitmap) {
+		final Interval<?> interval = query.getInterval();
+		final IntervalRelation relation = query.getIntervalRelation();
 
 		// get the relation or use a default one if none is defined
 		final IntervalRelation intervalRelation = relation == null ? IntervalRelation.WITHIN
 				: relation;
 
 		// the result bitmap
-		Bitmap bitmap = null;
+		final Bitmap result;
 
 		// check if there is a limit
-		final SelectQuery query = queryResult.getQuery();
 		if (!query.hasLimit() || query.getLimit() != 0) {
 
-			// combine the valid once with it
-			final Bitmap validBitmap = queryResult.getValidRecords();
-			bitmap = combine(bitmap, validBitmap);
-
 			// combine the time with it
-			if (bitmap == null || bitmap.isBitSet()) {
+			if (filteredBitmap == null || filteredBitmap.isBitSet()) {
 				final Bitmap timeBitmap = intervalRelation.determine(
 						intervalModel, index, interval);
-				bitmap = combine(bitmap, timeBitmap);
+				result = combine(filteredBitmap, timeBitmap);
+			} else {
+				result = null;
 			}
-
-			// combine the filter with it
-			if (bitmap == null || bitmap.isBitSet()) {
-				final DescriptorLogicResult filterResult = queryResult
-						.getFilterResult();
-				final Bitmap filterBitmap = filterResult == null ? null
-						: filterResult.getBitmap();
-				bitmap = combine(bitmap, filterBitmap);
-			}
+		} else {
+			result = null;
 		}
 
 		// if we don't have any result return null
-		if (bitmap == null) {
-			bitmap = indexFactory.createBitmap();
+		if (result == null) {
+			return indexFactory.createBitmap();
+		} else {
+			return result;
 		}
-
-		return bitmap;
 	}
 
 	/**

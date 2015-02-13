@@ -3,6 +3,8 @@ package net.meisen.dissertation.impl.parser.query.select;
 import java.util.Iterator;
 
 import net.meisen.dissertation.exceptions.QueryEvaluationException;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResultEntry;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.RecordsEvaluator;
 import net.meisen.dissertation.model.data.FieldNameGenerator;
 import net.meisen.dissertation.model.data.TidaModel;
@@ -92,7 +94,7 @@ public class SelectResultRecords extends SelectResult {
 	 * 
 	 * @param it
 	 *            the iterator to apply the limit to
-	 *            
+	 * 
 	 * @return the passed iterator
 	 */
 	protected IIntIterator applyLimit(final IIntIterator it) {
@@ -209,11 +211,19 @@ public class SelectResultRecords extends SelectResult {
 	public void determineResult(final TidaModel model) {
 		final RecordsEvaluator recordsEvaluator = new RecordsEvaluator(model);
 
-		final SelectQuery query = getQuery();
+		// get the filtered bitmap
+		final GroupResult filteredGroupResult = getFilteredGroupResult();
+		final GroupResultEntry singleGroupEntry = filteredGroupResult
+				.getSingleGroupEntry();
+		if (singleGroupEntry == null) {
+			throw new ForwardedRuntimeException(QueryEvaluationException.class,
+					1028, getQuery(), filteredGroupResult);
+		}
+		final Bitmap filteredBitmap = singleGroupEntry.getBitmap();
 
 		// get the records
-		this.recordsBitmap = recordsEvaluator.evaluateInterval(
-				query.getInterval(), getQuery().getIntervalRelation(), this);
+		this.recordsBitmap = recordsEvaluator.evaluateInterval(getQuery(),
+				filteredBitmap);
 
 		// get the types and names
 		this.idx = model.getIndex();

@@ -93,4 +93,25 @@ public class GroupResult implements Iterable<GroupResultEntry> {
 	public String toString() {
 		return results.values().toString();
 	}
+
+	/**
+	 * Checks if the group is based on one single group.
+	 * 
+	 * @return {@code true} if only one group is defined, otherwise
+	 *         {@code false}
+	 */
+	public boolean isSingleGroup() {
+		return results.size() == 1;
+	}
+
+	/**
+	 * Gets the one and only group defined, i.e. only returns a value if
+	 * {@code #isSingleGroup()} returns {@code true}.
+	 * 
+	 * @return the single {@code GroupResultEntry} or {@code null} if the
+	 *         definition is not a single group
+	 */
+	public GroupResultEntry getSingleGroupEntry() {
+		return isSingleGroup() ? results.values().iterator().next() : null;
+	}
 }

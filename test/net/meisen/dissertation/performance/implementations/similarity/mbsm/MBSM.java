@@ -1,9 +1,14 @@
 package net.meisen.dissertation.performance.implementations.similarity.mbsm;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import net.meisen.dissertation.impl.parser.query.BaseIntervalValue;
 import net.meisen.dissertation.impl.parser.query.Interval;
@@ -12,12 +17,14 @@ import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
+import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.IRecordsFilter;
 import net.meisen.dissertation.performance.implementations.RecordBasedImplementation;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
 import net.meisen.dissertation.performance.implementations.similarity.EventTable;
 import net.meisen.dissertation.performance.implementations.similarity.ibsm.ESequenceDefinition;
+import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * A measure-based matcher of time interval data records, using the idea of
@@ -56,10 +63,15 @@ public class MBSM extends RecordBasedImplementation {
 	 * Fills the {@code IntervalTree} with the specified records.
 	 */
 	public void fillIntervalTree() {
+		this.iTree.fillTree(transform(data));
+	}
+
+	protected List<IntervalData<Integer>> transform(
+			final List<Map<String, Object>> records) {
 		int i = 0;
 
 		final List<IntervalData<Integer>> list = new ArrayList<IntervalData<Integer>>();
-		for (final Map<String, Object> record : data) {
+		for (final Map<String, Object> record : records) {
 			final Object rStart = record.get(this.start);
 			final Object rEnd = record.get(this.end);
 
@@ -70,7 +82,7 @@ public class MBSM extends RecordBasedImplementation {
 			i++;
 		}
 
-		this.iTree.fillTree(list);
+		return list;
 	}
 
 	/**
@@ -173,21 +185,64 @@ public class MBSM extends RecordBasedImplementation {
 	protected TimeSeriesCollection measure(final SelectQuery query) {
 		return this.calculateMeasures(query, new IRecordsFilter() {
 
-			@Override
-			public List<Map<String, Object>> apply(final long start,
-					final long end) {
-				return iTree.query(start, end, data);
-			}
+			@SuppressWarnings("rawtypes")
+			private List[] container = null;
+			private int posStart = -1;
 
 			@Override
 			public List<Map<String, Object>> apply(final long start,
+					final long end) {
+				final List<Map<String, Object>> res = iTree.query(start, end,
+						data);
+				if (container == null) {
+					container = new List[(int) (end - start + 1)];
+					posStart = (int) start;
+
+					for (final Map<String, Object> record : res) {
+
+						// get the needed values from the record
+						long s = mapper.mapToLong(record.get(getStartField()));
+						long e = mapper.mapToLong(record.get(getEndField()));
+
+						// make sure we don't move out of the window
+						s = Math.max(s, start);
+						e = Math.min(e, end);
+
+						// add the record and normalize the start and end
+						for (int i = (int) s; i <= e; i++) {
+							final int pos = (int) (i - posStart);
+							@SuppressWarnings("unchecked")
+							List<Map<String, Object>> values = container[pos];
+							if (values == null) {
+								values = new ArrayList<Map<String, Object>>();
+								container[pos] = values;
+							}
+
+							values.add(record);
+						}
+					}
+				}
+
+				return res;
+			}
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public List<Map<String, Object>> apply(final long start,
 					final long end, final List<Map<String, Object>> records) {
-				throw new UnsupportedOperationException("Inc is not supported.");
+				assert start == end;
+
+				final List<Map<String, Object>> res = container[(int) (start - posStart)];
+				if (res == null) {
+					return Collections.<Map<String, Object>> emptyList();
+				} else {
+					return res;
+				}
 			}
 
 			@Override
 			public boolean incSupport() {
-				return false;
+				return true;
 			}
 		});
 	}
