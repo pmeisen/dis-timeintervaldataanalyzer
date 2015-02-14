@@ -44,7 +44,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * 
  */
 @SystemProperties(value = {
-		@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/bugs/bug0002/tidaConfig.xml"),
+		@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/bugs/bug0002/tidaConfigBug0002.xml"),
 		@SystemProperty(property = "test.folder", value = "TestCallsLoadingPerformance") })
 public class TestCallsLoadingPerformance extends LoaderBasedTest {
 	private final static File TESTFOLDER = new File(
