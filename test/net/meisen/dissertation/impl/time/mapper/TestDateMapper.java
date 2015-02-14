@@ -1,9 +1,12 @@
 package net.meisen.dissertation.impl.time.mapper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Iterator;
 
 import net.meisen.dissertation.impl.parser.query.DateIntervalValue;
 import net.meisen.dissertation.impl.parser.query.Interval;
@@ -343,9 +346,9 @@ public class TestDateMapper {
 	 */
 	@Test
 	public void testBounds() {
-		final DateMapper mapper = new DateMapper(Dates.isDate("20.01.1981"),
-				Dates.isDate("20.01.1981 23:59:00", Dates.GENERAL_TIMEZONE),
-				Minute.instance());
+		final DateMapper mapper = new DateMapper(Dates.isDate("20.01.1981",
+				Dates.GENERAL_TIMEZONE), Dates.isDate("20.01.1981 23:59:00",
+				Dates.GENERAL_TIMEZONE), Minute.instance());
 
 		final DateIntervalValue val1 = new DateIntervalValue(Dates.isDate(
 				"20.01.1981 08:00:00", Dates.GENERAL_TIMEZONE));
@@ -360,23 +363,115 @@ public class TestDateMapper {
 
 		interval = new Interval<Date>(val1, ex, val2, in);
 		bounds = mapper.getBounds(interval);
-		assertEquals(541, bounds[0]);
-		assertEquals(547, bounds[1]);
+		assertEquals(481, bounds[0]);
+		assertEquals(487, bounds[1]);
 
 		interval = new Interval<Date>(val1, ex, val2, ex);
 		bounds = mapper.getBounds(interval);
-		assertEquals(541, bounds[0]);
-		assertEquals(546, bounds[1]);
+		assertEquals(481, bounds[0]);
+		assertEquals(486, bounds[1]);
 
 		interval = new Interval<Date>(val1, in, val2, in);
 		bounds = mapper.getBounds(interval);
-		assertEquals(540, bounds[0]);
-		assertEquals(547, bounds[1]);
+		assertEquals(480, bounds[0]);
+		assertEquals(487, bounds[1]);
 
 		interval = new Interval<Date>(val1, in, val2, ex);
 		bounds = mapper.getBounds(interval);
-		assertEquals(540, bounds[0]);
-		assertEquals(546, bounds[1]);
+		assertEquals(480, bounds[0]);
+		assertEquals(486, bounds[1]);
+	}
+
+	/**
+	 * Tests the creation of the partition iterator.
+	 */
+	@Test
+	public void testPartitionIterator() {
+		int counter;
+		DateMapper mapper;
+		Date tmpltStart, tmpltEnd, tlStart, tlEnd;
+		Iterator<long[]> it;
+
+		// create an invalid time-line
+		tlStart = Dates.isDate("01.01.2008", Dates.GENERAL_TIMEZONE);
+		tlEnd = Dates.isDate("01.01.2008", Dates.GENERAL_TIMEZONE);
+		mapper = new DateMapper(tlStart, tlEnd, Minute.instance());
+
+		// get the iterator for a whole month
+		tmpltStart = Dates.isDate("01.01.2008", Dates.GENERAL_TIMEZONE);
+		tmpltEnd = Dates.isDate("31.01.2008 23:59:00", Dates.GENERAL_TIMEZONE);
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		assertFalse(it.hasNext());
+
+		// create a valid time-line for a month
+		tlStart = tmpltStart;
+		tlEnd = tmpltEnd;
+		mapper = new DateMapper(tlStart, tlEnd, Minute.instance());
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		assertTrue(it.hasNext());
+		assertPartition(mapper.getNormStartAsLong(), mapper.getNormEndAsLong(),
+				it.next());
+		assertFalse(it.hasNext());
+
+		// use a day as template
+		tmpltStart = Dates.isDate("02.01.2008", Dates.GENERAL_TIMEZONE);
+		tmpltEnd = Dates.isDate("02.01.2008 23:59:00", Dates.GENERAL_TIMEZONE);
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		counter = 0;
+		while (it.hasNext()) {
+			final long[] partition = it.next();
+			assertEquals(1439l, partition[1] - partition[0]);
+
+			counter++;
+		}
+		assertEquals(31, counter);
+
+		// use a day with offset as template
+		tmpltStart = Dates
+				.isDate("02.01.2008 01:00:00", Dates.GENERAL_TIMEZONE);
+		tmpltEnd = Dates.isDate("03.01.2008 00:59:00", Dates.GENERAL_TIMEZONE);
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		counter = 0;
+		while (it.hasNext()) {
+			final long[] partition = it.next();
+			assertEquals(1439l, partition[1] - partition[0]);
+
+			counter++;
+		}
+		assertEquals(30, counter);
+
+		// create a valid time-line for a year
+		tlStart = Dates.isDate("01.01.2008", Dates.GENERAL_TIMEZONE);
+		tlEnd = Dates.isDate("31.12.2008 23:59:00", Dates.GENERAL_TIMEZONE);
+		tmpltStart = Dates.isDate("02.01.2008", Dates.GENERAL_TIMEZONE);
+		tmpltEnd = Dates.isDate("02.01.2008 23:59:00", Dates.GENERAL_TIMEZONE);
+		mapper = new DateMapper(tlStart, tlEnd, Minute.instance());
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		counter = 0;
+		while (it.hasNext()) {
+			final long[] partition = it.next();
+			assertEquals(1439l, partition[1] - partition[0]);
+
+			counter++;
+		}
+		assertEquals(366, counter);
+
+	}
+
+	private void assertPartition(final long expStart, final long expEnd,
+			final long[] partition) {
+		assertEquals(expStart, partition[0]);
+		assertEquals(expEnd, partition[1]);
 	}
 
 	private void assertResult(final Date start, final Date end,

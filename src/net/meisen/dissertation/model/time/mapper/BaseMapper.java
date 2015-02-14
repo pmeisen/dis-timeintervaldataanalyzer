@@ -1,5 +1,7 @@
 package net.meisen.dissertation.model.time.mapper;
 
+import java.util.Iterator;
+
 import net.meisen.dissertation.impl.parser.query.Interval;
 import net.meisen.dissertation.model.time.granularity.ITimeGranularity;
 import net.meisen.general.genmisc.types.Numbers;
@@ -748,5 +750,83 @@ public abstract class BaseMapper<T> {
 					.getOpenType().isInclusive(), interval.getCloseType()
 					.isInclusive());
 		}
+	}
+
+	/**
+	 * This method is used to create an iterator, iterating over the time-line
+	 * in partitions defined. The method ensures, that the {@code interval} is a
+	 * part of the partition. Each partition will contain the same amount of
+	 * time-points as covered by the interval.
+	 * 
+	 * @param interval
+	 *            the interval to create the iterator for
+	 * 
+	 * @return the partition iterator
+	 */
+	public Iterator<long[]> createTimelinePartitionIterator(
+			final Interval<?> interval) {
+		final long[] bounds = getBounds(interval);
+
+		final long windowStart = bounds[0];
+		final long windowEnd = bounds[1];
+		final long windowSize = windowEnd - windowStart + 1;
+
+		final long offset = (windowStart - getNormStartAsLong()) % windowSize;
+		final long stepSize = windowSize - 1;
+
+		if (stepSize == 0) {
+			return new Iterator<long[]>() {
+
+				@Override
+				public boolean hasNext() {
+					return false;
+				}
+
+				@Override
+				public long[] next() {
+					return null;
+				}
+
+				@Override
+				public void remove() {
+					// not supported, silently ignored
+				}
+			};
+		}
+
+		final long firstStart;
+		final long firstEnd;
+		if (offset == 0) {
+			firstStart = getNormStartAsLong();
+			firstEnd = stepSize;
+		} else {
+			firstStart = offset + 1;
+			firstEnd = Math.min(firstStart + stepSize, getNormEndAsLong());
+		}
+
+		return new Iterator<long[]>() {
+			private long nextStart = firstStart;
+			private long nextEnd = firstEnd;
+
+			@Override
+			public boolean hasNext() {
+				return nextEnd - nextStart == stepSize;
+			}
+
+			@Override
+			public long[] next() {
+				final long[] next = new long[] { nextStart, nextEnd };
+
+				nextStart = nextEnd + 1;
+				nextEnd = Math.min(nextStart + stepSize, getNormEndAsLong());
+
+				return next;
+			}
+
+			@Override
+			public void remove() {
+				// not supported, silently ignored
+			}
+		};
 	}
 }

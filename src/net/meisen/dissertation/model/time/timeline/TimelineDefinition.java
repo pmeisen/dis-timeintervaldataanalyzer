@@ -530,7 +530,7 @@ public class TimelineDefinition {
 
 		validate();
 	}
-
+	
 	/**
 	 * Gets the defined granularity.
 	 * 

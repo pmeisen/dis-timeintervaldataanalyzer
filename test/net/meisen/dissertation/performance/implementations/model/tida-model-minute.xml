@@ -20,7 +20,7 @@
        id="tidaModel" name="Model used for several different tests">
   
   <time>
-    <timeline start="01.01.2008 00:00:00" end="30.12.2008 23:59:00" granularity="MINUTE" />
+    <timeline start="01.01.2008 00:00:00" end="31.12.2008 23:59:00" granularity="MINUTE" />
   </time>
 
   <meta>

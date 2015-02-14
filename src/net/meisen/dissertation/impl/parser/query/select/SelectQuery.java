@@ -429,4 +429,32 @@ public class SelectQuery implements IQuery {
 	public boolean hasLimit() {
 		return this.offset > 0 || this.limit > -1;
 	}
+
+	/**
+	 * Sets all the values of {@code this} to the values specified by the passed
+	 * {@code query}.
+	 * 
+	 * @param query
+	 *            the query to get the values from
+	 */
+	public void set(final SelectQuery query) {
+		setModelId(query.getModelId());
+		setResultType(query.getResultType());
+
+		setLimit(query.getLimit());
+		setOffset(query.getOffset());
+
+		setFilter(query.getFilter());
+		setGroup(query.getGroup());
+
+		setCount(query.isCount());
+		setIdsOnly(query.isIdsOnly());
+		setTransposed(query.isTransposed());
+
+		setInterval(query.getInterval());
+		setIntervalRelation(query.getIntervalRelation());
+
+		setMeasureDimension(query.getMeasureDimension());
+		setMeasures(query.getMeasures());
+	}
 }

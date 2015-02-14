@@ -1,14 +1,10 @@
 package net.meisen.dissertation.performance.implementations.similarity.mbsm;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import net.meisen.dissertation.impl.parser.query.BaseIntervalValue;
 import net.meisen.dissertation.impl.parser.query.Interval;
@@ -17,14 +13,12 @@ import net.meisen.dissertation.impl.time.series.TimeSeries;
 import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.IntervalModel;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.IRecordsFilter;
 import net.meisen.dissertation.performance.implementations.RecordBasedImplementation;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree;
 import net.meisen.dissertation.performance.implementations.helper.IntervalTree.IntervalData;
 import net.meisen.dissertation.performance.implementations.similarity.EventTable;
 import net.meisen.dissertation.performance.implementations.similarity.ibsm.ESequenceDefinition;
-import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * A measure-based matcher of time interval data records, using the idea of
@@ -66,6 +60,15 @@ public class MBSM extends RecordBasedImplementation {
 		this.iTree.fillTree(transform(data));
 	}
 
+	/**
+	 * Method used to transform the specified set of records into data used by
+	 * the {@code IntervalTree}.
+	 * 
+	 * @param records
+	 *            the records to be transformed
+	 *            
+	 * @return the list of data used by the {@code IntervalTree}
+	 */
 	protected List<IntervalData<Integer>> transform(
 			final List<Map<String, Object>> records) {
 		int i = 0;

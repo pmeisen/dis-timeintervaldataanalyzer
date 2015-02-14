@@ -1,10 +1,9 @@
 package net.meisen.dissertation.performance.paper.in2015.kdd;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.help.Performance;
@@ -18,13 +17,13 @@ import net.meisen.dissertation.performance.implementations.similarity.DistanceTy
 import net.meisen.dissertation.performance.implementations.similarity.EventTable;
 import net.meisen.dissertation.performance.implementations.similarity.ibsm.IBSM;
 import net.meisen.dissertation.performance.implementations.similarity.mbsm.MBSM;
-import net.meisen.general.genmisc.types.Dates;
+import net.meisen.dissertation.performance.implementations.similarity.tida.TimeSeriesSimilarityCollection;
+import net.meisen.dissertation.performance.implementations.similarity.tida.TimeSeriesSimilarityEvaluator;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class TestSimiliarity {
 
 		model = loader
 				.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-minute.xml");
-		holder = new DataHolder(model);
+		holder = new DataHolder(model, false);
 	}
 
 	@Test
@@ -76,7 +75,7 @@ public class TestSimiliarity {
 		p.start();
 		cmp = ets.get(0);
 		print(cmp.createCompareList(ets, DistanceType.MANHATTAN), 10);
-		System.out.println("COMPARE: " + p.printSecs(p.stop()));
+		System.out.println("COMPARE & SORT: " + p.printSecs(p.stop()));
 	}
 
 	@Test
@@ -104,10 +103,9 @@ public class TestSimiliarity {
 		p.start();
 		cmp = ets.get(0);
 		print(cmp.createCompareList(ets, DistanceType.MANHATTAN), 10);
-		System.out.println("COMPARE: " + p.printSecs(p.stop()));
+		System.out.println("COMPARE & SORT: " + p.printSecs(p.stop()));
 	}
 
-	@Ignore
 	@Test
 	public void testTidaMeasureSimilarity() {
 		final Performance p = new Performance();
@@ -128,18 +126,54 @@ public class TestSimiliarity {
 		} finally {
 			model.setBulkLoad(false);
 		}
-		p.stop();
+		System.out.println("ADDDATA: " + p.printSecs(p.stop()));
 
 		// create a TimeSeries and than do it as it's done in MBSM
+		final TimeSeriesSimilarityEvaluator evaluator = new TimeSeriesSimilarityEvaluator(
+				model);
+		p.start();
+		final List<TimeSeriesSimilarityCollection> res = evaluator
+				.evaluateSimilarity(query);
+		System.out.println("SIMILARITY: " + p.printSecs(p.stop()));
+
+		p.start();
+		Collections.sort(res);
+		print(res, 10);
+		System.out.println("SORTING: " + p.printSecs(p.stop()));
+
+		p.start();
+		final List<TimeSeriesSimilarityCollection> res2 = evaluator
+				.evaluateSimilarity(queryFactory
+						.<SelectQuery> parseQuery("SELECT TIMESERIES OF MAX(COUNT(PERSON)) AS CP ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008, 01.02.2008) GROUP BY TASKTYPE"));
+		System.out.println("SIMILARITY: " + p.printSecs(p.stop()));
+
+		p.start();
+		Collections.sort(res2);
+		print(res2, 10);
+		System.out.println("SORTING: " + p.printSecs(p.stop()));
 
 		// do the similarity on record-base
 	}
 
-	private void print(final TreeMap<Double, EventTable> map, final int amount) {
+	private void print(final List<TimeSeriesSimilarityCollection> list,
+			final int amount) {
 		int counter = 0;
-		for (final Entry<Double, EventTable> e : map.entrySet()) {
-			System.out.println(counter + ". " + e.getValue().getLabel() + " ("
-					+ e.getKey() + ")");
+		for (final TimeSeriesSimilarityCollection e : list) {
+			System.out.println(counter + ". " + e.getLabel(0) + " ("
+					+ e.getDistance() + ")");
+
+			counter++;
+			if (counter == amount) {
+				break;
+			}
+		}
+	}
+
+	private void print(final Map<EventTable, Double> map, final int amount) {
+		int counter = 0;
+		for (final Entry<EventTable, Double> e : map.entrySet()) {
+			System.out.println(counter + ". " + e.getKey().getLabel() + " ("
+					+ e.getValue() + ")");
 
 			counter++;
 			if (counter == amount) {

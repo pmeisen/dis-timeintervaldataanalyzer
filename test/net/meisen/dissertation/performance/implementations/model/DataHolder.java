@@ -20,6 +20,8 @@ import net.meisen.general.genmisc.types.Dates;
  * 
  */
 public class DataHolder {
+	private final static String DEF_DB = "/net/meisen/dissertation/performance/implementations/model/ghdataHsql.zip";
+
 	private final Db db;
 	private final List<Map<String, Object>> records;
 
@@ -31,8 +33,20 @@ public class DataHolder {
 	 *            (invalid considering the UTC and the other implementations)
 	 */
 	public DataHolder(final TidaModel model) {
-		this(model,
-				"/net/meisen/dissertation/performance/implementations/model/ghdataHsql.zip");
+		this(model, DEF_DB);
+	}
+
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 * @param random
+	 *            {@code true} to shuffle the records, otherwise {@code false}
+	 */
+	public DataHolder(final TidaModel model, final boolean random) {
+		this(model, DEF_DB, random);
 	}
 
 	/**
@@ -46,6 +60,23 @@ public class DataHolder {
 	 *            to the test-scenario
 	 */
 	public DataHolder(final TidaModel model, final String dbPath) {
+		this(model, dbPath, true);
+	}
+
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 * @param dbPath
+	 *            the path to the database to be used; must be valid according
+	 *            to the test-scenario
+	 * @param random
+	 *            {@code true} to shuffle the records, otherwise {@code false}
+	 */
+	public DataHolder(final TidaModel model, final String dbPath,
+			final boolean random) {
 
 		// open the database
 		db = new Db();
@@ -59,7 +90,8 @@ public class DataHolder {
 
 		// query the database
 		final List<Map<String, Object>> records;
-		final String query = "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA ORDER BY RAND()";
+		final String query = "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA"
+				+ (random ? " ORDER BY RAND()" : "");
 		try {
 			records = db.query("tida", query);
 		} catch (final SQLException e) {
@@ -77,7 +109,7 @@ public class DataHolder {
 					.get("INTERVAL_START"), TimeZone.getDefault().getID(),
 					Dates.GENERAL_TIMEZONE);
 			row.put("INTERVAL_START", rStart);
-			
+
 			final Object rEnd = Dates.mapToTimezone((Date) row
 					.get("INTERVAL_END"), TimeZone.getDefault().getID(),
 					Dates.GENERAL_TIMEZONE);

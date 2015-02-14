@@ -22,7 +22,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	private DescriptorLogicResult filterResult;
 	private GroupResult groupResult;
 	private GroupResult filteredGroupResult;
-	
+
 	/**
 	 * Standard constructor which is used to specify the {@code query} this
 	 * result is valid for.
@@ -80,7 +80,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	public void setGroupResult(final GroupResult groupResult) {
 		this.groupResult = groupResult;
 	}
-	
+
 	/**
 	 * Gets the filtered result of the group defined by the query.
 	 * 
@@ -122,6 +122,20 @@ public abstract class SelectResult implements IQueryResultSet,
 	@Override
 	public int[] getCollectedIds() {
 		return null;
+	}
+
+	/**
+	 * Sets all the values of {@code this} to the values specified by the passed
+	 * {@code result}.
+	 * 
+	 * @param result
+	 *            the result to get the values from
+	 */
+	public void set(final SelectResult result) {
+		setFilteredGroupResult(result.getFilteredGroupResult());
+		setFilterResult(result.getFilterResult());
+		setGroupResult(result.getGroupResult());
+		setValidRecords(result.getValidRecords());
 	}
 
 	/**

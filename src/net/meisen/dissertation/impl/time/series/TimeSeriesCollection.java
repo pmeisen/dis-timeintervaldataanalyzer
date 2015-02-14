@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 
+import net.meisen.dissertation.model.dimensions.TimeLevelMember;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
+import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 
 /**
  * A collection of a {@code TimeSeries} for a specified {@code interval}.
@@ -55,6 +58,31 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 	public void setLabel(final int pos, final String label,
 			final Object labelValue) {
 		labels.setLabel(pos, label, labelValue);
+	}
+
+	public void setLabels(final Set<TimeLevelMember> members) {
+		int i = 0;
+		for (final TimeLevelMember member : members) {
+			setLabel(i, member.getName(), member.getId());
+
+			i++;
+		}
+	}
+
+	public void setLabels(final TidaIndex index, final Object startPoint,
+			final boolean startInclusive) {
+
+		for (int i = 0; i < size; i++) {
+
+			// create a label for the timeSlice
+			final Object timeSliceLabel = index.getTimePointValue(startPoint,
+					startInclusive, i);
+			final String formattedTimeSliceLabel = index
+					.getTimePointLabel(timeSliceLabel);
+
+			// set the label formatted and the real object
+			setLabel(i, formattedTimeSliceLabel, timeSliceLabel);
+		}
 	}
 
 	/**

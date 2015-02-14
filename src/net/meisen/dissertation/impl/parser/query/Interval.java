@@ -6,7 +6,7 @@ package net.meisen.dissertation.impl.parser.query;
  * 
  * @author pmeisen
  * 
- * @param <T>
+ * @param <T> the type of the value
  */
 public class Interval<T> {
 

@@ -1,8 +1,14 @@
 package net.meisen.dissertation.performance.implementations.similarity;
 
+import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.procedure.TIntDoubleProcedure;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +16,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.meisen.general.genmisc.types.Numbers;
+import net.meisen.general.genmisc.types.Objects;
 
 /**
  * An event-table of a specific size (considering the representing e-sequence
@@ -66,6 +73,20 @@ public class EventTable {
 
 		this.calculator = calculator;
 		this.eventTable = new HashMap<List<Object>, double[]>();
+	}
+
+	@Override
+	public int hashCode() {
+		return label.hashCode();
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof EventTable) {
+			return Objects.equals(label, ((EventTable) obj).getLabel());
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -281,15 +302,39 @@ public class EventTable {
 	 * 
 	 * @return the sorted map
 	 */
-	public TreeMap<Double, EventTable> createCompareList(
+	public LinkedHashMap<EventTable, Double> createCompareList(
 			final List<EventTable> eventTables, final DistanceType dt) {
 
-		final TreeMap<Double, EventTable> sorted = new TreeMap<Double, EventTable>();
-		for (final EventTable et : eventTables) {
-			final double val = this.distance(et, dt);
-			sorted.put(val, et);
+		// calculate the distances
+		final TIntDoubleHashMap distances = new TIntDoubleHashMap();
+		for (int i = 0; i < eventTables.size(); i++) {
+			final double val = this.distance(eventTables.get(i), dt);
+			distances.put(i, val);
 		}
 
-		return sorted;
+		// find the top ten
+		final TreeMap<Integer, Double> sorted = new TreeMap<Integer, Double>(
+				new Comparator<Integer>() {
+
+					@Override
+					public int compare(final Integer o1, final Integer o2) {
+						return distances.get(o1) < distances.get(o2) ? -1 : 1;
+					}
+				});
+		distances.forEachEntry(new TIntDoubleProcedure() {
+
+			@Override
+			public boolean execute(final int a, final double b) {
+				sorted.put(a, b);
+				return true;
+			}
+		});
+
+		final LinkedHashMap<EventTable, Double> result = new LinkedHashMap<EventTable, Double>();
+		for (final int pos : sorted.keySet()) {
+			result.put(eventTables.get(pos), distances.get(pos));
+		}
+
+		return result;
 	}
 }

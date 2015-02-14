@@ -114,10 +114,22 @@ public class TimeSeriesEvaluator {
 		}
 	};
 
-	private final TidaIndex index;
-	private final BaseIndexFactory indexFactory;
-	private final IntervalModel intervalModel;
-	private final DimensionModel dimModel;
+	/**
+	 * The {@code TidaIndex} of the model specified during construction.
+	 */
+	protected final TidaIndex index;
+	/**
+	 * The {@code IndexFactory} of the model specified during construction.
+	 */
+	protected final BaseIndexFactory indexFactory;
+	/**
+	 * The {@code IntervalModel} of the model specified during construction.
+	 */
+	protected final IntervalModel intervalModel;
+	/**
+	 * The {@code DimensionModel} of the model specified during construction.
+	 */
+	protected final DimensionModel dimModel;
 
 	/**
 	 * Standard constructor initializing the {@code TimeSeriesEvaluator} for the
@@ -290,8 +302,10 @@ public class TimeSeriesEvaluator {
 						combined.getFacts());
 
 				// calculate each measure
-				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures);
+				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures)) {
+					return null;
+				}
 			}
 
 			timeSeriesPos++;
@@ -340,8 +354,10 @@ public class TimeSeriesEvaluator {
 						groupResultEntry.getBitmap());
 
 				// calculate each measure
-				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures);
+				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures)) {
+					return null;
+				}
 			}
 
 			timeSeriesPos++;
@@ -398,24 +414,16 @@ public class TimeSeriesEvaluator {
 						index, resultBitmap, combined.getFacts());
 
 				// calculate each measure
-				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures);
+				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures)) {
+					return null;
+				}
 			}
 
 			timeSeriesPos++;
 		}
 
 		return result;
-	}
-
-	private String createGroupId(final GroupResultEntry groupResultEntry) {
-		if (groupResultEntry == null) {
-			return null;
-		} else if (groupResultEntry.isGroup()) {
-			return groupResultEntry.getGroup();
-		} else {
-			return null;
-		}
 	}
 
 	/**
@@ -446,9 +454,20 @@ public class TimeSeriesEvaluator {
 			timeSlices = index.getIntervalIndexSlices(bounds[0], bounds[1]);
 		}
 
+		// determine the boundaries
+		final Object startPoint;
+		final boolean startInclusive;
+		if (interval == null) {
+			startInclusive = true;
+			startPoint = intervalModel.getTimelineDefinition().getStart();
+		} else {
+			startInclusive = interval.getOpenType().isInclusive();
+			startPoint = interval.getStart();
+		}
+
 		// create the result
-		final TimeSeriesCollection result = createTimeSeriesResult(interval,
-				timeSlices.length);
+		final TimeSeriesCollection result = createTimeSeriesResult(startPoint,
+				startInclusive, timeSlices.length);
 
 		/*
 		 * Iterate over the different slices and calculate each measure.
@@ -478,8 +497,10 @@ public class TimeSeriesEvaluator {
 						index, resultBitmap, factSet, offset + timeSeriesPos);
 
 				// calculate each measure
-				fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures);
+				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
+						itMeasures)) {
+					return null;
+				}
 			}
 
 			timeSeriesPos++;
@@ -498,31 +519,71 @@ public class TimeSeriesEvaluator {
 	 *            the position of the time-series to create the values for
 	 * @param evaluator
 	 *            the evaluator used to create the results
-	 * @param timeSeriesCollection
+	 * @param tsc
 	 *            the time-series to be filled
 	 * @param it
 	 *            the iterator used to iterate over the measures
+	 * @return {@code true} if the filling of the time-series should be
+	 *         processed, if {@code false} is returned any processing is
+	 *         cancelled and {@code null} is returned as result of the
+	 *         evaluation
 	 */
-	protected void fillTimeSeries(final String groupId,
+	protected boolean fillTimeSeries(final String groupId,
 			final int timeSeriesPos, final ExpressionEvaluator evaluator,
-			final TimeSeriesCollection timeSeriesCollection,
+			final TimeSeriesCollection tsc,
 			final Iterable<DescriptorMathTree> it) {
 
 		// calculate each measure
 		for (final DescriptorMathTree measure : it) {
-			final String timeSeriesId = groupId == null ? measure.getId()
-					: groupId + " (" + measure.getId() + ")";
+			final String tsId = createTimeSeriesId(groupId, measure);
 
 			// get or create the series
-			TimeSeries timeSeries = timeSeriesCollection
-					.getSeries(timeSeriesId);
-			if (timeSeries == null) {
-				timeSeries = timeSeriesCollection.createSeries(timeSeriesId);
-			}
+			final TimeSeries timeSeries = getTimeSeries(tsc, tsId);
 
 			// get the value of the series
 			final double value = evaluator.evaluateMeasure(measure);
 			timeSeries.setValue(timeSeriesPos, value);
+		}
+
+		return true;
+	}
+
+	/**
+	 * The identifier of the group specified by the entry.
+	 * 
+	 * @param groupResultEntry
+	 *            the entry to create the group for
+	 * 
+	 * @return the
+	 */
+	protected String createGroupId(final GroupResultEntry groupResultEntry) {
+		if (groupResultEntry == null) {
+			return null;
+		} else if (groupResultEntry.isGroup()) {
+			return groupResultEntry.getGroup();
+		} else {
+			return null;
+		}
+	}
+
+	protected TimeSeries getTimeSeries(final TimeSeriesCollection tsc,
+			final String tsId) {
+
+		final TimeSeries ts = tsc.getSeries(tsId);
+		if (ts == null) {
+			return tsc.createSeries(tsId);
+		} else {
+			return ts;
+		}
+	}
+
+	protected String createTimeSeriesId(final String groupId,
+			final DescriptorMathTree measure) {
+
+		if (groupId == null) {
+			return measure.getId();
+		} else {
+			return groupId + " (" + measure.getId() + ")";
 		}
 	}
 
@@ -557,43 +618,25 @@ public class TimeSeriesEvaluator {
 	 * Initializes the {@code TimeSeriesResult} without any {@code TimeSeries}
 	 * instances, but with initialized labeling.
 	 * 
-	 * @param interval
-	 *            the interval the {@code TimeSeries} should be based on
+	 * @param startPoint
+	 *            the point to start the time-series at
+	 * @param startInclusive
+	 *            {@code true} if the start is included, otherwise {@code false}
 	 * @param amountOfGranules
-	 *            the amount of granules defined for the {@code TimeSeries}
+	 *            the amount of values within the time-series
 	 * 
 	 * @return the created {@code TimeSeriesResult}
 	 * 
 	 * @see TimeSeriesCollection
 	 */
 	protected TimeSeriesCollection createTimeSeriesResult(
-			final Interval<?> interval, final int amountOfGranules) {
-
-		// determine the boundaries
-		final Object startPoint;
-		final boolean startInclusive;
-		if (interval == null) {
-			startInclusive = true;
-			startPoint = intervalModel.getTimelineDefinition().getStart();
-		} else {
-			startInclusive = interval.getOpenType().isInclusive();
-			startPoint = interval.getStart();
-		}
+			final Object startPoint, final boolean startInclusive,
+			final int amountOfGranules) {
 
 		// create the result
 		final TimeSeriesCollection result = new TimeSeriesCollection(
 				amountOfGranules, startPoint.getClass(), indexFactory);
-		for (int i = 0; i < amountOfGranules; i++) {
-
-			// create a label for the timeSlice
-			final Object timeSliceLabel = index.getTimePointValue(startPoint,
-					startInclusive, i);
-			final String formattedTimeSliceLabel = index
-					.getTimePointLabel(timeSliceLabel);
-
-			// set the label formatted and the real object
-			result.setLabel(i, formattedTimeSliceLabel, timeSliceLabel);
-		}
+		result.setLabels(index, startPoint, startInclusive);
 
 		return result;
 	}
@@ -608,16 +651,9 @@ public class TimeSeriesEvaluator {
 	 */
 	protected TimeSeriesCollection createTimeSeriesResult(
 			final Set<TimeLevelMember> members) {
-		final int amountOfGranules = members.size();
 		final TimeSeriesCollection result = new TimeSeriesCollection(
-				amountOfGranules, String.class, indexFactory);
-
-		int i = 0;
-		for (final TimeLevelMember member : members) {
-			result.setLabel(i, member.getName(), member.getId());
-
-			i++;
-		}
+				members.size(), String.class, indexFactory);
+		result.setLabels(members);
 
 		return result;
 	}

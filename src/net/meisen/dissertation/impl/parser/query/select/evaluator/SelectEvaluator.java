@@ -34,13 +34,18 @@ public class SelectEvaluator {
 	}
 
 	/**
-	 * Evaluates the specified {@code SelectQuery}.
+	 * Prepares an instance of the result to be evaluated. The preparation sets
+	 * all the values available by {@code this}, but does not trigger the
+	 * {@link SelectResult#determineResult(TidaModel)}.
 	 * 
 	 * @param query
-	 *            the query to be evaluated
-	 * @return the result of the query
+	 *            the query to prepare the result for
+	 * 
+	 * @return the prepared result
+	 * 
+	 * @see #evaluate(SelectQuery)
 	 */
-	public SelectResult evaluate(final SelectQuery query) {
+	public SelectResult prepareResult(final SelectQuery query) {
 
 		// the result holder
 		final SelectResult queryResult = createSelectResult(query);
@@ -101,6 +106,24 @@ public class SelectEvaluator {
 			// set the result as the group-filtered result
 			queryResult.setFilteredGroupResult(res);
 		}
+
+		return queryResult;
+	}
+
+	/**
+	 * Evaluates the specified {@code SelectQuery}. That means that the method
+	 * first prepares a result (see {@link #prepareResult(SelectQuery)}) and
+	 * than starts the determination of the result.
+	 * 
+	 * @param query
+	 *            the query to be evaluated
+	 * 
+	 * @return the result of the query
+	 */
+	public SelectResult evaluate(final SelectQuery query) {
+
+		// prepare a result for the query
+		final SelectResult queryResult = prepareResult(query);
 
 		// determine the result
 		queryResult.determineResult(model);
