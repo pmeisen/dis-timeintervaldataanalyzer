@@ -86,7 +86,7 @@ public class SelectQuery implements IQuery {
 
 	@Override
 	public String toString() {
-		return "select " + type + " in " + interval + " filter " + filter;
+		return "select " + type + " in " + interval + " filter " + filter + " group " + group;
 	}
 
 	/**

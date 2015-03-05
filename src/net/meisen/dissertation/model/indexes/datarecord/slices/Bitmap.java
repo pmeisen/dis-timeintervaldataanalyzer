@@ -23,7 +23,7 @@ import net.meisen.dissertation.model.util.IIntIterator;
  * 
  */
 public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
-		IBitmapIdCacheable {
+		IBitmapResult, IBitmapIdCacheable {
 
 	/**
 	 * The logical types to combine a bitmap with another.
@@ -432,8 +432,9 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 
 	/**
 	 * Combines the two bitmaps with each-other using an and-operation. A
-	 * {@code null} bitmap is handled as a full-bitmap, e.g. all values are set
-	 * to one.
+	 * {@code null} as {@code timeBitmap} is handled as empty bitmap, whereby a
+	 * {@code null} bitmap for the filter is handled as a full-bitmap, e.g. all
+	 * values are set to one.
 	 * 
 	 * @param factory
 	 *            the {@code IndexFactory} used if a new {@code Bitmap} has to
@@ -484,14 +485,17 @@ public abstract class Bitmap implements Iterable<Integer>, IBitmapContainer,
 
 	/**
 	 * Combines the container and the bitmap with each-other using an
-	 * or-operation.
+	 * or-operation. That said, if one is {@code null} the other is returned, if
+	 * both are {@code null} {@code null} is returned, if both aren't null the
+	 * or operation is applied.
 	 * 
 	 * @param bitmap
 	 *            the bitmap
 	 * @param container
 	 *            the {@code BitmapContainer}
 	 * 
-	 * @return the result of or-combination
+	 * @return the result of or-combination, if both are {@code null},
+	 *         {@code null} is returned
 	 */
 	public static Bitmap combineBitmaps(final Bitmap bitmap,
 			final IBitmapContainer container) {

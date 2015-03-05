@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<!-- OfflineMode (i.e. what should happen if a dataretriever is not available)
+     is optional and can be one of the following values (case-insensitive):
+      + true, y, yes
+      + false, n, no
+      + auto
+  -->
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     	http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+       					   http://dev.meisen.net/xsd/dissertation/model/indexes http://dev.meisen.net/xsd/dissertation/tidaIndexFactory.xsd
+       					   http://dev.meisen.net/xsd/dissertation/dimension     http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
+
+       offlinemode="false"
+       
+       id="testTimeSeriesSimilarityEvaluator">
+  
+  <time>
+    <timeline start="01.01.2015 00:00:00" end="31.12.2015 23:59:00" granularity="MINUTE" />
+  </time>
+
+  <meta>
+    <!-- As identifier-factory the following implementations are available:
+          + net.meisen.dissertation.impl.idfactories.IntegerIdsFactory
+          + net.meisen.dissertation.impl.idfactories.LongIdsFactory
+          + net.meisen.dissertation.impl.idfactories.UuIdsFactory
+          
+         The null-attribute (true or false) defines if null values are allowed within 
+         the model.
+         The failonduplicates-attributes (true or false) specifies if duplicates are 
+         just ignored or if an exception is thrown.
+      -->
+    <descriptors>
+      <string  id="NAME"  failonduplicates="false" null="false" name="person"   idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <integer id="IDEAS" failonduplicates="false" null="false" name="workarea" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+    </descriptors>
+    
+    <entries />
+  </meta>
+  
+  <dim:dimensions>
+    <dim:timedimension id="TIME">
+      <dim:hierarchy id="DEF" all="Everytime">
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR" template="RASTER_DAY_MINUTE_60" />
+        <dim:level id="HALFHOUR" template="RASTER_DAY_MINUTE_30" />
+        <dim:level id="MIN5DAY" template="RASTER_DAY_MINUTE_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+  </dim:dimensions>
+    
+  <structure>
+    <meta name="NAME" descriptor="NAME" />
+    <meta name="IDEAS" descriptor="IDEAS" />
+    
+    <interval name="START" type="start" />
+    <interval name="END" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="failOnNull" /> 
+</model>

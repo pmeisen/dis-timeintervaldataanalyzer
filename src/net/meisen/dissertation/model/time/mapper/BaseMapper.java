@@ -766,15 +766,26 @@ public abstract class BaseMapper<T> {
 	public Iterator<long[]> createTimelinePartitionIterator(
 			final Interval<?> interval) {
 		final long[] bounds = getBounds(interval);
+		return createTimelinePartitionIterator(bounds);
+	}
 
-		final long windowStart = bounds[0];
-		final long windowEnd = bounds[1];
-		final long windowSize = windowEnd - windowStart + 1;
+	/**
+	 * This method is used to create an iterator, iterating over the time-line
+	 * in partitions defined. The method ensures, that the {@code interval} is a
+	 * part of the partition. Each partition will contain the same amount of
+	 * time-points as covered by the interval.
+	 * 
+	 * @param range
+	 *            the range to determine the iterator for
+	 * 
+	 * @return the partition iterator
+	 */
+	public Iterator<long[]> createTimelinePartitionIterator(final long[] range) {
 
-		final long offset = (windowStart - getNormStartAsLong()) % windowSize;
-		final long stepSize = windowSize - 1;
+		final long windowStart = range[0];
+		final long windowEnd = range[1];
 
-		if (stepSize == 0) {
+		if (windowEnd - windowStart > distance) {
 			return new Iterator<long[]>() {
 
 				@Override
@@ -793,6 +804,11 @@ public abstract class BaseMapper<T> {
 				}
 			};
 		}
+
+		final long windowSize = windowEnd - windowStart + 1;
+
+		final long offset = (windowStart - getNormStartAsLong()) % windowSize;
+		final long stepSize = windowSize - 1;
 
 		final long firstStart;
 		final long firstEnd;

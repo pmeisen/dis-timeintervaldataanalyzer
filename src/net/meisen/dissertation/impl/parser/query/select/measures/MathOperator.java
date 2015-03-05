@@ -68,7 +68,7 @@ public class MathOperator {
 	}
 
 	/**
-	 * Checks if the operator represents a {@code AggregationFunction} and
+	 * Checks if the operator represents an {@code AggregationFunction} and
 	 * returns {@code true} in that case. Otherwise {@code false} is returned.
 	 * 
 	 * @return {@code true} if the operator represents a
@@ -79,7 +79,7 @@ public class MathOperator {
 	}
 
 	/**
-	 * Checks if the operator represents a {@code ArithmeticOperator} and
+	 * Checks if the operator represents an {@code ArithmeticOperator} and
 	 * returns {@code true} in that case. Otherwise {@code false} is returned.
 	 * 
 	 * @return {@code true} if the operator represents a

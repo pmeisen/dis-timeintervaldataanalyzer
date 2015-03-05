@@ -29,7 +29,7 @@ public class Count extends BaseAggregationFunction implements
 	@Override
 	public double aggregate(final TidaIndex index, final Bitmap bitmap,
 			final IFactsHolder facts) {
-		if (bitmap == null || facts == null) {
+		if (bitmap == null) {
 			return getDefaultValue();
 		}
 

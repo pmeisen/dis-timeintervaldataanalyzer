@@ -9,6 +9,7 @@ import net.meisen.dissertation.impl.parser.query.select.measures.IMathTreeElemen
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperator;
 import net.meisen.dissertation.impl.parser.query.select.measures.MathOperatorNode;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.measures.IAggregationFunction;
 import net.meisen.dissertation.model.measures.IFactsHolder;
 import net.meisen.dissertation.model.util.IIntIterator;
@@ -20,17 +21,25 @@ import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
  * @author pmeisen
  * 
  */
-public abstract class ExpressionEvaluator {
+public abstract class ExpressionEvaluator extends
+		BaseBitmapPreProcessorObservable implements IBitmapPreProcessorObserver {
 	private final TidaIndex index;
+	private final String groupId;
+
+	private boolean status;
 
 	/**
 	 * Default constructor specifying the index.
 	 * 
+	 * @param groupId
+	 *            the group the expression is evaluated for
 	 * @param index
 	 *            the {@code TidaIndex} to be used
 	 */
-	public ExpressionEvaluator(final TidaIndex index) {
+	public ExpressionEvaluator(final TidaIndex index, final String groupId) {
 		this.index = index;
+		this.groupId = groupId;
+		this.status = true;
 	}
 
 	/**
@@ -40,6 +49,15 @@ public abstract class ExpressionEvaluator {
 	 */
 	protected TidaIndex getIndex() {
 		return index;
+	}
+
+	protected boolean notifyObservers(final long normalizedTimePoint,
+			final Bitmap bitmap) {
+		return super.notifyObservers(getGroupId(), normalizedTimePoint, bitmap);
+	}
+
+	protected double getCancellationFlag() {
+		return Double.POSITIVE_INFINITY;
 	}
 
 	/**
@@ -120,15 +138,31 @@ public abstract class ExpressionEvaluator {
 			}
 
 			// apply the arithmetic
-			final double res1 = evaluateAggregatedValueForNode(node.getChild(0));
-			final double res2 = evaluateAggregatedValueForNode(node.getChild(1));
-			final ArithmeticOperator operator = op.getOperator();
-
-			return calculate(operator, res1, res2);
+			return evaluateAggregatedValueForNodes(node.getChild(0),
+					node.getChild(1), op.getOperator());
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1007, op);
 		}
+	}
+
+	protected double evaluateAggregatedValueForNodes(
+			final IMathTreeElement el1, final IMathTreeElement el2,
+			final ArithmeticOperator operator) {
+
+		// get the first value
+		final double res1 = evaluateAggregatedValueForNode(el1);
+		if (isCancelled(res1)) {
+			return getCancellationFlag();
+		}
+
+		// get the second value
+		final double res2 = evaluateAggregatedValueForNode(el2);
+		if (isCancelled(res2)) {
+			return getCancellationFlag();
+		}
+
+		return calculate(operator, res1, res2);
 	}
 
 	/**
@@ -174,8 +208,8 @@ public abstract class ExpressionEvaluator {
 			if (children == 1) {
 				final IMathTreeElement childNode = node.getChild(0);
 
-				if (useDefaultOfFunction()) {
-					return func.getDefaultValue();
+				if (useFunctionDirectly()) {
+					return applyFunction(func);
 				} else if (childNode instanceof MathOperatorNode) {
 					final IFactsHolder facts = evaluateMathForNode((MathOperatorNode) childNode);
 					return applyFunction(func, facts);
@@ -197,13 +231,26 @@ public abstract class ExpressionEvaluator {
 	}
 
 	/**
-	 * Method used to check if the default value of the function should be used
-	 * instead of a further processing.
+	 * Method used to check if the default value of the function should be used.
+	 * If this method returns {@code true} the system calls the method
+	 * {@link #applyFunction(IAggregationFunction)} instead of further
+	 * processing, otherwise the processing is continued.
 	 * 
 	 * @return {@code true} if the default value should be used, otherwise
 	 *         {@code false}
 	 */
-	protected abstract boolean useDefaultOfFunction();
+	protected abstract boolean useFunctionDirectly();
+
+	/**
+	 * Method called whenever the {@code useFunctionDireclty} method returned
+	 * {@code true}.
+	 * 
+	 * @param func
+	 *            the function to be used without any further information
+	 *            
+	 * @return the result of the application of the function
+	 */
+	protected abstract double applyFunction(final IAggregationFunction func);
 
 	/**
 	 * Gets the {@code FactsHolder} for the specified {@code DescriptorModel}
@@ -217,7 +264,10 @@ public abstract class ExpressionEvaluator {
 	protected abstract IFactsHolder getFactsHolder(final String modelId);
 
 	/**
-	 * Applies the function to the specified {@code facts}.
+	 * Applies the function to the specified {@code facts}. The method might
+	 * return the {@link #getCancellationFlag()}. If the flag is returned, the
+	 * function's calculation was terminated and the result is not valid and not
+	 * needed by the calling instance.
 	 * 
 	 * @param func
 	 *            the function to be applied
@@ -279,9 +329,17 @@ public abstract class ExpressionEvaluator {
 		}
 
 		// apply the arithmetic
-		final IFactsHolder res1 = evaluateMathForNode(node.getChild(0));
-		final IFactsHolder res2 = evaluateMathForNode(node.getChild(1));
 		final ArithmeticOperator operator = op.getOperator();
+		return evaluateMathForNodes(node.getChild(0), node.getChild(1),
+				operator);
+	}
+
+	protected IFactsHolder evaluateMathForNodes(final IMathTreeElement el1,
+			final IMathTreeElement el2, final ArithmeticOperator operator) {
+
+		// apply the arithmetic
+		final IFactsHolder res1 = evaluateMathForNode(el1);
+		final IFactsHolder res2 = evaluateMathForNode(el2);
 
 		return calculate(operator, res1, res2);
 	}
@@ -350,8 +408,8 @@ public abstract class ExpressionEvaluator {
 	 * 
 	 * @return the result
 	 */
-	protected double calculate(final ArithmeticOperator operator, double res1,
-			double res2) {
+	protected double calculate(final ArithmeticOperator operator,
+			final double res1, final double res2) {
 
 		// handle unknown values
 		if (Double.isNaN(res1) || Double.isNaN(res2)) {
@@ -360,5 +418,38 @@ public abstract class ExpressionEvaluator {
 
 		// handle known values
 		return operator.apply(res1, res2);
+	}
+
+	@Override
+	public boolean preProcessBitmap(
+			final BaseBitmapPreProcessorObservable observable,
+			final String groupId, final long normalizedTimePoint,
+			final Bitmap bitmap) {
+
+		/*
+		 * If the status failed once, we can stop anything and skip it.
+		 * Otherwise keep on the observation.
+		 */
+		if (!status) {
+			// nothing has changed
+		} else if (notifyObservers(groupId, normalizedTimePoint, bitmap)) {
+			// nothing has changed
+		} else {
+			status = false;
+		}
+
+		return status;
+	}
+
+	public boolean isCancelled(final double result) {
+		return !status || getCancellationFlag() == result;
+	}
+
+	public boolean getStatus() {
+		return status;
+	}
+
+	public String getGroupId() {
+		return groupId;
 	}
 }

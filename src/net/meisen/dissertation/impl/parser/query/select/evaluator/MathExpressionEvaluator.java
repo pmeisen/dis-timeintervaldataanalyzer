@@ -26,7 +26,6 @@ import net.meisen.general.genmisc.types.Numbers;
  * 
  */
 public class MathExpressionEvaluator extends ExpressionEvaluator {
-
 	private final Bitmap bitmap;
 	private final List<TimeMemberRange> ranges;
 	private final long[] bounds;
@@ -37,6 +36,8 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 	 * 
 	 * @param index
 	 *            the {@code TidaIndex}
+	 * @param groupId
+	 *            the group the expression is evaluated for
 	 * @param bounds
 	 *            the bounds defined generally
 	 * @param ranges
@@ -45,9 +46,10 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 	 *            the filter results (i.e. the combination of valid-records,
 	 *            filtering and group)
 	 */
-	public MathExpressionEvaluator(final TidaIndex index, final long[] bounds,
-			final List<TimeMemberRange> ranges, final Bitmap bitmap) {
-		super(index);
+	public MathExpressionEvaluator(final TidaIndex index, final String groupId,
+			final long[] bounds, final List<TimeMemberRange> ranges,
+			final Bitmap bitmap) {
+		super(index, groupId);
 
 		this.bounds = bounds;
 		this.ranges = ranges;
@@ -55,7 +57,12 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	protected boolean useDefaultOfFunction() {
+	protected double applyFunction(final IAggregationFunction func) {
+		throw new IllegalStateException("Should never be used.");
+	}
+
+	@Override
+	protected boolean useFunctionDirectly() {
 		return false;
 	}
 
@@ -164,12 +171,18 @@ public class MathExpressionEvaluator extends ExpressionEvaluator {
 
 				// get the result for the slice and add it
 				final LowExpressionEvaluator evaluator = new LowExpressionEvaluator(
-						getIndex(), bitmap, facts, i);
+						getIndex(), bitmap, facts, getGroupId(), i);
+				evaluator.addObserver(this);
 
-				// get the result and add it if it's a valid value
+				/*
+				 * Get the result and add it if it's a valid value, otherwise
+				 * cancel or don't add it.
+				 */
 				final double result = evaluator.evaluateMeasure(node);
-				if (Double.NaN != result) {
-					holder.add(evaluator.evaluateMeasure(node));
+				if (isCancelled(result)) {
+					return getCancellationFlag();
+				} else if (!Double.isNaN(result)) {
+					holder.add(result);
 				}
 
 				i++;

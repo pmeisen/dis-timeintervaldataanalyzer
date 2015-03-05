@@ -3,13 +3,21 @@ package net.meisen.dissertation.performance.implementations.similarity;
 import java.util.Map;
 
 /**
- * Interface used to change the {@code Calculator} used by an {@code EventTAble}
+ * Interface used to change the {@code Calculator} used by an {@code EventTable}
  * .
  * 
  * @author pmeisen
  * 
  */
 public interface IValueCalculator {
+
+	/**
+	 * The initializing value.
+	 * 
+	 * @return the value used for initialization.
+	 */
+	public double getInitValue();
+
 	/**
 	 * The default value used.
 	 * 

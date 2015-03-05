@@ -26,6 +26,8 @@ public class MixedExpressionEvaluator extends MathExpressionEvaluator {
 	 * 
 	 * @param index
 	 *            the {@code TidaIndex}
+	 * @param groupId
+	 *            the group the expression is evaluated for
 	 * @param bounds
 	 *            the bounds defined generally
 	 * @param ranges
@@ -34,17 +36,23 @@ public class MixedExpressionEvaluator extends MathExpressionEvaluator {
 	 *            the filter results (i.e. the combination of valid-records,
 	 *            filtering and group)
 	 * @param memberBitmap
-	 *            the combined bitmap of the member the evaluator is used for
+	 *            the combined bitmap of the members the evaluator is used for
 	 * @param memberFacts
-	 *            the combined facts of the member the evaluator is used for
+	 *            the combined facts of the members the evaluator is used for
 	 */
-	public MixedExpressionEvaluator(final TidaIndex index, final long[] bounds,
+	public MixedExpressionEvaluator(final TidaIndex index,
+			final String groupId, final long[] bounds,
 			final List<TimeMemberRange> ranges, final Bitmap groupBitmap,
 			final Bitmap memberBitmap, final FactDescriptorModelSet memberFacts) {
-		super(index, bounds, ranges, groupBitmap);
+		super(index, groupId, bounds, ranges, groupBitmap);
 
-		this.dimEvaluator = new DimExpressionEvaluator(getIndex(),
-				memberBitmap, memberFacts);
+		this.dimEvaluator = new DimExpressionEvaluator(getIndex(), groupId,
+				bounds, ranges, groupBitmap, memberBitmap, memberFacts);
+		/*
+		 * We don't have to add any observer, because the mixed version will
+		 * trigger the notification already by the MathExpressionEvaluator.
+		 */
+		// this.dimEvaluator.addObserver(this);
 	}
 
 	@Override

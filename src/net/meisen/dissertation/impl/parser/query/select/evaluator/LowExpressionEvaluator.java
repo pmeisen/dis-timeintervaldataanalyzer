@@ -33,13 +33,15 @@ public class LowExpressionEvaluator extends ExpressionEvaluator {
 	 *            filtering, grouping and time slicing
 	 * @param facts
 	 *            the facts associated to the time-slice
+	 * @param groupId
+	 *            the group the expression is evaluated for
 	 * @param timepoint
 	 *            the normalized time-point of the time
 	 */
 	public LowExpressionEvaluator(final TidaIndex index,
 			final Bitmap resultBitmap, final FactDescriptorModelSet facts,
-			final int timepoint) {
-		super(index);
+			final String groupId, final int timepoint) {
+		super(index, groupId);
 
 		this.facts = facts;
 		this.resultBitmap = resultBitmap;
@@ -47,12 +49,28 @@ public class LowExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
+	protected double applyFunction(final IAggregationFunction func) {
+		return applyFunction(func, null);
+	}
+
+	@Override
 	protected double applyFunction(final IAggregationFunction func,
 			final IFactsHolder facts) {
+
 		if (func instanceof ILowAggregationFunction) {
-			return ((ILowAggregationFunction) func).aggregate(getIndex(),
-					resultBitmap,
-					facts, timepoint);
+
+			// check the result of the observers and cancel if asked for
+			if (!notifyObservers(timepoint, resultBitmap)) {
+				return getCancellationFlag();
+			}
+
+			// check the result to be returned
+			if (facts == null) {
+				return func.getDefaultValue();
+			} else {
+				return ((ILowAggregationFunction) func).aggregate(getIndex(),
+						resultBitmap, facts, timepoint);
+			}
 		} else {
 			throw new ForwardedRuntimeException(QueryEvaluationException.class,
 					1022, ILowAggregationFunction.class.getSimpleName(),
@@ -67,7 +85,7 @@ public class LowExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	protected boolean useDefaultOfFunction() {
+	protected boolean useFunctionDirectly() {
 		return facts == null || resultBitmap == null;
 	}
 }

@@ -403,6 +403,8 @@ public class TestDateMapper {
 		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
 				new DateIntervalValue(tmpltStart), new DateIntervalValue(
 						tmpltEnd)));
+		assertTrue(it.hasNext());
+		assertPartition(0, 0, it.next());
 		assertFalse(it.hasNext());
 
 		// create a valid time-line for a month
@@ -426,7 +428,7 @@ public class TestDateMapper {
 		counter = 0;
 		while (it.hasNext()) {
 			final long[] partition = it.next();
-			assertEquals(1439l, partition[1] - partition[0]);
+			assertEquals(1440l, partition[1] - partition[0] + 1);
 
 			counter++;
 		}
@@ -442,7 +444,7 @@ public class TestDateMapper {
 		counter = 0;
 		while (it.hasNext()) {
 			final long[] partition = it.next();
-			assertEquals(1439l, partition[1] - partition[0]);
+			assertEquals(1440l, partition[1] - partition[0] + 1);
 
 			counter++;
 		}
@@ -460,11 +462,27 @@ public class TestDateMapper {
 		counter = 0;
 		while (it.hasNext()) {
 			final long[] partition = it.next();
-			assertEquals(1439l, partition[1] - partition[0]);
+			assertEquals(1440l, partition[1] - partition[0] + 1);
 
 			counter++;
 		}
 		assertEquals(366, counter);
+
+		// use a minute as template
+		tmpltStart = Dates.isDate("02.01.2008", Dates.GENERAL_TIMEZONE);
+		tmpltEnd = Dates.isDate("02.01.2008 00:00:00", Dates.GENERAL_TIMEZONE);
+		mapper = new DateMapper(tlStart, tlEnd, Minute.instance());
+		it = mapper.createTimelinePartitionIterator(new Interval<Date>(
+				new DateIntervalValue(tmpltStart), new DateIntervalValue(
+						tmpltEnd)));
+		counter = 0;
+		while (it.hasNext()) {
+			final long[] partition = it.next();
+			assertEquals(1l, partition[1] - partition[0] + 1);
+
+			counter++;
+		}
+		assertEquals(366 * 1440, counter);
 
 	}
 

@@ -11,6 +11,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.indexes.IIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
+import net.meisen.general.genmisc.types.Numbers;
 
 /**
  * A collection of a {@code TimeSeries} for a specified {@code interval}.
@@ -60,23 +61,36 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 		labels.setLabel(pos, label, labelValue);
 	}
 
+	/**
+	 * Sets the labels of the series for the specified {@code members}.
+	 * 
+	 * @param members
+	 *            the members defining the labels
+	 */
 	public void setLabels(final Set<TimeLevelMember> members) {
 		int i = 0;
 		for (final TimeLevelMember member : members) {
 			setLabel(i, member.getName(), member.getId());
-
 			i++;
 		}
 	}
 
-	public void setLabels(final TidaIndex index, final Object startPoint,
-			final boolean startInclusive) {
+	/**
+	 * Sets the labels for the specified {@code bounds}.
+	 * 
+	 * @param index
+	 *            the {@code TidaIndex} to determine the values
+	 * @param bounds
+	 *            the start and end of the time-series
+	 */
+	public void setLabels(final TidaIndex index, final long[] bounds) {
+		final int size = Numbers.castToInt(bounds[1] - bounds[0] + 1);
 
 		for (int i = 0; i < size; i++) {
 
 			// create a label for the timeSlice
-			final Object timeSliceLabel = index.getTimePointValue(startPoint,
-					startInclusive, i);
+			final Object timeSliceLabel = index
+					.getTimePointValue(bounds[0] + i);
 			final String formattedTimeSliceLabel = index
 					.getTimePointLabel(timeSliceLabel);
 
@@ -201,6 +215,7 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 
 	@Override
 	public String toString() {
+		final String nl = System.getProperty("line.separator");
 		final StringBuilder sb = new StringBuilder();
 
 		for (final Object o : timeSeries.getAll()) {
@@ -219,10 +234,10 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 				sb.append(String.format(Locale.US, "%.2f (%s)", ts.getValue(i),
 						labels.getLabel(i)));
 			}
-			sb.append(System.getProperty("line.separator"));
+			sb.append(nl);
 		}
 
-		return sb.toString();
+		return sb.toString().trim();
 	}
 
 	/**
@@ -250,6 +265,16 @@ public class TimeSeriesCollection implements Iterable<TimeSeries> {
 	 */
 	public int sizeOfLabels() {
 		return labels.size();
+	}
+
+	/**
+	 * Gets the size of the time-series, i.e. the amount of labels, entries etc.
+	 * 
+	 * @return the size of the time-series, i.e. the amount of labels, entries
+	 *         etc.
+	 */
+	public int sizeOfSeries() {
+		return size;
 	}
 
 	/**

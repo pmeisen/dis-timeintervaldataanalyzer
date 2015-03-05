@@ -417,36 +417,16 @@ public class TidaIndex implements IPersistable {
 	}
 
 	/**
-	 * Gets the time-point value for the specified {@code id}.
+	 * Gets the value associated to the normalizedValue.
 	 * 
-	 * @param id
-	 *            the {@code id} to get the time-point for
+	 * @param normalizedValue
+	 *            the normalized value
 	 * 
-	 * @return the time-point for the specified {@code id}
+	 * 
+	 * @return the associated value
 	 */
-	public Object getTimePointValue(final Object id) {
-		return intervalIndex.getValue(id);
-	}
-
-	/**
-	 * Gets the time-point value for the specified {@code pos}, which is assumed
-	 * to be relative to the specified {@code start}.
-	 * 
-	 * @param start
-	 *            the start on the timeline to which the specified {@code pos}
-	 *            is relative to
-	 * @param startInclusive
-	 *            determines if the realtive start point is inclusive, or if the
-	 *            next time point is the relative position
-	 * @param pos
-	 *            the position to get the time-point for, relative to the
-	 *            {@code start}
-	 * 
-	 * @return the time-point for the specified {@code id}
-	 */
-	public Object getTimePointValue(final Object start,
-			final boolean startInclusive, final long pos) {
-		return intervalIndex.getValue(start, startInclusive, pos);
+	public Object getTimePointValue(final long normalizedValue) {
+		return intervalIndex.getValue(normalizedValue);
 	}
 
 	/**

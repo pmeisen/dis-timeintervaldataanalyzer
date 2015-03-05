@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry;
 import net.meisen.dissertation.model.datastructure.StructureEntry;
+import net.meisen.dissertation.model.datastructure.IntervalStructureEntry.IntervalTypeFactory.IntervalType;
 
 /**
  * A {@code DataStructure} adds the semantics and the bindings to the data. That
@@ -97,5 +99,31 @@ public class DataStructure {
 	 */
 	public int getSize() {
 		return entryList.size();
+	}
+
+	/**
+	 * Gets the defined {@code IntervalStructureEntry} for the specified
+	 * {@code IntervalType}.
+	 * 
+	 * @param type
+	 *            the type to retrieve
+	 * 
+	 * @return the {@code IntervalStructureEntry} of the type, or {@code null}
+	 *         if non exists
+	 */
+	public IntervalStructureEntry getIntervalEntryOfType(final IntervalType type) {
+		if (type == null) {
+			return null;
+		}
+
+		final List<IntervalStructureEntry> entries = this
+				.getEntriesByClass(IntervalStructureEntry.class);
+		for (final IntervalStructureEntry entry : entries) {
+			if (type.equals(entry.getIntervalType())) {
+				return entry;
+			}
+		}
+
+		return null;
 	}
 }

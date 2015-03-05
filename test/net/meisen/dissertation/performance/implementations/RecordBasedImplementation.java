@@ -391,11 +391,11 @@ public abstract class RecordBasedImplementation extends
 
 		return tmpRes;
 	}
-	
+
 	public String getStartField() {
 		return start;
 	}
-	
+
 	public String getEndField() {
 		return end;
 	}

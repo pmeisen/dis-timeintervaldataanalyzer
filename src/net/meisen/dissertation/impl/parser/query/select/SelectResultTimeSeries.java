@@ -202,9 +202,20 @@ public class SelectResultTimeSeries extends SelectResult {
 		this.timeSeriesCollection = timeSeriesEvaluator.evaluateInterval(
 				getQuery(), this);
 	}
-	
+
 	@Override
 	public String toString() {
 		return timeSeriesCollection.toString();
+	}
+
+	/**
+	 * Sets the {@code TimeSeriesCollection} of {@code this}.
+	 * 
+	 * @param timeSeriesCollection
+	 *            the collection to be set
+	 */
+	public void setTimeSeriesCollection(
+			final TimeSeriesCollection timeSeriesCollection) {
+		this.timeSeriesCollection = timeSeriesCollection;
 	}
 }

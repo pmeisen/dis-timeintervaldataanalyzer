@@ -120,6 +120,21 @@ public class TimeLevelMember {
 	}
 
 	/**
+	 * Determines the size of all ranges of {@code this}.
+	 * 
+	 * @return the size, i.e. the amount of time-points covered
+	 */
+	public long size() {
+		long size = 0;
+
+		for (final TimeMemberRange range : ranges) {
+			size += range.size();
+		}
+
+		return size;
+	}
+
+	/**
 	 * Gets the amount of ranges defined for the member.
 	 * 
 	 * @return the amount of ranges defined for the member

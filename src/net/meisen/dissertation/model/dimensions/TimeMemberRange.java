@@ -42,6 +42,15 @@ public class TimeMemberRange {
 		return end;
 	}
 
+	/**
+	 * Gets the size of the range.
+	 * 
+	 * @return the size, i.e. the amount of time-points covered
+	 */
+	public long size() {
+		return end - start + 1;
+	}
+
 	@Override
 	public String toString() {
 		return "[" + start + ", " + end + "]";

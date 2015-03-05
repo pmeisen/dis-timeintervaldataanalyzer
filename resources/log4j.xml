@@ -44,10 +44,10 @@
   </logger>
 
   <logger name="net.meisen.general.sbconfigurator.config.DefaultConfiguration">
-    <level value="TRACE"/>
+    <level value="DEBUG"/>
   </logger>
     -->
-  
+
    <!-- ======================= --> 
    <!-- Setup the Root category -->
    <!-- ======================= -->

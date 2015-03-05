@@ -3,7 +3,6 @@ package net.meisen.dissertation.performance.implementations.similarity;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.procedure.TIntDoubleProcedure;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,30 +30,6 @@ public class EventTable {
 	private final int size;
 	private final String label;
 	private final IValueCalculator calculator;
-
-	/**
-	 * Constructor using the default count-calculator.
-	 * 
-	 * @param label
-	 *            a label for the table
-	 * @param size
-	 *            the size of the e-sequence to be represented
-	 */
-	public EventTable(final String label, final long size) {
-		this(label, size, new IValueCalculator() {
-
-			@Override
-			public double getDefaultValue() {
-				return 0.0;
-			}
-
-			@Override
-			public double calcValue(final double curValue,
-					final Map<String, Object> record) {
-				return curValue + 1.0;
-			}
-		});
-	}
 
 	/**
 	 * Creates a new {@code EventTable} for the specified time-points.
@@ -155,7 +130,7 @@ public class EventTable {
 		double[] entry = this.eventTable.get(label);
 		if (entry == null) {
 			entry = new double[this.size];
-			Arrays.fill(entry, calculator.getDefaultValue());
+			Arrays.fill(entry, calculator.getInitValue());
 			this.eventTable.put(label, entry);
 		}
 
@@ -228,7 +203,7 @@ public class EventTable {
 	public double get(final int pos, final List<Object> values) {
 		final double[] entry = this.eventTable.get(values);
 		if (entry == null) {
-			return Double.NEGATIVE_INFINITY;
+			return calculator.getDefaultValue();
 		} else {
 			return entry[pos];
 		}

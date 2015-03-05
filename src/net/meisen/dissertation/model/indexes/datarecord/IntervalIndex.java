@@ -588,35 +588,6 @@ public class IntervalIndex implements IDataRecordIndex {
 	}
 
 	/**
-	 * Gets the value of the timeSlice positioned relatively from the specified
-	 * {@code start}.
-	 * 
-	 * @param start
-	 *            the start value within the timeline.
-	 * @param startInclusive
-	 *            {@code true} to define the start value to be inclusive,
-	 *            otherwise it is exclusive
-	 * @param pos
-	 *            the - relative to the {@code start} - position to determine
-	 *            the formatted value for
-	 * 
-	 * @return the formatted value
-	 */
-	public Object getValue(final Object start, final boolean startInclusive,
-			final long pos) {
-
-		// determine the position, i.e. the normalized value
-		long valuePos = mapper.mapToLong(start);
-		if (!startInclusive) {
-			valuePos = valuePos + pos + 1;
-		} else {
-			valuePos = valuePos + pos;
-		}
-
-		return getValue(valuePos);
-	}
-
-	/**
 	 * Determines the value associated to the specified {@code normalizedValue}.
 	 * 
 	 * @param normalizedValue
@@ -626,22 +597,5 @@ public class IntervalIndex implements IDataRecordIndex {
 	 */
 	public Object getValue(final long normalizedValue) {
 		return mapper.resolve(normalizedValue);
-	}
-
-	/**
-	 * Gets the value for the specified {@code id}.
-	 * 
-	 * @param id
-	 *            the identifier to get the associated value for
-	 * 
-	 * @return the associated value to the specified identifier
-	 */
-	public Object getValue(final Object id) {
-		if (id instanceof Number) {
-			return getValue(((Number) id).longValue());
-		} else {
-			throw new IllegalArgumentException("Invalid identifier '" + id
-					+ "'.");
-		}
 	}
 }

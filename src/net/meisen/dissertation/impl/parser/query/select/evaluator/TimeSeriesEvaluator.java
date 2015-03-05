@@ -25,6 +25,7 @@ import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.FactDescriptorModelSet;
 import net.meisen.dissertation.model.indexes.datarecord.slices.SliceWithDescriptors;
 import net.meisen.dissertation.model.measures.IDimAggregationFunction;
+import net.meisen.dissertation.model.measures.ILowAggregationFunction;
 import net.meisen.dissertation.model.measures.IMathAggregationFunction;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 import net.meisen.general.genmisc.types.Numbers;
@@ -35,12 +36,13 @@ import net.meisen.general.genmisc.types.Numbers;
  * @author pmeisen
  * 
  */
-public class TimeSeriesEvaluator {
-	private static final DescriptorMathTree defaultMeasure = new DescriptorMathTree(
+public class TimeSeriesEvaluator extends BaseBitmapPreProcessorObservable {
+	protected static final DescriptorMathTree countMeasure = new DescriptorMathTree(
 			"COUNT");
+	protected static final ILowAggregationFunction countAggr = new Count();
 	static {
-		defaultMeasure.attach(new Count());
-		defaultMeasure.attach("");
+		countMeasure.attach(countAggr);
+		countMeasure.attach("");
 	}
 
 	private static final class CombinedSlices {
@@ -103,7 +105,7 @@ public class TimeSeriesEvaluator {
 				@Override
 				public DescriptorMathTree next() {
 					read = true;
-					return defaultMeasure;
+					return countMeasure;
 				}
 
 				@Override
@@ -163,19 +165,45 @@ public class TimeSeriesEvaluator {
 	public TimeSeriesCollection evaluateInterval(final SelectQuery query,
 			final SelectResult queryResult) {
 
+		// get the boundaries defined by the query
+		final long[] bounds = getBounds(query.getInterval());
+		return evaluateInterval(query, bounds, queryResult);
+	}
+
+	/**
+	 * Evaluates the result for the specified {@code interval} using the
+	 * specified bounds, instead of the bounds as specified by the {@code query}
+	 * .
+	 * 
+	 * @param query
+	 *            the query to create the result for
+	 * @param bounds
+	 *            the interval (i.e. bounds) to be used
+	 * @param queryResult
+	 *            the result of the parsing and interpretation of the select
+	 *            statement
+	 * 
+	 * @return the created {@code TimeSeries}
+	 * 
+	 * @see TimeSeries
+	 * @see SelectResultTimeSeries
+	 */
+	public TimeSeriesCollection evaluateInterval(final SelectQuery query,
+			final long[] bounds, final SelectResult queryResult) {
+
 		// get the result for each group
 		final GroupResult filteredGroupResult = queryResult
 				.getFilteredGroupResult();
 
 		// depending on the dimensions we have to choose what to do
 		if (query.getMeasureDimension() == null) {
-			return evaluateLow(query, filteredGroupResult);
+			return evaluateLow(query, bounds, filteredGroupResult);
 		} else if (!query.usesFunction(IMathAggregationFunction.class)) {
-			return evaluateDim(query, filteredGroupResult);
+			return evaluateDim(query, bounds, filteredGroupResult);
 		} else if (!query.usesFunction(IDimAggregationFunction.class)) {
-			return evaluateMath(query, filteredGroupResult);
+			return evaluateMath(query, bounds, filteredGroupResult);
 		} else {
-			return evaluateMixed(query, filteredGroupResult);
+			return evaluateMixed(query, bounds, filteredGroupResult);
 		}
 	}
 
@@ -260,21 +288,21 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
+	 * @param bounds
+	 *            the boundaries, normally retrieved from the query's interval
+	 *            by {@link #getBounds(Interval)}
 	 * @param filteredGroupResult
 	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateMixed(final SelectQuery query,
-			final GroupResult filteredGroupResult) {
+			final long[] bounds, final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
-		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
 		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
-
 		final DimensionSelector dim = query.getMeasureDimension();
-		final long[] bounds = getBounds(interval);
 
 		// get the members of the selected level
 		final Set<TimeLevelMember> members = dimModel.getTimeMembers(dim,
@@ -285,6 +313,7 @@ public class TimeSeriesEvaluator {
 
 		int timeSeriesPos = 0;
 		for (final TimeLevelMember member : members) {
+			final long size = member.size();
 
 			// iterate over the ranges and create combined bitmaps and facts
 			final CombinedSlices combined = createCombination(member, bounds);
@@ -297,13 +326,14 @@ public class TimeSeriesEvaluator {
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MixedExpressionEvaluator(
-						index, bounds, member.getRanges(),
+						index, groupId, bounds, member.getRanges(),
 						groupResultEntry.getBitmap(), resultBitmap,
 						combined.getFacts());
+				evaluator.addObservers(this);
 
 				// calculate each measure
-				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures)) {
+				if (!fillTimeSeries(groupId, timeSeriesPos, size, evaluator,
+						result, itMeasures)) {
 					return null;
 				}
 			}
@@ -311,6 +341,7 @@ public class TimeSeriesEvaluator {
 			timeSeriesPos++;
 		}
 
+		result.setLabels(members);
 		return result;
 	}
 
@@ -320,21 +351,21 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
+	 * @param bounds
+	 *            the boundaries, normally retrieved from the query's interval
+	 *            by {@link #getBounds(Interval)}
 	 * @param filteredGroupResult
 	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateMath(final SelectQuery query,
-			final GroupResult filteredGroupResult) {
+			final long[] bounds, final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
-		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
 		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
-
 		final DimensionSelector dim = query.getMeasureDimension();
-		final long[] bounds = getBounds(interval);
 
 		// get the members of the selected level
 		final Set<TimeLevelMember> members = dimModel.getTimeMembers(dim,
@@ -345,17 +376,20 @@ public class TimeSeriesEvaluator {
 
 		int timeSeriesPos = 0;
 		for (final TimeLevelMember member : members) {
+			final long size = member.size();
+
 			for (final GroupResultEntry groupResultEntry : itGroup) {
 				final String groupId = createGroupId(groupResultEntry);
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new MathExpressionEvaluator(
-						index, bounds, member.getRanges(),
+						index, groupId, bounds, member.getRanges(),
 						groupResultEntry.getBitmap());
+				evaluator.addObservers(this);
 
 				// calculate each measure
-				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures)) {
+				if (!fillTimeSeries(groupId, timeSeriesPos, size, evaluator,
+						result, itMeasures)) {
 					return null;
 				}
 			}
@@ -363,6 +397,7 @@ public class TimeSeriesEvaluator {
 			timeSeriesPos++;
 		}
 
+		result.setLabels(members);
 		return result;
 	}
 
@@ -372,21 +407,21 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
+	 * @param bounds
+	 *            the boundaries, normally retrieved from the query's interval
+	 *            by {@link #getBounds(Interval)}
 	 * @param filteredGroupResult
 	 *            the filtered group result
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateDim(final SelectQuery query,
-			final GroupResult filteredGroupResult) {
+			final long[] bounds, final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
-		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
 		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
-
 		final DimensionSelector dim = query.getMeasureDimension();
-		final long[] bounds = getBounds(interval);
 
 		// get the members of the selected level
 		final Set<TimeLevelMember> members = dimModel.getTimeMembers(dim,
@@ -397,6 +432,7 @@ public class TimeSeriesEvaluator {
 
 		int timeSeriesPos = 0;
 		for (final TimeLevelMember member : members) {
+			final long size = member.size();
 
 			// iterate over the ranges and create combined bitmaps and facts
 			final CombinedSlices combined = createCombination(member, bounds);
@@ -410,12 +446,15 @@ public class TimeSeriesEvaluator {
 						indexFactory, timeBitmap, groupResultEntry);
 
 				// create the evaluator
-				final DimExpressionEvaluator evaluator = new DimExpressionEvaluator(
-						index, resultBitmap, combined.getFacts());
+				final ExpressionEvaluator evaluator = new DimExpressionEvaluator(
+						index, groupId, bounds, member.getRanges(),
+						groupResultEntry.getBitmap(), resultBitmap,
+						combined.getFacts());
+				evaluator.addObservers(this);
 
 				// calculate each measure
-				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures)) {
+				if (!fillTimeSeries(groupId, timeSeriesPos, size, evaluator,
+						result, itMeasures)) {
 					return null;
 				}
 			}
@@ -423,6 +462,7 @@ public class TimeSeriesEvaluator {
 			timeSeriesPos++;
 		}
 
+		result.setLabels(members);
 		return result;
 	}
 
@@ -432,21 +472,22 @@ public class TimeSeriesEvaluator {
 	 * 
 	 * @param query
 	 *            the query to be evaluated
+	 * @param bounds
+	 *            the boundaries, normally retrieved from the query's interval
+	 *            by {@link #getBounds(Interval)}
 	 * @param filteredGroupResult
 	 *            the filtered result for each group
 	 * 
 	 * @return the created result
 	 */
 	protected TimeSeriesCollection evaluateLow(final SelectQuery query,
-			final GroupResult filteredGroupResult) {
+			final long[] bounds, final GroupResult filteredGroupResult) {
 
 		// get some stuff we need
-		final Interval<?> interval = query.getInterval();
 		final Iterable<DescriptorMathTree> itMeasures = it(query.getMeasures());
 		final Iterable<GroupResultEntry> itGroup = it(filteredGroupResult);
 
 		// determine the window and get the slices needed
-		final long[] bounds = getBounds(interval);
 		final SliceWithDescriptors<?>[] timeSlices;
 		if (bounds == null) {
 			timeSlices = new SliceWithDescriptors<?>[0];
@@ -454,20 +495,8 @@ public class TimeSeriesEvaluator {
 			timeSlices = index.getIntervalIndexSlices(bounds[0], bounds[1]);
 		}
 
-		// determine the boundaries
-		final Object startPoint;
-		final boolean startInclusive;
-		if (interval == null) {
-			startInclusive = true;
-			startPoint = intervalModel.getTimelineDefinition().getStart();
-		} else {
-			startInclusive = interval.getOpenType().isInclusive();
-			startPoint = interval.getStart();
-		}
-
 		// create the result
-		final TimeSeriesCollection result = createTimeSeriesResult(startPoint,
-				startInclusive, timeSlices.length);
+		final TimeSeriesCollection result = createTimeSeriesResult(bounds);
 
 		/*
 		 * Iterate over the different slices and calculate each measure.
@@ -494,17 +523,22 @@ public class TimeSeriesEvaluator {
 
 				// create the evaluator
 				final ExpressionEvaluator evaluator = new LowExpressionEvaluator(
-						index, resultBitmap, factSet, offset + timeSeriesPos);
+						index, resultBitmap, factSet, groupId, offset
+								+ timeSeriesPos);
+				evaluator.addObservers(this);
 
 				// calculate each measure
-				if (!fillTimeSeries(groupId, timeSeriesPos, evaluator, result,
-						itMeasures)) {
+				if (!fillTimeSeries(groupId, timeSeriesPos, 1l, evaluator,
+						result, itMeasures)) {
 					return null;
 				}
 			}
 
 			timeSeriesPos++;
 		}
+
+		// set the labels
+		result.setLabels(index, bounds);
 
 		return result;
 	}
@@ -517,6 +551,8 @@ public class TimeSeriesEvaluator {
 	 *            the identifier of the current group
 	 * @param timeSeriesPos
 	 *            the position of the time-series to create the values for
+	 * @param timePointsCovered
+	 *            the amount of time-points covered
 	 * @param evaluator
 	 *            the evaluator used to create the results
 	 * @param tsc
@@ -529,7 +565,8 @@ public class TimeSeriesEvaluator {
 	 *         evaluation
 	 */
 	protected boolean fillTimeSeries(final String groupId,
-			final int timeSeriesPos, final ExpressionEvaluator evaluator,
+			final int timeSeriesPos, final long timePointsCovered,
+			final ExpressionEvaluator evaluator,
 			final TimeSeriesCollection tsc,
 			final Iterable<DescriptorMathTree> it) {
 
@@ -537,11 +574,16 @@ public class TimeSeriesEvaluator {
 		for (final DescriptorMathTree measure : it) {
 			final String tsId = createTimeSeriesId(groupId, measure);
 
-			// get or create the series
-			final TimeSeries timeSeries = getTimeSeries(tsc, tsId);
-
-			// get the value of the series
+			// get the measure
 			final double value = evaluator.evaluateMeasure(measure);
+
+			// make sure the evaluator is still valid
+			if (evaluator.isCancelled(value)) {
+				return false;
+			}
+
+			// get or create the series and set the value
+			final TimeSeries timeSeries = getTimeSeries(tsc, tsId);
 			timeSeries.setValue(timeSeriesPos, value);
 		}
 
@@ -566,6 +608,16 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Method to retrieve a {@code TimeSeries} from the specified {@code tsc}.
+	 * 
+	 * @param tsc
+	 *            the collection to get the {@code TimeSeries} from
+	 * @param tsId
+	 *            the identifier of the {@code TimeSeries} to be retrieved
+	 * 
+	 * @return the found {@code TimeSeries} or {@code null} if non was found
+	 */
 	protected TimeSeries getTimeSeries(final TimeSeriesCollection tsc,
 			final String tsId) {
 
@@ -577,6 +629,17 @@ public class TimeSeriesEvaluator {
 		}
 	}
 
+	/**
+	 * Creates the identifier of the time-series used for the specified
+	 * {@code groupId} and {@code measure}.
+	 * 
+	 * @param groupId
+	 *            the identifier of the group
+	 * @param measure
+	 *            the measure
+	 * 
+	 * @return the identifier of the time-series
+	 */
 	protected String createTimeSeriesId(final String groupId,
 			final DescriptorMathTree measure) {
 
@@ -618,27 +681,17 @@ public class TimeSeriesEvaluator {
 	 * Initializes the {@code TimeSeriesResult} without any {@code TimeSeries}
 	 * instances, but with initialized labeling.
 	 * 
-	 * @param startPoint
-	 *            the point to start the time-series at
-	 * @param startInclusive
-	 *            {@code true} if the start is included, otherwise {@code false}
-	 * @param amountOfGranules
-	 *            the amount of values within the time-series
+	 * @param bounds
+	 *            the bounds defined
 	 * 
 	 * @return the created {@code TimeSeriesResult}
 	 * 
 	 * @see TimeSeriesCollection
 	 */
-	protected TimeSeriesCollection createTimeSeriesResult(
-			final Object startPoint, final boolean startInclusive,
-			final int amountOfGranules) {
-
-		// create the result
-		final TimeSeriesCollection result = new TimeSeriesCollection(
-				amountOfGranules, startPoint.getClass(), indexFactory);
-		result.setLabels(index, startPoint, startInclusive);
-
-		return result;
+	protected TimeSeriesCollection createTimeSeriesResult(final long[] bounds) {
+		final int size = Numbers.castToInt(bounds[1] - bounds[0] + 1);
+		return new TimeSeriesCollection(size, intervalModel.getTimelineMapper()
+				.getMappedType(), indexFactory);
 	}
 
 	/**
@@ -651,11 +704,8 @@ public class TimeSeriesEvaluator {
 	 */
 	protected TimeSeriesCollection createTimeSeriesResult(
 			final Set<TimeLevelMember> members) {
-		final TimeSeriesCollection result = new TimeSeriesCollection(
-				members.size(), String.class, indexFactory);
-		result.setLabels(members);
-
-		return result;
+		return new TimeSeriesCollection(members.size(), String.class,
+				indexFactory);
 	}
 
 	/**

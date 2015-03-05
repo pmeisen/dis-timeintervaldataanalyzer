@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.meisen.dissertation.config.TidaConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -21,6 +22,7 @@ import net.meisen.dissertation.model.time.mapper.BaseMapper;
 import net.meisen.dissertation.performance.implementations.model.DataHolder;
 import net.meisen.dissertation.performance.implementations.similarity.DistanceType;
 import net.meisen.dissertation.performance.implementations.similarity.EventTable;
+import net.meisen.dissertation.performance.implementations.similarity.IValueCalculator;
 import net.meisen.general.genmisc.types.Dates;
 import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
@@ -221,7 +223,25 @@ public class TestIBSM {
 	 */
 	@Test
 	public void testEventTableCreation() {
-		final EventTable eventTable = new EventTable("TEST", 100);
+		final EventTable eventTable = new EventTable("TEST", 100,
+				new IValueCalculator() {
+
+					@Override
+					public double getDefaultValue() {
+						return 0.0;
+					}
+
+					@Override
+					public double calcValue(final double curValue,
+							final Map<String, Object> record) {
+						return curValue + 1.0;
+					}
+
+					@Override
+					public double getInitValue() {
+						return 0.0;
+					}
+				});
 
 		final Object[] label1 = new Object[] { "A", "B", 5 };
 		final Object[] label2 = new Object[] { "A", "B", 6 };
