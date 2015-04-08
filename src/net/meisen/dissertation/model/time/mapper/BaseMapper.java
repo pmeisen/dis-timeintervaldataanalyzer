@@ -537,6 +537,7 @@ public abstract class BaseMapper<T> {
 	 * @return the concrete value
 	 * 
 	 * @see #denormalize(long)
+	 * @see #resolve(long)
 	 */
 	public abstract T demap(final long value);
 
