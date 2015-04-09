@@ -919,46 +919,43 @@ public class QueryServlet extends BaseServlet {
 		final TimelineDefinition timeline = intervalModel
 				.getTimelineDefinition();
 		final BaseMapper<?> mapper = intervalModel.getTimelineMapper();
-
 		final Interval<?> interval = selQuery.getInterval();
-
 		final JsonObject queryInfo = new JsonObject();
 
 		// add the interval's type
 		final JsonObject intInfo = new JsonObject();
-		if (Number.class.isAssignableFrom(interval.getType())) {
-			intInfo.add("type", "number");
-		} else if (Date.class.isAssignableFrom(interval.getType())) {
-			intInfo.add("type", "date");
+		if (interval != null) {
+			if (Number.class.isAssignableFrom(interval.getType())) {
+				intInfo.add("type", "number");
+			} else if (Date.class.isAssignableFrom(interval.getType())) {
+				intInfo.add("type", "date");
+			}
+	
+			// add the interval's start- and end-value
+			final long[] bounds = mapper.getBounds(interval);
+			intInfo.add("raw-start", createJsonValue(interval.getStart()));
+			intInfo.add("raw-end", createJsonValue(interval.getEnd()));
+			intInfo.add("start", createJsonValue(mapper.resolve(bounds[0])));
+			intInfo.add("end", createJsonValue(mapper.resolve(bounds[1])));
 		}
-
-		// add the interval's start- and end-value
-		final long[] bounds = mapper.getBounds(interval);
-		intInfo.add("raw-start", createJsonValue(interval.getStart()));
-		intInfo.add("raw-end", createJsonValue(interval.getEnd()));
-		intInfo.add("start", createJsonValue(mapper.resolve(bounds[0])));
-		intInfo.add("end", createJsonValue(mapper.resolve(bounds[1])));
-
-		// add the model
-		queryInfo.add("model", selQuery.getModelId());
 
 		// add the axis's start- and end-value
 		final JsonObject axisInfo = new JsonObject();
-		if (Number.class.isAssignableFrom(timeline.getType())) {
-			axisInfo.add("type", "number");
-		} else if (Date.class.isAssignableFrom(timeline.getType())) {
-			axisInfo.add("type", "date");
+		if (timeline != null) {
+			if (Number.class.isAssignableFrom(timeline.getType())) {
+				axisInfo.add("type", "number");
+			} else if (Date.class.isAssignableFrom(timeline.getType())) {
+				axisInfo.add("type", "date");
+			}
+			axisInfo.add("start", createJsonValue(timeline.getStart()));
+			axisInfo.add("end", createJsonValue(timeline.getEnd()));
+			axisInfo.add("granularity", timeline.getGranularity().toString());
 		}
-		axisInfo.add("start", createJsonValue(timeline.getStart()));
-		axisInfo.add("end", createJsonValue(timeline.getEnd()));
-		axisInfo.add("granularity", timeline.getGranularity().toString());
 
 		// add all the info to the query info
 		queryInfo.add("interval", intInfo);
 		queryInfo.add("timeaxis", axisInfo);
-
-		// add the time-axis info to the query info
-		queryInfo.add("timeaxis", axisInfo);
+		queryInfo.add("model", selQuery.getModelId());
 
 		return queryInfo;
 	}
