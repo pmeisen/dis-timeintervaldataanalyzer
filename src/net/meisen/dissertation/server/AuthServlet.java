@@ -125,7 +125,7 @@ public class AuthServlet extends BaseServlet {
 			// refresh the session
 			session.markAsUsed();
 
-			return new JsonObject().add("sessionId", (String) null);
+			return new JsonObject().add("sessionId", sessionId);
 		} else if ("userinfo".equals(method)) {
 			final String sessionId = parameters.get("sessionId");
 			final Session session = checkSession(sessionId);

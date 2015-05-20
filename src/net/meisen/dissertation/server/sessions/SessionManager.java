@@ -272,8 +272,6 @@ public class SessionManager implements IResourceResolver {
 
 		if (tmpDir == null) {
 			return null;
-		} else if (getSession(sessionId, false) == null) {
-			return null;
 		}
 
 		// get the directory
