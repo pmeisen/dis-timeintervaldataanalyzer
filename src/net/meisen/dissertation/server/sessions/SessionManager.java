@@ -488,6 +488,9 @@ public class SessionManager implements IResourceResolver {
 		// get the needed values
 		final String sessionId = uri.getHost();
 		final String filename = uri.getPath().substring(1);
+		
+		// check the session
+		this.getSession(sessionId, true);
 		final File file = getFile(sessionId, filename);
 
 		try {

@@ -135,7 +135,7 @@ public class TestSessionManager extends LoaderBasedTest {
 		@Test
 		public void testInvalidSession() {
 			thrown.expect(SessionManagerException.class);
-			thrown.expectMessage("session 'sessionId' does not exist");
+			thrown.expectMessage("session with id 'sessionId' could not be found");
 			manager.resolve("uploaded://sessionId/file");
 		}
 
