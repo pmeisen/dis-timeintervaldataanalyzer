@@ -109,7 +109,7 @@ exprDelete    : STMT_DELETE selectorIntIdList OP_FROM selectorModelId;
  * Define the different expressions/parts of the select statement
  */
 exprSelect          : exprSelectRecords | exprSelectTimeSeries;
-exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY exprComp)? (OP_LIMIT selectorOffset (SEPARATOR selectorLimit)?)?;
+exprSelectRecords   : STMT_SELECT (TYPE_RECORDS | (AGGR_COUNT | OP_IDONLY) BRACKET_ROUND_OPENED TYPE_RECORDS BRACKET_ROUND_CLOSED) OP_FROM selectorModelId (selectorIntervalRelation exprInterval)? (OP_FILTERBY (exprComp | compId))? (OP_LIMIT selectorOffset (SEPARATOR selectorLimit)?)?;
 exprSelectTimeSeries: STMT_SELECT (TYPE_TIMESERIES | OP_TRANSPOSE BRACKET_ROUND_OPENED TYPE_TIMESERIES BRACKET_ROUND_CLOSED) (OP_OF exprMeasure)? OP_FROM selectorModelId (OP_IN exprInterval)? (OP_FILTERBY exprComp)? (OP_GROUPBY exprGroup)?;
 exprMeasure         : (compNamedLowMeasure (SEPARATOR compNamedLowMeasure)* | (compNamedDimMathMeasure (SEPARATOR compNamedDimMathMeasure)* OP_ON selectorMember));
 exprInterval        : selectorOpenInterval (selectorDateInterval | selectorIntInterval) selectorCloseInterval;
@@ -130,6 +130,7 @@ compGroupExclude         : LOGICAL_EXCLUDE compGroupFilter;
 compGroupFilter          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
 compValueElement         : selectorNullValue | selectorDateValue | selectorIntValue | selectorValue;
+compId                   : FIELD_ID CMP_EQUAL INT;
 
 /*
  * Define the different measures
@@ -190,7 +191,7 @@ selectorValueList           : VALUE (SEPARATOR VALUE)*;
  * i.e.
  *  - specially marked tokens first, so that the marking is recognized
  *  - reserved words second
- *  - general tokens lately
+ *  - general tokens last
  */
 // "..." everything marked by quotes should be handled as identifier
 MARKED_ID : SYM_IDMARKER (SIMPLE_ID | ENHANCED_ID) SYM_IDMARKER;
@@ -205,6 +206,9 @@ POS_START_INCL : BRACKET_SQUARE_OPENED S T A R T '+'? BRACKET_SQUARE_CLOSED;
 POS_END_INCL   : BRACKET_SQUARE_OPENED E N D '+'? BRACKET_SQUARE_CLOSED;
 POS_START_EXCL : BRACKET_SQUARE_OPENED S T A R T '-' BRACKET_SQUARE_CLOSED;
 POS_END_EXCL   : BRACKET_SQUARE_OPENED E N D '-' BRACKET_SQUARE_CLOSED;
+
+// the word to select the identifier
+FIELD_ID       : BRACKET_SQUARE_OPENED I D BRACKET_SQUARE_CLOSED;
 
 // reserved words to define a SELECT statement
 STMT_GET      : G E T;

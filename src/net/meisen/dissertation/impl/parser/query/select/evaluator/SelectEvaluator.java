@@ -55,10 +55,15 @@ public class SelectEvaluator {
 		queryResult.setValidRecords(validRecords);
 
 		// determine the filter results
-		final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
-				model);
-		final DescriptorLogicResult filterResult = descriptorEvaluator
-				.evaluateTree(query.getFilter());
+		final IBitmapResult filterResult;
+		if (query.getRecordIdFilter() > -1) {
+			filterResult = Bitmap.createBitmap(model.getIndexFactory(),
+					query.getRecordIdFilter());
+		} else {
+			final DescriptorLogicEvaluator descriptorEvaluator = new DescriptorLogicEvaluator(
+					model);
+			filterResult = descriptorEvaluator.evaluateTree(query.getFilter());
+		}
 		queryResult.setFilterResult(filterResult);
 
 		// determine the different groups

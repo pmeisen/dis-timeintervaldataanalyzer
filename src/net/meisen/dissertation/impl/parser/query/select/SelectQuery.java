@@ -37,6 +37,7 @@ public class SelectQuery implements IQuery {
 
 	private GroupExpression group;
 	private DescriptorLogicTree filter;
+	private int recordIdFilter;
 
 	private String modelId;
 	private SelectResultType type;
@@ -55,6 +56,7 @@ public class SelectQuery implements IQuery {
 	public SelectQuery() {
 		measures = new ArrayList<DescriptorMathTree>();
 
+		recordIdFilter = -1;
 		limit = -1;
 		offset = 0;
 		transposed = false;
@@ -86,7 +88,8 @@ public class SelectQuery implements IQuery {
 
 	@Override
 	public String toString() {
-		return "select " + type + " in " + interval + " filter " + filter + " group " + group;
+		return "select " + type + " in " + interval + " filter " + filter
+				+ " group " + group;
 	}
 
 	/**
@@ -456,5 +459,27 @@ public class SelectQuery implements IQuery {
 
 		setMeasureDimension(query.getMeasureDimension());
 		setMeasures(query.getMeasures());
+	}
+
+	/**
+	 * Gets an identifier larger than {@code -1} if a identifier filter is
+	 * defined, otherwise {@code -1} is returned.
+	 * 
+	 * @return an identifier larger than {@code -1} if a identifier filter is
+	 *         defined, otherwise {@code -1}
+	 */
+	public int getRecordIdFilter() {
+		return recordIdFilter;
+	}
+
+	/**
+	 * Sets an record identifier filter (i.e., an id value of a record to
+	 * return). Set to {@code -1} if no such filter should be applied.
+	 * 
+	 * @param recordIdFilter
+	 *            the identifier of the record
+	 */
+	public void setRecordIdFilter(final int recordIdFilter) {
+		this.recordIdFilter = recordIdFilter < 0 ? -1 : recordIdFilter;
 	}
 }

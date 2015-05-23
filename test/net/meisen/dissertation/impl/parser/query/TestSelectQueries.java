@@ -197,6 +197,20 @@ public class TestSelectQueries extends LoaderBasedTest {
 	}
 
 	/**
+	 * Tests the query which uses a recordId filter.
+	 */
+	@Test
+	public void testRecordIdFilter() {
+		final SelectQuery query = q("SELECT RECORDS from MODELID WHERE [ID]=5");
+
+		assertEquals("MODELID", query.getModelId());
+		assertEquals(SelectResultType.RECORDS, query.getResultType());
+		assertFalse(query.isTransposed());
+		assertNull(query.getInterval());
+		assertEquals(5, query.getRecordIdFilter());
+	}
+
+	/**
 	 * Tests the query which selects the identifiers of all records.
 	 */
 	@Test
@@ -2637,6 +2651,36 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check the result
 		assertEquals(records.toString(), 0, ids.length);
+	}
+	
+	/**
+	 * Test the selection of records by an identifier.
+	 */
+	@Test
+	public void testRecordSelectionByIdentifier() {
+		IQuery query;
+		SelectResultRecords result;
+		int[] ids;
+		
+		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
+		m(xml);
+		
+		query = q("select RECORDS from testPersonModel WHERE [ID] = 2");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 2) > -1);
+		
+		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 2");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(0, ids.length);
+		
+		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 0");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);		
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(1, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
 	}
 
 	/**

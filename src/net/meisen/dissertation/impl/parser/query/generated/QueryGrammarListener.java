@@ -33,6 +33,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprAlive(@NotNull QueryGrammarParser.ExprAliveContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compId}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompId(@NotNull QueryGrammarParser.CompIdContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compId}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompId(@NotNull QueryGrammarParser.CompIdContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compStructureElement}.
 	 * @param ctx the parse tree
 	 */
@@ -352,17 +363,6 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	void exitExprValues(@NotNull QueryGrammarParser.ExprValuesContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
-	 * @param ctx the parse tree
-	 */
-	void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
-	 * @param ctx the parse tree
-	 */
-	void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#compMathAggrFunction}.
 	 * @param ctx the parse tree
 	 */
@@ -372,6 +372,17 @@ public interface QueryGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCompMathAggrFunction(@NotNull QueryGrammarParser.CompMathAggrFunctionContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link QueryGrammarParser#compMemberEqual}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link QueryGrammarParser#selectorFirstMathOperator}.

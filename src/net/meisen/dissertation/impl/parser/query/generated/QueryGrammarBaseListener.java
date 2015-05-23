@@ -45,6 +45,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterCompId(@NotNull QueryGrammarParser.CompIdContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompId(@NotNull QueryGrammarParser.CompIdContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterCompStructureElement(@NotNull QueryGrammarParser.CompStructureElementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -422,19 +435,6 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterCompMathAggrFunction(@NotNull QueryGrammarParser.CompMathAggrFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -442,6 +442,19 @@ public class QueryGrammarBaseListener implements QueryGrammarListener {
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitCompMathAggrFunction(@NotNull QueryGrammarParser.CompMathAggrFunctionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitCompMemberEqual(@NotNull QueryGrammarParser.CompMemberEqualContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

@@ -29,6 +29,7 @@ import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.Co
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompDimMeasureContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupExcludeContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompGroupIncludeContext;
+import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompIdContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowAggrFunctionContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureAtomContext;
 import net.meisen.dissertation.impl.parser.query.generated.QueryGrammarParser.CompLowMeasureContext;
@@ -739,6 +740,12 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 	@Override
 	public void exitCompNamedLowMeasure(final CompNamedLowMeasureContext ctx) {
 		q(SelectQuery.class).addMeasure(mathExpr);
+	}
+
+	@Override
+	public void exitCompId(final CompIdContext ctx) {
+		q(SelectQuery.class).setRecordIdFilter(
+				Integer.parseInt(ctx.INT().getText()));
 	}
 
 	@Override

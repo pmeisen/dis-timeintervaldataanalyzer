@@ -1,7 +1,7 @@
 package net.meisen.dissertation.impl.parser.query.select;
 
-import net.meisen.dissertation.impl.parser.query.select.evaluator.DescriptorLogicResult;
 import net.meisen.dissertation.impl.parser.query.select.evaluator.GroupResult;
+import net.meisen.dissertation.impl.parser.query.select.evaluator.IBitmapResult;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.parser.query.IQueryResultSet;
@@ -19,7 +19,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	private final SelectQuery query;
 
 	private Bitmap validRecords;
-	private DescriptorLogicResult filterResult;
+	private IBitmapResult filterResult;
 	private GroupResult groupResult;
 	private GroupResult filteredGroupResult;
 
@@ -48,7 +48,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	 * 
 	 * @return the result of the filter specified by the query
 	 */
-	public DescriptorLogicResult getFilterResult() {
+	public IBitmapResult getFilterResult() {
 		return filterResult;
 	}
 
@@ -58,7 +58,7 @@ public abstract class SelectResult implements IQueryResultSet,
 	 * @param filterResult
 	 *            the result of the filtering
 	 */
-	public void setFilterResult(final DescriptorLogicResult filterResult) {
+	public void setFilterResult(final IBitmapResult filterResult) {
 		this.filterResult = filterResult;
 	}
 
