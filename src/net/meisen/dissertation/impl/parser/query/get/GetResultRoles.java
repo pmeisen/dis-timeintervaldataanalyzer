@@ -75,13 +75,13 @@ public class GetResultRoles implements IQueryResultSet {
 
 	@Override
 	public Class<?>[] getTypes() {
-		return new Class<?>[] { String.class, String.class, String.class };
+		return new Class<?>[] { String.class, String.class };
 	}
 
 	@Override
 	public String[] getNames() {
 		final FieldNameGenerator fng = FieldNameGenerator.get();
-		return new String[] { fng.getUserFieldName(), fng.getRolesFieldName(),
+		return new String[] { fng.getRolesFieldName(),
 				fng.getPermissionsFieldName() };
 	}
 
