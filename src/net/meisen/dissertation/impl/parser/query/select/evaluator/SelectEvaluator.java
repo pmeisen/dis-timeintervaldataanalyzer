@@ -56,7 +56,7 @@ public class SelectEvaluator {
 
 		// determine the filter results
 		final IBitmapResult filterResult;
-		if (query.getRecordIdFilter() > -1) {
+		if (query.getRecordIdFilter() != null) {
 			filterResult = Bitmap.createBitmap(model.getIndexFactory(),
 					query.getRecordIdFilter());
 		} else {

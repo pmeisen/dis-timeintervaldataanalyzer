@@ -1,6 +1,7 @@
 package net.meisen.dissertation.impl.parser.query;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -207,7 +208,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertEquals(SelectResultType.RECORDS, query.getResultType());
 		assertFalse(query.isTransposed());
 		assertNull(query.getInterval());
-		assertEquals(5, query.getRecordIdFilter());
+		assertArrayEquals(new int[] { 5 }, query.getRecordIdFilter());
 	}
 
 	/**
@@ -2652,7 +2653,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		// check the result
 		assertEquals(records.toString(), 0, ids.length);
 	}
-	
+
 	/**
 	 * Test the selection of records by an identifier.
 	 */
@@ -2661,23 +2662,31 @@ public class TestSelectQueries extends LoaderBasedTest {
 		IQuery query;
 		SelectResultRecords result;
 		int[] ids;
-		
+
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testPersonModel.xml";
 		m(xml);
-		
+
 		query = q("select RECORDS from testPersonModel WHERE [ID] = 2");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
-		
+
+		query = q("select RECORDS from testPersonModel WHERE [ID] = 4 , 0,1,  8");
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		ids = result.getSelectedRecords().getIds();
+		assertEquals(3, ids.length);
+		assertTrue(Arrays.binarySearch(ids, 0) > -1);
+		assertTrue(Arrays.binarySearch(ids, 4) > -1);
+		assertTrue(Arrays.binarySearch(ids, 1) > -1);
+
 		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 2");
 		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
-		
+
 		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 0");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);		
+		result = (SelectResultRecords) factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);

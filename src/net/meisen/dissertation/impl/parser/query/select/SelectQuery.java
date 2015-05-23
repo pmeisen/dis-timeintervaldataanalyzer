@@ -37,7 +37,7 @@ public class SelectQuery implements IQuery {
 
 	private GroupExpression group;
 	private DescriptorLogicTree filter;
-	private int recordIdFilter;
+	private int[] recordIdFilter;
 
 	private String modelId;
 	private SelectResultType type;
@@ -56,7 +56,7 @@ public class SelectQuery implements IQuery {
 	public SelectQuery() {
 		measures = new ArrayList<DescriptorMathTree>();
 
-		recordIdFilter = -1;
+		recordIdFilter = null;
 		limit = -1;
 		offset = 0;
 		transposed = false;
@@ -462,24 +462,25 @@ public class SelectQuery implements IQuery {
 	}
 
 	/**
-	 * Gets an identifier larger than {@code -1} if a identifier filter is
-	 * defined, otherwise {@code -1} is returned.
+	 * Gets an array of identifier if a identifier filter is defined, otherwise
+	 * {@code null} is returned.
 	 * 
-	 * @return an identifier larger than {@code -1} if a identifier filter is
-	 *         defined, otherwise {@code -1}
+	 * @return an array of identifier if a identifier filter is defined,
+	 *         otherwise {@code null}
 	 */
-	public int getRecordIdFilter() {
+	public int[] getRecordIdFilter() {
 		return recordIdFilter;
 	}
 
 	/**
-	 * Sets an record identifier filter (i.e., an id value of a record to
-	 * return). Set to {@code -1} if no such filter should be applied.
+	 * Sets an record identifier filter (i.e., several id values of a record to
+	 * return). Set to {@code null} if no such filter should be applied.
 	 * 
 	 * @param recordIdFilter
-	 *            the identifier of the record
+	 *            the identifiers of the record
 	 */
-	public void setRecordIdFilter(final int recordIdFilter) {
-		this.recordIdFilter = recordIdFilter < 0 ? -1 : recordIdFilter;
+	public void setRecordIdFilter(final int... recordIdFilter) {
+		this.recordIdFilter = recordIdFilter == null
+				|| recordIdFilter.length == 0 ? null : recordIdFilter;
 	}
 }

@@ -130,7 +130,7 @@ compGroupExclude         : LOGICAL_EXCLUDE compGroupFilter;
 compGroupFilter          : BRACKET_CURLY_OPENED compDescValueTupel (SEPARATOR compDescValueTupel)* BRACKET_CURLY_CLOSED;
 compStructureElement     : selectorIntervalDef | selectorDescriptorId;
 compValueElement         : selectorNullValue | selectorDateValue | selectorIntValue | selectorValue;
-compId                   : FIELD_ID CMP_EQUAL INT;
+compId                   : FIELD_ID CMP_EQUAL INT (SEPARATOR INT)*;
 
 /*
  * Define the different measures

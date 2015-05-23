@@ -1,5 +1,7 @@
 package net.meisen.dissertation.impl.parser.query;
 
+import gnu.trove.set.hash.TIntHashSet;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -744,8 +746,14 @@ public class QueryGenerator extends QueryGrammarBaseListener {
 
 	@Override
 	public void exitCompId(final CompIdContext ctx) {
-		q(SelectQuery.class).setRecordIdFilter(
-				Integer.parseInt(ctx.INT().getText()));
+		final List<TerminalNode> idNodes = ctx.INT();
+
+		final TIntHashSet ids = new TIntHashSet(idNodes.size());
+		for (final TerminalNode node : idNodes) {
+			ids.add(Integer.parseInt(node.getText()));
+		}
+
+		q(SelectQuery.class).setRecordIdFilter(ids.toArray());
 	}
 
 	@Override
