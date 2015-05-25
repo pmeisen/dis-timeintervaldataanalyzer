@@ -56,7 +56,7 @@ public enum IntervalRelation {
 	 */
 	MEETING,
 	/**
-	 * The overlapping relation returns all the records which are overlap the
+	 * The overlapping relation returns all the records which overlap the
 	 * left- or right-side of the time-window. Overlapping means that the
 	 * interval overlaps only on one of the sides of the time-window, and not
 	 * both (that relation is called {@link #CONTAINING}). If the time-window is
