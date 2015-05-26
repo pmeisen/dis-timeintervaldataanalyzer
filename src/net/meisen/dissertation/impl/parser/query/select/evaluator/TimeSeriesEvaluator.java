@@ -235,7 +235,7 @@ public class TimeSeriesEvaluator extends BaseBitmapPreProcessorObservable {
 	 * @return an iterator, which cannot be {@code null}
 	 */
 	protected final Iterable<GroupResultEntry> it(final GroupResult groupResult) {
-		if (groupResult == null || groupResult.size() == 0) {
+		if (groupResult == null) {
 			return noGroupIterable;
 		} else {
 			return groupResult;

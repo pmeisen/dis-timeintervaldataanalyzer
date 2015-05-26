@@ -388,6 +388,7 @@ public class GroupEvaluator {
 			for (final GroupEntry<?> e : group) {
 				final Bitmap bitmap;
 				final Object meta = e.getMeta();
+
 				if (meta instanceof Descriptor) {
 					bitmap = getDescriptorBitmap((Descriptor<?, ?, ?>) meta);
 				} else if (meta instanceof DimensionSelector) {

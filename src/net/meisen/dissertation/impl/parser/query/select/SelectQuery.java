@@ -174,7 +174,7 @@ public class SelectQuery implements IQuery {
 	/**
 	 * Gets the defined {@code GroupExpresion} for the select query.
 	 * 
-	 * @return the defined {@code GroupExpresion}
+	 * @return the defined {@code GroupExpression}
 	 */
 	public GroupExpression getGroup() {
 		if (group == null) {

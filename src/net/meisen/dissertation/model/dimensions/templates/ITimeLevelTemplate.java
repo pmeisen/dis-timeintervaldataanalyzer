@@ -42,7 +42,7 @@ public interface ITimeLevelTemplate {
 			final String timezone) throws ForwardedRuntimeException;
 
 	/**
-	 * Creates an iteratore for the specified range.
+	 * Creates an iterator for the specified range.
 	 * 
 	 * @param model
 	 *            the {@code IntervalModel} used
