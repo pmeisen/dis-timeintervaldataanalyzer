@@ -85,14 +85,6 @@ public class TestCommunication {
 			// load the communicationModel
 			stmt.executeUpdate("LOAD FROM 'classpath://net/meisen/dissertation/server/testCommunicationModel.xml'");
 
-			// select a timeseries
-			res = stmt
-					.executeQuery("SELECT TIMESERIES OF COUNT(TASK) AS \"COUNT\" FROM testCommunicationModel IN [1, 2] GROUP BY WORKAREA");
-			assertTrue(res.next());
-			assertEquals("COUNT", res.getString(1));
-			assertEquals(0.0, res.getDouble(2), 0.0);
-			assertFalse(res.next());
-
 			// add some data
 			assertEquals(
 					1,

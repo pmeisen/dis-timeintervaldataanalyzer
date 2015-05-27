@@ -20,7 +20,8 @@
       <integer id="MANPOWER" />
     </descriptors>
 
-    <entries />
+    <entries>
+   	</entries>
   </meta>
     
   <data metahandling="create" intervalhandling="boundariesWhenNull" />
