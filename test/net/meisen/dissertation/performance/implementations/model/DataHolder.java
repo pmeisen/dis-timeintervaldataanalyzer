@@ -21,7 +21,7 @@ import net.meisen.general.genmisc.types.Dates;
  */
 public class DataHolder {
 	private final static String DEF_DB = "/net/meisen/dissertation/performance/implementations/model/ghdataHsql.zip";
-
+	private final static String DEF_QUERY = "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA";
 	private final Db db;
 	private final List<Map<String, Object>> records;
 
@@ -46,7 +46,7 @@ public class DataHolder {
 	 *            {@code true} to shuffle the records, otherwise {@code false}
 	 */
 	public DataHolder(final TidaModel model, final boolean random) {
-		this(model, DEF_DB, random);
+		this(model, DEF_DB, DEF_QUERY, random);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class DataHolder {
 	 *            to the test-scenario
 	 */
 	public DataHolder(final TidaModel model, final String dbPath) {
-		this(model, dbPath, true);
+		this(model, dbPath, DEF_QUERY, true);
 	}
 
 	/**
@@ -77,6 +77,42 @@ public class DataHolder {
 	 */
 	public DataHolder(final TidaModel model, final String dbPath,
 			final boolean random) {
+		this(model, dbPath, DEF_QUERY, random);
+	}
+
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 * @param dbPath
+	 *            the path to the database to be used; must be valid according
+	 *            to the test-scenario
+	 * @param fullQuery
+	 *            the query to be fired to retrieve data
+	 */
+	public DataHolder(final TidaModel model, final String dbPath,
+			final String fullQuery) {
+		this(model, dbPath, fullQuery, true);
+	}
+
+	/**
+	 * Constructs the holder for the specified model.
+	 * 
+	 * @param model
+	 *            the model to create the holder, needed to remove invalid data
+	 *            (invalid considering the UTC and the other implementations)
+	 * @param dbPath
+	 *            the path to the database to be used; must be valid according
+	 *            to the test-scenario
+	 * @param fullQuery
+	 *            the query to be fired to retrieve data
+	 * @param random
+	 *            {@code true} to shuffle the records, otherwise {@code false}
+	 */
+	public DataHolder(final TidaModel model, final String dbPath,
+			final String fullQuery, final boolean random) {
 
 		// open the database
 		db = new Db();
@@ -90,8 +126,7 @@ public class DataHolder {
 
 		// query the database
 		final List<Map<String, Object>> records;
-		final String query = "SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA"
-				+ (random ? " ORDER BY RAND()" : "");
+		final String query = fullQuery + (random ? " ORDER BY RAND()" : "");
 		try {
 			records = db.query("tida", query);
 		} catch (final SQLException e) {

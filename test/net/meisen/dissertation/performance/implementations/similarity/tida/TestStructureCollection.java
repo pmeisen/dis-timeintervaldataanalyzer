@@ -74,51 +74,51 @@ public class TestStructureCollection {
 			final int[] vals = coll.get(null, i);
 
 			if (vals == null) {
-				assertTrue("" + i, i == 0 || i == 4 || i > 6);
+				assertTrue("" + i, i == 0 || i == 1 || i == 5 || i > 7);
 			} else {
-				assertEquals(0, vals[Relation.UNKNOWN.ordinal()]);
-				assertEquals(0, vals[Relation.INVALID.ordinal()]);
+				assertEquals(0, vals[Relation.UNKNOWN.ordinal() + 1]);
+				assertEquals(0, vals[Relation.INVALID.ordinal() + 1]);
 
-				if (i == 1) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(0, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(0, vals[Relation.MEETS.ordinal()]);
-					assertEquals(2, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(1, vals[Relation.STARTEDBY.ordinal()]);
-				} else if (i == 2) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(2, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(1, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(0, vals[Relation.MEETS.ordinal()]);
-					assertEquals(2, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
+				if (i == 2) {
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(0, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(2, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(1, vals[Relation.STARTEDBY.ordinal() + 1]);
 				} else if (i == 3) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(0, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(1, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(1, vals[Relation.MEETS.ordinal()]);
-					assertEquals(0, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
-				} else if (i == 5) {
-					assertEquals(15, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(3, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(0, vals[Relation.MEETS.ordinal()]);
-					assertEquals(0, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(2, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(1, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(0, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(2, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
+				} else if (i == 4) {
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(1, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(1, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
 				} else if (i == 6) {
-					assertEquals(5, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(0, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(3, vals[Relation.MEETS.ordinal()]);
-					assertEquals(0, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
+					assertEquals(15, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(3, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(0, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
+				} else if (i == 7) {
+					assertEquals(5, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(3, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
 				} else {
 					fail("Unreachable " + i);
 				}
@@ -183,46 +183,106 @@ public class TestStructureCollection {
 			final int[] vals = coll.get(null, i);
 
 			if (vals == null) {
-				assertTrue("" + i, i == 0 || i == 4 || i > 5);
+				assertTrue("" + i, i == 0 || i == 1 || i == 5 || i > 6);
 			} else {
-				assertEquals(0, vals[Relation.UNKNOWN.ordinal()]);
-				assertEquals(0, vals[Relation.INVALID.ordinal()]);
+				assertEquals(0, vals[Relation.UNKNOWN.ordinal() + 1]);
+				assertEquals(0, vals[Relation.INVALID.ordinal() + 1]);
 
-				if (i == 1) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(0, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(1, vals[Relation.MEETS.ordinal()]);
-					assertEquals(2, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(1, vals[Relation.STARTEDBY.ordinal()]);
-				} else if (i == 2) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(2, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(1, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(0, vals[Relation.MEETS.ordinal()]);
-					assertEquals(2, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
+				if (i == 2) {
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(1, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(2, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(1, vals[Relation.STARTEDBY.ordinal() + 1]);
 				} else if (i == 3) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(0, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(1, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(0, vals[Relation.MEETS.ordinal()]);
-					assertEquals(0, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
-				} else if (i == 5) {
-					assertEquals(0, vals[Relation.BEFORE.ordinal()]);
-					assertEquals(0, vals[Relation.CONTAINS.ordinal()]);
-					assertEquals(3, vals[Relation.COTEMPORAL.ordinal()]);
-					assertEquals(0, vals[Relation.FINISHEDBY.ordinal()]);
-					assertEquals(3, vals[Relation.MEETS.ordinal()]);
-					assertEquals(0, vals[Relation.OVERLAPS.ordinal()]);
-					assertEquals(0, vals[Relation.STARTEDBY.ordinal()]);
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(2, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(1, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(0, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(2, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
+				} else if (i == 4) {
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(1, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(0, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
+				} else if (i == 6) {
+					assertEquals(0, vals[Relation.BEFORE.ordinal() + 1]);
+					assertEquals(0, vals[Relation.CONTAINS.ordinal() + 1]);
+					assertEquals(3, vals[Relation.COTEMPORAL.ordinal() + 1]);
+					assertEquals(0, vals[Relation.FINISHEDBY.ordinal() + 1]);
+					assertEquals(3, vals[Relation.MEETS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.OVERLAPS.ordinal() + 1]);
+					assertEquals(0, vals[Relation.STARTEDBY.ordinal() + 1]);
 				} else {
 					fail("Unreachable " + i);
 				}
+			}
+		}
+	}
+
+	@Test
+	public void test2() {
+		final StructureCollection coll = new StructureCollection(
+				new DefaultStructureGroupFactory(TouchingStructureGroup.class),
+				12);
+		Bitmap bmp;
+
+		// @formatter:off
+		/*
+		 * Create the following:
+		 *    012345678901
+		 * 0  011110000000
+		 * 1  111111000000
+		 * 2  000000011110
+		 * 3  000000011111
+		 */
+		// @formatter:on
+		bmp = Bitmap.createBitmap(factory, 1);
+		coll.set(null, 0, bmp);
+		bmp = Bitmap.createBitmap(factory, 0, 1);
+		coll.set(null, 1, bmp);
+		bmp = Bitmap.createBitmap(factory, 0, 1);
+		coll.set(null, 2, bmp);
+		bmp = Bitmap.createBitmap(factory, 0, 1);
+		coll.set(null, 3, bmp);
+		bmp = Bitmap.createBitmap(factory, 0, 1);
+		coll.set(null, 4, bmp);
+		bmp = Bitmap.createBitmap(factory, 1);
+		coll.set(null, 5, bmp);
+		coll.set(null, 6, null);
+		bmp = Bitmap.createBitmap(factory, 2, 3);
+		coll.set(null, 7, bmp);
+		bmp = Bitmap.createBitmap(factory, 2, 3);
+		coll.set(null, 8, bmp);
+		bmp = Bitmap.createBitmap(factory, 2, 3);
+		coll.set(null, 9, bmp);
+		bmp = Bitmap.createBitmap(factory, 2, 3);
+		coll.set(null, 10, bmp);
+
+
+		// finish the collection
+		coll.finish();
+
+		// see the results
+		for (int i = 0; i < 100; i++) {
+			final int[] vals = coll.get(null, i);
+
+			if (vals != null) {
+				System.out.println("-------" + i);
+				System.out.println(vals[Relation.BEFORE.ordinal() + 1]);
+				System.out.println(vals[Relation.CONTAINS.ordinal() + 1]);
+				System.out.println(vals[Relation.COTEMPORAL.ordinal() + 1]);
+				System.out.println(vals[Relation.FINISHEDBY.ordinal() + 1]);
+				System.out.println(vals[Relation.MEETS.ordinal() + 1]);
+				System.out.println(vals[Relation.OVERLAPS.ordinal() + 1]);
+				System.out.println(vals[Relation.STARTEDBY.ordinal() + 1]);
 			}
 		}
 	}

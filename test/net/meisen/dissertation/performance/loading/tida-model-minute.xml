@@ -9,22 +9,32 @@
 <model xmlns="http://dev.meisen.net/xsd/dissertation/model"
        xmlns:db="http://dev.meisen.net/xsd/dissertation/model/db"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:bc="http://dev.meisen.net/xsd/dissertation/caches/bitmap/file"
+       xmlns:fc="http://dev.meisen.net/xsd/dissertation/caches/facts/file"
        
-       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model     http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
-                           http://dev.meisen.net/xsd/dissertation/model/db  http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd"
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model               http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/db            http://dev.meisen.net/xsd/dissertation/tidaDatabaseExtension.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/bitmap/file  http://dev.meisen.net/xsd/dissertation/tidaFileBitmapCache.xsd
+                           http://dev.meisen.net/xsd/dissertation/caches/facts/file   http://dev.meisen.net/xsd/dissertation/tidaFileFactDescriptorModelSetCache.xsd"
 
        offlinemode="false"
        
        id="tidaDbMinuteLoadingPerformance" name="Model used for performance test">
- 
+
   <config>
 
     <caches>
       <identifier implementation="net.meisen.dissertation.impl.cache.FileIdentifierCache" />
       <metadata implementation="net.meisen.dissertation.impl.cache.FileMetaDataCache" />
-      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache" />
-      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache" />
+      <bitmap implementation="net.meisen.dissertation.impl.cache.FileBitmapCache">
+        <bc:config cleaningFactor="0.8" size="500000" />
+      </bitmap>
+      <factsets implementation="net.meisen.dissertation.impl.cache.FileFactDescriptorModelSetCache">
+        <fc:config cleaningFactor="0.8" size="500000" />
+      </factsets>
+      <!--
       <records implementation="net.meisen.dissertation.impl.cache.MapDbDataRecordCache" />
+      -->
     </caches>
 
     <dataretrievers>

@@ -3,9 +3,6 @@ package net.meisen.dissertation.performance.implementations.concrete;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.meisen.dissertation.impl.datasets.SingleStaticDataSet;
 import net.meisen.dissertation.impl.parser.query.select.IntervalRelation;
 import net.meisen.dissertation.impl.parser.query.select.SelectQuery;
@@ -18,6 +15,9 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.parser.query.IQueryResult;
 import net.meisen.dissertation.performance.implementations.BaseImplementation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("javadoc")
 public class Tida extends BaseImplementation<TidaModel> {
@@ -116,6 +116,7 @@ public class Tida extends BaseImplementation<TidaModel> {
 		data.setBulkLoad(true);
 		try {
 			for (final Map<String, Object> record : records) {
+
 				final SingleStaticDataSet dataSet = new SingleStaticDataSet(
 						record);
 				data.loadRecord(dataSet);

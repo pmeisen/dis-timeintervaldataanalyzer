@@ -83,6 +83,10 @@ public abstract class RecordBasedImplementation extends
 			final Map<String, Object> record, LogicalOperatorNode node) {
 		if (node == null) {
 			node = filter.getRoot();
+			
+			if (node.getChildren().size() == 0) {
+				return true;
+			}
 		}
 
 		final List<Boolean> values = new ArrayList<Boolean>();
@@ -262,10 +266,10 @@ public abstract class RecordBasedImplementation extends
 						for (long r = range.getStart(); r <= range.getEnd(); r++) {
 							final List<Map<String, Object>> rangeRecords;
 							rangeRecords = filter.apply(r, r, tpRecords);
+
 							final List<Double> res = calculateMeasure(
 									rangeRecords, iNode);
 							assert 1 == res.size();
-
 							values.add(res.get(0));
 						}
 
@@ -354,9 +358,10 @@ public abstract class RecordBasedImplementation extends
 			final List<Double> values) {
 		double tmpRes = Double.NaN;
 		if (func instanceof Sum) {
+			tmpRes = 0;
 			for (final double res : values) {
 				if (Double.isNaN(res)) {
-					tmpRes = Double.NaN;
+					tmpRes = 0;
 					break;
 				} else {
 					tmpRes = Double.isNaN(tmpRes) ? res : tmpRes + res;
@@ -367,8 +372,7 @@ public abstract class RecordBasedImplementation extends
 		} else if (func instanceof Min) {
 			for (final double res : values) {
 				if (Double.isNaN(res)) {
-					tmpRes = Double.NaN;
-					break;
+					continue;
 				} else {
 					tmpRes = Double.isNaN(tmpRes) ? res : (res < tmpRes ? res
 							: tmpRes);
@@ -377,8 +381,7 @@ public abstract class RecordBasedImplementation extends
 		} else if (func instanceof Max) {
 			for (final double res : values) {
 				if (Double.isNaN(res)) {
-					tmpRes = Double.NaN;
-					break;
+					continue;
 				} else {
 					tmpRes = Double.isNaN(tmpRes) ? res : (res > tmpRes ? res
 							: tmpRes);

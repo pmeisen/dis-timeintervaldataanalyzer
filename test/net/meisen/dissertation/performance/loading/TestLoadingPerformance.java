@@ -31,8 +31,9 @@ import org.junit.Test;
  * 
  */
 public class TestLoadingPerformance extends LoaderAndDbBasedTest {
-
 	private static Map<String, Long> results = new LinkedHashMap<String, Long>();
+
+	private static int total = 1000000;
 
 	/**
 	 * Disables all loggers.
@@ -44,86 +45,102 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 		Logger.getRootLogger().removeAllAppenders();
 		Logger.getRootLogger().addAppender(new NullAppender());
 
-		final File modelLocation = new File(".",
+		final File modelLocation = new File("_data/",
 				"tidaDbMinuteLoadingPerformance");
 		assertTrue(Files.deleteDir(modelLocation));
 	}
 
 	/**
-	 * Load 200k of data from an hsql database. The data is loaded in 20x 10k
-	 * steps.
+	 * Load data from an hsql database. The data is loaded in 10k chunks.
 	 * 
 	 * @throws IOException
 	 *             if the database cannot be opened
 	 */
 	@Test
 	public void testLoadingPerformance10000() throws IOException {
-		results.put("testLoadingPerformance10000", runLoading(10000));
-
-		// add four times the same data
-		final int amount = 19;
-		long sum = 0;
-		for (int i = 0; i < amount; i++) {
-			sum += runLoading(10000);
-		}
-
-		results.put("testLoadingPerformance10000 - Average",
-				(long) (sum / amount));
+		load(10000);
 	}
 
 	/**
-	 * Load 200k of data from an hsql database. The data is loaded in 4x 50k
-	 * steps.
+	 * Load data from an hsql database. The data is loaded in 50k chunks.
 	 * 
 	 * @throws IOException
 	 *             if the database cannot be opened
 	 */
 	@Test
 	public void testLoadingPerformance50000() throws IOException {
-		results.put("testLoadingPerformance50000", runLoading(50000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(50000);
-		sum += runLoading(50000);
-		sum += runLoading(50000);
-
-		results.put("testLoadingPerformance50000 - Average", (long) (sum / 3l));
+		load(50000);
 	}
 
 	/**
-	 * Load 200k of data from an hsql database. The data is loaded in 2x 100k
-	 * steps.
+	 * Load data from an hsql database. The data is loaded in 100k chunks.
 	 * 
 	 * @throws IOException
 	 *             if the database cannot be opened
 	 */
 	@Test
 	public void testLoadingPerformance100000() throws IOException {
-		results.put("testLoadingPerformance100000", runLoading(100000));
-
-		// add four times the same data
-		long sum = 0;
-		sum += runLoading(100000);
-
-		results.put("testLoadingPerformance100000 - Average", (long) (sum / 1l));
+		load(100000);
 	}
 
 	/**
-	 * Load 200k of data from an hsql database. The data is loaded in 1x 200k
-	 * steps.
+	 * Load data from an hsql database. The data is loaded in 200k chunks.
 	 * 
 	 * @throws IOException
 	 *             if the database cannot be opened
 	 */
 	@Test
 	public void testLoadingPerformance200000() throws IOException {
-		results.put("testLoadingPerformance200000", runLoading(200000));
+		load(200000);
+	}
+
+	/**
+	 * Load data from an hsql database. The data is loaded in 500k chunks.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
+	@Test
+	public void testLoadingPerformance500000() throws IOException {
+		load(500000);
+	}
+
+	/**
+	 * Load data from an hsql database. The data is loaded in 1000k chunks.
+	 * 
+	 * @throws IOException
+	 *             if the database cannot be opened
+	 */
+	@Test
+	public void testLoadingPerformance1000000() throws IOException {
+		load(1000000);
+	}
+
+	/**
+	 * Helper method to load the amount of data defind by {@code total}.
+	 * 
+	 * @param size
+	 *            the size of the chunks to be loaded
+	 * @throws IOException
+	 */
+	protected void load(long size) throws IOException {
+		results.put("testLoadingPerformance" + size, runLoading(0, size));
+
+		final long amount = total / size - 1;
+		long sum = 0;
+		for (int i = 0; i < amount; i++) {
+			sum += runLoading((i + 1) * size, size);
+		}
+
+		results.put("testLoadingPerformance" + size + " - Average",
+				amount == 0 ? 0 : (long) (sum / amount));
 	}
 
 	/**
 	 * Helper method used to load the specified amount of data.
 	 * 
+	 * @param offset
+	 *            the offset to pick the data from
 	 * @param amount
 	 *            the amount of data to be loaded
 	 * 
@@ -132,7 +149,8 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 	 * @throws IOException
 	 *             if the database cannot be opened
 	 */
-	protected long runLoading(final int amount) throws IOException {
+	protected long runLoading(final long offset, final long amount)
+			throws IOException {
 		System.setProperty("tidaModelMinute.dataAmount", "" + amount);
 
 		final Performance performance = new Performance();
@@ -164,11 +182,12 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 				.getDataModel().getDataRetriever("db_tida");
 		final DbQueryConfig config = new DbQueryConfig();
 		config.setLanguage("SQL");
-		config.setQuery("SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA WHERE ROWNUM() <= "
-				+ amount);
+		config.setQuery("SELECT KEY, PERSON, TASKTYPE, WORKAREA, INTERVAL_START, INTERVAL_END FROM SMC_DATA LIMIT "
+				+ amount + " OFFSET " + offset);
 
 		// add more data
-		final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(retriever, config);
+		final DataRetrieverDataSet dataSet = new DataRetrieverDataSet(
+				retriever, config);
 		final MultipleDataSetIterator it = new MultipleDataSetIterator(
 				OfflineMode.FALSE, dataSet);
 
@@ -195,6 +214,17 @@ public class TestLoadingPerformance extends LoaderAndDbBasedTest {
 				+ ", "
 				+ Math.round(addedAmount / (performanceRes[1] / 1000000000.0))
 				+ "]");
+
+		// memory usage
+		// Get the Java runtime
+		final Runtime runtime = Runtime.getRuntime();
+		// Run the garbage collector
+		runtime.gc();
+		// Calculate the used memory
+		final long memory = runtime.totalMemory() - runtime.freeMemory();
+		System.out.println("Used memory is bytes: " + memory);
+		System.out.println("Used memory is megabytes: " + memory
+				/ (1024l * 1024l));
 
 		return Math.round(addedAmount / (performanceRes[1] / 1000000000.0));
 	}

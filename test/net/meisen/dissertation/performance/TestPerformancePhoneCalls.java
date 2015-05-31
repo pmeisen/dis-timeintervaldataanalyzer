@@ -1,8 +1,9 @@
-package net.meisen.dissertation.performance.paper.in2014.iceis;
+package net.meisen.dissertation.performance;
 
 import static org.junit.Assert.assertEquals;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,6 @@ import net.meisen.dissertation.impl.time.series.TimeSeriesCollection;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.handler.TidaModelHandler;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
-import net.meisen.dissertation.performance.PerformanceResult;
 import net.meisen.dissertation.performance.implementations.IImplementation;
 import net.meisen.dissertation.performance.implementations.concrete.FilterCreatedIntervalTree;
 import net.meisen.dissertation.performance.implementations.concrete.Naive;
@@ -32,18 +32,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * The performance tests used for the ITNG paper 2015: {@code Bitmap-Based
- * On-Line Analytical Processing of Time Interval Data}
- * 
- * @author pmeisen
- * 
+ * Performance measurements against the IntervalTree
  */
 @ContextClass(TidaConfig.class)
 @ContextFile("sbconfigurator-core.xml")
 @RunWith(JUnitConfigurationRunner.class)
-public class TestPerformance {
-	private int INIT_RUNS = 5;
-	private int RUNS = 100;
+public class TestPerformancePhoneCalls {
+	private int INIT_RUNS = 1;
+	private int RUNS = 1;
 
 	@Autowired
 	private TidaModelHandler loader;
@@ -57,6 +53,7 @@ public class TestPerformance {
 	private String[] queries;
 	private int[] limits;
 	private Class<? extends IImplementation>[] impls;
+	private List<PerformanceResult> pResults;
 
 	/**
 	 * Initializes the test and the queries, limits and types to run.
@@ -65,40 +62,42 @@ public class TestPerformance {
 	@Before
 	public void initialize() {
 		final TidaModel model = loader
-				.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-minute.xml");
-		holder = new DataHolder(model);
+				.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-calls.xml");
+		holder = new DataHolder(
+				model,
+				"/net/meisen/dissertation/performance/implementations/model/phonecallsHsql.zip",
+				"SELECT INTERVAL_START, INTERVAL_END, CALLER, CALLERGENDER, RECIPIENT, RECIPIENTGENDER, ORIGIN, ORIGINCONTINENT, DESTINATION, DESTINATIONCONTINENT FROM PHONECALLS");
+		pResults = new ArrayList<PerformanceResult>();
 
 		// @formatter:off
 		INIT_RUNS = 1; // = 5;
-		RUNS = 10; // = 100;
+		RUNS = 1; // = 100;
 
 		queries = new String[] {
-				"SELECT TIMESERIES OF COUNT(TASKTYPE) AS C FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WA.LOC.TYPE='Gate'",
-				"SELECT TIMESERIES OF SUM(TASKTYPE) AS S ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WORKAREA='SEN.W14'",
-				"SELECT TIMESERIES OF MAX(COUNT(WORKAREA)) AS MC ON TIME.DEF.DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE TASKTYPE='short'",
-				"SELECT TIMESERIES OF MAX(SUM(PERSON) / COUNT(PERSON)) AS MSC ON TIME.DEF.MIN5DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE TASKTYPE='long'",
-				"SELECT TIMESERIES OF MIN(TASKTYPE) AS M ON TIME.DEF.MIN5DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE WA.LOC.TYPE='Ramp' OR PERSON='*9'",
-				"SELECT TIMESERIES OF SUM(COUNT(TASKTYPE)) AS S ON TIME.DEF.MIN5DAY FROM tidaModel IN [01.01.2008 00:00:00, 31.01.2008 23:59:00] WHERE (WA.LOC.TYPE='Ramp' OR PERSON='*9') AND (TASKTYPE='long' OR TASKTYPE='short')" 
-		};
+//				"SELECT TIMESERIES OF COUNT(CALLER) AS C FROM callsModel IN [01.01.2014 00:00:00, 31.01.2014 23:59:00]",
+//				"SELECT TIMESERIES OF MAX(SUM(CALLER)) AS C ON TIME.DEF.DAY FROM callsModel IN [01.01.2014 00:00:00, 31.01.2014 23:59:00] WHERE ORIGIN='Kansas*'",
+				"SELECT TIMESERIES OF SUM(COUNT(CALLER)) AS C ON TIME.DEF.DAY FROM callsModel IN [01.08.2013 00:00:00, 31.07.2014 23:59:00] WHERE CALLER='L*' AND (RECIPIENT='A*' OR RECIPIENT='M*')"
+				};
 		
 		limits = new int[] {
-				10,
-				100,
-				1000,
-				10000,
-				100000,
-				1000000
+				63825
 		}; 
 
 		
 		impls = new Class[] {
 				Naive.class,
-				PriorFilterIntervalTree.class,
-				FilterCreatedIntervalTree.class,
-				Tida.class
+				PriorFilterIntervalTree.class
+//				FilterCreatedIntervalTree.class,
+//				Tida.class
 		};
 		// @formatter:on
 
+		// print the results
+		for (final PerformanceResult pResult : pResults) {
+			System.out.println(pResult.csv());
+		}
+
+		// clean up
 		loader.unloadAll();
 	}
 
@@ -115,9 +114,13 @@ public class TestPerformance {
 		for (final int limit : limits) {
 			final List<Map<String, Object>> records = holder.getRecords(limit);
 
+			/*
+			 * if (LOG.isWarnEnabled()) { LOG.warn(records.toString()); }
+			 */
+
 			// load the model
 			final TidaModel model = loader
-					.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-minute.xml");
+					.loadViaXslt("/net/meisen/dissertation/performance/implementations/model/tida-model-calls.xml");
 			Tida.loadRecords(model, records);
 
 			// run each query
@@ -135,17 +138,20 @@ public class TestPerformance {
 					final IImplementation conImpl = cstr.newInstance(model,
 							records, INIT_RUNS, RUNS, queryFactory);
 
-					final PerformanceResult pRes = new PerformanceResult(limit,
-							Tida.getCount(queryFactory, parsedQuery),
+					final PerformanceResult pResult = new PerformanceResult(
+							limit, Tida.getCount(queryFactory, parsedQuery),
 							records.size(), impl.getSimpleName(), query);
 
 					oldRes = res;
-					res = conImpl.run(parsedQuery, pRes);
+					res = conImpl.run(parsedQuery, pResult);
 
 					// validate that we got the same results
 					if (oldRes != null) {
 						assertEquals(oldRes, res);
 					}
+
+					System.out.println(pResult.csv());
+					pResults.add(pResult);
 				}
 			}
 

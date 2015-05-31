@@ -9,6 +9,7 @@ import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.dissertation.model.indexes.BaseIndexFactory;
 import net.meisen.dissertation.model.parser.query.IQueryFactory;
 import net.meisen.dissertation.model.time.mapper.BaseMapper;
+import net.meisen.dissertation.performance.PerformanceResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,13 +86,30 @@ public abstract class BaseImplementation<T> implements IImplementation {
 		}
 	}
 
+	protected void setResults(final long[] results, final PerformanceResult pRes) {
+		long sum = 0;
+		long min = Long.MAX_VALUE;
+		long max = Long.MIN_VALUE;
+		for (int l = 0; l < runs; l++) {
+			sum += results[l];
+			min = results[l] < min ? results[l] : min;
+			max = results[l] > max ? results[l] : max;
+		}
+
+		pRes.runs = runs;
+		pRes.avg = (sum / (runs == 0 ? 1 : runs));
+		pRes.min = min;
+		pRes.max = max;
+	}
+
 	@Override
 	public TimeSeriesCollection run(final String query) {
 		return measure(queryFactory.<SelectQuery> parseQuery(query));
 	}
 
 	@Override
-	public TimeSeriesCollection run(final SelectQuery query) {
+	public TimeSeriesCollection run(final SelectQuery query,
+			final PerformanceResult pRes) {
 		final long[] results = new long[runs];
 
 		// do some parsing
@@ -113,7 +131,7 @@ public abstract class BaseImplementation<T> implements IImplementation {
 		}
 
 		// result
-		printResult(getClass().getSimpleName(), results);
+		setResults(results, pRes);
 		System.gc();
 
 		return tsc;

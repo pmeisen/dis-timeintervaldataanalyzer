@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:dim="http://dev.meisen.net/xsd/dissertation/dimension" 
+       xmlns:spp="http://dev.meisen.net/xsd/dissertation/preprocessor/script" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model                http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/preprocessor/script  http://dev.meisen.net/xsd/dissertation/tidaScriptPreProcessor.xsd
+                           http://dev.meisen.net/xsd/dissertation/dimension            http://dev.meisen.net/xsd/dissertation/tidaDimension.xsd"
+       
+       id="callsModel">
+  
+  <config>    
+    <preprocessor implementation="net.meisen.dissertation.impl.dataintegration.ScriptPreProcessor">
+      <spp:script language="javascript">
+        var result = new net.meisen.dissertation.impl.dataintegration.PreProcessedDataRecord(raw);
+                
+        result.setValue('CALLER',      raw.getValue('CALLER')      + ',' + raw.getValue('CALLERGENDER'));
+        result.setValue('RECIPIENT',   raw.getValue('RECIPIENT')   + ',' + raw.getValue('RECIPIENTGENDER'));
+        result.setValue('ORIGIN',      raw.getValue('ORIGIN')      + ',' + raw.getValue('ORIGINCONTINENT'));
+        result.setValue('DESTINATION', raw.getValue('DESTINATION') + ',' + raw.getValue('DESTINATIONCONTINENT'));
+      </spp:script>
+    </preprocessor>
+  </config>
+  
+  <time>
+    <timeline start="01.01.2013 00:00:00" end="31.12.2014 23:59:00" granularity="MINUTE" />
+  </time>
+    
+  <meta>
+    <descriptors>
+      <string id="CALLER" failonduplicates="false" />
+      <string id="RECIPIENT" failonduplicates="false" />
+      <string id="ORIGIN" failonduplicates="false" />
+      <string id="DESTINATION" failonduplicates="false" />
+      
+      <!-- nice to add, a high, low cost-model -->
+    </descriptors>
+
+    <entries />
+  </meta>
+  
+  <dim:dimensions>
+    <dim:timedimension id="TIME">
+      <dim:hierarchy id="DEF" all="Everytime">
+        <dim:level id="YEAR" template="YEARS" />
+        <dim:level id="MONTH" template="MONTHS" />
+        <dim:level id="DAY" template="DAYS" />
+        <dim:level id="HOUR" template="RASTER_DAY_MINUTE_60" />
+        <dim:level id="HALFHOUR" template="RASTER_DAY_MINUTE_30" />
+        <dim:level id="MIN5DAY" template="RASTER_DAY_MINUTE_5" />
+      </dim:hierarchy>
+    </dim:timedimension>
+    
+    <dim:dimension id="CALLER" descriptor="caller">
+      <dim:hierarchy id="GENDER">      
+        <dim:level id="TYPE">
+          <dim:member id="FEMALE" reg=".*,Female" rollUpTo="*" />
+          <dim:member id="MALE" reg=".*,Male" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+    
+    <dim:dimension id="RECIPIENT" descriptor="recipient">
+      <dim:hierarchy id="GENDER">      
+        <dim:level id="TYPE">
+          <dim:member id="FEMALE" reg=".*,Female" rollUpTo="*" />
+          <dim:member id="MALE" reg=".*,Male" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+    
+    <dim:dimension id="DESTINATION" descriptor="destination">
+      <dim:hierarchy id="AREA">      
+        <dim:level id="CONTINENT">
+          <dim:member id="AFRICA" reg=".*,Africa" rollUpTo="*" />
+          <dim:member id="ASIA" reg=".*,Asia" rollUpTo="*" />
+          <dim:member id="EUROPE" reg=".*,Europe" rollUpTo="*" />
+          <dim:member id="NORTHAMERICA" reg=".*,North America" rollUpTo="*" />
+          <dim:member id="SOUTHAMERICA" reg=".*,South America" rollUpTo="*" />
+          <dim:member id="OCEANIA" reg=".*,Oceania" rollUpTo="*" />
+          <dim:member id="UNKNOWN" reg=".*,Unknown" rollUpTo="*" />
+        </dim:level>
+      </dim:hierarchy>
+    </dim:dimension>
+  </dim:dimensions>
+  
+  <structure>
+    <meta name="CALLER" descriptor="CALLER" />
+    <meta name="RECIPIENT" descriptor="RECIPIENT" />
+    <meta name="ORIGIN" descriptor="ORIGIN" />
+    <meta name="DESTINATION" descriptor="DESTINATION" />
+    
+    <interval name="INTERVAL_START" type="start" />
+    <interval name="INTERVAL_END" type="end" />
+  </structure>
+  
+  <data metahandling="create" intervalhandling="failOnNull" />
+</model>
