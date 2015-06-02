@@ -12,13 +12,13 @@
       <value>
         tida.config.selector=tidaConfig.xml
         tida.server.http.port=7070
-	    tida.server.http.enabled=true
-	    tida.server.http.docroot=docroot
-	    tida.server.tsql.port=7000
-	    tida.server.tsql.enabled=true
-	    tida.server.tsql.timeout=1800000
-	    tida.server.control.port=7001
-	    tida.server.control.enabled=false
+        tida.server.http.enabled=true
+        tida.server.http.docroot=docroot
+        tida.server.tsql.port=7000
+        tida.server.tsql.enabled=true
+        tida.server.tsql.timeout=1800000
+        tida.server.control.port=7001
+        tida.server.control.enabled=false
       </value>
     </property>
   </bean>
