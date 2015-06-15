@@ -83,10 +83,10 @@ public class TestIBSM {
 		ESequenceDefinition esd;
 
 		// create some different instances and validate
-		// start="01.01.2008 00:00:00", end="30.12.2008 23:59:00", and
+		// start="01.01.2008 00:00:00", end="31.12.2008 23:59:00", and
 		// granularity="MINUTE"
-		val1 = new DateIntervalValue(Dates.isDate("20.01.2008 08:00:00", tz));
-		val2 = new DateIntervalValue(Dates.isDate("20.01.2008 08:07:00", tz));
+		val1 = new DateIntervalValue(Dates.isDate("01.01.2008 00:00:00", tz));
+		val2 = new DateIntervalValue(Dates.isDate("31.12.2008 23:59:00", tz));
 		interval = new Interval<Date>(val1, ex, val2, in);
 		esd = new ESequenceDefinition(model.getIntervalModel(), interval);
 

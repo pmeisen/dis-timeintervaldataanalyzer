@@ -94,8 +94,10 @@ public class TestSimiliarity {
 		// @formatter:on
 		// strQuery =
 		// "SELECT TIMESERIES OF SUM(PERSON) AS CP ON TIME.DEF.HOUR FROM tidaModel IN [01.01.2008, 02.01.2008) WHERE PERSON='Paul'";
-		strQuery = "SELECT TIMESERIES OF MAX(COUNT(PERSON)) AS CP ON TIME.DEF.HOUR FROM tidaModel IN [01.01.2008, 02.01.2008)";
-		k = 10;
+		// strQuery =
+		// "SELECT TIMESERIES OF MAX(COUNT(PERSON)) AS CP ON TIME.DEF.HOUR FROM tidaModel IN [01.01.2008, 02.01.2008)";
+		strQuery = "SELECT TIMESERIES OF COUNT(PERSON) AS CP FROM tidaModel IN [24.12.2008, 25.12.2008) WHERE TASKTYPE='short' AND WORKAREA='SEN.W07'";
+		k = 1;
 	}
 
 	@Test
@@ -187,7 +189,7 @@ public class TestSimiliarity {
 					+ ", " + e.getCountDistance() + ", "
 					+ e.getStructureDistance() + ")");
 
-			System.out.println(e);
+//			System.out.println(e);
 
 			counter++;
 			if (counter == amount) {

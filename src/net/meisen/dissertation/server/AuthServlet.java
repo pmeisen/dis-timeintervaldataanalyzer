@@ -146,4 +146,9 @@ public class AuthServlet extends BaseServlet {
 			throw new IllegalStateException("Unsupported method called.");
 		}
 	}
+
+	@Override
+	protected boolean measurePerformace() {
+		return false;
+	}
 }

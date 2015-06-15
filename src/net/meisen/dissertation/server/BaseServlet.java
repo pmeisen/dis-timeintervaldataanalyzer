@@ -1,5 +1,8 @@
 package net.meisen.dissertation.server;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import net.meisen.dissertation.config.xslt.DefaultValues;
@@ -174,9 +177,37 @@ public abstract class BaseServlet implements IServlet {
 			String result;
 			ContentType type;
 			try {
+
+				/*
+				 * Start some performance measure on TRACE
+				 */
+				ThreadMXBean mxBean = null;
+				long start = 0L;
+				if (LOG.isInfoEnabled() && measurePerformace()) {
+					final ThreadMXBean tmpMxBean = ManagementFactory
+							.getThreadMXBean();
+
+					if (tmpMxBean.isCurrentThreadCpuTimeSupported()) {
+						start = tmpMxBean.getCurrentThreadCpuTime();
+						mxBean = tmpMxBean;
+					}
+				}
+
 				final HandleResult handleRes = _handle(request);
 				result = handleRes.result;
 				type = handleRes.type;
+
+				/*
+				 * Stop performance measure on TRACE and write it
+				 */
+				if (mxBean != null) {
+					final long end = mxBean.getCurrentThreadCpuTime();
+					final DecimalFormat df = new DecimalFormat(
+							"###,##0.00000####");
+					final double cputime = ((double) end - start) / 1000000000.0;
+
+					LOG.info("Query was performed in " + df.format(cputime) + "s");
+				}
 			} catch (final AuthException e) {
 				if (LOG.isDebugEnabled()) {
 					LOG.error("Invalid request considering permissions.", e);
@@ -228,6 +259,17 @@ public abstract class BaseServlet implements IServlet {
 			final StringEntity entity = new StringEntity(result, type);
 			response.setEntity(entity);
 		}
+	}
+
+	/**
+	 * Method specifying if measure performance of the servlet should be printed
+	 * on info level.
+	 * 
+	 * @return {@code true} if the performance should be printed on info level,
+	 *         otherwise {@code false}
+	 */
+	protected boolean measurePerformace() {
+		return true;
 	}
 
 	/**
