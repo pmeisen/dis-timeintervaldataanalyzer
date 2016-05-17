@@ -1,4 +1,4 @@
 Time Interval Data Analyzer
 ============================
 
-Visit tida.meisen.net for further information and a downloadable version.
+Visit the [Tida Homepage](https://tida.meisen.net) for further information and a downloadable version.
