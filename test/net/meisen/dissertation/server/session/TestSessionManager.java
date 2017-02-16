@@ -197,15 +197,14 @@ public class TestSessionManager extends LoaderBasedTest {
 		 * Tests the modification of the temporary directory.
 		 */
 		@Test
-		public void testModifyTmpDir() {
+		public void testModifyTmpDir() throws IOException {
 			final File defTmpDir = manager.getTempDir();
 			assertTrue(defTmpDir.exists());
 
-			final File newTmpDir = new File(
-					System.getProperty("java.io.tmpdir"), "myNewDir");
+			final File newTmpDir = new File(System.getProperty("java.io.tmpdir"), "myNewDir");
 			manager.setTmpDir(Files.getCanonicalPath(newTmpDir));
 			assertFalse(defTmpDir.exists());
-			assertEquals(manager.getTempDir(), newTmpDir);
+			assertEquals(manager.getTempDir().getCanonicalFile(), newTmpDir.getCanonicalFile());
 
 			manager.release();
 			assertFalse(newTmpDir.exists());
@@ -259,11 +258,11 @@ public class TestSessionManager extends LoaderBasedTest {
 		 * Check if the directory was really changed.
 		 */
 		@Test
-		public void testChangedDirectory() {
+		public void testChangedDirectory() throws IOException {
 			final File tmpDir = manager.getTempDir();
 			assertTrue(tmpDir.exists());
-			assertEquals(tmpDir.getParentFile(),
-					new File(System.getProperty("java.io.tmpdir")));
+			assertEquals(tmpDir.getParentFile().getCanonicalFile(),
+					new File(System.getProperty("java.io.tmpdir")).getCanonicalFile());
 			manager.release();
 			assertFalse(tmpDir.exists());
 		}

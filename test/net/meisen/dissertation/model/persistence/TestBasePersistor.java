@@ -49,11 +49,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @SystemProperty(property = "testBeans.selector", value = "?")
 public class TestBasePersistor extends ExceptionBasedTest {
 
-	@Autowired(required = true)
+	@Autowired()
 	@Qualifier("coreConfiguration")
 	private IConfiguration configuration;
 
-	@Autowired(required = true)
+	@Autowired()
 	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
 	private IExceptionRegistry exceptionRegistry;
 
@@ -180,10 +180,10 @@ public class TestBasePersistor extends ExceptionBasedTest {
 		persistor.writeByte(fos, (byte) 2);
 		persistor.writeInt(fos, 2000);
 		persistor.writeLong(fos, Long.MAX_VALUE);
-		persistor.writeString(fos, "This is a äüöß String");
-		persistor.writeObject(fos, new String("Hi there äüöß"));
+		persistor.writeString(fos, "This is a Ã¤Ã¼Ã¶ÃŸ String");
+		persistor.writeObject(fos, "Hi there Ã¤Ã¼Ã¶ÃŸ");
 		persistor.writeObject(fos, null);
-		persistor.writeObject(fos, new String("I'm another"));
+		persistor.writeObject(fos, "I'm another");
 		persistor.writeInt(fos, Integer.MIN_VALUE);
 
 		fos.flush();
@@ -193,8 +193,8 @@ public class TestBasePersistor extends ExceptionBasedTest {
 		assertEquals((byte) 2, persistor.readByte(fis));
 		assertEquals(2000, persistor.readInt(fis));
 		assertEquals(Long.MAX_VALUE, persistor.readLong(fis));
-		assertEquals("This is a äüöß String", persistor.readString(fis));
-		assertEquals("Hi there äüöß", persistor.readObject(fis));
+		assertEquals("This is a Ã¤Ã¼Ã¶ÃŸ String", persistor.readString(fis));
+		assertEquals("Hi there Ã¤Ã¼Ã¶ÃŸ", persistor.readObject(fis));
 		assertNull(persistor.readObject(fis));
 		assertEquals("I'm another", persistor.readObject(fis));
 		assertEquals(Integer.MIN_VALUE, persistor.readInt(fis));

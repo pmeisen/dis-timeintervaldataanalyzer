@@ -71,10 +71,9 @@ public class TestMetaIndexDimension extends ModuleAndDbBasedTest {
 		assertEquals(16, idx.getAmountOfSlices());
 		final String[] vals = new String[] { "Hajo", "Uschi", "Edison",
 				"Linus", "Hannah", "Lasse", "Silas", "Rasmus", "Philipp",
-				"Tobias", "Holger", "Andrea", "Deborah", "Nicole", "Jörg",
+				"Tobias", "Holger", "Andrea", "Deborah", "Nicole", "JÃ¶rg",
 				"Stephanie" };
-		final int[] exp = new int[] { 8, 11, 5, 7, 11, 5, 8, 7, 2, 8, 5, 6, 4,
-				5, 5, 3 };
+		final int[] exp = new int[] { 8, 11, 5, 7, 11, 5, 8, 7, 2, 8, 5, 6, 4, 5, 5, 3 };
 		for (i = 0; i < vals.length; i++) {
 			assertEquals(exp[i], idx.getSliceByValue(vals[i]).count());
 		}

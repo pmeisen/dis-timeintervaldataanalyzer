@@ -3,7 +3,7 @@ package net.meisen.dissertation.model.time.granularity;
 import java.util.Date;
 
 /**
- * 0.001 seconds
+ * 0.001Â seconds
  */
 public class MilliSecond implements ISecondBasedGranularity,
 		IDateBasedGranularity {

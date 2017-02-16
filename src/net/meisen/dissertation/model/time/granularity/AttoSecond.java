@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-18 seconds
+ * 10^-18 seconds
  */
 public class AttoSecond implements ISecondBasedGranularity {
 	private static final AttoSecond instance = new AttoSecond();

@@ -1,18 +1,5 @@
 package net.meisen.dissertation.impl.persistence;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.exceptions.ZipPersistorException;
@@ -29,7 +16,6 @@ import net.meisen.general.sbconfigurator.runners.JUnitConfigurationRunner;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,13 +23,21 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * Tests the implementation of a {@code ZipPersistor}.
- * 
+ *
  * @author pmeisen
- * 
  * @see ZipPersistor
- * 
  */
 @RunWith(JUnitConfigurationRunner.class)
 @ContextClass(TestConfig.class)
@@ -51,226 +45,188 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @SystemProperty(property = "testBeans.selector", value = "?")
 public class TestZipPersistor extends ExceptionBasedTest {
 
-	@Autowired(required = true)
-	@Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
-	private IExceptionRegistry exceptionRegistry;
+    @Autowired()
+    @Qualifier(DefaultValues.EXCEPTIONREGISTRY_ID)
+    private IExceptionRegistry exceptionRegistry;
 
-	private File tmpDir;
-	private File tmpFile;
-	private ZipPersistor persistor;
+    private File tmpDir;
+    private File tmpFile;
+    private ZipPersistor persistor;
 
-	/**
-	 * Setups a temporary file to be used as well as a {@code ZipPersistor}
-	 * instance.
-	 * 
-	 * @throws IOException
-	 *             if the file cannot be created
-	 */
-	@Before
-	public void setUp() throws IOException {
-		tmpDir = new File(System.getProperty(("java.io.tmpdir")));
-		tmpFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
-		persistor = new ZipPersistor(exceptionRegistry);
+    /**
+     * Setups a temporary file to be used as well as a {@code ZipPersistor}
+     * instance.
+     *
+     * @throws IOException if the file cannot be created
+     */
+    @Before
+    public void setUp() throws IOException {
+        tmpDir = new File(System.getProperty(("java.io.tmpdir")));
+        tmpFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
+        persistor = new ZipPersistor(exceptionRegistry);
 
-		// make sure the file got created correctly
-		assertTrue(tmpFile.exists());
-		assertTrue(tmpFile.isFile());
-	}
+        // make sure the file got created correctly
+        assertTrue(tmpFile.exists());
+        assertTrue(tmpFile.isFile());
+    }
 
-	/**
-	 * Tests the creation of the saving location.
-	 */
-	@Test
-	public void testFileCreation() {
+    /**
+     * Tests the creation of the saving location.
+     */
+    @Test
+    public void testFileCreation() {
 
-		// try to use an existing file which should be deleteable
-		persistor.save(new FileLocation(tmpFile));
+        // try to use an existing file which should be deleteable
+        persistor.save(new FileLocation(tmpFile));
 
-		// create another temporary file in a sub-directory
-		final File fileWithSubDirectory = new File(tmpFile.getParent(),
-				"aSubDirectory/aFile.zip");
-		persistor.save(new FileLocation(fileWithSubDirectory));
-		assertTrue(fileWithSubDirectory.exists());
-		assertTrue(fileWithSubDirectory.isFile());
-		assertTrue(Files.deleteDir(fileWithSubDirectory.getParentFile()));
-	}
+        // create another temporary file in a sub-directory
+        final File fileWithSubDirectory = new File(tmpFile.getParent(),
+                "aSubDirectory/aFile.zip");
+        persistor.save(new FileLocation(fileWithSubDirectory));
+        assertTrue(fileWithSubDirectory.exists());
+        assertTrue(fileWithSubDirectory.isFile());
+        assertTrue(Files.deleteDir(fileWithSubDirectory.getParentFile()));
+    }
 
-	/**
-	 * Tests the exception expected when using an invalid filename without any
-	 * folder.
-	 */
-	@Test
-	public void testInvalidFilenameWithoutFolderException() {
-		thrown.expect(ZipPersistorException.class);
-		thrown.expectMessage("The storage-location '?' could not be created.");
+    /**
+     * Tests the exception expected when using an invalid filename without any
+     * folder.
+     */
+    @Test
+    public void testInvalidFilenameWithoutFolderException() {
+        thrown.expect(ZipPersistorException.class);
+        thrown.expectMessage("The storage-location '?' could not be created.");
 
-		persistor.save(new FileLocation(new File("?")));
-	}
+        persistor.save(new FileLocation(new File("?")));
+    }
+    
+    /**
+     * Tests the saving of a {@code null} location.
+     */
+    @Test
+    public void testSaveNullException() {
+        thrown.expect(ZipPersistorException.class);
+        thrown.expectMessage("A location must be specified.");
 
-	/**
-	 * Tests the exception expected when using an invalid filename with folder.
-	 */
-	@Test
-	public void testInvalidFilenameWithFolderException() {
-		thrown.expect(ZipPersistorException.class);
-		thrown.expectMessage("Unable to access or create the file");
+        persistor.save(null);
+    }
 
-		persistor.save(new FileLocation(new File(tmpDir, "?")));
-	}
+    /**
+     * Tests the saving process.
+     *
+     * @throws IOException if the file cannot be read
+     */
+    @Test
+    public void testSaving() throws IOException {
 
-	/**
-	 * Tests the saving of a {@code null} location.
-	 */
-	@Test
-	public void testSaveNullException() {
-		thrown.expect(ZipPersistorException.class);
-		thrown.expectMessage("A location must be specified.");
+        // we need to register some persistables
+        persistor.register(new Group("my", "group"),
+                new MockSaveSinglePersistable());
 
-		persistor.save(null);
-	}
+        // save the file
+        persistor.save(new FileLocation(tmpFile));
 
-	/**
-	 * Tests the usage of a file which is in use.
-	 * 
-	 * @throws IOException
-	 *             the exception if the file cannot be created
-	 */
-	@Test
-	public void testFileInUseException() throws IOException {
-		tmpFile.createNewFile();
-		final InputStream stream = new FileInputStream(tmpFile);
-		try {
-			persistor.save(new FileLocation(tmpFile));
-			fail("Exception not thrown.");
-		} catch (final ZipPersistorException e) {
-			assertTrue(e
-					.getMessage()
-					.contains(
-							"cannot be used as storage-location, because it already exists and cannot be removed"));
-		} finally {
-			Streams.closeIO(stream);
-		}
-	}
+        // check the result
+        final ZipFile file = new ZipFile(tmpFile);
+        assertEquals(1, file.size());
 
-	/**
-	 * Tests the saving process.
-	 * 
-	 * @throws IOException
-	 *             if the file cannot be read
-	 */
-	@Test
-	public void testSaving() throws IOException {
+        final ZipEntry entry = file.entries().nextElement();
+        assertEquals("my/group/" + MockSaveSinglePersistable.ID,
+                entry.getName());
+        final String content = Streams.readFromStream(file
+                .getInputStream(entry));
+        assertEquals(MockSaveSinglePersistable.CONTENT, content);
 
-		// we need to register some persistables
-		persistor.register(new Group("my", "group"),
-				new MockSaveSinglePersistable());
+        // close the file and give it free
+        file.close();
+    }
 
-		// save the file
-		persistor.save(new FileLocation(tmpFile));
+    /**
+     * Tests the loading of a saved instance.
+     */
+    @Test
+    public void testLoading() {
+        final Group group = new Group("please", "load", "me");
 
-		// check the result
-		final ZipFile file = new ZipFile(tmpFile);
-		assertEquals(1, file.size());
+        // we need to register some persistables
+        persistor.register(group, new MockSaveSinglePersistable());
 
-		final ZipEntry entry = file.entries().nextElement();
-		assertEquals("my/group/" + MockSaveSinglePersistable.ID,
-				entry.getName());
-		final String content = Streams.readFromStream(file
-				.getInputStream(entry));
-		assertEquals(MockSaveSinglePersistable.CONTENT, content);
+        // save the file
+        persistor.save(new FileLocation(tmpFile));
 
-		// close the file and give it free
-		file.close();
-	}
+        // now load the file
+        final MockLoadSinglePersistable loader = new MockLoadSinglePersistable();
+        persistor.unregister(group);
+        persistor.register(group, loader);
+        persistor.load(new FileLocation(tmpFile));
 
-	/**
-	 * Tests the loading of a saved instance.
-	 */
-	@Test
-	public void testLoading() {
-		final Group group = new Group("please", "load", "me");
+        // check the result that was loaded
+        assertEquals(MockSaveSinglePersistable.CONTENT, loader.getContent());
+    }
 
-		// we need to register some persistables
-		persistor.register(group, new MockSaveSinglePersistable());
+    /**
+     * Tests the saving of a single {@code MetaData} instance
+     *
+     * @throws IOException if the file cannot be read
+     */
+    @Test
+    public void testSavingOfSingleMetaData() throws IOException {
+        final String name = "meta.info";
+        final String content = "This is some MetaData with weird symbols Ã¼Ã¶Ã¤ÃŸ";
 
-		// save the file
-		persistor.save(new FileLocation(tmpFile));
+        persistor.save(new FileLocation(tmpFile), new MetaData(new Identifier(
+                name), content));
 
-		// now load the file
-		final MockLoadSinglePersistable loader = new MockLoadSinglePersistable();
-		persistor.unregister(group);
-		persistor.register(group, loader);
-		persistor.load(new FileLocation(tmpFile));
+        // check the result
+        final ZipFile file = new ZipFile(tmpFile);
+        assertEquals(1, file.size());
 
-		// check the result that was loaded
-		assertEquals(MockSaveSinglePersistable.CONTENT, loader.getContent());
-	}
+        final ZipEntry entry = file.entries().nextElement();
+        assertEquals(name, entry.getName());
+        final String readContent = Streams.readFromStream(file
+                .getInputStream(entry));
+        assertEquals(content, readContent);
 
-	/**
-	 * Tests the saving of a single {@code MetaData} instance
-	 * 
-	 * @throws IOException
-	 *             if the file cannot be read
-	 */
-	@Test
-	public void testSavingOfSingleMetaData() throws IOException {
-		final String name = "meta.info";
-		final String content = "This is some MetaData with weird symbols üöäß";
+        // close the handler
+        file.close();
+    }
 
-		persistor.save(new FileLocation(tmpFile), new MetaData(new Identifier(
-				name), content));
+    /**
+     * Tests the saving of multiple {@code MetaData} instances.
+     *
+     * @throws IOException if the file cannot be read
+     */
+    @Test
+    public void testSavingOfMultipleMetaData() throws IOException {
 
-		// check the result
-		final ZipFile file = new ZipFile(tmpFile);
-		assertEquals(1, file.size());
+        // @formatter:off
+        MetaData[] data = new MetaData[]{
+                new MetaData(new Identifier("myName.text", "group"), "This is a string"),
+                new MetaData(new Identifier("another.file", "group"), new ByteArrayInputStream("Another String".getBytes())),
+                new MetaData(new Identifier("suck"))};
+        // @formatter:on
 
-		final ZipEntry entry = file.entries().nextElement();
-		assertEquals(name, entry.getName());
-		final String readContent = Streams.readFromStream(file
-				.getInputStream(entry));
-		assertEquals(content, readContent);
+        persistor.save(new FileLocation(tmpFile), data);
 
-		// close the handler
-		file.close();
-	}
+        // check the result
+        final ZipFile file = new ZipFile(tmpFile);
+        assertEquals(3, file.size());
+        assertEquals("This is a string", Streams.readFromStream(file
+                .getInputStream(file.getEntry("group/myName.text"))));
+        assertEquals("Another String", Streams.readFromStream(file
+                .getInputStream(file.getEntry("group/another.file"))));
+        assertEquals("", Streams.readFromStream(file.getInputStream(file
+                .getEntry("suck"))));
 
-	/**
-	 * Tests the saving of multiple {@code MetaData} instances.
-	 * 
-	 * @throws IOException
-	 *             if the file cannot be read
-	 */
-	@Test
-	public void testSavingOfMultipleMetaData() throws IOException {
+        // close the handler
+        file.close();
+    }
 
-		// @formatter:off
-		MetaData[] data = new MetaData[] { 
-				new MetaData(new Identifier("myName.text", "group"), "This is a string"),
-				new MetaData(new Identifier("another.file", "group"), new ByteArrayInputStream("Another String".getBytes())),
-				new MetaData(new Identifier("suck")) };
-		// @formatter:on
-
-		persistor.save(new FileLocation(tmpFile), data);
-
-		// check the result
-		final ZipFile file = new ZipFile(tmpFile);
-		assertEquals(3, file.size());
-		assertEquals("This is a string", Streams.readFromStream(file
-				.getInputStream(file.getEntry("group/myName.text"))));
-		assertEquals("Another String", Streams.readFromStream(file
-				.getInputStream(file.getEntry("group/another.file"))));
-		assertEquals("", Streams.readFromStream(file.getInputStream(file
-				.getEntry("suck"))));
-
-		// close the handler
-		file.close();
-	}
-
-	/**
-	 * Delete the created temporary file
-	 */
-	@After
-	public void cleanUp() {
-		assertTrue(tmpFile.delete());
-	}
+    /**
+     * Delete the created temporary file
+     */
+    @After
+    public void cleanUp() {
+        assertTrue(tmpFile.delete());
+    }
 }

@@ -5,7 +5,7 @@
   
   <groupId>net.meisen.dissertation</groupId>
   <artifactId>net-meisen-dissertation-dis-timeintervaldataanalyzer</artifactId>
-  <version>TRUNK</version>
+  <version>TRUNK-SNAPSHOT</version>
   <name>dis-timeintervaldataanalyzer</name>
   <description>Time Interval Data Analyzer</description>
   <packaging>jar</packaging>
@@ -166,6 +166,20 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
+      <version>0.8.0.RELEASE</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

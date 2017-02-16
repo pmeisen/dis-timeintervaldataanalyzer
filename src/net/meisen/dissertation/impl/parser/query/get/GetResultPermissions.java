@@ -46,12 +46,11 @@ public class GetResultPermissions implements IQueryResultSet {
 	 * 
 	 * @see IAuthManager
 	 */
-	public GetResultPermissions(final IAuthManager authManager,
-			final Set<String> tidaModels) {
+	public GetResultPermissions(final IAuthManager authManager, final Set<String> tidaModels) {
 		this.authManager = authManager;
 
 		if (tidaModels == null) {
-			this.tidaModels = new HashSet<String>();
+			this.tidaModels = new HashSet<>();
 		} else {
 			this.tidaModels = tidaModels;
 		}
@@ -64,13 +63,12 @@ public class GetResultPermissions implements IQueryResultSet {
 
 	@Override
 	public Iterator<Object[]> iterator() {
-		final List<Object[]> data = new ArrayList<Object[]>();
+		final List<Object[]> data = new ArrayList<>();
 
 		// get the users
 		final Set<String> users = authManager.getUsers();
 		for (final String user : users) {
-			final Set<DefinedPermission> perms = new TreeSet<DefinedPermission>(
-					authManager.getUserPermissions(user));
+			final Set<DefinedPermission> perms = new TreeSet<>(authManager.getUserPermissions(user));
 
 			for (final DefinedPermission perm : perms) {
 				final String permModelId = perm.getModelId();
@@ -82,8 +80,7 @@ public class GetResultPermissions implements IQueryResultSet {
 						data.add(new Object[] {
 								user,
 								modelId,
-								perm.getPermission().toString(modelId,
-										DefinedPermission.DEF_SEPARATOR) });
+								perm.getPermission().toString(modelId, DefinedPermission.DEF_SEPARATOR) });
 					}
 				} else {
 					data.add(new Object[] { user, perm.getModelId(),

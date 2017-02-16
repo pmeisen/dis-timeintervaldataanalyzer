@@ -69,7 +69,7 @@ public class TestIndexedCollectionDefinition {
 
 		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class);
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(1, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(keyDef, subject.getKeyDefinition());
@@ -77,7 +77,7 @@ public class TestIndexedCollectionDefinition {
 		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER);
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(1, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(keyDef, subject.getKeyDefinition());
@@ -87,7 +87,7 @@ public class TestIndexedCollectionDefinition {
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
 				"WHATEVER", null);
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(4, subject.getParameter().size());
 		assertEquals(5, subject.getParameter().get(0));
 		assertEquals(keyDef, subject.getParameter().get(1));
@@ -99,7 +99,7 @@ public class TestIndexedCollectionDefinition {
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
 				"WHATEVER");
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals("WHATEVERMOD", subject.getParameter().get(1));
@@ -108,7 +108,7 @@ public class TestIndexedCollectionDefinition {
 		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
 				"WHATEVER");
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals("WHATEVERMOD", subject.getParameter().get(1));
@@ -118,7 +118,7 @@ public class TestIndexedCollectionDefinition {
 				"WHATEVER",
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER);
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals("WHATEVER", subject.getParameter().get(0));
 		assertEquals(keyDef, subject.getParameter().get(1));
@@ -147,7 +147,7 @@ public class TestIndexedCollectionDefinition {
 						IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
 						new BigDecimal(5) });
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(Number.class, subject.getParameter().get(1));
@@ -162,7 +162,7 @@ public class TestIndexedCollectionDefinition {
 						IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
 						new Integer(5) });
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(Integer.class, subject.getParameter().get(1));
@@ -177,7 +177,7 @@ public class TestIndexedCollectionDefinition {
 						IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
 						new Integer(5) });
 		subject = def.create(keyDef);
-		assertTrue(subject instanceof ComplexIndexedCollection);
+		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(Integer.class, subject.getParameter().get(1));
@@ -204,6 +204,7 @@ public class TestIndexedCollectionDefinition {
 	@Test
 	public void testExceptionWhenToManyTypesAreDefined() {
 		thrown.expect(IllegalArgumentException.class);
+		//noinspection deprecation
 		thrown.expectMessage(JUnitMatchers
 				.containsString("cannot be more types ('3') specified than argumentes ('2')"));
 
@@ -239,14 +240,14 @@ public class TestIndexedCollectionDefinition {
 	@Test
 	public void testExceptionWhenNoConstructorCanBeFound() {
 		thrown.expect(IllegalArgumentException.class);
+		//noinspection deprecation
 		thrown.expectMessage(JUnitMatchers
 				.containsString("Cannot find any valid constructor for the definition"));
 
 		new IndexedCollectionDefinition(
 				SimpleIndexedCollection.class,
-				new Object[] {
-						null,
-						IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
-						null });
+				null,
+				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
+				null);
 	}
 }

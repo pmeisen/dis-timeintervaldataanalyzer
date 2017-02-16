@@ -93,77 +93,85 @@ public class TestDimensionHandler {
 			members = hierarchy.getMembers(level.getId());
 
 			// test the levels
-			if (level.getId().equals("*")) {
-				assertEquals("All Locations", level.getName());
-				assertEquals(1, members.size());
-				assertEquals("*", members.iterator().next().getId());
-			} else if (level.getId().equals("HOTEL")) {
-				assertEquals(level.getId(), level.getName());
-				assertEquals(4, members.size());
+			switch (level.getId()) {
+				case "*":
+					assertEquals("All Locations", level.getName());
+					assertEquals(1, members.size());
+					assertEquals("*", members.iterator().next().getId());
+					break;
+				case "HOTEL":
+					assertEquals(level.getId(), level.getName());
+					assertEquals(4, members.size());
 
-				// test the members of the level
-				for (final DescriptorMember member : members) {
-					if (member.getId().equals("DREAM")) {
-						assertEquals("Traum", member.getName());
-						assertNull(member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("*", member.getRollUpTo().iterator()
-								.next().getId());
-					} else if (member.getId().equals("STAR")) {
-						assertNull(member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("*", member.getRollUpTo().iterator()
-								.next().getId());
-					} else if (member.getId().equals("ADV")) {
-						assertEquals("TENT\\d", member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("*", member.getRollUpTo().iterator()
-								.next().getId());
-					} else if (member.getId().equals("TENT")) {
-						assertEquals("\\QTENT\\E", member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("*", member.getRollUpTo().iterator()
-								.next().getId());
-					} else {
-						fail("Invalid member found '" + member.getId() + "'.");
-					}
-				}
-			} else if (level.getId().equals("ROOMS")) {
-				assertEquals("Räume", level.getName());
-				assertEquals(3, members.size());
-
-				// test the members of the level
-				for (final DescriptorMember member : members) {
-					if (member.getId().equals("POSF")) {
-						assertEquals("POS F\\d", member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("DREAM", member.getRollUpTo().iterator()
-								.next().getId());
-					} else if (member.getId().equals("POSG")) {
-						assertEquals("POS G\\d", member.getPattern());
-						assertEquals(2, member.getRollUpTo().size());
-
-						// check the rollUpTo-Members
-						for (final DescriptorMember m : member.getRollUpTo()) {
-							if (m.getId().equals("DREAM")
-									|| m.getId().equals("STAR")) {
-								// found the right one
-							} else {
-								fail("Invalid rollUpTo-member found '"
-										+ m.getId() + "'.");
-							}
+					// test the members of the level
+					for (final DescriptorMember member : members) {
+						switch (member.getId()) {
+							case "DREAM":
+								assertEquals("Traum", member.getName());
+								assertNull(member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("*", member.getRollUpTo().iterator().next().getId());
+								break;
+							case "STAR":
+								assertNull(member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("*", member.getRollUpTo().iterator().next().getId());
+								break;
+							case "ADV":
+								assertEquals("TENT\\d", member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("*", member.getRollUpTo().iterator().next().getId());
+								break;
+							case "TENT":
+								assertEquals("\\QTENT\\E", member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("*", member.getRollUpTo().iterator().next().getId());
+								break;
+							default:
+								fail("Invalid member found '" + member.getId() + "'.");
+								break;
 						}
-					} else if (member.getId().equals("POSA")) {
-						assertEquals("POS A\\d", member.getPattern());
-						assertEquals(1, member.getRollUpTo().size());
-						assertEquals("STAR", member.getRollUpTo().iterator()
-								.next().getId());
-					} else {
-						fail("Invalid member found '" + member.getId() + "'.");
 					}
-				}
-			} else {
-				fail("Invalid level found '" + level.getId() + "'.");
+					break;
+				case "ROOMS":
+					assertEquals("RÃ¤ume", level.getName());
+					assertEquals(3, members.size());
+
+					// test the members of the level
+					for (final DescriptorMember member : members) {
+						switch (member.getId()) {
+							case "POSF":
+								assertEquals("POS F\\d", member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("DREAM", member.getRollUpTo().iterator().next().getId());
+								break;
+							case "POSG":
+								assertEquals("POS G\\d", member.getPattern());
+								assertEquals(2, member.getRollUpTo().size());
+
+								// check the rollUpTo-Members
+								for (final DescriptorMember m : member.getRollUpTo()) {
+									if (m.getId().equals("DREAM") || m.getId().equals("STAR")) {
+										// found the right one
+									} else {
+										fail("Invalid rollUpTo-member found '" + m.getId() + "'.");
+									}
+								}
+								break;
+							case "POSA":
+								assertEquals("POS A\\d", member.getPattern());
+								assertEquals(1, member.getRollUpTo().size());
+								assertEquals("STAR", member.getRollUpTo().iterator().next().getId());
+								break;
+							default:
+								fail("Invalid member found '" + member.getId() + "'.");
+								break;
+						}
+					}
+					break;
+				default:
+					fail("Invalid level found '" + level.getId() + "'.");
+					break;
 			}
 		}
 

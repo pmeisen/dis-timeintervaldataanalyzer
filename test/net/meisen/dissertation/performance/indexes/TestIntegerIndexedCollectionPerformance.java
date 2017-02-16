@@ -40,7 +40,7 @@ public class TestIntegerIndexedCollectionPerformance {
 
 		@Override
 		public Object generateId(final Object data) {
-			return ((Integer) data).intValue();
+			return data;
 		}
 	}
 
@@ -57,7 +57,7 @@ public class TestIntegerIndexedCollectionPerformance {
 		@Override
 		public Object generateData() {
 			i++;
-			return new Integer(i);
+			return i;
 		}
 	}
 

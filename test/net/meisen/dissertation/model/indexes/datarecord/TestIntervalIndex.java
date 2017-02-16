@@ -244,10 +244,8 @@ public class TestIntervalIndex extends DbBasedTest {
 			if (i > 2) {
 				assertNull(slices[i]);
 			} else {
-				assertTrue(slices[i].getClass().getName(),
-						slices[i] instanceof SliceWithDescriptors);
-				assertEquals((short) (i + 320),
-						((SliceWithDescriptors<?>) slices[i]).getId());
+				assertTrue(slices[i].getClass().getName(), slices[i] != null);
+				assertEquals((short) (i + 320), slices[i].getId());
 			}
 		}
 
@@ -609,8 +607,7 @@ public class TestIntervalIndex extends DbBasedTest {
 
 			// make sure the notExpected aren't there
 			for (final FactDescriptor<?> desc : set) {
-				assertFalse("found " + desc + " (" + set + ")",
-						notExpected.contains(desc));
+				assertFalse("found " + desc + " (" + set + ")", notExpected.contains(desc));
 			}
 		}
 	}

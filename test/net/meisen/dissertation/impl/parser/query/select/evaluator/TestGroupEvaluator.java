@@ -109,10 +109,10 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		expr.addExclusion("MALE");
 
 		group = new Group();
-		group.append(new GroupEntry<DimensionSelector>("MALE", sel));
+		group.append(new GroupEntry<>("MALE", sel));
 		assertTrue(evaluator.excludes(group, expr.getExclusions()));
 		group = new Group();
-		group.append(new GroupEntry<DimensionSelector>("FEMALE", sel));
+		group.append(new GroupEntry<>("FEMALE", sel));
 		assertFalse(evaluator.excludes(group, expr.getExclusions()));
 
 	}
@@ -235,7 +235,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		}
 
 		group = new GroupExpression("PERSON", "LOCATION");
-		group.addExclusion("P*", (String) null);
+		group.addExclusion("P*", null);
 		res = evaluator.generateGroups(group);
 		assertEquals(11, res.size());
 		for (final Group g : res) {
@@ -289,7 +289,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 5) == 0);
 		entry = res.getEntry("Philipp", null);
 		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 2) == 0);
-		entry = res.getEntry("Philipp", "Mönchengladbach");
+		entry = res.getEntry("Philipp", "MÃ¶nchengladbach");
 		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 1) == 0);
 		entry = res.getEntry("Philipp", "Aachen");
 		assertTrue(Arrays.binarySearch(entry.getBitmap().getIds(), 3) == 0);
@@ -310,15 +310,14 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 
 		// create a simple expression
 		group = new GroupExpression();
-		group.setSelectors("LOCATION", new DimensionSelector("PERSON",
-				"GENDER", "GENDER"));
+		group.setSelectors("LOCATION", new DimensionSelector("PERSON", "GENDER", "GENDER"));
 		group.addExclusion("*", "MALE");
 		assertTrue(group.isValid());
 
 		res = evaluator.evaluateGroupExpression(group);
 		assertEquals(3, res.size());
 
-		resEntry = res.getEntry("Mönchengladbach", "FEMALE");
+		resEntry = res.getEntry("MÃ¶nchengladbach", "FEMALE");
 		assertEquals(0, resEntry.getBitmap().determineCardinality());
 
 		resEntry = res.getEntry(null, "FEMALE");
@@ -329,8 +328,7 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 
 		// create an expression with no results
 		group = new GroupExpression();
-		group.setSelectors("LOCATION", new DimensionSelector("PERSON",
-				"GENDER", "GENDER"));
+		group.setSelectors("LOCATION", new DimensionSelector("PERSON", "GENDER", "GENDER"));
 		group.addExclusion("*");
 		assertTrue(group.isValid());
 

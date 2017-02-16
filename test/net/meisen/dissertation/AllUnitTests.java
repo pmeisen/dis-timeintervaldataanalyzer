@@ -7,7 +7,6 @@ import net.meisen.dissertation.config.xslt.TestXsltTidaModel;
 import net.meisen.dissertation.help.TestDb;
 import net.meisen.dissertation.impl.auth.shiro.TestMapDbAuthorizingRealm;
 import net.meisen.dissertation.impl.auth.shiro.TestShiroAuthManager;
-import net.meisen.dissertation.impl.cache.TestRecentlyUsedCachingStrategy;
 import net.meisen.dissertation.impl.cache.TestFileBitmapCache;
 import net.meisen.dissertation.impl.cache.TestFileBitmapIdCacheConfig;
 import net.meisen.dissertation.impl.cache.TestFileCaches;
@@ -19,6 +18,7 @@ import net.meisen.dissertation.impl.cache.TestMapDbBitmapCache;
 import net.meisen.dissertation.impl.cache.TestMapDbDataRecordCache;
 import net.meisen.dissertation.impl.cache.TestMemoryIdentifierCache;
 import net.meisen.dissertation.impl.cache.TestMemoryMetaDataCache;
+import net.meisen.dissertation.impl.cache.TestRecentlyUsedCachingStrategy;
 import net.meisen.dissertation.impl.dataintegration.TestPreProcessedDataRecord;
 import net.meisen.dissertation.impl.dataintegration.TestScriptPreProcessor;
 import net.meisen.dissertation.impl.dataretriever.TestCsvDataRetriever;
@@ -72,6 +72,10 @@ import net.meisen.dissertation.impl.persistence.TestZipPersistor;
 import net.meisen.dissertation.impl.time.granularity.TestTimeGranularityFactory;
 import net.meisen.dissertation.impl.time.mapper.TestDateMapper;
 import net.meisen.dissertation.impl.time.mapper.TestMapperFactory;
+import net.meisen.dissertation.jdbc.TestTidaConnection;
+import net.meisen.dissertation.jdbc.TestTidaDatabaseMetaData;
+import net.meisen.dissertation.jdbc.TestTidaDriver;
+import net.meisen.dissertation.jdbc.TestTidaResultSet;
 import net.meisen.dissertation.model.auth.permissions.TestDefinedPermission;
 import net.meisen.dissertation.model.data.TestDataModel;
 import net.meisen.dissertation.model.data.TestDataStructure;
@@ -113,183 +117,189 @@ import net.meisen.dissertation.server.TestCommunication;
 import net.meisen.dissertation.server.TestTidaServer;
 import net.meisen.dissertation.server.session.TestSession;
 import net.meisen.dissertation.server.session.TestSessionManager;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
  * All tests together as a {@link Suite}
- * 
+ *
  * @author pmeisen
- * 
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 
-		// Test the utilities
-		TestDefaultValues.class,
+        // Test the utilities
+        TestDefaultValues.class,
 
-		// Test general helper
-		TestDb.class,
+        // Test general helper
+        TestDb.class,
 
-		// Test the configuration
-		TestConfig.TestConfigSuite.class,
+        // Test the configuration
+        TestConfig.TestConfigSuite.class,
 
-		// Test persistence
-		TestGroup.class,
-		TestIdentifier.class,
-		TestBasePersistor.class,
-		TestZipPersistor.class,
+        // Test persistence
+        TestGroup.class,
+        TestIdentifier.class,
+        TestBasePersistor.class,
+        TestZipPersistor.class,
 
-		// Test indexes
-		TestCompositeIndexKey.class,
-		TestIndexKeyDefinition.class,
-		TestMapIndex.class,
-		TestIndexedCollectionDefinition.class,
-		TestNestedIndexedCollection.class,
-		TestMultipleIndexedCollection.class,
-		TestIntArrayCollection.class,
-		TestContinuousIntIndexedCollection.class,
+        // Test indexes
+        TestCompositeIndexKey.class,
+        TestIndexKeyDefinition.class,
+        TestMapIndex.class,
+        TestIndexedCollectionDefinition.class,
+        TestNestedIndexedCollection.class,
+        TestMultipleIndexedCollection.class,
+        TestIntArrayCollection.class,
+        TestContinuousIntIndexedCollection.class,
 
-		// Test the factory for the indexes
-		TestIndexFactory.TestIndexFactorySuite.class,
+        // Test the factory for the indexes
+        TestIndexFactory.TestIndexFactorySuite.class,
 
-		// Test the id factories
-		TestByteIdsFactory.class,
-		TestShortIdsFactory.class,
-		TestIntegerIdsFactory.class,
-		TestLongIdsFactory.class,
-		TestUuIdsFactory.class,
+        // Test the id factories
+        TestByteIdsFactory.class,
+        TestShortIdsFactory.class,
+        TestIntegerIdsFactory.class,
+        TestLongIdsFactory.class,
+        TestUuIdsFactory.class,
 
-		// Test the descriptors
-		TestDescriptorPrimitiveDataType.class,
-		TestDoubleDescriptor.class,
-		TestIntegerDescriptor.class,
-		TestLongDescriptor.class,
-		TestGeneralDescriptor.class,
+        // Test the descriptors
+        TestDescriptorPrimitiveDataType.class,
+        TestDoubleDescriptor.class,
+        TestIntegerDescriptor.class,
+        TestLongDescriptor.class,
+        TestGeneralDescriptor.class,
 
-		// Test the descriptorModel
-		TestDescriptorModel.class,
+        // Test the descriptorModel
+        TestDescriptorModel.class,
 
-		// Tests the formatting of dates, granularities, and the factory
-		TestDateFormat.class,
-		TestDateBasedHelper.class,
-		TestMinute.class,
-		TestTimeGranularityFactory.class,
+        // Tests the formatting of dates, granularities, and the factory
+        TestDateFormat.class,
+        TestDateBasedHelper.class,
+        TestMinute.class,
+        TestTimeGranularityFactory.class,
 
-		// Test the normalizer, the timeline and the mapper
-		TestDateNormalizer.class,
-		TestTimelineDefinition.class,
-		TestDateMapper.class,
+        // Test the normalizer, the timeline and the mapper
+        TestDateNormalizer.class,
+        TestTimelineDefinition.class,
+        TestDateMapper.class,
 
-		// Test the time factory
-		TestBaseMapperFactory.class,
-		TestMapperFactory.TestMapperFactorySuite.class,
+        // Test the time factory
+        TestBaseMapperFactory.class,
+        TestMapperFactory.TestMapperFactorySuite.class,
 
-		// Test the dataRetrievers
-		TestDataCollection.class,
-		TestDataRecord.class,
-		TestPreProcessedDataRecord.class,
-		TestDbDataRetriever.class,
-		TestCsvDataRetriever.class,
-		TestFixedStructureDataRetriever.class,
+        // Test the dataRetrievers
+        TestDataCollection.class,
+        TestDataRecord.class,
+        TestPreProcessedDataRecord.class,
+        TestDbDataRetriever.class,
+        TestCsvDataRetriever.class,
+        TestFixedStructureDataRetriever.class,
 
-		// Test the preProcessors
-		TestScriptPreProcessor.class,
+        // Test the preProcessors
+        TestScriptPreProcessor.class,
 
-		// Test the dataSets
-		TestSingleStaticDataSet.class,
-		TestDataRetrieverDataSet.class,
-		TestMultipleDataSetIterator.class,
+        // Test the dataSets
+        TestSingleStaticDataSet.class,
+        TestDataRetrieverDataSet.class,
+        TestMultipleDataSetIterator.class,
 
-		// Test the different created instances
-		TestDataStructure.class,
-		TestMetaDataModel.class,
-		TestDataModel.class,
+        // Test the different created instances
+        TestDataStructure.class,
+        TestMetaDataModel.class,
+        TestDataModel.class,
 
-		// Test the xsd and xslt
-		TestXsdTidaModel.class,
-		TestXsltTidaModel.class,
+        // Test the xsd and xslt
+        TestXsdTidaModel.class,
+        TestXsltTidaModel.class,
 
-		// Test some bitmap implementations
-		TestBitmapId.class,
-		TestEWAHBitmap.class,
-		TestRoaringBitmap.class,
+        // Test some bitmap implementations
+        TestBitmapId.class,
+        TestEWAHBitmap.class,
+        TestRoaringBitmap.class,
 
-		// Test the handler
-		TestTidaModelHandler.class,
+        // Test the handler
+        TestTidaModelHandler.class,
 
-		// Test the record pre-processing
-		TestProcessedDataRecord.class,
+        // Test the record pre-processing
+        TestProcessedDataRecord.class,
 
-		// Test the caches
-		TestMemoryMetaDataCache.class,
-		TestFileMetaDataCache.class,
-		TestMemoryIdentifierCache.class,
-		TestFileIdentifierCache.class,
-		TestFileBitmapIdCacheConfig.class,
-		TestRecentlyUsedCachingStrategy.class,
-		TestFileBitmapCache.class,
-		TestFileFactDescriptorModelSetCache.class,
-		TestFileCaches.TestFileCachesSuite.class,
-		TestMapDbBitmapCache.class,
-		TestMapDbDataRecordCache.class,
-		TestIdsOnlyDataRecordCache.class,
+        // Test the caches
+        TestMemoryMetaDataCache.class,
+        TestFileMetaDataCache.class,
+        TestMemoryIdentifierCache.class,
+        TestFileIdentifierCache.class,
+        TestFileBitmapIdCacheConfig.class,
+        TestRecentlyUsedCachingStrategy.class,
+        TestFileBitmapCache.class,
+        TestFileFactDescriptorModelSetCache.class,
+        TestFileCaches.TestFileCachesSuite.class,
+        TestMapDbBitmapCache.class,
+        TestMapDbDataRecordCache.class,
+        TestIdsOnlyDataRecordCache.class,
 
-		// Test the index for facts
-		TestFactDescriptorSet.class,
-		TestFactDescriptorModelSet.class,
+        // Test the index for facts
+        TestFactDescriptorSet.class,
+        TestFactDescriptorModelSet.class,
 
-		// Test the tida-indexes
-		TestMetaIndexDimension.class,
-		TestMetaIndex.class,
-		TestIntervalIndex.class,
-		TestDataRecordIndex.class,
-		TestTidaIndex.class,
+        // Test the tida-indexes
+        TestMetaIndexDimension.class,
+        TestMetaIndex.class,
+        TestIntervalIndex.class,
+        TestDataRecordIndex.class,
+        TestTidaIndex.class,
 
-		// Test the fact-holder
-		TestMapFactsArrayBased.class,
-		TestMapFactsDescriptorBased.class,
+        // Test the fact-holder
+        TestMapFactsArrayBased.class,
+        TestMapFactsDescriptorBased.class,
 
-		// Test the query
-		TestDescriptorValue.class, TestDescriptorComperator.class,
-		TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
-		TestGroupEvaluator.class, TestAliveQueries.class,
-		TestLoadQueries.class,
-		TestUnloadQueries.class,
-		TestSelectQueries.class,
-		TestInsertQueries.class,
-		TestAddQueries.class,
-		TestDropQueries.class,
-		TestModifyQueries.class,
-		TestGrantQueries.class,
-		TestRevokeQueries.class,
-		TestAssignQueries.class,
-		TestRemoveQueries.class,
-		TestGetQueries.class,
-		TestDeleteQueries.class,
+        // Test the query
+        TestDescriptorValue.class, TestDescriptorComperator.class,
+        TestGroupExpression.class, TestDescriptorLogicEvaluator.class,
+        TestGroupEvaluator.class, TestAliveQueries.class,
+        TestLoadQueries.class,
+        TestUnloadQueries.class,
+        TestSelectQueries.class,
+        TestInsertQueries.class,
+        TestAddQueries.class,
+        TestDropQueries.class,
+        TestModifyQueries.class,
+        TestGrantQueries.class,
+        TestRevokeQueries.class,
+        TestAssignQueries.class,
+        TestRemoveQueries.class,
+        TestGetQueries.class,
+        TestDeleteQueries.class,
 
-		// Test authentication manager
-		TestDefinedPermission.class,
-		TestMapDbAuthorizingRealm.class,
-		TestShiroAuthManager.class,
+        // Test authentication manager
+        TestDefinedPermission.class,
+        TestMapDbAuthorizingRealm.class,
+        TestShiroAuthManager.class,
 
-		// Tests dimensions
-		TestDescriptorDimension.class, TestDescriptorGraph.class,
-		TestDays.class, TestMinutes.class,
-		TestTimeLevelTemplateManager.TestTimeLevelTemplateManagerSuite.class,
-		TestTimeGraph.class, TestTimeGraphMemberIndex.class,
-		TestDimensionHandler.class,
+        // Tests dimensions
+        TestDescriptorDimension.class, TestDescriptorGraph.class,
+        TestDays.class, TestMinutes.class,
+        TestTimeLevelTemplateManager.TestTimeLevelTemplateManagerSuite.class,
+        TestTimeGraph.class, TestTimeGraphMemberIndex.class,
+        TestDimensionHandler.class,
 
-		// Test the session management
-		TestSession.class, TestSessionManager.TestSessionManagerSuite.class,
+        // Test the session management
+        TestSession.class, TestSessionManager.TestSessionManagerSuite.class,
 
-		// Test the server
-		TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,
-		TestAuthServlet.class,
+        // Test the server
+        TestTidaServer.class, TestCommunication.TestCommunicationSuite.class,
+        TestAuthServlet.class,
 
-		// Tests re-running the server
-		TestTidaModelHandlerPersistency.class })
+        // Tests re-running the server
+        TestTidaModelHandlerPersistency.class,
+
+        // JDBC related tests
+        TestTidaDriver.class,
+        TestTidaConnection.class,
+        TestTidaResultSet.class,
+        TestTidaDatabaseMetaData.TestTidaDatabaseMetaDataSuite.class,
+        TestCommunication.class
+})
 public class AllUnitTests {
 
 }

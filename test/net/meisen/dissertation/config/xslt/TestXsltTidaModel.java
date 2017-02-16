@@ -79,6 +79,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
  * @author pmeisen
  * 
  */
+@SuppressWarnings("deprecation")
 @ContextClass(TidaConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
 public class TestXsltTidaModel extends ModuleAndDbBasedTest {
@@ -269,8 +270,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testInvalidDataRetriever() {
 		thrown.expect(DbDataRetrieverException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("Unable to retrieve a new connection to the specified database"));
+		thrown.expectMessage(JUnitMatchers.containsString("Unable to retrieve a new connection to the specified database"));
 
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetriever.xml");
 	}
@@ -351,8 +351,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testStructureWithoutBinding() {
 		thrown.expect(RuntimeException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("xslt could not transform"));
+		thrown.expectMessage(JUnitMatchers.containsString("xslt could not transform"));
 
 		getDataStructure("/net/meisen/dissertation/config/xslt/invalidStructureWithoutBinding.xml");
 	}
@@ -457,7 +456,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertNull(model.getDataRetriever("another_id"));
 
 		// get the expected
-		final Set<Integer> expected = new HashSet<Integer>();
+		final Set<Integer> expected = new HashSet<>();
 		for (int i = 1; i <= 10000; i = i == 9 ? 9991 : i + 1) {
 			expected.add(i);
 		}
@@ -491,8 +490,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertEquals(Classes.getClass(DefaultValues.getDefaultGranularity()),
 				def.getGranularity().getClass());
 		assertEquals(now.getTime(), def.<Date> getStart().getTime(), 1000);
-		assertEquals(DateFormat.YEAR.modify(now, 1).getTime(), def
-				.<Date> getEnd().getTime(), 1000);
+		assertEquals(DateFormat.YEAR.modify(now, 1).getTime(), def.<Date> getEnd().getTime(), 1000);
 	}
 
 	/**
@@ -524,8 +522,8 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertEquals(Long.class, def.getType());
 		assertEquals(DefaultValues.getDefaultGranularity(), def
 				.getGranularity().getClass().getName());
-		assertEquals(1500l, def.getStart());
-		assertEquals(10000l, def.getEnd());
+		assertEquals(Long.valueOf(1500L), def.getStart());
+		assertEquals(Long.valueOf(10000L), def.getEnd());
 	}
 
 	/**
@@ -643,7 +641,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		assertEquals(13, des.size());
 
 		// check all the created identifiers of the integers
-		final Set<UUID> uuids = new HashSet<UUID>();
+		final Set<UUID> uuids = new HashSet<>();
 		for (final Descriptor<?, ?, ?> r : des) {
 			if (!m.getDescriptorModel(r.getModelId()).getIdClass()
 					.equals(UuIdsFactory.class)) {
@@ -658,9 +656,9 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 		// check all the created identifiers of the descriptors
 		des = m.getDescriptorsByClass(ListDescriptor.class);
 		assertEquals(3, des.size());
-		final Set<String> expectedValues = new HashSet<String>(Arrays.asList(
+		final Set<String> expectedValues = new HashSet<>(Arrays.asList(
 				"A", "B", "C", "D", "E", "F", "G", "H", "I"));
-		final Set<Long> longids = new HashSet<Long>();
+		final Set<Long> longids = new HashSet<>();
 		for (final Descriptor<?, ?, ?> d : des) {
 			assertTrue(d.getId().getClass().getName(),
 					d.getId() instanceof Long);

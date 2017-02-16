@@ -1,13 +1,5 @@
 package net.meisen.dissertation.model.time;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.text.ParseException;
-import java.util.Date;
-
-import net.meisen.dissertation.model.time.DateNormalizer;
 import net.meisen.dissertation.model.time.DateNormalizer.RoundType;
 import net.meisen.dissertation.model.time.granularity.Day;
 import net.meisen.dissertation.model.time.granularity.DeciSecond;
@@ -24,8 +16,14 @@ import net.meisen.dissertation.model.time.granularity.Week;
 import net.meisen.dissertation.model.time.granularity.YoctoSecond;
 import net.meisen.dissertation.model.time.granularity.ZeptoSecond;
 import net.meisen.general.genmisc.types.Dates;
-
 import org.junit.Test;
+
+import java.text.ParseException;
+import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the implementation of {@code HierarchyOfTime}.
@@ -142,7 +140,7 @@ public class TestDateNormalizer {
 		assertEquals(1.0 / 1000000000000000.0, m, 0.0);
 
 		m = n.getMultiplier(Week.instance(), YoctoSecond.instance());
-		assertEquals(6.048 * 100000000000000000000000000000.0, m, 0.0);
+		assertEquals(6.048 * 100000000000000000000000000000.0, m, 0.00000001);
 	}
 
 	/**

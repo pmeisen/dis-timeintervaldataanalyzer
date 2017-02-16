@@ -94,7 +94,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * <td height="20">03.03.2014 00:00</td>
  * <td>03.03.2014 16:19</td>
  * <td>Philipp</td>
- * <td>Mönchengladbach</td>
+ * <td>MÃ¶nchengladbach</td>
  * <td>3</td>
  * <td>2</td>
  * </tr>
@@ -291,8 +291,8 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertNotNull(interval);
 		assertTrue(interval.getStart() instanceof Long);
 
-		assertEquals(new Long(500), interval.getStart());
-		assertEquals(new Long(600), interval.getEnd());
+		assertEquals(500L, interval.getStart());
+		assertEquals(600L, interval.getEnd());
 		assertEquals(IntervalType.EXCLUDE, interval.getOpenType());
 		assertEquals(IntervalType.EXCLUDE, interval.getCloseType());
 	}
@@ -1260,7 +1260,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1279,8 +1279,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
-				null);
+		final SelectResult res = factory.evaluateQuery(q(query), null);
 
 		// check the result's filter
 		final int[] filterRes = res.getFilterResult().getBitmap().getIds();
@@ -1305,7 +1304,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1332,7 +1331,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1359,7 +1358,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1385,7 +1384,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1411,7 +1410,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1437,7 +1436,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1457,7 +1456,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1480,7 +1479,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1499,7 +1498,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1524,7 +1523,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1532,16 +1531,16 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertNotNull(gRes);
 		assertEquals(12, gRes.size());
 		assertNotNull(gRes.getEntry("Aachen", "Philipp"));
-		assertNotNull(gRes.getEntry("Mönchengladbach", "Philipp"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach", "Philipp"));
 		assertNotNull(gRes.getEntry("Undefined", "Philipp"));
 		assertNotNull(gRes.getEntry("Aachen", "Debbie"));
-		assertNotNull(gRes.getEntry("Mönchengladbach", "Debbie"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach", "Debbie"));
 		assertNotNull(gRes.getEntry("Undefined", "Debbie"));
 		assertNotNull(gRes.getEntry("Aachen", "Tobias"));
-		assertNotNull(gRes.getEntry("Mönchengladbach", "Tobias"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach", "Tobias"));
 		assertNotNull(gRes.getEntry("Undefined", "Tobias"));
 		assertNotNull(gRes.getEntry("Aachen", "Edison"));
-		assertNotNull(gRes.getEntry("Mönchengladbach", "Edison"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach", "Edison"));
 		assertNotNull(gRes.getEntry("Undefined", "Edison"));
 	}
 
@@ -1557,7 +1556,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1580,7 +1579,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1603,7 +1602,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1626,7 +1625,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResult res = (SelectResult) factory.evaluateQuery(q(query),
+		final SelectResult res = factory.evaluateQuery(q(query),
 				null);
 
 		// check the result's filter
@@ -1709,22 +1708,22 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// 1. fire and check the query (excluding null)
 		String query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION exclude {(NULL)}";
-		SelectResult res = (SelectResult) factory.evaluateQuery(q(query), null);
+		SelectResult res = factory.evaluateQuery(q(query), null);
 		GroupResult gRes = res.getGroupResult();
 		assertNotNull(gRes);
 		assertEquals(2, gRes.size());
-		assertNotNull(gRes.getEntry("Mönchengladbach"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach"));
 		assertNotNull(gRes.getEntry("Aachen"));
 
 		// 2. fire and check the query (including null)
 		query = "select timeseries from testPersonModel in [03.03.2014,05.03.2014) group by LOCATION ";
-		res = (SelectResult) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		gRes = res.getGroupResult();
 		assertNotNull(gRes);
 		assertEquals(3, gRes.size());
 		assertNotNull(gRes.getEntry((String) null));
 		assertEquals(2, gRes.getEntry((String) null).getBitmap().getIds()[0]);
-		assertNotNull(gRes.getEntry("Mönchengladbach"));
+		assertNotNull(gRes.getEntry("MÃ¶nchengladbach"));
 		assertNotNull(gRes.getEntry("Aachen"));
 	}
 
@@ -1841,7 +1840,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
@@ -1872,12 +1871,12 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.size());
 
-		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
+		final TimeSeries tsMg = tsRes.getSeries("MÃ¶nchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
 		assertEquals(0.0, tsMg.getValue(2), 0.0);
@@ -1908,13 +1907,13 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.size());
 
 		final TimeSeries tsMg = tsRes
-				.getSeries("Mönchengladbach, Edison (SCREAMS)");
+				.getSeries("MÃ¶nchengladbach, Edison (SCREAMS)");
 		assertEquals(Double.NaN, tsMg.getValue(0), 0.0);
 		assertEquals(Double.NaN, tsMg.getValue(1), 0.0);
 		assertEquals(Double.NaN, tsMg.getValue(2), 0.0);
@@ -1946,11 +1945,11 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 
-		final TimeSeries tsMg = tsRes.getSeries("Mönchengladbach (SCREAMS)");
+		final TimeSeries tsMg = tsRes.getSeries("MÃ¶nchengladbach (SCREAMS)");
 		assertEquals(3.0, tsMg.getValue(0), 0.0);
 		assertEquals(3.0, tsMg.getValue(1), 0.0);
 		assertEquals(0.0, tsMg.getValue(2), 0.0);
@@ -1979,7 +1978,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(2, tsRes.amountOfSeries());
@@ -2021,7 +2020,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
@@ -2145,7 +2144,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
@@ -2183,7 +2182,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(3, tsRes.amountOfSeries());
@@ -2221,7 +2220,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
@@ -2269,7 +2268,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		assertEquals(4, tsRes.amountOfSeries());
@@ -2572,7 +2571,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 
@@ -2615,7 +2614,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query
-		final SelectResultTimeSeries res = (SelectResultTimeSeries) factory
+		final SelectResultTimeSeries res = factory
 				.evaluateQuery(q(query), null);
 		final TimeSeriesCollection tsRes = res.getTimeSeriesResult();
 		int counter = 0;
@@ -2645,7 +2644,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -2667,13 +2666,13 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		query = q("select RECORDS from testPersonModel WHERE [ID] = 2");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 
 		query = q("select RECORDS from testPersonModel WHERE [ID] = 4 , 0,1,  8");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(3, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2681,12 +2680,12 @@ public class TestSelectQueries extends LoaderBasedTest {
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 
 		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 2");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		query = q("select RECORDS from testPersonModel WITHIN [03.03.2014, 03.03.2014 02:32:00] WHERE [ID] = 0");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2704,7 +2703,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -2729,7 +2728,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -2753,19 +2752,19 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check a startingWith-query outside the start- & end-range
 		query = q("select RECORDS from testPersonModel startingWith [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a startingWith-query outside the start-range
 		query = q("select RECORDS from testPersonModel startingWith [01.03.2014, 03.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a startingWith-query with an exact start
 		query = q("select RECORDS from testPersonModel startingWith [03.03.2014 00:00:00, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2775,7 +2774,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check another startingWith-query with an exact start
 		query = q("select RECORDS from testPersonModel startingWith [03.03.2014 16:20:00, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
@@ -2796,19 +2795,19 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check a finishingWith-query outside the start- & end-range
 		query = q("select RECORDS from testPersonModel finishingWith [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a finishingWith-query outside the end-range
 		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a finishingWith-query outside the end-range
 		query = q("select RECORDS from testPersonModel finishingWith [01.03.2014, 04.03.2014 23:59:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2832,26 +2831,26 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check a during-query outside the start-range
 		query = q("select RECORDS from testPersonModel during [01.03.2014, 02.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a during-query outside the end-range
 		query = q("select RECORDS from testPersonModel during [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check a during-query with end outside
 		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 03.03.2014 17:30:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 
 		// check a during-query outside the end
 		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 05.03.2020 00:00:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
@@ -2859,26 +2858,26 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check a during-query exactly on the end
 		query = q("select RECORDS from testPersonModel during [03.03.2014 16:19:00, 04.03.2014 23:59:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 
 		// check a during-query with complete range
 		query = q("select RECORDS from testPersonModel during (01.03.2014 16:17:20, 20.03.2014 16:30:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(6, ids.length);
 
 		// check a during-query with edge-timewindow's range
 		query = q("select RECORDS from testPersonModel during [02.03.2014 00:00:00, 05.03.2014 00:00:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(6, ids.length);
 
 		// check a during-query with edge-timewindow's range
 		query = q("select RECORDS from testPersonModel during [03.03.2014 00:00:00, 05.03.2014 00:00:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
@@ -2900,26 +2899,26 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an before-query outside the start-range
 		query = q("select RECORDS from testPersonModel before [01.03.2014, 02.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an before-query outside the end-range
 		query = q("select RECORDS from testPersonModel before [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(6, ids.length);
 
 		// check an before-query
 		query = q("select RECORDS from testPersonModel before (03.03.2014 16:19:00, 03.03.2014 16:30:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 
 		// check an before-query
 		query = q("select RECORDS from testPersonModel before (03.03.2014 17:22:00, 30.03.2014 16:30:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
@@ -2941,19 +2940,19 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an containing-query outside the start-range
 		query = q("select RECORDS from testPersonModel containing [01.03.2014, 02.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an containing-query outside the end-range
 		query = q("select RECORDS from testPersonModel Containing [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an containing-query selecting some values
 		query = q("select RECORDS from testPersonModel Containing [03.03.2014 16:19:00, 04.03.2014 23:59:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(3, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2962,7 +2961,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an containing-query on the edge of an interval
 		query = q("select RECORDS from testPersonModel Containing (03.03.2014 17:22:00, 03.03.2014 17:23:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -2986,37 +2985,37 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an overlapping-query outside the start- and end-range
 		query = q("select RECORDS from testPersonModel overlapping [01.01.2014, 24.12.2014)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an overlapping-query using the whole range
 		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 05.03.2014)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an overlapping-query at the edge at the start
 		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 01.03.2014]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an overlapping-query at the edge at the end
 		query = q("select RECORDS from testPersonModel overlapping [04.03.2014 23:59:00, 05.03.2014)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an overlapping-query with just one point
 		query = q("select RECORDS from testPersonModel overlapping [04.03.2014 23:58:00, 04.03.2014 23:58:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// overlapping at start and end
 		query = q("select RECORDS from testPersonModel overlapping [03.03.2014 16:15:00, 05.03.2014]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -3026,7 +3025,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// overlapping at the end of the time-window
 		query = q("select RECORDS from testPersonModel overlapping [01.03.2014, 03.03.2014 17:10:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(4, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -3036,7 +3035,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// overlapping at the start of the time-window
 		query = q("select RECORDS from testPersonModel overlapping [03.03.2014 16:15:00, 03.03.2014 17:10:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
@@ -3058,26 +3057,26 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// checking meeting the start-edge of time-line
 		query = q("select RECORDS from testPersonModel meeting [03.03.2014 00:00:00, 03.03.2014 00:00:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// checking meeting the end-edge of time-line
 		query = q("select RECORDS from testPersonModel meeting [04.03.2014 23:59:00, 04.03.2014 23:59:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// checking meeting one interval
 		query = q("select RECORDS from testPersonModel meeting [03.03.2014 17:20:00, 03.03.2014 17:21:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 
 		// checking meeting specific points
 		query = q("select RECORDS from testPersonModel meeting [03.03.2014 16:20:00, 03.03.2014 17:21:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
@@ -3099,26 +3098,26 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an after-query outside the start-range
 		query = q("select RECORDS from testPersonModel after [01.03.2014, 02.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(6, ids.length);
 
 		// check an after-query outside the end-range
 		query = q("select RECORDS from testPersonModel after [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an after-query
 		query = q("select RECORDS from testPersonModel after [01.03.2014, 03.03.2014 16:20:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 3) > -1);
 
 		// check an after-query
 		query = q("select RECORDS from testPersonModel after [01.03.2014, 03.03.2014 16:19:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(2, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
@@ -3141,49 +3140,49 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// check an equalTo-query outside the end-range
 		query = q("select RECORDS from testPersonModel equalTo [05.03.2014, 05.03.2014 02:32:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an equalTo-query outside the start-range
 		query = q("select RECORDS from testPersonModel equalTo [01.01.2014, 20.01.2014 08:07:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an equalTo-query selecting one value
 		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 03.03.2014 16:19:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 
 		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 03.03.2014 16:20:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 1) > -1);
 
 		query = q("select RECORDS from testPersonModel equalTo (03.03.2014 16:19:00, 03.03.2014 17:22:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(1, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 2) > -1);
 
 		query = q("select RECORDS from testPersonModel equalTo (03.03.2014 16:19:00, 03.03.2014 17:22:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an eqaulTo-query with exceeded end
 		query = q("select RECORDS from testPersonModel equalTo [01.03.2014 00:00:00, 28.03.2014 16:20:00)");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(0, ids.length);
 
 		// check an eqaulTo-query bound by the time-line
 		query = q("select RECORDS from testPersonModel equalTo [03.03.2014 00:00:00, 04.03.2014 23:59:00]");
-		result = (SelectResultRecords) factory.evaluateQuery(query, null);
+		result = factory.evaluateQuery(query, null);
 		ids = result.getSelectedRecords().getIds();
 		assertEquals(3, ids.length);
 		assertTrue(Arrays.binarySearch(ids, 0) > -1);
@@ -3203,7 +3202,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -3224,7 +3223,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -3253,7 +3252,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select RECORDS from testPersonModel where LOCATION.GEO.CONTINENT='EUROPE'";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		records = res.getSelectedRecords();
 		ids = records.getIds();
 
@@ -3267,7 +3266,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='FEMALE'";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		records = res.getSelectedRecords();
 		ids = records.getIds();
 
@@ -3277,7 +3276,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select RECORDS from testPersonModel where LOCATION.GEO.CONTINENT='*'";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		records = res.getSelectedRecords();
 		ids = records.getIds();
 
@@ -3292,7 +3291,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='FEMALE' OR (PERSON='Philipp' AND NOT LOCATION='Aachen')";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		records = res.getSelectedRecords();
 		ids = records.getIds();
 
@@ -3304,7 +3303,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select RECORDS from testPersonModel where PERSON.GENDER.GENDER='MALE' AND PERSON='Tobias'";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		records = res.getSelectedRecords();
 		ids = records.getIds();
 
@@ -3329,62 +3328,62 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// use a filter and see if it's applied, there are 3 philipp records
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2, 5";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(1, res.count());
 		assertRecords(res.iterator(), new int[] { 3 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 1, 2";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(2, res.count());
 		assertRecords(res.iterator(), new int[] { 2, 3 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2, 5";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(1, res.count());
 		assertRecords(res.iterator(), new int[] { 3 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 4,1";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(0, res.count());
 		assertRecords(res.iterator(), new int[] {});
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 3, 1";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(0, res.count());
 		assertRecords(res.iterator(), new int[] {});
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 1, 1";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(1, res.count());
 		assertRecords(res.iterator(), new int[] { 2 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 0";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(3, res.count());
 		assertRecords(res.iterator(), new int[] { 1, 2, 3 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 2";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(1, res.count());
 		assertRecords(res.iterator(), new int[] { 3 });
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 3";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(0, res.count());
 		assertRecords(res.iterator(), new int[] {});
 
 		query = "select RECORDS from testPersonModel where PERSON='Philipp' limit 4";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(0, res.count());
 		assertRecords(res.iterator(), new int[] {});
 
 		query = "select RECORDS from testPersonModel where LOCATION='Aachen' limit 0, 2";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(2, res.count());
 		assertRecords(res.iterator(), new int[] { 0, 3 });
 
 		query = "select RECORDS from testPersonModel where LOCATION='Aachen' limit 3, 2";
-		res = (SelectResultRecords) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		assertEquals(1, res.count());
 		assertRecords(res.iterator(), new int[] { 5 });
 	}
@@ -3431,7 +3430,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 
 		// fire the query and get the result
 		query = "select TIMESERIES of count(PERSON) as CNT from testPersonModel IN [03.03.2014 16:19:00, 03.03.2014 16:20:00] where LOCATION.GEO.CONTINENT='UNKNOWN' OR PERSON='Tobias'";
-		res = (SelectResultTimeSeries) factory.evaluateQuery(q(query), null);
+		res = factory.evaluateQuery(q(query), null);
 		ts = res.getTimeSeriesResult().getSeries("CNT");
 		assertEquals(2, ts.size());
 		assertEquals(1.0, ts.getValue(0), 0.0);
@@ -3450,7 +3449,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 		final Bitmap records = res.getSelectedRecords();
 		final int[] ids = records.getIds();
@@ -3481,7 +3480,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 
 		/*
@@ -3556,13 +3555,13 @@ public class TestSelectQueries extends LoaderBasedTest {
 				"^tmpSelectQueriesRecordRetrieval\\-.*$");
 
 		final String xml = "/net/meisen/dissertation/impl/parser/query/testRecordRetrieval.xml";
-		final String query = "select IDS(RECORDS) from selectQueriesRecordRetrieval filter by PERSON='Tobias' OR LOCATION='Mönchengladbach'";
+		final String query = "select IDS(RECORDS) from selectQueriesRecordRetrieval filter by PERSON='Tobias' OR LOCATION='MÃ¶nchengladbach'";
 
 		// load the model
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 
 		/*
@@ -3617,7 +3616,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 
 		/*
@@ -3668,7 +3667,7 @@ public class TestSelectQueries extends LoaderBasedTest {
 		m(xml);
 
 		// fire the query and get the result
-		final SelectResultRecords res = (SelectResultRecords) factory
+		final SelectResultRecords res = factory
 				.evaluateQuery(q(query), null);
 
 		Iterator<Object[]> it = res.iterator();
@@ -3681,54 +3680,54 @@ public class TestSelectQueries extends LoaderBasedTest {
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(0, rec[3]);
-				assertEquals("Aachen", rec[4]);
-				assertEquals("Tobias", rec[5]);
+				assertEquals("Aachen", rec[3]);
+				assertEquals("Tobias", rec[4]);
+				assertEquals(0, rec[5]);
 				break;
 			case 1:
 				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("03.03.2014 16:19:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(3, rec[3]);
-				assertEquals("Mönchengladbach", rec[4]);
-				assertEquals("Philipp", rec[5]);
+				assertEquals("MÃ¶nchengladbach", rec[3]);
+				assertEquals("Philipp", rec[4]);
+				assertEquals(3, rec[5]);
 				break;
 			case 2:
 				assertEquals(Dates.parseDate("03.03.2014 16:20:00",
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("03.03.2014 17:21:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(0, rec[3]);
-				assertEquals("Undefined", rec[4]);
-				assertEquals("Philipp", rec[5]);
+				assertEquals("Undefined", rec[3]);
+				assertEquals("Philipp", rec[4]);
+				assertEquals(0, rec[5]);
 				break;
 			case 3:
 				assertEquals(Dates.parseDate("03.03.2014 17:22:00",
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(0, rec[3]);
-				assertEquals("Aachen", rec[4]);
-				assertEquals("Philipp", rec[5]);
+				assertEquals("Aachen", rec[3]);
+				assertEquals("Philipp", rec[4]);
+				assertEquals(0, rec[5]);
 				break;
 			case 4:
 				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(0, rec[3]);
-				assertEquals("Aachen", rec[4]);
-				assertEquals("Debbie", rec[5]);
+				assertEquals("Aachen", rec[3]);
+				assertEquals("Debbie", rec[4]);
+				assertEquals(0, rec[5]);
 				break;
 			case 5:
 				assertEquals(Dates.parseDate("03.03.2014 00:00:00",
 						"dd.MM.yyyy HH:m:ss"), rec[1]);
 				assertEquals(Dates.parseDate("04.03.2014 23:59:00",
 						"dd.MM.yyyy HH:m:ss"), rec[2]);
-				assertEquals(12, rec[3]);
-				assertEquals("Aachen", rec[4]);
-				assertEquals("Edison", rec[5]);
+				assertEquals("Aachen", rec[3]);
+				assertEquals("Edison", rec[4]);
+				assertEquals(12, rec[5]);
 				break;
 			default:
 				fail("Invalid amount of records: " + Arrays.asList(rec));

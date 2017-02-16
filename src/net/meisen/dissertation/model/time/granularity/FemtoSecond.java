@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-15 seconds
+ * 10^-15Â seconds
  */
 public class FemtoSecond implements ISecondBasedGranularity {
 	private static final FemtoSecond instance = new FemtoSecond();

@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-6 seconds
+ * 10^-6Â seconds
  */
 public class MicroSecond implements ISecondBasedGranularity {
 	private static final MicroSecond instance = new MicroSecond();

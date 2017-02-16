@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-21 seconds
+ * 10^-21Â seconds
  */
 public class ZeptoSecond implements ISecondBasedGranularity {
 	private static final ZeptoSecond instance = new ZeptoSecond();

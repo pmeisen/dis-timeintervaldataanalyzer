@@ -189,10 +189,8 @@ public class TestCommunication {
 		@Test
 		public void testMultiThreadedUsage() throws SQLException {
 			runMultiThreadUsage("testCommunicationModel", 100, 100, 100, 100);
-			runMultiThreadUsage("testCommunicationModelWithFileCache", 100, 50,
-					50, 10);
-			runMultiThreadUsage("testCommunicationModelWithMapDbCache", 70, 50,
-					30, 10);
+			runMultiThreadUsage("testCommunicationModelWithFileCache", 100, 50, 50, 10);
+			runMultiThreadUsage("testCommunicationModelWithMapDbCache", 70, 50, 30, 10);
 		}
 
 		/**

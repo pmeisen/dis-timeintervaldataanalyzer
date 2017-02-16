@@ -15,6 +15,7 @@ import org.junit.Test;
  * @author pmeisen
  * 
  */
+@SuppressWarnings({"EqualsWithItself", "ObjectEqualsNull"})
 public class TestGroup {
 
 	/**

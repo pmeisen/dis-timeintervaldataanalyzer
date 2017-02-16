@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-12 seconds
+ * 10^-12Â seconds
  */
 public class PicoSecond implements ISecondBasedGranularity {
 	private static final PicoSecond instance = new PicoSecond();

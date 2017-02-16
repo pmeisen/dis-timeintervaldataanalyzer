@@ -38,7 +38,7 @@ public class Group implements Iterable<Group> {
 	 */
 	public Group(final String... items) {
 		// validate the selected items
-		validate(this.items);
+		validate(items);
 
 		this.items = items == null ? new String[0] : items;
 	}
@@ -67,12 +67,12 @@ public class Group implements Iterable<Group> {
 			return;
 		} else {
 			for (final String item : items) {
-				if (!item.matches(VALIDATION_EXPR)) {
+				if (item == null) {
+					throw new IllegalArgumentException("A group cannot be null.");
+				} else if (!"".equals(item) && !item.matches(VALIDATION_EXPR)) {
 					throw new IllegalArgumentException(
-							"The group '"
-									+ item
-									+ "' is invalid considering the validation expression '"
-									+ VALIDATION_EXPR + "'.");
+							"The group '" + item + "' is invalid considering the validation expression '" +
+									VALIDATION_EXPR + "'.");
 				}
 			}
 		}

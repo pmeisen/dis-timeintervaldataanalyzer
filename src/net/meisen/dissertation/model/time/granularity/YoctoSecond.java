@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 10^-24 seconds
+ * 10^-24Â seconds
  */
 public class YoctoSecond implements ISecondBasedGranularity {
 	private static final YoctoSecond instance = new YoctoSecond();

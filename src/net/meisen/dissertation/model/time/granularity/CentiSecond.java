@@ -1,7 +1,7 @@
 package net.meisen.dissertation.model.time.granularity;
 
 /**
- * 0.01 seconds
+ * 0.01 seconds
  */
 public class CentiSecond implements ISecondBasedGranularity {
 	private static final CentiSecond instance = new CentiSecond();
