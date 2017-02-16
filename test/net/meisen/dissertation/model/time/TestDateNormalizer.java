@@ -140,7 +140,7 @@ public class TestDateNormalizer {
 		assertEquals(1.0 / 1000000000000000.0, m, 0.0);
 
 		m = n.getMultiplier(Week.instance(), YoctoSecond.instance());
-		assertEquals(6.048 * 100000000000000000000000000000.0, m, 0.00000001);
+		assertEquals(604800000000000000000000000000.0, m, 1000000000000000.0);
 	}
 
 	/**

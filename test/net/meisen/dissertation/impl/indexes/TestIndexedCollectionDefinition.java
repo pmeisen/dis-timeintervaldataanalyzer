@@ -1,20 +1,19 @@
 package net.meisen.dissertation.impl.indexes;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.math.BigDecimal;
-
 import net.meisen.dissertation.impl.indexes.mock.ComplexIndexedCollection;
 import net.meisen.dissertation.impl.indexes.mock.SimpleIndexedCollection;
 import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.rules.ExpectedException;
+
+import java.math.BigDecimal;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests the implementation of a {@code IndexedCollectionDefinition}.
@@ -61,8 +60,7 @@ public class TestIndexedCollectionDefinition {
 	 */
 	@Test
 	public void testComplexCreation() {
-		final IndexKeyDefinition keyDef = new IndexKeyDefinition(
-				TestIndexedCollectionDefinition.class);
+		final IndexKeyDefinition keyDef = new IndexKeyDefinition(TestIndexedCollectionDefinition.class);
 		IndexedCollectionDefinition def;
 
 		ComplexIndexedCollection subject;
@@ -82,10 +80,8 @@ public class TestIndexedCollectionDefinition {
 		assertEquals(keyDef, subject.getParameter().get(0));
 		assertEquals(keyDef, subject.getKeyDefinition());
 
-		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
-				new Integer(5),
-				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
-				"WHATEVER", null);
+		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class, 5,
+				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER, "WHATEVER", null);
 		subject = def.create(keyDef);
 		assertTrue(subject != null);
 		assertEquals(4, subject.getParameter().size());
@@ -96,8 +92,7 @@ public class TestIndexedCollectionDefinition {
 		assertEquals(keyDef, subject.getKeyDefinition());
 
 		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
-				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER,
-				"WHATEVER");
+				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER, "WHATEVER");
 		subject = def.create(keyDef);
 		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
@@ -105,8 +100,7 @@ public class TestIndexedCollectionDefinition {
 		assertEquals("WHATEVERMOD", subject.getParameter().get(1));
 		assertEquals(keyDef, subject.getKeyDefinition());
 
-		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
-				"WHATEVER");
+		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class, "WHATEVER");
 		subject = def.create(keyDef);
 		assertTrue(subject != null);
 		assertEquals(2, subject.getParameter().size());
@@ -114,8 +108,7 @@ public class TestIndexedCollectionDefinition {
 		assertEquals("WHATEVERMOD", subject.getParameter().get(1));
 		assertEquals(keyDef, subject.getKeyDefinition());
 
-		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class,
-				"WHATEVER",
+		def = new IndexedCollectionDefinition(ComplexIndexedCollection.class, "WHATEVER",
 				IndexedCollectionDefinition.INDEXKEYDEFINITION_PLACEHOLDER);
 		subject = def.create(keyDef);
 		assertTrue(subject != null);
@@ -191,6 +184,7 @@ public class TestIndexedCollectionDefinition {
 	@Test
 	public void testExceptionWhenNoType() {
 		thrown.expect(NullPointerException.class);
+		//noinspection deprecation
 		thrown.expectMessage(JUnitMatchers
 				.containsString("type must be specified"));
 

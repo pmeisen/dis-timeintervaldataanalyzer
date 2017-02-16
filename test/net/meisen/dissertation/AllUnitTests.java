@@ -298,7 +298,7 @@ import org.junit.runners.Suite;
         TestTidaConnection.class,
         TestTidaResultSet.class,
         TestTidaDatabaseMetaData.TestTidaDatabaseMetaDataSuite.class,
-        TestCommunication.class
+        net.meisen.dissertation.jdbc.protocol.TestCommunication.class
 })
 public class AllUnitTests {
 

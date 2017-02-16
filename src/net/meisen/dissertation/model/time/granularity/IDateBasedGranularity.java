@@ -19,7 +19,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * @author pmeisen
 	 * 
 	 */
-	public static class DateBasedHelper {
+	class DateBasedHelper {
 		private final String timeDateIdentifiers = "ymdhnsi";
 
 		/**
@@ -101,7 +101,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * }
 	 * </pre>
 	 */
-	public final static DateBasedHelper helper = new DateBasedHelper();
+	DateBasedHelper helper = new DateBasedHelper();
 
 	/**
 	 * Gets the format of the date which represents the
@@ -110,7 +110,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * @return the {@code DateFormat} which represents the
 	 *         {@code DateBasedGranularity}
 	 */
-	public DateFormat getFormat();
+	DateFormat getFormat();
 
 	/**
 	 * Determines the representer used for the extracted {@code long} values.
@@ -123,7 +123,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * 
 	 * @return the representer
 	 */
-	public long determineRepresentor(final Date date);
+	long determineRepresentor(final Date date);
 
 	/**
 	 * Resolve a representer to a {@code Date} which can be used for output or
@@ -134,7 +134,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * 
 	 * @return the {@code Date} instance for the representer
 	 */
-	public Date resolveRepresenter(final long value);
+	Date resolveRepresenter(final long value);
 
 	/**
 	 * This method is used to determine if {@code this} is assignable to a
@@ -157,7 +157,7 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * @return {@code true} if {@code this} fits into the specified
 	 *         {@code identifier}, otherwise {@code false}
 	 */
-	public boolean isAssignableTo(final char identifier);
+	boolean isAssignableTo(final char identifier);
 
 	/**
 	 * Gets the identifier of {@code this}. The identifier defines what level of granularity is used by {@code this}.
@@ -175,5 +175,5 @@ public interface IDateBasedGranularity extends ITimeGranularity {
 	 * 
 	 * @see #isAssignableTo(char)
 	 */
-	public char getIdentifier();
+	char getIdentifier();
 }

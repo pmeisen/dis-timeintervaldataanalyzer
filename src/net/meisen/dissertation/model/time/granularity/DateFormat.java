@@ -41,16 +41,15 @@ public enum DateFormat {
 	/**
 	 * a millisecond
 	 */
-	MILLISECOND("SSS", "yyyyMMdd_HHmmss_SSS", "dd.MM.yyyy HH:mm:ss,SSS",
-			Calendar.MILLISECOND);
+	MILLISECOND("SSS", "yyyyMMdd_HHmmss_SSS", "dd.MM.yyyy HH:mm:ss,SSS", Calendar.MILLISECOND);
 
 	private final String format;
 	private final String idFormat;
 	private final String printFormat;
 	private final int calendarValue;
 
-	private DateFormat(final String format, final String idFormat,
-			final String printFormat, final int calendarValue) {
+	DateFormat(final String format, final String idFormat,
+			   final String printFormat, final int calendarValue) {
 		this.format = format;
 		this.idFormat = idFormat;
 		this.printFormat = printFormat;
@@ -65,7 +64,8 @@ public enum DateFormat {
 	 * @return the value
 	 */
 	public int getValue(final Date date) {
-		return Integer.parseInt(Dates.createStringFromDate(date, getFormat()));
+		return Integer.parseInt(Dates.formatDate(date, getFormat(),
+				TimeZone.getTimeZone(Dates.GENERAL_TIMEZONE).getID()));
 	}
 
 	/**
@@ -80,8 +80,7 @@ public enum DateFormat {
 	 * @return the resulting date
 	 */
 	public Date modify(final Date date, final long mod) {
-		final Calendar c = Calendar.getInstance(TimeZone
-				.getTimeZone(Dates.GENERAL_TIMEZONE));
+		final Calendar c = Calendar.getInstance(TimeZone.getTimeZone(Dates.GENERAL_TIMEZONE));
 		c.setTime(date);
 
 		// we want to support long modifications

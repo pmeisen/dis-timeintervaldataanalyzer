@@ -15,7 +15,7 @@ import net.meisen.dissertation.model.indexes.BaseIndexedCollection;
  * 
  */
 public class ComplexIndexedCollection extends BaseIndexedCollection {
-	private List<Object> params = new ArrayList<Object>();
+	private List<Object> params = new ArrayList<>();
 
 	/**
 	 * Even complex has a simple constructor.
@@ -60,8 +60,7 @@ public class ComplexIndexedCollection extends BaseIndexedCollection {
 	 * @param someString
 	 *            some string
 	 */
-	public ComplexIndexedCollection(final IndexKeyDefinition keyDefinition,
-			final String someString) {
+	public ComplexIndexedCollection(final IndexKeyDefinition keyDefinition, final String someString) {
 		this(keyDefinition, (Object) (someString + "MOD"));
 	}
 
@@ -73,8 +72,7 @@ public class ComplexIndexedCollection extends BaseIndexedCollection {
 	 * @param someObject
 	 *            some object
 	 */
-	public ComplexIndexedCollection(final IndexKeyDefinition keyDefinition,
-			final Object someObject) {
+	public ComplexIndexedCollection(final IndexKeyDefinition keyDefinition, final Object someObject) {
 		super(keyDefinition);
 
 		params.add(keyDefinition);
@@ -89,8 +87,7 @@ public class ComplexIndexedCollection extends BaseIndexedCollection {
 	 * @param keyDefinition
 	 *            the {@code IndexKeyDefinition}
 	 */
-	public ComplexIndexedCollection(final Object someObject,
-			final IndexKeyDefinition keyDefinition) {
+	public ComplexIndexedCollection(final Object someObject, final IndexKeyDefinition keyDefinition) {
 		super(keyDefinition);
 
 		params.add(someObject);
@@ -108,8 +105,7 @@ public class ComplexIndexedCollection extends BaseIndexedCollection {
 	 * @param nr
 	 *            the generalized {@code Number}
 	 */
-	public ComplexIndexedCollection(final Integer marker,
-			final IndexKeyDefinition keyDefinition, final Number nr) {
+	public ComplexIndexedCollection(final Integer marker, final IndexKeyDefinition keyDefinition, final Number nr) {
 		super(keyDefinition);
 
 		params.add(keyDefinition);
@@ -127,8 +123,7 @@ public class ComplexIndexedCollection extends BaseIndexedCollection {
 	 * @param nr
 	 *            the generalized {@code Integer}
 	 */
-	public ComplexIndexedCollection(final Integer marker,
-			final IndexKeyDefinition keyDefinition, final Integer nr) {
+	public ComplexIndexedCollection(final Integer marker, final IndexKeyDefinition keyDefinition, final Integer nr) {
 		super(keyDefinition);
 
 		params.add(keyDefinition);
