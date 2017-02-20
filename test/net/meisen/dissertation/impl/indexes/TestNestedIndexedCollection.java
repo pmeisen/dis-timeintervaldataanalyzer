@@ -63,7 +63,7 @@ public class TestNestedIndexedCollection {
 				new PersonMock("Meisen", "Tobias", 32),
 				new PersonMock("Meisen", "Andrea", 35),
 				new PersonMock("Meisen", "Holger", 39),
-				new PersonMock("Meyer", "Jörg", 40),
+				new PersonMock("Meyer", "JÃ¶rg", 40),
 				new PersonMock("Lockhausen", "Bodo", 34),
 				new PersonMock("Pehle", "Jann", 30),
 				new PersonMock("Meisen", "Deborah", 32),
@@ -91,7 +91,7 @@ public class TestNestedIndexedCollection {
 
 		subject = new NestedIndexedCollection(defKey, defAge);
 		assertTrue(subject.addObject(new PersonMock("Meisen", "Philipp", 32)));
-		assertTrue(subject.addObject(new PersonMock("Meyer", "Jörg", 40)));
+		assertTrue(subject.addObject(new PersonMock("Meyer", "JÃ¶rg", 40)));
 		assertFalse(subject.addObject(new PersonMock("Meisen", "Tobias", 32)));
 
 		assertEquals(new PersonMock("Meisen", "Philipp", 32),
@@ -117,7 +117,7 @@ public class TestNestedIndexedCollection {
 
 		assertNotNull(subject.getObject("Meisen", 32, "Philipp"));
 		assertNotNull(subject.getObject("Meisen", 32, "Tobias"));
-		assertNotNull(subject.getObject("Meyer", 40, "Jörg"));
+		assertNotNull(subject.getObject("Meyer", 40, "JÃ¶rg"));
 		assertNotNull(subject.getObject("Pehle", 30, "Jann"));
 		assertNull(subject.getObject("Pehle", 32, "Jann"));
 
