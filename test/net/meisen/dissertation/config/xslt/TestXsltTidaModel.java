@@ -67,6 +67,7 @@ import net.meisen.general.sbconfigurator.config.transformer.DefaultXsltTransform
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
@@ -270,7 +271,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testInvalidDataRetriever() {
 		thrown.expect(DbDataRetrieverException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("Unable to retrieve a new connection to the specified database"));
+		thrown.expectMessage(CoreMatchers.containsString("Unable to retrieve a new connection to the specified database"));
 
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetriever.xml");
 	}
@@ -281,7 +282,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testInvalidDataRetrieverReference() {
 		thrown.expect(NoSuchBeanDefinitionException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("No bean named"));
+		thrown.expectMessage(CoreMatchers.containsString("No bean named"));
 
 		getMetaDataModel("/net/meisen/dissertation/config/xslt/invalidDataRetrieverReference.xml");
 	}
@@ -351,7 +352,7 @@ public class TestXsltTidaModel extends ModuleAndDbBasedTest {
 	@Test
 	public void testStructureWithoutBinding() {
 		thrown.expect(RuntimeException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("xslt could not transform"));
+		thrown.expectMessage(CoreMatchers.containsString("xslt could not transform"));
 
 		getDataStructure("/net/meisen/dissertation/config/xslt/invalidStructureWithoutBinding.xml");
 	}

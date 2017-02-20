@@ -36,10 +36,10 @@ public class TestFactDescriptorSet {
 		final IndexFactory indexFactory = new IndexFactory();
 		final IntegerIdsFactory idFactory = new IntegerIdsFactory();
 
-		modelInvariant = new DescriptorModel<Integer>("modelInvariant",
+		modelInvariant = new DescriptorModel<>("modelInvariant",
 				"modelInvariant", IntegerDescriptor.class, idFactory,
 				indexFactory);
-		modelVariant = new DescriptorModel<Integer>("modelVariant",
+		modelVariant = new DescriptorModel<>("modelVariant",
 				"modelVariant", VariantDescriptor.class, idFactory,
 				indexFactory);
 	}
@@ -51,12 +51,9 @@ public class TestFactDescriptorSet {
 	public void testJustVariantOrder() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		assertTrue(set.add(modelVariant.createDescriptor("VAL3000")
-				.getFactDescriptor()));
-		assertTrue(set.add(modelVariant.createDescriptor("VAL2000")
-				.getFactDescriptor()));
-		assertTrue(set.add(modelVariant.createDescriptor("VAL1000")
-				.getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL3000").getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL2000").getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL1000").getFactDescriptor()));
 
 		assertEquals(set.size(), 3);
 		assertTrue(set.containsVariantRecords());
@@ -67,14 +64,14 @@ public class TestFactDescriptorSet {
 		assertFalse(it.hasNext());
 
 		it = set.variantIterator();
+		assertEquals(3, it.next().getId());
 		assertEquals(1, it.next().getId());
 		assertEquals(2, it.next().getId());
-		assertEquals(3, it.next().getId());
 
 		it = set.variantIterator();
+		assertEquals(3, it.next().getId());
 		assertEquals(1, it.next().getId());
 		assertEquals(2, it.next().getId());
-		assertEquals(3, it.next().getId());
 	}
 
 	/**
@@ -84,7 +81,7 @@ public class TestFactDescriptorSet {
 	public void testJustInvariantOrder() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7,
 				Double.NaN)));
 		assertTrue(set.add(modelInvariant.createDescriptor(500)
 				.getFactDescriptor()));
@@ -118,7 +115,7 @@ public class TestFactDescriptorSet {
 				.getFactDescriptor()));
 		assertTrue(set.add(modelInvariant.createDescriptor(100)
 				.getFactDescriptor()));
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7,
 				Double.NaN)));
 		assertTrue(set.add(modelVariant.createDescriptor("VAL2000")
 				.getFactDescriptor()));
@@ -137,8 +134,8 @@ public class TestFactDescriptorSet {
 
 		it = set.variantIterator();
 		assertEquals(3, it.next().getId());
-		assertEquals(2, it.next().getId());
 		assertEquals(5, it.next().getId());
+		assertEquals(2, it.next().getId());
 	}
 
 	/**
@@ -148,24 +145,16 @@ public class TestFactDescriptorSet {
 	public void testToArray() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		assertTrue(set.add(modelInvariant.createDescriptor(500)
-				.getFactDescriptor()));
-		assertTrue(set.add(modelVariant.createDescriptor("VAL3000")
-				.getFactDescriptor()));
-		assertTrue(set.add(modelVariant.createDescriptor("VAL1000")
-				.getFactDescriptor()));
-		assertTrue(set.add(modelInvariant.createDescriptor(100)
-				.getFactDescriptor()));
-		assertTrue(set.add(modelVariant.createDescriptor("VAL2000")
-				.getFactDescriptor()));
-		assertTrue(set.add(modelInvariant.createDescriptor(200)
-				.getFactDescriptor()));
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
-				Double.NaN)));
+		assertTrue(set.add(modelInvariant.createDescriptor(500).getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL3000").getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL1000").getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(100).getFactDescriptor()));
+		assertTrue(set.add(modelVariant.createDescriptor("VAL2000").getFactDescriptor()));
+		assertTrue(set.add(modelInvariant.createDescriptor(200).getFactDescriptor()));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7, Double.NaN)));
 
 		final List<Object> nr1 = Arrays.asList(set.toArray());
-		final List<FactDescriptor<?>> nr2 = Arrays.asList(set
-				.toArray(new FactDescriptor<?>[] {}));
+		final List<FactDescriptor<?>> nr2 = Arrays.asList(set.toArray(new FactDescriptor<?>[] {}));
 
 		// check each list
 		final List<?>[] lists = new List<?>[] { nr1, nr2 };
@@ -177,8 +166,8 @@ public class TestFactDescriptorSet {
 			assertEquals(1, ((FactDescriptor<?>) list.get(2)).getId());
 			assertEquals(7, ((FactDescriptor<?>) list.get(3)).getId());
 			assertEquals(3, ((FactDescriptor<?>) list.get(4)).getId());
-			assertEquals(2, ((FactDescriptor<?>) list.get(5)).getId());
-			assertEquals(5, ((FactDescriptor<?>) list.get(6)).getId());
+			assertEquals(5, ((FactDescriptor<?>) list.get(5)).getId());
+			assertEquals(2, ((FactDescriptor<?>) list.get(6)).getId());
 		}
 	}
 
@@ -189,28 +178,22 @@ public class TestFactDescriptorSet {
 	public void testModifiedDuplicates() {
 		final FactDescriptorSet set = new FactDescriptorSet();
 
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
-				Double.NaN)));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7, Double.NaN)));
 		assertEquals(1, set.size());
 
-		assertTrue(set
-				.add(new FactDescriptor<Integer>("modelInvariant", 7, 7.0)));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7, 7.0)));
 		assertEquals(1, set.size());
 
-		assertFalse(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
-				7.0)));
+		assertFalse(set.add(new FactDescriptor<>("modelInvariant", 7, 7.0)));
 		assertEquals(1, set.size());
 
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
-				17.0)));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7, 17.0)));
 		assertEquals(1, set.size());
 
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 7,
-				Double.NaN)));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 7, Double.NaN)));
 		assertEquals(1, set.size());
 
-		assertTrue(set.add(new FactDescriptor<Integer>("modelInvariant", 8,
-				Double.NaN)));
+		assertTrue(set.add(new FactDescriptor<>("modelInvariant", 8, Double.NaN)));
 		assertEquals(2, set.size());
 	}
 }

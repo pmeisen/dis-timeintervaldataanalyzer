@@ -32,6 +32,7 @@ public abstract class ThreadForTesting extends Thread {
 		try {
 			_run();
 		} catch (final Throwable ex) {
+			ex.printStackTrace();
 			this.ex = ex;
 		} finally {
 			try {

@@ -109,6 +109,14 @@
       <artifactId>mapdb</artifactId>
       <version>1.0.3</version>
     </dependency>
+
+    <!-- the old JavaScript engine, prior Java 8, use 'rhino' as engine -->
+    <dependency>
+      <groupId>cat.inspiracio</groupId>
+      <artifactId>rhino-js-engine</artifactId>
+      <version>1.7.7.1</version>
+      <optional>true</optional>
+    </dependency>
     
     <!-- parser -->
     <dependency>

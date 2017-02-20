@@ -15,6 +15,7 @@ import net.meisen.dissertation.impl.indexes.mock.PersonMock;
 import net.meisen.dissertation.model.indexes.IndexKeyDefinition;
 import net.meisen.dissertation.model.indexes.IndexedCollectionDefinition;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
@@ -102,8 +103,7 @@ public class TestMultipleIndexedCollection {
 	@Test
 	public void testInvalidAmountOfDefinitions() {
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("size of the definitions must be equal"));
+		thrown.expectMessage(CoreMatchers.containsString("size of the definitions must be equal"));
 
 		final IndexKeyDefinition key1 = new IndexKeyDefinition(UUID.class,
 				"toString");
@@ -121,8 +121,7 @@ public class TestMultipleIndexedCollection {
 	@Test
 	public void testExceptionWhenDifferentObjectClasses() {
 		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("objectClasses of all keys must be equal"));
+		thrown.expectMessage(CoreMatchers.containsString("objectClasses of all keys must be equal"));
 
 		final IndexKeyDefinition key1 = new IndexKeyDefinition(UUID.class,
 				"toString");

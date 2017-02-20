@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import net.meisen.general.sbconfigurator.config.exception.ValidationFailedException;
 import net.meisen.general.sbconfigurator.config.transformer.DefaultXsdValidator;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
@@ -107,7 +108,7 @@ public class TestXsdTidaModel {
 	public void testExceptionDoubleDescriptorsModel()
 			throws ValidationFailedException {
 		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
+		thrown.expectMessage(CoreMatchers.containsString("validation failed"));
 
 		assertException(
 				"/net/meisen/dissertation/config/xsd/exceptionDoubleDescriptorsModel.xml",
@@ -123,7 +124,7 @@ public class TestXsdTidaModel {
 	@Test
 	public void testExceptionNoValuesModel() throws ValidationFailedException {
 		thrown.expect(ValidationFailedException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("validation failed"));
+		thrown.expectMessage(CoreMatchers.containsString("validation failed"));
 
 		assertException(
 				"/net/meisen/dissertation/config/xsd/exceptionNoValuesModel.xml",

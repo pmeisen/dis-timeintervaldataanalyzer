@@ -29,13 +29,13 @@ public class FactDescriptorSet implements Collection<FactDescriptor<?>> {
 	 * Creates a new instance of a {@code DescriptorSet}.
 	 */
 	public FactDescriptorSet() {
-		this.nonNanSet = new TreeSet<FactDescriptor<?>>();
+		this.nonNanSet = new TreeSet<>();
 
 		// there won't be hopefully that many
-		this.variantSet = new HashSet<FactDescriptor<?>>(0, (float) 1.00);
+		this.variantSet = new HashSet<>(0, (float) 1.00);
 
 		// typically there won't be any Double.NaN
-		this.nanSet = new HashSet<FactDescriptor<?>>(0, (float) 1.00);
+		this.nanSet = new HashSet<>(0, (float) 1.00);
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class FactDescriptorSet implements Collection<FactDescriptor<?>> {
 		final boolean nan = Double.isNaN(fact.getFact());
 
 		boolean removed = false;
-		if (!removed && !variant) {
+		if (!variant) {
 			removed = this.variantSet.remove(fact);
 		}
 		if (!removed && !nan) {
@@ -109,7 +109,7 @@ public class FactDescriptorSet implements Collection<FactDescriptor<?>> {
 	public boolean addAll(final Collection<? extends FactDescriptor<?>> facts) {
 		boolean res = false;
 		for (final FactDescriptor<?> fact : facts) {
-			res = add(fact) && res;
+			res = add(fact) || res;
 		}
 
 		return res;
@@ -279,6 +279,7 @@ public class FactDescriptorSet implements Collection<FactDescriptor<?>> {
 		return toArray(new Object[] {});
 	}
 
+	@SuppressWarnings("SuspiciousToArrayCall")
 	@Override
 	public <T> T[] toArray(final T[] template) {
 		final T[] nonNanArray = this.nonNanSet.toArray(template);

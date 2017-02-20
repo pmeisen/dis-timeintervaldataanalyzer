@@ -23,6 +23,7 @@ import net.meisen.dissertation.model.indexes.datarecord.MetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.slices.Bitmap;
 import net.meisen.dissertation.model.indexes.datarecord.slices.BitmapId;
 import net.meisen.general.genmisc.types.Files;
+import net.meisen.general.genmisc.types.Misc;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 
@@ -33,9 +34,9 @@ import org.mockito.Mockito;
 
 /**
  * Tests the implementation of a {@code FileBitmapCache}.
- * 
+ *
  * @author pmeisen
- * 
+ *
  */
 @ContextClass(TestConfig.class)
 @ContextFile("test-sbconfigurator-core.xml")
@@ -62,19 +63,19 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 	/**
 	 * Creates a {@code BitmapId} with the specified identifier.
-	 * 
+	 *
 	 * @param nr
 	 *            the identifier
-	 * 
+	 *
 	 * @return the created {@code BitmapId}
 	 */
 	protected BitmapId<Integer> createBitmapId(final int nr) {
-		return new BitmapId<Integer>(nr, IntervalIndex.class);
+		return new BitmapId<>(nr, IntervalIndex.class);
 	}
 
 	/**
 	 * Helper method to cache some generated bitmaps to the {@code fc}.
-	 * 
+	 *
 	 * @param fc
 	 *            the {@code FileBitmapCache} to add data to
 	 * @param amount
@@ -127,22 +128,26 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidModelIdException() {
-		thrown.expect(BaseFileBitmapIdCacheException.class);
-		thrown.expectMessage("unable to create the cache location");
+		if (Misc.isWindows()) {
+			thrown.expect(BaseFileBitmapIdCacheException.class);
+			thrown.expectMessage("unable to create the cache location");
 
-		// use an invalid character for a folder
-		final TidaModel model = new TidaModel() {
-			@Override
-			public String getId() {
-				return "?";
-			}
+			// use an invalid character for a folder
+			final TidaModel model = new TidaModel() {
+				@Override
+				public String getId() {
+					return "/?:";
+				}
 
-			@Override
-			public File getLocation() {
-				return null;
+				@Override
+				public File getLocation() {
+					return null;
+				}
 			};
-		};
-		fc.initialize(model);
+			fc.initialize(model);
+		} else {
+			assertTrue("Always true not testable on system.", true);
+		}
 	}
 
 	/**
@@ -150,26 +155,32 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 */
 	@Test
 	public void testInvalidLocationException() {
-		thrown.expect(BaseFileBitmapIdCacheException.class);
-		thrown.expectMessage("unable to create the cache location");
 
-		// use an invalid character for a folder
-		final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
-		config.setLocation(null);
-		fc.setConfig(config);
+		if (Misc.isWindows()) {
 
-		final TidaModel model = new TidaModel() {
-			@Override
-			public String getId() {
-				return "modelId";
-			}
+			thrown.expect(BaseFileBitmapIdCacheException.class);
+			thrown.expectMessage("unable to create the cache location");
 
-			@Override
-			public File getLocation() {
-				return new File("?");
+			// use an invalid character for a folder
+			final FileBitmapIdCacheConfig config = new FileBitmapIdCacheConfig();
+			config.setLocation(null);
+			fc.setConfig(config);
+
+			final TidaModel model = new TidaModel() {
+				@Override
+				public String getId() {
+					return "modelId";
+				}
+
+				@Override
+				public File getLocation() {
+					return new File("?");
+				}
 			};
-		};
-		fc.initialize(model);
+			fc.initialize(model);
+		} else {
+			assertTrue("Always true, not testable on system", true);
+		}
 	}
 
 	/**
@@ -215,7 +226,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// retrieve some bitmaps for different identifiers
 		for (int i = 0; i < 1000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, IntervalIndex.class);
+			final BitmapId<?> id = new BitmapId<>(i, IntervalIndex.class);
 
 			assertFalse(fc.isCached(id));
 			assertEquals(emptyBitmap, fc.get(id));
@@ -229,30 +240,31 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	@Test
 	public void testPersistance() {
 		fc.initialize(model);
+		addSamples();
 
+		fc.clearCache();
+
+		// check to read all the bitmaps
+		assertCacheSamples();
+	}
+
+	private void addSamples() {
 		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
+			final BitmapId<?> id = new BitmapId<>(i, MetaIndex.class, "Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
 			fc.cache(id, bmp);
 
-			// clear the cache
-			fc.clearCache();
-
 			// retrieve the bitmap and check the cache status
-			assertFalse(fc.isCached(id));
 			assertEquals(bmp, fc.get(id));
 			assertTrue(fc.isCached(id));
 		}
+	}
 
-		fc.clearCache();
-
-		// check to read all the bitmaps
+	private void assertCacheSamples() {
 		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
+			final BitmapId<?> id = new BitmapId<>(i, MetaIndex.class, "Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// get the bitmap from the cache
@@ -271,19 +283,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// disable the persistancy
 		fc.setPersistency(false);
-
-		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
-			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
-
-			// cache the bitmap
-			fc.cache(id, bmp);
-
-			// retrieve the bitmap and check the cache status
-			assertEquals(bmp, fc.get(id));
-			assertTrue(fc.isCached(id));
-		}
+		addSamples();
 
 		// everything should be in cache
 		assertEquals(50000, fc.getCacheSize());
@@ -295,16 +295,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 		fc.clearCache();
 
 		// check to read all the bitmaps
-		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
-			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
-
-			// get the bitmap from the cache
-			assertFalse(fc.isCached(id));
-			assertEquals(bmp, fc.get(id));
-			assertTrue(fc.isCached(id));
-		}
+		assertCacheSamples();
 	}
 
 	/**
@@ -322,19 +313,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// disable the persistancy
 		fc.setPersistency(false);
-
-		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
-			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
-
-			// cache the bitmap
-			fc.cache(id, bmp);
-
-			// retrieve the bitmap and check the cache status
-			assertEquals(bmp, fc.get(id));
-			assertTrue(fc.isCached(id));
-		}
+		addSamples();
 
 		// enable it again
 		fc.setPersistency(true);
@@ -344,8 +323,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 		// check to read all the bitmaps
 		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
+			final BitmapId<?> id = new BitmapId<>(i, MetaIndex.class, "Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// get the bitmap from the cache
@@ -360,12 +338,10 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	@Test
 	public void testBulkPersistanceWithClearCache() {
 		fc.initialize(model);
-
 		fc.setPersistency(false);
 
 		for (int i = 0; i < 50000; i++) {
-			final BitmapId<?> id = new BitmapId<Integer>(i, MetaIndex.class,
-					"Classifier1");
+			final BitmapId<?> id = new BitmapId<>(i, MetaIndex.class, "Classifier1");
 			final Bitmap bmp = Bitmap.createBitmap(model.getIndexFactory(), i);
 
 			// cache the bitmap
@@ -527,7 +503,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 	/**
 	 * Tests the multi-threading of a {@code FileBitmapCache}.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 *             if a thread is interrupted
 	 */
@@ -547,9 +523,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 					}
 				}
 
-				int i = 1;
-
-				assertEquals(i, fc.getCacheSize());
+				assertEquals(1, fc.getCacheSize());
 				assertTrue(fc.isCached(createBitmapId(0)));
 				assertFalse(fc.isCached(createBitmapId(1)));
 
@@ -558,7 +532,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 				// the first call 1 isn't cached
 				if (!fc.isCached(createBitmapId(1))) {
-					i++;
+					// just wait
 				}
 				assertNotNull(fc.get(createBitmapId(1)));
 			}
@@ -594,7 +568,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 	/**
 	 * Tests the multi-threading using bulk-write.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 *             if the threads cannot be found
 	 */
@@ -618,7 +592,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			public void _run() {
 				for (int i = 0; i < 4 * amount; i++) {
 					int nr = r.nextInt(amount);
-					final BitmapId<?> id = new BitmapId<Integer>(nr,
+					final BitmapId<?> id = new BitmapId<>(nr,
 							MetaIndex.class, "Classifier1");
 					final Bitmap res = fc.get(id);
 					final Bitmap bmp = Bitmap.createBitmap(
@@ -640,7 +614,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 			public void _run() {
 				fc.setPersistency(false);
 				for (int i = 0; i < amount; i++) {
-					final BitmapId<?> id = new BitmapId<Integer>(i,
+					final BitmapId<?> id = new BitmapId<>(i,
 							MetaIndex.class, "Classifier1");
 					final Bitmap bmp = Bitmap.createBitmap(
 							model.getIndexFactory(), i);
@@ -697,7 +671,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 	/**
 	 * Tests some sample usage scenario.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 *             if a thread gets interrupted
 	 */
@@ -789,7 +763,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 	 * {@code amount} bitmaps, whereby the id is defined by the number of it's
 	 * creation. The created bitmap will have the bit sets defined by
 	 * {@code id + offset}.
-	 * 
+	 *
 	 * @param amount
 	 *            the amount of bitmaps to be created
 	 * @param offset
@@ -811,7 +785,7 @@ public class TestFileBitmapCache extends ModuleBasedTest {
 
 	/**
 	 * Picks random bitmaps and checks the values.
-	 * 
+	 *
 	 * @param rnd
 	 *            the randomizer
 	 * @param runs

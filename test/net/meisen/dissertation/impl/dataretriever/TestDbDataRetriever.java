@@ -27,6 +27,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
+import org.hamcrest.CoreMatchers;
 import org.hsqldb.jdbcDriver;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -150,8 +151,7 @@ public class TestDbDataRetriever {
 		final DbDataRetriever db = Util.create(c, "tidaTestData");
 
 		thrown.expect(DbDataRetrieverException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("specify a queryConfiguration"));
+		thrown.expectMessage(CoreMatchers.containsString("specify a queryConfiguration"));
 
 		db.retrieve(null);
 	}
@@ -164,7 +164,7 @@ public class TestDbDataRetriever {
 		final DbDataRetriever db = Util.create(c, "tidaTestData");
 
 		thrown.expect(DataRetrieverException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("class '"
+		thrown.expectMessage(CoreMatchers.containsString("class '"
 				+ DbDataRetriever.class.getName()
 				+ "' does not support a queryConfiguration of type '"
 				+ TestDbDataRetriever.class.getName() + "$1'"));

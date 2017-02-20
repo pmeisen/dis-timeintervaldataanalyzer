@@ -106,7 +106,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	public BaseFileBitmapIdCache() {
 		this.strategy = new RandomCachingStrategy();
 
-		this.notPersisted = new HashSet<BitmapId<?>>();
+		this.notPersisted = new HashSet<>();
 
 		this.ownersLock = new ReentrantReadWriteLock();
 		this.cacheLock = new ReentrantReadWriteLock();
@@ -117,13 +117,13 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		this.cacheSize = getDefaultCacheSize();
 		this.cacheCleaningFactor = getDefaultCacheCleaningFactor();
 
-		this.owners = new HashMap<BitmapId<?>, IBitmapIdOwner>();
-		this.idx = new HashMap<BitmapId<?>, IndexEntry>();
-		this.cache = new HashMap<BitmapId<?>, T>(this.cacheSize);
+		this.owners = new HashMap<>();
+		this.idx = new HashMap<>();
+		this.cache = new HashMap<>(this.cacheSize);
 
-		this.fileReaders = new ArrayList<RandomAccessFile>();
-		this.fileWriters = new ArrayList<FileBasedDataOutputStream>();
-		this.files = new ArrayList<File>();
+		this.fileReaders = new ArrayList<>();
+		this.fileWriters = new ArrayList<>();
+		this.files = new ArrayList<>();
 
 		this.persistency = true;
 		this.init = false;
@@ -306,8 +306,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	 *             or if the {@code expectedNumber} is used by another
 	 *             {@code file}
 	 */
-	protected void _addDataFile(final File dataFile, final int expectedNumber)
-			throws BaseFileBitmapIdCacheException {
+	protected void _addDataFile(final File dataFile, final int expectedNumber) throws BaseFileBitmapIdCacheException {
 
 		if (!dataFile.exists() || !dataFile.isFile()) {
 			exceptionRegistry.throwException(getExceptionClass(1013), 1013,
@@ -321,8 +320,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			reader = new RandomAccessFile(dataFile, "r");
 			writer = new FileBasedDataOutputStream(dataFile, true);
 		} catch (final IOException e) {
-			exceptionRegistry.throwException(getExceptionClass(1012), 1012, e,
-					dataFile);
+			exceptionRegistry.throwException(getExceptionClass(1012), 1012, e, dataFile);
 			return;
 		}
 
@@ -376,8 +374,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		try {
 			file.createNewFile();
 		} catch (final IOException e) {
-			exceptionRegistry.throwException(getExceptionClass(1006), 1006, e,
-					file);
+			exceptionRegistry.throwException(getExceptionClass(1006), 1006, e, file);
 		}
 
 		// bitmap reader and writer
@@ -453,9 +450,9 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		if (curFileNumber > -1) {
 			fileLock.readLock().lock();
 			try {
-				final FileBasedDataOutputStream writer = fileWriters
-						.get(curFileNumber);
+				final FileBasedDataOutputStream writer = fileWriters.get(curFileNumber);
 
+				//noinspection SynchronizationOnLocalVariableOrMethodParameter
 				synchronized (writer) {
 					priorSize = writer.getCurrentPosition();
 					fileNr = curFileNumber;
@@ -541,8 +538,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 				cacheable = createFromInput(reader);
 			}
 		} catch (final IOException ex) {
-			exceptionRegistry.throwException(getExceptionClass(1017), 1017, ex,
-					e);
+			exceptionRegistry.throwException(getExceptionClass(1017), 1017, ex, e);
 			return null;
 		} finally {
 			fileLock.readLock().unlock();
@@ -859,6 +855,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			}
 
 			// persist it to the file
+			//noinspection SynchronizeOnNonFinalField
 			synchronized (idxTableWriter) {
 				try {
 					idxTableWriter.seek(idxFilePos);
@@ -1052,7 +1049,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 			this.location = null;
 			this.cacheSize = getDefaultCacheSize();
 			this.maxFileSizeInByte = getDefaultMaxFileSizeInByte();
-		} else if (config instanceof FileBitmapIdCacheConfig == false) {
+		} else if (!(config instanceof FileBitmapIdCacheConfig)) {
 			exceptionRegistry.throwException(getExceptionClass(1001), 1001,
 					config.getClass().getName());
 		} else {
@@ -1151,6 +1148,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 		}
 
 		// release the index writer
+		//noinspection SynchronizeOnNonFinalField
 		synchronized (idxTableWriter) {
 
 			// release the indexTableWriter
@@ -1365,7 +1363,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 	protected void _bulkWrite(final Collection<BitmapId<?>> filterIds) {
 
 		// define the BitmapIds which really should be written
-		final Set<BitmapId<?>> toBeWritten = new HashSet<BitmapId<?>>(
+		final Set<BitmapId<?>> toBeWritten = new HashSet<>(
 				notPersisted);
 		if (filterIds != null) {
 			toBeWritten.retainAll(filterIds);
@@ -1424,7 +1422,7 @@ public abstract class BaseFileBitmapIdCache<T extends IBitmapIdCacheable>
 
 		idxLock.readLock().lock();
 		try {
-			keys = new ArrayList<BitmapId<?>>(idx.size());
+			keys = new ArrayList<>(idx.size());
 			keys.addAll(idx.keySet());
 		} finally {
 			idxLock.readLock().unlock();

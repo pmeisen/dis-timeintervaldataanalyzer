@@ -8,6 +8,7 @@ import net.meisen.dissertation.help.ExceptionBasedTest;
 import net.meisen.dissertation.model.dataretriever.mock.MockDataCollection;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 
@@ -114,7 +115,7 @@ public class TestDataRecord extends ExceptionBasedTest {
 	@Test
 	public void testExceptionInvalidGetPosition() {
 		thrown.expect(IndexOutOfBoundsException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("Index: 5, Size: 3"));
+		thrown.expectMessage(CoreMatchers.containsString("Index: 5, Size: 3"));
 
 		final DataCollection<Integer> dc = new MockDataCollection<Integer>(
 				new Integer[] { 5, 6, 7 });

@@ -15,6 +15,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
@@ -69,7 +70,7 @@ public class TestByteIdsFactory extends ExceptionBasedTest {
 		final byte invalidId = ByteIdsFactory.FIRST_ID - 1;
 
 		thrown.expect(IdsFactoryException.class);
-		thrown.expectMessage(JUnitMatchers.containsString("The identifier '"
+		thrown.expectMessage(CoreMatchers.containsString("The identifier '"
 				+ invalidId + "' is invalid"));
 
 		factory.initialize(invalidId);
@@ -84,8 +85,7 @@ public class TestByteIdsFactory extends ExceptionBasedTest {
 		factory.initialize(Byte.MAX_VALUE);
 
 		thrown.expect(IdsFactoryException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("amount of available identifiers is reached"));
+		thrown.expectMessage(CoreMatchers.containsString("amount of available identifiers is reached"));
 
 		factory.getId();
 	}

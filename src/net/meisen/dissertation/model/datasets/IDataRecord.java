@@ -17,7 +17,7 @@ public interface IDataRecord {
 	 * @return {@code true} if a value for the specified name is assigned,
 	 *         otherwise {@code false}
 	 */
-	public boolean hasNamedValue(final String name);
+	boolean hasNamedValue(final String name);
 
 	/**
 	 * Gets the value associated to the specified {@code position}. A position
@@ -31,7 +31,7 @@ public interface IDataRecord {
 	 * @throws RuntimeException
 	 *             if the position is invalid
 	 */
-	public Object getValue(final int position) throws RuntimeException;
+	Object getValue(final int position) throws RuntimeException;
 
 	/**
 	 * Gets the value associated to the specified {@code name}.
@@ -44,7 +44,7 @@ public interface IDataRecord {
 	 * @throws RuntimeException
 	 *             if the position is invalid
 	 */
-	public Object getValue(final String name) throws RuntimeException;
+	Object getValue(final String name) throws RuntimeException;
 
 	/**
 	 * Checks if a position is valid for {@code this} {@code DataRecord}. A
@@ -57,7 +57,7 @@ public interface IDataRecord {
 	 *         (i.e. no exception is thrown) for {@code this} {@code DataRecord}
 	 *         , otherwise {@code false}
 	 */
-	public boolean isValidPosition(final int position);
+	boolean isValidPosition(final int position);
 
 	/**
 	 * Gets the name of the specified position (1-based). The method might throw
@@ -69,7 +69,7 @@ public interface IDataRecord {
 	 * 
 	 * @see #isValidPosition(int)
 	 */
-	public String getName(final int position);
+	String getName(final int position);
 
 	/**
 	 * Gets the position of the specified name.
@@ -80,5 +80,5 @@ public interface IDataRecord {
 	 * @return the position (1-based), or a value smaller than 1 if the name
 	 *         could not be found
 	 */
-	public int getPosition(final String name);
+	int getPosition(final String name);
 }

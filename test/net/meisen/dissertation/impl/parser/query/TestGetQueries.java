@@ -1,18 +1,5 @@
 package net.meisen.dissertation.impl.parser.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import net.meisen.dissertation.config.xslt.DefaultValues;
 import net.meisen.dissertation.help.LoaderBasedTest;
 import net.meisen.dissertation.impl.auth.shiro.ShiroAuthManager;
@@ -30,7 +17,6 @@ import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.general.genmisc.types.Files;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperties;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,12 +25,26 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.io.File;
+import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Tests the implementation of {@link GetQuery} and {@link GetResultModels}.
  * 
  * @author pmeisen
  * 
  */
+@SuppressWarnings("SuspiciousMethodCalls")
 @SystemProperties(value = {
 		@SystemProperty(property = "tida.config.selector", value = "net/meisen/dissertation/impl/parser/query/tidaConfigUsingShiroAuth.xml"),
 		@SystemProperty(property = "test.tmpFolder", value = "testGetQueries") })
@@ -168,7 +168,7 @@ public class TestGetQueries extends LoaderBasedTest {
 		final GetResultModels res = factory.evaluateQuery(query, null);
 		assertEquals(2, res.size());
 
-		final Set<String> expected = new HashSet<String>();
+		final Set<String> expected = new HashSet<>();
 		expected.add("testNumberModel");
 		expected.add("testPersonModel");
 
@@ -445,5 +445,8 @@ public class TestGetQueries extends LoaderBasedTest {
 			}
 		}
 		assertEquals(3, counter);
+
+		factory.evaluateQuery(q("DROP USER 'philipp'"), null);
+		factory.evaluateQuery(q("DROP ROLE 'user'"), null);
 	}
 }

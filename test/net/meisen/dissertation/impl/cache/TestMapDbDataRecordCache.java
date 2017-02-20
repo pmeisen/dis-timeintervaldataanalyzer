@@ -89,16 +89,16 @@ public class TestMapDbDataRecordCache extends ModuleBasedTest {
 		assertEquals(DataType.INT, recCache.getDataTypes()[0]);
 		assertEquals(DataType.LONG, recCache.getDataTypes()[1]);
 		assertEquals(DataType.LONG, recCache.getDataTypes()[2]);
-		assertEquals(DataType.INT, recCache.getDataTypes()[3]);
-		assertEquals(DataType.STRING, recCache.getDataTypes()[4]);
+		assertEquals(DataType.STRING, recCache.getDataTypes()[3]);
+		assertEquals(DataType.INT, recCache.getDataTypes()[4]);
 		for (int i = 0; i < amountOfRecords; i++) {
 			final Object[] rec = recCache.get(i);
 
 			assertEquals(i, rec[0]);
-			assertEquals(new Long(i), rec[1]);
-			assertEquals(new Long(i + 1), rec[2]);
-			assertEquals(i, rec[3]);
-			assertEquals("" + i, rec[4]);
+			assertEquals((long) i, rec[1]);
+			assertEquals((long) (i + 1), rec[2]);
+			assertEquals("" + i, rec[3]);
+			assertEquals(i, rec[4]);
 		}
 	}
 

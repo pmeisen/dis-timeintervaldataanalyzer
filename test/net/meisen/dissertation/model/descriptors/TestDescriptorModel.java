@@ -27,6 +27,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
@@ -339,8 +340,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionDuplicatedValueDescriptorCreation() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("descriptor 'MyValue' already exists in the model 'ModelId'"));
+		thrown.expectMessage(CoreMatchers.containsString("descriptor 'MyValue' already exists in the model 'ModelId'"));
 
 		// get the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
@@ -360,8 +360,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionInvalidDescriptorType() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("Failed to add the descriptor '1' to the model 'ModelId'"));
+		thrown.expectMessage(CoreMatchers.containsString("Failed to add the descriptor '1' to the model 'ModelId'"));
 
 		// create to models one to create a descriptor and add it to the other
 		final DescriptorModel<Integer> modelIntIds = new DescriptorModel<Integer>(
@@ -404,8 +403,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	@Test
 	public void testInvalidCreateUsingNull() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("Null-values are not supported by the model 'ModelId'"));
+		thrown.expectMessage(CoreMatchers.containsString("Null-values are not supported by the model 'ModelId'"));
 
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
 				"ModelId", "ModelName", GeneralDescriptor.class,
@@ -449,8 +447,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionAddingNullDescriptorWithDifferentId() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("cannot be added to the model"));
+		thrown.expectMessage(CoreMatchers.containsString("cannot be added to the model"));
 
 		// create the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(
@@ -473,8 +470,7 @@ public class TestDescriptorModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionAddingDescriptorWithDifferentId() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("cannot be added to the model"));
+		thrown.expectMessage(CoreMatchers.containsString("cannot be added to the model"));
 
 		// create the model
 		final DescriptorModel<Integer> model = new DescriptorModel<Integer>(

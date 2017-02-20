@@ -189,8 +189,6 @@ public class TestSimiliarity {
 					+ ", " + e.getCountDistance() + ", "
 					+ e.getStructureDistance() + ")");
 
-//			System.out.println(e);
-
 			counter++;
 			if (counter == amount) {
 				break;

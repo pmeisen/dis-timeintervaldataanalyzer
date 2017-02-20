@@ -492,8 +492,7 @@ public class Db {
 				} else if (eingabe.trim().equals("")) {
 					break;
 				} else if (!eingabe.matches("^[a-zA-Z0-9\\-_]+")) {
-					System.out
-							.println("Invalid name for a database, please use only alphanumeric characters and _ or -");
+					System.out.println("Invalid name for a database, please use only alphanumeric characters and _ or -");
 					System.out.println(eingabe);
 				} else {
 					dbList.add(eingabe);

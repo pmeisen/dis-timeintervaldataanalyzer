@@ -11,7 +11,7 @@
   
   <config>
     <preprocessor implementation="net.meisen.dissertation.impl.dataintegration.ScriptPreProcessor">
-      <spp:script language="javascript">
+      <spp:script language="rhino">
         var result = new net.meisen.dissertation.impl.dataintegration.PreProcessedDataRecord(raw);
         
         var screams = raw.getValue(5);

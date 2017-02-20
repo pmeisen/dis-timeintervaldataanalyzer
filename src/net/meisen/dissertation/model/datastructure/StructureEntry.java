@@ -99,7 +99,6 @@ public abstract class StructureEntry {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + ": "
-				+ (name == null ? position : name);
+		return getClass().getSimpleName() + ": " + (name == null ? position : name);
 	}
 }

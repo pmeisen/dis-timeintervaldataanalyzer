@@ -27,7 +27,7 @@ public class IntervalStructureEntry extends StructureEntry {
 		 * @author pmeisen
 		 * 
 		 */
-		public static enum IntervalType {
+		public enum IntervalType {
 			/**
 			 * Marks the entry to be the start.
 			 */
@@ -35,7 +35,7 @@ public class IntervalStructureEntry extends StructureEntry {
 			/**
 			 * Marks the entry to be the end.
 			 */
-			END;
+			END
 		}
 
 		private final static IntervalType DEF_TYPE = IntervalType.START;
@@ -77,7 +77,7 @@ public class IntervalStructureEntry extends StructureEntry {
 		 * @author pmeisen
 		 * 
 		 */
-		public static enum IntervalEndPointType {
+		public enum IntervalEndPointType {
 			/**
 			 * Marks the end-point to be included.
 			 */
@@ -85,7 +85,7 @@ public class IntervalStructureEntry extends StructureEntry {
 			/**
 			 * Marks the end-point to be excluded.
 			 */
-			EXCLUDE;
+			EXCLUDE
 		}
 
 		private final static IntervalEndPointType DEF_TYPE = IntervalEndPointType.INCLUDE;

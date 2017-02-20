@@ -24,6 +24,7 @@ import net.meisen.general.sbconfigurator.runners.annotations.ContextClass;
 import net.meisen.general.sbconfigurator.runners.annotations.ContextFile;
 import net.meisen.general.sbconfigurator.runners.annotations.SystemProperty;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.matchers.JUnitMatchers;
 import org.junit.runner.RunWith;
@@ -137,8 +138,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	@Test
 	public void testNullDescriptorModel() {
 		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("A DescriptorModel cannot be null"));
+		thrown.expectMessage(CoreMatchers.containsString("A DescriptorModel cannot be null"));
 
 		final MetaDataModel model = createTestModel();
 		model.addDescriptorModel(null);
@@ -151,8 +151,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	@Test
 	public void testDuplicateDescriptorModel() {
 		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("A DescriptorModel with id 'ID2' already exists"));
+		thrown.expectMessage(CoreMatchers.containsString("A DescriptorModel with id 'ID2' already exists"));
 
 		final MetaDataModel model = createTestModel();
 
@@ -168,8 +167,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionInvalidModelDescriptorCreation() {
 		thrown.expect(MetaDataModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("Unable to find a model with id 'IDONTEXIST'"));
+		thrown.expectMessage(CoreMatchers.containsString("Unable to find a model with id 'IDONTEXIST'"));
 
 		// get the model
 		final MetaDataModel model = createTestModel();
@@ -184,8 +182,7 @@ public class TestMetaDataModel extends ExceptionBasedTest {
 	@Test
 	public void testExceptionDuplicatedValueDescriptorCreation() {
 		thrown.expect(DescriptorModelException.class);
-		thrown.expectMessage(JUnitMatchers
-				.containsString("descriptor 'My New ID1' already exists in the model 'ID1'"));
+		thrown.expectMessage(CoreMatchers.containsString("descriptor 'My New ID1' already exists in the model 'ID1'"));
 
 		// get the model
 		final MetaDataModel model = createTestModel();

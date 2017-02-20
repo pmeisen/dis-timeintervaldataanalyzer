@@ -1,11 +1,5 @@
 package net.meisen.dissertation.model.indexes.datarecord;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-
 import net.meisen.dissertation.exceptions.PersistorException;
 import net.meisen.dissertation.exceptions.TidaIndexException;
 import net.meisen.dissertation.model.data.DataStructure;
@@ -22,9 +16,14 @@ import net.meisen.dissertation.model.persistence.Group;
 import net.meisen.dissertation.model.persistence.IPersistable;
 import net.meisen.dissertation.model.persistence.Identifier;
 import net.meisen.general.genmisc.exceptions.ForwardedRuntimeException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An index for {@code TimeIntervalDataAnalysis}. The index is used to select
@@ -77,7 +76,7 @@ public class TidaIndex implements IPersistable {
 	 */
 	public TidaIndex(final TidaModel model, final int lastUsedId) {
 		this.model = model;
-		this.indexes = new HashMap<Class<? extends IDataRecordIndex>, IDataRecordIndex>();
+		this.indexes = new HashMap<>();
 
 		// determine the last valid identifier
 		final Bitmap bmp = model.getIndexFactory().createBitmap();
@@ -211,14 +210,12 @@ public class TidaIndex implements IPersistable {
 	 * @param record
 	 *            the record to be indexed
 	 */
-	public void index(final DataStructure dataStructure,
-			final IDataRecord record) {
+	public void index(final DataStructure dataStructure, final IDataRecord record) {
 		final int recordId = dataId;
 
 		// make sure values still fit
 		if (recordId > lastValidId || recordId < 0) {
-			throw new ForwardedRuntimeException(TidaIndexException.class, 1001,
-					dataId, lastValidId);
+			throw new ForwardedRuntimeException(TidaIndexException.class, 1001, dataId, lastValidId);
 		} else {
 
 			// increase the identifier it should never be used again
@@ -226,8 +223,7 @@ public class TidaIndex implements IPersistable {
 		}
 
 		// let's pre-process the record and map all the values
-		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(
-				dataStructure, record, model, recordId);
+		final ProcessedDataRecord processedRecord = new ProcessedDataRecord(dataStructure, record, model, recordId);
 
 		// now index the record
 		for (final IDataRecordIndex idx : indexes.values()) {
@@ -239,9 +235,7 @@ public class TidaIndex implements IPersistable {
 	 * Method used to optimize the index considering mainly storage.
 	 */
 	public void optimize() {
-		for (final IDataRecordIndex idx : indexes.values()) {
-			idx.optimize();
-		}
+		indexes.values().forEach(IDataRecordIndex::optimize);
 	}
 
 	/**

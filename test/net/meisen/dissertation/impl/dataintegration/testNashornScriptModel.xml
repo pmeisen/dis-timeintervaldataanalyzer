@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:spp="http://dev.meisen.net/xsd/dissertation/preprocessor/script" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/preprocessor/script  http://dev.meisen.net/xsd/dissertation/tidaScriptPreProcessor.xsd
+                           http://dev.meisen.net/xsd/dissertation/model                http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+       
+       id="testScriptModel">
+  
+  <config>
+    <preprocessor implementation="net.meisen.dissertation.impl.dataintegration.ScriptPreProcessor">
+      <spp:script language="nashorn">
+        var screams = raw.getValue(5);
+        var category = screams > 5 ? 'MANY' : 'NONE';
+        
+        result.setValue('CONST', 'MYCONSTANT');
+        result.setValue('MORESCREAMS', new java.lang.Integer(++screams));
+        result.setValue('SCREAMCATEGORY', category);
+      </spp:script>
+    </preprocessor>
+  </config>
+  
+  <time>
+    <timeline start="03.03.2014" end="04.03.2014 23:59:00" granularity="MINUTE" />
+  </time>
+  
+  <meta>
+    <descriptors>
+      <string id="PERSON" />
+      <string id="LOCATION" />
+      <string id="SCREAMCATEGORY" />
+      <string id="CONST" />
+      <integer id="SCREAMS" />
+      <integer id="MORESCREAMS" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="PERSON" value="Tobias" />
+      <entry descriptor="PERSON" value="Philipp" />
+      <entry descriptor="PERSON" value="Edison" />
+      <entry descriptor="PERSON" value="Debbie" />
+
+      <entry descriptor="LOCATION" value="Aachen" />
+      <entry descriptor="LOCATION" value="Mönchengladbach" />
+      <entry descriptor="LOCATION" value="Undefined" />
+    </entries>
+  </meta>
+  
+  <structure>   
+    <meta position="3" descriptor="PERSON" />
+    <meta position="4" descriptor="LOCATION" />
+    <meta position="5" descriptor="SCREAMS" />
+    <meta name="SCREAMCATEGORY" descriptor="SCREAMCATEGORY" />
+    <meta name="MORESCREAMS" descriptor="MORESCREAMS" />
+    <meta name="CONST" descriptor="CONST" />
+    
+    <interval position="1" type="start" />
+    <interval position="2" type="end" />
+  </structure>
+  
+  <data metahandling="create">
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Tobias" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="03.03.2014 16:19:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Mönchengladbach" />
+      <entry class="java.lang.Integer" value="3" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 16:20:00" />
+      <entry class="java.util.Date" value="03.03.2014 17:21:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Undefined" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 17:22:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Philipp" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Debbie" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="0" />
+    </dataset>
+    
+    <dataset>
+      <entry class="java.util.Date" value="03.03.2014 00:00:00" />
+      <entry class="java.util.Date" value="04.03.2014 23:59:00" />
+      <entry class="java.lang.String" value="Edison" />
+      <entry class="java.lang.String" value="Aachen" />
+      <entry class="java.lang.Integer" value="12" />
+    </dataset>
+  </data>
+</model>
