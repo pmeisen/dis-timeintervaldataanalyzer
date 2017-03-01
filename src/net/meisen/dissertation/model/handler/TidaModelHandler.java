@@ -52,6 +52,7 @@ import org.w3c.dom.Node;
  * @author pmeisen
  * 
  */
+@SuppressWarnings({"ConstantConditions", "ResultOfMethodCallIgnored"})
 public class TidaModelHandler {
 	private final static String AUTOLOAD_FILENAME = "handler.data";
 	private final static String MODEL_FILENAME = "model.xml";
@@ -70,7 +71,7 @@ public class TidaModelHandler {
 	 */
 	protected class ManipulatedXml {
 		private byte[] manipulatedXml;
-		private Map<String, String> oldValues = new HashMap<String, String>();
+		private Map<String, String> oldValues = new HashMap<>();
 
 		/**
 		 * Adds the old value of a changed value.
@@ -128,12 +129,12 @@ public class TidaModelHandler {
 	 * The loaded configuration used to load the {@code TidaModel} instances
 	 * using {@link IConfiguration#loadDelayed(String, InputStream)}.
 	 */
-	@Autowired(required = true)
+	@Autowired()
 	@Qualifier("coreConfiguration")
 	protected IConfiguration configuration;
 
-	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<String, IModuleHolder>();
-	private Map<String, byte[]> configurations = new ConcurrentHashMap<String, byte[]>();
+	private Map<String, IModuleHolder> moduleHolders = new ConcurrentHashMap<>();
+	private Map<String, byte[]> configurations = new ConcurrentHashMap<>();
 
 	/**
 	 * Initializes the handler.
@@ -172,7 +173,7 @@ public class TidaModelHandler {
 	 * @return the available (i.e. also not loaded models)
 	 */
 	public Set<String> getAvailableTidaModels() {
-		final Set<String> set = new HashSet<String>();
+		final Set<String> set = new HashSet<>();
 
 		final File defLoc = new File(getDefaultLocation());
 		final List<File> modelDirs = Files.getCurrentSubDirectories(defLoc);
@@ -320,8 +321,7 @@ public class TidaModelHandler {
 			moduleHolder.release();
 
 			// release the model
-			final TidaModel model = moduleHolder
-					.getModule(DefaultValues.TIDAMODEL_ID);
+			final TidaModel model = moduleHolder.getModule(DefaultValues.TIDAMODEL_ID);
 			model.release();
 
 			if (LOG.isInfoEnabled()) {
@@ -564,8 +564,7 @@ public class TidaModelHandler {
 		final byte[] config = configurations.get(id);
 
 		// get the module from the holder
-		final TidaModel model = moduleHolder
-				.getModule(DefaultValues.TIDAMODEL_ID);
+		final TidaModel model = moduleHolder.getModule(DefaultValues.TIDAMODEL_ID);
 		persistor.register(configId.getGroup().append("model"), model);
 
 		// write the file
@@ -857,7 +856,7 @@ public class TidaModelHandler {
 	 *         automatically loaded
 	 */
 	protected Set<String> _readAutoloads() {
-		final Set<String> autoloads = new HashSet<String>();
+		final Set<String> autoloads = new HashSet<>();
 		final File autoloadFile = getAutoloadFile();
 
 		if (!autoloadFile.exists()) {
