@@ -1,4 +1,5 @@
 #Time Interval Data Analyzer
+[![Build Status](https://travis-ci.org/pmeisen/dis-timeintervaldataanalyzer.svg?branch=master)](https://travis-ci.org/pmeisen/dis-timeintervaldataanalyzer)
 
 This project creates the back-end of the Time Interval Data Server. It is mentioned in the book [Time Interval Data Analysis](https://www.amazon.com/Analyzing-Time-Interval-Data-Introducing/dp/3658157275).
 For further insights regarding the provided analytical capacities of the TIDAInformationSystem, the used TIDAModel and TIDAQueryLanguage have a look at the book or at the following research papers:

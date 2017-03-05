@@ -14,7 +14,7 @@
   </target>
 
   <target name="03-run-test-suite" depends="02-compile-sources">
-    <do-run-test-suite testSuite="${testSuite}" maxmemory="2048M"/>
+    <do-run-test-suite testSuite="${testSuite}" maxmemory="3G"/>
   </target>
 
   <target name="04-deploy" depends="02-compile-sources">
