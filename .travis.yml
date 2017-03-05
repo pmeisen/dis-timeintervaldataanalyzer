@@ -36,7 +36,7 @@ before_install:
 install: true
 
 before_script:
-  - export ANT_OPTS=-Xms512M -Xmx2048M
+  - export ANT_OPTS="-Xms512M -Xmx2048M"
 
 script: ant 03-run-test-suite 04-deploy
 
