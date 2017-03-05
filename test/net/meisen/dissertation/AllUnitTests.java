@@ -131,17 +131,17 @@ import org.junit.runners.Suite;
         // Test the utilities
         TestDefaultValues.class,
 
-//        // Test general helper
-//        TestDb.class,
-//
-//        // Test the configuration
-//        TestConfig.TestConfigSuite.class,
-//
-//        // Test persistence
-//        TestGroup.class,
-//        TestIdentifier.class,
-//        TestBasePersistor.class,
-//        TestZipPersistor.class,
+        // Test general helper
+        TestDb.class,
+
+        // Test the configuration
+        TestConfig.TestConfigSuite.class,
+
+        // Test persistence
+        TestGroup.class,
+        TestIdentifier.class,
+        TestBasePersistor.class,
+        TestZipPersistor.class,
 //
 //        // Test indexes
 //        TestCompositeIndexKey.class,
