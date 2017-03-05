@@ -1,0 +1,46 @@
+language: java
+jdk:
+  - oraclejdk8
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+env:
+  global:
+    - secure: m5yMVhOcbtKbtwGK6civHVwBIbvBWjKWAvxdQ/ysheFnvSzl9PkW52WoHKfm+OloCyDyysMSk5ho17Aga3+MlYUNH/HCEFv/9TrLkp3SBJTi1FreKgxPt80yql+wTZYgC/nmfjughMepALUce0G2neAQ+b6rvElU5WqsynREyCF5dgDOJ0uoz9mvhq1rwabw1TJp54n/LpGhugH3hy0eLcn+KPsknINUHYtKqS6SgzC1OVam4rv2LvnrIp5kJrJKwCpMcCAr062L39p468jVhuiIZeNxuzOjZHr8DCT3caHpxqE6DbZP3iD5oyqDWZCzoXC8LvLQbZLJd2WKrHBQu1EghvKjYvkFMIE+6dd0K7Mpoar79wT79BvUOp0VdXCGGWxUrxcnVN7rGD7AsoIbGynz7Jnoxk1ZbDvXERZSWfn+/oaQXmLQelHcMzkxPUu3Q4fDvllV4sKlS8sn/VjEE/j4e9ML6ZEdDgHvCMpQyA5eC6Xu7JxJ8Q+MhvEc4uHTsQctLi1FgxqTl0CJo2kZUMgNIgFdKQG2hQZNXmpQ0Z2AtLqD3lLTYY6Qh4DZ7LMP6cV2KFjsC/pIAkN31+xC49CCXgnjCKqDBxmr3Ac0SFfA4jkV8ISh5QSBqh68xEn13zJRh5in4Bo+KuaQFL85RvNF6VXlLqK4jN1e0BmrLgE=
+    - secure: gh9tcxhuUSz2/bBzHm8S3s6EQPU1GQjEQX+46b/YvTNGY33nRJLrOCdegxj0gN/QL+MPRVG2f0DSzPWLNjFhIvWvAk43uRbqSThmzXqFC0qnDoh7h2bm5cpuIOEl23VCxgYJUkyQeIIN7ZhRHdBDpNmPPEWu6Poue9Dad3lCo2I3ysca6nOVRuj0zqB76D/gebVhuBVOHzI4wAeguhCjNyMQ98JVrQaJydN6gTwGwyZgFjAOXKMY7lXPpPws3QMsn+7xNQsqQzorLPnRg+HtnI0DFwILyr9+P5kNxrQPYmawCwIAuYGCk9V+NbcN7M+GSONTzuyL5xsjU/Oi86kvq93zysKo5BHbAbyBCh2XRxafJ/ym//wtDMgsdgTR8VBV9cQXHmMhiT4Rvicc7opK5TXCyu73FXCJRqtyPB+Cq0POZ8raYuJqL6WLqxqjzKfHmU74V3iclt8NJNRbVcT+R/JrZPEWT3zi4NHVrBmXnXrphPGhdWhbDqnzFGTm152FMgwsBdZ+p9BjwwxSaNX83acOwKcsCr2GVYY8fccLY1q98CMRTndgoDOzvEevkXFqHkr1TecAeXbnz/6lFucZo9bp10kqOko/+5wxpsWxHC9udhCV11p2e2aMiyIH6j5rgcgJixWhCxM3pTpeaJTYcedfxtEiSEQKAN2NuP7/gcQ=
+    - secure: DPg2pSi9dsdfBJsAEzKdANm52zjbq0gIjtMy2Mu7hELRdYN14hKNZtQXndpaz+J9FQw3QyfcIvGz/m3QvhKBp0MEGGIk6/1c+Y0dlW0YVzi5Zpqkq2wYtFjT4kyBHJ+2uev+kWEhIuacdqC6AExJ3wBv7/s+KZ0l9yGjxZI0l5ps9nzz28CylxVTb6bYjepUXTH/mK7820yoIU7NzJSlYVI3po8x+Reg+Q0EMegXRmppECdd3AtxwD4RFDuathkqGbW+sJLqIpSyvNZoOnJYIDyGWabSPvgOLfM65f8rPgHw9Kp02vYtiQEr0KBvhEYxkJrT+W2fm84mGWUt7quTVNgrRdPSNjwjIPY41DiwY4qigDUELUVILVn95cxXq8iwQ8slnJh1ko+A2KwFgevPwJfQWpX7ytfjuncnLTXHXOQnlW7lmIMsYyFcuhp3e9aOe84hn6T/oS0ZfUo0vaiGVdi4qZZ0WQ0StoNxJ6EnYcE8qDgYzun0C2Za7Urr+1NVHydpDtzk9429KZJXnkWqEcASAIzDed6sBlRdQohPHUojUO2wlSQHF8/3RJArS8bl9O8l1VOHyQ3yyNf+00qssIDgtBpBpFKEBVCo6hc9Qu01KRCgV/tSCQmzuKdOqaaT729gezcRn6JSDGb8xgIy7b56ZdohZSMsUeCJa3EccQA=
+    - GITHUB_URL=https://github.com/pmeisen/tida-m2
+    - GITHUB_CREDENTIALS=~/.git-credentials
+    - MAVEN_M2=~/.m2
+
+before_install:
+  - git config --global user.name "$GITHUB_USER"
+  - git config --global user.email "$GITHUB_EMAIL"
+  - git config --global push.default matching
+  - git config --global credential.helper store --file=$GITHUB_CREDENTIALS
+
+  - touch $GITHUB_CREDENTIALS
+  - echo https://$GITHUB_USER:$GITHUB_PASSWORD@github.com/pmeisen/tida-m2 > $GITHUB_CREDENTIALS
+
+  - wget https://github.com/pmeisen/tida-workspace/archive/master.zip -O /tmp/master.zip
+  - unzip -o /tmp/master.zip -d ../
+  - mv ../tida-workspace-master ../tida-workspace
+
+  - mkdir -p $MAVEN_M2
+  - cd $MAVEN_M2
+  - rm -R *
+  - git clone $GITHUB_URL .
+  - cd $TRAVIS_BUILD_DIR
+install: true
+
+script: ant 03-run-test-suite 04-deploy
+
+after_success:
+  - cd $MAVEN_M2
+  - git pull $GITHUB_URL
+  - git add .
+  - git commit -m "Travis automated build $TRAVIS_BUILD_NUMBER ($TRAVIS_BUILD_ID)"
+  - git push $GITHUB_URL
+  - cd $TRAVIS_BUILD_DIR
