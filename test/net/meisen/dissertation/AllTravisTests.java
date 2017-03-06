@@ -54,17 +54,17 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 
         // Test the handler
-        TestTidaModelHandler.class,
+//        TestTidaModelHandler.class,
 
         // Test the record pre-processing
-        TestProcessedDataRecord.class,
+//        TestProcessedDataRecord.class,
 
         // Test the tida-indexes
-        TestMetaIndexDimension.class,
-        TestMetaIndex.class,
-        TestIntervalIndex.class,
-        TestDataRecordIndex.class,
-        TestTidaIndex.class,
+//        TestMetaIndexDimension.class,
+//        TestMetaIndex.class,
+//        TestIntervalIndex.class,
+//        TestDataRecordIndex.class,
+//        TestTidaIndex.class,
 
         // Test the query
         TestDescriptorValue.class, TestDescriptorComperator.class,
@@ -85,24 +85,24 @@ import org.junit.runners.Suite;
         TestDeleteQueries.class,
 
         // Tests dimensions
-        TestDescriptorDimension.class, // long init, 6s
-        TestDescriptorGraph.class, // long init, 7s
-        TestDays.class,
-        TestMinutes.class,
-        TestTimeLevelTemplateManager.TestTimeLevelTemplateManagerSuite.class,
-        TestTimeGraph.class, TestTimeGraphMemberIndex.class,
-        TestDimensionHandler.class,
+//        TestDescriptorDimension.class, // long init, 6s
+//        TestDescriptorGraph.class, // long init, 7s
+//        TestDays.class,
+//        TestMinutes.class,
+//        TestTimeLevelTemplateManager.TestTimeLevelTemplateManagerSuite.class,
+//        TestTimeGraph.class, TestTimeGraphMemberIndex.class,
+//        TestDimensionHandler.class,
 
         // Test the server
-        TestTidaServer.class, // 47s
-        TestCommunicationSuite.class, // 4m
-        TestAuthServlet.class, // 23s
+//        TestTidaServer.class, // 47s
+//        TestCommunicationSuite.class, // 4m
+//        TestAuthServlet.class, // 23s
 
         // JDBC related tests
-        TestTidaDriver.class,
-        TestTidaConnection.class,
-        TestTidaResultSet.class,
-        TestTidaDatabaseMetaData.TestTidaDatabaseMetaDataSuite.class,
+//        TestTidaDriver.class,
+//        TestTidaConnection.class,
+//        TestTidaResultSet.class,
+//        TestTidaDatabaseMetaData.TestTidaDatabaseMetaDataSuite.class,
         net.meisen.dissertation.jdbc.protocol.TestCommunication.class
 })
 public class AllTravisTests {
