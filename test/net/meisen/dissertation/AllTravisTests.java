@@ -53,9 +53,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 
-        // Test the configuration
-        TestConfig.TestConfigSuite.class, // really long init, 41s
-
         // Test the handler
         TestTidaModelHandler.class,
 
