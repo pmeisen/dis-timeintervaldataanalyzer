@@ -20,4 +20,8 @@
   <target name="04-deploy" depends="02-compile-sources">
     <build-jar />
   </target>
+
+  <target name="99-run-travis-test-suite" depends="02-compile-sources">
+    <do-run-test-suite testSuite="net.meisen.dissertation.AllTravisTests" maxmemory="2048M"/>
+  </target>
 </project>

@@ -37,7 +37,7 @@ public class LoaderBasedTest extends ExceptionBasedTest {
 	@Qualifier(DefaultValues.MODELHANDLER_ID)
 	protected TidaModelHandler loader;
 
-	private List<TidaModel> models = new ArrayList<TidaModel>();
+	private List<TidaModel> models = new ArrayList<>();
 
 	/**
 	 * Helper method to load a specific model. The method loads the data of the
