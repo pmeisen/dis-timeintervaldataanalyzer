@@ -35,7 +35,7 @@ before_install:
   - cd $TRAVIS_BUILD_DIR
 install: true
 
-script: travis_wait 60 ant 03-run-test-suite 04-deploy
+script: ant 04-deploy
 
 after_success:
   - cd $MAVEN_M2
