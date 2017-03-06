@@ -1,4 +1,4 @@
-package net.meisen.dissertation.server;
+package net.meisen.dissertation;
 
 import net.meisen.dissertation.config.TestConfig;
 import net.meisen.dissertation.impl.indexes.TestDataRecordIndex;
@@ -39,6 +39,9 @@ import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndex;
 import net.meisen.dissertation.model.indexes.datarecord.TestMetaIndexDimension;
 import net.meisen.dissertation.model.indexes.datarecord.TestProcessedDataRecord;
 import net.meisen.dissertation.model.indexes.datarecord.TestTidaIndex;
+import net.meisen.dissertation.server.TestAuthServlet;
+import net.meisen.dissertation.server.TestCommunication.TestCommunicationSuite;
+import net.meisen.dissertation.server.TestTidaServer;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -95,7 +98,7 @@ import org.junit.runners.Suite;
 
         // Test the server
         TestTidaServer.class, // 47s
-        TestCommunication.TestCommunicationSuite.class, // 4m
+        TestCommunicationSuite.class, // 4m
         TestAuthServlet.class, // 23s
 
         // JDBC related tests
