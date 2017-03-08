@@ -29,3 +29,5 @@ accordingly to the back-ends HTTP configuration.
 <p align="center">
   <img src="https://raw.githubusercontent.com/pmeisen/dis-timeintervaldataanalyzer/master/docs/tida-server-settings.png" alt="Server Settings" width="460">
 </p>
+
+Further documentation regarding the usage of the available `ant-targets`, `troubleshooting`, and many more may be added in the future.
