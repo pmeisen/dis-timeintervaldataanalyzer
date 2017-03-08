@@ -9,7 +9,7 @@ For further insights regarding the provided analytical capacities of the TIDAInf
 - [Indexing](https://www.researchgate.net/publication/274897254_Bitmap-Based_On-Line_Analytical_Processing_of_Time_Interval_Data)
 - [Similarity](https://www.researchgate.net/publication/283712168_Similarity_Search_of_Bounded_TIDASETs_within_Large_Time_Interval_Databases)
 
-If you'd like to test, play with, or develop the TIDAPlatform, please have a look at the umbrella/wrapper project [dis-timeintervaldataanalyzer-assembly](https://github.com/pmeisen/dis-timeintervaldataanalyzer-assembly).
+If you'd like to test, play with, or develop the TIDAPlatform, please have a look at the [umbrella/wrapper project](https://github.com/pmeisen/dis-timeintervaldataanalyzer-assembly).
  
 ## Back-End Development
 
