@@ -87,8 +87,8 @@ public class TestCommunication extends TestBaseWithConnection {
 			stmt.close();
 		}
 		assertNotNull(exception);
-		assertTrue(exception.getMessage().contains("PermissionException"));
-		assertTrue(exception.getMessage().contains("GLOBAL.connectTSQL"));
+		assertTrue(exception.getClass().getName(), exception.getMessage().contains("PermissionException"));
+		assertTrue(exception.getClass().getName(), exception.getMessage().contains("GLOBAL.connectTSQL"));
 
 		// check if tobias tries to load a model - the account cannot load
 		stmt = tobiasConn.createStatement();
