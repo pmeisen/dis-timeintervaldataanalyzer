@@ -1,4 +1,4 @@
-#Time Interval Data Analyzer
+# Time Interval Data Analyzer
 [![Build Status](https://travis-ci.org/pmeisen/dis-timeintervaldataanalyzer.svg?branch=master)](https://travis-ci.org/pmeisen/dis-timeintervaldataanalyzer)
 
 This project creates the back-end of the Time Interval Data Server. It is mentioned in the book [Time Interval Data Analysis](https://www.amazon.com/Analyzing-Time-Interval-Data-Introducing/dp/3658157275).
