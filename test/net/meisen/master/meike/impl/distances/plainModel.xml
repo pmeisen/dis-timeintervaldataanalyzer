@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model  http://dev.meisen.net/xsd/dissertation/tidaModel.xsd"
+
+       id="plainModel">
+
+    <time>
+        <timeline start="01.01.2017" end="31.12.2017 23:59:00" granularity="MINUTE" />
+    </time>
+
+    <meta>
+        <descriptors>
+        </descriptors>
+
+        <entries>
+        </entries>
+    </meta>
+
+    <structure>
+        <interval position="1" type="start" />
+        <interval position="2" type="end" />
+    </structure>
+
+    <data metahandling="create">
+        <dataset>
+            <entry class="java.util.Date" value="01.01.2017 00:00:00" />
+            <entry class="java.util.Date" value="04.03.2017 23:59:00" />
+        </dataset>
+
+        <dataset>
+            <entry class="java.util.Date" value="03.03.2017 00:00:00" />
+            <entry class="java.util.Date" value="03.03.2017 16:19:00" />
+        </dataset>
+
+        <dataset>
+            <entry class="java.util.Date" value="03.03.2017 16:20:00" />
+            <entry class="java.util.Date" value="03.03.2017 17:21:00" />
+        </dataset>
+
+        <dataset>
+            <entry class="java.util.Date" value="03.03.2017 17:22:00" />
+            <entry class="java.util.Date" value="04.03.2017 23:59:00" />
+        </dataset>
+
+        <dataset>
+            <entry class="java.util.Date" value="03.03.2017 00:00:00" />
+            <entry class="java.util.Date" value="04.03.2017 23:59:00" />
+        </dataset>
+
+        <dataset>
+            <entry class="java.util.Date" value="03.03.2017 00:00:00" />
+            <entry class="java.util.Date" value="05.03.2017 23:59:00" />
+        </dataset>
+    </data>
+</model>

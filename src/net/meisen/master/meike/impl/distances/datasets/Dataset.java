@@ -19,7 +19,7 @@ public class Dataset {
      *           The set of intervals this dataset consists of; must not be
      *           {@code null}.
      */
-    public Dataset(final Collection<Interval> intervals) {
+    Dataset(final Collection<Interval> intervals) {
         assert null != intervals;
 
         this.intervals = intervals;
