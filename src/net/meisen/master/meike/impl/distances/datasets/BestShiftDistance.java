@@ -3,6 +3,7 @@ package net.meisen.master.meike.impl.distances.datasets;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMatcher;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class BestShiftDistance implements IDatasetDistance {
 
     private final IDatasetMinCostMatcher matcher;
+    private long maxOffset = -1;
 
     private BestShiftDistance(final IDatasetMinCostMatcher matcher) {
         this.matcher = matcher;
@@ -33,6 +35,18 @@ public class BestShiftDistance implements IDatasetDistance {
         assert null != matcher;
 
         return new BestShiftDistance(matcher);
+    }
+
+    /**
+     * Limits the offsets to try for finding the best shift to those within a
+     * range of {@code maxOffset} from zero. Negative values mean that there is
+     * no limit - all possible offsets will be tried.
+     *
+     * @param maxOffset
+     *            the new offset range to use
+     */
+    public void setMaxOffset(final long maxOffset) {
+        this.maxOffset = maxOffset;
     }
 
     @Override
@@ -87,6 +101,15 @@ public class BestShiftDistance implements IDatasetDistance {
             }
         }
 
-        return offsets.stream().sorted().collect(Collectors.toList());
+        if (this.maxOffset > -1) {
+            return offsets.stream()
+                    .filter(v -> -this.maxOffset <= v && v <= this.maxOffset)
+                    .sorted(Comparator.comparingLong(v -> Math.abs(0 - v)))
+                    .collect(Collectors.toList());
+        } else {
+            return offsets.stream()
+                    .sorted(Comparator.comparingLong(v -> Math.abs(0 - v)))
+                    .collect(Collectors.toList());
+        }
     }
 }

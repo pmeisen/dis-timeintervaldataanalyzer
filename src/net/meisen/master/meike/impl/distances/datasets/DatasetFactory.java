@@ -43,13 +43,16 @@ public class DatasetFactory {
     public Dataset convertRecords(final SelectResultRecords records) {
         assert null != records;
 
+        final Date start = (Date) records.getQuery().getInterval().getStart();
+        final long offset = start.getTime();
+
         final TidaIndex index = this.model.getIndex();
         final Set<Interval> intervals =
                 Arrays.stream(records.getSelectedRecords().getIds())
                 .mapToObj(id -> {
                     final Object[] times = index.getTimePointValuesOfRecord(id);
-                    final long startTime = ((Date) times[0]).getTime();
-                    final long endTime = ((Date) times[1]).getTime();
+                    final long startTime = ((Date) times[0]).getTime() - offset;
+                    final long endTime = ((Date) times[1]).getTime() - offset;
                     return new Interval(startTime, endTime);
                 }).collect(Collectors.toSet());
 
