@@ -23,6 +23,8 @@ public class TestBasicDistances {
     private final Interval directlyBefore = new Interval(0L, 4L);
     private final Interval afterWithGap = new Interval(15L, 20L);
     private final Interval directlyAfter = new Interval(12L, 15L);
+    private final Interval zeroLength = new Interval(3L, 3L);
+    private final Interval zeroLengthOther = new Interval(4L, 4L);
 
     @Test
     public void testEndDistance() {
@@ -41,6 +43,7 @@ public class TestBasicDistances {
         assertEquals(8.0/12, distance.calculate(original, directlyBefore), 0);
         assertEquals(8.0/16, distance.calculate(original, afterWithGap), 0);
         assertEquals(3.0/11, distance.calculate(original, directlyAfter), 0);
+        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 
     @Test
@@ -60,7 +63,7 @@ public class TestBasicDistances {
         assertEquals(0, distance.calculate(original, directlyBefore), 0);
         assertEquals(3.0/16, distance.calculate(original, afterWithGap), 0);
         assertEquals(0, distance.calculate(original, directlyAfter), 0);
-
+        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 
     @Test
@@ -80,6 +83,7 @@ public class TestBasicDistances {
         assertEquals(1, distance.calculate(original, directlyBefore), 0);
         assertEquals(1, distance.calculate(original, afterWithGap), 0);
         assertEquals(1, distance.calculate(original, directlyAfter), 0);
+        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 
     @Test
@@ -99,6 +103,7 @@ public class TestBasicDistances {
         assertEquals(1-4.0/8, distance.calculate(original, directlyBefore), 0);
         assertEquals(1-5.0/8, distance.calculate(original, afterWithGap), 0);
         assertEquals(1-3.0/8, distance.calculate(original, directlyAfter), 0);
+        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 
     @Test
@@ -118,5 +123,6 @@ public class TestBasicDistances {
         assertEquals(4.0/12, distance.calculate(original, directlyBefore), 0);
         assertEquals(11.0/16, distance.calculate(original, afterWithGap), 0);
         assertEquals(8.0/11, distance.calculate(original, directlyAfter), 0);
+        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 }

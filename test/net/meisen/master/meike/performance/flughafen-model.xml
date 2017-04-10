@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:csv="http://dev.meisen.net/xsd/dissertation/model/csv"
+
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model       http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/csv   http://dev.meisen.net/xsd/dissertation/tidaCsvExtension.xsd"
+       id="flughafen">
+
+  <config>
+    <dataretrievers>
+      <dataretriever id="csv_retriever">
+        <csv:config file="/net/meisen/master/meike/performance/flughafen-first.csv" classpath="true" separator=";" />
+      </dataretriever>
+    </dataretrievers>
+  </config>
+
+  <time>
+    <timeline start="01.01.2008 00:00:00" end="31.12.2008 23:59:00" granularity="MINUTE" />
+  </time>
+    
+  <meta>
+    <descriptors>
+      <string id="PERSON" failonduplicates="false" null="false" name="person" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="TASKTYPE" failonduplicates="false" null="false" name="tasktype" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+      <string id="WORKAREA" failonduplicates="false" null="false" name="workarea" idfactory="net.meisen.dissertation.impl.idfactories.ShortIdsFactory" />
+    </descriptors>
+
+    <entries>
+      <entry descriptor="PERSON" dataretriever="csv_retriever">
+        <csv:selector column="PERSON" />
+      </entry>
+
+      <entry descriptor="TASKTYPE" dataretriever="csv_retriever">
+        <csv:selector column="TASKTYPE" />
+      </entry>
+
+      <entry descriptor="WORKAREA" dataretriever="csv_retriever">
+        <csv:selector column="WORKAREA" />
+      </entry>
+    </entries>
+  </meta>
+
+  <structure>
+    <meta name="PERSON" descriptor="PERSON" />
+    <meta name="TASKTYPE" descriptor="TASKTYPE" />
+    <meta name="WORKAREA" descriptor="WORKAREA" />
+
+    <interval name="INTERVAL_START" type="start" />
+    <interval name="INTERVAL_END" type="end" />
+  </structure>
+
+  <data metahandling="create" intervalhandling="failOnNull">
+    <dataset dataretriever="csv_retriever" />
+  </data>
+</model>

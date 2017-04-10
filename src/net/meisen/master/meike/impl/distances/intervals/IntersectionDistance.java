@@ -1,5 +1,6 @@
 package net.meisen.master.meike.impl.distances.intervals;
 
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
@@ -11,6 +12,6 @@ public class IntersectionDistance implements IIntervalDistance {
     @Override
     public double calculate(final Interval original, final Interval other) {
         return 1 - (double) original.getLengthOfIntersectionWith(other) /
-                min(original.getLength(), other.getLength());
+                max(1, min(original.getLength(), other.getLength()));
     }
 }

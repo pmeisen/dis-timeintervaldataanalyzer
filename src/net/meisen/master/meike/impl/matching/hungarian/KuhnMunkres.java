@@ -39,8 +39,12 @@ public class KuhnMunkres implements IDatasetMinCostMatcher {
         final int[] matching = algorithm.execute();
 
         double matchingCost = 0;
-        for (int i = 0; i < costs.length; i++) {
-            matchingCost += costs[i][matching[i]];
+        final int maxI = firstDataset.getIntervals().size();
+        final int maxJ = secondDataset.getIntervals().size();
+        for (int i = 0; i < maxI; i++) {
+            if (matching[i] < maxJ) {
+                matchingCost += costs[i][matching[i]];
+            }
         }
         return matchingCost;
     }
