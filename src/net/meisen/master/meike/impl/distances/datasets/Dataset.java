@@ -32,4 +32,16 @@ public class Dataset {
     public Collection<Interval> getIntervals() {
         return Collections.unmodifiableCollection(this.intervals);
     }
+
+    /**
+     * Shifts all intervals of this dataset by the given value.
+     *
+     * @param offset
+     *           the value to be used for shifting all the intervals
+     */
+    public void setOffset(final long offset) {
+        for (final Interval interval : this.intervals) {
+            interval.setOffset(offset);
+        }
+    }
 }
