@@ -58,6 +58,9 @@ class CostMatrix {
             costs[i] = new double[dimension];
             for (int j = 0; j < second.length; j++) {
                 costs[i][j] = distance.calculate(first[i], second[j]);
+                if(Double.isNaN(costs[i][j])) {
+                    throw new IllegalStateException("Cost must be a number!");
+                }
                 maximum = Math.max(maximum, costs[i][j]);
             }
         }

@@ -1,6 +1,8 @@
 package net.meisen.master.meike.impl.distances.intervals;
 
 
+import static java.lang.Math.max;
+
 /**
  * Calculates a distance value based on the gap between the two
  * {@link Interval}s: If the intervals overlap, this distance is zero,
@@ -12,6 +14,6 @@ public class GapDistance implements IIntervalDistance {
     @Override
     public double calculate(final Interval original, final Interval other) {
         return (double) original.getGapBetweenThisAnd(other) /
-                original.getTotalLengthCombinedWith(other);
+                max(1, original.getTotalLengthCombinedWith(other));
     }
 }

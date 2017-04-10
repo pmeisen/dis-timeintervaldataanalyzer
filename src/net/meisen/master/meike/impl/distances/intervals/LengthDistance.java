@@ -10,7 +10,7 @@ public class LengthDistance implements IIntervalDistance {
 
     @Override
     public double calculate(final Interval original, final Interval other) {
-        return 1 - (double) Math.min(original.getLength(), other.getLength()) /
-                max(1.0, max(original.getLength(), other.getLength()));
+        return 1 - max(1, (double) Math.min(original.getLength(), other.getLength())) /
+                max(1, max(original.getLength(), other.getLength()));
     }
 }
