@@ -30,14 +30,16 @@ public class TestWeightedSumDistance {
     public void testCombinationOfAllWeightsGivesValidResultForEmptyIntervals() {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
         distances.put(new EndDistance(), 1.0);
+        distances.put(new EndPositionDistance(), 1.0);
         distances.put(new GapDistance(), 1.0);
         distances.put(new IntersectionDistance(), 1.0);
         distances.put(new LengthDistance(), 1.0);
         distances.put(new StartDistance(), 1.0);
+        distances.put(new StartPositionDistance(), 1.0);
         final WeightedSumDistance distance = new WeightedSumDistance(distances);
 
         assertEquals(1.0, distance.calculate(this.someEmptyInterval, this.someEmptyInterval), 0);
-        assertEquals(4.0, distance.calculate(this.someEmptyInterval, this.anotherEmptyInterval), 0);
+        assertEquals(5.0, distance.calculate(this.someEmptyInterval, this.anotherEmptyInterval), 0);
     }
 
     private class ConstantDistance implements IIntervalDistance {

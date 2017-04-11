@@ -47,6 +47,26 @@ public class TestBasicDistances {
     }
 
     @Test
+    public void testEndPositionDistance() {
+        final EndPositionDistance distance = new EndPositionDistance();
+
+        assertEquals(0, distance.calculate(original, identical), 0);
+        assertEquals(0, distance.calculate(original, sameStartShorter), 0);
+        assertEquals(1, distance.calculate(original, sameStartLonger), 0);
+        assertEquals(0, distance.calculate(original, sameEndShorter), 0);
+        assertEquals(0, distance.calculate(original, sameEndLonger), 0);
+        assertEquals(1, distance.calculate(original, containingWholeInterval), 0);
+        assertEquals(0, distance.calculate(original, containingStart), 0);
+        assertEquals(1, distance.calculate(original, containingEnd), 0);
+        assertEquals(0, distance.calculate(original, contained), 0);
+        assertEquals(0, distance.calculate(original, beforeWithGap), 0);
+        assertEquals(0, distance.calculate(original, directlyBefore), 0);
+        assertEquals(1, distance.calculate(original, afterWithGap), 0);
+        assertEquals(1, distance.calculate(original, directlyAfter), 0);
+        assertEquals(1, distance.calculate(zeroLength, zeroLengthOther), 0);
+    }
+
+    @Test
     public void testGapDistance() {
         final GapDistance distance = new GapDistance();
 
@@ -124,5 +144,25 @@ public class TestBasicDistances {
         assertEquals(11.0/16, distance.calculate(original, afterWithGap), 0);
         assertEquals(8.0/11, distance.calculate(original, directlyAfter), 0);
         assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
+    }
+
+    @Test
+    public void testStartPositionDistance() {
+        final StartPositionDistance distance = new StartPositionDistance();
+
+        assertEquals(0, distance.calculate(original, identical), 0);
+        assertEquals(0, distance.calculate(original, sameStartShorter), 0);
+        assertEquals(0, distance.calculate(original, sameStartLonger), 0);
+        assertEquals(0, distance.calculate(original, sameEndShorter), 0);
+        assertEquals(1, distance.calculate(original, sameEndLonger), 0);
+        assertEquals(1, distance.calculate(original, containingWholeInterval), 0);
+        assertEquals(1, distance.calculate(original, containingStart), 0);
+        assertEquals(0, distance.calculate(original, containingEnd), 0);
+        assertEquals(0, distance.calculate(original, contained), 0);
+        assertEquals(1, distance.calculate(original, beforeWithGap), 0);
+        assertEquals(1, distance.calculate(original, directlyBefore), 0);
+        assertEquals(0, distance.calculate(original, afterWithGap), 0);
+        assertEquals(0, distance.calculate(original, directlyAfter), 0);
+        assertEquals(0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 }
