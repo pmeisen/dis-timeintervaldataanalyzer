@@ -41,7 +41,7 @@ public class TestKuhnMunkres {
         final double minimumCost = kuhnMunkres.calculateMinimumCost(
                 this.originalDataset, this.shorterDataset);
 
-        assertEquals(6.0, minimumCost, 0);
+        assertEquals(1.0, minimumCost, 0);
     }
 
     @Test
@@ -50,6 +50,6 @@ public class TestKuhnMunkres {
         final double minimumCost = kuhnMunkres.calculateMinimumCost(
                 this.originalDataset, this.longerDataset);
 
-        assertEquals(15.0, minimumCost, 0);
+        assertEquals(4.0, minimumCost, 0);
     }
 }

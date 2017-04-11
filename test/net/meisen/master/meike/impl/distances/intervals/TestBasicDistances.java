@@ -103,7 +103,7 @@ public class TestBasicDistances {
         assertEquals(1-4.0/8, distance.calculate(original, directlyBefore), 0);
         assertEquals(1-5.0/8, distance.calculate(original, afterWithGap), 0);
         assertEquals(1-3.0/8, distance.calculate(original, directlyAfter), 0);
-        assertEquals(1.0, distance.calculate(zeroLength, zeroLengthOther), 0);
+        assertEquals(0.0, distance.calculate(zeroLength, zeroLengthOther), 0);
     }
 
     @Test

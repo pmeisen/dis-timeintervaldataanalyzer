@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.max;
+
 /**
  * Factory for creating {@link Dataset}s from records.
  */
@@ -43,19 +45,24 @@ public class DatasetFactory {
     public Dataset convertRecords(final SelectResultRecords records) {
         assert null != records;
 
-        final Date start = (Date) records.getQuery().getInterval().getStart();
-        final long offset = start.getTime();
+        final long offset = null == records.getQuery().getInterval()
+                ? 0
+                : ((Date)records.getQuery().getInterval().getStart()).getTime();
 
         final TidaIndex index = this.model.getIndex();
         final Set<Interval> intervals =
                 Arrays.stream(records.getSelectedRecords().getIds())
-                .mapToObj(id -> {
-                    final Object[] times = index.getTimePointValuesOfRecord(id);
-                    final long startTime = ((Date) times[0]).getTime() - offset;
-                    final long endTime = ((Date) times[1]).getTime() - offset;
-                    return new Interval(startTime, endTime);
-                }).collect(Collectors.toSet());
+                        .mapToObj(id -> this.getInterval(index, id, offset))
+                        .collect(Collectors.toSet());
 
         return new Dataset(intervals);
+    }
+
+    private Interval getInterval(final TidaIndex index, final int id,
+                                 final long timeOffset) {
+        final Object[] times = index.getTimePointValuesOfRecord(id);
+        final long startTime = max(0, ((Date) times[0]).getTime() - timeOffset);
+        final long endTime = max(0, ((Date) times[1]).getTime() - timeOffset);
+        return new Interval(startTime, endTime);
     }
 }

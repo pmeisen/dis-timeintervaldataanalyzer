@@ -13,6 +13,7 @@ public class TestWeightedSumDistance {
     private final Interval anotherInterval = new Interval(20L, 37L);
 
     private final Interval someEmptyInterval = new Interval(5L, 5L);
+    private final Interval anotherEmptyInterval = new Interval(10L, 10L);
 
     @Test
     public void testWeightsAreUsedCorrectly() {
@@ -35,7 +36,8 @@ public class TestWeightedSumDistance {
         distances.put(new StartDistance(), 1.0);
         final WeightedSumDistance distance = new WeightedSumDistance(distances);
 
-        assertEquals(0.0, distance.calculate(this.someEmptyInterval, this.someEmptyInterval), 0);
+        assertEquals(1.0, distance.calculate(this.someEmptyInterval, this.someEmptyInterval), 0);
+        assertEquals(4.0, distance.calculate(this.someEmptyInterval, this.anotherEmptyInterval), 0);
     }
 
     private class ConstantDistance implements IIntervalDistance {
