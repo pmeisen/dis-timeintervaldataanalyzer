@@ -100,9 +100,9 @@ public class TestPerformanceFlughafen extends LoaderBasedTest {
         final long distanceTime = System.currentTimeMillis() - distanceStartTime;
         System.out.println("Calculating the distances took " + distanceTime + " milliseconds.");
 
-        assertEquals(443.3538571262819, cost1, 0.0000001);
-        assertEquals(389.3171285104354, cost2, 0.0000001);
-        assertEquals(419.05172366984084, cost3, 0.0000001);
+        assertEquals(533.1535571262812, cost1, 0.0000001);
+        assertEquals(883.3401090523115, cost2, 0.0000001);
+        assertEquals(568.7435313621484, cost3, 0.0000001);
     }
 
     @Test
@@ -133,8 +133,8 @@ public class TestPerformanceFlughafen extends LoaderBasedTest {
         final long distanceTime = System.currentTimeMillis() - distanceStartTime;
         System.out.println("Calculating the distances took " + distanceTime + " milliseconds.");
 
-        assertEquals(443.35385712628243, cost1, 0.0000001);
-        assertEquals(386.2912381719339, cost2, 0.0000001);
-        assertEquals(414.4698591965746, cost3, 0.0000001);
+        assertEquals(533.1535571262816, cost1, 0.0000001);
+        assertEquals(880.3189999366434, cost2, 0.0000001);
+        assertEquals(564.1600808460587, cost3, 0.0000001);
     }
 }
