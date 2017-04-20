@@ -2,8 +2,8 @@ package net.meisen.master.meike.impl.matching.hungarian;
 
 import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.matching.CostMatrix;
 import org.junit.Test;
 
 import java.util.Arrays;

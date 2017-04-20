@@ -1,13 +1,7 @@
 package net.meisen.master.meike.performance;
 
-import net.meisen.dissertation.config.xslt.DefaultValues;
-import net.meisen.dissertation.help.LoaderBasedTest;
-import net.meisen.dissertation.impl.parser.query.QueryFactory;
-import net.meisen.dissertation.impl.parser.query.select.SelectResultRecords;
+import com.google.common.collect.ImmutableSet;
 import net.meisen.dissertation.model.data.TidaModel;
-
-import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
-import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.DatasetFactory;
@@ -22,11 +16,12 @@ import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMatcher;
 import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
+import net.meisen.master.meike.impl.matching.lowerBounds.IgnoreMatching;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -34,33 +29,23 @@ import static org.junit.Assert.assertEquals;
 /**
  * Performance tests using the flughafen data.
  */
-public class TestPerformanceFlughafen extends LoaderBasedTest {
-    @Autowired
-    @Qualifier(DefaultValues.QUERYFACTORY_ID)
-    private QueryFactory queryFactory;
-
-    @SuppressWarnings("unchecked")
-    private <T extends IQuery> T createQuery(final String query) {
-        return (T) queryFactory.parseQuery(query);
+public class TestPerformanceFlughafen extends BasePerformanceTest {
+    private TidaModel loadModel() {
+        return m("/net/meisen/master/meike/performance/flughafen-model.xml", true);
     }
 
-    @SuppressWarnings("unchecked")
-    private SelectResultRecords evaluateQuery(final TidaModel model,
-                                              final String query) {
-        final TidaIndex index = model.getIndex();
-
-        final SelectResultRecords records =
-                queryFactory.evaluateQuery(createQuery(query), null);
-        records.determineResult(model);
-        return records;
+    private Dataset getFullDatasetForDate(final String date,
+                                          final TidaModel model,
+                                          final DatasetFactory datasetFactory) {
+        final String query = "SELECT RECORDS FROM flughafen DURING [" + date + " 00:00:00, " + date + " 23:59:59]";
+        return this.getDatasetFor(query, model, datasetFactory);
     }
 
-    private Dataset getDatasetForDate(final String date, final TidaModel model,
-                                      final DatasetFactory datasetFactory) {
-        final SelectResultRecords records = this.evaluateQuery(model,
-                "SELECT RECORDS FROM flughafen DURING [" + date + " 00:00:00, " + date + " 09:59:59]");
-
-        return datasetFactory.convertRecords(records);
+    private Dataset getShortDatasetForDate(final String date,
+                                           final TidaModel model,
+                                           final DatasetFactory datasetFactory) {
+        final String query = "SELECT RECORDS FROM flughafen DURING [" + date + " 00:00:00, " + date + " 09:59:59]";
+        return this.getDatasetFor(query, model, datasetFactory);
     }
 
     private IDatasetMinCostMatcher createKuhnMunkresMatcher() {
@@ -73,32 +58,75 @@ public class TestPerformanceFlughafen extends LoaderBasedTest {
         return KuhnMunkres.from(new WeightedSumDistance(distances));
     }
 
+    private IDatasetMinCostMatcher createLowerBoundMatcher() {
+        final Map<IIntervalDistance, Double> distances = new HashMap<>();
+        distances.put(new EndDistance(), 1.0);
+        distances.put(new GapDistance(), 1.0);
+        distances.put(new IntersectionDistance(), 1.0);
+        distances.put(new LengthDistance(), 1.0);
+        distances.put(new StartDistance(), 1.0);
+        return IgnoreMatching.from(new WeightedSumDistance(distances));
+    }
+
     @Test
-    public void testPlainDistanceKuhnMunkres() {
-        final TidaModel model = m("/net/meisen/master/meike/performance/flughafen-model.xml", true);
+    public void testTimingKuhnMunkres() {
+        final TidaModel model = this.loadModel();
         final DatasetFactory datasetFactory = DatasetFactory.forModel(model);
 
-        final long loadStartTime = System.currentTimeMillis();
+        final String originalDate = "05.01.2008";
+        final ImmutableSet<String> candidateDates = ImmutableSet.of(
+                "07.01.2008",
+                "08.01.2008",
+                "09.01.2008",
+                "01.01.2008",
+                "02.01.2008",
+                "03.01.2008",
+                "04.01.2008",
+                "05.01.2008",
+                "06.01.2008",
+                "10.01.2008");
 
-        final Dataset dayOne = this.getDatasetForDate("05.01.2008", model, datasetFactory);
-        final Dataset dayTwo = this.getDatasetForDate("02.01.2008", model, datasetFactory);
-        final Dataset dayThree = this.getDatasetForDate("03.01.2008", model, datasetFactory);
-        final Dataset dayFour = this.getDatasetForDate("04.01.2008", model, datasetFactory);
+        final Dataset original = this.getFullDatasetForDate(originalDate, model, datasetFactory);
 
-        final long loadTime = System.currentTimeMillis() - loadStartTime;
-        System.out.println("Loading took " + loadTime + " milliseconds.");
+        final List<Dataset> candidates = new ArrayList<>();
+        for (final String candidateDate : candidateDates) {
+            candidates.add(this.getFullDatasetForDate(candidateDate, model, datasetFactory));
+        }
+
+        final IDatasetDistance kuhnMunkres =
+                PlainDistance.from(this.createKuhnMunkresMatcher());
+        final IDatasetDistance lowerBound =
+                PlainDistance.from(this.createLowerBoundMatcher());
+
+        for (final Dataset candidate : candidates) {
+            final long exactStartTime = System.currentTimeMillis();
+            final double exactCost = kuhnMunkres.calculate(original, candidate);
+            final long exactFinishTime = System.currentTimeMillis();
+            System.out.println("Time for exact result:\t" + (exactFinishTime - exactStartTime) + "\t Value: " + exactCost);
+
+            final long boundStartTime = System.currentTimeMillis();
+            final double boundCost = lowerBound.calculate(original, candidate);
+            final long boundFinishTime = System.currentTimeMillis();
+            System.out.println("Time for lower bound:\t" + (boundFinishTime - boundStartTime) + "\t Value: " + boundCost);
+        }
+    }
+
+    @Test
+    public void testPlainDistanceKuhnMunkresCosts() {
+        final TidaModel model = this.loadModel();
+        final DatasetFactory datasetFactory = DatasetFactory.forModel(model);
+
+        final Dataset dayOne = this.getShortDatasetForDate("05.01.2008", model, datasetFactory);
+        final Dataset dayTwo = this.getShortDatasetForDate("02.01.2008", model, datasetFactory);
+        final Dataset dayThree = this.getShortDatasetForDate("03.01.2008", model, datasetFactory);
+        final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
         final IDatasetDistance distance =
                 PlainDistance.from(this.createKuhnMunkresMatcher());
 
-        final long distanceStartTime = System.currentTimeMillis();
-
         final double cost1 = distance.calculate(dayOne, dayTwo);
         final double cost2 = distance.calculate(dayOne, dayThree);
         final double cost3 = distance.calculate(dayOne, dayFour);
-
-        final long distanceTime = System.currentTimeMillis() - distanceStartTime;
-        System.out.println("Calculating the distances took " + distanceTime + " milliseconds.");
 
         assertEquals(533.1535571262812, cost1, 0.0000001);
         assertEquals(883.3401090523115, cost2, 0.0000001);
@@ -106,19 +134,14 @@ public class TestPerformanceFlughafen extends LoaderBasedTest {
     }
 
     @Test
-    public void testBestShiftKuhnMunkres() {
-        final TidaModel model = m("/net/meisen/master/meike/performance/flughafen-model.xml", true);
+    public void testBestShiftKuhnMunkresCosts() {
+        final TidaModel model = this.loadModel();
         final DatasetFactory datasetFactory = DatasetFactory.forModel(model);
 
-        final long loadStartTime = System.currentTimeMillis();
-
-        final Dataset dayOne = this.getDatasetForDate("05.01.2008", model, datasetFactory);
-        final Dataset dayTwo = this.getDatasetForDate("02.01.2008", model, datasetFactory);
-        final Dataset dayThree = this.getDatasetForDate("03.01.2008", model, datasetFactory);
-        final Dataset dayFour = this.getDatasetForDate("04.01.2008", model, datasetFactory);
-
-        final long loadTime = System.currentTimeMillis() - loadStartTime;
-        System.out.println("Loading took " + loadTime + " milliseconds.");
+        final Dataset dayOne = this.getShortDatasetForDate("05.01.2008", model, datasetFactory);
+        final Dataset dayTwo = this.getShortDatasetForDate("02.01.2008", model, datasetFactory);
+        final Dataset dayThree = this.getShortDatasetForDate("03.01.2008", model, datasetFactory);
+        final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
         final BestShiftDistance distance =
                 BestShiftDistance.from(this.createKuhnMunkresMatcher());
@@ -129,9 +152,6 @@ public class TestPerformanceFlughafen extends LoaderBasedTest {
         final double cost1 = distance.calculate(dayOne, dayTwo);
         final double cost2 = distance.calculate(dayOne, dayThree);
         final double cost3 = distance.calculate(dayOne, dayFour);
-
-        final long distanceTime = System.currentTimeMillis() - distanceStartTime;
-        System.out.println("Calculating the distances took " + distanceTime + " milliseconds.");
 
         assertEquals(533.1535571262816, cost1, 0.0000001);
         assertEquals(880.3189999366434, cost2, 0.0000001);
