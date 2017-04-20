@@ -2,6 +2,7 @@ package net.meisen.master.meike.impl.matching.hungarian;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
+import net.meisen.master.meike.impl.matching.CostMatrix;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMatcher;
 
 /**
@@ -35,6 +36,7 @@ public class KuhnMunkres implements IDatasetMinCostMatcher {
                                        final Dataset secondDataset) {
         final double[][] costs = new CostMatrix(this.distanceMeasure,
                 firstDataset, secondDataset).getCosts();
+
         final HungarianAlgorithm algorithm = new HungarianAlgorithm(costs);
         final int[] matching = algorithm.execute();
 

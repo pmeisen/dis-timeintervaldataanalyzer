@@ -1,4 +1,4 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.matching;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
@@ -10,7 +10,7 @@ import java.util.Arrays;
  * Utility class for creating and manipulating the cost matrix for two given
  * sets of {@link Interval}s and a distance measure.
  */
-class CostMatrix {
+public class CostMatrix {
     private final double[][] costs;
 
     public CostMatrix(final IIntervalDistance distanceMeasure,
