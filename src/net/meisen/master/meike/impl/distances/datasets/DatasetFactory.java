@@ -65,6 +65,6 @@ public class DatasetFactory {
         // the [START] and [END] is always located at pos 1 and 2, 0 is [ID]
         final long startTime = max(0, ((Date) values[1]).getTime() - timeOffset);
         final long endTime = max(0, ((Date) values[2]).getTime() - timeOffset);
-        return new Interval(0, 0);
+        return new Interval(startTime, endTime);
     }
 }
