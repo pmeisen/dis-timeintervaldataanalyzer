@@ -18,6 +18,9 @@ import static java.lang.Math.max;
 public class DatasetFactory {
     private final TidaModel model;
 
+    private int startPos = -1;
+    private int endPos = -1;
+
     private DatasetFactory(final TidaModel model) {
         this.model = model;
     }
@@ -25,8 +28,7 @@ public class DatasetFactory {
     /**
      * Initializes a factory for creating datasets for the given model.
      *
-     * @param model
-     *            The tida model to use; must not be {@code null}.
+     * @param model The tida model to use; must not be {@code null}.
      * @return an initialized dataset factory
      */
     public static DatasetFactory forModel(final TidaModel model) {
@@ -38,8 +40,7 @@ public class DatasetFactory {
     /**
      * Converts the given select result records to a dataset of {@link Interval}s.
      *
-     * @param records
-     *            The results from a record select query; must not be {@code null}.
+     * @param records The results from a record select query; must not be {@code null}.
      * @return a corresponding dataset.
      */
     public Dataset convertRecords(final SelectResultRecords records) {
@@ -47,7 +48,7 @@ public class DatasetFactory {
 
         final long offset = null == records.getQuery().getInterval()
                 ? 0
-                : ((Date)records.getQuery().getInterval().getStart()).getTime();
+                : ((Date) records.getQuery().getInterval().getStart()).getTime();
 
         final TidaIndex index = this.model.getIndex();
         final Set<Interval> intervals =
@@ -58,11 +59,12 @@ public class DatasetFactory {
         return new Dataset(intervals);
     }
 
-    private Interval getInterval(final TidaIndex index, final int id,
-                                 final long timeOffset) {
-        final Object[] times = index.getTimePointValuesOfRecord(id);
-        final long startTime = max(0, ((Date) times[0]).getTime() - timeOffset);
-        final long endTime = max(0, ((Date) times[1]).getTime() - timeOffset);
-        return new Interval(startTime, endTime);
+    protected Interval getInterval(final TidaIndex index, final int id, final long timeOffset) {
+        final Object[] values = index.getRecordAsArray(id);
+
+        // the [START] and [END] is always located at pos 1 and 2, 0 is [ID]
+        final long startTime = max(0, ((Date) values[1]).getTime() - timeOffset);
+        final long endTime = max(0, ((Date) values[2]).getTime() - timeOffset);
+        return new Interval(0, 0);
     }
 }
