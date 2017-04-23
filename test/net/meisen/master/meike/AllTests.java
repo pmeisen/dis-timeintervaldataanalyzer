@@ -6,6 +6,8 @@ import net.meisen.master.meike.impl.distances.intervals.TestBasicDistances;
 import net.meisen.master.meike.impl.distances.intervals.TestWeightedSumDistance;
 import net.meisen.master.meike.impl.matching.hungarian.TestCostMatrix;
 import net.meisen.master.meike.impl.matching.hungarian.TestKuhnMunkres;
+import net.meisen.master.meike.performance.TestPerformanceCostMatrix;
+import net.meisen.master.meike.performance.TestPerformanceDatasetFactory;
 import net.meisen.master.meike.performance.TestPerformanceFlughafen;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -21,6 +23,8 @@ import org.junit.runners.Suite;
         TestWeightedSumDistance.class,
         TestCostMatrix.class,
         TestKuhnMunkres.class,
+        TestPerformanceDatasetFactory.class,
+        TestPerformanceCostMatrix.class,
         TestPerformanceFlughafen.class
 })
 public class AllTests {

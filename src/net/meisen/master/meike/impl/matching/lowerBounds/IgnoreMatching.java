@@ -35,21 +35,10 @@ public class IgnoreMatching implements IDatasetMinCostMatcher {
     @Override
     public double calculateMinimumCost(final Dataset firstDataset,
                                        final Dataset secondDataset) {
-        final long startTime = System.currentTimeMillis();
         final CostMatrix costMatrix = new CostMatrix(this.distanceMeasure,
                 firstDataset, secondDataset);
-        final long costMatrixFinishTime = System.currentTimeMillis();
-        final long costMatrixTime = costMatrixFinishTime - startTime;
-        System.out.println("Cost matrix: \t" + costMatrixTime);
 
-        final double lowerBoundValue = this.sumOfRowMinima(costMatrix);
-        final long algorithmFinishTime = System.currentTimeMillis();
-        final long algorithmTime = algorithmFinishTime - costMatrixFinishTime;
-        System.out.println("Algorithm:\t" + algorithmTime);
-
-        System.out.println("Ratio: \t" + algorithmTime / (double) costMatrixTime);
-
-        return lowerBoundValue;
+        return this.sumOfRowMinima(costMatrix);
     }
 
     private double sumOfRowMinima(final CostMatrix costMatrix) {

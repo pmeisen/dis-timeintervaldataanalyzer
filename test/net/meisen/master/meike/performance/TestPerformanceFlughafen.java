@@ -98,6 +98,7 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final IDatasetDistance lowerBound =
                 PlainDistance.from(this.createLowerBoundMatcher());
 
+        final long startTime = System.currentTimeMillis();
         for (final Dataset candidate : candidates) {
             final long exactStartTime = System.currentTimeMillis();
             final double exactCost = kuhnMunkres.calculate(original, candidate);
@@ -109,6 +110,8 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
             final long boundFinishTime = System.currentTimeMillis();
             System.out.println("Time for lower bound:\t" + (boundFinishTime - boundStartTime) + "\t Value: " + boundCost);
         }
+        final long endTime = System.currentTimeMillis();
+        System.out.println(endTime - startTime);
     }
 
     @Test
