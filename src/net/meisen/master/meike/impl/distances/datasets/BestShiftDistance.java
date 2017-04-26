@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class BestShiftDistance implements IDatasetDistance {
 
     private final IDatasetMinCostMatcher matcher;
+
     private long maxOffset = -1;
 
     private BestShiftDistance(final IDatasetMinCostMatcher matcher) {
