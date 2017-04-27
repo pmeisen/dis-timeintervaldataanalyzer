@@ -14,7 +14,7 @@ import net.meisen.master.meike.impl.distances.intervals.IntersectionDistance;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMatcher;
+import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
 import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
 import net.meisen.master.meike.impl.matching.lowerBounds.IgnoreMatching;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         return this.getDatasetFor(query, model, datasetFactory);
     }
 
-    private IDatasetMinCostMatcher createKuhnMunkresMatcher() {
+    private IDatasetMinCostMapper createKuhnMunkresMatcher() {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
         distances.put(new EndDistance(), 1.0);
         distances.put(new GapDistance(), 1.0);
@@ -58,7 +58,7 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         return KuhnMunkres.from(new WeightedSumDistance(distances));
     }
 
-    private IDatasetMinCostMatcher createLowerBoundMatcher() {
+    private IDatasetMinCostMapper createLowerBoundMatcher() {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
         distances.put(new EndDistance(), 1.0);
         distances.put(new GapDistance(), 1.0);

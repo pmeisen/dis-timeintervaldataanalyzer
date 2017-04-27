@@ -2,6 +2,7 @@ package net.meisen.master.meike;
 
 import net.meisen.master.meike.impl.distances.datasets.TestBestShiftDistance;
 import net.meisen.master.meike.impl.distances.datasets.TestDatasetFactory;
+import net.meisen.master.meike.impl.distances.datasets.TestIterativeShiftDistance;
 import net.meisen.master.meike.impl.distances.intervals.TestBasicDistances;
 import net.meisen.master.meike.impl.distances.intervals.TestWeightedSumDistance;
 import net.meisen.master.meike.impl.knnSearch.TestNearestNeighbors;
@@ -19,6 +20,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         TestBestShiftDistance.class,
+        TestIterativeShiftDistance.class,
         TestDatasetFactory.class,
         TestBasicDistances.class,
         TestWeightedSumDistance.class,

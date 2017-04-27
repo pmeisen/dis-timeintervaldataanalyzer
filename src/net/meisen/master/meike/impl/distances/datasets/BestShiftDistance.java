@@ -1,7 +1,7 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMatcher;
+import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -12,41 +12,47 @@ import java.util.stream.Collectors;
 /**
  * Allows calculating the distance between two {@link Dataset}s considering
  * the possibility to shift all {@link Interval}s of one of them by a constant
- * offset.
+ * offset. The algorithm considers all 4n^2 possible offset values in order of
+ * increasing absolute value; if the application allows limiting the range of
+ * possible offsets, a maximum valid offset can be configured beforehand.
  */
 public class BestShiftDistance implements IDatasetDistance {
 
-    private final IDatasetMinCostMatcher matcher;
+    public static final long UNLIMITED_OFFSET = -1;
 
-    private long maxOffset = -1;
+    private final IDatasetMinCostMapper mapper;
 
-    private BestShiftDistance(final IDatasetMinCostMatcher matcher) {
-        this.matcher = matcher;
+    private long maxOffset = UNLIMITED_OFFSET;
+
+    private BestShiftDistance(final IDatasetMinCostMapper mapper) {
+        this.mapper = mapper;
     }
 
     /**
-     * Creates a new instance using the given matcher for distance calculation.
+     * Creates a new instance using the given mapper for distance calculation.
      *
-     * @param matcher
-     *           the matcher to calculate the distance between two datasets;
-     *           must not be {@code null}.
-     * @return an instance of this class that uses the given matcher
+     * @param mapper
+     *          the mapper to calculate the distance between two datasets;
+     *          must not be {@code null}.
+     * @return an instance of this class that uses the given mapper
      */
-    public static BestShiftDistance from(final IDatasetMinCostMatcher matcher) {
-        assert null != matcher;
+    public static BestShiftDistance from(final IDatasetMinCostMapper mapper) {
+        assert null != mapper;
 
-        return new BestShiftDistance(matcher);
+        return new BestShiftDistance(mapper);
     }
 
     /**
      * Limits the offsets to try for finding the best shift to those within a
-     * range of {@code maxOffset} from zero. Negative values mean that there is
-     * no limit - all possible offsets will be tried.
+     * range of {@code maxOffset} from zero. Setting this to the default value
+     * {@link BestShiftDistance#UNLIMITED_OFFSET} will remove any restrictions.
      *
      * @param maxOffset
-     *            the new offset range to use
+     *          the new offset range to use
      */
     public void setMaxOffset(final long maxOffset) {
+        assert 0 <= maxOffset || UNLIMITED_OFFSET == maxOffset;
+
         this.maxOffset = maxOffset;
     }
 
@@ -76,7 +82,7 @@ public class BestShiftDistance implements IDatasetDistance {
                                        final Dataset original,
                                        final Dataset other) {
         original.setOffset(offset);
-        return this.matcher.calculateMinimumCost(original, other);
+        return this.mapper.calculateMinimumCostMapping(original, other).getCost();
     }
 
     /**
@@ -102,13 +108,13 @@ public class BestShiftDistance implements IDatasetDistance {
             }
         }
 
-        if (this.maxOffset > -1) {
+        if (UNLIMITED_OFFSET == this.maxOffset) {
             return offsets.stream()
-                    .filter(v -> -this.maxOffset <= v && v <= this.maxOffset)
                     .sorted(Comparator.comparingLong(v -> Math.abs(0 - v)))
                     .collect(Collectors.toList());
         } else {
             return offsets.stream()
+                    .filter(v -> -this.maxOffset <= v && v <= this.maxOffset)
                     .sorted(Comparator.comparingLong(v -> Math.abs(0 - v)))
                     .collect(Collectors.toList());
         }

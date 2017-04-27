@@ -1,5 +1,6 @@
 package net.meisen.master.meike.impl.matching.hungarian;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
@@ -13,18 +14,18 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCostMatrix {
 
-    private Dataset originalDataset = new Dataset(ImmutableSet.of(
+    private Dataset originalDataset = new Dataset(ImmutableList.of(
             new Interval(0L, 4L),
             new Interval(2L, 5L),
             new Interval(6L, 8L)));
-    private Dataset sameLengthDataset = new Dataset(ImmutableSet.of(
+    private Dataset sameLengthDataset = new Dataset(ImmutableList.of(
             new Interval(1L, 3L),
             new Interval(2L, 7L),
             new Interval(5L, 9L)));
-    private Dataset shorterDataset = new Dataset(ImmutableSet.of(
+    private Dataset shorterDataset = new Dataset(ImmutableList.of(
             new Interval(5L, 7L),
             new Interval(2L, 3L)));
-    private Dataset longerDataset = new Dataset(ImmutableSet.of(
+    private Dataset longerDataset = new Dataset(ImmutableList.of(
             new Interval(0L, 5L),
             new Interval(3L, 9L),
             new Interval(1L, 10L),

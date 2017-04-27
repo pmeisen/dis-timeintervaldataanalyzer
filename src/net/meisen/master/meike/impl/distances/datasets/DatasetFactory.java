@@ -7,7 +7,7 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.max;
@@ -28,7 +28,8 @@ public class DatasetFactory {
     /**
      * Initializes a factory for creating datasets for the given model.
      *
-     * @param model The tida model to use; must not be {@code null}.
+     * @param model
+     *          The tida model to use; must not be {@code null}.
      * @return an initialized dataset factory
      */
     public static DatasetFactory forModel(final TidaModel model) {
@@ -38,9 +39,11 @@ public class DatasetFactory {
     }
 
     /**
-     * Converts the given select result records to a dataset of {@link Interval}s.
+     * Converts the given select result records to a {@link Dataset} of
+     * {@link Interval}s.
      *
-     * @param records The results from a record select query; must not be {@code null}.
+     * @param records
+     *          The results from a record select query; must not be {@code null}.
      * @return a corresponding dataset.
      */
     public Dataset convertRecords(final SelectResultRecords records) {
@@ -51,10 +54,10 @@ public class DatasetFactory {
                 : ((Date) records.getQuery().getInterval().getStart()).getTime();
 
         final TidaIndex index = this.model.getIndex();
-        final Set<Interval> intervals =
+        final List<Interval> intervals =
                 Arrays.stream(records.getSelectedRecords().getIds())
                         .mapToObj(id -> this.getInterval(index, id, offset))
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toList());
 
         return new Dataset(intervals);
     }
