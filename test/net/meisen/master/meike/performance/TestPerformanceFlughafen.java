@@ -98,20 +98,18 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final IDatasetDistance lowerBound =
                 PlainDistance.from(this.createLowerBoundMatcher());
 
-        final long startTime = System.currentTimeMillis();
-        for (final Dataset candidate : candidates) {
-            final long exactStartTime = System.currentTimeMillis();
-            final double exactCost = kuhnMunkres.calculate(original, candidate);
-            final long exactFinishTime = System.currentTimeMillis();
-            System.out.println("Time for exact result:\t" + (exactFinishTime - exactStartTime) + "\t Value: " + exactCost);
-
-            final long boundStartTime = System.currentTimeMillis();
-            final double boundCost = lowerBound.calculate(original, candidate);
-            final long boundFinishTime = System.currentTimeMillis();
-            System.out.println("Time for lower bound:\t" + (boundFinishTime - boundStartTime) + "\t Value: " + boundCost);
-        }
-        final long endTime = System.currentTimeMillis();
-        System.out.println(endTime - startTime);
+        this.logger.logTiming("Total test run", () -> {
+            for (final Dataset candidate : candidates) {
+                this.logger.logTiming("Lower bound", () -> {
+                    final double boundCost = lowerBound.calculate(original, candidate);
+                    this.logger.log("Bound value:\t" + boundCost);
+                });
+                this.logger.logTiming("Exact calculation", () -> {
+                    final double exactCost = kuhnMunkres.calculate(original, candidate);
+                    this.logger.log("Exact value:\t" + exactCost);
+                });
+            }
+        });
     }
 
     @Test
@@ -149,8 +147,6 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final BestShiftDistance distance =
                 BestShiftDistance.from(this.createKuhnMunkresMatcher());
         distance.setMaxOffset(180000);
-
-        final long distanceStartTime = System.currentTimeMillis();
 
         final double cost1 = distance.calculate(dayOne, dayTwo);
         final double cost2 = distance.calculate(dayOne, dayThree);

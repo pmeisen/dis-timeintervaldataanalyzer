@@ -1,7 +1,6 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.intervals.EndDistance;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;

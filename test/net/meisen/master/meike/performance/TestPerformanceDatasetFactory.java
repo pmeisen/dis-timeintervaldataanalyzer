@@ -30,12 +30,13 @@ public class TestPerformanceDatasetFactory extends BasePerformanceTest {
                 "02.01.2008", "03.01.2008", "04.01.2008", "05.01.2008");
 
         for (int i = 1; i <= 3; i++) {
-            System.out.println("Iteration " + i);
-            for (final String date : dates) {
-                final long startTime = System.currentTimeMillis();
-                this.getDatasetForDate(date, model, datasetFactory);
-                System.out.println("Took " + (System.currentTimeMillis() - startTime) + " milliseconds.");
-            }
+            this.logger.logTiming("Iteration " + i + " total", () -> {
+                for (final String date : dates) {
+                    this.logger.logTiming(date, () -> {
+                        this.getDatasetForDate(date, model, datasetFactory);
+                    });
+                }
+            });
         }
     }
 }

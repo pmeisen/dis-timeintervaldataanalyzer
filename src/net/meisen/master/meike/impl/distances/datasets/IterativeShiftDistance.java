@@ -3,6 +3,8 @@ package net.meisen.master.meike.impl.distances.datasets;
 import javafx.util.Pair;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.logging.ILogger;
+import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
 import net.meisen.master.meike.impl.matching.Mapping;
 
@@ -19,11 +21,13 @@ import java.util.stream.Collectors;
 public class IterativeShiftDistance implements IDatasetDistance {
     private final IDatasetMinCostMapper mapper;
     private final IIntervalDistance distanceMeasure;
+    private final ILogger logger;
 
     private IterativeShiftDistance(final IDatasetMinCostMapper mapper,
                                    final IIntervalDistance distanceMeasure) {
         this.mapper = mapper;
         this.distanceMeasure = distanceMeasure;
+        this.logger = new SimpleConsoleLogger();
     }
 
     /**
@@ -53,7 +57,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
         assert null != other;
 
         long nextOffset = this.calculateInitialOffset(original, other);
-        System.out.println("Initial offset: \t" + nextOffset);
+        this.logger.log("Initial offset: \t" + nextOffset);
         long previousOffset;
         Mapping mapping;
         do {
@@ -110,7 +114,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
                 minimumCost = cost;
             }
         }
-        System.out.println("Best offset: \t" + bestOffset);
+        this.logger.log("Best offset: \t" + bestOffset);
         return bestOffset;
     }
 

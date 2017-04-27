@@ -9,6 +9,7 @@ import net.meisen.dissertation.model.indexes.datarecord.TidaIndex;
 import net.meisen.dissertation.model.parser.query.IQuery;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.DatasetFactory;
+import net.meisen.master.meike.impl.logging.PerformanceLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -19,6 +20,8 @@ public class BasePerformanceTest extends LoaderBasedTest {
     @Autowired
     @Qualifier(DefaultValues.QUERYFACTORY_ID)
     private QueryFactory queryFactory;
+
+    protected final PerformanceLogger logger = new PerformanceLogger();
 
     @SuppressWarnings("unchecked")
     private <T extends IQuery> T createQuery(final String query) {

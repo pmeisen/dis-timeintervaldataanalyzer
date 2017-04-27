@@ -1,7 +1,11 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.logging.ILogger;
+import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -21,11 +25,13 @@ public class BestShiftDistance implements IDatasetDistance {
     public static final long UNLIMITED_OFFSET = -1;
 
     private final IDatasetMinCostMapper mapper;
+    private final ILogger logger;
 
     private long maxOffset = UNLIMITED_OFFSET;
 
     private BestShiftDistance(final IDatasetMinCostMapper mapper) {
         this.mapper = mapper;
+        this.logger = new SimpleConsoleLogger();
     }
 
     /**
@@ -73,7 +79,7 @@ public class BestShiftDistance implements IDatasetDistance {
             }
         }
 
-        System.out.println("Best offset: " + bestOffset);
+        this.logger.log("Best offset: \t" + bestOffset);
 
         return bestDistance;
     }

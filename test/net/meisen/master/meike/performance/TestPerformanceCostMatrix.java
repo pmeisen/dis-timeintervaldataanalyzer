@@ -71,15 +71,14 @@ public class TestPerformanceCostMatrix extends BasePerformanceTest {
         final Pair<Dataset, Collection<Dataset>> datasets = this.loadDatasets();
         final Dataset original = datasets.getKey();
 
-        final long startTime = System.currentTimeMillis();
-        for (final Dataset candidate : datasets.getValue()) {
-            final long costMatrixStartTime = System.currentTimeMillis();
-            final CostMatrix costMatrix = new CostMatrix(distance, original, candidate);
-            final long costMatrixFinsihTime = System.currentTimeMillis();
-            System.out.println("Cost matrix: \t" + (costMatrixFinsihTime - costMatrixStartTime));
-        }
-        final long endTime = System.currentTimeMillis();
-        System.out.println("Total: \t" + (endTime - startTime));
+        this.logger.logTiming("All cost matrices", () -> {
+            for (final Dataset candidate : datasets.getValue()) {
+                this.logger.logTiming("Cost matrix", () -> {
+                    final CostMatrix costMatrix =
+                            new CostMatrix(distance, original, candidate);
+                });
+            }
+        });
     }
 
     @Test
