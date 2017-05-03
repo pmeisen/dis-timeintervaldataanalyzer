@@ -2,6 +2,8 @@ package net.meisen.master.meike.impl.matching;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.matching.CostMatrix;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 /**
  * Interface for algorithms that calculate a min-cost mapping (usually a
@@ -19,4 +21,6 @@ public interface IDatasetMinCostMapper {
      * @return a mapping between the two datasets' intervals with minimum cost
      */
     Mapping calculateMinimumCostMapping(Dataset original, Dataset other);
+
+    Mapping calculateMinimumCostMapping(CostMatrix costMatrix);
 }

@@ -8,7 +8,11 @@ import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.matching.costCalculation.CompleteMatrix;
+import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -44,7 +48,7 @@ public class TestIterativeShiftDistance {
     private IIntervalDistance createIntervalDistance() {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
         distances.put(new EndDistance(), 1.0);
-        distances.put(new LengthDistance(), 1.0);
+        distances.put(new LengthDistance(), 2.0);
         distances.put(new StartDistance(), 1.0);
         return new WeightedSumDistance(distances);
     }
@@ -52,22 +56,24 @@ public class TestIterativeShiftDistance {
     @Test
     public void testShiftedCandidateGivesZeroDistance() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure);
+        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 
-        final double bestDistance = datasetDistance.calculate(original, shiftedByTen);
-        assertEquals(0.0, bestDistance, 0);
+        final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTen);
+        assertEquals(0.0, bestMapping.getCost(), 0);
     }
 
     @Test
     public void testShiftedCandidateWithExtra() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure);
+        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 
-        final double bestDistance = datasetDistance.calculate(original, shiftedByTenPlusExtra);
-        assertEquals(9.793518518518518, bestDistance, 0.0001);
+        final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTenPlusExtra);
+        assertEquals(0.0, bestMapping.getCost(), 0.0001);
     }
 }

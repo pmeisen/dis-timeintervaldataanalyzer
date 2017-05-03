@@ -3,6 +3,7 @@ package net.meisen.master.meike.impl.knnSearch;
 import net.meisen.master.meike.impl.bounds.ILowerBound;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 import java.util.Collection;
 import java.util.List;
@@ -83,7 +84,8 @@ public class NearestNeighborSearch {
 
         while (queue.peek().getLowerBound() < nearestNeighbors.getLargestDistance()) {
             final Dataset candidate = queue.poll().getDataset();
-            nearestNeighbors.add(Neighbor.from(candidate, this.exactDistance.calculate(original, candidate)));
+            final Mapping mapping = this.exactDistance.calculate(original, candidate);
+            nearestNeighbors.add(Neighbor.from(candidate, mapping.getCost()));
         }
 
         return nearestNeighbors;

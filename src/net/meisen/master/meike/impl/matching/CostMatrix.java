@@ -19,19 +19,30 @@ import java.util.concurrent.TimeUnit;
  */
 public class CostMatrix {
     private final double[][] costs;
-    private final ExecutorService executorService = Executors.newWorkStealingPool();
+    private final int firstDatasetLength;
+    private final int secondDatasetLength;
 
     public CostMatrix(final IIntervalDistance distanceMeasure,
                       final Dataset firstDataset,
                       final Dataset secondDataset) {
         final Interval[] firstIntervals = firstDataset.getIntervals().toArray(new Interval[0]);
+        this.firstDatasetLength = firstIntervals.length;
         final Interval[] secondIntervals = secondDataset.getIntervals().toArray(new Interval[0]);
+        this.secondDatasetLength = secondIntervals.length;
         this.costs = this.createEmptyCostMatrix(Math.max(firstIntervals.length, secondIntervals.length));
         this.fillCostMatrix(distanceMeasure, firstIntervals, secondIntervals);
     }
 
     public double[][] getCosts() {
         return this.costs;
+    }
+
+    public int getFirstDatasetLength() {
+        return this.firstDatasetLength;
+    }
+
+    public int getSecondDatasetLength() {
+        return this.secondDatasetLength;
     }
 
     private double[][] createEmptyCostMatrix(final int dimension) {
@@ -46,54 +57,24 @@ public class CostMatrix {
                                                 final Interval[] first,
                                                 final Interval[] second) {
         final List<Callable<Double>> callables = new LinkedList<>();
-        for (int i = 0; i < first.length; i++) {
-            final int index = i;
-            callables.add(() -> {
-                double maximum = 0;
-                for (int j = 0; j < second.length; j++) {
-                    final double cost = distance.calculate(first[index], second[j]);
-                    this.costs[index][j] = cost;
-                    maximum = Math.max(maximum, cost);
-                }
-                return maximum;
-            });
-        }
+
         return callables;
     }
 
     private void fillCostMatrix(final IIntervalDistance distance,
                                 final Interval[] first,
                                 final Interval[] second) {
-        final double maximum =
-                this.runAndGetMaximum(this.getCallables(distance, first, second));
-        this.fillDummyValuesWith(maximum, first.length, second.length);
+        double maximum = 0;
 
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(3, TimeUnit.SECONDS);
-        } catch (final InterruptedException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private double runAndGetMaximum(final Collection<Callable<Double>> callables) {
-        try {
-            final OptionalDouble optionalMaximum = executorService.invokeAll(callables)
-                    .stream()
-                    .mapToDouble(future -> {
-                        try {
-                            return future.get();
-                        } catch (Exception exception) {
-                            throw new IllegalStateException(exception);
-                        }
-                    }).max();
-            if (optionalMaximum.isPresent()) {
-                return optionalMaximum.getAsDouble();
+        for (int i = 0; i < first.length; i++) {
+            for (int j = 0; j < second.length; j++) {
+                final double cost = distance.calculate(first[i], second[j]);
+                this.costs[i][j] = cost;
+                maximum = Math.max(maximum, cost);
             }
-        } catch (final InterruptedException exception) {
-            throw new IllegalStateException(exception);
         }
-        return Integer.MAX_VALUE;
+
+        this.fillDummyValuesWith(maximum, first.length, second.length);
     }
 
     private void fillDummyValuesWith(final double value, final int firstLength,
@@ -102,21 +83,15 @@ public class CostMatrix {
 
         if (firstLength < dimension) {
             for (int i = firstLength; i < dimension; i++) {
-                final int index = i;
-                executorService.submit(() -> {
-                    for (int j = 0; j < dimension; j++) {
-                        costs[index][j] = value;
-                    }
-                });
+                for (int j = 0; j < dimension; j++) {
+                    costs[i][j] = value;
+                }
             }
         } else if (secondLength < dimension) {
             for (int i = 0; i < dimension; i++) {
-                final int index = i;
-                executorService.submit(() -> {
-                    for (int j = secondLength; j < dimension; j++) {
-                        costs[index][j] = value;
-                    }
-                });
+                for (int j = secondLength; j < dimension; j++) {
+                    costs[i][j] = value;
+                }
             }
         }
     }

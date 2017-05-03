@@ -6,7 +6,7 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.Mapping;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -52,7 +52,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
     }
 
     @Override
-    public double calculate(final Dataset original, final Dataset other) {
+    public Mapping calculate(final Dataset original, final Dataset other) {
         assert null != original;
         assert null != other;
 
@@ -66,7 +66,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
             previousOffset = nextOffset;
             nextOffset = this.calculateBestOffset(original, other, mapping);
         } while (nextOffset != previousOffset);
-        return mapping.getCost();
+        return mapping;
     }
 
     /**
@@ -98,9 +98,9 @@ public class IterativeShiftDistance implements IDatasetDistance {
     private long calculateBestOffset(final Dataset original, final Dataset other,
                                      final Mapping mapping) {
         final List<Pair<Interval, Interval>> pairs = new LinkedList<>();
-        for (int i = 0; i < mapping.getMappingIndices().length; i++) {
-            final int mappedIndex = mapping.getMappingIndices()[i];
-            if (Mapping.INDEX_FOR_INTERVAL_WITHOUT_MATCH != mappedIndex) {
+        for (int i = 0; i < original.getNumberOfIntervals(); i++) {
+            final int mappedIndex = mapping.getMappingIndices().get(i);
+            if (mappedIndex < other.getNumberOfIntervals()) {
                 pairs.add(new Pair<>(original.getIntervals().get(i),
                         other.getIntervals().get(mappedIndex)));
             }

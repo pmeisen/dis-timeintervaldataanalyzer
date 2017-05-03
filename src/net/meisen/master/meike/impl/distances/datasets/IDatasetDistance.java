@@ -1,6 +1,7 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 /**
  * Allows calculating the distance between two data sets based on the distances
@@ -19,6 +20,6 @@ public interface IDatasetDistance {
      *            Another {@link Dataset} to be compared to the original
      * @return the distance value of the two datasets
      */
-    double calculate(final Dataset original, final Dataset other);
+    Mapping calculate(final Dataset original, final Dataset other);
 }
 

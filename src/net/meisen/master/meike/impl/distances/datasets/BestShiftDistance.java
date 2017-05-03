@@ -4,8 +4,7 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -63,32 +62,31 @@ public class BestShiftDistance implements IDatasetDistance {
     }
 
     @Override
-    public double calculate(final Dataset original, final Dataset other) {
+    public Mapping calculate(final Dataset original, final Dataset other) {
         assert null != original;
         assert null != other;
 
-        double bestDistance = Double.MAX_VALUE;
+        Mapping bestMapping = null;
         long bestOffset = 0;
 
         for (final long offset : this.getPossibleOffsets(original, other)) {
-            final double distance =
+            final Mapping mapping =
                     this.calculateWithOffset(offset, original, other);
-            if (distance < bestDistance) {
-                bestDistance = distance;
+            if (null == bestMapping || mapping.getCost() < bestMapping.getCost()) {
+                bestMapping = mapping;
                 bestOffset = offset;
             }
         }
-
         this.logger.log("Best offset: \t" + bestOffset);
 
-        return bestDistance;
+        return bestMapping;
     }
 
-    private double calculateWithOffset(final long offset,
+    private Mapping calculateWithOffset(final long offset,
                                        final Dataset original,
                                        final Dataset other) {
         original.setOffset(offset);
-        return this.mapper.calculateMinimumCostMapping(original, other).getCost();
+        return this.mapper.calculateMinimumCostMapping(original, other);
     }
 
     /**

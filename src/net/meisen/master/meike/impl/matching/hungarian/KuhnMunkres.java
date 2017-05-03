@@ -4,17 +4,25 @@ import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.matching.CostMatrix;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.Mapping;
-import sun.applet.resources.MsgAppletViewer;
+import net.meisen.master.meike.impl.matching.costCalculation.ICostCalculator;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the Kuhn-Munkres algorithm.
  */
 public class KuhnMunkres implements IDatasetMinCostMapper {
     private final IIntervalDistance distanceMeasure;
+    private final MappingFactory mappingFactory;
 
-    private KuhnMunkres(final IIntervalDistance distanceMeasure) {
+    private KuhnMunkres(final IIntervalDistance distanceMeasure,
+                        final MappingFactory mappingFactory) {
         this.distanceMeasure = distanceMeasure;
+        this.mappingFactory = mappingFactory;
     }
 
     /**
@@ -27,45 +35,31 @@ public class KuhnMunkres implements IDatasetMinCostMapper {
      *
      * @return an instance of the Kuhn-Munkres implementation
      */
-    public static KuhnMunkres from(final IIntervalDistance distanceMeasure) {
+    public static KuhnMunkres from(final IIntervalDistance distanceMeasure,
+                                   final MappingFactory mappingFactory) {
         assert null != distanceMeasure;
+        assert null != mappingFactory;
 
-        return new KuhnMunkres(distanceMeasure);
+        return new KuhnMunkres(distanceMeasure, mappingFactory);
     }
 
     @Override
     public Mapping calculateMinimumCostMapping(final Dataset firstDataset,
                                                final Dataset secondDataset) {
-        final double[][] costs = new CostMatrix(this.distanceMeasure,
-                firstDataset, secondDataset).getCosts();
+        final CostMatrix costMatrix = new CostMatrix(this.distanceMeasure,
+                firstDataset, secondDataset);
 
-        final HungarianAlgorithm algorithm = new HungarianAlgorithm(costs);
-        final int[] matching = algorithm.execute();
-
-        final double matchingCost = this.calculateMatchingCost(costs, matching);
-        final int[] reducedMatching = this.getReducedMatching(matching,
-                firstDataset.getNumberOfIntervals(),
-                secondDataset.getNumberOfIntervals() - 1);
-
-        return Mapping.create(matchingCost, reducedMatching);
+        return this.calculateMinimumCostMapping(costMatrix);
     }
 
-    private double calculateMatchingCost(final double[][] costs,
-                                         final int[] matching) {
-        double matchingCost = 0;
-        for (int i = 0; i < costs.length; i++) {
-            matchingCost += costs[i][matching[i]];
-        }
-        return matchingCost;
-    }
+    @Override
+    public Mapping calculateMinimumCostMapping(CostMatrix costMatrix) {
+        final double[][] costs = costMatrix.getCosts();
+        final List<Integer> matchingIndices = Arrays
+                .stream(new HungarianAlgorithm(costs).execute())
+                .boxed()
+                .collect(Collectors.toList());
 
-    private int[] getReducedMatching(final int[] matching, final int length, final int maxValue) {
-        final int[] reducedMatching = new int[length];
-        for (int i = 0; i < length; i++) {
-            reducedMatching[i] = matching[i] <= maxValue
-                    ? matching[i]
-                    : Mapping.INDEX_FOR_INTERVAL_WITHOUT_MATCH;
-        }
-        return reducedMatching;
+        return this.mappingFactory.create(costMatrix, matchingIndices);
     }
 }

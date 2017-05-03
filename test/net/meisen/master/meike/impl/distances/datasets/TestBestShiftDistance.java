@@ -8,7 +8,10 @@ import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -35,7 +38,8 @@ public class TestBestShiftDistance {
         distances.put(new EndDistance(), 1.0);
         distances.put(new LengthDistance(), 1.0);
         distances.put(new StartDistance(), 1.0);
-        return KuhnMunkres.from(new WeightedSumDistance(distances));
+        return KuhnMunkres.from(new WeightedSumDistance(distances),
+                MappingFactory.from(new OnlyMatchedIntervals()));
     }
 
     @Test
@@ -43,7 +47,7 @@ public class TestBestShiftDistance {
         final IDatasetMinCostMapper matcher = this.createKuhnMunkresMatcher();
         final IDatasetDistance distance = BestShiftDistance.from(matcher);
 
-        final double bestDistance = distance.calculate(original, shiftedByThree);
-        assertEquals(0.0, bestDistance, 0);
+        final Mapping bestMapping = distance.calculate(original, shiftedByThree);
+        assertEquals(0.0, bestMapping.getCost(), 0);
     }
 }

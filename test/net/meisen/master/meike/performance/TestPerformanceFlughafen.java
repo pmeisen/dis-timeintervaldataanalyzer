@@ -14,15 +14,23 @@ import net.meisen.master.meike.impl.distances.intervals.IntersectionDistance;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
+import net.meisen.master.meike.impl.matching.CostMatrix;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.matching.costCalculation.CompleteMatrix;
+import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
 import net.meisen.master.meike.impl.matching.lowerBounds.IgnoreMatching;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,24 +56,14 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         return this.getDatasetFor(query, model, datasetFactory);
     }
 
-    private IDatasetMinCostMapper createKuhnMunkresMatcher() {
+    private IIntervalDistance createIntervalDistance() {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
         distances.put(new EndDistance(), 1.0);
         distances.put(new GapDistance(), 1.0);
         distances.put(new IntersectionDistance(), 1.0);
         distances.put(new LengthDistance(), 1.0);
         distances.put(new StartDistance(), 1.0);
-        return KuhnMunkres.from(new WeightedSumDistance(distances));
-    }
-
-    private IDatasetMinCostMapper createLowerBoundMatcher() {
-        final Map<IIntervalDistance, Double> distances = new HashMap<>();
-        distances.put(new EndDistance(), 1.0);
-        distances.put(new GapDistance(), 1.0);
-        distances.put(new IntersectionDistance(), 1.0);
-        distances.put(new LengthDistance(), 1.0);
-        distances.put(new StartDistance(), 1.0);
-        return IgnoreMatching.from(new WeightedSumDistance(distances));
+        return new WeightedSumDistance(distances);
     }
 
     @Test
@@ -75,15 +73,15 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
 
         final String originalDate = "05.01.2008";
         final ImmutableSet<String> candidateDates = ImmutableSet.of(
-                "07.01.2008",
-                "08.01.2008",
-                "09.01.2008",
                 "01.01.2008",
                 "02.01.2008",
                 "03.01.2008",
                 "04.01.2008",
                 "05.01.2008",
                 "06.01.2008",
+                "07.01.2008",
+                "08.01.2008",
+                "09.01.2008",
                 "10.01.2008");
 
         final Dataset original = this.getFullDatasetForDate(originalDate, model, datasetFactory);
@@ -93,21 +91,76 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
             candidates.add(this.getFullDatasetForDate(candidateDate, model, datasetFactory));
         }
 
-        final IDatasetDistance kuhnMunkres =
-                PlainDistance.from(this.createKuhnMunkresMatcher());
-        final IDatasetDistance lowerBound =
-                PlainDistance.from(this.createLowerBoundMatcher());
+        final IIntervalDistance distanceMeasure = this.createIntervalDistance();
+
+        final IDatasetMinCostMapper kuhnMunkres = KuhnMunkres.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IDatasetMinCostMapper lowerBound = IgnoreMatching.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
 
         this.logger.logTiming("Total test run", () -> {
             for (final Dataset candidate : candidates) {
+                final CostMatrix costMatrix = this.logger.logTiming("Cost matrix", () ->
+                    new CostMatrix(distanceMeasure, original, candidate));
                 this.logger.logTiming("Lower bound", () -> {
-                    final double boundCost = lowerBound.calculate(original, candidate);
+                    final double boundCost = lowerBound.calculateMinimumCostMapping(costMatrix).getCost();
                     this.logger.log("Bound value:\t" + boundCost);
                 });
                 this.logger.logTiming("Exact calculation", () -> {
-                    final double exactCost = kuhnMunkres.calculate(original, candidate);
+                    final double exactCost = kuhnMunkres.calculateMinimumCostMapping(costMatrix).getCost();
                     this.logger.log("Exact value:\t" + exactCost);
                 });
+            }
+        });
+    }
+
+    @Test
+    public void testParallelization() {
+        final TidaModel model = this.loadModel();
+        final DatasetFactory datasetFactory = DatasetFactory.forModel(model);
+
+        final String originalDate = "05.01.2008";
+        final ImmutableSet<String> candidateDates = ImmutableSet.of(
+                "01.01.2008",
+                "02.01.2008",
+                "03.01.2008",
+                "04.01.2008",
+                "05.01.2008",
+                "06.01.2008",
+                "07.01.2008",
+                "08.01.2008",
+                "09.01.2008",
+                "10.01.2008");
+
+        final Dataset original = this.getFullDatasetForDate(originalDate, model, datasetFactory);
+
+        final List<Dataset> candidates = new ArrayList<>();
+        for (final String candidateDate : candidateDates) {
+            candidates.add(this.getFullDatasetForDate(candidateDate, model, datasetFactory));
+        }
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(6);
+
+        final IIntervalDistance distanceMeasure = this.createIntervalDistance();
+
+        final IDatasetMinCostMapper kuhnMunkres = KuhnMunkres.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IDatasetMinCostMapper lowerBound = IgnoreMatching.from(distanceMeasure,
+                MappingFactory.from(new OnlyMatchedIntervals()));
+
+        this.logger.logTiming("Total test run", () -> {
+            for (final Dataset candidate : candidates) {
+                executorService.submit(() -> {
+                    final CostMatrix costMatrix = new CostMatrix(distanceMeasure, original, candidate);
+                    final double boundCost = lowerBound.calculateMinimumCostMapping(costMatrix).getCost();
+                    final double exactCost = kuhnMunkres.calculateMinimumCostMapping(costMatrix).getCost();
+                });
+            }
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(300, TimeUnit.SECONDS);
+            } catch (final InterruptedException e) {
+                throw new IllegalStateException(e);
             }
         });
     }
@@ -123,15 +176,16 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
         final IDatasetDistance distance =
-                PlainDistance.from(this.createKuhnMunkresMatcher());
+                PlainDistance.from(KuhnMunkres.from(this.createIntervalDistance(),
+                        MappingFactory.from(new CompleteMatrix())));
 
-        final double cost1 = distance.calculate(dayOne, dayTwo);
-        final double cost2 = distance.calculate(dayOne, dayThree);
-        final double cost3 = distance.calculate(dayOne, dayFour);
+        final Mapping mapping1 = distance.calculate(dayOne, dayTwo);
+        final Mapping mapping2 = distance.calculate(dayOne, dayThree);
+        final Mapping mapping3 = distance.calculate(dayOne, dayFour);
 
-        assertEquals(533.1535571262812, cost1, 0.0000001);
-        assertEquals(883.3401090523115, cost2, 0.0000001);
-        assertEquals(568.7435313621484, cost3, 0.0000001);
+        assertEquals(533.1535571262812, mapping1.getCost(), 0.0000001);
+        assertEquals(883.3401090523115, mapping2.getCost(), 0.0000001);
+        assertEquals(568.7435313621484, mapping3.getCost(), 0.0000001);
     }
 
     @Test
@@ -145,15 +199,16 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
         final BestShiftDistance distance =
-                BestShiftDistance.from(this.createKuhnMunkresMatcher());
+                BestShiftDistance.from(KuhnMunkres.from(this.createIntervalDistance(),
+                        MappingFactory.from(new CompleteMatrix())));
         distance.setMaxOffset(180000);
 
-        final double cost1 = distance.calculate(dayOne, dayTwo);
-        final double cost2 = distance.calculate(dayOne, dayThree);
-        final double cost3 = distance.calculate(dayOne, dayFour);
+        final Mapping mapping1 = distance.calculate(dayOne, dayTwo);
+        final Mapping mapping2 = distance.calculate(dayOne, dayThree);
+        final Mapping mapping3 = distance.calculate(dayOne, dayFour);
 
-        assertEquals(533.1535571262816, cost1, 0.0000001);
-        assertEquals(880.3189999366434, cost2, 0.0000001);
-        assertEquals(564.1600808460587, cost3, 0.0000001);
+        assertEquals(533.1535571262816, mapping1.getCost(), 0.0000001);
+        assertEquals(880.3189999366434, mapping2.getCost(), 0.0000001);
+        assertEquals(564.1600808460587, mapping3.getCost(), 0.0000001);
     }
 }

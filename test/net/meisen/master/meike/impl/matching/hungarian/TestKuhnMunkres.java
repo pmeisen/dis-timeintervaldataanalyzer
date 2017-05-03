@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.matching.costCalculation.CompleteMatrix;
+import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
+import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -29,7 +32,8 @@ public class TestKuhnMunkres {
 
     @Test
     public void testCalculationForSameLength() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance());
+        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
+                MappingFactory.from(new OnlyMatchedIntervals()));
         final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
                 this.originalDataset, this.sameLengthDataset).getCost();
 
@@ -38,7 +42,8 @@ public class TestKuhnMunkres {
 
     @Test
     public void testCalculationForShorter() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance());
+        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
+                MappingFactory.from(new CompleteMatrix()));
         final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
                 this.originalDataset, this.shorterDataset).getCost();
 
@@ -47,7 +52,8 @@ public class TestKuhnMunkres {
 
     @Test
     public void testCalculationForLonger() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance());
+        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
+                MappingFactory.from(new CompleteMatrix()));
         final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
                 this.originalDataset, this.longerDataset).getCost();
 

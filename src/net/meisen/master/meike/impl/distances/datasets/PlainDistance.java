@@ -2,6 +2,7 @@ package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 /**
  * Allows calculating the plain distance between two {@link Dataset}s without
@@ -30,10 +31,10 @@ public class PlainDistance implements IDatasetDistance {
     }
 
     @Override
-    public double calculate(final Dataset original, final Dataset other) {
+    public Mapping calculate(final Dataset original, final Dataset other) {
         assert null != original;
         assert null != other;
 
-        return this.mapper.calculateMinimumCostMapping(original, other).getCost();
+        return this.mapper.calculateMinimumCostMapping(original, other);
     }
 }
