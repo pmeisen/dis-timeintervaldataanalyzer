@@ -1,9 +1,7 @@
-package net.meisen.master.meike.impl.matching;
+package net.meisen.master.meike.impl.mapping;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.CostMatrix;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
 
 /**
  * Interface for algorithms that calculate a min-cost mapping (usually a
@@ -12,7 +10,7 @@ import net.meisen.master.meike.impl.matching.mapping.Mapping;
 public interface IDatasetMinCostMapper {
     /**
      * Calculates a minimum cost mapping between the {@link Interval}s of the
-     * given {@link Dataset}s. Usually this is a maximum cardinality matching
+     * given {@link Dataset}s. Usually this is a maximum cardinality matching.
      *
      * @param original
      *          the original dataset which the other is being compared to

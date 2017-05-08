@@ -7,11 +7,11 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
-import net.meisen.master.meike.impl.matching.hungarian.KuhnMunkres;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
-import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
+import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
+import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
+import net.meisen.master.meike.impl.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.MappingFactory;
 import org.junit.Test;
 
 import java.util.HashMap;

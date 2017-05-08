@@ -1,7 +1,7 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.Mapping;
 
 /**
  * Allows calculating the distance between two data sets based on the distances

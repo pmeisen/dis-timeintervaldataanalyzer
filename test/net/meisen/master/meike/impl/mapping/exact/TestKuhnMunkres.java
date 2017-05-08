@@ -1,12 +1,11 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.mapping.exact;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.costCalculation.CompleteMatrix;
-import net.meisen.master.meike.impl.matching.costCalculation.OnlyMatchedIntervals;
-import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
+import net.meisen.master.meike.impl.mapping.costCalculation.CompleteMatrix;
+import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
+import net.meisen.master.meike.impl.mapping.MappingFactory;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -1,7 +1,6 @@
-package net.meisen.master.meike.impl.matching.mapping;
+package net.meisen.master.meike.impl.mapping;
 
-import net.meisen.master.meike.impl.matching.CostMatrix;
-import net.meisen.master.meike.impl.matching.costCalculation.ICostCalculator;
+import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
 
 import java.util.List;
 

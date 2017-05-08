@@ -1,12 +1,11 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.mapping.exact;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
-import net.meisen.master.meike.impl.matching.CostMatrix;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.costCalculation.ICostCalculator;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
-import net.meisen.master.meike.impl.matching.mapping.MappingFactory;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.MappingFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +29,7 @@ public class KuhnMunkres implements IDatasetMinCostMapper {
      * distance measure as a cost function between intervals.
      *
      * @param distanceMeasure
-     *           the distance measure to determine the cost of matching one
+     *           the distance measure to determine the cost of mapping one
      *           interval to another; must not be {@code null}.
      *
      * @return an instance of the Kuhn-Munkres implementation

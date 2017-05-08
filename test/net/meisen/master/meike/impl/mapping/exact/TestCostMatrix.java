@@ -1,10 +1,9 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.mapping.exact;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.CostMatrix;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
 import org.junit.Test;
 
 import java.util.Arrays;

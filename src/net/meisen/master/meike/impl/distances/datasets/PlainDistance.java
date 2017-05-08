@@ -1,8 +1,8 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.Mapping;
 
 /**
  * Allows calculating the plain distance between two {@link Dataset}s without

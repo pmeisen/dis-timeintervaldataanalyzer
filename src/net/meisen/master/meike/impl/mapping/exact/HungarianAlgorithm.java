@@ -1,4 +1,4 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.mapping.exact;
 
 import java.util.Arrays;
 
@@ -47,7 +47,7 @@ import java.util.Arrays;
  *
  * @author Kevin L. Stern
  */
-public class HungarianAlgorithm {
+class HungarianAlgorithm {
     private final double[][] costMatrix;
     private final int rows, cols, dim;
     private final double[] labelByWorker, labelByJob;

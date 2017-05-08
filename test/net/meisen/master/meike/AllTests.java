@@ -6,8 +6,8 @@ import net.meisen.master.meike.impl.distances.datasets.TestIterativeShiftDistanc
 import net.meisen.master.meike.impl.distances.intervals.TestBasicDistances;
 import net.meisen.master.meike.impl.distances.intervals.TestWeightedSumDistance;
 import net.meisen.master.meike.impl.knnSearch.TestNearestNeighbors;
-import net.meisen.master.meike.impl.matching.hungarian.TestCostMatrix;
-import net.meisen.master.meike.impl.matching.hungarian.TestKuhnMunkres;
+import net.meisen.master.meike.impl.mapping.exact.TestCostMatrix;
+import net.meisen.master.meike.impl.mapping.exact.TestKuhnMunkres;
 import net.meisen.master.meike.performance.TestPerformanceCostMatrix;
 import net.meisen.master.meike.performance.TestPerformanceDatasetFactory;
 import net.meisen.master.meike.performance.TestPerformanceFlughafen;

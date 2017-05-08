@@ -1,10 +1,10 @@
-package net.meisen.master.meike.impl.matching.hungarian;
+package net.meisen.master.meike.impl.mapping.exact;
 
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 
 /**
- * Very simple distance measure to be used in the matching tests.
+ * Very simple distance measure to be used in the mapping tests.
  */
 public class FakeDistance implements IIntervalDistance {
     @Override

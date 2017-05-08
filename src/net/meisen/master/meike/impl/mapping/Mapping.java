@@ -1,4 +1,4 @@
-package net.meisen.master.meike.impl.matching.mapping;
+package net.meisen.master.meike.impl.mapping;
 
 import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
@@ -10,6 +10,8 @@ import java.util.List;
  * This can be a matching or any other arbitrary mapping.
  */
 public class Mapping {
+    public static final int NOT_MAPPED = -1;
+
     private final double cost;
     private final List<Integer> mappingIndices;
 
@@ -27,18 +29,20 @@ public class Mapping {
     }
 
     /**
-     * Returns the indexes of the other dataset in the order they are mapped to
-     * the intervals of the original dataset, i.e. {@code mapping[i] = j} means
-     * that the i-th interval of the original dataset gets mapped to the j-th
-     * interval of the other dataset. {@code mapping[i] = -1} means that the
-     * i-th interval of the original dataset is not mapped to any interval of
-     * the other dataset.
+     * Given the index i of one of the intervals in the original dataset, this
+     * method returns the index j of the interval in the other dataset which
+     * interval i is mapped to. The return value {@code NOT_MAPPED} means
+     * that the i-th interval of the original dataset is not mapped to any
+     * interval of the other dataset.
      *
-     * @return a mapping from the indices of the first dataset's intervals to
-     * the second dataset's intervals
+     * @param originalIndex
+     *          the index of the original interval whose mapping partner's index
+     *          is to be retrieved     *
+     * @return the index of the interval in the other dataset which the i-th
+     * interval in the original dataset is mapped to
      */
-    public List<Integer> getMappingIndices() {
-        return this.mappingIndices;
+    public int getMappedIndex(final int originalIndex) {
+        return this.mappingIndices.get(originalIndex);
     }
 
     /**

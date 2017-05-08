@@ -16,7 +16,7 @@ import net.meisen.master.meike.impl.distances.intervals.RandomDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartPositionDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
-import net.meisen.master.meike.impl.matching.CostMatrix;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
 import org.junit.Test;
 
 import java.util.ArrayList;

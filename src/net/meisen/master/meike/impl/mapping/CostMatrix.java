@@ -1,17 +1,12 @@
-package net.meisen.master.meike.impl.matching;
+package net.meisen.master.meike.impl.mapping;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.OptionalDouble;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for creating and manipulating the cost matrix for two given

@@ -5,8 +5,8 @@ import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
-import net.meisen.master.meike.impl.matching.IDatasetMinCostMapper;
-import net.meisen.master.meike.impl.matching.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.Mapping;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -99,8 +99,8 @@ public class IterativeShiftDistance implements IDatasetDistance {
                                      final Mapping mapping) {
         final List<Pair<Interval, Interval>> pairs = new LinkedList<>();
         for (int i = 0; i < original.getNumberOfIntervals(); i++) {
-            final int mappedIndex = mapping.getMappingIndices().get(i);
-            if (mappedIndex < other.getNumberOfIntervals()) {
+            final int mappedIndex = mapping.getMappedIndex(i);
+            if (Mapping.NOT_MAPPED != mappedIndex && mappedIndex < other.getNumberOfIntervals()) {
                 pairs.add(new Pair<>(original.getIntervals().get(i),
                         other.getIntervals().get(mappedIndex)));
             }
