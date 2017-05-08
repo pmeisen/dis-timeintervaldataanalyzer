@@ -1,7 +1,9 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
+import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 
 /**
@@ -10,10 +12,13 @@ import net.meisen.master.meike.impl.mapping.Mapping;
  */
 public class PlainDistance implements IDatasetDistance {
 
-    private final IDatasetMinCostMapper mapper;
+    private final IMinCostMapper mapper;
+    private final IIntervalDistance intervalDistance;
 
-    private PlainDistance(final IDatasetMinCostMapper mapper) {
+    private PlainDistance(final IMinCostMapper mapper,
+                          final IIntervalDistance intervalDistance) {
         this.mapper = mapper;
+        this.intervalDistance = intervalDistance;
     }
 
     /**
@@ -24,10 +29,12 @@ public class PlainDistance implements IDatasetDistance {
      *           must not be {@code null}.
      * @return an instance of this class that uses the given mapper
      */
-    public static PlainDistance from(final IDatasetMinCostMapper mapper) {
+    public static PlainDistance from(final IMinCostMapper mapper,
+                                     final IIntervalDistance intervalDistance) {
         assert null != mapper;
+        assert null != intervalDistance;
 
-        return new PlainDistance(mapper);
+        return new PlainDistance(mapper, intervalDistance);
     }
 
     @Override
@@ -35,6 +42,8 @@ public class PlainDistance implements IDatasetDistance {
         assert null != original;
         assert null != other;
 
-        return this.mapper.calculateMinimumCostMapping(original, other);
+        final CostMatrix costMatrix =
+                new CostMatrix(this.intervalDistance, original, other);
+        return this.mapper.calculateMinimumCostMapping(costMatrix);
     }
 }

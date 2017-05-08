@@ -5,7 +5,8 @@ import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 
 import java.util.Comparator;
@@ -19,11 +20,11 @@ import java.util.stream.Collectors;
  * Implementation of the iterative search for the best shift value and matching.
  */
 public class IterativeShiftDistance implements IDatasetDistance {
-    private final IDatasetMinCostMapper mapper;
+    private final IMinCostMapper mapper;
     private final IIntervalDistance distanceMeasure;
     private final ILogger logger;
 
-    private IterativeShiftDistance(final IDatasetMinCostMapper mapper,
+    private IterativeShiftDistance(final IMinCostMapper mapper,
                                    final IIntervalDistance distanceMeasure) {
         this.mapper = mapper;
         this.distanceMeasure = distanceMeasure;
@@ -43,7 +44,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
      * @return a new instance of {@link IterativeShiftDistance}
      */
     public static IterativeShiftDistance from(
-            final IDatasetMinCostMapper mapper,
+            final IMinCostMapper mapper,
             final IIntervalDistance distanceMeasure) {
         assert null != mapper;
         assert null != distanceMeasure;
@@ -62,7 +63,9 @@ public class IterativeShiftDistance implements IDatasetDistance {
         Mapping mapping;
         do {
             other.setOffset(nextOffset);
-            mapping = this.mapper.calculateMinimumCostMapping(original, other);
+            final CostMatrix costMatrix =
+                    new CostMatrix(this.distanceMeasure, original, other);
+            mapping = this.mapper.calculateMinimumCostMapping(costMatrix);
             previousOffset = nextOffset;
             nextOffset = this.calculateBestOffset(original, other, mapping);
         } while (nextOffset != previousOffset);

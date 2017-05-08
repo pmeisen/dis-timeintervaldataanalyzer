@@ -3,6 +3,7 @@ package net.meisen.master.meike.impl.mapping.exact;
 import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.costCalculation.CompleteMatrix;
 import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.mapping.MappingFactory;
@@ -31,30 +32,36 @@ public class TestKuhnMunkres {
 
     @Test
     public void testCalculationForSameLength() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
-                MappingFactory.from(new OnlyMatchedIntervals()));
-        final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
-                this.originalDataset, this.sameLengthDataset).getCost();
+        final KuhnMunkres kuhnMunkres =
+                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
+        final CostMatrix costMatrix =
+                new CostMatrix(new FakeDistance(), this.originalDataset, this.sameLengthDataset);
+        final double minimumCost =
+                kuhnMunkres.calculateMinimumCostMapping(costMatrix).getCost();
 
         assertEquals(2.0, minimumCost, 0);
     }
 
     @Test
     public void testCalculationForShorter() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
-                MappingFactory.from(new CompleteMatrix()));
-        final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
-                this.originalDataset, this.shorterDataset).getCost();
+        final KuhnMunkres kuhnMunkres =
+                KuhnMunkres.from(MappingFactory.from(new CompleteMatrix()));
+        final CostMatrix costMatrix =
+                new CostMatrix(new FakeDistance(), this.originalDataset, this.shorterDataset);
+        final double minimumCost =
+                kuhnMunkres.calculateMinimumCostMapping(costMatrix).getCost();
 
         assertEquals(6.0, minimumCost, 0);
     }
 
     @Test
     public void testCalculationForLonger() {
-        final KuhnMunkres kuhnMunkres = KuhnMunkres.from(new FakeDistance(),
-                MappingFactory.from(new CompleteMatrix()));
-        final double minimumCost = kuhnMunkres.calculateMinimumCostMapping(
-                this.originalDataset, this.longerDataset).getCost();
+        final KuhnMunkres kuhnMunkres =
+                KuhnMunkres.from(MappingFactory.from(new CompleteMatrix()));
+        final CostMatrix costMatrix =
+                new CostMatrix(new FakeDistance(), this.originalDataset, this.longerDataset);
+        final double minimumCost =
+                kuhnMunkres.calculateMinimumCostMapping(costMatrix).getCost();
 
         assertEquals(15.0, minimumCost, 0);
     }

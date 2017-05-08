@@ -15,7 +15,7 @@ import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.costCalculation.CompleteMatrix;
 import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
@@ -93,10 +93,10 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
 
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
 
-        final IDatasetMinCostMapper kuhnMunkres = KuhnMunkres.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
-        final IDatasetMinCostMapper lowerBound = DoubleMatching.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper kuhnMunkres =
+                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper lowerBound =
+                DoubleMatching.from(MappingFactory.from(new OnlyMatchedIntervals()), distanceMeasure);
 
         this.logger.logTiming("Total test run", () -> {
             for (final Dataset candidate : candidates) {
@@ -143,10 +143,10 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
 
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
 
-        final IDatasetMinCostMapper kuhnMunkres = KuhnMunkres.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
-        final IDatasetMinCostMapper lowerBound = DoubleMatching.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper kuhnMunkres =
+                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper lowerBound =
+                DoubleMatching.from(MappingFactory.from(new OnlyMatchedIntervals()), distanceMeasure);
 
         this.logger.logTiming("Total test run", () -> {
             for (final Dataset candidate : candidates) {
@@ -175,9 +175,9 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayThree = this.getShortDatasetForDate("03.01.2008", model, datasetFactory);
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
-        final IDatasetDistance distance =
-                PlainDistance.from(KuhnMunkres.from(this.createIntervalDistance(),
-                        MappingFactory.from(new CompleteMatrix())));
+        final IDatasetDistance distance = PlainDistance.from(
+                KuhnMunkres.from(MappingFactory.from(new CompleteMatrix())),
+                this.createIntervalDistance());
 
         final Mapping mapping1 = distance.calculate(dayOne, dayTwo);
         final Mapping mapping2 = distance.calculate(dayOne, dayThree);
@@ -198,9 +198,9 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayThree = this.getShortDatasetForDate("03.01.2008", model, datasetFactory);
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
-        final BestShiftDistance distance =
-                BestShiftDistance.from(KuhnMunkres.from(this.createIntervalDistance(),
-                        MappingFactory.from(new CompleteMatrix())));
+        final BestShiftDistance distance = BestShiftDistance.from(KuhnMunkres.from(
+              MappingFactory.from(new CompleteMatrix())),
+                this.createIntervalDistance());
         distance.setMaxOffset(180000);
 
         final Mapping mapping1 = distance.calculate(dayOne, dayTwo);

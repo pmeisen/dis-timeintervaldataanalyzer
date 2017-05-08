@@ -1,9 +1,11 @@
 package net.meisen.master.meike.impl.distances.datasets;
 
+import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 
 import java.util.Comparator;
@@ -23,13 +25,16 @@ public class BestShiftDistance implements IDatasetDistance {
 
     public static final long UNLIMITED_OFFSET = -1;
 
-    private final IDatasetMinCostMapper mapper;
+    private final IMinCostMapper mapper;
+    private final IIntervalDistance intervalDistance;
     private final ILogger logger;
 
     private long maxOffset = UNLIMITED_OFFSET;
 
-    private BestShiftDistance(final IDatasetMinCostMapper mapper) {
+    private BestShiftDistance(final IMinCostMapper mapper,
+                              final IIntervalDistance intervalDistance) {
         this.mapper = mapper;
+        this.intervalDistance = intervalDistance;
         this.logger = new SimpleConsoleLogger();
     }
 
@@ -41,10 +46,12 @@ public class BestShiftDistance implements IDatasetDistance {
      *          must not be {@code null}.
      * @return an instance of this class that uses the given mapper
      */
-    public static BestShiftDistance from(final IDatasetMinCostMapper mapper) {
+    public static BestShiftDistance from(final IMinCostMapper mapper,
+                                         final IIntervalDistance intervalDistance) {
         assert null != mapper;
+        assert null != intervalDistance;
 
-        return new BestShiftDistance(mapper);
+        return new BestShiftDistance(mapper, intervalDistance);
     }
 
     /**
@@ -86,7 +93,9 @@ public class BestShiftDistance implements IDatasetDistance {
                                        final Dataset original,
                                        final Dataset other) {
         original.setOffset(offset);
-        return this.mapper.calculateMinimumCostMapping(original, other);
+        final CostMatrix costMatrix =
+                new CostMatrix(this.intervalDistance, original, other);
+        return this.mapper.calculateMinimumCostMapping(costMatrix);
     }
 
     /**

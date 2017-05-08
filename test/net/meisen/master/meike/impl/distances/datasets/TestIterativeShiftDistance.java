@@ -7,7 +7,7 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
+import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 import net.meisen.master.meike.impl.mapping.Mapping;
@@ -55,8 +55,8 @@ public class TestIterativeShiftDistance {
     @Test
     public void testShiftedCandidateGivesZeroDistance() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper matcher =
+                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 
@@ -67,8 +67,8 @@ public class TestIterativeShiftDistance {
     @Test
     public void testShiftedCandidateWithExtra() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IDatasetMinCostMapper matcher = KuhnMunkres.from(distanceMeasure,
-                MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper matcher =
+                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 

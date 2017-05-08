@@ -1,9 +1,9 @@
 package net.meisen.master.meike.impl.knnSearch;
 
-import net.meisen.master.meike.impl.bounds.ILowerBound;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
 import net.meisen.master.meike.impl.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.lowerBounds.ILowerBound;
 
 import java.util.Collection;
 import java.util.List;

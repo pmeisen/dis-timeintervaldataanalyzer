@@ -3,7 +3,6 @@ package net.meisen.master.meike.impl.mapping.lowerBounds;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
-import net.meisen.master.meike.impl.mapping.IDatasetMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 import net.meisen.master.meike.impl.mapping.MappingFactory;
 
@@ -15,41 +14,27 @@ import java.util.stream.IntStream;
 /**
  * Lower bound obtained by ignoring the constraint that we need a matching.
  */
-public class DoubleMatching implements IDatasetMinCostMapper {
-    private final IIntervalDistance distanceMeasure;
+public class DoubleMatching implements ILowerBound {
     private final MappingFactory mappingFactory;
+    private final IIntervalDistance intervalDistance;
 
-    private DoubleMatching(final IIntervalDistance distanceMeasure,
-                           final MappingFactory mappingFactory) {
-        this.distanceMeasure = distanceMeasure;
+    private DoubleMatching(final MappingFactory mappingFactory,
+                           final IIntervalDistance intervalDistance) {
         this.mappingFactory = mappingFactory;
+        this.intervalDistance = intervalDistance;
     }
 
     /**
-     * Creates a new instance of the lower bound implementation using the given
-     * distance measure as a cost function between intervals.
-     *
-     * @param distanceMeasure
-     *           the distance measure to determine the cost of mapping one
-     *           interval to another; must not be {@code null}.
+     * Creates a new instance of the lower bound implementation.
      *
      * @return an instance of the double matching lower bound implementation
      */
-    public static DoubleMatching from(final IIntervalDistance distanceMeasure,
-                                      final MappingFactory mappingFactory) {
-        assert null != distanceMeasure;
+    public static DoubleMatching from(final MappingFactory mappingFactory,
+                                      final IIntervalDistance intervalDistance) {
         assert null != mappingFactory;
+        assert null != intervalDistance;
 
-        return new DoubleMatching(distanceMeasure, mappingFactory);
-    }
-
-    @Override
-    public Mapping calculateMinimumCostMapping(final Dataset firstDataset,
-                                               final Dataset secondDataset) {
-        final CostMatrix costMatrix = new CostMatrix(this.distanceMeasure,
-                firstDataset, secondDataset);
-
-        return this.calculateMinimumCostMapping(costMatrix);
+        return new DoubleMatching(mappingFactory, intervalDistance);
     }
 
     @Override
@@ -59,7 +44,7 @@ public class DoubleMatching implements IDatasetMinCostMapper {
         return this.getRowMinimaMapping(costMatrix);
     }
 
-    private Mapping getRowMinimaMapping(final CostMatrix costMatrix) throws IllegalStateException{
+    private Mapping getRowMinimaMapping(final CostMatrix costMatrix) {
         final double[][] costs = costMatrix.getCosts();
         final List<Integer> mappingIndices = Arrays.stream(costs)
                 .map(row -> IntStream.range(0, row.length)
@@ -68,5 +53,13 @@ public class DoubleMatching implements IDatasetMinCostMapper {
                 .collect(Collectors.toList());
 
         return this.mappingFactory.create(costMatrix, mappingIndices);
+    }
+
+    @Override
+    public double calculate(final Dataset original, final Dataset other) {
+        final CostMatrix costMatrix =
+                new CostMatrix(this.intervalDistance, original, other);
+
+        return this.calculateMinimumCostMapping(costMatrix).getCost();
     }
 }
