@@ -27,6 +27,9 @@ public class PlainDistance implements IDatasetDistance {
      * @param mapper
      *           the mapper to calculate the distance between two datasets;
      *           must not be {@code null}.
+     * @param intervalDistance
+     *           a distance measure for pairs of intervals; must not be
+     *           {@code null}.
      * @return an instance of this class that uses the given mapper
      */
     public static PlainDistance from(final IMinCostMapper mapper,

@@ -44,7 +44,10 @@ public class BestShiftDistance implements IDatasetDistance {
      * @param mapper
      *          the mapper to calculate the distance between two datasets;
      *          must not be {@code null}.
-     * @return an instance of this class that uses the given mapper
+     * @param intervalDistance
+     *          a distance measure for pairs of intervals; must not be
+     *          {@code null}.
+     * @return an instance of this class that uses the given mapper and distance
      */
     public static BestShiftDistance from(final IMinCostMapper mapper,
                                          final IIntervalDistance intervalDistance) {
@@ -90,8 +93,8 @@ public class BestShiftDistance implements IDatasetDistance {
     }
 
     private Mapping calculateWithOffset(final long offset,
-                                       final Dataset original,
-                                       final Dataset other) {
+                                        final Dataset original,
+                                        final Dataset other) {
         original.setOffset(offset);
         final CostMatrix costMatrix =
                 new CostMatrix(this.intervalDistance, original, other);
