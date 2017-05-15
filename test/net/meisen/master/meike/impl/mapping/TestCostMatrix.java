@@ -1,9 +1,10 @@
-package net.meisen.master.meike.impl.mapping.exact;
+package net.meisen.master.meike.impl.mapping;
 
 import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.exact.AbsoluteStartDistance;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,18 +14,18 @@ import static org.junit.Assert.assertEquals;
 
 public class TestCostMatrix {
 
-    private Dataset originalDataset = new Dataset(ImmutableList.of(
+    private final Dataset originalDataset = new Dataset(ImmutableList.of(
             new Interval(0L, 4L),
             new Interval(2L, 5L),
             new Interval(6L, 8L)));
-    private Dataset sameLengthDataset = new Dataset(ImmutableList.of(
+    private final Dataset sameLengthDataset = new Dataset(ImmutableList.of(
             new Interval(1L, 3L),
             new Interval(2L, 7L),
             new Interval(5L, 9L)));
-    private Dataset shorterDataset = new Dataset(ImmutableList.of(
+    private final Dataset shorterDataset = new Dataset(ImmutableList.of(
             new Interval(5L, 7L),
             new Interval(2L, 3L)));
-    private Dataset longerDataset = new Dataset(ImmutableList.of(
+    private final Dataset longerDataset = new Dataset(ImmutableList.of(
             new Interval(0L, 5L),
             new Interval(3L, 9L),
             new Interval(1L, 10L),
@@ -32,7 +33,7 @@ public class TestCostMatrix {
 
     @Test
     public void testCostMatrixCreationForSameLength() {
-        final CostMatrix costMatrix = new CostMatrix(new FakeDistance(),
+        final CostMatrix costMatrix = new CostMatrix(new AbsoluteStartDistance(),
                 this.originalDataset, this.sameLengthDataset);
 
         final String expected = "[1.0, 2.0, 5.0]\n" +
@@ -44,7 +45,7 @@ public class TestCostMatrix {
 
     @Test
     public void testCostMatrixCreationForShorter() {
-        final CostMatrix costMatrix = new CostMatrix(new FakeDistance(),
+        final CostMatrix costMatrix = new CostMatrix(new AbsoluteStartDistance(),
                 this.originalDataset, this.shorterDataset);
 
         final String expected = "[5.0, 2.0, 5.0]\n" +
@@ -56,7 +57,7 @@ public class TestCostMatrix {
 
     @Test
     public void testCostMatrixCreationForLonger() {
-        final CostMatrix costMatrix = new CostMatrix(new FakeDistance(),
+        final CostMatrix costMatrix = new CostMatrix(new AbsoluteStartDistance(),
                 this.originalDataset, this.longerDataset);
 
         final String expected = "[0.0, 3.0, 1.0, 11.0]\n" +

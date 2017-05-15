@@ -38,6 +38,7 @@ public class Mapping {
                                  final CostMatrix costMatrix) {
         assert null != mappingIndices;
         assert null != costMatrix;
+        assert mappingIndices.size() == costMatrix.getCosts().length;
 
         return new Mapping(mappingIndices, costMatrix);
     }
@@ -105,7 +106,7 @@ public class Mapping {
         final int secondLength = this.costMatrix.getSecondDatasetLength();
         final List<Interval> unmappedIntervals = new LinkedList<>();
         for (int i = 0; i < this.costMatrix.getFirstDatasetLength(); i++) {
-            if (this.mappingIndices.get(i) < secondLength) {
+            if (this.mappingIndices.get(i) >= secondLength) {
                 unmappedIntervals.add(this.costMatrix.getFirstDataset().get(i));
             }
         }
@@ -115,10 +116,8 @@ public class Mapping {
     private List<Interval> getUnmappedIntervalsOfSecondDataset() {
         final List<Interval> secondIntervals = costMatrix.getSecondDataset();
         final List<Interval> secondDataset = new LinkedList<>(secondIntervals);
-        for (final int i : this.mappingIndices) {
-            if (secondIntervals.size() > i) {
-                secondDataset.remove(secondIntervals.get(i));
-            }
+        for (int i = 0; i < this.costMatrix.getFirstDatasetLength(); i++) {
+            secondDataset.remove(secondIntervals.get(this.mappingIndices.get(i)));
         }
         return secondDataset;
     }

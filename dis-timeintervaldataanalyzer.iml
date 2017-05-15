@@ -35,5 +35,33 @@
         <jarDirectory url="file://$MODULE_DIR$/testLib" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library name="JUnit5">
+        <CLASSES>
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/junit/lib/junit-jupiter-api-5.0.0-M4.jar!/" />
+          <root url="jar://$APPLICATION_HOME_DIR$/plugins/junit/lib/opentest4j-1.0.0-M2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/testLib/guava-15.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/junit-4.12.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/hsqldb-2.3.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/httpmime-4.3.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/httpclient-4.3.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/commons-codec-1.6.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/hamcrest-core-1.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/mockito-all-1.9.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/bonecp-0.8.0.RELEASE.jar!/" />
+          <root url="jar://$MODULE_DIR$/testLib/net-meisen-general-gen-sbconfigurator-TRUNK-SNAPSHOT-test.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

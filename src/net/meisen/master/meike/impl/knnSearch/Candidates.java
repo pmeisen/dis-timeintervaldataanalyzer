@@ -1,6 +1,7 @@
 package net.meisen.master.meike.impl.knnSearch;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,7 @@ class Candidates {
                 .orElse(Double.MAX_VALUE);
         return this.candidates.stream()
                 .filter(dataset -> dataset.getLowerBound() < maxLowerBound)
+                .sorted(Comparator.comparing(BoundedDataset::getLowerBound))
                 .collect(Collectors.toList());
     }
 }

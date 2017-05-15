@@ -35,7 +35,7 @@ public class TestKuhnMunkres {
         final KuhnMunkres kuhnMunkres = KuhnMunkres.create();
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
         final CostMatrix costMatrix =
-                new CostMatrix(new FakeDistance(), this.originalDataset, this.sameLengthDataset);
+                new CostMatrix(new AbsoluteStartDistance(), this.originalDataset, this.sameLengthDataset);
         final Mapping mapping = kuhnMunkres.calculateMinimumCostMapping(costMatrix);
         final double minimumCost = costCalculator.calculateCost(mapping);
 
@@ -47,7 +47,7 @@ public class TestKuhnMunkres {
         final KuhnMunkres kuhnMunkres = KuhnMunkres.create();
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1.111);
         final CostMatrix costMatrix =
-                new CostMatrix(new FakeDistance(), this.originalDataset, this.shorterDataset);
+                new CostMatrix(new AbsoluteStartDistance(), this.originalDataset, this.shorterDataset);
         final Mapping mapping = kuhnMunkres.calculateMinimumCostMapping(costMatrix);
         final double minimumCost = costCalculator.calculateCost(mapping);
 
@@ -59,7 +59,7 @@ public class TestKuhnMunkres {
         final KuhnMunkres kuhnMunkres = KuhnMunkres.create();
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1.0101);
         final CostMatrix costMatrix =
-                new CostMatrix(new FakeDistance(), this.originalDataset, this.longerDataset);
+                new CostMatrix(new AbsoluteStartDistance(), this.originalDataset, this.longerDataset);
         final Mapping mapping = kuhnMunkres.calculateMinimumCostMapping(costMatrix);
         final double minimumCost = costCalculator.calculateCost(mapping);
 
