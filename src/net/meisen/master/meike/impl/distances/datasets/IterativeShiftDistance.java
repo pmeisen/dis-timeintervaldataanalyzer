@@ -67,7 +67,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
                     new CostMatrix(this.distanceMeasure, original, other);
             mapping = this.mapper.calculateMinimumCostMapping(costMatrix);
             previousOffset = nextOffset;
-            nextOffset = this.calculateBestOffset(original, other, mapping);
+            nextOffset = this.calculateBestOffset(mapping);
         } while (nextOffset != previousOffset);
         return mapping;
     }
@@ -98,16 +98,8 @@ public class IterativeShiftDistance implements IDatasetDistance {
         return sumOfIntervalBounds / (2.0 * numberOfIntervals);
     }
 
-    private long calculateBestOffset(final Dataset original, final Dataset other,
-                                     final Mapping mapping) {
-        final List<Pair<Interval, Interval>> pairs = new LinkedList<>();
-        for (int i = 0; i < original.getNumberOfIntervals(); i++) {
-            final int mappedIndex = mapping.getMappedIndex(i);
-            if (Mapping.NOT_MAPPED != mappedIndex && mappedIndex < other.getNumberOfIntervals()) {
-                pairs.add(new Pair<>(original.getIntervals().get(i),
-                        other.getIntervals().get(mappedIndex)));
-            }
-        }
+    private long calculateBestOffset(final Mapping mapping) {
+        final List<Pair<Interval, Interval>> pairs = mapping.getPairs();
         long bestOffset = 0;
         double minimumCost = Double.MAX_VALUE;
         for (final long offset : this.getPossibleOffsets(pairs)) {

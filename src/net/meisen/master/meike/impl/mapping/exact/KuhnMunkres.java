@@ -3,7 +3,6 @@ package net.meisen.master.meike.impl.mapping.exact;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
-import net.meisen.master.meike.impl.mapping.MappingFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -13,21 +12,15 @@ import java.util.stream.Collectors;
  * Implementation of the Kuhn-Munkres algorithm.
  */
 public class KuhnMunkres implements IMinCostMapper {
-    private final MappingFactory mappingFactory;
-
-    private KuhnMunkres(final MappingFactory mappingFactory) {
-        this.mappingFactory = mappingFactory;
-    }
+    private KuhnMunkres() {}
 
     /**
      * Creates a new instance of the Kuhn-Munkres implementation.
      *
      * @return an instance of the Kuhn-Munkres implementation
      */
-    public static KuhnMunkres from(final MappingFactory mappingFactory) {
-        assert null != mappingFactory;
-
-        return new KuhnMunkres(mappingFactory);
+    public static KuhnMunkres create() {
+        return new KuhnMunkres();
     }
 
     @Override
@@ -38,6 +31,6 @@ public class KuhnMunkres implements IMinCostMapper {
                 .boxed()
                 .collect(Collectors.toList());
 
-        return this.mappingFactory.create(costMatrix, matchingIndices);
+        return Mapping.create(matchingIndices, costMatrix);
     }
 }

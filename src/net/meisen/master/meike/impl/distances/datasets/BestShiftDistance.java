@@ -7,6 +7,7 @@ import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
+import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -27,14 +28,17 @@ public class BestShiftDistance implements IDatasetDistance {
 
     private final IMinCostMapper mapper;
     private final IIntervalDistance intervalDistance;
+    private final ICostCalculator costCalculator;
     private final ILogger logger;
 
     private long maxOffset = UNLIMITED_OFFSET;
 
     private BestShiftDistance(final IMinCostMapper mapper,
-                              final IIntervalDistance intervalDistance) {
+                              final IIntervalDistance intervalDistance,
+                              final ICostCalculator costCalculator) {
         this.mapper = mapper;
         this.intervalDistance = intervalDistance;
+        this.costCalculator = costCalculator;
         this.logger = new SimpleConsoleLogger();
     }
 
@@ -47,14 +51,18 @@ public class BestShiftDistance implements IDatasetDistance {
      * @param intervalDistance
      *          a distance measure for pairs of intervals; must not be
      *          {@code null}.
+     * @param costCalculator
+     *          a cost calculator for determining the cost of a mapping
      * @return an instance of this class that uses the given mapper and distance
      */
     public static BestShiftDistance from(final IMinCostMapper mapper,
-                                         final IIntervalDistance intervalDistance) {
+                                         final IIntervalDistance intervalDistance,
+                                         final ICostCalculator costCalculator) {
         assert null != mapper;
         assert null != intervalDistance;
+        assert null != costCalculator;
 
-        return new BestShiftDistance(mapper, intervalDistance);
+        return new BestShiftDistance(mapper, intervalDistance, costCalculator);
     }
 
     /**
@@ -77,14 +85,18 @@ public class BestShiftDistance implements IDatasetDistance {
         assert null != other;
 
         Mapping bestMapping = null;
+        double bestCost = Double.MAX_VALUE;
         long bestOffset = 0;
 
-        for (final long offset : this.getPossibleOffsets(original, other)) {
-            final Mapping mapping =
-                    this.calculateWithOffset(offset, original, other);
-            if (null == bestMapping || mapping.getCost() < bestMapping.getCost()) {
-                bestMapping = mapping;
-                bestOffset = offset;
+        for (final long currentOffset : this.getPossibleOffsets(original, other)) {
+            final Mapping currentMapping =
+                    this.calculateWithOffset(currentOffset, original, other);
+            final double currentCost =
+                    this.costCalculator.calculateCost(currentMapping);
+            if (currentCost < bestCost) {
+                bestMapping = currentMapping;
+                bestCost = currentCost;
+                bestOffset = currentOffset;
             }
         }
         this.logger.log("Best offset: \t" + bestOffset);

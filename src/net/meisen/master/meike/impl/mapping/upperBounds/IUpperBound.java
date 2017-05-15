@@ -6,7 +6,7 @@ import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 /**
  * Interface for upper bounding mappers.
  */
-public interface IUpperBound extends IMinCostMapper {
+public interface IUpperBound {
     /**
      * Calculates the upper bounding value for the minimum cost maximum
      * cardinality matching between the intervals of the given {@link Dataset}s.

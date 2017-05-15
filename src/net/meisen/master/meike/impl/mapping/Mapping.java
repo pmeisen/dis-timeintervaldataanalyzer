@@ -1,54 +1,125 @@
 package net.meisen.master.meike.impl.mapping;
 
 import com.google.common.collect.ImmutableList;
+import javafx.util.Pair;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
+import net.meisen.master.meike.impl.distances.intervals.Interval;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Wrapper around a mapping from one {@link Dataset} to another and its cost.
- * This can be a matching or any other arbitrary mapping.
+ * Wrapper around a mapping from the {@link Interval}s of one {@link Dataset} to
+ * the {@link Interval}s of another. This can be a matching or any other
+ * arbitrary mapping.
  */
 public class Mapping {
-    public static final int NOT_MAPPED = -1;
-
-    private final double cost;
     private final List<Integer> mappingIndices;
+    private final CostMatrix costMatrix;
 
-    private Mapping(final double cost, final List<Integer> mappingIndices) {
-        this.cost = cost;
+    private Mapping(final List<Integer> mappingIndices,
+                    final CostMatrix costMatrix) {
         this.mappingIndices = ImmutableList.copyOf(mappingIndices);
-    }
-
-    static Mapping create(final double cost,
-                          final List<Integer> mappingIndices) {
-        assert 0 <= cost;
-        assert null != mappingIndices;
-
-        return new Mapping(cost, mappingIndices);
+        this.costMatrix = costMatrix;
     }
 
     /**
-     * Given the index i of one of the intervals in the original dataset, this
-     * method returns the index j of the interval in the other dataset which
-     * interval i is mapped to. The return value {@code NOT_MAPPED} means
-     * that the i-th interval of the original dataset is not mapped to any
-     * interval of the other dataset.
+     * Creates a mapping from the given cost matrix and mapping indices.
      *
-     * @param originalIndex
-     *          the index of the original interval whose mapping partner's index
-     *          is to be retrieved
-     * @return the index of the interval in the other dataset which the i-th
-     * interval in the original dataset is mapped to
+     * @param mappingIndices
+     *          list of indices indicating which interval from the first
+     *          dataset is mapped to which interval of the second dataset
+     * @param costMatrix
+     *          the cost matrix which the mapping is based on
+     * @return a new mapping instance
      */
-    public int getMappedIndex(final int originalIndex) {
-        return this.mappingIndices.get(originalIndex);
+    public static Mapping create(final List<Integer> mappingIndices,
+                                 final CostMatrix costMatrix) {
+        assert null != mappingIndices;
+        assert null != costMatrix;
+
+        return new Mapping(mappingIndices, costMatrix);
     }
 
     /**
-     * @return the cost of this mapping
+     * @return a list of the costs for all mapped pairs; a missing value
+     * indicates that an interval was mapped to a dummy interval and thus
+     * there is no real cost.
      */
-    public double getCost() {
-        return this.cost;
+    public List<Optional<Double>> getMappingCosts() {
+        final int firstLength = this.costMatrix.getFirstDatasetLength();
+        final int secondLength = this.costMatrix.getSecondDatasetLength();
+        final List<Optional<Double>> result = new LinkedList<>();
+        for (int i = 0; i < this.costMatrix.getCosts().length; i++) {
+            if (i < firstLength) {
+                final int j = this.mappingIndices.get(i);
+                final Optional<Double> cost = j < secondLength
+                        ? Optional.of(this.costMatrix.getCosts()[i][j])
+                        : Optional.empty();
+                result.add(cost);
+            } else {
+                result.add(Optional.empty());
+            }
+        }
+        return result;
+    }
+
+    public List<Pair<Interval, Interval>> getPairs() {
+        final List<Pair<Interval, Interval>> pairs = new LinkedList<>();
+        for (int i = 0; i < this.costMatrix.getFirstDatasetLength(); i++) {
+            final int mappedIndex = this.mappingIndices.get(i);
+            if (mappedIndex < this.costMatrix.getSecondDatasetLength()) {
+                pairs.add(new Pair<>(this.costMatrix.getFirstDataset().get(i),
+                        this.costMatrix.getSecondDataset().get(mappedIndex)));
+            }
+        }
+        return pairs;
+    }
+
+    /**
+     * When the underlying datasets are of different lengths, some intervals
+     * of the larger dataset are not part of the mapping. This method returns
+     * all those intervals.
+     */
+    public List<Interval> getUnmappedIntervalsOfLargerDataset() {
+        return this.firstDatasetIsShorter()
+                ? this.getUnmappedIntervalsOfSecondDataset()
+                : this.getUnmappedIntervalsOfFirstDataset();
+    }
+
+    /**
+     * @return all intervals of the smaller dataset.
+     */
+    public List<Interval> getIntervalsOfSmallerDataset()  {
+        return this.firstDatasetIsShorter()
+                ? this.costMatrix.getFirstDataset()
+                : this.costMatrix.getSecondDataset();
+    }
+
+    private boolean firstDatasetIsShorter() {
+        return this.costMatrix.getFirstDatasetLength() < this.costMatrix.getSecondDatasetLength();
+    }
+
+    private List<Interval> getUnmappedIntervalsOfFirstDataset() {
+        final int secondLength = this.costMatrix.getSecondDatasetLength();
+        final List<Interval> unmappedIntervals = new LinkedList<>();
+        for (int i = 0; i < this.costMatrix.getFirstDatasetLength(); i++) {
+            if (this.mappingIndices.get(i) < secondLength) {
+                unmappedIntervals.add(this.costMatrix.getFirstDataset().get(i));
+            }
+        }
+        return unmappedIntervals;
+    }
+
+    private List<Interval> getUnmappedIntervalsOfSecondDataset() {
+        final List<Interval> secondIntervals = costMatrix.getSecondDataset();
+        final List<Interval> secondDataset = new LinkedList<>(secondIntervals);
+        for (final int i : this.mappingIndices) {
+            if (secondIntervals.size() > i) {
+                secondDataset.remove(secondIntervals.get(i));
+            }
+        }
+        return secondDataset;
     }
 }

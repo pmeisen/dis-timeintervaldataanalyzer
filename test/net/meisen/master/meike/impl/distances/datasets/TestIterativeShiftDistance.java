@@ -8,10 +8,9 @@ import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
-import net.meisen.master.meike.impl.mapping.costCalculation.OnlyMatchedIntervals;
+import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 import net.meisen.master.meike.impl.mapping.Mapping;
-import net.meisen.master.meike.impl.mapping.MappingFactory;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -55,24 +54,22 @@ public class TestIterativeShiftDistance {
     @Test
     public void testShiftedCandidateGivesZeroDistance() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IMinCostMapper matcher =
-                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper matcher = KuhnMunkres.create();
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 
         final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTen);
-        assertEquals(0.0, bestMapping.getCost(), 0);
+        assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0);
     }
 
     @Test
     public void testShiftedCandidateWithExtra() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
-        final IMinCostMapper matcher =
-                KuhnMunkres.from(MappingFactory.from(new OnlyMatchedIntervals()));
+        final IMinCostMapper matcher = KuhnMunkres.create();
         final IDatasetDistance datasetDistance =
                 IterativeShiftDistance.from(matcher, distanceMeasure);
 
         final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTenPlusExtra);
-        assertEquals(0.0, bestMapping.getCost(), 0.0001);
+        assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0.0001);
     }
 }

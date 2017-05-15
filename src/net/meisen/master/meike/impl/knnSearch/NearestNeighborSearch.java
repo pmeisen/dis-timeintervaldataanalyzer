@@ -1,6 +1,7 @@
 package net.meisen.master.meike.impl.knnSearch;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
+import net.meisen.master.meike.impl.mapping.Mapping;
 import net.meisen.master.meike.impl.mapping.lowerBounds.ILowerBound;
 import net.meisen.master.meike.impl.mapping.upperBounds.IUpperBound;
 

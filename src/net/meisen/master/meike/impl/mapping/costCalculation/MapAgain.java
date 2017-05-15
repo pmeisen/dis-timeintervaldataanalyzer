@@ -6,11 +6,8 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
-import net.meisen.master.meike.impl.mapping.MappingFactory;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,67 +16,56 @@ import java.util.List;
  * dataset.
  */
 public class MapAgain implements ICostCalculator {
-    private final IMinCostMapper minCostMapper =
-            KuhnMunkres.from(MappingFactory.from(new CompleteMatrix()));
-
+    private final IMinCostMapper minCostMapper = KuhnMunkres.create();
     private final IIntervalDistance distance;
+    private final double costForFinallyUnmappedIntervals;
 
-    private MapAgain(final IIntervalDistance distance) {
+    private MapAgain(final IIntervalDistance distance,
+                     final double costForFinallyUnmappedIntervals) {
         this.distance = distance;
+        this.costForFinallyUnmappedIntervals = costForFinallyUnmappedIntervals;
     }
 
-    public static MapAgain fromDistance(final IIntervalDistance distance) {
-        return new MapAgain(distance);
+    public static MapAgain from(final IIntervalDistance distance,
+                                final double costForFinallyUnmappedIntervals) {
+        assert null != distance;
+
+        return new MapAgain(distance, costForFinallyUnmappedIntervals);
     }
 
     @Override
-    public double calculateCost(final CostMatrix costMatrix,
-                                final List<Integer> mappingIndices) {
-        final List<Integer> unmappedIntervals = new LinkedList<>();
-        final List<Integer> mappedIntervals = new LinkedList<>();
+    public double calculateCost(final Mapping mapping) {
+        double mappingCost = mapping.getMappingCosts().stream()
+                .mapToDouble(opt -> opt.orElse(0.0))
+                .sum();
 
-        double matchingCost = 0;
-        for (int i = 0; i < costMatrix.getFirstDatasetLength(); i++) {
-            final int mappedIntervalIndex = mappingIndices.get(i);
-            if (mappedIntervalIndex != Mapping.NOT_MAPPED) {
-                matchingCost += costMatrix.getCosts()[i][mappedIntervalIndex];
-                mappedIntervals.add(mappedIntervalIndex);
-            } else {
-                unmappedIntervals.add(i);
-            }
-        }
+        final List<Interval> unmappedIntervals =
+                mapping.getUnmappedIntervalsOfLargerDataset();
+        final List<Interval> intervalsOfSmallerDataset =
+                mapping.getIntervalsOfSmallerDataset();
 
-        matchingCost += this.getCostOfSecondMatching(
-                this.reduceFirstDataset(unmappedIntervals, costMatrix),
-                this.reduceSecondDataset(mappedIntervals, costMatrix));
+        mappingCost += this.getCostOfSecondMatching(unmappedIntervals,
+                intervalsOfSmallerDataset);
 
-        return matchingCost;
+        return mappingCost;
     }
 
-    private List<Interval> reduceFirstDataset(final List<Integer> unmappedIntervals,
-                                              final CostMatrix costMatrix) {
-        final List<Interval> firstIntervals = costMatrix.getFirstDataset();
-        final ArrayList<Interval> firstDataset = new ArrayList<>();
-        for (final int i : unmappedIntervals) {
-            firstDataset.add(firstIntervals.get(i));
-        }
-        return firstDataset;
-    }
-
-    private List<Interval> reduceSecondDataset(final List<Integer> mappedIntervals,
-                                               final CostMatrix costMatrix) {
-        final List<Interval> secondIntervals = costMatrix.getSecondDataset();
-        final List<Interval> secondDataset = new LinkedList<>(secondIntervals);
-        for (final int i : mappedIntervals) {
-            secondDataset.remove(secondIntervals.get(i));
-        }
-        return secondDataset;
-    }
-
-    private double getCostOfSecondMatching(final List<Interval> first,
-                                           final List<Interval> second) {
+    private double getCostOfSecondMatching(final List<Interval> unmapped,
+                                           final List<Interval> smaller) {
         final CostMatrix costMatrix =
-                new CostMatrix(distance, new Dataset(first), new Dataset(second));
-        return this.minCostMapper.calculateMinimumCostMapping(costMatrix).getCost();
+                new CostMatrix(distance, new Dataset(unmapped), new Dataset(smaller));
+        final Mapping mapping =
+                this.minCostMapper.calculateMinimumCostMapping(costMatrix);
+        final ICostCalculator costCalculator =
+                this.getCostCalculator(unmapped, smaller);
+        return costCalculator.calculateCost(mapping);
+    }
+
+    private ICostCalculator getCostCalculator(final List<Interval> unmapped,
+                                              final List<Interval> smaller) {
+        final double costForUnmapped = unmapped.size() < smaller.size()
+                ? 0
+                : this.costForFinallyUnmappedIntervals;
+        return ConstantCostForUnmappedIntervals.fromCost(costForUnmapped);
     }
 }
