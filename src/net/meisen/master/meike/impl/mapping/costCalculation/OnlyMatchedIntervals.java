@@ -1,6 +1,7 @@
 package net.meisen.master.meike.impl.mapping.costCalculation;
 
 import net.meisen.master.meike.impl.mapping.CostMatrix;
+import net.meisen.master.meike.impl.mapping.Mapping;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class OnlyMatchedIntervals implements ICostCalculator {
         double matchingCost = 0;
         for (int i = 0; i < costMatrix.getFirstDatasetLength(); i++) {
             final int mappedIntervalIndex = mappingIndices.get(i);
-            if (mappedIntervalIndex < costMatrix.getSecondDatasetLength()) {
+            if (mappedIntervalIndex != Mapping.NOT_MAPPED) {
                 matchingCost += costMatrix.getCosts()[i][mappedIntervalIndex];
             }
         }

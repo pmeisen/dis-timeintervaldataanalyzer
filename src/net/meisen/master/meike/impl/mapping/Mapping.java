@@ -21,7 +21,7 @@ public class Mapping {
     }
 
     static Mapping create(final double cost,
-                                 final List<Integer> mappingIndices) {
+                          final List<Integer> mappingIndices) {
         assert 0 <= cost;
         assert null != mappingIndices;
 
@@ -37,7 +37,7 @@ public class Mapping {
      *
      * @param originalIndex
      *          the index of the original interval whose mapping partner's index
-     *          is to be retrieved     *
+     *          is to be retrieved
      * @return the index of the interval in the other dataset which the i-th
      * interval in the original dataset is mapped to
      */
