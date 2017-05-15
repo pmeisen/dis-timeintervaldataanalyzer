@@ -1,7 +1,6 @@
 package net.meisen.master.meike.impl.mapping.upperBounds;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 
 /**
  * Interface for upper bounding mappers.

@@ -54,15 +54,13 @@ class Candidates {
      * bounding values.
      */
     public List<BoundedDataset> getRemainingCandidates() {
-        final List<BoundedDataset> remaining = new ArrayList<>();
-
         final double maxLowerBound = this.candidates.stream()
                 .mapToDouble(BoundedDataset::getUpperBound)
                 .sorted()
                 .skip(this.numberOfNearestNeighbors - 1)
                 .findFirst()
                 .orElse(Double.MAX_VALUE);
-        return remaining.stream()
+        return this.candidates.stream()
                 .filter(dataset -> dataset.getLowerBound() < maxLowerBound)
                 .collect(Collectors.toList());
     }

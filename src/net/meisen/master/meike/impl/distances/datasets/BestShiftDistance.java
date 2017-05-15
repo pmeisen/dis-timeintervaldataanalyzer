@@ -122,7 +122,7 @@ public class BestShiftDistance implements IDatasetDistance {
      *           the original dataset
      * @param other
      *           the dataset that is being compared to the original one
-     * @return all values that might be the best offset, ordered ascendingly.
+     * @return all values that might be the best offset, sorted in ascending order.
      */
     private List<Long> getPossibleOffsets(final Dataset original,
                                           final Dataset other) {
