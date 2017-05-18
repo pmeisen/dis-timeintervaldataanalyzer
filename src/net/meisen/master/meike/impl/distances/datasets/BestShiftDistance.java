@@ -3,7 +3,7 @@ package net.meisen.master.meike.impl.distances.datasets;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
-import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
+import net.meisen.master.meike.impl.logging.SilentLogger;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
@@ -39,7 +39,7 @@ public class BestShiftDistance implements IDatasetDistance {
         this.mapper = mapper;
         this.intervalDistance = intervalDistance;
         this.costCalculator = costCalculator;
-        this.logger = new SimpleConsoleLogger();
+        this.logger = new SilentLogger();
     }
 
     /**
@@ -84,6 +84,9 @@ public class BestShiftDistance implements IDatasetDistance {
         assert null != original;
         assert null != other;
 
+        original.setOffset(0);
+        other.setOffset(0);
+
         Mapping bestMapping = null;
         double bestCost = Double.MAX_VALUE;
         long bestOffset = 0;
@@ -99,7 +102,7 @@ public class BestShiftDistance implements IDatasetDistance {
                 bestOffset = currentOffset;
             }
         }
-        this.logger.log("Best offset: \t" + bestOffset);
+        this.logger.log("BSD - Best offset: \t" + bestOffset);
 
         return bestMapping;
     }
@@ -107,10 +110,10 @@ public class BestShiftDistance implements IDatasetDistance {
     private Mapping calculateWithOffset(final long offset,
                                         final Dataset original,
                                         final Dataset other) {
-        original.setOffset(offset);
+        other.setOffset(offset);
         final CostMatrix costMatrix =
                 new CostMatrix(this.intervalDistance, original, other);
-        return this.mapper.calculateMinimumCostMapping(costMatrix);
+        return this.mapper.calculateMinimumCostMapping(costMatrix).withOffset(offset);
     }
 
     /**

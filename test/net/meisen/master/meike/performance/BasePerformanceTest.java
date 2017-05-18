@@ -40,8 +40,9 @@ public class BasePerformanceTest extends LoaderBasedTest {
     }
 
     protected Dataset getDatasetFor(final String query, final TidaModel model,
-                                    final DatasetFactory datasetFactory) {
+                                    final DatasetFactory datasetFactory,
+                                    final String datasetId) {
         final SelectResultRecords records = this.evaluateQuery(model, query);
-        return datasetFactory.convertRecords(records);
+        return datasetFactory.convertRecords(records, datasetId);
     }
 }

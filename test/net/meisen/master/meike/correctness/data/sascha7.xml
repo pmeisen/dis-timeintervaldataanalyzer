@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<model xmlns="http://dev.meisen.net/xsd/dissertation/model"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:csv="http://dev.meisen.net/xsd/dissertation/model/csv"
+
+       xsi:schemaLocation="http://dev.meisen.net/xsd/dissertation/model         http://dev.meisen.net/xsd/dissertation/tidaModel.xsd
+                           http://dev.meisen.net/xsd/dissertation/model/csv     http://dev.meisen.net/xsd/dissertation/tidaCsvExtension.xsd"
+       id="sascha7">
+
+    <config>
+        <caches>
+            <identifier implementation="net.meisen.dissertation.impl.cache.MemoryIdentifierCache" />
+            <metadata implementation="net.meisen.dissertation.impl.cache.MemoryMetaDataCache" />
+            <bitmap implementation="net.meisen.dissertation.impl.cache.MemoryBitmapCache" />
+            <factsets implementation="net.meisen.dissertation.impl.cache.MemoryFactDescriptorModelSetCache" />
+            <records implementation="net.meisen.dissertation.impl.cache.MemoryDataRecordCache" />
+        </caches>
+
+        <dataretrievers>
+            <dataretriever id="csv_retriever">
+                <csv:config file="/net/meisen/master/meike/correctness/data/sascha7.csv" classpath="true" separator=";" />
+            </dataretriever>
+        </dataretrievers>
+    </config>
+
+    <time>
+        <timeline start="01.01.2017 00:00:00" end="16.12.2017 23:59:59" granularity="SECOND" />
+    </time>
+
+    <meta>
+        <descriptors />
+        <entries />
+    </meta>
+
+    <structure>
+        <interval name="INTERVAL_START" type="start" />
+        <interval name="INTERVAL_END" type="end" />
+    </structure>
+
+    <data metahandling="create" intervalhandling="failOnNull">
+        <dataset dataretriever="csv_retriever" />
+    </data>
+</model>

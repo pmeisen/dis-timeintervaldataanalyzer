@@ -45,14 +45,14 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
                                           final TidaModel model,
                                           final DatasetFactory datasetFactory) {
         final String query = "SELECT RECORDS FROM flughafen DURING [" + date + " 00:00:00, " + date + " 23:59:59]";
-        return this.getDatasetFor(query, model, datasetFactory);
+        return this.getDatasetFor(query, model, datasetFactory, date);
     }
 
     private Dataset getShortDatasetForDate(final String date,
                                            final TidaModel model,
                                            final DatasetFactory datasetFactory) {
         final String query = "SELECT RECORDS FROM flughafen DURING [" + date + " 00:00:00, " + date + " 09:59:59]";
-        return this.getDatasetFor(query, model, datasetFactory);
+        return this.getDatasetFor(query, model, datasetFactory, date);
     }
 
     private IIntervalDistance createIntervalDistance() {

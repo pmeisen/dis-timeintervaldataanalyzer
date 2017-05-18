@@ -35,7 +35,7 @@ public class DoubleMatcher implements IMinCostMapper {
         final double[][] costs = costMatrix.getCosts();
         final List<Integer> mappingIndices = Arrays.stream(costs)
                 .map(row -> IntStream.range(0, row.length)
-                        .reduce((i,j) -> row[i] > row[j] ? i : j)
+                        .reduce((i,j) -> row[i] < row[j] ? i : j)
                         .orElseThrow(() -> new IllegalStateException("Not supposed to happen.")))
                 .collect(Collectors.toList());
 

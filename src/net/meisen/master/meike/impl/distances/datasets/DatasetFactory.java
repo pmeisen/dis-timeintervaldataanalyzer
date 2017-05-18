@@ -47,7 +47,22 @@ public class DatasetFactory {
      * @return a corresponding dataset.
      */
     public Dataset convertRecords(final SelectResultRecords records) {
+        return this.convertRecords(records, "unknown");
+    }
+
+    /**
+     * Converts the given select result records to a {@link Dataset} of
+     * {@link Interval}s.
+     *
+     * @param records
+     *          The results from a record select query; must not be {@code null}.
+     * @param id
+     *          The id to give to the created dataset
+     * @return a corresponding dataset.
+     */
+    public Dataset convertRecords(final SelectResultRecords records, final String id) {
         assert null != records;
+        assert null != id;
 
         final long offset = null == records.getQuery().getInterval()
                 ? 0
@@ -56,10 +71,10 @@ public class DatasetFactory {
         final TidaIndex index = this.model.getIndex();
         final List<Interval> intervals =
                 Arrays.stream(records.getSelectedRecords().getIds())
-                        .mapToObj(id -> this.getInterval(index, id, offset))
+                        .mapToObj(recordId -> this.getInterval(index, recordId, offset))
                         .collect(Collectors.toList());
 
-        return new Dataset(intervals);
+        return new Dataset(intervals, id);
     }
 
     protected Interval getInterval(final TidaIndex index, final int id, final long timeOffset) {

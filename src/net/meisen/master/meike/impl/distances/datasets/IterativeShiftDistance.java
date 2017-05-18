@@ -4,7 +4,7 @@ import javafx.util.Pair;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
-import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
+import net.meisen.master.meike.impl.logging.SilentLogger;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
@@ -27,7 +27,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
                                    final IIntervalDistance distanceMeasure) {
         this.mapper = mapper;
         this.distanceMeasure = distanceMeasure;
-        this.logger = new SimpleConsoleLogger();
+        this.logger = new SilentLogger();
     }
 
     /**
@@ -56,15 +56,18 @@ public class IterativeShiftDistance implements IDatasetDistance {
         assert null != original;
         assert null != other;
 
+        original.setOffset(0);
+        other.setOffset(0);
+
         long nextOffset = this.calculateInitialOffset(original, other);
-        this.logger.log("Initial offset: \t" + nextOffset);
+        this.logger.log("ISD - Initial offset: \t" + nextOffset);
         long previousOffset;
         Mapping mapping;
         do {
             other.setOffset(nextOffset);
             final CostMatrix costMatrix =
                     new CostMatrix(this.distanceMeasure, original, other);
-            mapping = this.mapper.calculateMinimumCostMapping(costMatrix);
+            mapping = this.mapper.calculateMinimumCostMapping(costMatrix).withOffset(nextOffset);
             previousOffset = nextOffset;
             nextOffset = this.calculateBestOffset(mapping);
         } while (nextOffset != previousOffset);
@@ -108,7 +111,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
                 minimumCost = cost;
             }
         }
-        this.logger.log("Best offset: \t" + bestOffset);
+        this.logger.log("ISD - Best offset: \t" + bestOffset);
         return bestOffset;
     }
 

@@ -17,6 +17,7 @@ import java.util.Optional;
 public class Mapping {
     private final List<Integer> mappingIndices;
     private final CostMatrix costMatrix;
+    private long offset;
 
     private Mapping(final List<Integer> mappingIndices,
                     final CostMatrix costMatrix) {
@@ -41,6 +42,15 @@ public class Mapping {
         assert mappingIndices.size() == costMatrix.getCosts().length;
 
         return new Mapping(mappingIndices, costMatrix);
+    }
+
+    public Mapping withOffset(final long offset) {
+        this.offset = offset;
+        return this;
+    }
+
+    public long getOffset() {
+        return this.offset;
     }
 
     /**

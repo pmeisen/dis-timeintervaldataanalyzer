@@ -11,6 +11,22 @@ import java.util.List;
  */
 public class Dataset {
     private final List<Interval> intervals;
+    private final String id;
+
+    /**
+     * Creates a new {@link Dataset} from the given {@link Interval}s.
+     *
+     * @param intervals
+     *           The intervals that make up this dataset; must not be
+     *           {@code null}.
+     */
+    public Dataset(final List<Interval> intervals, final String id) {
+        assert null != intervals;
+        assert null != id;
+
+        this.intervals = intervals;
+        this.id = id;
+    }
 
     /**
      * Creates a new {@link Dataset} from the given {@link Interval}s.
@@ -23,6 +39,7 @@ public class Dataset {
         assert null != intervals;
 
         this.intervals = intervals;
+        this.id = "unknown";
     }
 
     /**
@@ -50,5 +67,9 @@ public class Dataset {
         for (final Interval interval : this.intervals) {
             interval.setOffset(offset);
         }
+    }
+
+    public String getId() {
+        return this.id;
     }
 }

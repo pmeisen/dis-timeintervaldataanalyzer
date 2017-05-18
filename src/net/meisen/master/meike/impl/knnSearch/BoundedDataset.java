@@ -5,7 +5,7 @@ import net.meisen.master.meike.impl.distances.datasets.Dataset;
 /**
  * Wrapper around a {@link Dataset} and its best known bound values.
  */
-class BoundedDataset implements Comparable<BoundedDataset> {
+public class BoundedDataset implements Comparable<BoundedDataset> {
     private final Dataset dataset;
     private double lowerBound;
     private double upperBound;

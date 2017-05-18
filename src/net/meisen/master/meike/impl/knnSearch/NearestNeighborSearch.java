@@ -36,8 +36,9 @@ public class NearestNeighborSearch {
      *          the last entry should be the exact measure.
      * @return an instance of the nearest neighborhood search class
      */
-    public NearestNeighborSearch from(final List<ILowerBound> lowerBounds,
-                                      final List<IUpperBound> upperBounds) {
+    public static NearestNeighborSearch from(
+            final List<ILowerBound> lowerBounds,
+            final List<IUpperBound> upperBounds) {
         assert null != lowerBounds;
         assert null != upperBounds;
         assert lowerBounds.size() == upperBounds.size();

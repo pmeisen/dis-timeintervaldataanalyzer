@@ -45,8 +45,11 @@ public class PlainDistance implements IDatasetDistance {
         assert null != original;
         assert null != other;
 
+        original.setOffset(0);
+        other.setOffset(0);
+
         final CostMatrix costMatrix =
                 new CostMatrix(this.intervalDistance, original, other);
-        return this.mapper.calculateMinimumCostMapping(costMatrix);
+        return this.mapper.calculateMinimumCostMapping(costMatrix).withOffset(0);
     }
 }
