@@ -8,6 +8,7 @@ import net.meisen.master.meike.impl.distances.intervals.Interval;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper around a mapping from the {@link Interval}s of one {@link Dataset} to
@@ -130,5 +131,9 @@ public class Mapping {
             secondDataset.remove(secondIntervals.get(this.mappingIndices.get(i)));
         }
         return secondDataset;
+    }
+
+    public String getMappingIndices() {
+        return String.join(",\t", this.mappingIndices.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 }

@@ -6,7 +6,6 @@ import java.util.Map;
  * Calculates the weighted sum of a set of more basic distance values.
  */
 public class WeightedSumDistance implements IIntervalDistance {
-
     private final Map<IIntervalDistance, Double> weightedDistances;
 
     /**
@@ -33,5 +32,15 @@ public class WeightedSumDistance implements IIntervalDistance {
                 .mapToDouble(entry -> entry.getKey().calculate(original, other)
                         * entry.getValue())
                 .sum();
+    }
+
+    @Override
+    public String toString() {
+        String result = "";
+        for (final Double weight : this.weightedDistances.values()) {
+            result += Double.toString(weight);
+            result += ", ";
+        }
+        return result;
     }
 }

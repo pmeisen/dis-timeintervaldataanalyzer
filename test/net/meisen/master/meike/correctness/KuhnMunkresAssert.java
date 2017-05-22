@@ -18,6 +18,8 @@ public class KuhnMunkresAssert extends AbstractAssert<KuhnMunkresAssert, KuhnMun
                 .isGreaterThanOrEqualTo(actual.bestShiftDistanceResult.getValue());
         Assertions.assertThat(actual.iterativeShiftDistanceResult.getValue())
                 .isGreaterThanOrEqualTo(actual.bestShiftDistanceResult.getValue());
+                //.isBetween(actual.bestShiftDistanceResult.getValue(),
+                //        actual.plainDistanceResult.getValue());
         return this;
     }
 }

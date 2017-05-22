@@ -2,13 +2,8 @@ package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.master.meike.correctness.KuhnMunkresResult.Builder;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.DatasetFactory;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
-import net.meisen.master.meike.impl.distances.datasets.IterativeShiftDistance;
-import net.meisen.master.meike.impl.distances.datasets.PlainDistance;
 import net.meisen.master.meike.impl.distances.intervals.EndDistance;
 import net.meisen.master.meike.impl.distances.intervals.GapDistance;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
@@ -16,28 +11,16 @@ import net.meisen.master.meike.impl.distances.intervals.IntersectionDistance;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
 import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
-import net.meisen.master.meike.impl.knnSearch.BoundedDataset;
-import net.meisen.master.meike.impl.knnSearch.NearestNeighborSearch;
-import net.meisen.master.meike.impl.mapping.IMinCostMapper;
-import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
-import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
-import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
-import net.meisen.master.meike.impl.mapping.lowerBounds.DoubleMatchingBound;
-import net.meisen.master.meike.impl.mapping.upperBounds.Exact;
 import net.meisen.master.meike.performance.BasePerformanceTest;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static net.meisen.master.meike.correctness.KuhnMunkresAssert.assertThatResult;
-
-public class TestSascha extends BasePerformanceTest {
+public class SaschaBasedTest extends BasePerformanceTest {
     private static final String originalDate = "01.01.2017";
-    private static final ImmutableList<ImmutableList<String>> candidateDates = ImmutableList.of(
+    protected static final ImmutableList<ImmutableList<String>> allCandidateDates = ImmutableList.of(
             ImmutableList.of(
                     "12.01.2017", "18.01.2017", "27.01.2017", "07.02.2017", "10.02.2017",
                     "23.02.2017", "27.02.2017", "11.03.2017", "27.03.2017", "04.04.2017",
@@ -91,11 +74,6 @@ public class TestSascha extends BasePerformanceTest {
                     "14.06.2017", "20.06.2017", "10.07.2017", "19.07.2017", "26.07.2017",
                     "15.08.2017", "24.08.2017", "10.09.2017", "21.09.2017", "07.10.2017",
                     "15.10.2017", "24.11.2017", "30.11.2017", "16.12.2017"));
-    private static final List<IIntervalDistance> intervalDistances =
-            ImmutableList.of(
-                    ImmutableList.of(1.0, 1.0, 1.0, 1.0, 1.0),
-                    ImmutableList.of(1.0, 0.0, 0.0, 2.0, 1.0))
-            .stream().map(TestSascha::createIntervalDistance).collect(Collectors.toList());
 
     private TidaModel loadModel(final int modelNumber) {
         return m("/net/meisen/master/meike/correctness/data/sascha" + modelNumber + ".xml", true);
@@ -121,78 +99,15 @@ public class TestSascha extends BasePerformanceTest {
         return new WeightedSumDistance(distances);
     }
 
-    private Datasets loadDatasets(final int modelNumber) {
+    protected Datasets loadDatasets(final int modelNumber, final List<String> candidateDates) {
         final TidaModel model = this.loadModel(modelNumber);
         final DatasetFactory datasetFactory = DatasetFactory.forModel(model);
 
         final Dataset original = this.getForDate(originalDate, model, datasetFactory, modelNumber);
         final List<Dataset> candidates = new ArrayList<>();
-        for (final String candidateDate : candidateDates.get(modelNumber - 1)) {
+        for (final String candidateDate : candidateDates) {
             candidates.add(this.getForDate(candidateDate, model, datasetFactory, modelNumber));
         }
         return new Datasets(original, candidates);
-    }
-
-    public List<KuhnMunkresResult> getKuhnMunkresDatasetDistances(
-            final Datasets datasets, final IIntervalDistance intervalDistance) {
-        final IMinCostMapper kuhnMunkres = KuhnMunkres.create();
-        final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1);
-
-        final IDatasetDistance plainDistance = PlainDistance.from(kuhnMunkres, intervalDistance);
-        final IDatasetDistance iterativeDistance = IterativeShiftDistance.from(kuhnMunkres, intervalDistance);
-        final IDatasetDistance bestShiftDistance = BestShiftDistance.from(kuhnMunkres, intervalDistance, costCalculator);
-
-        return datasets.candidates.stream()
-                .map(candidate -> Builder.forDataset(candidate)
-                        .withPlainDistanceResult(plainDistance.calculate(datasets.original, candidate))
-                        .withIterativeShiftDistanceResult(iterativeDistance.calculate(datasets.original, candidate))
-                        .withBestShiftDistanceResult(bestShiftDistance.calculate(datasets.original, candidate))
-                        .build(costCalculator))
-                .collect(Collectors.toList());
-    }
-
-    public List<BoundedDataset> getNearestNeighbors(
-            final Datasets datasets, final IIntervalDistance intervalDistance) {
-        final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1);
-
-        final NearestNeighborSearch knnSearch = NearestNeighborSearch.from(
-                ImmutableList.of(DoubleMatchingBound.from(new LengthDistance(), costCalculator)),
-                ImmutableList.of(Exact.from(BestShiftDistance.from(KuhnMunkres.create(), intervalDistance, costCalculator), costCalculator)));
-
-        return knnSearch.find(5, datasets.original, datasets.candidates);
-    }
-
-    @Test
-    public void testKuhnMunkres() {
-        final IIntervalDistance intervalDistance = createIntervalDistance(
-                ImmutableList.of(1.0, 1.0, 1.0, 1.0, 1.0));
-        for (int i = 1; i <= candidateDates.size(); i++) {
-            logger.log("Test set " + i + ":");
-            final Datasets datasets = this.loadDatasets(i);
-            final List<KuhnMunkresResult> results =
-                    this.getKuhnMunkresDatasetDistances(datasets, intervalDistance);
-            for (final KuhnMunkresResult result : results) {
-                logger.log(result.toString());
-                assertThatResult(result).hasValidCosts();
-            }
-            this.unload();
-        }
-    }
-
-    @Test
-    public void testNearestNeighbors() {
-        for (int i = 1; i <= candidateDates.size(); i++) {
-            logger.log("Test set " + i + ":");
-            final Datasets datasets = this.loadDatasets(i);
-            for (final IIntervalDistance distance : intervalDistances) {
-                final List<BoundedDataset> nearestNeighbors =
-                        this.getNearestNeighbors(datasets, distance);
-                for (final BoundedDataset neighbor : nearestNeighbors) {
-                    logger.log(neighbor.getDataset().getId() + " - " + neighbor.getUpperBound());
-                }
-                logger.log("-----");
-            }
-            this.unload();
-        }
     }
 }

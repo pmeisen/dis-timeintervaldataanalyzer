@@ -65,6 +65,13 @@ class KuhnMunkresResult {
         return this.dataset.getId() +
                 " - Plain: " + plainDistanceResult.getValue() +
                 "\t Iterative: " + iterativeShiftDistanceResult.getValue() +
-                "\t Best shift: " + bestShiftDistanceResult.getValue();
+                " (" + (iterativeShiftDistanceResult.getKey().getOffset() / 60000) + ")" +
+                "\t Best shift: " + bestShiftDistanceResult.getValue() +
+                " (" + (bestShiftDistanceResult.getKey().getOffset() / 60000) + ")";
+    }
+
+    public String getImprovements() {
+        return String.format("%4.3f" , iterativeShiftDistanceResult.getValue()  - plainDistanceResult.getValue()) + " iterative, " +
+                String.format("%4.3f", bestShiftDistanceResult.getValue() - plainDistanceResult.getValue()) + " best";
     }
 }

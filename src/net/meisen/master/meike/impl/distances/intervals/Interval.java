@@ -94,4 +94,18 @@ public class Interval {
     public long getGapBetweenThisAnd(final Interval other) {
         return max(0, max(this.getStart(), other.getStart()) - min(this.getEnd(), other.getEnd()));
     }
+
+    @Override
+    public String toString() {
+        return '[' + millisToTimeString(this.start) +
+                " - " + millisToTimeString(this.end) + ']';
+    }
+
+    private String millisToTimeString(final long milliseconds) {
+        long second = (milliseconds / 1000) % 60;
+        long minute = (milliseconds / (1000 * 60)) % 60;
+        long hour = (milliseconds / (1000 * 60 * 60));
+
+        return String.format("%02d:%02d:%02d", hour, minute, second);
+    }
 }

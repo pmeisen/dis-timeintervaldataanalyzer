@@ -59,19 +59,30 @@ public class IterativeShiftDistance implements IDatasetDistance {
         original.setOffset(0);
         other.setOffset(0);
 
-        long nextOffset = this.calculateInitialOffset(original, other);
-        this.logger.log("ISD - Initial offset: \t" + nextOffset);
+        long currentOffset = this.calculateInitialOffset(original, other);
+        this.logger.log("ISD - Initial offset: \t" + currentOffset);
         long previousOffset;
-        Mapping mapping;
+        Mapping currentMapping;
+        Mapping bestMapping = null;
+        double bestMappingCost = Double.MAX_VALUE;
         do {
-            other.setOffset(nextOffset);
+            other.setOffset(currentOffset);
             final CostMatrix costMatrix =
                     new CostMatrix(this.distanceMeasure, original, other);
-            mapping = this.mapper.calculateMinimumCostMapping(costMatrix).withOffset(nextOffset);
-            previousOffset = nextOffset;
-            nextOffset = this.calculateBestOffset(mapping);
-        } while (nextOffset != previousOffset);
-        return mapping;
+            currentMapping = this.mapper.calculateMinimumCostMapping(costMatrix)
+                    .withOffset(currentOffset);
+
+            final double currentMappingCost = currentMapping.getMappingCosts()
+                    .stream().mapToDouble(opt -> opt.orElse(0.0)).sum();
+            if (currentMappingCost < bestMappingCost) {
+                bestMappingCost = currentMappingCost;
+                bestMapping = currentMapping;
+            }
+
+            previousOffset = currentOffset;
+            currentOffset = this.calculateBestOffset(currentMapping);
+        } while (currentOffset != previousOffset);
+        return bestMapping;
     }
 
     /**
