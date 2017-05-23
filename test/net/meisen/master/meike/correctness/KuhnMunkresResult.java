@@ -71,7 +71,7 @@ class KuhnMunkresResult {
     }
 
     public String getImprovements() {
-        return String.format("%4.3f" , iterativeShiftDistanceResult.getValue()  - plainDistanceResult.getValue()) + " iterative, " +
+        return String.format("%4.3f" , iterativeShiftDistanceResult.getValue()  - plainDistanceResult.getValue()) + " iterative,\n" +
                 String.format("%4.3f", bestShiftDistanceResult.getValue() - plainDistanceResult.getValue()) + " best";
     }
 }

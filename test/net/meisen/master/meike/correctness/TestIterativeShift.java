@@ -4,7 +4,10 @@ import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
-import net.meisen.master.meike.impl.distances.datasets.IterativeShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
@@ -12,7 +15,7 @@ import net.meisen.master.meike.impl.mapping.Mapping;
 import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
 import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
-import net.meisen.master.meike.testUtils.Factories;
+import net.meisen.master.meike.impl.distances.intervals.Factories;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,7 +30,11 @@ public class TestIterativeShift extends SaschaBasedTest {
         final IIntervalDistance equalWeightsDistance =
                 Factories.weightedDistance(1.0, 1.0, 1.0, 1.0, 1.0);
         final IDatasetDistance iterativeDistance =
-                IterativeShiftDistance.from(kuhnMunkres, equalWeightsDistance);
+                IterativeShiftDistance.from(kuhnMunkres,
+                        equalWeightsDistance,
+                        new CentroidOffset(),
+                        MinCostOffset.fromIntervalDistance(equalWeightsDistance),
+                        ModifiedDistances.using(ImmutableList.of(), kuhnMunkres));
         final IDatasetDistance bestShiftDistance =
                 BestShiftDistance.from(kuhnMunkres, equalWeightsDistance, costCalculator);
 

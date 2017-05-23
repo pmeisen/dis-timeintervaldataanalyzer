@@ -12,7 +12,7 @@ import net.meisen.master.meike.impl.mapping.costCalculation.MapAgain;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 import net.meisen.master.meike.impl.mapping.lowerBounds.DoubleMatchingBound;
 import net.meisen.master.meike.impl.mapping.upperBounds.Exact;
-import net.meisen.master.meike.testUtils.Factories;
+import net.meisen.master.meike.impl.distances.intervals.Factories;
 import org.junit.Test;
 
 import java.util.ArrayList;

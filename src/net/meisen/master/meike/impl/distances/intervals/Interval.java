@@ -52,6 +52,9 @@ public class Interval {
         return this.end - this.start;
     }
 
+    public double getCentroid() {
+        return (this.getEnd() + this.getStart()) / 2.0;
+    }
     /**
      * Sets the offset of this interval to the given value.
      * @param offset

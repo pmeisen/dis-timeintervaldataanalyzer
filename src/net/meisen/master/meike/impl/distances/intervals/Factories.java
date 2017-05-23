@@ -1,18 +1,10 @@
-package net.meisen.master.meike.testUtils;
-
-import net.meisen.master.meike.impl.distances.intervals.EndDistance;
-import net.meisen.master.meike.impl.distances.intervals.GapDistance;
-import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
-import net.meisen.master.meike.impl.distances.intervals.IntersectionDistance;
-import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
-import net.meisen.master.meike.impl.distances.intervals.StartDistance;
-import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
+package net.meisen.master.meike.impl.distances.intervals;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Utility class for creating objects needed for tests.
+ * Utility class for creating interval distances.
  */
 public class Factories {
     public static IIntervalDistance weightedDistance(

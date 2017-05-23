@@ -1,6 +1,11 @@
-package net.meisen.master.meike.impl.distances.datasets;
+package net.meisen.master.meike.impl.distances.datasets.iterativeShift;
 
 import com.google.common.collect.ImmutableList;
+import net.meisen.master.meike.impl.distances.datasets.Dataset;
+import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
 import net.meisen.master.meike.impl.distances.intervals.EndDistance;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
@@ -56,7 +61,10 @@ public class TestIterativeShiftDistance {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
         final IMinCostMapper matcher = KuhnMunkres.create();
         final IDatasetDistance datasetDistance =
-                IterativeShiftDistance.from(matcher, distanceMeasure);
+                IterativeShiftDistance.from(matcher, distanceMeasure,
+                        new CentroidOffset(),
+                        MinCostOffset.fromIntervalDistance(distanceMeasure),
+                        ModifiedDistances.using(ImmutableList.of(), matcher));
 
         final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTen);
         assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0);
@@ -67,7 +75,10 @@ public class TestIterativeShiftDistance {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
         final IMinCostMapper matcher = KuhnMunkres.create();
         final IDatasetDistance datasetDistance =
-                IterativeShiftDistance.from(matcher, distanceMeasure);
+                IterativeShiftDistance.from(matcher, distanceMeasure,
+                        new CentroidOffset(),
+                        MinCostOffset.fromIntervalDistance(distanceMeasure),
+                        ModifiedDistances.using(ImmutableList.of(), matcher));
 
         final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTenPlusExtra);
         assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0.0001);
