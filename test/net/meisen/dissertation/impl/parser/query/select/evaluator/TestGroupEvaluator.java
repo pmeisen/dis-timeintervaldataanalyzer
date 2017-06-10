@@ -158,10 +158,10 @@ public class TestGroupEvaluator extends ModuleBasedTest {
 		group = new GroupExpression("PERSON");
 		res = evaluator.generateGroups(group);
 		assertEquals(4, res.size());
-		assertContains(res, m.getDescriptorByValue("PERSON", "Philipp"), 0);
-		assertContains(res, m.getDescriptorByValue("PERSON", "Debbie"), 0);
-		assertContains(res, m.getDescriptorByValue("PERSON", "Tobias"), 0);
-		assertContains(res, m.getDescriptorByValue("PERSON", "*Edison*"), 0);
+		assertContains(res, (Descriptor<String, ?, ?>) m.getDescriptorByValue("PERSON", "Philipp"), 0);
+		assertContains(res, (Descriptor<String, ?, ?>) m.getDescriptorByValue("PERSON", "Debbie"), 0);
+		assertContains(res, (Descriptor<String, ?, ?>) m.getDescriptorByValue("PERSON", "Tobias"), 0);
+		assertContains(res, (Descriptor<String, ?, ?>) m.getDescriptorByValue("PERSON", "*Edison*"), 0);
 
 		// generate a group for two descriptors
 		group = new GroupExpression("SCREAMS", "PERSON");

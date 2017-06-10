@@ -1,6 +1,7 @@
 package net.meisen.master.meike.impl.distances.intervals;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Calculates the weighted sum of a set of more basic distance values.
@@ -36,11 +37,6 @@ public class WeightedSumDistance implements IIntervalDistance {
 
     @Override
     public String toString() {
-        String result = "";
-        for (final Double weight : this.weightedDistances.values()) {
-            result += Double.toString(weight);
-            result += ", ";
-        }
-        return result;
+        return String.join(",", this.weightedDistances.values().stream().map(val -> Double.toString(val)).collect(Collectors.toList()));
     }
 }

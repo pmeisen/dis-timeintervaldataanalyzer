@@ -9,7 +9,10 @@ import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeS
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedInitial;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedNext;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.LengthOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MedianOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
@@ -31,7 +34,7 @@ public class TestKuhnMunkres extends SaschaBasedTest {
                 Factories.weightedDistance(1.0, 1.0, 1.0, 1.0, 1.0);
         final IIntervalDistance lengthImportantDistance =
                 Factories.weightedDistance(1.0, 1.0, 5.0, 1.0, 1.0);
-        final List<IIntervalDistance> distances = ImmutableList.of(equalWeightsDistance, lengthImportantDistance);
+        final List<IIntervalDistance> distances = ImmutableList.of(equalWeightsDistance);
         for (int i = 1; i <= allCandidateDates.size(); i++) {
             logger.log("Test set " + i + ":");
             final Datasets datasets = this.loadDatasets(i, allCandidateDates.get(i-1));
@@ -77,8 +80,10 @@ public class TestKuhnMunkres extends SaschaBasedTest {
                 intervalDistance,
                 CombinedInitial.from(ImmutableList.of(
                         new CentroidOffset(),
-                        LengthOffset.from(minCostMapper, new CentroidOffset()))),
-                new CentroidOffset(),
+                        LengthOffset.from(minCostMapper, new MedianOffset()))),
+                CombinedNext.from(ImmutableList.of(
+                        new MedianOffset(),
+                        MinCostOffset.fromIntervalDistance(intervalDistance))),
                 ModifiedDistances.using(ImmutableList.of(
                         Factories.weightedDistance(1, 1, 3, 0, 0),
                         Factories.weightedDistance(2, 2, 5, 1, 1)),

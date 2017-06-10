@@ -7,9 +7,12 @@ import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftDistance;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedInitial;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedNext;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.LengthOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MedianOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
-import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
@@ -19,49 +22,43 @@ import net.meisen.master.meike.impl.distances.intervals.Factories;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class TestIterativeShift extends SaschaBasedTest {
+public class TestIterativeVsBestShift extends SaschaBasedTest {
     @Test
-    public void testIrregularitiesInFirstTestSet() {
+    public void testIrregularities() {
+        final int modelNumber = 3;
+        final List<String> dates = ImmutableList.of(
+                "17.02.2017", "15.03.2017", "22.03.2017", "05.04.2017",
+                "14.04.2017", "01.06.2017", "27.06.2017", "28.09.2017",
+                "16.10.2017", "15.11.2017", "04.12.2017");
         final IMinCostMapper kuhnMunkres = KuhnMunkres.create();
-        final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1);
+        final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
 
         final IIntervalDistance equalWeightsDistance =
                 Factories.weightedDistance(1.0, 1.0, 1.0, 1.0, 1.0);
         final IDatasetDistance iterativeDistance =
                 IterativeShiftDistance.from(kuhnMunkres,
                         equalWeightsDistance,
-                        new CentroidOffset(),
-                        MinCostOffset.fromIntervalDistance(equalWeightsDistance),
-                        ModifiedDistances.using(ImmutableList.of(), kuhnMunkres));
+                        CombinedInitial.from(ImmutableList.of(
+                                new CentroidOffset(),
+                                LengthOffset.from(kuhnMunkres, new MedianOffset()))),
+                        CombinedNext.from(ImmutableList.of(
+                                new MedianOffset(),
+                                MinCostOffset.fromIntervalDistance(equalWeightsDistance))),
+                        ModifiedDistances.using(ImmutableList.of(
+                                Factories.weightedDistance(1, 1, 3, 0, 0),
+                                Factories.weightedDistance(2, 2, 5, 1, 1)),
+                                kuhnMunkres));
         final IDatasetDistance bestShiftDistance =
                 BestShiftDistance.from(kuhnMunkres, equalWeightsDistance, costCalculator);
 
-        final Datasets datasets = this.loadDatasets(1, ImmutableList.of("11.03.2017", "06.05.2017"));
+        final Datasets datasets = this.loadDatasets(modelNumber, dates);
         for (final Dataset candidate : datasets.candidates) {
-            logger.log(getRepresentation(datasets.original));
-            logger.log(getRepresentation(candidate));
-
             final Mapping iterativeMapping = iterativeDistance.calculate(datasets.original, candidate);
-            logger.log("Iterative : \t " + getRepresentation(iterativeMapping));
+            logger.log(Utils.getPlotterCommand(modelNumber, candidate.getId(), iterativeMapping, "-iterative"));
 
             final Mapping bestMapping = bestShiftDistance.calculate(datasets.original, candidate);
-            logger.log("Best Shift: \t " + getRepresentation(bestMapping));
+            logger.log(Utils.getPlotterCommand(modelNumber, candidate.getId(), bestMapping, "-best"));
         }
-    }
-
-    private String getRepresentation(final Dataset dataset) {
-        return String.join(", ", getIntervalRepresentations(dataset));
-    }
-
-    private List<String> getIntervalRepresentations(final Dataset dataset) {
-        return dataset.getIntervals().stream()
-                .map(Interval::toString)
-                .collect(Collectors.toList());
-    }
-
-    private String getRepresentation(final Mapping mapping) {
-        return mapping.getMappingIndices();
     }
 }

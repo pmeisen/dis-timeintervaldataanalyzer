@@ -134,6 +134,6 @@ public class Mapping {
     }
 
     public String getMappingIndices() {
-        return String.join(",\t", this.mappingIndices.stream().map(String::valueOf).collect(Collectors.toList()));
+        return String.join(",", this.mappingIndices.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 }

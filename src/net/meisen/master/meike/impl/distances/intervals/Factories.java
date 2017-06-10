@@ -11,11 +11,11 @@ public class Factories {
             double startWeight, double endWeight, double lengthWeight,
             double gapWeight, double intersectionWeight) {
         final Map<IIntervalDistance, Double> distances = new HashMap<>();
+        distances.put(new StartDistance(), startWeight);
         distances.put(new EndDistance(), endWeight);
+        distances.put(new LengthDistance(), lengthWeight);
         distances.put(new GapDistance(), gapWeight);
         distances.put(new IntersectionDistance(), intersectionWeight);
-        distances.put(new LengthDistance(), lengthWeight);
-        distances.put(new StartDistance(), startWeight);
         return new WeightedSumDistance(distances);
     }
 }
