@@ -11,13 +11,12 @@ import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.Min
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.logging.ILogger;
-import net.meisen.master.meike.impl.logging.SilentLogger;
+import net.meisen.master.meike.impl.logging.MappingLogger;
 import net.meisen.master.meike.impl.logging.SimpleConsoleLogger;
 import net.meisen.master.meike.impl.mapping.CostMatrix;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.Mapping;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Stream.of;
 
 /**
  * Implementation of the iterative search for the best shift value and matching.
@@ -38,6 +36,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
     private final INeighborhood neighborhood;
     private final MinCostOffset minCostOffset;
     private final ILogger logger;
+    private MappingLogger mappingLogger = MappingLogger.createFor(0, "01.01.2017", "wrong");
 
     private IterativeShiftDistance(final IMinCostMapper mapper,
                                    final IIntervalDistance distanceMeasure,
@@ -51,6 +50,7 @@ public class IterativeShiftDistance implements IDatasetDistance {
         this.neighborhood = neighborhood;
         this.minCostOffset = MinCostOffset.fromIntervalDistance(distanceMeasure);
         this.logger = new SimpleConsoleLogger();
+        this.mappingLogger.enabled = false;
     }
 
     /**
@@ -89,6 +89,10 @@ public class IterativeShiftDistance implements IDatasetDistance {
                 initialOffsetCalculator, nextOffsetCalculator, neighborhood);
     }
 
+    public void setMappingLogger(final MappingLogger mLogger) {
+        this.mappingLogger = mLogger;
+    }
+
     @Override
     public Mapping calculate(final Dataset original, final Dataset other) {
         assert null != original;
@@ -114,12 +118,18 @@ public class IterativeShiftDistance implements IDatasetDistance {
                 .flatMap(o -> this.getClosest(allowedOffsets, o).stream())
                 .distinct()
                 .collect(Collectors.toList());
+        mappingLogger.log("Initial offsets:");
+        mappingLogger.log(offsets);
 
         while (!offsets.isEmpty()) {
             alreadyUsedOffsets.addAll(offsets);
             final List<Mapping> newMappings = offsets.stream()
                     .map(off -> this.getMappingForOffset(off, original, other))
                     .collect(Collectors.toList());
+            mappingLogger.log("New mappings:");
+            for (final Mapping mapping : newMappings) {
+                mappingLogger.log(mapping);
+            }
 
             final Pair<Mapping, Double> bestNewMapping = newMappings.stream()
                     .map(m -> new Pair<>(m, this.getCost(m)))
@@ -128,16 +138,25 @@ public class IterativeShiftDistance implements IDatasetDistance {
                     .orElseThrow(() -> new IllegalStateException("Cannot happen"));
             if (bestNewMapping.getValue() < bestMapping.getValue()) {
                 bestMapping = bestNewMapping;
+                mappingLogger.log("Best new mapping (" + bestNewMapping.getValue() + "):");
+                mappingLogger.log(bestNewMapping.getKey());
+            } else {
+                break;
             }
 
             final List<Mapping> neighbors =
                     this.neighborhood.getNeighbors(bestNewMapping.getKey(), original, other);
+            mappingLogger.log("Neighbors:");
+            for (final Mapping mapping : neighbors) {
+                mappingLogger.log(mapping);
+            }
             offsets = Stream.concat(Stream.of(bestNewMapping.getKey()), neighbors.stream().distinct())
                     .flatMap(m -> this.nextOffsetCalculator.calculate(m).stream())
                     .flatMap(o -> this.getClosest(allowedOffsets, o).stream())
                     .distinct()
                     .filter(o -> !alreadyUsedOffsets.contains(o))
                     .collect(Collectors.toList());
+            mappingLogger.log(offsets);
         }
         bestMapping.getKey().withOffset(this.getBestOffset(bestMapping.getKey()));
         return bestMapping;

@@ -13,6 +13,9 @@ import java.util.List;
 public class CentroidOffset implements IInitialOffsetCalculator {
     @Override
     public List<Long> calculate(final Dataset original, final Dataset other) {
+        original.setOffset(0);
+        other.setOffset(0);
+
         return ImmutableList.of(Math.round(this.calculateCentroid(original)
                 - this.calculateCentroid(other)));
     }

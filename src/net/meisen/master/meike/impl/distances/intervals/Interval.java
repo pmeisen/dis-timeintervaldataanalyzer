@@ -63,6 +63,11 @@ public class Interval {
     public void setOffset(final long offset) {
         this.offset = offset;
     }
+
+    public long getOffset() {
+        return this.offset;
+    }
+
     /**
      * Calculates the length of the intersection of this interval with another
      * one.
