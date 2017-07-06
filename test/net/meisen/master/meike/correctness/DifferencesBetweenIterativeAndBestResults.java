@@ -15,6 +15,7 @@ import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.INe
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.LengthOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MedianOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MonotoneMapping;
 import net.meisen.master.meike.impl.distances.intervals.Factories;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
@@ -33,32 +34,32 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class TestInterestingDatasets extends SaschaBasedTest {
+public class DifferencesBetweenIterativeAndBestResults extends SaschaBasedTest {
     private final List<IIntervalDistance> intervalDistances = ImmutableList.of(
             Factories.weightedDistance(1, 1, 1, 1, 1));
 
     private final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
 
     private final List<Integer> modelNumbersToTest = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8);
-    private static final int numberOfNeighborsToFind = 30;
 
     @Test
-    public void testForWhichNeighborsIterativeIsNotOptimal() {
+    public void testForWhichCandidatesIterativeIsNotOptimal() {
         for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-
+            this.logHeader(modelNumber);
             final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-
             for (final IIntervalDistance distance : intervalDistances) {
                 final List<BoundedDataset> neighbors = this.findNearestNeighbors(datasets, distance);
                 this.logCosts(neighbors);
                 this.logPlotterCommands(modelNumber, distance, datasets.original, neighbors);
             }
-
             this.unload();
         }
+    }
+
+    private void logHeader(final int modelNumber) {
+        logger.log("-------------------------");
+        logger.log("Test set number " + modelNumber);
+        logger.log("-------------------------");
     }
 
     private void logCosts(final List<BoundedDataset> nearestNeighbors) {
@@ -84,30 +85,26 @@ public class TestInterestingDatasets extends SaschaBasedTest {
                     .finalMapping();
             if (bestMapping.getOffset() != iterativeMapping.getOffset()) {
                 logger.log(nearestNeighbors.indexOf(neighbor) + ":\t" +
-                        //String.format("%6.5f", getCostGap(bestMapping, iterativeMapping)) + "\t" +
-                        String.format("%4.2f", getRelativeGap(bestMapping, iterativeMapping)) + "%");
-                logger.log(Utils.getPlotterCommand(modelNumber, neighbor.getDataset().getId(), bestMapping, "-best"));
-                logger.log(Utils.getPlotterCommand(modelNumber, neighbor.getDataset().getId(), iterativeMapping, "-iterative"));
+                        String.format("%4.2f", getRelativeCostGap(bestMapping, iterativeMapping)) + "% gap to optimal");
+                logger.log(Utils.getSpecificPlotterCommand(modelNumber, neighbor.getDataset().getId(), bestMapping, "-best"));
+                logger.log(Utils.getSpecificPlotterCommand(modelNumber, neighbor.getDataset().getId(), iterativeMapping, "-iterative"));
             }
         }
     }
 
-    private double getCostGap(final Mapping bestMapping, final Mapping iterativeMapping) {
-        final double bestCost = bestMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
-        final double iterativeCost = iterativeMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
-        return iterativeCost - bestCost;
-    }
-
-    private double getRelativeGap(final Mapping bestMapping, final Mapping iterativeMapping) {
-        final double bestCost = bestMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
-        final double iterativeCost = iterativeMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
+    private double getRelativeCostGap(final Mapping bestMapping, final Mapping iterativeMapping) {
+        final double bestCost = bestMapping.getMappingCosts().stream()
+                .mapToDouble(c -> c.orElse(0.0))
+                .sum();
+        final double iterativeCost = iterativeMapping.getMappingCosts().stream()
+                .mapToDouble(c -> c.orElse(0.0))
+                .sum();
         return (iterativeCost - bestCost) * 100.0 / bestCost;
     }
 
     private List<BoundedDataset> findNearestNeighbors(final Datasets datasets, final IIntervalDistance distance) {
         final NearestNeighborSearch knnSearch = this.createKnnSearch(distance);
-
-        return knnSearch.find(numberOfNeighborsToFind, datasets.original, datasets.candidates);
+        return knnSearch.find(datasets.candidates.size(), datasets.original, datasets.candidates);
     }
 
     private NearestNeighborSearch createKnnSearch(final IIntervalDistance distance) {
@@ -135,6 +132,7 @@ public class TestInterestingDatasets extends SaschaBasedTest {
         final IInitialOffsetCalculator initialOffsetCalculator =
                 CombinedInitial.from(ImmutableList.of(
                         new CentroidOffset(),
+                        MonotoneMapping.fromDistance(distance, 3),
                         LengthOffset.from(mapper, nextOffsetCalculator)));
 
 

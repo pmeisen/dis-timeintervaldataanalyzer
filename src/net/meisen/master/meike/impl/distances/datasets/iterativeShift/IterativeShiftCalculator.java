@@ -160,7 +160,7 @@ public class IterativeShiftCalculator implements IDatasetDistanceCalculator {
             mapping = this.nextMapping();
         }
 
-        System.out.println("Offsets: \t" + this.alreadyUsedOffsets.size()
+        this.mappingLogger.log("Offsets: \t" + this.alreadyUsedOffsets.size()
                 + "\t/\t" + this.allowedOffsets.size() + "\t\t"
                 + (this.alreadyUsedOffsets.size() * 100.0 / this.allowedOffsets.size()));
 

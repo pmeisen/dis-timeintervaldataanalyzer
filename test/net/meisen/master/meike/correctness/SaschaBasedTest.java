@@ -4,21 +4,15 @@ import com.google.common.collect.ImmutableList;
 import net.meisen.dissertation.model.data.TidaModel;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.DatasetFactory;
-import net.meisen.master.meike.impl.distances.intervals.EndDistance;
-import net.meisen.master.meike.impl.distances.intervals.GapDistance;
-import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
-import net.meisen.master.meike.impl.distances.intervals.IntersectionDistance;
-import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
-import net.meisen.master.meike.impl.distances.intervals.StartDistance;
-import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.performance.BasePerformanceTest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class SaschaBasedTest extends BasePerformanceTest {
+/**
+ * Base class for tests that use the data created by Sascha.
+ */
+public abstract class SaschaBasedTest extends BasePerformanceTest {
     private static final String originalDate = "01.01.2017";
     protected static final ImmutableList<ImmutableList<String>> allCandidateDates = ImmutableList.of(
             ImmutableList.of(
@@ -85,18 +79,6 @@ public class SaschaBasedTest extends BasePerformanceTest {
         final String query = "SELECT RECORDS FROM sascha" + modelNumber
                 + " DURING [" + date + " 00:00:00, " + date + " 23:59:59]";
         return this.getDatasetFor(query, model, datasetFactory, date);
-    }
-
-    private static IIntervalDistance createIntervalDistance(final List<Double> weights) {
-        assert 5 == weights.size();
-
-        final Map<IIntervalDistance, Double> distances = new HashMap<>();
-        distances.put(new EndDistance(), weights.get(0));
-        distances.put(new GapDistance(), weights.get(1));
-        distances.put(new IntersectionDistance(), weights.get(2));
-        distances.put(new LengthDistance(), weights.get(3));
-        distances.put(new StartDistance(), weights.get(4));
-        return new WeightedSumDistance(distances);
     }
 
     protected Datasets loadDatasets(final int modelNumber, final List<String> candidateDates) {

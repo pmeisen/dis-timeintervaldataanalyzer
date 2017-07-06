@@ -35,10 +35,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Tests for evaluating which heuristics help how much for the Sascha data.
+ */
 public class ImprovementsByHeuristic extends SaschaBasedTest {
     private final List<Integer> modelNumbersToTest = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8);
 
     private final IIntervalDistance intervalDistance = Factories.weightedDistance(1, 1, 1, 1, 1);
+
     private final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
     private final IMinCostMapper mapper = KuhnMunkres.create();
 
@@ -55,51 +59,36 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
     private final IterativeShiftFactory iterativeShiftFactory = this.createIterativeShiftFactory(defaultNextOffsetCalculator, defaultNeighborhood);
 
     @Test
-    public void testMedianOffsetImprovements() {
+    public void testImprovementsByDifferentMedians() {
         final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
                 new Pair<>("Standard", this.createMedianFactory(true, false, false, false, false)),
-                new Pair<>("Largest\t", this.createMedianFactory(false, true, false, false, false)),
+                new Pair<>("Largest", this.createMedianFactory(false, true, false, false, false)),
                 new Pair<>("Smallest", this.createMedianFactory(false, false, true, false, false)),
-                new Pair<>("Extreme\t", this.createMedianFactory(false, false, false, true, false)),
-                new Pair<>("Moderate", this.createMedianFactory(false, false, false, false, true)),
-                new Pair<>("SmExtr\t", this.createMedianFactory(true, false, false, true, false)),
-                new Pair<>("Combined", this.createMedianFactory(true, true, true, true, true)));
-
+                new Pair<>("Most Extreme", this.createMedianFactory(false, false, false, true, false)),
+                new Pair<>("Least Extreme", this.createMedianFactory(false, false, false, false, true)),
+                new Pair<>("Smallest & Most Extreme", this.createMedianFactory(true, false, false, true, false)),
+                new Pair<>("All", this.createMedianFactory(true, true, true, true, true)));
         this.calculateImprovements(heuristics);
     }
 
     @Test
-    public void testLengthNeighborhoodImprovements() {
-        final INeighborhood fourNeighborhood = ModifiedDistances.using(
-                ImmutableList.of(
-                        Factories.weightedDistance(1, 1, 4, 0, 0)),
-                mapper);
-        final INeighborhood tenNeighborhood = ModifiedDistances.using(
-                ImmutableList.of(
-                        Factories.weightedDistance(1, 1, 10, 0, 0)),
-                mapper);
-        final INeighborhood zeroNeighborhood = ModifiedDistances.using(
-                ImmutableList.of(
-                        Factories.weightedDistance(1, 1, 0, 0, 0)),
-                mapper);
-        final INeighborhood combinedNeighborhood = ModifiedDistances.using(
-                ImmutableList.of(
+    public void testImprovementsByDifferentLengthModifications() {
+        final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
+                new Pair<>("Length Four", this.createLengthModificationFactory(
+                        Factories.weightedDistance(1, 1, 4, 0, 0))),
+                new Pair<>("Length Ten", this.createLengthModificationFactory(
+                        Factories.weightedDistance(1, 1, 10, 0, 0))),
+                new Pair<>("Zero Length", this.createLengthModificationFactory(
+                        Factories.weightedDistance(1, 1, 0, 0, 0))),
+                new Pair<>("Combined", this.createLengthModificationFactory(
                         Factories.weightedDistance(1, 1, 4, 0, 0),
                         Factories.weightedDistance(1, 1, 10, 0, 0),
-                        Factories.weightedDistance(1, 1, 0, 0, 0)),
-                mapper);
-
-        final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
-                new Pair<>("Four Length", this.createLengthFactory(fourNeighborhood)),
-                new Pair<>("Ten Length", this.createLengthFactory(tenNeighborhood)),
-                new Pair<>("Zero Length", this.createLengthFactory(zeroNeighborhood)),
-                new Pair<>("Combined", this.createLengthFactory(combinedNeighborhood)));
-
+                        Factories.weightedDistance(1, 1, 0, 0, 0))));
         this.calculateImprovements(heuristics);
     }
 
     @Test
-    public void testCombinedImprovement() {
+    public void testImprovementsByMediansAndLengthModifications() {
         final INextOffsetCalculator nextOffsetCalculator = MedianOffset.usingAll();
 
         final INeighborhood fourNeighborhood = ModifiedDistances.using(
@@ -115,29 +104,9 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
                 mapper);
 
         final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
-                new Pair<>("Only Median",this.createIterativeShiftFactory(nextOffsetCalculator, defaultNeighborhood)),
-                new Pair<>("With Four L", this.createIterativeShiftFactory(nextOffsetCalculator, fourNeighborhood)),
-                new Pair<>("With Combin", this.createIterativeShiftFactory(nextOffsetCalculator, combinedNeighborhood)));
-
-        this.calculateImprovements(heuristics);
-    }
-
-    @Test
-    public void testMostPromisingCandidates() {
-        final INextOffsetCalculator allMediansNextOffset = MedianOffset.usingAll();
-
-        final INeighborhood modifiedLengthNeighborhood = ModifiedDistances.using(
-                ImmutableList.of(
-                        Factories.weightedDistance(1, 1, 4, 0, 0),
-                        Factories.weightedDistance(5, 5, 1, 1, 1)),
-                mapper);
-
-        final INeighborhood localPerturbationNeighborhood = new LocalPerturbation();
-
-        final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
-                new Pair<>("Everything",this.createIterativeShiftFactory(allMediansNextOffset,
-                        CombinedNeighborhood.from(ImmutableList.of(modifiedLengthNeighborhood, localPerturbationNeighborhood)))),
-                new Pair<>("Median Length", this.createIterativeShiftFactory(allMediansNextOffset, modifiedLengthNeighborhood)));
+                new Pair<>("Only Median", this.createIterativeShiftFactory(nextOffsetCalculator, defaultNeighborhood)),
+                new Pair<>("With Length Four", this.createIterativeShiftFactory(nextOffsetCalculator, fourNeighborhood)),
+                new Pair<>("With Combined Length", this.createIterativeShiftFactory(nextOffsetCalculator, combinedNeighborhood)));
 
         this.calculateImprovements(heuristics);
     }
@@ -145,10 +114,11 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
     @Test
     public void testInfluenceOfMonotoneMappingHeuristic() {
         final IInitialOffsetCalculator monotoneMapping = MonotoneMapping.fromDistance(intervalDistance, 5);
+
         final INextOffsetCalculator allMediansNextOffset = MedianOffset.usingAll();
         final INextOffsetCalculator standardMedianNextOffset =
                 MedianOffset.including(true, false, false, false, false);
-        final INeighborhood modifiedLengthNeighborhood = ModifiedDistances.using(
+        final INeighborhood lengthModifications = ModifiedDistances.using(
                 ImmutableList.of(
                         Factories.weightedDistance(1, 1, 4, 0, 0),
                         Factories.weightedDistance(5, 5, 1, 1, 1)),
@@ -156,24 +126,24 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
         final INeighborhood localPerturbationNeighborhood = new LocalPerturbation();
 
         final List<Pair<String, IterativeShiftFactory>> heuristics = ImmutableList.of(
-                new Pair<>("Only MonMap", this.createIterativeShiftFactory(
+                new Pair<>("Only Monotone Mappings", this.createIterativeShiftFactory(
                         monotoneMapping, defaultNextOffsetCalculator, defaultNeighborhood)),
-                new Pair<>("WithMedians", this.createIterativeShiftFactory(
+                new Pair<>("With Medians", this.createIterativeShiftFactory(
                         monotoneMapping,
                         CombinedNext.from(ImmutableList.of(defaultNextOffsetCalculator, allMediansNextOffset)),
                         defaultNeighborhood)),
-                new Pair<>("WithMed&Length", this.createIterativeShiftFactory(
+                new Pair<>("With Medians & Length", this.createIterativeShiftFactory(
                         monotoneMapping,
                         CombinedNext.from(ImmutableList.of(defaultNextOffsetCalculator, allMediansNextOffset)),
-                        modifiedLengthNeighborhood)),
-                new Pair<>("WithLocalPerturbation", this.createIterativeShiftFactory(
+                        lengthModifications)),
+                new Pair<>("With Local Perturbation", this.createIterativeShiftFactory(
                         monotoneMapping,
                         defaultNextOffsetCalculator,
                         localPerturbationNeighborhood)),
                 new Pair<>("Everything", this.createIterativeShiftFactory(
                         CombinedInitial.from(ImmutableList.of(new CentroidOffset(), monotoneMapping)),
                         CombinedNext.from(ImmutableList.of(defaultNextOffsetCalculator, allMediansNextOffset)),
-                        CombinedNeighborhood.from(ImmutableList.of(modifiedLengthNeighborhood, localPerturbationNeighborhood)))));
+                        CombinedNeighborhood.from(ImmutableList.of(lengthModifications, localPerturbationNeighborhood)))));
 
         this.calculateImprovements(heuristics);
     }
@@ -194,96 +164,66 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
 
     private void calculateImprovements(final List<Pair<String, IterativeShiftFactory>> heuristics) {
         for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-            final String heuristicsTitles = heuristics.stream()
-                    .map(Pair::getKey)
-                    .collect(Collectors.joining("\t\t"));
-            logger.log("Candidate\tBest\t\tIter gap\t\t" + heuristicsTitles);
+            this.logHeader(modelNumber, heuristics);
 
-            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
             final List<IterativeShiftFactory> factories = heuristics.stream().map(Pair::getValue).collect(Collectors.toList());
 
+            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
             datasets.candidates.stream()
-                    .map(candidate -> {
-                        final double bestCost = this.getCost(this.calculate(this.bestShiftFactory, datasets.original, candidate));
-                        final Pair<Mapping, MappingStatistics> iterativeMapping = this.calc(this.iterativeShiftFactory, datasets.original, candidate);
-                        final double iterativeCost = this.getCost(iterativeMapping.getKey());
-                        final List<Pair<Mapping, MappingStatistics>> mappings = factories.stream()
-                                .map(f -> this.calc(f, datasets.original, candidate))
-                                .collect(Collectors.toList());
-                        final List<Double> gaps = Stream.concat(
-                                Stream.of(iterativeCost - bestCost),
-                                mappings.stream().map(m -> this.getCost(m.getKey()) - bestCost)).collect(Collectors.toList());
-                        final List<MappingStatistics> statistics = Stream.concat(
-                                Stream.of(iterativeMapping.getValue()),
-                                mappings.stream().map(Pair::getValue)).collect(Collectors.toList());
-                        return new Result(candidate.getId(), bestCost, gaps, statistics);
-                    })
+                    .map(candidate -> this.getResultsForCandidate(candidate, datasets.original, factories))
                     .sorted(Comparator.comparing(result -> result.bestCost))
-                    .forEach(result -> {
-                        final StringBuilder outputBuilder = new StringBuilder(result.id);
-                        outputBuilder.append("\t");
-                        outputBuilder.append(this.formatAbsolute(result.bestCost));
-                        outputBuilder.append("\t[");
-                        outputBuilder.append(result.mappingStatistics.get(0).possibleOffsets);
-                        outputBuilder.append("]");
-                        for (int i = 0; i < result.gaps.size(); i++) {
-                            outputBuilder.append("\t");
-                            outputBuilder.append(this.formatAbsolute(result.gaps.get(i)));
-                            outputBuilder.append(this.formatRelative(result.gaps.get(i), result.bestCost));
-                            outputBuilder.append("\t[");
-                            outputBuilder.append(result.mappingStatistics.get(i).initialOffsets);
-                            outputBuilder.append(",");
-                            outputBuilder.append(result.mappingStatistics.get(i).usedOffsets);
-                            outputBuilder.append("]");
-                        }
-                        logger.log(outputBuilder.toString());
-                    });
+                    .forEach(this::logResult);
             this.unload();
         }
     }
 
-    private void calculateImprovementsOld(final List<Pair<String, IterativeShiftFactory>> heuristics) {
-        for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-            final String heuristicsTitles = heuristics.stream()
-                    .map(Pair::getKey)
-                    .collect(Collectors.joining("\t\t"));
-            logger.log("Candidate\tBest\tIter gap\t\t" + heuristicsTitles);
+    private void logHeader(final int modelNumber, final List<Pair<String, IterativeShiftFactory>> heuristics) {
+        logger.log("-------------------------");
+        logger.log("Test set number " + modelNumber);
+        logger.log("-------------------------");
+        final String heuristicsTitles = heuristics.stream()
+                .map(Pair::getKey)
+                .collect(Collectors.joining("\t\t"));
+        logger.log("Candidate\tBest\t\tIterative gap\t\t" + heuristicsTitles);
+    }
 
-            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-            final List<ICalculatorFactory> factories = heuristics.stream().map(Pair::getValue).collect(Collectors.toList());
+    private Result getResultsForCandidate(final Dataset candidate,
+                                          final Dataset original,
+                                          final List<IterativeShiftFactory> factories) {
+        final double bestCost = this.getCost(this.calculate(this.bestShiftFactory, original, candidate));
 
-            for (final Dataset candidate : datasets.candidates) {
-                final Mapping best = this.calculate(this.bestShiftFactory, datasets.original, candidate);
-                final Mapping iterative = this.calculate(this.iterativeShiftFactory, datasets.original, candidate);
-                final double bestCost = this.getCost(best);
-                final double iterativeCost = this.getCost(iterative);
+        final Pair<Mapping, MappingStatistics> iterativeMapping = this.calc(this.iterativeShiftFactory, original, candidate);
+        final double iterativeCost = this.getCost(iterativeMapping.getKey());
 
-                final List<Mapping> mappings = factories.stream()
-                        .map(f -> this.calculate(f, datasets.original, candidate))
-                        .collect(Collectors.toList());
-                final List<Double> gaps = Stream.concat(
-                        Stream.of(iterativeCost - bestCost),
-                        mappings.stream().map(m -> this.getCost(m) - bestCost)).collect(Collectors.toList());
+        final List<Pair<Mapping, MappingStatistics>> heuristicsMappings = factories.stream()
+                .map(f -> this.calc(f, original, candidate))
+                .collect(Collectors.toList());
+        final List<Double> gaps = Stream.concat(
+                Stream.of(iterativeCost - bestCost),
+                heuristicsMappings.stream().map(m -> this.getCost(m.getKey()) - bestCost)).collect(Collectors.toList());
+        final List<MappingStatistics> statistics = Stream.concat(
+                Stream.of(iterativeMapping.getValue()),
+                heuristicsMappings.stream().map(Pair::getValue)).collect(Collectors.toList());
+        return new Result(candidate.getId(), bestCost, gaps, statistics);
+    }
 
-                final StringBuilder outputBuilder = new StringBuilder(candidate.getId());
-                outputBuilder.append("\t");
-                outputBuilder.append(this.formatAbsolute(bestCost));
-                for (final Double gap : gaps) {
-                    outputBuilder.append("\t");
-                    outputBuilder.append(this.formatAbsolute(gap));
-                    outputBuilder.append(this.formatRelative(gap, bestCost));
-                }
-                logger.log(outputBuilder.toString());
-
-                this.unload();
-            }
+    private void logResult(final Result result) {
+        final StringBuilder outputBuilder = new StringBuilder(result.id);
+        outputBuilder.append("\t");
+        outputBuilder.append(this.formatCost(result.bestCost, result.bestCost));
+        outputBuilder.append("\t[");
+        outputBuilder.append(result.mappingStatistics.get(0).possibleOffsets);
+        outputBuilder.append("]");
+        for (int i = 0; i < result.gaps.size(); i++) {
+            outputBuilder.append("\t");
+            outputBuilder.append(this.formatCost(result.gaps.get(i), result.bestCost));
+            outputBuilder.append("\t[");
+            outputBuilder.append(result.mappingStatistics.get(i).initialOffsets);
+            outputBuilder.append(",");
+            outputBuilder.append(result.mappingStatistics.get(i).usedOffsets);
+            outputBuilder.append("]");
         }
+        logger.log(outputBuilder.toString());
     }
 
     private Mapping calculate(final ICalculatorFactory factory, final Dataset original, final Dataset candidate) {
@@ -295,15 +235,13 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
     }
 
     private double getCost(final Mapping mapping) {
-        return mapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
+        return mapping.getMappingCosts().stream()
+                .mapToDouble(c -> c.orElse(0.0))
+                .sum();
     }
 
-    private String formatAbsolute(final double cost) {
-        return String.format("%5.4f", cost);
-    }
-
-    private String formatRelative(final double cost, final double total) {
-        return " (" + String.format("%4.2f", cost * 100.0 / total) + ")";
+    private String formatCost(final double cost, final double total) {
+        return String.format("%5.4f", cost) + " (" + String.format("%4.2f", cost * 100.0 / total) + ")";
     }
 
     private IterativeShiftFactory createIterativeShiftFactory(
@@ -322,8 +260,9 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
                 initialOffsetCalculator, nextOffsetCalculator, neighborhood);
     }
 
-    private IterativeShiftFactory createLengthFactory(final INeighborhood neighborhood) {
-        return this.createIterativeShiftFactory(defaultNextOffsetCalculator, neighborhood);
+    private IterativeShiftFactory createLengthModificationFactory(IIntervalDistance... distances) {
+        return this.createIterativeShiftFactory(this.defaultNextOffsetCalculator,
+                ModifiedDistances.using(ImmutableList.copyOf(distances), this.mapper));
     }
 
     private IterativeShiftFactory createMedianFactory(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {

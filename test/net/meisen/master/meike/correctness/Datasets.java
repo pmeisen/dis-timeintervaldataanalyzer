@@ -5,6 +5,9 @@ import net.meisen.master.meike.impl.distances.datasets.Dataset;
 
 import java.util.List;
 
+/**
+ * Utility class for wrapping the original dataset and some candidates.
+ */
 class Datasets {
     public final Dataset original;
     public final ImmutableList<Dataset> candidates;

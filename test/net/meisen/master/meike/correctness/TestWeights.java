@@ -1,6 +1,7 @@
 package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
+import net.meisen.master.meike.correctness.Utils.Neighbor;
 import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
@@ -21,10 +22,12 @@ import net.meisen.master.meike.impl.mapping.upperBounds.IUpperBound;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Tests for checking how well certain weights for a {@link WeightedSumDistance}
- * work for a certain test set.
+ * work for a certain test set. For that, we use the KNN search to rank all
+ * candidates and log the commands for plotting them in that order.
  */
 public class TestWeights extends SaschaBasedTest {
     private final List<IIntervalDistance> weightedDistances = ImmutableList.of(
@@ -44,54 +47,44 @@ public class TestWeights extends SaschaBasedTest {
     @Test
     public void testNearestNeighborsForDifferentWeights() {
         for (final int modelNumber : modelNumbersToTest) {
-            logger.log("----------------------------");
-            logger.log("Output for test set number " + modelNumber);
-            logger.log("----------------------------");
-
+            this.logHeader(modelNumber);
             final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-
             for (final IIntervalDistance distance : weightedDistances) {
                 final List<BoundedDataset> neighbors = this.findNearestNeighbors(datasets, distance);
-                this.logPlotterCommands(modelNumber, distance, datasets.original, neighbors);
+                this.logPlotterCommand(modelNumber, distance, datasets.original, neighbors);
             }
-
             this.unload();
         }
     }
 
-    private void logPlotterCommands(final int modelNumber,
-                                    final IIntervalDistance distance,
-                                    final Dataset original,
-                                    final List<BoundedDataset> nearestNeighbors) {
-        final ICalculatorFactory bestShiftFactory = this.getBestShiftFactory(distance);
-
-        final StringBuilder commandBuilder = new StringBuilder(
-                "python neighbors-plotter.py /home/meike/masterarbeit/data/sascha/sascha" + modelNumber + ".csv \"");
-
-        for (final BoundedDataset neighbor : nearestNeighbors) {
-            if (nearestNeighbors.indexOf(neighbor) > 0) {
-                commandBuilder.append("_");
-            }
-            final Mapping bestMapping = bestShiftFactory
-                    .getDistanceCalculatorFor(original, neighbor.getDataset())
-                    .finalMapping();
-            commandBuilder.append(this.getAmerican(neighbor.getDataset().getId()) + ";"
-                    + bestMapping.getOffset() + ";" + bestMapping.getMappingIndicesString() + ";" + neighbor.getUpperBound());
-        }
-
-        commandBuilder.append("\" \"Dataset " + modelNumber + ", weights " + distance.toString() + "\"");
-        commandBuilder.append(" testWeightsOutput" + modelNumber + '_' + distance.toString());
-        logger.log(commandBuilder.toString());
+    private void logHeader(final int modelNumber) {
+        this.logger.log("----------------------------");
+        this.logger.log("Output for test set number " + modelNumber);
+        this.logger.log("----------------------------");
     }
 
-    private String getAmerican(final String date) {
-        return "2017-" + date.substring(3, 5) + "-" + date.substring(0,2);
+    private void logPlotterCommand(final int modelNumber,
+                                   final IIntervalDistance distanceMeasure,
+                                   final Dataset original,
+                                   final List<BoundedDataset> nearestNeighbors) {
+        final ICalculatorFactory bestShiftFactory = this.getBestShiftFactory(distanceMeasure);
+
+        final String inputFileName = "/home/meike/masterarbeit/data/sascha/sascha" + modelNumber + ".csv";
+        final String outputFileName = "testWeights_" + modelNumber + "_" + distanceMeasure;
+        final String title = "Dataset " + modelNumber + ", weights " + distanceMeasure;
+        final List<Neighbor> neighbors = nearestNeighbors.stream()
+                .map(n -> {
+                    final Mapping bestMapping = bestShiftFactory
+                            .getDistanceCalculatorFor(original, n.getDataset())
+                            .finalMapping();
+                    return new Neighbor(n.getDataset().getId(), bestMapping, n.getUpperBound());
+                }).collect(Collectors.toList());
+        this.logger.log(Utils.getNeighborsPlotterCommand(inputFileName, outputFileName, title, neighbors));
     }
 
     private List<BoundedDataset> findNearestNeighbors(final Datasets datasets, final IIntervalDistance distance) {
-        final NearestNeighborSearch knnSearch = this.createKnnSearch(distance);
-
-        return knnSearch.find(datasets.candidates.size(), datasets.original, datasets.candidates);
+        return this.createKnnSearch(distance)
+                .find(datasets.candidates.size(), datasets.original, datasets.candidates);
     }
 
     private NearestNeighborSearch createKnnSearch(final IIntervalDistance distance) {
