@@ -57,7 +57,7 @@ public class LocalSearchExamples extends SaschaBasedTest {
             this.createFactoriesWithMedianOffsets();
 
     private final IterativeShiftFactory withMedianAndLengthModification =
-            this.createIterativeShiftFactory(new MedianOffset(), new LocalPerturbation());
+            this.createIterativeShiftFactory(MedianOffset.usingAll(), new LocalPerturbation());
 
     private final List<Integer> modelNumbersToTest = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8);
 
@@ -123,7 +123,7 @@ public class LocalSearchExamples extends SaschaBasedTest {
         this.iterativeShiftFactory.disableMappingLogger();
 
         final IterativeShiftFactory withMedian = this.createIterativeShiftFactory(
-                this.createOffset(false, false, false, true, false),
+                MedianOffset.including(false, false, false, true, false),
                 new EmptyNeighborhood());
         withMedian.setMappingLogger(MappingLogger.createFor(testSet, date, "median"));
         final Mapping medianMapping = withMedian
@@ -166,23 +166,13 @@ public class LocalSearchExamples extends SaschaBasedTest {
 
     private List<IterativeShiftFactory> createFactoriesWithMedianOffsets() {
         final List<MedianOffset> offsets = ImmutableList.of(
-                this.createOffset(true, false, false, false, false),
-                this.createOffset(false, true, false, false, false),
-                this.createOffset(false, false, true, false, false),
-                this.createOffset(false, false, false, true, false),
-                this.createOffset(false, false, false, false, true),
-                this.createOffset(true, false, false, true, false));
+                MedianOffset.including(true, false, false, false, false),
+                MedianOffset.including(false, true, false, false, false),
+                MedianOffset.including(false, false, true, false, false),
+                MedianOffset.including(false, false, false, true, false),
+                MedianOffset.including(false, false, false, false, true),
+                MedianOffset.including(true, false, false, true, false));
 
         return offsets.stream().map(this::createIterativeShiftFactory).collect(Collectors.toList());
-    }
-
-    private MedianOffset createOffset(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {
-        final MedianOffset offset = new MedianOffset();
-        offset.useStandard = standard;
-        offset.useLarger = large;
-        offset.useSmaller = small;
-        offset.useMostExtreme = extreme;
-        offset.useLeastExtreme = moderate;
-        return offset;
     }
 }

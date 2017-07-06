@@ -113,11 +113,11 @@ public class IterativeSuboptimal {
     @Test
     public void testThatHeuristicsAreNotOptimal() {
         final List<MedianOffset> medianOffsets = ImmutableList.of(
-                this.createMedianOffset(true, false, false, false, false),
-                this.createMedianOffset(false, true, false, false, false),
-                this.createMedianOffset(false, false, true, false, false),
-                this.createMedianOffset(false, false, false, true, false),
-                this.createMedianOffset(false, false, false, false, true));
+                MedianOffset.including(true, false, false, false, false),
+                MedianOffset.including(false, true, false, false, false),
+                MedianOffset.including(false, false, true, false, false),
+                MedianOffset.including(false, false, false, true, false),
+                MedianOffset.including(false, false, false, false, true));
         for (final MedianOffset offset : medianOffsets) {
             final IterativeShiftFactory heuristic = this.createHeuristicsFactory(offset);
             final Mapping mapping = heuristic.getDistanceCalculatorFor(original, candidate).finalMapping();
@@ -160,15 +160,5 @@ public class IterativeSuboptimal {
                 new CentroidOffset(),
                 medianOffset,
                 new LocalPerturbation());
-    }
-
-    private MedianOffset createMedianOffset(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {
-        final MedianOffset offset = new MedianOffset();
-        offset.useStandard = standard;
-        offset.useLarger = large;
-        offset.useSmaller = small;
-        offset.useMostExtreme = extreme;
-        offset.useLeastExtreme = moderate;
-        return offset;
     }
 }

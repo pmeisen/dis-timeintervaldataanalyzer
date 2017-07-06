@@ -44,7 +44,7 @@ public class TestBestShiftFlughafen extends BasePerformanceTest {
             new Pair<>("E", Factories.weightedDistance(1, 1, 5, 0, 0)),
             new Pair<>("F", Factories.weightedDistance(1, 1, 1, 3, 3)));
 
-    private static int numberOfThreads;
+    private static int numberOfThreads = 4;
 
     public static void main(String[] args) throws Exception {
         numberOfThreads = Integer.parseInt(args[0]);

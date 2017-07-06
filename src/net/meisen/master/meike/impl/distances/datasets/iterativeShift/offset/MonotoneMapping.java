@@ -4,6 +4,8 @@ import javafx.util.Pair;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
+import net.meisen.master.meike.impl.mapping.Mapping;
+import org.assertj.core.util.VisibleForTesting;
 
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -11,9 +13,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Calculates initial offset candidates by picking some monotone mapping.
+ * Calculates initial offset candidates by considering some monotone
+ * {@link Mapping}s between the {@link Interval}s of the given {@link Dataset}s:
+ * For each such monotone mapping, this returns the offset value for which the
+ * interval distance between the pairs defined by the mapping is minimized.
  */
 public class MonotoneMapping implements IInitialOffsetCalculator {
+    /**
+     * Defines how many intervals of the shorter {@link Dataset} may be unmapped.
+     */
     private final int maxOverShift;
     private final IIntervalDistance intervalDistance;
 
@@ -30,17 +38,32 @@ public class MonotoneMapping implements IInitialOffsetCalculator {
     @Override
     public List<Long> calculate(final Dataset original, final Dataset other) {
         final List<Long> possibleOffsets = Utils.getPossibleOffsets(original, other);
-        final List<Long> chosenOffsets = new LinkedList<>();
 
-        for (final List<Pair<Integer, Integer>> indexPairs : getIndexPairs(original.getNumberOfIntervals(), other.getNumberOfIntervals())) {
-            chosenOffsets.add(getBestOffset(indexPairs.stream()
-                    .map(pair -> new Pair<>(original.getIntervals().get(pair.getKey()), other.getIntervals().get(pair.getValue())))
-                    .collect(Collectors.toList()), possibleOffsets));
-        }
-
-        return chosenOffsets.stream().distinct().collect(Collectors.toList());
+        return this.getIntervalPairLists(original, other).stream()
+                .map(pairList -> this.getBestOffset(pairList, possibleOffsets))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
+    private List<List<Pair<Interval, Interval>>> getIntervalPairLists(
+            final Dataset original, final Dataset other) {
+        final Interval[] originalIntervals = original.getIntervals().toArray(new Interval[0]);
+        final Interval[] otherIntervals = other.getIntervals().toArray(new Interval[0]);
+
+        return getIndexPairs(originalIntervals.length, otherIntervals.length).stream()
+                .map(pairs -> this.getIntervalPairs(originalIntervals, otherIntervals, pairs))
+                .collect(Collectors.toList());
+    }
+
+    private List<Pair<Interval, Interval>> getIntervalPairs(
+            final Interval[] original, final Interval[] other,
+            final List<Pair<Integer, Integer>> indexPairs) {
+        return indexPairs.stream()
+                .map(pair -> new Pair<>(original[pair.getKey()], other[pair.getValue()]))
+                .collect(Collectors.toList());
+    }
+
+    @VisibleForTesting
     List<List<Pair<Integer, Integer>>> getIndexPairs(final int firstLength, final int secondLength) {
         final List<List<Pair<Integer, Integer>>> result = new LinkedList<>();
         for (int i = Math.max(0, secondLength - firstLength) + maxOverShift; i >= 0; i--) {

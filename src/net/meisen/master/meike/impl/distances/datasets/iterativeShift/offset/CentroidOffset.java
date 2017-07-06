@@ -13,18 +13,21 @@ import java.util.List;
 public class CentroidOffset implements IInitialOffsetCalculator {
     @Override
     public List<Long> calculate(final Dataset original, final Dataset other) {
-        original.setOffset(0);
         other.setOffset(0);
 
-        return ImmutableList.of(Math.round(this.calculateCentroid(original)
-                - this.calculateCentroid(other)));
+        return ImmutableList.of(this.getDistanceOfCentroids(original, other));
     }
 
     private double calculateCentroid(final Dataset dataset) {
-        double sumOfIntervalCentroids = dataset.getIntervals().stream()
+        final double sumOfIntervalCentroids = dataset.getIntervals().stream()
                 .mapToDouble(Interval::getCentroid)
                 .sum();
-        long numberOfIntervals = dataset.getIntervals().size();
+        final long numberOfIntervals = dataset.getIntervals().size();
         return sumOfIntervalCentroids / numberOfIntervals;
+    }
+
+    private long getDistanceOfCentroids(final Dataset original, final Dataset other) {
+        return Math.round(this.calculateCentroid(original)
+                - this.calculateCentroid(other));
     }
 }

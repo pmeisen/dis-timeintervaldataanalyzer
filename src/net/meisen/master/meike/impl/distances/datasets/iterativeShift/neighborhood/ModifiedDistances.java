@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Defines a neighborhood by applying a set of different distance measures.
+ * Defines a neighborhood by applying a set of different distance measures:
+ * For each such distance measure, the best {@link Mapping} for the given
+ * {@link Mapping}'s current offset is included in the neighborhood.
  */
 public class ModifiedDistances implements INeighborhood {
     private final List<IIntervalDistance> distanceMeasures;

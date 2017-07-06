@@ -35,7 +35,6 @@ public class LengthOffset implements IInitialOffsetCalculator {
 
     @Override
     public List<Long> calculate(final Dataset original, final Dataset other) {
-        original.setOffset(0);
         other.setOffset(0);
 
         final CostMatrix costMatrix =

@@ -6,7 +6,8 @@ import net.meisen.master.meike.impl.mapping.Mapping;
 import java.util.List;
 
 /**
- * Interface that defines a neighborhood of a {@link Mapping}.
+ * Interface that defines a neighborhood of a {@link Mapping}, i.e. a set of
+ * similar {@link Mapping}s.
  */
 public interface INeighborhood {
     /**

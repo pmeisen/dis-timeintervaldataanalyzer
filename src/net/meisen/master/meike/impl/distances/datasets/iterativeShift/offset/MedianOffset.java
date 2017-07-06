@@ -11,11 +11,33 @@ import java.util.stream.Collectors;
  * Super class for next offset calculators that take the median of some offsets.
  */
 public class MedianOffset implements INextOffsetCalculator {
-    public boolean useStandard = true;
-    public boolean useLarger = true;
-    public boolean useSmaller = true;
-    public boolean useMostExtreme = true;
-    public boolean useLeastExtreme = true;
+    private final boolean useStandard;
+    private final boolean useLargest;
+    private final boolean useSmallest;
+    private final boolean useMostExtreme;
+    private final boolean useLeastExtreme;
+
+    private MedianOffset(final boolean useStandard, final boolean useLargest,
+                         final boolean useSmallest, final boolean useMostExtreme,
+                         final boolean useLeastExtreme) {
+        this.useStandard = useStandard;
+        this.useLargest = useLargest;
+        this.useSmallest = useSmallest;
+        this.useMostExtreme = useMostExtreme;
+        this.useLeastExtreme = useLeastExtreme;
+    }
+
+    public static MedianOffset including(final boolean useStandard,
+                                         final boolean useLargest,
+                                         final boolean useSmallest,
+                                         final boolean useMostExtreme,
+                                         final boolean useLeastExtreme) {
+        return new MedianOffset(useStandard, useLargest, useSmallest, useMostExtreme, useLeastExtreme);
+    }
+
+    public static MedianOffset usingAll() {
+        return new MedianOffset(true, true, true, true, true);
+    }
 
     @Override
     public List<Long> calculate(final Mapping mapping) {
@@ -26,10 +48,10 @@ public class MedianOffset implements INextOffsetCalculator {
         if (this.useStandard) {
             offsets.add(this.getMedian(allCenterDistances));
         }
-        if (this.useLarger) {
+        if (this.useLargest) {
             offsets.add(this.getMedian(allCenterDistances.subList(0, length / 2)));
         }
-        if (this.useSmaller) {
+        if (this.useSmallest) {
             offsets.add(this.getMedian(allCenterDistances.subList(length / 2, length)));
         }
         if (this.useMostExtreme) {
@@ -63,7 +85,7 @@ public class MedianOffset implements INextOffsetCalculator {
     }
 
     private long getMedian(final List<Double> offsets) {
-        int numberOfPairs = offsets.size();
+        final int numberOfPairs = offsets.size();
         if (numberOfPairs % 2 == 0) {
             return Math.round((offsets.get(numberOfPairs / 2)
                     + offsets.get(numberOfPairs / 2 - 1)) / 2);

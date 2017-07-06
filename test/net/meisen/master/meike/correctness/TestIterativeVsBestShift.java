@@ -1,12 +1,9 @@
 package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftCalculator;
 import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistanceCalculator;
-import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftCalculator;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
@@ -45,9 +42,9 @@ public class TestIterativeVsBestShift extends SaschaBasedTest {
                         equalWeightsDistance,
                         CombinedInitial.from(ImmutableList.of(
                                 new CentroidOffset(),
-                                LengthOffset.from(kuhnMunkres, new MedianOffset()))),
+                                LengthOffset.from(kuhnMunkres, MedianOffset.usingAll()))),
                         CombinedNext.from(ImmutableList.of(
-                                new MedianOffset(),
+                                MedianOffset.usingAll(),
                                 MinCostOffset.fromIntervalDistance(equalWeightsDistance))),
                         ModifiedDistances.using(ImmutableList.of(
                                 Factories.weightedDistance(1, 1, 3, 0, 0),

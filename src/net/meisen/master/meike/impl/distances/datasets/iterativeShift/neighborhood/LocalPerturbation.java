@@ -1,7 +1,9 @@
 package net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
+import net.meisen.master.meike.impl.distances.intervals.Interval;
 import net.meisen.master.meike.impl.mapping.Mapping;
+import org.assertj.core.util.VisibleForTesting;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -12,10 +14,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Calculates the neighbors of a permutation by applying local perturbations.
+ * Calculates the neighbors of a permutation by applying local perturbations:
+ * Starting from any pair that contributes a lot to the overall cost of a
+ * given {@link Mapping}, {@link Interval}s are re-assigned to their lowest-cost
+ * partner in the other {@link Dataset}.
  */
 public class LocalPerturbation implements INeighborhood {
     private static final int NOT_SET = -1;
+    private static final int NUMBER_OF_STARTS = 10;
 
     @Override
     public List<Mapping> getNeighbors(final Mapping mapping,
@@ -26,14 +32,17 @@ public class LocalPerturbation implements INeighborhood {
                 .collect(Collectors.toList());
     }
 
-    Mapping getNeighborStartingFrom(final int startIndex,
-                                    final Mapping mapping) {
+    @VisibleForTesting
+    Mapping getNeighborStartingFrom(final int startIndex, final Mapping mapping) {
         final double[][] costMatrix = mapping.getCostMatrix().getCosts();
         final int firstDatasetLength = mapping.getCostMatrix().getFirstDatasetLength();
         final List<Integer> originalMappingIndices = mapping.getMappingIndices();
-        final Integer[] resultMappingIndices = this.initializeNewMapping(costMatrix.length);
-        final Set<Integer> remainingMappingPartners = new HashSet<>(
-                IntStream.range(0, costMatrix.length).boxed().collect(Collectors.toList()));
+
+        final Integer[] resultMappingIndices =
+                this.initializeNewMapping(costMatrix.length);
+        final Set<Integer> remainingMappingPartners =
+                new HashSet<>(IntStream.range(0, costMatrix.length)
+                        .boxed().collect(Collectors.toList()));
 
         int currentIndex = startIndex;
         while (resultMappingIndices[currentIndex] == NOT_SET && currentIndex < firstDatasetLength) {
@@ -70,7 +79,7 @@ public class LocalPerturbation implements INeighborhood {
         return IntStream.range(0, mapping.getCostMatrix().getFirstDatasetLength())
                 .boxed()
                 .sorted(Comparator.comparing(i -> -mapping.getMappingCosts().get(i).orElse(Double.MAX_VALUE)))
-                .limit(10)
+                .limit(NUMBER_OF_STARTS)
                 .collect(Collectors.toList());
     }
 }

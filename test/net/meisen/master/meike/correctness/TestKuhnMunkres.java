@@ -88,9 +88,9 @@ public class TestKuhnMunkres extends SaschaBasedTest {
                 intervalDistance,
                 CombinedInitial.from(ImmutableList.of(
                         new CentroidOffset(),
-                        LengthOffset.from(minCostMapper, new MedianOffset()))),
+                        LengthOffset.from(minCostMapper, MedianOffset.usingAll()))),
                 CombinedNext.from(ImmutableList.of(
-                        new MedianOffset(),
+                        MedianOffset.usingAll(),
                         MinCostOffset.fromIntervalDistance(intervalDistance))),
                 ModifiedDistances.using(ImmutableList.of(
                         Factories.weightedDistance(1, 1, 3, 0, 0),

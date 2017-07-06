@@ -1,12 +1,9 @@
 package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftCalculator;
 import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistanceCalculator;
-import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftCalculator;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.INeighborhood;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
@@ -38,10 +35,7 @@ import java.util.List;
 
 public class TestInterestingDatasets extends SaschaBasedTest {
     private final List<IIntervalDistance> intervalDistances = ImmutableList.of(
-            Factories.weightedDistance(1, 1, 1, 1, 1)//,
-            /*Factories.weightedDistance(2, 2, 4, 1, 1),
-            Factories.weightedDistance(4, 4, 2, 0, 0),
-            Factories.weightedDistance(0, 0, 1, 1, 1)*/);
+            Factories.weightedDistance(1, 1, 1, 1, 1));
 
     private final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
 
@@ -135,7 +129,7 @@ public class TestInterestingDatasets extends SaschaBasedTest {
 
         final INextOffsetCalculator nextOffsetCalculator =
                 CombinedNext.from(ImmutableList.of(
-                        new MedianOffset(),
+                        MedianOffset.usingAll(),
                         MinCostOffset.fromIntervalDistance(distance)));
 
         final IInitialOffsetCalculator initialOffsetCalculator =

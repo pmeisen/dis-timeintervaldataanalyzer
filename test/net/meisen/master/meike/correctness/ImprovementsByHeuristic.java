@@ -100,8 +100,7 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
 
     @Test
     public void testCombinedImprovement() {
-        final INextOffsetCalculator nextOffsetCalculator =
-                this.createMedianOffset(true, true, true, true, true);
+        final INextOffsetCalculator nextOffsetCalculator = MedianOffset.usingAll();
 
         final INeighborhood fourNeighborhood = ModifiedDistances.using(
                 ImmutableList.of(
@@ -125,8 +124,7 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
 
     @Test
     public void testMostPromisingCandidates() {
-        final INextOffsetCalculator allMediansNextOffset =
-                this.createMedianOffset(true, true, true, true, true);
+        final INextOffsetCalculator allMediansNextOffset = MedianOffset.usingAll();
 
         final INeighborhood modifiedLengthNeighborhood = ModifiedDistances.using(
                 ImmutableList.of(
@@ -147,10 +145,9 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
     @Test
     public void testInfluenceOfMonotoneMappingHeuristic() {
         final IInitialOffsetCalculator monotoneMapping = MonotoneMapping.fromDistance(intervalDistance, 5);
-        final INextOffsetCalculator allMediansNextOffset =
-                this.createMedianOffset(true, true, true, true, true);
+        final INextOffsetCalculator allMediansNextOffset = MedianOffset.usingAll();
         final INextOffsetCalculator standardMedianNextOffset =
-                this.createMedianOffset(true, false, false, false, false);
+                MedianOffset.including(true, false, false, false, false);
         final INeighborhood modifiedLengthNeighborhood = ModifiedDistances.using(
                 ImmutableList.of(
                         Factories.weightedDistance(1, 1, 4, 0, 0),
@@ -331,17 +328,7 @@ public class ImprovementsByHeuristic extends SaschaBasedTest {
 
     private IterativeShiftFactory createMedianFactory(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {
         return this.createIterativeShiftFactory(
-                this.createMedianOffset(standard, large, small, extreme, moderate),
+                MedianOffset.including(standard, large, small, extreme, moderate),
                 defaultNeighborhood);
-    }
-
-    private MedianOffset createMedianOffset(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {
-        final MedianOffset offset = new MedianOffset();
-        offset.useStandard = standard;
-        offset.useLarger = large;
-        offset.useSmaller = small;
-        offset.useMostExtreme = extreme;
-        offset.useLeastExtreme = moderate;
-        return offset;
     }
 }
