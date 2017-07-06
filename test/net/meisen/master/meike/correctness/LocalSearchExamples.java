@@ -2,11 +2,12 @@ package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
 import javafx.util.Pair;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.EmptyNeighborhood;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.INeighborhood;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.LocalPerturbation;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedInitial;
@@ -26,6 +27,7 @@ import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Test class for finding examples for which the local search heuristics help.
@@ -33,116 +35,74 @@ import java.util.List;
 public class LocalSearchExamples extends SaschaBasedTest {
     private final IIntervalDistance intervalDistance =
             Factories.weightedDistance(1, 1, 1, 0, 0);
+
     private final ICostCalculator costCalculator =
             ConstantCostForUnmappedIntervals.fromCost(0);
-    private final BestShiftDistance bestShiftDistance =
-            BestShiftDistance.from(KuhnMunkres.create(), intervalDistance, this.costCalculator);
-    private final IterativeShiftDistance iterativeShiftDistance =
-            this.createIterativeShiftDistance(new EmptyNeighborhood());
-    private final IterativeShiftDistance withLengthModification =
-            this.createIterativeShiftDistance(ModifiedDistances.using(ImmutableList.of(
+
+    private final BestShiftFactory bestShiftFactory = BestShiftFactory.from(
+            KuhnMunkres.create(), intervalDistance, this.costCalculator);
+
+    private final IterativeShiftFactory iterativeShiftFactory =
+            this.createIterativeShiftFactory(new EmptyNeighborhood());
+
+    private final IterativeShiftFactory withLengthModification =
+            this.createIterativeShiftFactory(ModifiedDistances.using(ImmutableList.of(
                     Factories.weightedDistance(1, 1, 4, 0, 0)),
                     KuhnMunkres.create()));
-    private final IterativeShiftDistance withMedianNextOffset =
-            this.createIterativeShiftDistance(new MedianOffset());
+
+    private final IterativeShiftFactory withLocalPerturbation =
+            this.createIterativeShiftFactory(new LocalPerturbation());
+
+    private final List<IterativeShiftFactory> withMedianOffsets =
+            this.createFactoriesWithMedianOffsets();
+
+    private final IterativeShiftFactory withMedianAndLengthModification =
+            this.createIterativeShiftFactory(new MedianOffset(), new LocalPerturbation());
 
     private final List<Integer> modelNumbersToTest = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8);
 
-    @Test
-    public void calculateBestShiftVsIterative() {
-        for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-
-            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-
-            for (final Dataset candidate : datasets.candidates) {
-                final Mapping best = this.bestShiftDistance.calculate(datasets.original, candidate);
-                final Mapping iterative = this.iterativeShiftDistance.calculate(datasets.original, candidate);
-                final double costGap = this.getCostGap(best, iterative);
-                if (costGap > 0) {
-                    logger.log(candidate.getId() + "\t" + String.format("%5.4f", costGap));
-                } else {
-                    logger.log("\t\t\t\t\t\t\t" + candidate.getId());
-                }
-            }
-
-            this.unload();
-        }
+    private String formatAbsolute(final double cost) {
+        return String.format("%5.4f", cost);
     }
 
-    @Test
-    public void getBetterWithLengthNeighborhood() {
-        for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-
-            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-
-            for (final Dataset candidate : datasets.candidates) {
-                final Mapping best = this.bestShiftDistance.calculate(datasets.original, candidate);
-                final Mapping iterative = this.iterativeShiftDistance.calculate(datasets.original, candidate);
-                final double costGap = this.getCostGap(best, iterative);
-                if (costGap > 0) {
-                    final Mapping withLength = this.withLengthModification.calculate(datasets.original, candidate);
-                    final double newGap = this.getCostGap(best, withLength);
-                    if (newGap < costGap) {
-                        logger.log(candidate.getId() + "\t" + String.format("%5.4f", newGap) + "\t" + String.format("%5.4f", costGap));
-                    }
-                }
-            }
-
-            this.unload();
-        }
-    }
-
-    @Test
-    public void getBetterWithMedianNeighborhood() {
-        for (final int modelNumber : modelNumbersToTest) {
-            logger.log("-------------------------");
-            logger.log("Test set number " + modelNumber);
-            logger.log("-------------------------");
-
-            final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
-
-            for (final Dataset candidate : datasets.candidates) {
-                final Mapping best = this.bestShiftDistance.calculate(datasets.original, candidate);
-                final Mapping iterative = this.iterativeShiftDistance.calculate(datasets.original, candidate);
-                final double costGap = this.getCostGap(best, iterative);
-                if (costGap > 0) {
-                    final Mapping withLength = this.withMedianNextOffset.calculate(datasets.original, candidate);
-                    final double newGap = this.getCostGap(best, withLength);
-                    if (newGap < costGap) {
-                        logger.log(candidate.getId() + "\t"
-                                + String.format("%5.4f", newGap) + "\t"
-                                + String.format("%5.4f", costGap) + "\t"
-                                + String.format("%5.4f", newGap / costGap) + "\t"
-                                + String.format("%5.4f", costGap - newGap));
-                    }
-                }
-            }
-
-            this.unload();
-        }
+    private String formatRelative(final double cost, final double total) {
+        return " (" + String.format("%4.2f", cost * 100.0 / total) + ")";
     }
 
     @Test
     public void investigateMedianNeighborhoodImprovements() {
         final List<Pair<Integer, List<String>>> testDatasets = ImmutableList.of(
-                new Pair<>(3, ImmutableList.of("29.01.2017", "28.02.2017")));
+                new Pair<>(6, ImmutableList.of("16.11.2017", "23.10.2017")),
+                new Pair<>(7, ImmutableList.of("15.03.2017", "15.09.2017")),
+                new Pair<>(3, ImmutableList.of("17.02.2017", "28.02.2017", "05.04.2017", "08.06.2017",
+                        "15.06.2017", "08.08.2017", "16.10.2017", "15.11.2017", "04.12.2017")));
 
         for (final Pair<Integer, List<String>> testDataset : testDatasets) {
             final Datasets datasets = this.loadDatasets(testDataset.getKey(), testDataset.getValue());
             for (final Dataset candidate : datasets.candidates) {
-                final Mapping bestMapping = this.bestShiftDistance.calculate(datasets.original, candidate);
-                final Mapping iterativeMapping = this.iterativeShiftDistance.calculate(datasets.original, candidate);
-                final Mapping medianMapping = this.withMedianNextOffset.calculate(datasets.original, candidate);
+                final Mapping bestMapping = this.bestShiftFactory
+                        .getDistanceCalculatorFor(datasets.original, candidate)
+                        .finalMapping();
+                final Mapping iterativeMapping = this.iterativeShiftFactory
+                        .getDistanceCalculatorFor(datasets.original, candidate)
+                        .finalMapping();
+                final List<Mapping> medianMappings = this.withMedianOffsets.stream()
+                        .map(o -> o.getDistanceCalculatorFor(datasets.original, candidate).finalMapping())
+                        .collect(Collectors.toList());
+                final Mapping lengthMapping = this.withLengthModification
+                        .getDistanceCalculatorFor(datasets.original, candidate)
+                        .finalMapping();
+                final Mapping combinedMapping = this.withMedianAndLengthModification
+                        .getDistanceCalculatorFor(datasets.original, candidate)
+                        .finalMapping();
                 logger.log(candidate.getId());
                 logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), bestMapping, "-best"));
                 logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), iterativeMapping, "-iterative"));
-                logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), medianMapping, "-median"));
+                for (int i = 0; i < medianMappings.size(); i++) {
+                    logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), medianMappings.get(i), "-median" + (i+1)));
+                }
+                logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), lengthMapping, "-length"));
+                logger.log(Utils.getPlotterCommand(testDataset.getKey(), candidate.getId(), combinedMapping, "-combined"));
             }
             this.unload();
         }
@@ -150,42 +110,49 @@ public class LocalSearchExamples extends SaschaBasedTest {
 
     @Test
     public void investigateMappingProgression() {
-        final int testSet = 3;
-        final String date = "28.02.2017";
+        final int testSet = 6;
+        final String date = "16.11.2017";
 
         final Datasets datasets = this.loadDatasets(testSet, ImmutableList.of(date));
         final Dataset candidate = datasets.candidates.get(0);
 
-        this.iterativeShiftDistance.setMappingLogger(MappingLogger.createFor(testSet, date, "iterative"));
-        final Mapping iterativeMapping = this.iterativeShiftDistance.calculate(datasets.original, candidate);
+        this.iterativeShiftFactory.setMappingLogger(MappingLogger.createFor(testSet, date, "iterative"));
+        final Mapping iterativeMapping = this.iterativeShiftFactory
+                .getDistanceCalculatorFor(datasets.original, candidate)
+                .finalMapping();
+        this.iterativeShiftFactory.disableMappingLogger();
 
-        this.withMedianNextOffset.setMappingLogger(MappingLogger.createFor(testSet, date, "median"));
-        final Mapping medianMapping = this.withMedianNextOffset.calculate(datasets.original, candidate);
+        final IterativeShiftFactory withMedian = this.createIterativeShiftFactory(
+                this.createOffset(false, false, false, true, false),
+                new EmptyNeighborhood());
+        withMedian.setMappingLogger(MappingLogger.createFor(testSet, date, "median"));
+        final Mapping medianMapping = withMedian
+                .getDistanceCalculatorFor(datasets.original, candidate)
+                .finalMapping();
+        withMedian.disableMappingLogger();
 
         this.unload();
     }
 
-    private double getCostGap(final Mapping bestMapping, final Mapping iterativeMapping) {
-        final double bestCost = bestMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
-        final double iterativeCost = iterativeMapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
-        return iterativeCost - bestCost;
+    private double getCost(final Mapping mapping) {
+        return mapping.getMappingCosts().stream().mapToDouble(c -> c.orElse(0.0)).sum();
     }
 
-    private IterativeShiftDistance createIterativeShiftDistance(final INeighborhood neighborhood) {
-        final IMinCostMapper mapper = KuhnMunkres.create();
-
+    private IterativeShiftFactory createIterativeShiftFactory(
+            final INeighborhood neighborhood) {
         final INextOffsetCalculator nextOffsetCalculator =
                 MinCostOffset.fromIntervalDistance(this.intervalDistance);
-
-        final IInitialOffsetCalculator initialOffsetCalculator =
-                CombinedInitial.from(ImmutableList.of(
-                        new CentroidOffset(),
-                        LengthOffset.from(mapper, nextOffsetCalculator)));
-
-        return IterativeShiftDistance.from(mapper, intervalDistance, initialOffsetCalculator, nextOffsetCalculator, neighborhood);
+        return this.createIterativeShiftFactory(nextOffsetCalculator, neighborhood);
     }
 
-    private IterativeShiftDistance createIterativeShiftDistance(final INextOffsetCalculator nextOffsetCalculator) {
+    private IterativeShiftFactory createIterativeShiftFactory(
+            final INextOffsetCalculator nextOffsetCalculator) {
+        return this.createIterativeShiftFactory(nextOffsetCalculator, new EmptyNeighborhood());
+    }
+
+    private IterativeShiftFactory createIterativeShiftFactory(
+            final INextOffsetCalculator nextOffsetCalculator,
+            final INeighborhood neighborhood) {
         final IMinCostMapper mapper = KuhnMunkres.create();
 
         final IInitialOffsetCalculator initialOffsetCalculator =
@@ -193,8 +160,29 @@ public class LocalSearchExamples extends SaschaBasedTest {
                         new CentroidOffset(),
                         LengthOffset.from(mapper, MinCostOffset.fromIntervalDistance(this.intervalDistance))));
 
-        final INeighborhood neighborhood = new EmptyNeighborhood();
+        return IterativeShiftFactory.from(mapper, costCalculator, intervalDistance,
+                initialOffsetCalculator, nextOffsetCalculator, neighborhood);
+    }
 
-        return IterativeShiftDistance.from(mapper, intervalDistance, initialOffsetCalculator, nextOffsetCalculator, neighborhood);
+    private List<IterativeShiftFactory> createFactoriesWithMedianOffsets() {
+        final List<MedianOffset> offsets = ImmutableList.of(
+                this.createOffset(true, false, false, false, false),
+                this.createOffset(false, true, false, false, false),
+                this.createOffset(false, false, true, false, false),
+                this.createOffset(false, false, false, true, false),
+                this.createOffset(false, false, false, false, true),
+                this.createOffset(true, false, false, true, false));
+
+        return offsets.stream().map(this::createIterativeShiftFactory).collect(Collectors.toList());
+    }
+
+    private MedianOffset createOffset(boolean standard, boolean large, boolean small, boolean extreme, boolean moderate) {
+        final MedianOffset offset = new MedianOffset();
+        offset.useStandard = standard;
+        offset.useLarger = large;
+        offset.useSmaller = small;
+        offset.useMostExtreme = extreme;
+        offset.useLeastExtreme = moderate;
+        return offset;
     }
 }

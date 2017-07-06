@@ -48,7 +48,7 @@ public class MappingLogger implements ILogger {
                 + modelNumber + ".csv "
                 + american_date + " "
                 + mapping.getOffset()/1000 + " "
-                + mapping.getMappingIndices() + " "
+                + mapping.getMappingIndicesString() + " "
                 + modelNumber + "-" + american_date + suff;
     }
 }

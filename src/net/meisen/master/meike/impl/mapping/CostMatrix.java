@@ -27,6 +27,20 @@ public class CostMatrix {
         this.fillCostMatrix(distanceMeasure);
     }
 
+    private CostMatrix(final double[][] costs,
+                       final Dataset firstDataset,
+                       final Dataset secondDataset) {
+        this.costs = costs;
+        this.firstDataset = firstDataset.getIntervals().toArray(new Interval[0]);
+        this.secondDataset = secondDataset.getIntervals().toArray(new Interval[0]);
+    }
+
+    public static CostMatrix fromMatrix(final double[][] costs,
+                                        final Dataset firstDataset,
+                                        final Dataset secondDataset) {
+        return new CostMatrix(costs, firstDataset, secondDataset);
+    }
+
     public double[][] getCosts() {
         return this.costs;
     }

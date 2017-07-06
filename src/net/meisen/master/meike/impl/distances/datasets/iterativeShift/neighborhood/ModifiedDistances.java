@@ -34,8 +34,9 @@ public class ModifiedDistances implements INeighborhood {
                                       final Dataset other) {
         other.setOffset(mapping.getOffset());
         return this.distanceMeasures.stream()
-                .map(distanceMeasure -> mapper.calculateMinimumCostMapping(
-                        new CostMatrix(distanceMeasure, original, other)))
+                .map(distanceMeasure -> mapper
+                        .calculateMinimumCostMapping(new CostMatrix(distanceMeasure, original, other))
+                        .withOffset(mapping.getOffset()))
                 .collect(Collectors.toList());
     }
 }

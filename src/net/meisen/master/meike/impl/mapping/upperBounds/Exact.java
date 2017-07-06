@@ -1,31 +1,35 @@
 package net.meisen.master.meike.impl.mapping.upperBounds;
 
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
+import net.meisen.master.meike.impl.distances.datasets.IDatasetDistanceCalculator;
 import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
 
 /**
- * Exact upper bound using some {@link IDatasetDistance} and
+ * Exact upper bound using some {@link IDatasetDistanceCalculator} and
  * {@link ICostCalculator}.
  */
 public class Exact implements IUpperBound {
-    private final IDatasetDistance distance;
+    private final ICalculatorFactory distanceCalculatorFactory;
     private final ICostCalculator costCalculator;
 
-    private Exact(final IDatasetDistance distance, final ICostCalculator costCalculator) {
-        this.distance = distance;
+    private Exact(final ICalculatorFactory distanceCalculatorFactory,
+                  final ICostCalculator costCalculator) {
+        this.distanceCalculatorFactory = distanceCalculatorFactory;
         this.costCalculator = costCalculator;
     }
 
-    public static Exact from(final IDatasetDistance distance, final ICostCalculator costCalculator) {
-        assert null != distance;
+    public static Exact from(final ICalculatorFactory distanceCalculatorFactory,
+                             final ICostCalculator costCalculator) {
+        assert null != distanceCalculatorFactory;
         assert null != costCalculator;
 
-        return new Exact(distance, costCalculator);
+        return new Exact(distanceCalculatorFactory, costCalculator);
     }
 
     @Override
     public double calculate(Dataset original, Dataset other) {
-        return this.costCalculator.calculateCost(this.distance.calculate(original, other));
+        return this.costCalculator.calculateCost(this.distanceCalculatorFactory
+                .getDistanceCalculatorFor(original, other).finalMapping());
     }
 }

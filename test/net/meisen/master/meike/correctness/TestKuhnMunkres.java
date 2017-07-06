@@ -2,10 +2,10 @@ package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.correctness.KuhnMunkresResult.Builder;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
-import net.meisen.master.meike.impl.distances.datasets.PlainDistance;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
-import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
+import net.meisen.master.meike.impl.distances.datasets.PlainFactory;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedInitial;
@@ -59,24 +59,32 @@ public class TestKuhnMunkres extends SaschaBasedTest {
         final IMinCostMapper kuhnMunkres = KuhnMunkres.create();
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(1);
 
-        final IDatasetDistance plainDistance = PlainDistance.from(kuhnMunkres, intervalDistance);
-        final IDatasetDistance iterativeDistance = this.createIterativeDistance(kuhnMunkres, intervalDistance);
-        final IDatasetDistance bestShiftDistance = BestShiftDistance.from(kuhnMunkres, intervalDistance, costCalculator);
+        final ICalculatorFactory plainFactory = PlainFactory.from(kuhnMunkres, intervalDistance);
+        final ICalculatorFactory iterativeFactory = this.createIterativeFactory(kuhnMunkres, intervalDistance, costCalculator);
+        final ICalculatorFactory bestShiftFactory = BestShiftFactory.from(kuhnMunkres, intervalDistance, costCalculator);
 
         return datasets.candidates.stream()
                 .map(candidate -> Builder.forDataset(candidate)
-                        .withPlainDistanceResult(plainDistance.calculate(datasets.original, candidate))
-                        .withIterativeShiftDistanceResult(iterativeDistance.calculate(datasets.original, candidate))
-                        .withBestShiftDistanceResult(bestShiftDistance.calculate(datasets.original, candidate))
+                        .withPlainDistanceResult(plainFactory
+                                .getDistanceCalculatorFor(datasets.original, candidate)
+                                .finalMapping())
+                        .withIterativeShiftDistanceResult(iterativeFactory
+                                .getDistanceCalculatorFor(datasets.original, candidate)
+                                .finalMapping())
+                        .withBestShiftDistanceResult(bestShiftFactory
+                                .getDistanceCalculatorFor(datasets.original, candidate)
+                                .finalMapping())
                         .build(costCalculator))
                 .collect(Collectors.toList());
     }
 
-    private IDatasetDistance createIterativeDistance(
+    private ICalculatorFactory createIterativeFactory(
             final IMinCostMapper minCostMapper,
-            final IIntervalDistance intervalDistance) {
-        return IterativeShiftDistance.from(
+            final IIntervalDistance intervalDistance,
+            final ICostCalculator costCalculator) {
+        return IterativeShiftFactory.from(
                 minCostMapper,
+                costCalculator,
                 intervalDistance,
                 CombinedInitial.from(ImmutableList.of(
                         new CentroidOffset(),

@@ -2,7 +2,8 @@ package net.meisen.master.meike.impl.distances.datasets.iterativeShift;
 
 import com.google.common.collect.ImmutableList;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
+import net.meisen.master.meike.impl.distances.datasets.IDatasetDistanceCalculator;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.MinCostOffset;
@@ -14,6 +15,7 @@ import net.meisen.master.meike.impl.distances.intervals.StartDistance;
 import net.meisen.master.meike.impl.distances.intervals.WeightedSumDistance;
 import net.meisen.master.meike.impl.mapping.IMinCostMapper;
 import net.meisen.master.meike.impl.mapping.costCalculation.ConstantCostForUnmappedIntervals;
+import net.meisen.master.meike.impl.mapping.costCalculation.ICostCalculator;
 import net.meisen.master.meike.impl.mapping.exact.KuhnMunkres;
 import net.meisen.master.meike.impl.mapping.Mapping;
 import org.junit.Test;
@@ -59,28 +61,34 @@ public class TestIterativeShiftDistance {
     @Test
     public void testShiftedCandidateGivesZeroDistance() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
+        final ICostCalculator costCalculator =  ConstantCostForUnmappedIntervals.fromCost(0);
         final IMinCostMapper matcher = KuhnMunkres.create();
-        final IDatasetDistance datasetDistance =
-                IterativeShiftDistance.from(matcher, distanceMeasure,
+        final ICalculatorFactory distanceCalculatorFactory =
+                IterativeShiftFactory.from(matcher, costCalculator, distanceMeasure,
                         new CentroidOffset(),
                         MinCostOffset.fromIntervalDistance(distanceMeasure),
                         ModifiedDistances.using(ImmutableList.of(), matcher));
 
-        final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTen);
-        assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0);
+        final Mapping bestMapping = distanceCalculatorFactory
+                .getDistanceCalculatorFor(original, shiftedByTen)
+                .finalMapping();
+        assertEquals(0.0, costCalculator.calculateCost(bestMapping), 0);
     }
 
     @Test
     public void testShiftedCandidateWithExtra() {
         final IIntervalDistance distanceMeasure = this.createIntervalDistance();
+        final ICostCalculator costCalculator =  ConstantCostForUnmappedIntervals.fromCost(0);
         final IMinCostMapper matcher = KuhnMunkres.create();
-        final IDatasetDistance datasetDistance =
-                IterativeShiftDistance.from(matcher, distanceMeasure,
+        final ICalculatorFactory distanceCalculatorFactory =
+                IterativeShiftFactory.from(matcher, costCalculator, distanceMeasure,
                         new CentroidOffset(),
                         MinCostOffset.fromIntervalDistance(distanceMeasure),
                         ModifiedDistances.using(ImmutableList.of(), matcher));
 
-        final Mapping bestMapping = datasetDistance.calculate(original, shiftedByTenPlusExtra);
-        assertEquals(0.0, ConstantCostForUnmappedIntervals.fromCost(0).calculateCost(bestMapping), 0.0001);
+        final Mapping bestMapping = distanceCalculatorFactory
+                .getDistanceCalculatorFor(original, shiftedByTenPlusExtra)
+                .finalMapping();
+        assertEquals(0.0, costCalculator.calculateCost(bestMapping), 0.0001);
     }
 }

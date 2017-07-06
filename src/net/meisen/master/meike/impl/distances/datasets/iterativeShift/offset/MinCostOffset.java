@@ -78,12 +78,11 @@ public class MinCostOffset implements IInitialOffsetCalculator,
                 .flatMapToLong(pair -> {
                         final Interval first = pair.getKey();
                         final Interval second = pair.getValue();
-                        second.setOffset(0);
                         return LongStream.of(
-                                first.getStart() - second.getEnd(),
-                                first.getEnd() - second.getEnd(),
-                                first.getStart() - second.getStart(),
-                                first.getEnd() - second.getStart());
+                                first.getStart() - second.getEnd() + second.getOffset(),
+                                first.getEnd() - second.getEnd() + second.getOffset(),
+                                first.getStart() - second.getStart() + second.getOffset(),
+                                first.getEnd() - second.getStart() + second.getOffset());
                 })
                 .boxed()
                 .sorted(Comparator.comparingLong(v -> Math.abs(0 - v)))

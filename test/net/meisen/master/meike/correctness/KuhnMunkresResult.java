@@ -45,16 +45,22 @@ class KuhnMunkresResult {
         }
 
         public Builder withPlainDistanceResult(final Mapping plainDistanceResult) {
+            assert null != plainDistanceResult;
+
             this.plainDistanceResult = plainDistanceResult;
             return this;
         }
 
         public Builder withIterativeShiftDistanceResult(final Mapping iterativeShiftDistanceResult) {
+            assert null != iterativeShiftDistanceResult;
+
             this.iterativeShiftDistanceResult = iterativeShiftDistanceResult;
             return this;
         }
 
         public Builder withBestShiftDistanceResult(final Mapping bestShiftDistanceResult) {
+            assert null != bestShiftDistanceResult;
+
             this.bestShiftDistanceResult = bestShiftDistanceResult;
             return this;
         }
@@ -65,9 +71,9 @@ class KuhnMunkresResult {
         return this.dataset.getId() +
                 " - Plain: " + plainDistanceResult.getValue() +
                 "\t Iterative: " + iterativeShiftDistanceResult.getValue() +
-                " (" + (iterativeShiftDistanceResult.getKey().getOffset() / 1000) + ")" +
+                " (" + (iterativeShiftDistanceResult.getKey().getOffset()) + ")" +
                 "\t Best shift: " + bestShiftDistanceResult.getValue() +
-                " (" + (bestShiftDistanceResult.getKey().getOffset() / 1000) + ")";
+                " (" + (bestShiftDistanceResult.getKey().getOffset()) + ")";
     }
 
     public String getImprovements() {

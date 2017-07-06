@@ -23,6 +23,7 @@ public class CombinedNext implements INextOffsetCalculator {
     public List<Long> calculate(Mapping mapping) {
         return this.offsetCalculators.stream()
                 .flatMap(c -> c.calculate(mapping).stream())
+                .distinct()
                 .collect(Collectors.toList());
     }
 }

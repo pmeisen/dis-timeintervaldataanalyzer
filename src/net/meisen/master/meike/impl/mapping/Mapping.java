@@ -54,6 +54,10 @@ public class Mapping {
         return this.offset;
     }
 
+    public CostMatrix getCostMatrix() {
+        return this.costMatrix;
+    }
+
     /**
      * @return a list of the costs for all mapped pairs; a missing value
      * indicates that an interval was mapped to a dummy interval and thus
@@ -133,7 +137,11 @@ public class Mapping {
         return secondDataset;
     }
 
-    public String getMappingIndices() {
+    public List<Integer> getMappingIndices() {
+        return ImmutableList.copyOf(this.mappingIndices);
+    }
+
+    public String getMappingIndicesString() {
         return String.join(",", this.mappingIndices.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 }

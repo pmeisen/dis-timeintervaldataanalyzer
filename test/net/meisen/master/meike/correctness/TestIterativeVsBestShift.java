@@ -1,10 +1,13 @@
 package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftCalculator;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
-import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
+import net.meisen.master.meike.impl.distances.datasets.IDatasetDistanceCalculator;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftCalculator;
+import net.meisen.master.meike.impl.distances.datasets.iterativeShift.IterativeShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.neighborhood.ModifiedDistances;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CentroidOffset;
 import net.meisen.master.meike.impl.distances.datasets.iterativeShift.offset.CombinedInitial;
@@ -36,8 +39,9 @@ public class TestIterativeVsBestShift extends SaschaBasedTest {
 
         final IIntervalDistance equalWeightsDistance =
                 Factories.weightedDistance(1.0, 1.0, 1.0, 1.0, 1.0);
-        final IDatasetDistance iterativeDistance =
-                IterativeShiftDistance.from(kuhnMunkres,
+        final ICalculatorFactory iterativeFactory =
+                IterativeShiftFactory.from(kuhnMunkres,
+                        costCalculator,
                         equalWeightsDistance,
                         CombinedInitial.from(ImmutableList.of(
                                 new CentroidOffset(),
@@ -49,15 +53,19 @@ public class TestIterativeVsBestShift extends SaschaBasedTest {
                                 Factories.weightedDistance(1, 1, 3, 0, 0),
                                 Factories.weightedDistance(2, 2, 5, 1, 1)),
                                 kuhnMunkres));
-        final IDatasetDistance bestShiftDistance =
-                BestShiftDistance.from(kuhnMunkres, equalWeightsDistance, costCalculator);
+        final ICalculatorFactory bestShiftFactory =
+                BestShiftFactory.from(kuhnMunkres, equalWeightsDistance, costCalculator);
 
         final Datasets datasets = this.loadDatasets(modelNumber, dates);
         for (final Dataset candidate : datasets.candidates) {
-            final Mapping iterativeMapping = iterativeDistance.calculate(datasets.original, candidate);
+            final Mapping iterativeMapping = iterativeFactory
+                    .getDistanceCalculatorFor(datasets.original, candidate)
+                    .finalMapping();
             logger.log(Utils.getPlotterCommand(modelNumber, candidate.getId(), iterativeMapping, "-iterative"));
 
-            final Mapping bestMapping = bestShiftDistance.calculate(datasets.original, candidate);
+            final Mapping bestMapping = bestShiftFactory
+                    .getDistanceCalculatorFor(datasets.original, candidate)
+                    .finalMapping();
             logger.log(Utils.getPlotterCommand(modelNumber, candidate.getId(), bestMapping, "-best"));
         }
     }

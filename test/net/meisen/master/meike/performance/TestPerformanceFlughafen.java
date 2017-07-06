@@ -2,11 +2,11 @@ package net.meisen.master.meike.performance;
 
 import com.google.common.collect.ImmutableSet;
 import net.meisen.dissertation.model.data.TidaModel;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
 import net.meisen.master.meike.impl.distances.datasets.DatasetFactory;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
-import net.meisen.master.meike.impl.distances.datasets.PlainDistance;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
+import net.meisen.master.meike.impl.distances.datasets.PlainFactory;
 import net.meisen.master.meike.impl.distances.intervals.EndDistance;
 import net.meisen.master.meike.impl.distances.intervals.GapDistance;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
@@ -176,13 +176,13 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayThree = this.getShortDatasetForDate("03.01.2008", model, datasetFactory);
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
-        final IDatasetDistance distance = PlainDistance.from(
+        final ICalculatorFactory distance = PlainFactory.from(
                 KuhnMunkres.create(), this.createIntervalDistance());
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(5);
 
-        final Mapping mapping1 = distance.calculate(dayOne, dayTwo);
-        final Mapping mapping2 = distance.calculate(dayOne, dayThree);
-        final Mapping mapping3 = distance.calculate(dayOne, dayFour);
+        final Mapping mapping1 = distance.getDistanceCalculatorFor(dayOne, dayTwo).finalMapping();
+        final Mapping mapping2 = distance.getDistanceCalculatorFor(dayOne, dayThree).finalMapping();
+        final Mapping mapping3 = distance.getDistanceCalculatorFor(dayOne, dayFour).finalMapping();
 
         assertEquals(533.3538571262819, costCalculator.calculateCost(mapping1), 0.0000001);
         assertEquals(884.3171285104353, costCalculator.calculateCost(mapping2), 0.0000001);
@@ -200,13 +200,13 @@ public class TestPerformanceFlughafen extends BasePerformanceTest {
         final Dataset dayFour = this.getShortDatasetForDate("04.01.2008", model, datasetFactory);
 
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(5);
-        final BestShiftDistance distance = BestShiftDistance.from(KuhnMunkres.create(),
+        final BestShiftFactory distance = BestShiftFactory.from(KuhnMunkres.create(),
                 this.createIntervalDistance(), costCalculator);
         distance.setMaxOffset(180000);
 
-        final Mapping mapping1 = distance.calculate(dayOne, dayTwo);
-        final Mapping mapping2 = distance.calculate(dayOne, dayThree);
-        final Mapping mapping3 = distance.calculate(dayOne, dayFour);
+        final Mapping mapping1 = distance.getDistanceCalculatorFor(dayOne, dayTwo).finalMapping();
+        final Mapping mapping2 = distance.getDistanceCalculatorFor(dayOne, dayThree).finalMapping();
+        final Mapping mapping3 = distance.getDistanceCalculatorFor(dayOne, dayFour).finalMapping();
 
         assertEquals(533.3538571262819, costCalculator.calculateCost(mapping1), 0.0000001);
         assertEquals(881.2912381719334, costCalculator.calculateCost(mapping2), 0.0000001);

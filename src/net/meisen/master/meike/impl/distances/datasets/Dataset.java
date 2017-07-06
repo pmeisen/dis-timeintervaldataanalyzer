@@ -3,7 +3,9 @@ package net.meisen.master.meike.impl.distances.datasets;
 import net.meisen.master.meike.impl.distances.intervals.Interval;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper around a set of {@link Interval}s to facilitate operations on whole
@@ -24,7 +26,9 @@ public class Dataset {
         assert null != intervals;
         assert null != id;
 
-        this.intervals = intervals;
+        this.intervals = intervals.stream()
+                .sorted(Comparator.comparing(Interval::getCentroid))
+                .collect(Collectors.toList());
         this.id = id;
     }
 

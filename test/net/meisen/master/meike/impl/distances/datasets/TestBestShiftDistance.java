@@ -45,10 +45,11 @@ public class TestBestShiftDistance {
     public void testThatShiftedIntervalGivesZeroDistance() {
         final IMinCostMapper matcher = KuhnMunkres.create();
         final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
-        final IDatasetDistance distance =
-                BestShiftDistance.from(matcher, this.createIntervalDistance(), costCalculator);
 
-        final Mapping bestMapping = distance.calculate(original, shiftedByThree);
+        final Mapping bestMapping = BestShiftFactory
+                .from(matcher, this.createIntervalDistance(), costCalculator)
+                .getDistanceCalculatorFor(original, shiftedByThree)
+                .finalMapping();
         assertEquals(0.0, costCalculator.calculateCost(bestMapping), 0);
     }
 }

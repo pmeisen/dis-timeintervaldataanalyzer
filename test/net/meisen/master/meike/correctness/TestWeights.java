@@ -1,9 +1,9 @@
 package net.meisen.master.meike.correctness;
 
 import com.google.common.collect.ImmutableList;
-import net.meisen.master.meike.impl.distances.datasets.BestShiftDistance;
+import net.meisen.master.meike.impl.distances.datasets.BestShiftFactory;
 import net.meisen.master.meike.impl.distances.datasets.Dataset;
-import net.meisen.master.meike.impl.distances.datasets.IDatasetDistance;
+import net.meisen.master.meike.impl.distances.datasets.ICalculatorFactory;
 import net.meisen.master.meike.impl.distances.intervals.Factories;
 import net.meisen.master.meike.impl.distances.intervals.IIntervalDistance;
 import net.meisen.master.meike.impl.distances.intervals.LengthDistance;
@@ -30,15 +30,19 @@ public class TestWeights extends SaschaBasedTest {
     private final List<IIntervalDistance> weightedDistances = ImmutableList.of(
             Factories.weightedDistance(1, 1, 1, 1, 1),
             Factories.weightedDistance(2, 2, 4, 1, 1),
-            Factories.weightedDistance(4, 4, 2, 0, 0),
-            Factories.weightedDistance(0, 0, 1, 1, 1));
+            Factories.weightedDistance(4, 4, 1, 0, 0),
+            Factories.weightedDistance(1, 1, 10, 0, 0),
+            Factories.weightedDistance(0, 0, 0, 1, 1),
+            Factories.weightedDistance(1, 1, 0, 0, 0),
+            Factories.weightedDistance(1, 0, 0, 0, 0),
+            Factories.weightedDistance(0, 1, 0, 0, 0));
 
     private final ICostCalculator costCalculator = ConstantCostForUnmappedIntervals.fromCost(0);
 
     private final List<Integer> modelNumbersToTest = ImmutableList.of(1, 2, 3, 4, 5, 6, 7, 8);
 
     @Test
-    public void foo() {
+    public void testNearestNeighborsForDifferentWeights() {
         for (final int modelNumber : modelNumbersToTest) {
             logger.log("----------------------------");
             logger.log("Output for test set number " + modelNumber);
@@ -47,9 +51,6 @@ public class TestWeights extends SaschaBasedTest {
             final Datasets datasets = this.loadDatasets(modelNumber, allCandidateDates.get(modelNumber - 1));
 
             for (final IIntervalDistance distance : weightedDistances) {
-                /*logger.log("---------------------------------");
-                logger.log("Weights: " + distance.toString());
-                logger.log("---------------------------------");*/
                 final List<BoundedDataset> neighbors = this.findNearestNeighbors(datasets, distance);
                 this.logPlotterCommands(modelNumber, distance, datasets.original, neighbors);
             }
@@ -62,7 +63,7 @@ public class TestWeights extends SaschaBasedTest {
                                     final IIntervalDistance distance,
                                     final Dataset original,
                                     final List<BoundedDataset> nearestNeighbors) {
-        final IDatasetDistance bestShift = this.getBestShiftDistance(distance);
+        final ICalculatorFactory bestShiftFactory = this.getBestShiftFactory(distance);
 
         final StringBuilder commandBuilder = new StringBuilder(
                 "python neighbors-plotter.py /home/meike/masterarbeit/data/sascha/sascha" + modelNumber + ".csv \"");
@@ -71,9 +72,11 @@ public class TestWeights extends SaschaBasedTest {
             if (nearestNeighbors.indexOf(neighbor) > 0) {
                 commandBuilder.append("_");
             }
-            final Mapping bestMapping = bestShift.calculate(original, neighbor.getDataset());
+            final Mapping bestMapping = bestShiftFactory
+                    .getDistanceCalculatorFor(original, neighbor.getDataset())
+                    .finalMapping();
             commandBuilder.append(this.getAmerican(neighbor.getDataset().getId()) + ";"
-                    + bestMapping.getOffset() + ";" + bestMapping.getMappingIndices() + ";" + neighbor.getUpperBound());
+                    + bestMapping.getOffset() + ";" + bestMapping.getMappingIndicesString() + ";" + neighbor.getUpperBound());
         }
 
         commandBuilder.append("\" \"Dataset " + modelNumber + ", weights " + distance.toString() + "\"");
@@ -88,7 +91,7 @@ public class TestWeights extends SaschaBasedTest {
     private List<BoundedDataset> findNearestNeighbors(final Datasets datasets, final IIntervalDistance distance) {
         final NearestNeighborSearch knnSearch = this.createKnnSearch(distance);
 
-        return knnSearch.find(10, datasets.original, datasets.candidates);
+        return knnSearch.find(datasets.candidates.size(), datasets.original, datasets.candidates);
     }
 
     private NearestNeighborSearch createKnnSearch(final IIntervalDistance distance) {
@@ -96,12 +99,12 @@ public class TestWeights extends SaschaBasedTest {
                 DoubleMatchingBound.from(new LengthDistance(), this.costCalculator));
 
         final List<IUpperBound> upperBounds = ImmutableList.of(
-                Exact.from(this.getBestShiftDistance(distance), this.costCalculator));
+                Exact.from(this.getBestShiftFactory(distance), this.costCalculator));
 
         return NearestNeighborSearch.from(lowerBounds, upperBounds);
     }
 
-    private IDatasetDistance getBestShiftDistance(final IIntervalDistance distance) {
-        return BestShiftDistance.from(KuhnMunkres.create(), distance, this.costCalculator);
+    private ICalculatorFactory getBestShiftFactory(final IIntervalDistance distance) {
+        return BestShiftFactory.from(KuhnMunkres.create(), distance, this.costCalculator);
     }
 }

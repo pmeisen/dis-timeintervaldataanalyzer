@@ -41,8 +41,10 @@ public class MapAgain implements ICostCalculator {
 
         final List<Interval> unmappedIntervals =
                 mapping.getUnmappedIntervalsOfLargerDataset();
+        unmappedIntervals.forEach(i -> i.setOffset(mapping.getOffset()));
         final List<Interval> intervalsOfSmallerDataset =
                 mapping.getIntervalsOfSmallerDataset();
+        intervalsOfSmallerDataset.forEach(i -> i.setOffset(mapping.getOffset()));
 
         mappingCost += this.getCostOfSecondMatching(unmappedIntervals,
                 intervalsOfSmallerDataset);

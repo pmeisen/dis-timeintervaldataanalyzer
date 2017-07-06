@@ -23,6 +23,7 @@ public class CombinedInitial implements IInitialOffsetCalculator {
     public List<Long> calculate(final Dataset original, final Dataset other) {
         return this.offsetCalculators.stream()
                 .flatMap(c -> c.calculate(original, other).stream())
+                .distinct()
                 .collect(Collectors.toList());
     }
 }
